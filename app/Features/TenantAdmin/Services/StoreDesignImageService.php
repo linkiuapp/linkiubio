@@ -20,20 +20,14 @@ class StoreDesignImageService
     {
         // Generar nombre único para el archivo
         $filename = 'logo_' . time() . '.' . $file->getClientOriginalExtension();
-        $path = 'store-design/' . $storeId . '/' . $filename;
+        $relativePath = 'store-design/' . $storeId;
         
-        // ✅ Crear directorio si no existe
-        $destinationPath = public_path('storage/store-design/' . $storeId);
-        if (!file_exists($destinationPath)) {
-            mkdir($destinationPath, 0755, true);
-        }
+        // ✅ Guardar con Storage::disk('public')->putFileAs() - Compatible con S3 y local
+        $savedPath = Storage::disk('public')->putFileAs($relativePath, $file, $filename);
         
-        // ✅ GUARDAR con move() - Método estándar obligatorio
-        $file->move($destinationPath, $filename);
-        
-        // ✅ Retornar URLs usando método estándar
+        // ✅ Retornar PATH RELATIVO (el accessor del modelo lo convertirá a URL)
         return [
-            'logo_url' => asset('storage/' . $path),
+            'logo_url' => $savedPath,
             'logo_webp_url' => null // Por ahora no generamos WebP
         ];
     }
@@ -49,20 +43,14 @@ class StoreDesignImageService
     {
         // Generar nombre único para el archivo
         $filename = 'favicon_' . time() . '.' . $file->getClientOriginalExtension();
-        $path = 'store-design/' . $storeId . '/' . $filename;
+        $relativePath = 'store-design/' . $storeId;
         
-        // ✅ Crear directorio si no existe
-        $destinationPath = public_path('storage/store-design/' . $storeId);
-        if (!file_exists($destinationPath)) {
-            mkdir($destinationPath, 0755, true);
-        }
+        // ✅ Guardar con Storage::disk('public')->putFileAs() - Compatible con S3 y local
+        $savedPath = Storage::disk('public')->putFileAs($relativePath, $file, $filename);
         
-        // ✅ GUARDAR con move() - Método estándar obligatorio
-        $file->move($destinationPath, $filename);
-        
-        // ✅ Retornar URL usando método estándar
+        // ✅ Retornar PATH RELATIVO (el accessor del modelo lo convertirá a URL)
         return [
-            'favicon_url' => asset('storage/' . $path)
+            'favicon_url' => $savedPath
         ];
     }
 

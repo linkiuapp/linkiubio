@@ -239,25 +239,18 @@ public function update(Request $request)
             $filename = $type . '_' . time() . '.' . $extension;
             $relativePath = 'store-design/' . $storeId . '/' . $filename;
             
-            // ✅ Crear directorio si no existe
-            $destinationPath = public_path('storage/store-design/' . $storeId);
-            if (!file_exists($destinationPath)) {
-                mkdir($destinationPath, 0755, true);
-            }
-            
-            // ✅ GUARDAR usando método estándar
-            $fullPath = public_path('storage/' . $relativePath);
-            file_put_contents($fullPath, $imageData);
+            // ✅ Guardar usando Storage::disk('public')->put() - Compatible con S3 y local
+            Storage::disk('public')->put($relativePath, $imageData);
 
-            // ✅ Retornar URLs usando método estándar
+            // ✅ Retornar PATH RELATIVO (el accessor del modelo lo convertirá a URL)
             if ($type === 'logo') {
                 return [
-                    'logo_url' => asset('storage/' . $relativePath),
+                    'logo_url' => $relativePath,
                     'logo_webp_url' => null
                 ];
             } else {
                 return [
-                    'favicon_url' => asset('storage/' . $relativePath)
+                    'favicon_url' => $relativePath
                 ];
             }
         } catch (\Exception $e) {
