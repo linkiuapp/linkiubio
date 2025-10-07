@@ -101,46 +101,67 @@ class ProfileController extends Controller
             // Manejar logo
             if ($request->hasFile('app_logo')) {
                 $logoFile = $request->file('app_logo');
-                $logoFilename = 'logo_' . time() . '.' . $logoFile->getClientOriginalExtension();
+                $extension = $logoFile->getClientOriginalExtension();
+                $logoFilename = 'logo_' . time() . '.' . $extension;
                 $logoPath = 'system/' . $logoFilename;
                 
                 // Guardar en almacenamiento local
-                Storage::disk('public')->putFileAs('system', $logoFile, $logoFilename);
+                $saved = Storage::disk('public')->putFileAs('system', $logoFile, $logoFilename);
                 
-                // TODO: Implementar actualización de APP_LOGO sin modificar .env directamente  
-                // $this->updateEnvVariable('APP_LOGO', $logoPath);
-                
-                // Por ahora, guardamos en sesión para mostrar el cambio temporalmente
-                session(['temp_app_logo' => $logoPath]);
-                
-                // Log para debugging
-                \Log::info("Logo guardado en bucket S3: {$logoPath}");
+                if ($saved) {
+                    // Guardar en sesión para mostrar el cambio inmediatamente
+                    session(['temp_app_logo' => $logoPath]);
+                    
+                    // Log para debugging
+                    \Log::info("✅ Logo guardado exitosamente", [
+                        'filename' => $logoFilename,
+                        'path' => $logoPath,
+                        'full_path' => storage_path('app/public/' . $logoPath),
+                        'size' => $logoFile->getSize(),
+                        'mime' => $logoFile->getMimeType()
+                    ]);
+                } else {
+                    \Log::error("❌ Error al guardar logo: Storage::putFileAs retornó false");
+                }
             }
 
             // Manejar favicon
             if ($request->hasFile('app_favicon')) {
                 $faviconFile = $request->file('app_favicon');
-                $faviconFilename = 'favicon_' . time() . '.' . $faviconFile->getClientOriginalExtension();
+                $extension = $faviconFile->getClientOriginalExtension();
+                $faviconFilename = 'favicon_' . time() . '.' . $extension;
                 $faviconPath = 'system/' . $faviconFilename;
                 
                 // Guardar en almacenamiento local
-                Storage::disk('public')->putFileAs('system', $faviconFile, $faviconFilename);
+                $saved = Storage::disk('public')->putFileAs('system', $faviconFile, $faviconFilename);
                 
-                // TODO: Implementar actualización de APP_FAVICON sin modificar .env directamente
-                // $this->updateEnvVariable('APP_FAVICON', $faviconPath);
-                
-                // Por ahora, guardamos en sesión para mostrar el cambio temporalmente
-                session(['temp_app_favicon' => $faviconPath]);
-                
-                // Log para debugging
-                \Log::info("Favicon guardado en bucket S3: {$faviconPath}");
+                if ($saved) {
+                    // Guardar en sesión para mostrar el cambio inmediatamente
+                    session(['temp_app_favicon' => $faviconPath]);
+                    
+                    // Log para debugging
+                    \Log::info("✅ Favicon guardado exitosamente", [
+                        'filename' => $faviconFilename,
+                        'path' => $faviconPath,
+                        'full_path' => storage_path('app/public/' . $faviconPath),
+                        'size' => $faviconFile->getSize(),
+                        'mime' => $faviconFile->getMimeType()
+                    ]);
+                } else {
+                    \Log::error("❌ Error al guardar favicon: Storage::putFileAs retornó false");
+                }
             }
 
             return back()->with('status', 'app-settings-updated');
         } catch (\Exception $e) {
-            // Log del error para debugging
-            \Log::error('Error en updateAppSettings: ' . $e->getMessage());
-            return back()->with('status', 'app-settings-error');
+            // Log detallado del error para debugging
+            \Log::error('❌ Error en updateAppSettings', [
+                'message' => $e->getMessage(),
+                'file' => $e->getFile(),
+                'line' => $e->getLine(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return back()->with('status', 'app-settings-error')->withErrors(['error' => $e->getMessage()]);
         }
     }
 
