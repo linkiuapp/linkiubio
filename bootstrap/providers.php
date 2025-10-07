@@ -1,7 +1,7 @@
 <?php
 
 return [
-    App\Core\Providers\AppServiceProvider::class,
+    App\Providers\AppServiceProvider::class,
     App\Core\Providers\AuthServiceProvider::class,
     App\Core\Providers\ComponentsServiceProvider::class,
     App\Core\Providers\EventServiceProvider::class,
