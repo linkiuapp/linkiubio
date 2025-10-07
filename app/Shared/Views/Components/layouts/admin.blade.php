@@ -15,22 +15,18 @@ use Illuminate\Support\Facades\Storage;
         $tempFavicon = session('temp_app_favicon');
         $appFavicon = $tempFavicon ?: env('APP_FAVICON');
         
+        $faviconSrc = asset('favicon.ico'); // Default
+        
         if ($appFavicon) {
             try {
-                // Temporalmente simplificado para evitar problemas con fileinfo
-                $faviconSrc = asset('storage/' . $appFavicon);
-                /*
-                if (config('filesystems.disks.s3.bucket')) {
-                    $faviconSrc = Storage::disk('public')->url($appFavicon);
-                } else {
-                    $faviconSrc = asset('storage/' . $appFavicon);
-                }
-                */
+                // ✅ Usar Storage::url() siempre - funciona en local Y en S3/Laravel Cloud
+                $faviconSrc = Storage::disk('public')->url($appFavicon);
             } catch (\Exception $e) {
-                $faviconSrc = asset('storage/' . $appFavicon);
+                \Log::error('Error generando URL de favicon en layout', [
+                    'favicon_path' => $appFavicon,
+                    'error' => $e->getMessage()
+                ]);
             }
-        } else {
-            $faviconSrc = asset('favicon.ico');
         }
     @endphp
     <link rel="icon" type="image/x-icon" href="{{ $faviconSrc }}">

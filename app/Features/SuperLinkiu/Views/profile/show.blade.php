@@ -301,13 +301,13 @@ use Illuminate\Support\Facades\Storage;
                                             $logoSrc = null;
                                             if ($appLogo) {
                                                 try {
-                                                    if (config('filesystems.disks.s3.bucket')) {
-                                                        $logoSrc = Storage::disk('public')->url($appLogo);
-                                                    } else {
-                                                        $logoSrc = asset('storage/' . $appLogo);
-                                                    }
+                                                    // ✅ Usar Storage::url() siempre - funciona en local Y en S3/Laravel Cloud
+                                                    $logoSrc = Storage::disk('public')->url($appLogo);
                                                 } catch (\Exception $e) {
-                                                    $logoSrc = asset('storage/' . $appLogo);
+                                                    \Log::error('Error generando URL de logo', [
+                                                        'logo_path' => $appLogo,
+                                                        'error' => $e->getMessage()
+                                                    ]);
                                                 }
                                             }
                                         @endphp
@@ -316,7 +316,8 @@ use Illuminate\Support\Facades\Storage;
                                                 <p class="text-xs text-black-200 mb-2">Logo actual:</p>
                                                 <img src="{{ $logoSrc }}" 
                                                      alt="Logo actual" 
-                                                     class="h-12 object-contain border border-accent-200 rounded-lg p-2">
+                                                     class="h-12 object-contain border border-accent-200 rounded-lg p-2"
+                                                     onerror="console.error('Error cargando logo:', this.src); this.style.display='none';">
                                             </div>
                                         @endif
                                         
@@ -352,13 +353,13 @@ use Illuminate\Support\Facades\Storage;
                                             $faviconSrc = null;
                                             if ($appFavicon) {
                                                 try {
-                                                    if (config('filesystems.disks.s3.bucket')) {
-                                                        $faviconSrc = Storage::disk('public')->url($appFavicon);
-                                                    } else {
-                                                        $faviconSrc = asset('storage/' . $appFavicon);
-                                                    }
+                                                    // ✅ Usar Storage::url() siempre - funciona en local Y en S3/Laravel Cloud
+                                                    $faviconSrc = Storage::disk('public')->url($appFavicon);
                                                 } catch (\Exception $e) {
-                                                    $faviconSrc = asset('storage/' . $appFavicon);
+                                                    \Log::error('Error generando URL de favicon', [
+                                                        'favicon_path' => $appFavicon,
+                                                        'error' => $e->getMessage()
+                                                    ]);
                                                 }
                                             }
                                         @endphp
@@ -367,7 +368,8 @@ use Illuminate\Support\Facades\Storage;
                                                 <p class="text-xs text-black-200 mb-2">Favicon actual:</p>
                                                 <img src="{{ $faviconSrc }}" 
                                                      alt="Favicon actual" 
-                                                     class="w-8 h-8 object-contain border border-accent-200 rounded">
+                                                     class="w-8 h-8 object-contain border border-accent-200 rounded"
+                                                     onerror="console.error('Error cargando favicon:', this.src); this.style.display='none';">
                                             </div>
                                         @endif
                                         
