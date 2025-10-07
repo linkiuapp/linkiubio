@@ -1,0 +1,55 @@
+name: Deploy LinkiuBio to VPS
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+        
+    - name: Sync files to server
+      uses: appleboy/scp-action@v0.1.7
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: root
+        password: ${{ secrets.VPS_PASSWORD }}
+        port: ${{ secrets.VPS_PORT }}
+        source: "."
+        target: "/home/wwlink/linkiubio_app/"
+        overwrite: true
+        
+    - name: Deploy on server
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.VPS_HOST }}
+        username: root
+        password: ${{ secrets.VPS_PASSWORD }}
+        port: ${{ secrets.VPS_PORT }}
+        script: |
+          cd /home/wwlink/linkiubio_app/
+          
+          # Fix permissions (Apache runs as nobody user)
+          chmod -R 777 storage/
+          chmod -R 775 bootstrap/cache/
+          chown -R nobody:nobody storage/
+          chown -R nobody:nobody bootstrap/cache/
+          
+          # Install dependencies
+          composer install --no-dev --optimize-autoloader --no-interaction
+          
+          # Clear and cache
+          php artisan config:clear
+          php artisan cache:clear
+          php artisan route:clear
+          php artisan view:clear
+          php artisan config:cache
+          php artisan route:cache
+          php artisan view:cache
+          
+          echo "Deploy completed successfully!"
