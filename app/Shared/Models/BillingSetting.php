@@ -11,6 +11,9 @@ class BillingSetting extends Model
 
     protected $fillable = [
         'logo_url',
+        'app_logo',
+        'app_favicon',
+        'app_name',
         'company_name',
         'company_address',
         'tax_id',

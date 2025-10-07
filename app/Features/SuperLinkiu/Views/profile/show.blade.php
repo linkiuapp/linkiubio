@@ -1,5 +1,6 @@
 @php
 use Illuminate\Support\Facades\Storage;
+use App\Shared\Models\BillingSetting;
 @endphp
 
 @extends('shared::layouts.admin')
@@ -295,8 +296,9 @@ use Illuminate\Support\Facades\Storage;
                                         <label for="app_logo" class="block text-sm text-black-300 mb-2">Logo de la Aplicación</label>
                                         
                                         @php
-                                            $tempLogo = session('temp_app_logo');
-                                            $appLogo = $tempLogo ?: env('APP_LOGO');
+                                            // ✅ LEER DESDE BASE DE DATOS (persistente)
+                                            $settings = BillingSetting::getInstance();
+                                            $appLogo = $settings->app_logo;
                                             
                                             $logoSrc = null;
                                             if ($appLogo) {
@@ -347,8 +349,11 @@ use Illuminate\Support\Facades\Storage;
                                         <label for="app_favicon" class="block text-sm text-black-300 mb-2">Favicon</label>
                                         
                                         @php
-                                            $tempFavicon = session('temp_app_favicon');
-                                            $appFavicon = $tempFavicon ?: env('APP_FAVICON');
+                                            // ✅ LEER DESDE BASE DE DATOS (persistente) - Reutilizar $settings
+                                            if (!isset($settings)) {
+                                                $settings = BillingSetting::getInstance();
+                                            }
+                                            $appFavicon = $settings->app_favicon;
                                             
                                             $faviconSrc = null;
                                             if ($appFavicon) {

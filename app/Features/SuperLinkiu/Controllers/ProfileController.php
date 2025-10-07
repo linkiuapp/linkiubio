@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Support\Str;
+use App\Shared\Models\BillingSetting;
 
 class ProfileController extends Controller
 {
@@ -98,6 +99,8 @@ class ProfileController extends Controller
         ]);
 
         try {
+            $settings = BillingSetting::getInstance();
+            
             // Manejar logo
             if ($request->hasFile('app_logo')) {
                 $logoFile = $request->file('app_logo');
@@ -105,18 +108,18 @@ class ProfileController extends Controller
                 $logoFilename = 'logo_' . time() . '.' . $extension;
                 $logoPath = 'system/' . $logoFilename;
                 
-                // Guardar en almacenamiento local
+                // Guardar en almacenamiento (S3 en Laravel Cloud, local en desarrollo)
                 $saved = Storage::disk('public')->putFileAs('system', $logoFile, $logoFilename);
                 
                 if ($saved) {
-                    // Guardar en sesión para mostrar el cambio inmediatamente
-                    session(['temp_app_logo' => $logoPath]);
+                    // ✅ GUARDAR EN BASE DE DATOS (persistente)
+                    $settings->app_logo = $logoPath;
+                    $settings->save();
                     
                     // Log para debugging
                     \Log::info("✅ Logo guardado exitosamente", [
                         'filename' => $logoFilename,
                         'path' => $logoPath,
-                        'full_path' => storage_path('app/public/' . $logoPath),
                         'size' => $logoFile->getSize(),
                         'mime' => $logoFile->getMimeType()
                     ]);
@@ -132,24 +135,30 @@ class ProfileController extends Controller
                 $faviconFilename = 'favicon_' . time() . '.' . $extension;
                 $faviconPath = 'system/' . $faviconFilename;
                 
-                // Guardar en almacenamiento local
+                // Guardar en almacenamiento (S3 en Laravel Cloud, local en desarrollo)
                 $saved = Storage::disk('public')->putFileAs('system', $faviconFile, $faviconFilename);
                 
                 if ($saved) {
-                    // Guardar en sesión para mostrar el cambio inmediatamente
-                    session(['temp_app_favicon' => $faviconPath]);
+                    // ✅ GUARDAR EN BASE DE DATOS (persistente)
+                    $settings->app_favicon = $faviconPath;
+                    $settings->save();
                     
                     // Log para debugging
                     \Log::info("✅ Favicon guardado exitosamente", [
                         'filename' => $faviconFilename,
                         'path' => $faviconPath,
-                        'full_path' => storage_path('app/public/' . $faviconPath),
                         'size' => $faviconFile->getSize(),
                         'mime' => $faviconFile->getMimeType()
                     ]);
                 } else {
                     \Log::error("❌ Error al guardar favicon: Storage::putFileAs retornó false");
                 }
+            }
+
+            // Guardar nombre de app si cambió
+            if ($request->filled('app_name')) {
+                $settings->app_name = $request->app_name;
+                $settings->save();
             }
 
             return back()->with('status', 'app-settings-updated');

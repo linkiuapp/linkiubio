@@ -1,5 +1,6 @@
 @php
 use Illuminate\Support\Facades\Storage;
+use App\Shared\Models\BillingSetting;
 @endphp
 
 <!DOCTYPE html>
@@ -12,8 +13,9 @@ use Illuminate\Support\Facades\Storage;
     
     <!-- Favicon -->
     @php
-        $tempFavicon = session('temp_app_favicon');
-        $appFavicon = $tempFavicon ?: env('APP_FAVICON');
+        // ✅ LEER DESDE BASE DE DATOS (persistente)
+        $settings = BillingSetting::getInstance();
+        $appFavicon = $settings->app_favicon;
         
         $faviconSrc = asset('favicon.ico'); // Default
         

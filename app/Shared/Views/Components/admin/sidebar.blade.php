@@ -1,6 +1,7 @@
 
 @php
 use Illuminate\Support\Facades\Storage;
+use App\Shared\Models\BillingSetting;
 @endphp
 
 <!-- Sidebar -->
@@ -13,29 +14,29 @@ use Illuminate\Support\Facades\Storage;
         <div class="flex items-center">
             <a href="{{ route('superlinkiu.dashboard') }}">
                 @php
-                    $tempLogo = session('temp_app_logo');
-                    $appLogo = $tempLogo ?: env('APP_LOGO');
+                    // ✅ LEER DESDE BASE DE DATOS (persistente)
+                    $settings = BillingSetting::getInstance();
+                    $appLogo = $settings->app_logo;
                     
                     $logoSrc = null;
                     if ($appLogo) {
                         try {
-                            // Temporalmente simplificado para evitar problemas con fileinfo
-                            $logoSrc = asset('storage/' . $appLogo);
-                            /*
-                            if (config('filesystems.disks.s3.bucket')) {
-                                $logoSrc = Storage::disk('public')->url($appLogo);
-                            } else {
-                                $logoSrc = asset('storage/' . $appLogo);
-                            }
-                            */
+                            // ✅ Usar Storage::url() siempre - funciona en local Y en S3/Laravel Cloud
+                            $logoSrc = Storage::disk('public')->url($appLogo);
                         } catch (\Exception $e) {
-                            $logoSrc = asset('storage/' . $appLogo);
+                            \Log::error('Error generando URL de logo en sidebar', [
+                                'logo_path' => $appLogo,
+                                'error' => $e->getMessage()
+                            ]);
                         }
                     }
                 @endphp
                 
                 @if($logoSrc)
-                    <img src="{{ $logoSrc }}" alt="{{ config('app.name') }}" class="w-auto h-10 mt-1">
+                    <img src="{{ $logoSrc }}" 
+                         alt="{{ config('app.name') }}" 
+                         class="w-auto h-10 mt-1"
+                         onerror="this.src='{{ asset('assets/images/Logo_Linkiu.svg') }}';">
                 @else
                     <img src="{{ asset('assets/images/Logo_Linkiu.svg') }}" alt="{{ config('app.name') }}" class="w-auto h-10 mt-1">
                 @endif
