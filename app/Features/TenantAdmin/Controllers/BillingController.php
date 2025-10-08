@@ -342,8 +342,7 @@ class BillingController extends Controller
             'sliders' => $plan->max_slider,
             'locations' => $plan->max_sedes,
             'bank_accounts' => $plan->max_bank_accounts ?? min($plan->max_sedes ?? 1, 3),
-            'coupons' => $plan->max_active_coupons,
-            'active_promotions' => $plan->max_active_promotions
+            'coupons' => $plan->max_active_coupons
         ];
     }
 
