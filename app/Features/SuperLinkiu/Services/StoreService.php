@@ -36,20 +36,23 @@ class StoreService
             $plan = Plan::findOrFail($data['plan_id']);
             $processedSlug = $this->processSlugForPlan($data['slug'], $plan);
 
-            // Preparar datos de la tienda (sin los campos del propietario)
+            // Preparar datos de la tienda (sin los campos del propietario que van a users)
             $storeData = collect($data)->except([
-                'owner_name', 'admin_email', 'owner_document_type', 'owner_document_number',
-                'owner_country', 'owner_department', 'owner_city', 'admin_password'
+                'owner_name', 'admin_email', 'admin_password'
             ])->filter(function ($value) {
                 return $value !== null && $value !== '';
             })->toArray();
 
-            // Crear la tienda
+            // Crear la tienda con ubicación del propietario
             $store = Store::create([
                 ...$storeData,
                 'slug' => $processedSlug,
                 'status' => $data['status'] ?? 'active',
                 'verified' => false,
+                // ✅ Guardar ubicación del propietario en la tienda
+                'country' => $data['owner_country'] ?? null,
+                'department' => $data['owner_department'] ?? null,
+                'city' => $data['owner_city'] ?? null,
             ]);
 
             // 🔧 Preparar contexto para Observers
