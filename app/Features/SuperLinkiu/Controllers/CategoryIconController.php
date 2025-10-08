@@ -73,16 +73,9 @@ class CategoryIconController extends Controller
                 $file = $request->file('icon_file');
                 $filename = $name . '.' . $file->getClientOriginalExtension();
                 
-                // ✅ Guardar con método estándar ESTANDAR_IMAGENES.md
-                // Crear directorio si no existe
-                $destinationPath = public_path('storage/category-icons');
-                if (!file_exists($destinationPath)) {
-                    mkdir($destinationPath, 0755, true);
-                }
-                
-                // GUARDAR con move() - Método estándar obligatorio
-                $file->move($destinationPath, $filename);
-                $imagePath = 'category-icons/' . $filename;
+                // ✅ Guardar usando Storage::disk('public')->putFileAs()
+                // Compatible con S3 (Laravel Cloud) y filesystem local
+                $imagePath = Storage::disk('public')->putFileAs('category-icons', $file, $filename);
             } else {
                 throw new \Exception('No se recibió el archivo de imagen');
             }
@@ -147,27 +140,20 @@ class CategoryIconController extends Controller
 
             // Manejar nuevo archivo si se sube
             if ($request->hasFile('icon_file')) {
-                // ✅ Eliminar archivo anterior usando método estándar
+                // ✅ Eliminar archivo anterior del storage
                 if ($categoryIcon->image_path) {
-                    $oldFile = public_path('storage/' . $categoryIcon->image_path);
-                    if (file_exists($oldFile)) {
-                        unlink($oldFile);
-                    }
+                    Storage::disk('public')->delete($categoryIcon->image_path);
                 }
 
-                // Subir nuevo archivo al bucket S3
+                // ✅ Guardar nuevo archivo usando Storage::disk('public')->putFileAs()
+                // Compatible con S3 (Laravel Cloud) y filesystem local
                 $file = $request->file('icon_file');
                 $filename = $request->name . '.' . $file->getClientOriginalExtension();
                 
-                // ✅ Crear directorio si no existe
-                $destinationPath = public_path('storage/category-icons');
-                if (!file_exists($destinationPath)) {
-                    mkdir($destinationPath, 0755, true);
-                }
+                // Guardar en storage/category-icons/
+                $savedPath = Storage::disk('public')->putFileAs('category-icons', $file, $filename);
                 
-                // GUARDAR con move() - Método estándar obligatorio
-                $file->move($destinationPath, $filename);
-                $data['image_path'] = 'category-icons/' . $filename;
+                $data['image_path'] = $savedPath; // Guardar path relativo
             }
 
             $categoryIcon->update($data);
