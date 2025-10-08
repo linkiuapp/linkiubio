@@ -506,44 +506,36 @@ class StoreService
     // ================================================================
 
     /**
-     * Enviar emails de creación de tienda (bienvenida + credenciales)
+     * Enviar email de bienvenida con credenciales al crear tienda
      */
     private function sendStoreCreationEmails(Store $store, User $storeAdmin, string $password): void
     {
         try {
-            // 📧 EMAIL 1: BIENVENIDA
+            // 📧 EMAIL: BIENVENIDA CON CREDENCIALES (usa template_store_created de SendGrid)
             \App\Jobs\SendEmailJob::dispatch('template', $storeAdmin->email, [
-                'template_key' => 'store_welcome',
+                'template_key' => 'store_created',
                 'variables' => [
+                    'first_name' => $storeAdmin->name,
                     'admin_name' => $storeAdmin->name,
                     'store_name' => $store->name,
+                    'owner_name' => $storeAdmin->name,
+                    'admin_email' => $storeAdmin->email,
+                    'admin_password' => $password,
+                    'login_url' => route('tenant.admin.login', $store->slug),
                     'store_url' => url($store->slug),
                     'plan_name' => $store->plan->name ?? 'Plan básico',
                     'support_email' => 'soporte@linkiu.email'
                 ]
             ]);
 
-            // 📧 EMAIL 2: CREDENCIALES (5 segundos después)
-            \App\Jobs\SendEmailJob::dispatch('template', $storeAdmin->email, [
-                'template_key' => 'store_credentials',
-                'variables' => [
-                    'admin_name' => $storeAdmin->name,
-                    'store_name' => $store->name,
-                    'admin_email' => $storeAdmin->email,
-                    'password' => $password,
-                    'login_url' => route('tenant.admin.login', $store->slug),
-                    'store_url' => url($store->slug),
-                    'support_email' => 'soporte@linkiu.email'
-                ]
-            ])->delay(now()->addSeconds(5));
-
-            Log::info('📧 STORE SERVICE: Emails de creación programados', [
+            Log::info('📧 STORE SERVICE: Email de creación programado', [
                 'store_id' => $store->id,
-                'admin_email' => $storeAdmin->email
+                'admin_email' => $storeAdmin->email,
+                'template_key' => 'store_created'
             ]);
 
         } catch (\Exception $e) {
-            Log::error('📧 STORE SERVICE: Error al programar emails de creación', [
+            Log::error('📧 STORE SERVICE: Error al programar email de creación', [
                 'store_id' => $store->id,
                 'error' => $e->getMessage()
             ]);
@@ -564,13 +556,34 @@ class StoreService
                 return;
             }
 
+            // Determinar el template según el nuevo estado
+            $templateKey = match($newStatus) {
+                'suspended' => 'store_suspended',
+                'active' => $oldStatus === 'suspended' ? 'store_reactivated' : null,
+                'verified' => 'store_verified',
+                default => null
+            };
+
+            if (!$templateKey) {
+                Log::info('📧 STORE SERVICE: No hay template para este cambio de estado', [
+                    'old_status' => $oldStatus,
+                    'new_status' => $newStatus
+                ]);
+                return;
+            }
+
             \App\Jobs\SendEmailJob::dispatch('template', $storeAdmin->email, [
-                'template_key' => 'store_status_changed',
+                'template_key' => $templateKey,
                 'variables' => [
+                    'first_name' => $storeAdmin->name,
                     'admin_name' => $storeAdmin->name,
+                    'owner_name' => $storeAdmin->name,
                     'store_name' => $store->name,
                     'old_value' => $this->getStatusLabel($oldStatus),
                     'new_value' => $this->getStatusLabel($newStatus),
+                    'suspension_reason' => $newStatus === 'suspended' ? 'Cambio de estado desde panel de administración' : '',
+                    'verification_date' => $newStatus === 'verified' ? now()->format('d/m/Y') : '',
+                    'reactivation_date' => $newStatus === 'active' ? now()->format('d/m/Y') : '',
                     'change_date' => now()->format('d/m/Y H:i'),
                     'changed_by' => Auth::user()->name ?? 'Sistema',
                     'login_url' => route('tenant.admin.login', $store->slug),
@@ -580,7 +593,8 @@ class StoreService
 
             Log::info('📧 STORE SERVICE: Email de cambio de estado programado', [
                 'store_id' => $store->id,
-                'admin_email' => $storeAdmin->email
+                'admin_email' => $storeAdmin->email,
+                'template_key' => $templateKey
             ]);
 
         } catch (\Exception $e) {
@@ -606,12 +620,14 @@ class StoreService
             }
 
             \App\Jobs\SendEmailJob::dispatch('template', $storeAdmin->email, [
-                'template_key' => 'store_plan_changed',
+                'template_key' => 'plan_changed',
                 'variables' => [
+                    'first_name' => $storeAdmin->name,
                     'admin_name' => $storeAdmin->name,
+                    'owner_name' => $storeAdmin->name,
                     'store_name' => $store->name,
-                    'old_value' => $oldPlan->name ?? 'Plan anterior',
-                    'new_value' => $newPlan->name,
+                    'old_plan' => $oldPlan->name ?? 'N/A',
+                    'new_plan' => $newPlan->name,
                     'change_date' => now()->format('d/m/Y H:i'),
                     'changed_by' => Auth::user()->name ?? 'Sistema',
                     'login_url' => route('tenant.admin.login', $store->slug),
