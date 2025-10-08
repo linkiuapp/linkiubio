@@ -12,21 +12,29 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('plans', function (Blueprint $table) {
-            // ✅ Límites que SÍ se usan en el código
-            $table->integer('max_variables')->default(15)->after('max_categories')
-                ->comment('Máximo de variables por producto (tallas, colores, etc.)');
+            // ✅ Agregar columnas solo si NO existen
+            if (!Schema::hasColumn('plans', 'max_variables')) {
+                $table->integer('max_variables')->default(15)->after('max_categories')
+                    ->comment('Máximo de variables por producto (tallas, colores, etc.)');
+            }
             
-            $table->integer('max_bank_accounts')->default(2)->after('max_delivery_zones')
-                ->comment('Máximo de cuentas bancarias para recibir pagos');
+            if (!Schema::hasColumn('plans', 'max_bank_accounts')) {
+                $table->integer('max_bank_accounts')->default(2)->after('max_delivery_zones')
+                    ->comment('Máximo de cuentas bancarias para recibir pagos');
+            }
             
-            $table->integer('analytics_retention_days')->default(90)->after('support_response_time')
-                ->comment('Días de retención de datos de analíticas');
+            if (!Schema::hasColumn('plans', 'analytics_retention_days')) {
+                $table->integer('analytics_retention_days')->default(90)->after('support_response_time')
+                    ->comment('Días de retención de datos de analíticas');
+            }
         });
 
-        // ❌ ELIMINAR columna que NO se usa
-        Schema::table('plans', function (Blueprint $table) {
-            $table->dropColumn('max_active_promotions');
-        });
+        // ❌ ELIMINAR columna solo si existe
+        if (Schema::hasColumn('plans', 'max_active_promotions')) {
+            Schema::table('plans', function (Blueprint $table) {
+                $table->dropColumn('max_active_promotions');
+            });
+        }
     }
 
     /**
