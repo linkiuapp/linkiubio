@@ -37,8 +37,17 @@ class CategoryIcon extends Model
             return null;
         }
         
-        // ✅ Usar método estándar para generar URLs con cache buster
+        // ✅ Usar Storage::url() para compatibilidad con S3/Laravel Cloud
         // Agregar timestamp de updated_at para forzar recarga cuando se actualiza
-        return asset('storage/' . $this->image_path) . '?v=' . $this->updated_at->timestamp;
+        try {
+            return Storage::disk('public')->url($this->image_path) . '?v=' . $this->updated_at->timestamp;
+        } catch (\Exception $e) {
+            \Log::error('Error generando URL de icono de categoría', [
+                'icon_id' => $this->id,
+                'image_path' => $this->image_path,
+                'error' => $e->getMessage()
+            ]);
+            return null;
+        }
     }
 } 
