@@ -151,6 +151,16 @@ class StoreController extends Controller
         try {
             $result = $this->storeService->createStore($request->validated(), $request);
             
+            // ✅ Si viene del wizard, redirigir de vuelta al wizard con modal de éxito
+            if ($request->has('from_wizard') || $request->input('from_wizard') === 'true') {
+                return redirect()
+                    ->route('superlinkiu.stores.create-wizard')
+                    ->with('success', 'Tienda creada exitosamente.')
+                    ->with('admin_credentials', $result['admin_credentials'])
+                    ->with('show_success_modal', true);
+            }
+            
+            // ✅ Si es creación normal, redirigir a index con modal
             return redirect()
                 ->route('superlinkiu.stores.index')
                 ->with('success', 'Tienda creada exitosamente.')

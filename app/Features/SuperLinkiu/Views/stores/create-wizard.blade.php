@@ -3,6 +3,14 @@
 @section('title', 'Crear Nueva Tienda - Wizard')
 
 @section('content')
+
+{{-- ✅ Modal de Éxito (aparece después de crear la tienda) --}}
+@if(session('admin_credentials'))
+<x-superlinkiu::enhanced-credential-modal
+    :credentials="session('admin_credentials')"
+    :show="true"
+/>
+@endif
 <div class="container-fluid" x-data="storeWizard()">
     
     {{-- Debug: Mostrar errores de validación si existen --}}
@@ -59,6 +67,7 @@
     <form id="wizardForm" method="POST" action="{{ route('superlinkiu.stores.store') }}" class="bg-accent rounded-lg shadow-sm" @submit="handleFormSubmit">
         @csrf
         <input type="hidden" name="_token" value="{{ csrf_token() }}">
+        <input type="hidden" name="from_wizard" value="true">
         
         <!-- Hidden fields for form data -->
         <input type="hidden" name="plan_id" x-model="formData.plan_id">
