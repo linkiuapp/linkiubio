@@ -428,16 +428,6 @@ class Order extends Model
         return $this->status === self::STATUS_CANCELLED;
     }
 
-    public function canBeEdited(): bool
-    {
-        return in_array($this->status, [self::STATUS_PENDING, self::STATUS_CONFIRMED]);
-    }
-
-    public function isFinalStatus(): bool
-    {
-        return in_array($this->status, [self::STATUS_DELIVERED, self::STATUS_CANCELLED]);
-    }
-
     /**
      * Métodos de cálculo
      */
