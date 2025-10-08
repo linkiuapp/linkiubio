@@ -12,11 +12,12 @@
             Exportar Excel
         </button>
         
-        <a href="{{ route('superlinkiu.stores.bulk.import') }}" 
+        {{-- TODO: Implementar importación masiva --}}
+        {{-- <a href="{{ route('superlinkiu.stores.bulk.import') }}" 
            class="btn-outline-secondary px-4 py-2 rounded-lg flex items-center gap-2">
             <x-solar-upload-outline class="w-5 h-5" />
             Importación Masiva
-        </a>
+        </a> --}}
         
         <a href="{{ route('superlinkiu.stores.create-wizard') }}" 
            class="btn-primary px-4 py-2 rounded-lg flex items-center gap-2">
