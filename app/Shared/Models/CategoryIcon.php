@@ -37,7 +37,8 @@ class CategoryIcon extends Model
             return null;
         }
         
-        // ✅ Usar método estándar para generar URLs
-        return asset('storage/' . $this->image_path);
+        // ✅ Usar método estándar para generar URLs con cache buster
+        // Agregar timestamp de updated_at para forzar recarga cuando se actualiza
+        return asset('storage/' . $this->image_path) . '?v=' . $this->updated_at->timestamp;
     }
 } 
