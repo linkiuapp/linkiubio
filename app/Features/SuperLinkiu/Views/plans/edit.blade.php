@@ -159,27 +159,15 @@
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-black-400 mb-2">
-                                Variables de producto <span class="text-error-300">*</span>
+                                Variables por Producto <span class="text-error-300">*</span>
+                                <span class="block text-xs text-black-300 mt-1">Ej: tallas, colores, tamaños</span>
                             </label>
                             <input type="number" 
                                    name="max_variables" 
-                                   value="{{ old('max_variables', $plan->max_variables ?? 10) }}"
-                                   min="0"
+                                   value="{{ old('max_variables', $plan->max_variables ?? 15) }}"
+                                   min="1"
                                    class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('max_variables') border-error-200 @enderror">
                             @error('max_variables')
-                                <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-black-400 mb-2">
-                                Imágenes por producto <span class="text-error-300">*</span>
-                            </label>
-                            <input type="number" 
-                                   name="max_product_images" 
-                                   value="{{ old('max_product_images', $plan->max_product_images ?? 3) }}"
-                                   min="1"
-                                   class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('max_product_images') border-error-200 @enderror">
-                            @error('max_product_images')
                                 <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
                             @enderror
                         </div>
@@ -197,11 +185,11 @@
                                 Sliders homepage <span class="text-error-300">*</span>
                             </label>
                             <input type="number" 
-                                   name="max_sliders" 
-                                   value="{{ old('max_sliders', $plan->max_sliders ?? 1) }}"
+                                   name="max_slider" 
+                                   value="{{ old('max_slider', $plan->max_slider ?? 1) }}"
                                    min="0"
-                                   class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('max_sliders') border-error-200 @enderror">
-                            @error('max_sliders')
+                                   class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('max_slider') border-error-200 @enderror">
+                            @error('max_slider')
                                 <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
                             @enderror
                         </div>
@@ -229,14 +217,14 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-black-400 mb-2">
-                                Sedes físicas <span class="text-error-300">*</span>
+                                Sedes / Ubicaciones <span class="text-error-300">*</span>
                             </label>
                             <input type="number" 
-                                   name="max_locations" 
-                                   value="{{ old('max_locations', $plan->max_locations ?? 1) }}"
+                                   name="max_sedes" 
+                                   value="{{ old('max_sedes', $plan->max_sedes ?? 1) }}"
                                    min="1"
-                                   class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('max_locations') border-error-200 @enderror">
-                            @error('max_locations')
+                                   class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('max_sedes') border-error-200 @enderror">
+                            @error('max_sedes')
                                 <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
                             @enderror
                         </div>
@@ -261,20 +249,7 @@
                     <h4 class="text-base font-medium text-black-400 mb-3 flex items-center gap-2">
                         <span>💰</span> Pagos
                     </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-black-400 mb-2">
-                                Métodos de pago activos <span class="text-error-300">*</span>
-                            </label>
-                            <input type="number" 
-                                   name="max_payment_methods" 
-                                   value="{{ old('max_payment_methods', $plan->max_payment_methods ?? 2) }}"
-                                   min="1"
-                                   class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('max_payment_methods') border-error-200 @enderror">
-                            @error('max_payment_methods')
-                                <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
-                            @enderror
-                        </div>
+                    <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-black-400 mb-2">
                                 Cuentas bancarias <span class="text-error-300">*</span>
@@ -291,34 +266,12 @@
                     </div>
                 </div>
 
-                <!-- 📊 VENTAS Y PEDIDOS -->
-                <div class="mb-6">
-                    <h4 class="text-base font-medium text-black-400 mb-3 flex items-center gap-2">
-                        <span>📊</span> Ventas y Pedidos
-                    </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-black-400 mb-2">
-                                Meses de historial de pedidos <span class="text-error-300">*</span>
-                            </label>
-                            <input type="number" 
-                                   name="order_history_months" 
-                                   value="{{ old('order_history_months', $plan->order_history_months ?? 6) }}"
-                                   min="1"
-                                   class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('order_history_months') border-error-200 @enderror">
-                            @error('order_history_months')
-                                <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
-                            @enderror
-                        </div>
-                    </div>
-                </div>
-
                 <!-- 👥 ADMINISTRACIÓN -->
                 <div class="mb-6">
                     <h4 class="text-base font-medium text-black-400 mb-3 flex items-center gap-2">
                         <span>👥</span> Administración
                     </h4>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-1 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-black-400 mb-2">
                                 Usuarios administradores <span class="text-error-300">*</span>
@@ -329,19 +282,6 @@
                                    min="1"
                                    class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('max_admins') border-error-200 @enderror">
                             @error('max_admins')
-                                <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
-                            @enderror
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-black-400 mb-2">
-                                Tickets de soporte mensuales <span class="text-error-300">*</span>
-                            </label>
-                            <input type="number" 
-                                   name="max_tickets_per_month" 
-                                   value="{{ old('max_tickets_per_month', $plan->max_tickets_per_month ?? 2) }}"
-                                   min="1"
-                                   class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('max_tickets_per_month') border-error-200 @enderror">
-                            @error('max_tickets_per_month')
                                 <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
                             @enderror
                         </div>

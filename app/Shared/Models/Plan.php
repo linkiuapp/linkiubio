@@ -20,38 +20,31 @@ class Plan extends Model
         'duration_in_days',
         'image_url',
         
-        // PRODUCTOS
+        // ✅ PRODUCTOS (Validados)
         'max_products',
         'max_categories',
         'max_variables',
-        'max_product_images',
         
-        // DISEÑO Y MARKETING
-        'max_sliders',
+        // ✅ DISEÑO Y MARKETING (Validados)
+        'max_slider',  // Singular - coincide con BD
         'max_active_coupons',
-        'max_active_promotions',
         
-        // ENVÍOS Y LOGÍSTICA
-        'max_locations',
+        // ✅ ENVÍOS Y LOGÍSTICA (Validados)
+        'max_sedes',  // Nombre en BD (locations)
         'max_delivery_zones',
         
-        // PAGOS
-        'max_payment_methods',
+        // ✅ PAGOS (Validados)
         'max_bank_accounts',
         
-        // VENTAS Y PEDIDOS
-        'order_history_months',
-        
-        // ADMINISTRACIÓN
+        // ✅ ADMINISTRACIÓN (Validados)
         'max_admins',
-        'max_tickets_per_month',
         'support_level',
         'support_response_time',
         
-        // ANALÍTICAS
+        // ✅ ANALÍTICAS (Validados)
         'analytics_retention_days',
         
-        // CONFIGURACIÓN
+        // ✅ CONFIGURACIÓN
         'is_active',
         'is_public',
         'is_featured',

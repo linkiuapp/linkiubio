@@ -119,6 +119,7 @@
             <div class="mb-8">
                 <h3 class="text-lg font-semibold text-black-400 mb-4">Límites del Plan</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                    <!-- ✅ PRODUCTOS -->
                     <div>
                         <label class="block text-sm font-medium text-black-400 mb-2">
                             Productos <span class="text-error-300">*</span>
@@ -129,45 +130,6 @@
                                min="1"
                                class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('max_products') border-error-200 @enderror">
                         @error('max_products')
-                            <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
-                        @enderror
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-black-400 mb-2">
-                            Sliders <span class="text-error-300">*</span>
-                        </label>
-                        <input type="number" 
-                               name="max_slider" 
-                               value="{{ old('max_slider', 1) }}"
-                               min="0"
-                               class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('max_slider') border-error-200 @enderror">
-                        @error('max_slider')
-                            <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
-                        @enderror
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-black-400 mb-2">
-                            Promociones <span class="text-error-300">*</span>
-                        </label>
-                        <input type="number" 
-                               name="max_active_promotions" 
-                               value="{{ old('max_active_promotions', 1) }}"
-                               min="0"
-                               class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('max_active_promotions') border-error-200 @enderror">
-                        @error('max_active_promotions')
-                            <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
-                        @enderror
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-black-400 mb-2">
-                            Cupones <span class="text-error-300">*</span>
-                        </label>
-                        <input type="number" 
-                               name="max_active_coupons" 
-                               value="{{ old('max_active_coupons', 1) }}"
-                               min="0"
-                               class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('max_active_coupons') border-error-200 @enderror">
-                        @error('max_active_coupons')
                             <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
                         @enderror
                     </div>
@@ -186,7 +148,51 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-black-400 mb-2">
-                            Sedes <span class="text-error-300">*</span>
+                            Variables por Producto <span class="text-error-300">*</span>
+                        </label>
+                        <input type="number" 
+                               name="max_variables" 
+                               value="{{ old('max_variables', 15) }}"
+                               min="1"
+                               class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('max_variables') border-error-200 @enderror"
+                               title="Ej: tallas, colores, tamaños">
+                        @error('max_variables')
+                            <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    
+                    <!-- ✅ DISEÑO Y MARKETING -->
+                    <div>
+                        <label class="block text-sm font-medium text-black-400 mb-2">
+                            Sliders <span class="text-error-300">*</span>
+                        </label>
+                        <input type="number" 
+                               name="max_slider" 
+                               value="{{ old('max_slider', 1) }}"
+                               min="0"
+                               class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('max_slider') border-error-200 @enderror">
+                        @error('max_slider')
+                            <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-black-400 mb-2">
+                            Cupones Activos <span class="text-error-300">*</span>
+                        </label>
+                        <input type="number" 
+                               name="max_active_coupons" 
+                               value="{{ old('max_active_coupons', 1) }}"
+                               min="0"
+                               class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('max_active_coupons') border-error-200 @enderror">
+                        @error('max_active_coupons')
+                            <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    
+                    <!-- ✅ ENVÍOS Y LOGÍSTICA -->
+                    <div>
+                        <label class="block text-sm font-medium text-black-400 mb-2">
+                            Sedes / Ubicaciones <span class="text-error-300">*</span>
                         </label>
                         <input type="number" 
                                name="max_sedes" 
@@ -194,19 +200,6 @@
                                min="1"
                                class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('max_sedes') border-error-200 @enderror">
                         @error('max_sedes')
-                            <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
-                        @enderror
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium text-black-400 mb-2">
-                            Administradores <span class="text-error-300">*</span>
-                        </label>
-                        <input type="number" 
-                               name="max_admins" 
-                               value="{{ old('max_admins', 1) }}"
-                               min="1"
-                               class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('max_admins') border-error-200 @enderror">
-                        @error('max_admins')
                             <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
                         @enderror
                     </div>
@@ -220,6 +213,52 @@
                                min="1"
                                class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('max_delivery_zones') border-error-200 @enderror">
                         @error('max_delivery_zones')
+                            <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    
+                    <!-- ✅ PAGOS -->
+                    <div>
+                        <label class="block text-sm font-medium text-black-400 mb-2">
+                            Cuentas Bancarias <span class="text-error-300">*</span>
+                        </label>
+                        <input type="number" 
+                               name="max_bank_accounts" 
+                               value="{{ old('max_bank_accounts', 2) }}"
+                               min="1"
+                               class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('max_bank_accounts') border-error-200 @enderror">
+                        @error('max_bank_accounts')
+                            <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    
+                    <!-- ✅ ADMINISTRACIÓN -->
+                    <div>
+                        <label class="block text-sm font-medium text-black-400 mb-2">
+                            Administradores <span class="text-error-300">*</span>
+                        </label>
+                        <input type="number" 
+                               name="max_admins" 
+                               value="{{ old('max_admins', 1) }}"
+                               min="1"
+                               class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('max_admins') border-error-200 @enderror">
+                        @error('max_admins')
+                            <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
+                        @enderror
+                    </div>
+                    
+                    <!-- ✅ ANALÍTICAS -->
+                    <div>
+                        <label class="block text-sm font-medium text-black-400 mb-2">
+                            Retención de Analíticas (días) <span class="text-error-300">*</span>
+                        </label>
+                        <input type="number" 
+                               name="analytics_retention_days" 
+                               value="{{ old('analytics_retention_days', 90) }}"
+                               min="30"
+                               step="30"
+                               class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('analytics_retention_days') border-error-200 @enderror">
+                        @error('analytics_retention_days')
                             <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
                         @enderror
                     </div>

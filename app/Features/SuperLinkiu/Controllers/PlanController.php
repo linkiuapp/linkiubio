@@ -49,21 +49,17 @@ class PlanController extends Controller
             'prices.quarterly' => 'nullable|numeric|min:0',
             'prices.semester' => 'nullable|numeric|min:0',
             
-            // Límites actualizados
+            // ✅ Límites validados (Solo los que existen en BD y se usan)
             'max_products' => 'required|integer|min:1',
-            'max_sliders' => 'required|integer|min:0',
-            'max_variables' => 'required|integer|min:0',
-            'max_product_images' => 'required|integer|min:1',
-            'max_active_coupons' => 'required|integer|min:0',
             'max_categories' => 'required|integer|min:1',
-            'max_locations' => 'required|integer|min:1',
+            'max_variables' => 'required|integer|min:1',
+            'max_slider' => 'required|integer|min:0',  // Singular - coincide con BD
+            'max_active_coupons' => 'required|integer|min:0',
+            'max_sedes' => 'required|integer|min:1',  // Nombre en BD
             'max_delivery_zones' => 'required|integer|min:1',
-            'max_payment_methods' => 'required|integer|min:1',
             'max_bank_accounts' => 'required|integer|min:1',
-            'order_history_months' => 'required|integer|min:1',
             'max_admins' => 'required|integer|min:1',
-            'max_tickets_per_month' => 'required|integer|min:1',
-            'analytics_retention_days' => 'required|integer|min:7',
+            'analytics_retention_days' => 'required|integer|min:30',
             
             // Soporte
             'support_level' => 'required|in:basic,priority,premium',
@@ -152,21 +148,17 @@ class PlanController extends Controller
             'prices.quarterly' => 'nullable|numeric|min:0',
             'prices.semester' => 'nullable|numeric|min:0',
             
-            // Límites actualizados
+            // ✅ Límites validados (Solo los que existen en BD y se usan)
             'max_products' => 'required|integer|min:1',
-            'max_sliders' => 'required|integer|min:0',
-            'max_variables' => 'required|integer|min:0',
-            'max_product_images' => 'required|integer|min:1',
-            'max_active_coupons' => 'required|integer|min:0',
             'max_categories' => 'required|integer|min:1',
-            'max_locations' => 'required|integer|min:1',
+            'max_variables' => 'required|integer|min:1',
+            'max_slider' => 'required|integer|min:0',  // Singular - coincide con BD
+            'max_active_coupons' => 'required|integer|min:0',
+            'max_sedes' => 'required|integer|min:1',  // Nombre en BD
             'max_delivery_zones' => 'required|integer|min:1',
-            'max_payment_methods' => 'required|integer|min:1',
             'max_bank_accounts' => 'required|integer|min:1',
-            'order_history_months' => 'required|integer|min:1',
             'max_admins' => 'required|integer|min:1',
-            'max_tickets_per_month' => 'required|integer|min:1',
-            'analytics_retention_days' => 'required|integer|min:7',
+            'analytics_retention_days' => 'required|integer|min:30',
             
             // Soporte
             'support_level' => 'required|in:basic,priority,premium',
@@ -191,7 +183,7 @@ class PlanController extends Controller
         $validated['is_featured'] = $request->boolean('is_featured');
         
         // Incrementar versión si hay cambios significativos
-        $significantChanges = ['price', 'max_products', 'max_categories', 'max_locations'];
+        $significantChanges = ['price', 'max_products', 'max_categories', 'max_sedes'];
         $hasSignificantChanges = false;
         
         foreach ($significantChanges as $field) {
@@ -213,38 +205,7 @@ class PlanController extends Controller
             });
         }
 
-        // Manejar transición de nombres de campos
-        $updateData = $validated;
-        
-        // Si la tabla todavía tiene campos antiguos, mapear a los nuevos
-        try {
-            $plan->update($updateData);
-        } catch (\Exception $e) {
-            // Si falla, puede ser porque los campos nuevos no existen
-            // Mapear a campos antiguos temporalmente
-            if (isset($updateData['max_sliders'])) {
-                $updateData['max_slider'] = $updateData['max_sliders'];
-                unset($updateData['max_sliders']);
-            }
-            if (isset($updateData['max_locations'])) {
-                $updateData['max_sedes'] = $updateData['max_locations'];
-                unset($updateData['max_locations']);
-            }
-            
-            // Remover campos que pueden no existir
-            $fieldsToRemove = ['max_variables', 'max_product_images', 'max_payment_methods', 
-                              'max_bank_accounts', 'order_history_months', 'max_tickets_per_month', 
-                              'analytics_retention_days'];
-            
-            foreach ($fieldsToRemove as $field) {
-                if (isset($updateData[$field])) {
-                    unset($updateData[$field]);
-                }
-            }
-            
-            // Intentar actualizar con campos antiguos
-            $plan->update($updateData);
-        }
+        $plan->update($validated);
 
         return redirect()
             ->route('superlinkiu.plans.index')
