@@ -323,29 +323,64 @@
                 storeDescription: @json($store->description)
             });
             
-            // Color picker simplificado
+            // Color picker con sincronización mejorada
             Alpine.data('colorPicker', (modelName) => ({
                 color: '',
                 isOpen: false,
                 error: null,
                 
                 init() {
+                    // Inicializar con valor del store
                     this.color = this.$store?.design?.[modelName] || '#FFFFFF';
+                    console.log('🎨 Color picker init:', modelName, '=', this.color);
+                    
+                    // Watch para sincronizar cambios del input al store
+                    this.$watch('color', (newColor) => {
+                        if (newColor && !this.error && this.$store?.design) {
+                            this.$store.design[modelName] = newColor;
+                            console.log('🔄 Color updated:', modelName, '=', newColor);
+                        }
+                    });
                 },
                 
-                open() { this.isOpen = true; },
-                close() { this.isOpen = false; },
+                open() { 
+                    this.isOpen = true; 
+                },
+                
+                close() { 
+                    this.isOpen = false; 
+                },
                 
                 setColor(color) {
+                    console.log('🎯 Setting color from palette:', color);
                     this.color = color;
-                    if (this.$store?.design) {
+                    this.validate();
+                    if (!this.error && this.$store?.design) {
                         this.$store.design[modelName] = color;
                     }
                     this.close();
                 },
                 
                 validate() {
-                    // Validación básica
+                    this.error = null;
+                    const hexRegex = /^#[0-9A-Fa-f]{6}$/;
+                    
+                    if (this.color && !this.color.startsWith('#')) {
+                        this.color = '#' + this.color;
+                    }
+                    
+                    if (this.color && !hexRegex.test(this.color)) {
+                        this.error = 'Color inválido (formato: #RRGGBB)';
+                    }
+                },
+                
+                validateFinal() {
+                    this.validate();
+                    if (this.error) {
+                        // Revertir al valor del store si hay error
+                        this.color = this.$store.design[modelName] || '#FFFFFF';
+                        this.error = null;
+                    }
                 }
             }));
             

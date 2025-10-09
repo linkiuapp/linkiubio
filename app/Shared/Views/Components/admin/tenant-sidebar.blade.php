@@ -19,10 +19,11 @@ use Illuminate\Support\Facades\Storage;
                     @if($profileImage)
                         <img src="{{ $profileImage }}" 
                             alt="Perfil" 
-                            class="w-8 h-8 rounded-full object-cover border border-accent-200">
+                            class="w-18 h-18 rounded-full object-cover border-2 border-accent-200"
+                            style="width: 72px; height: 72px;">
                     @else
-                        <div class="w-8 h-8 bg-primary-300 rounded-full flex items-center justify-center">
-                            <span class="text-accent-50 text-body-small font-bold">
+                        <div class="w-18 h-18 bg-primary-300 rounded-full flex items-center justify-center" style="width: 72px; height: 72px;">
+                            <span class="text-accent-50 text-xl font-bold">
                                 {{ substr(auth()->user()->name, 0, 1) }}
                             </span>
                         </div>

@@ -21,11 +21,12 @@
 
             <!-- Logo -->
             <div class="mb-4">
-                <div class="rounded-full mx-auto flex items-center justify-center">
+                <div class="mx-auto flex items-center justify-center">
                     @if($store->design && $store->design->logo_url)
                         <img src="{{ $store->design->logo_url }}" 
                              alt="Logo" 
-                             class="w-27 h-27 object-contain">
+                             class="w-18 h-18 rounded-full object-cover"
+                             style="width: 72px; height: 72px;">
                     @endif
                 </div>
             </div>
