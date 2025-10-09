@@ -68,9 +68,28 @@ use App\Shared\Models\BillingSetting;
             <!-- Tienda -->
             <li>
                 <a href="{{ route('superlinkiu.stores.index') }}" 
-                   class="item-sidebar {{ request()->routeIs('superlinkiu.stores.*') ? 'item-sidebar-active' : '' }}">
+                   class="item-sidebar {{ request()->routeIs('superlinkiu.stores.*') && !request()->routeIs('superlinkiu.store-requests.*') ? 'item-sidebar-active' : '' }}">
                     <x-solar-shop-outline class="w-4 h-4 mr-2" />
                     Gestión de tiendas
+                </a>
+            </li>
+
+            <!-- Solicitudes de Tiendas -->
+            <li>
+                <a href="{{ route('superlinkiu.store-requests.index') }}" 
+                   class="item-sidebar {{ request()->routeIs('superlinkiu.store-requests.*') ? 'item-sidebar-active' : '' }}">
+                    <x-solar-document-add-outline class="w-4 h-4 mr-2" />
+                    Solicitudes de Tiendas
+                    @php
+                        $pendingCount = \App\Shared\Models\Store::where('approval_status', 'pending_approval')->count();
+                    @endphp
+                    @if($pendingCount > 0)
+                        <span id="pending-requests-badge" class="ml-auto text-xs bg-warning-300 text-white px-2 py-1 rounded-full font-bold">
+                            {{ $pendingCount }}
+                        </span>
+                    @else
+                        <span id="pending-requests-badge" class="ml-auto text-xs bg-warning-300 text-white px-2 py-1 rounded-full font-bold hidden"></span>
+                    @endif
                 </a>
             </li>
 
@@ -246,6 +265,23 @@ use App\Shared\Models\BillingSetting;
             <h3 class="title-group-sidebar mt-6">
                 Configuración
             </h3>
+
+            <!-- Categorías de Negocio -->
+            <li>
+                <a href="{{ route('superlinkiu.business-categories.index') }}" class="item-sidebar {{ request()->routeIs('superlinkiu.business-categories.*') ? 'item-sidebar-active' : '' }}">
+                    <x-solar-tag-outline class="w-4 h-4 mr-2" />
+                    Categorías de Negocio
+                    @php
+                        $totalCategories = \App\Shared\Models\BusinessCategory::count();
+                        $autoApproveCategories = \App\Shared\Models\BusinessCategory::where('requires_manual_approval', false)->where('is_active', true)->count();
+                    @endphp
+                    @if($totalCategories > 0)
+                        <span class="ml-auto text-xs bg-success-300 text-white px-2 py-1 rounded-full">
+                            {{ $autoApproveCategories }}/{{ $totalCategories }}
+                        </span>
+                    @endif
+                </a>
+            </li>
 
             <!-- Iconos de Categorías -->
             <li>
