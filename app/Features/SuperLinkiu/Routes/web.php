@@ -49,6 +49,16 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
             [\App\Features\SuperLinkiu\Controllers\BusinessCategoryController::class, 'reorder'])
             ->name('business-categories.reorder');
         
+        // Store Approval Requests
+        Route::prefix('store-requests')->name('store-requests.')->group(function () {
+            Route::get('/', [\App\Features\SuperLinkiu\Controllers\StoreApprovalController::class, 'index'])->name('index');
+            Route::get('/{store}', [\App\Features\SuperLinkiu\Controllers\StoreApprovalController::class, 'show'])->name('show');
+            Route::post('/{store}/approve', [\App\Features\SuperLinkiu\Controllers\StoreApprovalController::class, 'approve'])->name('approve');
+            Route::post('/{store}/reject', [\App\Features\SuperLinkiu\Controllers\StoreApprovalController::class, 'reject'])->name('reject');
+            Route::post('/{store}/assign-category', [\App\Features\SuperLinkiu\Controllers\StoreApprovalController::class, 'assignCategory'])->name('assign-category');
+            Route::post('/{store}/update-notes', [\App\Features\SuperLinkiu\Controllers\StoreApprovalController::class, 'updateNotes'])->name('update-notes');
+        });
+        
         // Template API endpoints
         Route::prefix('api/templates')->name('api.templates.')->group(function () {
             Route::get('/', [StoreController::class, 'getTemplates'])->name('index');
