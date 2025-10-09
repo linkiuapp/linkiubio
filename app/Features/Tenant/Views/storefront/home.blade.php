@@ -27,7 +27,7 @@
                             @endif
                             
                             <!-- Imagen del slider -->
-                            <div class="w-full aspect-[16/9] sm:aspect-[17/10] max-w-full bg-accent-100 rounded-lg overflow-hidden relative">
+                            <div class="w-full aspect-[17/10] max-w-full bg-accent-100 rounded-lg overflow-hidden relative">
                                 @if($slider->image_url)
                                     <img src="{{ $slider->image_url }}" 
                                          alt="{{ $slider->name }}" 
@@ -55,8 +55,9 @@
                         </div>
                     @endforeach
                     
-                    <!-- Duplicar slides para efecto infinito (solo si hay más de 3) -->
-                    @if($sliders->count() > 3)
+                    <!-- Duplicar slides para efecto infinito - duplicar según viewport -->
+                    @if($sliders->count() > 1)
+                        {{-- Duplicar 2 para móvil, 3 para desktop (tomamos 3 para cubrir ambos casos) --}}
                         @foreach($sliders->take(3) as $index => $slider)
                             <div class="w-1/2 sm:w-1/3 flex-shrink-0 relative flex justify-center px-1">
                                 @if($slider->url && $slider->url_type !== 'none')
@@ -74,7 +75,7 @@
                                 @endif
                                 
                                 <!-- Imagen del slider -->
-                                <div class="w-full aspect-[16/9] sm:aspect-[17/10] max-w-full bg-accent-100 rounded-lg overflow-hidden relative">
+                                <div class="w-full aspect-[17/10] max-w-full bg-accent-100 rounded-lg overflow-hidden relative">
                                     @if($slider->image_url)
                                         <img src="{{ $slider->image_url }}" 
                                              alt="{{ $slider->name }}" 
