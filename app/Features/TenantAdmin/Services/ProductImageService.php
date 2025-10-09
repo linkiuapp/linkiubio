@@ -52,26 +52,15 @@ class ProductImageService
             // Generar nombre único para la imagen
             $filename = $this->generateUniqueFilename($image);
             
-            // Guardar en almacenamiento local (método directo sin Storage facade)
+            // ✅ Guardar usando Storage::disk('public') - Compatible con S3 (Laravel Cloud)
             $directory = 'products/' . $product->id . '/images';
-            $publicPath = storage_path('app/public');
-            $fullDirectoryPath = $publicPath . '/' . $directory;
-            $fullFilePath = $fullDirectoryPath . '/' . $filename;
             
-            // Crear directorio si no existe (método directo PHP)
-            if (!file_exists($fullDirectoryPath)) {
-                mkdir($fullDirectoryPath, 0755, true);
+            // Guardar imagen en S3/storage público
+            $relativePath = Storage::disk('public')->putFileAs($directory, $image, $filename);
+            
+            if (!$relativePath) {
+                throw new \Exception('Error guardando imagen de producto en storage');
             }
-            
-            // Copiar archivo directamente sin usar Storage facade
-            if (copy($image->getPathname(), $fullFilePath)) {
-                $path = $directory . '/' . $filename; // Path relativo para BD
-            } else {
-                throw new \Exception('Error copiando archivo de imagen');
-            }
-            
-            // Path para guardar en BD (será usado para generar URL)
-            $relativePath = $path;
 
             // Crear registro en base de datos
             $productImage = ProductImage::create([
@@ -112,32 +101,22 @@ class ProductImageService
     public function deleteImage(ProductImage $image): bool
     {
         try {
-            // Eliminar archivo físico
-            $fullPath = public_path('storage/' . $image->image_path);
-            if (file_exists($fullPath)) {
-                unlink($fullPath);
+            // ✅ Eliminar archivo físico usando Storage - Compatible con S3
+            if ($image->image_path && Storage::disk('public')->exists($image->image_path)) {
+                Storage::disk('public')->delete($image->image_path);
             }
 
-            // Eliminar thumbnails si existen
-            if ($image->thumbnail_path) {
-                $thumbnailPath = public_path('storage/' . $image->thumbnail_path);
-                if (file_exists($thumbnailPath)) {
-                    unlink($thumbnailPath);
-                }
+            // ✅ Eliminar thumbnails si existen
+            if ($image->thumbnail_path && Storage::disk('public')->exists($image->thumbnail_path)) {
+                Storage::disk('public')->delete($image->thumbnail_path);
             }
 
-            if ($image->medium_path) {
-                $mediumPath = public_path('storage/' . $image->medium_path);
-                if (file_exists($mediumPath)) {
-                    unlink($mediumPath);
-                }
+            if ($image->medium_path && Storage::disk('public')->exists($image->medium_path)) {
+                Storage::disk('public')->delete($image->medium_path);
             }
 
-            if ($image->large_path) {
-                $largePath = public_path('storage/' . $image->large_path);
-                if (file_exists($largePath)) {
-                    unlink($largePath);
-                }
+            if ($image->large_path && Storage::disk('public')->exists($image->large_path)) {
+                Storage::disk('public')->delete($image->large_path);
             }
 
             // Eliminar registro de BD
