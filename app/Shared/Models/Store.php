@@ -38,6 +38,21 @@ class Store extends Model
         'meta_title',
         'meta_description',
         'meta_keywords',
+        
+        // Campos de aprobación
+        'business_type',
+        'business_document_type',
+        'business_document_number',
+        'document_verified',
+        'approval_status',
+        'approved_at',
+        'approved_by',
+        'rejection_reason',
+        'rejection_message',
+        'rejected_at',
+        'can_reapply_at',
+        'admin_notes',
+        'business_category_id',
     ];
 
     protected $casts = [
@@ -57,6 +72,16 @@ class Store extends Model
     public function plan()
     {
         return $this->belongsTo(Plan::class);
+    }
+
+    public function businessCategory()
+    {
+        return $this->belongsTo(BusinessCategory::class);
+    }
+
+    public function approvedBy()
+    {
+        return $this->belongsTo(User::class, 'approved_by');
     }
 
     public function planExtensions()
