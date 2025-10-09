@@ -315,6 +315,11 @@ class SendGridEmailService
             return 'billing';
         }
         
+        // ✅ Templates del flujo de aprobación de tiendas
+        if (in_array($templateType, ['store_pending_review', 'store_approved', 'store_rejected', 'new_store_request'])) {
+            return 'store_management';
+        }
+        
         return 'store_management';
     }
 
@@ -410,6 +415,45 @@ class SendGridEmailService
                 'days_overdue' => '5',
                 'payment_url' => 'https://linkiu.com/pay/INV-2024-001',
                 'suspension_date' => date('d/m/Y', strtotime('+5 days'))
+            ],
+            
+            // ✅ Aprobación de Tiendas (NUEVO)
+            'store_pending_review' => [
+                'admin_name' => 'Juan Pérez',
+                'store_name' => 'Tienda de Prueba',
+                'business_type' => 'Restaurante',
+                'business_document_type' => 'NIT',
+                'business_document_number' => '900123456-7',
+                'estimated_time' => '6 horas',
+                'support_email' => 'soporte@linkiu.email'
+            ],
+            'store_approved' => [
+                'admin_name' => 'Juan Pérez',
+                'store_name' => 'Tienda de Prueba',
+                'admin_email' => 'admin@tiendaprueba.com',
+                'password' => 'TempPassword123!',
+                'login_url' => 'https://linkiu.com/admin/login',
+                'store_url' => 'https://linkiu.com/tienda-prueba',
+                'plan_name' => 'Plan Explorer',
+                'support_email' => 'soporte@linkiu.email'
+            ],
+            'store_rejected' => [
+                'admin_name' => 'Juan Pérez',
+                'store_name' => 'Tienda de Prueba',
+                'rejection_reason' => 'Documentación incompleta',
+                'rejection_message' => 'El documento NIT no pudo ser verificado. Por favor, verifica que el número esté correcto y vuelve a intentarlo.',
+                'can_reapply_date' => date('d/m/Y', strtotime('+15 days')),
+                'appeal_email' => 'apelaciones@linkiu.email'
+            ],
+            'new_store_request' => [
+                'store_name' => 'Tienda de Prueba',
+                'business_type' => 'Restaurante',
+                'business_document_type' => 'NIT',
+                'business_document_number' => '900123456-7',
+                'admin_name' => 'Juan Pérez',
+                'admin_email' => 'admin@tiendaprueba.com',
+                'created_at' => date('d/m/Y H:i'),
+                'review_url' => 'https://linkiu.com/admin/store-requests'
             ]
         ];
 

@@ -6,6 +6,7 @@ use App\Shared\Models\Store;
 use App\Shared\Traits\LogsActivity;
 use App\Shared\Models\User;
 use App\Shared\Models\Plan;
+use App\Shared\Models\BusinessCategory;
 use App\Core\Providers\RouteServiceProvider;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -13,7 +14,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Services\SimpleEmailService;
 use App\Services\SendGridEmailService;
+use App\Services\RUTValidationService;
 use App\Models\EmailConfiguration;
+use App\Events\StoreRequestCreated;
 
 class StoreService
 {
@@ -43,7 +46,10 @@ class StoreService
                 return $value !== null && $value !== '';
             })->toArray();
 
-            // Crear la tienda con ubicación del propietario
+            // 🔐 LÓGICA DE AUTO-APROBACIÓN
+            $approvalData = $this->determineApprovalStatus($data);
+
+            // Crear la tienda con ubicación del propietario y datos de aprobación
             $store = Store::create([
                 ...$storeData,
                 'slug' => $processedSlug,
@@ -53,6 +59,7 @@ class StoreService
                 'country' => $data['owner_country'] ?? null,
                 'department' => $data['owner_department'] ?? null,
                 'city' => $data['owner_city'] ?? null,
+                ...$approvalData // Agregar datos de aprobación
             ]);
 
             // 🔧 Preparar contexto para Observers
@@ -69,17 +76,24 @@ class StoreService
             Log::info('🏪 STORE SERVICE: Tienda creada exitosamente', [
                 'store_id' => $store->id,
                 'store_slug' => $store->slug,
-                'admin_id' => $storeAdmin->id
+                'admin_id' => $storeAdmin->id,
+                'approval_status' => $store->approval_status
             ]);
 
-            // 📧 ENVIAR EMAILS DE BIENVENIDA Y CREDENCIALES
+            // 📧 ENVIAR EMAILS SEGÚN ESTADO DE APROBACIÓN
             $this->sendStoreCreationEmails($store, $storeAdmin, $data['admin_password']);
+
+            // 📡 BROADCAST SI ES SOLICITUD PENDIENTE
+            if ($store->approval_status === 'pending_approval') {
+                event(new StoreRequestCreated($store));
+            }
 
             return [
                 'success' => true,
                 'store' => $store,
                 'admin' => $storeAdmin,
-                'admin_credentials' => [
+                'approval_status' => $store->approval_status,
+                'admin_credentials' => $store->approval_status === 'approved' ? [
                     'store_name' => $store->name,
                     'store_slug' => $store->slug,
                     'name' => $storeAdmin->name,
@@ -90,7 +104,7 @@ class StoreService
                     // Mantener compatibilidad con otros usos
                     'store_url' => url($store->slug),
                     'login_url' => route('tenant.admin.login', $store->slug)
-                ]
+                ] : null
             ];
 
         } catch (\Exception $e) {
@@ -511,34 +525,152 @@ class StoreService
     private function sendStoreCreationEmails(Store $store, User $storeAdmin, string $password): void
     {
         try {
-            // 📧 EMAIL: BIENVENIDA CON CREDENCIALES (usa template_store_created de SendGrid)
-            \App\Jobs\SendEmailJob::dispatch('template', $storeAdmin->email, [
-                'template_key' => 'store_created',
-                'variables' => [
-                    'first_name' => $storeAdmin->name,
-                    'admin_name' => $storeAdmin->name,
-                    'store_name' => $store->name,
-                    'owner_name' => $storeAdmin->name,
+            if ($store->approval_status === 'approved') {
+                // ✅ APROBADA: Enviar credenciales
+                \App\Jobs\SendEmailJob::dispatch('template', $storeAdmin->email, [
+                    'template_key' => 'store_approved',
+                    'variables' => [
+                        'first_name' => $storeAdmin->name,
+                        'admin_name' => $storeAdmin->name,
+                        'store_name' => $store->name,
+                        'owner_name' => $storeAdmin->name,
+                        'admin_email' => $storeAdmin->email,
+                        'password' => $password,
+                        'login_url' => route('tenant.admin.login', $store->slug),
+                        'store_url' => url($store->slug),
+                        'plan_name' => $store->plan->name ?? 'Plan básico',
+                        'support_email' => 'soporte@linkiu.email'
+                    ]
+                ]);
+
+                Log::info('📧 STORE SERVICE: Email de aprobación automática enviado', [
+                    'store_id' => $store->id,
+                    'admin_email' => $storeAdmin->email
+                ]);
+            } else {
+                // ⏳ PENDIENTE: Enviar notificación de revisión
+                \App\Jobs\SendEmailJob::dispatch('template', $storeAdmin->email, [
+                    'template_key' => 'store_pending_review',
+                    'variables' => [
+                        'admin_name' => $storeAdmin->name,
+                        'store_name' => $store->name,
+                        'business_type' => $store->businessCategory->name ?? $store->business_type ?? 'No especificado',
+                        'business_document_type' => $store->business_document_type ?? 'N/A',
+                        'business_document_number' => $store->business_document_number ?? 'N/A',
+                        'estimated_time' => '6 horas',
+                        'support_email' => 'soporte@linkiu.email'
+                    ]
+                ]);
+
+                // 📧 Notificar al SuperAdmin sobre la nueva solicitud
+                $superAdminEmail = config('mail.super_admin_email', 'admin@linkiu.email');
+                \App\Jobs\SendEmailJob::dispatch('template', $superAdminEmail, [
+                    'template_key' => 'new_store_request',
+                    'variables' => [
+                        'store_name' => $store->name,
+                        'business_type' => $store->businessCategory->name ?? $store->business_type ?? 'No especificado',
+                        'business_document_type' => $store->business_document_type ?? 'N/A',
+                        'business_document_number' => $store->business_document_number ?? 'N/A',
+                        'admin_name' => $storeAdmin->name,
+                        'admin_email' => $storeAdmin->email,
+                        'created_at' => $store->created_at->format('d/m/Y H:i'),
+                        'review_url' => route('superlinkiu.store-requests.index')
+                    ]
+                ])->delay(now()->addSeconds(5));
+
+                Log::info('📧 STORE SERVICE: Emails de solicitud pendiente enviados', [
+                    'store_id' => $store->id,
                     'admin_email' => $storeAdmin->email,
-                    'admin_password' => $password,
-                    'login_url' => route('tenant.admin.login', $store->slug),
-                    'store_url' => url($store->slug),
-                    'plan_name' => $store->plan->name ?? 'Plan básico',
-                    'support_email' => 'soporte@linkiu.email'
-                ]
-            ]);
-
-            Log::info('📧 STORE SERVICE: Email de creación programado', [
-                'store_id' => $store->id,
-                'admin_email' => $storeAdmin->email,
-                'template_key' => 'store_created'
-            ]);
-
+                    'superadmin_notified' => true
+                ]);
+            }
         } catch (\Exception $e) {
-            Log::error('📧 STORE SERVICE: Error al programar email de creación', [
+            Log::error('📧 STORE SERVICE: Error enviando emails', [
                 'store_id' => $store->id,
                 'error' => $e->getMessage()
             ]);
+        }
+    }
+
+    /**
+     * Determinar el estado de aprobación de la tienda según categoría y documento
+     */
+    private function determineApprovalStatus(array $data): array
+    {
+        // Si no hay categoría o documento, dejar como pending por defecto
+        if (!isset($data['business_category_id']) || !isset($data['business_document_number'])) {
+            Log::info('🔐 APPROVAL: Tienda sin categoría o documento → PENDING', [
+                'has_category' => isset($data['business_category_id']),
+                'has_document' => isset($data['business_document_number'])
+            ]);
+            
+            return [
+                'approval_status' => 'pending_approval'
+            ];
+        }
+
+        // Obtener la categoría
+        $category = BusinessCategory::find($data['business_category_id']);
+        
+        if (!$category || !$category->is_active) {
+            Log::warning('🔐 APPROVAL: Categoría no encontrada o inactiva → PENDING', [
+                'category_id' => $data['business_category_id']
+            ]);
+            
+            return [
+                'approval_status' => 'pending_approval'
+            ];
+        }
+
+        // Si la categoría requiere aprobación manual, dejar pending
+        if ($category->requires_manual_approval) {
+            Log::info('🔐 APPROVAL: Categoría requiere aprobación manual → PENDING', [
+                'category' => $category->name
+            ]);
+            
+            return [
+                'approval_status' => 'pending_approval'
+            ];
+        }
+
+        // Validar el documento según el tipo
+        $documentType = $data['business_document_type'] ?? null;
+        $documentNumber = $data['business_document_number'];
+        $validationService = new RUTValidationService();
+        
+        $isDocumentValid = false;
+        if ($documentType === 'NIT') {
+            $isDocumentValid = $validationService->validateNIT($documentNumber);
+        } elseif ($documentType === 'CC') {
+            $isDocumentValid = $validationService->validateCC($documentNumber);
+        }
+
+        if ($isDocumentValid) {
+            // ✅ AUTO-APROBACIÓN: Categoría permite + Documento válido
+            Log::info('🔐 APPROVAL: Auto-aprobación → APPROVED', [
+                'category' => $category->name,
+                'document_type' => $documentType,
+                'document_valid' => true
+            ]);
+            
+            return [
+                'approval_status' => 'approved',
+                'document_verified' => true,
+                'approved_at' => now(),
+                'approved_by' => auth()->id()
+            ];
+        } else {
+            // ⚠️ Documento no válido → PENDING
+            Log::warning('🔐 APPROVAL: Documento no válido → PENDING', [
+                'category' => $category->name,
+                'document_type' => $documentType,
+                'document_valid' => false
+            ]);
+            
+            return [
+                'approval_status' => 'pending_approval',
+                'document_verified' => false
+            ];
         }
     }
 
