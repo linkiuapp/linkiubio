@@ -2,32 +2,28 @@
 
 namespace App\Events;
 
-use App\Shared\Models\Ticket;
 use App\Shared\Models\TicketResponse;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
-use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class TicketResponseAdded implements ShouldBroadcast
+class NewTicketResponse implements ShouldBroadcast
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    public $ticket;
     public $response;
+    public $ticket;
     public $isForSupport;
 
     /**
      * Create a new event instance.
      */
-    public function __construct(Ticket $ticket, TicketResponse $response)
+    public function __construct(TicketResponse $response)
     {
-        $this->ticket = $ticket;
         $this->response = $response;
+        $this->ticket = $response->ticket;
         
         // Determinar si es para soporte (SuperAdmin) o para el admin de tienda
         $this->isForSupport = $this->response->is_from_store;
@@ -65,7 +61,7 @@ class TicketResponseAdded implements ShouldBroadcast
             'ticket_number' => $this->ticket->ticket_number,
             'subject' => $this->ticket->subject,
             'response_id' => $this->response->id,
-            'message' => \Str::limit($this->response->message, 100),
+            'message' => $this->response->message,
             'is_from_store' => $this->response->is_from_store,
             'sender_name' => $this->response->is_from_store 
                 ? ($this->ticket->store->name ?? 'Admin de Tienda')
@@ -77,3 +73,4 @@ class TicketResponseAdded implements ShouldBroadcast
         ];
     }
 }
+

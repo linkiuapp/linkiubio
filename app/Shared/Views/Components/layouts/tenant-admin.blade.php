@@ -267,7 +267,7 @@
         });
     </script>
 </head>
-<body class="bg-secondary-50 font-body">
+<body class="bg-secondary-50 font-body tenant-admin" data-store-id="{{ $store->id }}">
     <!-- Sidebar del Admin de Tienda -->
     @include('shared::admin.tenant-sidebar', ['store' => $store])
     

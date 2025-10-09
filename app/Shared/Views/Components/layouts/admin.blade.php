@@ -38,7 +38,7 @@ use App\Shared\Models\BillingSetting;
     
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="font-inter bg-black-50/70">
+<body class="font-inter bg-black-50/70 super-admin">
     <x-admin-sidebar />
     <x-admin-navbar />
     

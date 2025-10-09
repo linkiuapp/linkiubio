@@ -107,6 +107,11 @@ class AnnouncementController extends Controller
         // Crear anuncio
         $announcement = PlatformAnnouncement::create($validated);
 
+        // 🔔 Disparar evento de nuevo anuncio para notificar a todos los admins de tiendas
+        if ($announcement->is_active) {
+            event(new \App\Events\NewAnnouncement($announcement));
+        }
+
         return redirect()
             ->route('superlinkiu.announcements.index')
             ->with('success', 'Anuncio creado exitosamente.');

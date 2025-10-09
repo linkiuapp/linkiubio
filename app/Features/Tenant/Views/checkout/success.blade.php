@@ -2,10 +2,12 @@
 
 @push('scripts')
 <meta name="csrf-token" content="{{ csrf_token() }}">
+<!-- Pusher para notificaciones en tiempo real -->
+<script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
 @endpush
 
 @section('content')
-<div class="max-w-2xl mx-auto px-4 py-6 space-y-6">
+<div class="max-w-2xl mx-auto px-4 py-6 space-y-6" data-order-id="{{ $order->id }}">
     <!-- Header dinámico según método de envío -->
     <div class="text-center">
         <div class="w-20 h-20 bg-gradient-to-r from-success-300 to-primary-300 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
@@ -200,7 +202,10 @@ document.addEventListener('DOMContentLoaded', function() {
     // ✅ RESETEAR CARRITO DESPUÉS DE PEDIDO COMPLETADO
     resetCartAfterOrder();
     
-    // Actualizar cada 30 segundos
+    // 🔔 INICIALIZAR PUSHER PARA ESCUCHAR CAMBIOS EN TIEMPO REAL
+    initRealtimeNotifications();
+    
+    // Actualizar cada 30 segundos (backup por si Pusher falla)
     setInterval(loadOrderStatus, 30000);
 });
 
@@ -416,6 +421,96 @@ function refreshOrderStatus() {
             button.disabled = false;
         }, 1000);
     });
+}
+
+// 🔔 INICIALIZAR NOTIFICACIONES EN TIEMPO REAL CON PUSHER
+function initRealtimeNotifications() {
+    if (!ORDER_ID) {
+        console.log('❌ No hay ORDER_ID, no se inicializa Pusher');
+        return;
+    }
+    
+    try {
+        console.log('🔔 Inicializando Pusher para pedido:', ORDER_ID);
+        
+        // Inicializar Pusher
+        const pusher = new Pusher('{{ config("broadcasting.connections.pusher.key") }}', {
+            cluster: '{{ config("broadcasting.connections.pusher.options.cluster") }}',
+            forceTLS: true
+        });
+        
+        // Suscribirse al canal del pedido
+        const orderChannel = pusher.subscribe(`order.${ORDER_ID}`);
+        
+        console.log('📡 Suscrito al canal: order.' + ORDER_ID);
+        
+        // Escuchar cambios de estado
+        orderChannel.bind('status.changed', function(data) {
+            console.log('🔔 ¡Estado del pedido cambió!', data);
+            
+            // Mostrar notificación visual
+            showStatusChangeNotification(data);
+            
+            // Reproducir sonido
+            playNotificationSound();
+            
+            // Actualizar el estado en la página
+            loadOrderStatus();
+        });
+        
+        console.log('✅ Pusher inicializado correctamente');
+        
+    } catch (error) {
+        console.error('❌ Error inicializando Pusher:', error);
+    }
+}
+
+// Mostrar notificación de cambio de estado
+function showStatusChangeNotification(data) {
+    // Crear toast
+    const toast = document.createElement('div');
+    toast.className = 'fixed top-4 right-4 bg-success-300 text-white px-6 py-4 rounded-lg shadow-lg z-[9999] max-w-md animate-slide-in';
+    toast.innerHTML = `
+        <div class="flex items-center gap-3">
+            <span class="text-2xl">🔔</span>
+            <div class="flex-1">
+                <strong class="block mb-1">¡Estado actualizado!</strong>
+                <span class="text-sm">${data.message}</span>
+            </div>
+            <button onclick="this.parentElement.parentElement.remove()" class="text-white hover:text-accent-100">
+                ✕
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(toast);
+    
+    setTimeout(() => {
+        toast.style.opacity = '0';
+        toast.style.transform = 'translateX(100%)';
+        toast.style.transition = 'all 0.3s ease';
+        setTimeout(() => toast.remove(), 300);
+    }, 5000);
+}
+
+// Reproducir sonido de notificación
+function playNotificationSound() {
+    try {
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+
+        oscillator.frequency.value = 800;
+        gainNode.gain.value = 0.1;
+
+        oscillator.start();
+        oscillator.stop(audioContext.currentTime + 0.1);
+    } catch (e) {
+        console.log('No se pudo reproducir sonido:', e);
+    }
 }
 </script>
 @endpush
