@@ -39,6 +39,16 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
         Route::post('stores/{store}/extend-plan', [StoreController::class, 'extendPlan'])
             ->name('stores.extend-plan');
             
+        // Business Categories
+        Route::resource('business-categories', \App\Features\SuperLinkiu\Controllers\BusinessCategoryController::class)
+            ->names('business-categories');
+        Route::post('business-categories/{businessCategory}/toggle-status', 
+            [\App\Features\SuperLinkiu\Controllers\BusinessCategoryController::class, 'toggleStatus'])
+            ->name('business-categories.toggle-status');
+        Route::post('business-categories/reorder', 
+            [\App\Features\SuperLinkiu\Controllers\BusinessCategoryController::class, 'reorder'])
+            ->name('business-categories.reorder');
+        
         // Template API endpoints
         Route::prefix('api/templates')->name('api.templates.')->group(function () {
             Route::get('/', [StoreController::class, 'getTemplates'])->name('index');

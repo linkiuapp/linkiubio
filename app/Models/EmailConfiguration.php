@@ -29,6 +29,16 @@ class EmailConfiguration extends Model
         'template_plan_changed',
         'template_plan_changed_vars',
         
+        // Templates de Aprobación de Tiendas
+        'template_store_pending_review',
+        'template_store_pending_review_vars',
+        'template_store_approved',
+        'template_store_approved_vars',
+        'template_store_rejected',
+        'template_store_rejected_vars',
+        'template_new_store_request_superadmin',
+        'template_new_store_request_superadmin_vars',
+        
         // Templates de Tickets
         'template_ticket_response',
         'template_ticket_response_vars',
@@ -57,6 +67,10 @@ class EmailConfiguration extends Model
         'template_store_suspended_vars' => 'array',
         'template_store_reactivated_vars' => 'array',
         'template_plan_changed_vars' => 'array',
+        'template_store_pending_review_vars' => 'array',
+        'template_store_approved_vars' => 'array',
+        'template_store_rejected_vars' => 'array',
+        'template_new_store_request_superadmin_vars' => 'array',
         'template_ticket_response_vars' => 'array',
         'template_ticket_resolved_vars' => 'array',
         'template_ticket_assigned_vars' => 'array',
