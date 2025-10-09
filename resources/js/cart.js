@@ -449,8 +449,12 @@ class Cart {
     }
 }
 
-// Inicializar carrito cuando carga la página (solo si estamos en storefront)
-document.addEventListener('DOMContentLoaded', function() {
+// Función de inicialización del carrito
+function initializeCart() {
+    console.log('🛒 initializeCart() called');
+    console.log('📍 Current path:', window.location.pathname);
+    console.log('📋 Document readyState:', document.readyState);
+    
     // Verificar que estamos en una página de storefront
     const isStorefront = !window.location.pathname.includes('/admin') && 
                         !window.location.pathname.includes('/superlinkiu') &&
@@ -458,17 +462,44 @@ document.addEventListener('DOMContentLoaded', function() {
                         window.location.pathname !== '/login' &&
                         window.location.pathname !== '/register';
     
+    console.log('🏪 Is storefront?', isStorefront);
+    
+    // Verificar CSRF token
+    const csrfToken = document.querySelector('meta[name="csrf-token"]');
+    console.log('🔐 CSRF token found?', csrfToken !== null);
+    
     if (isStorefront) {
         try {
+            console.log('🛒 Creating new Cart instance...');
             window.cart = new Cart();
-            console.log('🛒 Cart initialized successfully');
+            console.log('✅ Cart initialized successfully');
+            console.log('✅ Cart available:', typeof window.cart);
+            console.log('✅ window.cart:', window.cart);
         } catch (error) {
             console.error('❌ Error initializing cart:', error);
+            console.error('❌ Error stack:', error.stack);
         }
     } else {
         console.log('ℹ️ Cart not initialized (not in storefront context)');
+        console.log('ℹ️ Reasons:', {
+            hasAdmin: window.location.pathname.includes('/admin'),
+            hasSuperLinkiu: window.location.pathname.includes('/superlinkiu'),
+            isRoot: window.location.pathname === '/',
+            isLogin: window.location.pathname === '/login',
+            isRegister: window.location.pathname === '/register'
+        });
     }
-});
+}
+
+// Inicializar carrito cuando carga la página (solo si estamos en storefront)
+// Usar readyState para verificar si DOM ya está listo o esperar evento
+if (document.readyState === 'loading') {
+    // DOM aún no está listo, esperar evento
+    document.addEventListener('DOMContentLoaded', initializeCart);
+} else {
+    // DOM ya está listo, inicializar inmediatamente
+    initializeCart();
+}
 
 // Exponer funciones globales si es necesario (solo si el carrito está inicializado)
 window.addToCart = function(productId, productName, productPrice, productImage) {
