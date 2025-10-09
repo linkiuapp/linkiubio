@@ -17,7 +17,7 @@
 
     <!-- Header -->
     <header class="relative overflow-hidden" style="background: {{ $store->design ? $store->design->header_background_color : '' }}">
-        <div class="px-6 py-8 text-center">
+        <div class="px-6 py-12 text-center">
 
             <!-- Logo -->
             <div class="mb-4">
@@ -26,7 +26,7 @@
                         <img src="{{ $store->design->logo_url }}" 
                              alt="Logo" 
                              class="w-18 h-18 rounded-full object-cover"
-                             style="width: 72px; height: 72px;">
+                             style="width: 150px; height: 150px;">
                     @endif
                 </div>
             </div>
