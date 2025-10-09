@@ -3,7 +3,7 @@
 namespace App\Features\TenantAdmin\Controllers;
 
 use App\Features\TenantAdmin\Models\StoreDesign;
-// use App\Features\TenantAdmin\Models\StoreDesignHistory; // Removido para MVP
+use App\Features\TenantAdmin\Models\StoreDesignHistory;
 use App\Features\TenantAdmin\Services\StoreDesignImageService;
 use App\Http\Controllers\Controller;
 use App\Shared\Models\Store;
