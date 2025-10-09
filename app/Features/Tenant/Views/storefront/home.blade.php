@@ -28,8 +28,8 @@
                             
                             <!-- Imagen del slider -->
                             <div class="w-full aspect-[16/9] sm:aspect-[17/10] max-w-full bg-accent-100 rounded-lg overflow-hidden relative">
-                                @if($slider->image_path)
-                                    <img src="{{ asset('storage/' . $slider->image_path) }}" 
+                                @if($slider->image_url)
+                                    <img src="{{ $slider->image_url }}" 
                                          alt="{{ $slider->name }}" 
                                          class="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105">
                                 @endif
@@ -75,8 +75,8 @@
                                 
                                 <!-- Imagen del slider -->
                                 <div class="w-full aspect-[16/9] sm:aspect-[17/10] max-w-full bg-accent-100 rounded-lg overflow-hidden relative">
-                                    @if($slider->image_path)
-                                        <img src="{{ asset('storage/' . $slider->image_path) }}" 
+                                    @if($slider->image_url)
+                                        <img src="{{ $slider->image_url }}" 
                                              alt="{{ $slider->name }}" 
                                              class="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105">
                                     @endif
