@@ -11,7 +11,7 @@
                      :style="getTransform()">
                     
                     @foreach($sliders as $index => $slider)
-                        <div class="w-full sm:w-1/3 flex-shrink-0 relative flex justify-center px-1">
+                        <div class="w-1/2 sm:w-1/3 flex-shrink-0 relative flex justify-center px-1">
                             @if($slider->url && $slider->url_type !== 'none')
                                 @if($slider->url_type === 'external')
                                     <a href="{{ $slider->url }}" 
@@ -54,6 +54,54 @@
                             @endif
                         </div>
                     @endforeach
+                    
+                    <!-- Duplicar slides para efecto infinito (solo si hay más de 3) -->
+                    @if($sliders->count() > 3)
+                        @foreach($sliders->take(3) as $index => $slider)
+                            <div class="w-1/2 sm:w-1/3 flex-shrink-0 relative flex justify-center px-1">
+                                @if($slider->url && $slider->url_type !== 'none')
+                                    @if($slider->url_type === 'external')
+                                        <a href="{{ $slider->url }}" 
+                                           target="_blank" 
+                                           rel="noopener noreferrer"
+                                           class="block relative group">
+                                    @else
+                                        <a href="{{ $slider->url_type === 'internal' ? url($store->slug . '/' . ltrim($slider->url, '/')) : '#' }}" 
+                                           class="block relative group">
+                                    @endif
+                                @else
+                                    <div class="block relative group">
+                                @endif
+                                
+                                <!-- Imagen del slider -->
+                                <div class="w-full aspect-[16/9] sm:aspect-[17/10] max-w-full bg-accent-100 rounded-lg overflow-hidden relative">
+                                    @if($slider->image_url)
+                                        <img src="{{ $slider->image_url }}" 
+                                             alt="{{ $slider->name }}" 
+                                             class="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105">
+                                    @endif
+                                    
+                                    <!-- Overlay suave (solo si tiene enlace) -->
+                                    @if($slider->url && $slider->url_type !== 'none')
+                                        <div class="absolute inset-0 bg-gradient-to-t from-black-500/20 via-transparent to-transparent"></div>
+                                    @endif
+                                    
+                                    <!-- Indicador de enlace -->
+                                    @if($slider->url && $slider->url_type !== 'none')
+                                        <div class="absolute top-1 right-1 bg-accent-50/20 backdrop-blur-sm rounded-full p-0.5 opacity-70 group-hover:opacity-100 transition-opacity">
+                                            <x-solar-arrow-right-outline class="w-2 h-2 text-accent-50" />
+                                        </div>
+                                    @endif
+                                </div>
+                                
+                                @if($slider->url && $slider->url_type !== 'none')
+                                    </a>
+                                @else
+                                    </div>
+                                @endif
+                            </div>
+                        @endforeach
+                    @endif
                 </div>
             </div>
             
@@ -241,7 +289,6 @@ function sliderComponent(sliders, duration = 5) {
         
         init() {
             this.checkViewport();
-            this.calculateMaxSlide();
             
             if (this.sliders.length > 1) {
                 this.startAutoPlay();
@@ -249,11 +296,12 @@ function sliderComponent(sliders, duration = 5) {
             
             // Escuchar cambios de tamaño de ventana
             window.addEventListener('resize', () => {
+                const wasMobile = this.isMobile;
                 this.checkViewport();
-                this.calculateMaxSlide();
-                // Ajustar slide actual si es necesario
-                if (this.currentSlide > this.maxSlide) {
-                    this.currentSlide = this.maxSlide;
+                
+                // Si cambió de móvil a desktop o viceversa, resetear a slide 0
+                if (wasMobile !== this.isMobile) {
+                    this.currentSlide = 0;
                 }
             });
         },
@@ -262,39 +310,40 @@ function sliderComponent(sliders, duration = 5) {
             this.isMobile = window.innerWidth < 640; // sm breakpoint de Tailwind
         },
         
-        calculateMaxSlide() {
-            if (this.isMobile) {
-                // Móvil: mostrar 1 a la vez
-                this.maxSlide = Math.max(0, this.sliders.length - 1);
-            } else {
-                // Desktop: mostrar 3 a la vez
-                this.maxSlide = Math.max(0, this.sliders.length - 3);
-            }
-        },
-        
         getTransform() {
             if (this.isMobile) {
-                // Móvil: desplazar 100% + gap
-                return `transform: translateX(calc(-${this.currentSlide * 100}% - ${this.currentSlide * 8}px))`;
+                // Móvil: desplazar 50% + gap (2 slides visibles)
+                return `transform: translateX(calc(-${this.currentSlide * 50}% - ${this.currentSlide * 8}px))`;
             } else {
-                // Desktop: desplazar 33.333% + gap
+                // Desktop: desplazar 33.333% + gap (3 slides visibles)
                 return `transform: translateX(calc(-${this.currentSlide * 33.333}% - ${this.currentSlide * 12}px))`;
             }
         },
         
         goToSlide(index) {
-            // Asegurar que no exceda el máximo
-            this.currentSlide = Math.min(index, this.maxSlide);
+            this.currentSlide = index;
             this.resetAutoPlay();
         },
         
         nextSlide() {
-            if (this.currentSlide >= this.maxSlide) {
-                // Volver al inicio si llegó al final
-                this.currentSlide = 0;
-            } else {
-                this.currentSlide = this.currentSlide + 1;
+            this.currentSlide = this.currentSlide + 1;
+            
+            // Efecto infinito: si llegó al final, resetear sin transición
+            if (this.currentSlide >= this.sliders.length) {
+                setTimeout(() => {
+                    const sliderElement = document.querySelector('.slider-container .flex');
+                    if (sliderElement) {
+                        sliderElement.style.transition = 'none';
+                        this.currentSlide = 0;
+                        
+                        // Restaurar transición después de un frame
+                        setTimeout(() => {
+                            sliderElement.style.transition = 'transform 500ms ease-in-out';
+                        }, 50);
+                    }
+                }, 500);
             }
+            
             this.resetAutoPlay();
         },
         
