@@ -29,22 +29,13 @@ class SliderImageService
                 return null;
             }
             
-            // Guardar imagen en almacenamiento local (método directo sin Storage facade)
+            // ✅ Guardar usando Storage::disk('public') - Compatible con S3 (Laravel Cloud)
             $directory = 'sliders/' . $slider->store_id;
-            $publicPath = storage_path('app/public');
-            $fullDirectoryPath = $publicPath . '/' . $directory;
-            $fullFilePath = $fullDirectoryPath . '/' . $filename;
+            $path = $directory . '/' . $filename;
             
-            // Crear directorio si no existe (método directo PHP)
-            if (!file_exists($fullDirectoryPath)) {
-                mkdir($fullDirectoryPath, 0755, true);
-            }
-            
-            // Guardar imagen procesada directamente
-            if (file_put_contents($fullFilePath, $processedImage)) {
-                $path = $directory . '/' . $filename; // Path relativo para BD
-            } else {
-                throw new \Exception('Error guardando imagen de slider');
+            // Guardar imagen en S3/storage público
+            if (!Storage::disk('public')->put($path, $processedImage)) {
+                throw new \Exception('Error guardando imagen de slider en storage');
             }
 
             return $path;
@@ -199,11 +190,9 @@ class SliderImageService
 
         try {
             $originalPath = $originalSlider->image_path;
-            $publicPath = storage_path('app/public');
-            $fullOriginalPath = $publicPath . '/' . $originalPath;
             
-            // Verificar que el archivo original existe
-            if (!file_exists($fullOriginalPath)) {
+            // ✅ Verificar que el archivo original existe en storage
+            if (!Storage::disk('public')->exists($originalPath)) {
                 return null;
             }
 
@@ -211,19 +200,13 @@ class SliderImageService
             $pathInfo = pathinfo($originalPath);
             $newFilename = $pathInfo['filename'] . '-copy-' . time() . '.' . $pathInfo['extension'];
             
-            // Crear directorio si no existe (método directo PHP)
             $directory = 'sliders/' . $newSlider->store_id;
-            $fullDirectoryPath = $publicPath . '/' . $directory;
-            if (!file_exists($fullDirectoryPath)) {
-                mkdir($fullDirectoryPath, 0755, true);
-            }
-
             $newPath = $directory . '/' . $newFilename;
-            $fullNewPath = $publicPath . '/' . $newPath;
             
-            // Copiar archivo directamente
-            if (!copy($fullOriginalPath, $fullNewPath)) {
-                throw new \Exception('Error copiando imagen de slider');
+            // ✅ Copiar archivo usando Storage - Compatible con S3
+            $imageContent = Storage::disk('public')->get($originalPath);
+            if (!Storage::disk('public')->put($newPath, $imageContent)) {
+                throw new \Exception('Error copiando imagen de slider en storage');
             }
 
             return $newPath;
@@ -256,8 +239,9 @@ class SliderImageService
         }
 
         try {
-            $fullPath = Storage::disk('public')->path($imagePath);
-            $imageInfo = getimagesize($fullPath);
+            // ✅ Para S3, obtenemos el contenido y usamos getimagesizefromstring
+            $imageContent = Storage::disk('public')->get($imagePath);
+            $imageInfo = getimagesizefromstring($imageContent);
             
             if (!$imageInfo) {
                 return null;

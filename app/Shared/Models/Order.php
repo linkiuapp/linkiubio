@@ -528,7 +528,7 @@ class Order extends Model
             return null;
         }
 
-        return asset('storage/orders/payment-proofs/' . $this->payment_proof_path);
+        return \Illuminate\Support\Facades\Storage::disk('public')->url('orders/payment-proofs/' . $this->payment_proof_path);
     }
 
     /**

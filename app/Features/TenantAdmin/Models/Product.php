@@ -192,13 +192,13 @@ class Product extends Model
     {
         // Prioridad 1: Imagen principal configurada
         if ($this->mainImage && $this->mainImage->image_path) {
-            return asset('storage/' . $this->mainImage->image_path);
+            return Storage::disk('public')->url($this->mainImage->image_path);
         }
         
         // Prioridad 2: Primera imagen disponible
         $firstImage = $this->images()->first();
         if ($firstImage && $firstImage->image_path) {
-            return asset('storage/' . $firstImage->image_path);
+            return Storage::disk('public')->url($firstImage->image_path);
         }
         
         return asset('assets/images/placeholder-product.svg');
@@ -211,18 +211,18 @@ class Product extends Model
     {
         // Prioridad 1: Thumbnail de imagen principal configurada
         if ($this->mainImage && $this->mainImage->thumbnail_path) {
-            return asset('storage/' . $this->mainImage->thumbnail_path);
+            return Storage::disk('public')->url($this->mainImage->thumbnail_path);
         }
         
         // Prioridad 2: Thumbnail de primera imagen disponible
         $firstImage = $this->images()->first();
         if ($firstImage && $firstImage->thumbnail_path) {
-            return asset('storage/' . $firstImage->thumbnail_path);
+            return Storage::disk('public')->url($firstImage->thumbnail_path);
         }
         
         // Prioridad 3: Imagen original si no hay thumbnail
         if ($firstImage && $firstImage->image_path) {
-            return asset('storage/' . $firstImage->image_path);
+            return Storage::disk('public')->url($firstImage->image_path);
         }
         
         return asset('assets/images/placeholder-product.svg');
