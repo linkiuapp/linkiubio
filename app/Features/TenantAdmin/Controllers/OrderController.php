@@ -456,6 +456,9 @@ class OrderController extends Controller
             //     $order->statusHistory()->latest()->first()->update(['notes' => $validated['notes']]);
             // }
 
+            // 🔔 Disparar evento de cambio de estado para notificar al cliente
+            event(new \App\Events\OrderStatusChanged($order, $oldStatus, $validated['status']));
+
             return response()->json([
                 'success' => true,
                 'message' => "Estado cambiado de {$order::STATUSES[$oldStatus]} a {$order->status_label}",

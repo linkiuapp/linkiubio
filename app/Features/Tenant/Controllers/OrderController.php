@@ -305,6 +305,9 @@ class OrderController extends Controller
 
             DB::commit();
 
+            // 🔔 Disparar evento de nuevo pedido para notificar al admin
+            event(new \App\Events\NewOrderCreated($order));
+
             // Respuesta para AJAX
             if ($request->expectsJson()) {
                 return response()->json([
