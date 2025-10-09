@@ -140,6 +140,73 @@ class CreateStoreRequest extends FormRequest
             if ($this->slug && RouteServiceProvider::isReservedSlug($this->slug)) {
                 $validator->errors()->add('slug', 'Esta URL está reservada por el sistema.');
             }
+
+            // ✅ Validación: Documento duplicado en tiendas aprobadas activas
+            if ($this->business_document_number && $this->business_document_type) {
+                $existingStore = \App\Shared\Models\Store::where('business_document_number', $this->business_document_number)
+                    ->where('business_document_type', $this->business_document_type)
+                    ->where('approval_status', 'approved')
+                    ->where('status', '!=', 'suspended')
+                    ->first();
+
+                if ($existingStore) {
+                    $validator->errors()->add(
+                        'business_document_number',
+                        "Este documento ({$this->business_document_type}: {$this->business_document_number}) ya está registrado en una tienda aprobada y activa: {$existingStore->name}"
+                    );
+                }
+            }
+
+            // ✅ Validación: Email duplicado en tiendas aprobadas
+            if ($this->email) {
+                $existingStore = \App\Shared\Models\Store::where('email', $this->email)
+                    ->where('approval_status', 'approved')
+                    ->where('status', '!=', 'suspended')
+                    ->first();
+
+                if ($existingStore) {
+                    $validator->errors()->add(
+                        'email',
+                        "Este email ya está registrado en una tienda aprobada y activa: {$existingStore->name}"
+                    );
+                }
+            }
+
+            // ✅ Validación: Admin email duplicado en tiendas aprobadas
+            if ($this->admin_email) {
+                $existingAdmin = \App\Shared\Models\User::where('email', $this->admin_email)
+                    ->whereHas('store', function ($query) {
+                        $query->where('approval_status', 'approved')
+                              ->where('status', '!=', 'suspended');
+                    })
+                    ->first();
+
+                if ($existingAdmin) {
+                    $validator->errors()->add(
+                        'admin_email',
+                        "Este email de administrador ya está registrado en una tienda aprobada y activa"
+                    );
+                }
+            }
+
+            // ✅ Validación: Bloqueo de re-aplicación (solicitudes rechazadas con can_reapply_at)
+            if ($this->admin_email) {
+                $rejectedStore = \App\Shared\Models\Store::whereHas('admins', function ($query) {
+                        $query->where('email', $this->admin_email);
+                    })
+                    ->where('approval_status', 'rejected')
+                    ->whereNotNull('can_reapply_at')
+                    ->where('can_reapply_at', '>', now())
+                    ->first();
+
+                if ($rejectedStore) {
+                    $daysRemaining = now()->diffInDays($rejectedStore->can_reapply_at, false);
+                    $validator->errors()->add(
+                        'admin_email',
+                        "Este email tiene una solicitud rechazada. Podrás re-aplicar en {$daysRemaining} días ({$rejectedStore->can_reapply_at->format('d/m/Y')})."
+                    );
+                }
+            }
         });
     }
 }

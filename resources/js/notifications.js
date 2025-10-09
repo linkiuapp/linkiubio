@@ -1,7 +1,243 @@
-// Sistema de notificaciones en tiempo real con Pusher
-console.log('🔔 Notifications.js loaded');
+/**
+ * Sistema de Notificaciones en Tiempo Real
+ * Maneja notificaciones de pedidos, tickets, anuncios y solicitudes de tiendas
+ */
 
-// Función para pedir permiso de notificaciones de escritorio
+console.log('🔔 notifications.js: Initializing...');
+
+// Auto-inicializar cuando el DOM esté listo
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initNotifications);
+} else {
+    initNotifications();
+}
+
+function initNotifications() {
+    console.log('🔔 notifications.js: DOM ready, checking for context...');
+
+    // Esperar a que Pusher esté disponible
+    if (typeof window.Echo === 'undefined' || typeof window.pusher === 'undefined') {
+        console.warn('⚠️ Pusher/Echo not available yet, waiting...');
+        setTimeout(initNotifications, 500);
+        return;
+    }
+
+    console.log('✅ Pusher available, setting up notifications...');
+
+    // Pedir permisos para notificaciones de escritorio
+    requestNotificationPermission();
+
+    // Detectar contexto y configurar listeners
+    const body = document.body;
+    
+    // SUPER ADMIN: Escuchar solicitudes de tiendas
+    if (body.classList.contains('super-admin')) {
+        console.log('🔔 SuperAdmin detected, subscribing to store requests...');
+        setupStoreRequestsListener();
+    }
+
+    // TENANT ADMIN: Escuchar nuevos pedidos
+    const storeId = body.dataset.storeId;
+    if (storeId) {
+        console.log(`🔔 TenantAdmin detected (Store ID: ${storeId}), subscribing to orders...`);
+        setupNewOrderListener(storeId);
+        setupTicketResponseListener(storeId);
+    }
+
+    // CLIENTE: Escuchar cambios de estado de pedido
+    const orderId = body.dataset.orderId;
+    if (orderId) {
+        console.log(`🔔 Client detected (Order ID: ${orderId}), subscribing to order status...`);
+        setupOrderStatusListener(orderId);
+    }
+
+    // TODOS: Escuchar anuncios de la plataforma
+    setupAnnouncementsListener();
+}
+
+/**
+ * 🆕 LISTENER: Solicitudes de tiendas (SuperAdmin)
+ */
+function setupStoreRequestsListener() {
+    try {
+        window.Echo.channel('platform.store.requests')
+            .listen('store.request.created', (data) => {
+                console.log('🆕 Nueva solicitud de tienda recibida:', data);
+
+                // Desktop notification
+                showDesktopNotification(
+                    '🏪 Nueva Solicitud de Tienda',
+                    `${data.store_name} (${data.business_type}) solicita aprobación`
+                );
+
+                // Toast in-app
+                showToast(
+                    '🏪 Nueva Solicitud de Tienda',
+                    `<strong>${data.store_name}</strong> (${data.business_type})<br>` +
+                    `Documento: ${data.document_type} ${data.document_number}<br>` +
+                    `Admin: ${data.admin_name} (${data.admin_email})<br>` +
+                    `<a href="${data.review_url}" class="text-primary-200 underline">Ver solicitud →</a>`,
+                    'info',
+                    10000 // 10 segundos
+                );
+
+                // Sonido
+                playNotificationSound();
+
+                // Actualizar badge (si existe)
+                updatePendingBadge();
+            });
+
+        console.log('✅ Store requests listener configured');
+    } catch (error) {
+        console.error('❌ Error setting up store requests listener:', error);
+    }
+}
+
+/**
+ * 📦 LISTENER: Nuevos pedidos (Tenant Admin)
+ */
+function setupNewOrderListener(storeId) {
+    try {
+        window.Echo.channel(`store.${storeId}.orders`)
+            .listen('new.order', (data) => {
+                console.log('📦 Nuevo pedido recibido:', data);
+
+                // Desktop notification
+                showDesktopNotification(
+                    '📦 Nuevo Pedido',
+                    `Pedido #${data.order_number} de ${data.customer_name}`
+                );
+
+                // Toast in-app
+                showToast(
+                    '📦 Nuevo Pedido',
+                    `<strong>Pedido #${data.order_number}</strong><br>` +
+                    `Cliente: ${data.customer_name}<br>` +
+                    `Total: $${data.total}<br>` +
+                    `<a href="${data.order_url}" class="text-primary-200 underline">Ver pedido →</a>`,
+                    'success',
+                    8000
+                );
+
+                // Sonido
+                playNotificationSound();
+            });
+
+        console.log('✅ New order listener configured for store:', storeId);
+    } catch (error) {
+        console.error('❌ Error setting up new order listener:', error);
+    }
+}
+
+/**
+ * 🔄 LISTENER: Cambio de estado de pedido (Cliente)
+ */
+function setupOrderStatusListener(orderId) {
+    try {
+        window.Echo.channel(`order.${orderId}`)
+            .listen('status.changed', (data) => {
+                console.log('🔄 Estado de pedido actualizado:', data);
+
+                // Actualizar UI si estamos en la página de gracias
+                const statusElement = document.getElementById('order-status');
+                if (statusElement) {
+                    statusElement.textContent = data.status_text;
+                    statusElement.className = `px-3 py-1 rounded-full text-sm font-medium ${data.status_class}`;
+                }
+
+                // Toast in-app
+                showToast(
+                    '🔄 Pedido Actualizado',
+                    data.message,
+                    'info',
+                    5000
+                );
+
+                // Desktop notification (si la página no está en foco)
+                if (document.hidden) {
+                    showDesktopNotification(
+                        '🔄 Pedido Actualizado',
+                        data.message
+                    );
+                }
+
+                // Sonido suave
+                playNotificationSound(0.3);
+            });
+
+        console.log('✅ Order status listener configured for order:', orderId);
+    } catch (error) {
+        console.error('❌ Error setting up order status listener:', error);
+    }
+}
+
+/**
+ * 💬 LISTENER: Respuestas de tickets
+ */
+function setupTicketResponseListener(storeId) {
+    try {
+        // Tenant Admin escucha respuestas del SuperAdmin
+        window.Echo.channel(`store.${storeId}.tickets`)
+            .listen('ticket.response', (data) => {
+                console.log('💬 Nueva respuesta de ticket:', data);
+
+                showToast(
+                    '💬 Nueva Respuesta en Ticket',
+                    `<strong>Ticket #${data.ticket_number}</strong><br>` +
+                    `${data.response_preview}<br>` +
+                    `<a href="${data.ticket_url}" class="text-primary-200 underline">Ver ticket →</a>`,
+                    'info',
+                    8000
+                );
+
+                showDesktopNotification(
+                    '💬 Nueva Respuesta',
+                    `Ticket #${data.ticket_number}: ${data.response_preview}`
+                );
+
+                playNotificationSound();
+            });
+
+        console.log('✅ Ticket response listener configured for store:', storeId);
+    } catch (error) {
+        console.error('❌ Error setting up ticket response listener:', error);
+    }
+}
+
+/**
+ * 📢 LISTENER: Anuncios de la plataforma
+ */
+function setupAnnouncementsListener() {
+    try {
+        window.Echo.channel('platform.announcements')
+            .listen('new.announcement', (data) => {
+                console.log('📢 Nuevo anuncio:', data);
+
+                showToast(
+                    '📢 ' + data.title,
+                    data.message,
+                    'warning',
+                    10000
+                );
+
+                showDesktopNotification(
+                    '📢 ' + data.title,
+                    data.message
+                );
+
+                playNotificationSound();
+            });
+
+        console.log('✅ Announcements listener configured');
+    } catch (error) {
+        console.error('❌ Error setting up announcements listener:', error);
+    }
+}
+
+/**
+ * 🔔 Pedir permiso para notificaciones de escritorio
+ */
 function requestNotificationPermission() {
     if ('Notification' in window && Notification.permission === 'default') {
         Notification.requestPermission().then(permission => {
@@ -10,305 +246,98 @@ function requestNotificationPermission() {
     }
 }
 
-// Función para mostrar notificación de escritorio
-function showDesktopNotification(title, options = {}) {
+/**
+ * 🖥️ Mostrar notificación de escritorio
+ */
+function showDesktopNotification(title, body) {
     if ('Notification' in window && Notification.permission === 'granted') {
-        const notification = new Notification(title, {
-            icon: '/favicon.ico',
-            badge: '/favicon.ico',
-            ...options
-        });
-
-        // Cerrar automáticamente después de 10 segundos
-        setTimeout(() => notification.close(), 10000);
-
-        return notification;
+        try {
+            new Notification(title, {
+                body: body,
+                icon: '/favicon.ico',
+                badge: '/favicon.ico',
+                tag: 'linkiu-notification',
+                requireInteraction: false
+            });
+        } catch (error) {
+            console.error('❌ Error showing desktop notification:', error);
+        }
     }
-    return null;
 }
 
-// Función para mostrar toast/mensaje in-app
-function showToast(message, type = 'info', duration = 5000) {
+/**
+ * 🎨 Mostrar toast in-app
+ */
+function showToast(title, message, type = 'info', duration = 5000) {
+    const toastContainer = getOrCreateToastContainer();
+
     const toast = document.createElement('div');
+    toast.className = `toast-notification ${type} animate-slide-in`;
+    
     const colors = {
-        info: 'bg-info-300 text-white',
-        success: 'bg-success-300 text-white',
-        warning: 'bg-warning-300 text-white',
-        error: 'bg-error-300 text-white',
-        primary: 'bg-primary-300 text-white'
+        success: 'bg-green-50 border-green-200 text-green-800',
+        error: 'bg-red-50 border-red-200 text-red-800',
+        warning: 'bg-yellow-50 border-yellow-200 text-yellow-800',
+        info: 'bg-blue-50 border-blue-200 text-blue-800'
     };
 
-    toast.className = `fixed top-4 right-4 ${colors[type] || colors.info} px-6 py-4 rounded-lg shadow-lg z-[9999] max-w-md animate-slide-in`;
     toast.innerHTML = `
-        <div class="flex items-center gap-3">
-            <span class="text-2xl">🔔</span>
-            <div class="flex-1">${message}</div>
-            <button onclick="this.parentElement.parentElement.remove()" class="text-white hover:text-accent-100">
-                ✕
-            </button>
+        <div class="flex items-start gap-3 p-4 rounded-lg border-2 ${colors[type]} shadow-lg max-w-md">
+            <div class="flex-1">
+                <h4 class="font-bold text-sm mb-1">${title}</h4>
+                <div class="text-xs">${message}</div>
+            </div>
+            <button onclick="this.parentElement.parentElement.remove()" class="text-gray-400 hover:text-gray-600 text-xl leading-none">&times;</button>
         </div>
     `;
 
-    document.body.appendChild(toast);
+    toastContainer.appendChild(toast);
 
+    // Auto-remover después del tiempo especificado
     setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateX(100%)';
+        toast.classList.add('animate-slide-out');
         setTimeout(() => toast.remove(), 300);
     }, duration);
 }
 
-// Función para reproducir sonido de notificación
-function playNotificationSound() {
-    // Crear un beep suave usando Web Audio API
+/**
+ * 📦 Obtener o crear contenedor de toasts
+ */
+function getOrCreateToastContainer() {
+    let container = document.getElementById('toast-container');
+    if (!container) {
+        container = document.createElement('div');
+        container.id = 'toast-container';
+        container.className = 'fixed top-4 right-4 z-[9999] flex flex-col gap-2';
+        document.body.appendChild(container);
+    }
+    return container;
+}
+
+/**
+ * 🔊 Reproducir sonido de notificación
+ */
+function playNotificationSound(volume = 0.5) {
     try {
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        const oscillator = audioContext.createOscillator();
-        const gainNode = audioContext.createGain();
-
-        oscillator.connect(gainNode);
-        gainNode.connect(audioContext.destination);
-
-        oscillator.frequency.value = 800; // Frecuencia del tono
-        gainNode.gain.value = 0.1; // Volumen bajo
-
-        oscillator.start();
-        oscillator.stop(audioContext.currentTime + 0.1); // Duración corta
-    } catch (e) {
-        console.log('No se pudo reproducir sonido:', e);
+        const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTYIG2m98OScTgwOUKXi8LZjHAU2kNXzzn0xBSF1xe/glUELElyx6OyrWBUIQ5zd8sFuJAUuhM/z24k2Bhxqve/mnE4MDU+k4vC2ZBwENY/U8M5/MwUgcsPu4JhEDBFaquLwq1gVB0Kb3PLBbyQFLoTP89yJNgYca77v5Z1ODAxOpd/vtmQcBDWP0/DPgDQFIG/D7t+aRQ0QV6nj8axaFwZAmNryvnAmBSuCzvLaiTQHHWi87+SfTw0LTafg77ViFAU1jtTwz4I0Bh9uxe7fmUYOEFWo4/KsWhgGP5bZ8r52KAUrgs/y24o1Bh1nu+7koE8OCkun4O+2YhQEM47U8dCBMwYeb8Xu35tGDhBTqOL');
+        audio.volume = volume;
+        audio.play().catch(e => console.log('Could not play notification sound:', e));
+    } catch (error) {
+        console.log('Notification sound not available');
     }
 }
 
-// Función para actualizar badge de contador
-function updateBadge(selector, count) {
-    const badge = document.querySelector(selector);
+/**
+ * 🔢 Actualizar badge de solicitudes pendientes
+ */
+function updatePendingBadge() {
+    const badge = document.getElementById('pending-requests-badge');
     if (badge) {
-        badge.textContent = count;
-        if (count > 0) {
-            badge.classList.remove('hidden');
-            badge.classList.add('animate-pulse');
-            setTimeout(() => badge.classList.remove('animate-pulse'), 1000);
-        } else {
-            badge.classList.add('hidden');
-        }
+        const currentCount = parseInt(badge.textContent) || 0;
+        badge.textContent = currentCount + 1;
+        badge.classList.remove('hidden');
     }
 }
 
-// ====================
-// ADMIN TIENDA - Escuchar nuevos pedidos
-// ====================
-export function initTenantAdminNotifications(storeId) {
-    if (!window.pusher) {
-        console.error('❌ Pusher no está inicializado');
-        return;
-    }
-
-    console.log('🔔 Inicializando notificaciones para Admin Tienda', { storeId });
-
-    // Pedir permiso para notificaciones de escritorio
-    requestNotificationPermission();
-
-    // Canal para nuevos pedidos
-    const ordersChannel = window.pusher.subscribe(`store.${storeId}.orders`);
-    
-    console.log('📡 Suscrito al canal: store.' + storeId + '.orders');
-    
-    ordersChannel.bind('new.order', function(data) {
-        console.log('🛒 Nuevo pedido recibido:', data);
-
-        // Notificación de escritorio
-        const notification = showDesktopNotification('🛒 Nuevo Pedido', {
-            body: `${data.customer_name}\nTotal: ${data.formatted_total}\n${data.order_number}`,
-            tag: 'new-order-' + data.order_id,
-            requireInteraction: true
-        });
-
-        if (notification) {
-            notification.onclick = function() {
-                window.focus();
-                window.location.href = data.url;
-            };
-        }
-
-        // Toast in-app
-        showToast(
-            `<strong>Nuevo Pedido #${data.order_number}</strong><br>
-            ${data.customer_name} - ${data.formatted_total}`,
-            'primary',
-            8000
-        );
-
-        // Sonido
-        playNotificationSound();
-
-        // Actualizar contador si existe
-        updateBadge('.new-orders-badge', parseInt(document.querySelector('.new-orders-badge')?.textContent || 0) + 1);
-    });
-
-    // Canal para tickets (respuestas de soporte)
-    const ticketsChannel = window.pusher.subscribe(`store.${storeId}.tickets`);
-    
-    ticketsChannel.bind('ticket.response', function(data) {
-        console.log('🎫 Nueva respuesta de ticket:', data);
-
-        // Notificación de escritorio
-        showDesktopNotification('🎫 Respuesta de Soporte', {
-            body: `Ticket #${data.ticket_number}\n${data.sender_name}`,
-            tag: 'ticket-response-' + data.ticket_id
-        });
-
-        // Toast in-app
-        showToast(
-            `<strong>Respuesta en Ticket #${data.ticket_number}</strong><br>
-            ${data.sender_name}: ${data.message}`,
-            'info',
-            6000
-        );
-
-        playNotificationSound();
-    });
-
-    // Canal para anuncios de plataforma
-    const announcementsChannel = window.pusher.subscribe('platform.announcements');
-    
-    announcementsChannel.bind('new.announcement', function(data) {
-        console.log('📢 Nuevo anuncio:', data);
-
-        // Notificación de escritorio
-        showDesktopNotification(`${data.type_icon} ${data.type_label}`, {
-            body: `${data.title}\n${data.message}`,
-            tag: 'announcement-' + data.id
-        });
-
-        // Toast in-app con tipo según prioridad
-        showToast(
-            `<strong>${data.type_icon} ${data.title}</strong><br>
-            ${data.message}`,
-            data.is_urgent ? 'warning' : 'info',
-            data.is_urgent ? 10000 : 6000
-        );
-
-        if (data.is_urgent) {
-            playNotificationSound();
-        }
-    });
-
-    console.log('✅ Notificaciones de Admin Tienda inicializadas');
-}
-
-// ====================
-// SUPER ADMIN - Escuchar respuestas de tickets
-// ====================
-export function initSuperAdminNotifications() {
-    if (!window.pusher) {
-        console.error('❌ Pusher no está inicializado');
-        return;
-    }
-
-    console.log('🔔 Inicializando notificaciones para SuperAdmin');
-
-    requestNotificationPermission();
-
-    // Canal para respuestas de tickets de las tiendas
-    const ticketsChannel = window.pusher.subscribe('support.tickets');
-    
-    ticketsChannel.bind('ticket.response', function(data) {
-        console.log('🎫 Nueva respuesta de ticket de tienda:', data);
-
-        showDesktopNotification('🎫 Respuesta de Tienda', {
-            body: `Ticket #${data.ticket_number}\n${data.sender_name}`,
-            tag: 'ticket-response-' + data.ticket_id
-        });
-
-        showToast(
-            `<strong>Respuesta en Ticket #${data.ticket_number}</strong><br>
-            ${data.sender_name}: ${data.message}`,
-            'primary',
-            6000
-        );
-
-        playNotificationSound();
-        updateBadge('.new-tickets-badge', parseInt(document.querySelector('.new-tickets-badge')?.textContent || 0) + 1);
-    });
-
-    console.log('✅ Notificaciones de SuperAdmin inicializadas');
-}
-
-// ====================
-// CLIENTE - Escuchar cambios de estado de pedido
-// ====================
-export function initCustomerNotifications(orderId) {
-    if (!window.pusher) {
-        console.error('❌ Pusher no está inicializado');
-        return;
-    }
-
-    console.log('🔔 Inicializando notificaciones para Cliente', { orderId });
-
-    // Canal específico del pedido
-    const orderChannel = window.pusher.subscribe(`order.${orderId}`);
-    
-    orderChannel.bind('status.changed', function(data) {
-        console.log('📦 Estado del pedido cambió:', data);
-
-        // Toast in-app
-        showToast(
-            `<strong>${data.message}</strong><br>
-            Pedido #${data.order_number}`,
-            'success',
-            8000
-        );
-
-        playNotificationSound();
-
-        // Actualizar estado en la página si existe el elemento
-        const statusElement = document.querySelector('[data-order-status]');
-        if (statusElement) {
-            statusElement.textContent = data.status_label;
-            statusElement.className = getStatusColorClass(data.new_status);
-        }
-
-        // Trigger custom event para que la página lo maneje
-        window.dispatchEvent(new CustomEvent('orderStatusChanged', { detail: data }));
-    });
-
-    console.log('✅ Notificaciones de Cliente inicializadas');
-}
-
-// Función auxiliar para colores de estado
-function getStatusColorClass(status) {
-    const colors = {
-        pending: 'bg-warning-300 text-white',
-        confirmed: 'bg-success-300 text-white',
-        preparing: 'bg-info-300 text-white',
-        ready: 'bg-primary-300 text-white',
-        in_transit: 'bg-info-300 text-white',
-        delivered: 'bg-success-300 text-white',
-        cancelled: 'bg-error-300 text-white'
-    };
-    return `px-3 py-1 rounded-full text-sm font-medium ${colors[status] || 'bg-black-300 text-white'}`;
-}
-
-// Auto-inicializar según el contexto
-document.addEventListener('DOMContentLoaded', function() {
-    // Esperar a que Pusher esté listo
-    setTimeout(() => {
-        const body = document.body;
-        
-        // Detectar contexto y auto-inicializar
-        if (body.classList.contains('tenant-admin')) {
-            const storeId = body.dataset.storeId;
-            if (storeId) {
-                initTenantAdminNotifications(storeId);
-            }
-        } else if (body.classList.contains('super-admin')) {
-            initSuperAdminNotifications();
-        } else if (body.classList.contains('customer-order-tracking')) {
-            const orderId = body.dataset.orderId;
-            if (orderId) {
-                initCustomerNotifications(orderId);
-            }
-        }
-    }, 1000);
-});
+console.log('✅ notifications.js loaded successfully');
 
