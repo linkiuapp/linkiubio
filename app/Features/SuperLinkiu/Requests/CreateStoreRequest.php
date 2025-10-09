@@ -51,6 +51,12 @@ class CreateStoreRequest extends FormRequest
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string',
             'meta_keywords' => 'nullable|string|max:255',
+            
+            // ✅ Campos de aprobación (NUEVO)
+            'business_category_id' => 'nullable|exists:business_categories,id',
+            'business_type' => 'nullable|string|max:255',
+            'business_document_type' => 'nullable|in:NIT,CC,CE,RUT',
+            'business_document_number' => 'nullable|string|max:20',
         ];
     }
 

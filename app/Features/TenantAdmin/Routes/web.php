@@ -39,10 +39,10 @@ Route::post('/login', [AuthController::class, 'login'])
 
 
 
-// Rutas protegidas (con middleware auth)
-Route::middleware(['auth', 'store.admin'])->group(function () {
+// Rutas protegidas (con middleware auth + verificación de aprobación)
+Route::middleware(['auth', 'store.admin', 'store.approval'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
-    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->withoutMiddleware('store.approval');
     
     // Profile Routes (Usuario/Seguridad)
     Route::prefix('profile')->name('profile.')->group(function () {

@@ -67,6 +67,7 @@ class Kernel extends HttpKernel
         'verified' => \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         'super.admin' => \App\Shared\Middleware\SuperAdminMiddleware::class,
         'store.admin' => \App\Shared\Middleware\StoreAdminMiddleware::class,
+        'store.approval' => \App\Shared\Middleware\CheckStoreApprovalStatus::class,
         'tenant.identify' => \App\Shared\Middleware\TenantIdentificationMiddleware::class,
         'email.config.rate.limit' => \App\Shared\Middleware\EmailConfigurationRateLimitMiddleware::class,
         'debug.auth' => \App\Http\Middleware\DebugAuthMiddleware::class,
