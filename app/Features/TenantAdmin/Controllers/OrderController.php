@@ -703,11 +703,17 @@ class OrderController extends Controller
         
         if (!$fileContent) {
             \Log::error('❌ File not found in any storage:', [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number,
                 'attempted_paths' => $possiblePaths,
                 'public_disk_checked' => true,
                 'local_disk_checked' => true
             ]);
-            abort(404, 'Comprobante no encontrado. Es posible que el archivo se haya subido antes de la migración a S3 y no esté disponible.');
+            
+            // Redirigir a editar con mensaje de error
+            return redirect()
+                ->route('tenant.admin.orders.edit', [$storeSlug, $order->id])
+                ->with('error', 'El archivo del comprobante no está disponible. Pudo haberse subido antes de la migración a S3. Por favor, vuelve a subir el comprobante usando el formulario a continuación.');
         }
 
         // Enviar archivo

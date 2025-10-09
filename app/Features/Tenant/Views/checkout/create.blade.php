@@ -1050,29 +1050,29 @@ function renderPaymentMethods() {
                     </label>
                     
                     <!-- Transferencia Fields -->
-                    <div id="transfer-fields-${method.id}" class="hidden mt-4 pl-16 space-y-4">
+                    <div id="transfer-fields-${method.id}" class="hidden mt-4 sm:pl-16 space-y-3">
                         ${accounts.map(account => `
-                            <div class="bg-gradient-to-r from-info-50 to-primary-50 border border-info-200 rounded-xl p-5 shadow-sm">
-                                <h4 class="font-bold text-info-400 mb-4 flex items-center text-sm">
-                                    <span class="text-lg mr-2">🏦</span>
+                            <div class="bg-gradient-to-r from-info-50 to-primary-50 border border-info-200 rounded-lg p-3 sm:p-4 shadow-sm">
+                                <h4 class="font-bold text-info-400 mb-3 flex items-center text-sm">
+                                    <span class="text-base mr-2">🏦</span>
                                     ${account.bank_name}
                                 </h4>
-                                <div class="space-y-3">
+                                <div class="space-y-2">
                                     <!-- Tipo de Cuenta -->
-                                    <div class="bg-accent-50 rounded-lg p-3 border border-accent-200">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-xs text-black-400 font-medium">Tipo de Cuenta:</span>
-                                            <span class="text-sm font-bold text-black-500 bg-primary-100 px-2 py-1 rounded-full">${account.account_type || 'Cuenta Corriente'}</span>
+                                    <div class="bg-accent-50 rounded-lg p-2 border border-accent-200">
+                                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
+                                            <span class="text-xs text-black-400 font-medium">Tipo:</span>
+                                            <span class="text-xs sm:text-sm font-bold text-black-500 bg-primary-100 px-2 py-0.5 rounded-full inline-block">${account.account_type || 'Cuenta Corriente'}</span>
                                         </div>
                                     </div>
                                     
                                     <!-- Número de Cuenta -->
-                                    <div class="bg-accent-50 rounded-lg p-3 border border-accent-200">
-                                        <div class="flex justify-between items-center">
-                                            <span class="text-xs text-black-400 font-medium">Número de Cuenta:</span>
-                                            <div class="flex items-center gap-2">
-                                                <span class="text-sm font-mono font-bold text-primary-300 bg-primary-100 px-3 py-1 rounded-lg tracking-wider" id="account-${account.id}">${account.account_number}</span>
-                                                <button type="button" onclick="copyToClipboard('account-${account.id}')" class="text-xs bg-primary-200 hover:bg-primary-300 text-primary-400 px-3 py-1 rounded-lg font-semibold transition-colors">
+                                    <div class="bg-accent-50 rounded-lg p-2 border border-accent-200">
+                                        <div class="space-y-2">
+                                            <span class="text-xs text-black-400 font-medium block">Número de Cuenta:</span>
+                                            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                                <span class="text-xs sm:text-sm font-mono font-bold text-primary-300 bg-primary-100 px-2 py-1 rounded-lg tracking-wider break-all" id="account-${account.id}">${account.account_number}</span>
+                                                <button type="button" onclick="copyToClipboard('account-${account.id}')" class="text-xs bg-primary-200 hover:bg-primary-300 text-primary-400 px-2 py-1 rounded-lg font-semibold transition-colors whitespace-nowrap">
                                                     📋 Copiar
                                                 </button>
                                             </div>
@@ -1080,21 +1080,21 @@ function renderPaymentMethods() {
                                     </div>
                                     
                                     <!-- Titular -->
-                                    <div class="bg-accent-50 rounded-lg p-3 border border-accent-200">
-                                        <div class="flex justify-between items-center">
+                                    <div class="bg-accent-50 rounded-lg p-2 border border-accent-200">
+                                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
                                             <span class="text-xs text-black-400 font-medium">Titular:</span>
-                                            <span class="text-sm font-bold text-black-500">${account.account_holder}</span>
+                                            <span class="text-xs sm:text-sm font-bold text-black-500">${account.account_holder}</span>
                                         </div>
                                     </div>
                                     
                                     ${account.document_number ? `
                                         <!-- Documento -->
-                                        <div class="bg-accent-50 rounded-lg p-3 border border-accent-200">
-                                            <div class="flex justify-between items-center">
-                                                <span class="text-xs text-black-400 font-medium">Documento:</span>
-                                                <div class="flex items-center gap-2">
-                                                    <span class="text-sm font-mono font-bold text-info-400 bg-info-100 px-3 py-1 rounded-lg" id="document-${account.id}">${account.document_number}</span>
-                                                    <button type="button" onclick="copyToClipboard('document-${account.id}')" class="text-xs bg-info-200 hover:bg-info-300 text-info-400 px-3 py-1 rounded-lg font-semibold transition-colors">
+                                        <div class="bg-accent-50 rounded-lg p-2 border border-accent-200">
+                                            <div class="space-y-2">
+                                                <span class="text-xs text-black-400 font-medium block">Documento:</span>
+                                                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+                                                    <span class="text-xs sm:text-sm font-mono font-bold text-info-400 bg-info-100 px-2 py-1 rounded-lg break-all" id="document-${account.id}">${account.document_number}</span>
+                                                    <button type="button" onclick="copyToClipboard('document-${account.id}')" class="text-xs bg-info-200 hover:bg-info-300 text-info-400 px-2 py-1 rounded-lg font-semibold transition-colors whitespace-nowrap">
                                                         📋 Copiar
                                                     </button>
                                                 </div>
@@ -1105,9 +1105,9 @@ function renderPaymentMethods() {
                             </div>
                         `).join('')}
                         
-                        <div class="bg-accent-100 border border-accent-200 rounded-lg p-4">
+                        <div class="bg-accent-100 border border-accent-200 rounded-lg p-3">
                             <label for="payment_proof" class="block text-sm font-medium text-black-500 mb-2">
-                                Comprobante de Pago ${method.require_proof ? '*' : '(Opcional)'}
+                                Comprobante ${method.require_proof ? '*' : '(Opcional)'}
                             </label>
                             <input 
                                 type="file" 
@@ -1119,8 +1119,8 @@ function renderPaymentMethods() {
                             >
                             <p class="text-xs text-black-300 mt-1">
                                 ${method.require_proof ? 
-                                    'Sube tu comprobante de transferencia (JPG, PNG o PDF) - OBLIGATORIO' : 
-                                    'Sube tu comprobante de transferencia (JPG, PNG o PDF) - OPCIONAL'
+                                    'JPG, PNG o PDF - OBLIGATORIO' : 
+                                    'JPG, PNG o PDF - OPCIONAL'
                                 }
                             </p>
                         </div>

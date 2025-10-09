@@ -80,55 +80,62 @@
             
             <div class="space-y-3">
                 @foreach($products as $product)
-                    <div class="bg-accent-50 rounded-lg p-3 flex items-center gap-3 border border-accent-200 hover:shadow-sm transition-shadow relative">
-                        <!-- Imagen del producto -->
-                        <div class="w-16 h-16 bg-accent-100 rounded-lg flex-shrink-0 overflow-hidden">
-                            @if($product->mainImage)
-                                <img src="{{ $product->main_image_url }}" 
-                                     alt="{{ $product->name }}" 
-                                     class="w-16 h-16 object-cover">
-                            @else
-                                <div class="w-16 h-16 flex items-center justify-center text-black-200">
-                                    <x-solar-gallery-outline class="w-6 h-6" />
+                    <a href="{{ route('tenant.product', [$store->slug, $product->slug]) }}" 
+                       class="bg-white rounded-lg p-3 border border-accent-200 hover:border-primary-200 hover:shadow-sm transition-all duration-200 block">
+                        <div class="flex items-center gap-3">
+                            <!-- Imagen del producto -->
+                            <div class="w-16 h-16 bg-accent-100 rounded-lg flex-shrink-0 overflow-hidden">
+                                @if($product->main_image_url)
+                                    <img src="{{ $product->main_image_url }}" 
+                                         alt="{{ $product->name }}" 
+                                         class="w-full h-full object-cover">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center text-black-200">
+                                        <x-solar-gallery-outline class="w-6 h-6" />
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- Información del producto -->
+                            <div class="flex-1 min-w-0">
+                                <h3 class="font-medium text-black-400 text-sm mb-1 line-clamp-1">{{ $product->name }}</h3>
+                                
+                                @if($product->description)
+                                    <p class="text-xs text-black-300 mb-2 line-clamp-1">{{ $product->description }}</p>
+                                @endif
+
+                                <!-- Precio prominente -->
+                                <div class="text-base font-bold text-primary-300 mb-1">
+                                    ${{ number_format($product->price, 0, ',', '.') }}
                                 </div>
-                            @endif
-                        </div>
-                        
-                        <!-- Información del producto -->
-                        <div class="flex-1 min-w-0">
-                            <h3 class="font-semibold text-black-400 text-sm">{{ $product->name }}</h3>
-                            @if($product->description)
-                                <p class="text-xs text-black-300 mt-1 line-clamp-2">{{ $product->description }}</p>
-                            @endif
-                            
-                            <!-- Categorías del producto (solo si tiene más de una) -->
-                            @if($product->categories->count() > 1)
-                                <div class="flex flex-wrap gap-1 mt-2">
-                                    @foreach($product->categories->where('id', '!=', $category->id)->take(2) as $cat)
-                                        <span class="text-xs bg-primary-100 text-primary-300 px-2 py-1 rounded-full">
-                                            {{ $cat->name }}
-                                        </span>
-                                    @endforeach
-                                    @if($product->categories->where('id', '!=', $category->id)->count() > 2)
-                                        <span class="text-xs text-black-300">+{{ $product->categories->where('id', '!=', $category->id)->count() - 2 }}</span>
-                                    @endif
-                                </div>
-                            @endif
-                            
-                            <div class="mt-2 text-lg font-bold text-black-500">
-                                ${{ number_format($product->price, 0, ',', '.') }}
+
+                                <!-- Categorías pequeñas (mostrar otras categorías si tiene) -->
+                                @if($product->categories->count() > 1)
+                                    <div class="flex flex-wrap gap-1">
+                                        @foreach($product->categories->where('id', '!=', $category->id)->take(2) as $cat)
+                                            <span class="px-2 py-0.5 bg-primary-50 text-primary-300 rounded text-xs">
+                                                {{ $cat->name }}
+                                            </span>
+                                        @endforeach
+                                        @if($product->categories->where('id', '!=', $category->id)->count() > 2)
+                                            <span class="text-xs text-black-200">+{{ $product->categories->where('id', '!=', $category->id)->count() - 2 }}</span>
+                                        @endif
+                                    </div>
+                                @endif
+                            </div>
+
+                            <!-- Botón agregar al carrito -->
+                            <div class="flex-shrink-0">
+                                <button type="button" class="add-to-cart-btn bg-secondary-300 hover:bg-secondary-200 text-white w-11 h-11 rounded-lg flex items-center justify-center transition-colors" 
+                                        data-product-id="{{ $product->id }}"
+                                        data-product-name="{{ $product->name }}"
+                                        data-product-price="{{ $product->price }}"
+                                        data-product-image="{{ $product->main_image_url }}">
+                                    <x-solar-cart-plus-outline class="w-5 h-5" />
+                                </button>
                             </div>
                         </div>
-                        
-                        <!-- Botón agregar -->
-                        <button class="add-to-cart-btn bg-secondary-300 hover:bg-secondary-200 text-accent-50 w-8 h-8 rounded-full flex items-center justify-center transition-colors flex-shrink-0" 
-                                data-product-id="{{ $product->id }}"
-                                data-product-name="{{ $product->name }}"
-                                data-product-price="{{ $product->price }}"
-                                data-product-image="{{ $product->main_image_url }}">
-                            <x-solar-add-circle-outline class="w-5 h-5" />
-                        </button>
-                    </div>
+                    </a>
                 @endforeach
             </div>
         </div>

@@ -210,13 +210,25 @@
                     @if($order->payment_proof_path)
                         <div>
                             <label class="block text-xs text-black-400 mb-1">Comprobante</label>
-                            <div class="flex items-center">
-                                <x-solar-document-outline class="w-4 h-4 text-success-300 mr-2" />
-                                <a href="{{ route('tenant.admin.orders.download-payment-proof', [$store->slug, $order->id]) }}" 
-                                   class="text-sm text-primary-200 hover:text-primary-300">
-                                    Descargar comprobante
+                            <div class="flex items-center gap-3">
+                                <div class="flex items-center">
+                                    <x-solar-document-outline class="w-4 h-4 text-success-300 mr-2" />
+                                    <a href="{{ route('tenant.admin.orders.download-payment-proof', [$store->slug, $order->id]) }}" 
+                                       class="text-sm text-primary-200 hover:text-primary-300"
+                                       target="_blank">
+                                        Descargar comprobante
+                                    </a>
+                                </div>
+                                <a href="{{ route('tenant.admin.orders.edit', [$store->slug, $order->id]) }}" 
+                                   class="text-xs text-black-300 hover:text-black-400">
+                                    (Re-subir si no funciona)
                                 </a>
                             </div>
+                            <p class="text-xs text-black-300 mt-1">
+                                <span class="text-warning-300">⚠️</span> Si el archivo no se descarga, puede haber sido subido antes de la migración a S3. 
+                                <a href="{{ route('tenant.admin.orders.edit', [$store->slug, $order->id]) }}" 
+                                   class="text-primary-200 hover:text-primary-300">Edita el pedido</a> para re-subirlo.
+                            </p>
                         </div>
                     @endif
                 </div>
