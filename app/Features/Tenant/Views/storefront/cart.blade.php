@@ -224,8 +224,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                 },
                 body: JSON.stringify({ 
-                    item_key: itemKey,
-                    quantity: newQuantity
+                    item_key: String(itemKey),
+                    quantity: parseInt(newQuantity)
                 })
             });
 

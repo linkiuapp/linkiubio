@@ -425,9 +425,11 @@ class Cart {
     initializeEvents() {
         // Eventos para botones "agregar al carrito"
         document.addEventListener('click', (e) => {
-            if (e.target.closest('.add-to-cart-btn')) {
+            const btn = e.target.closest('.add-to-cart-btn');
+            if (btn) {
                 e.preventDefault();
-                const btn = e.target.closest('.add-to-cart-btn');
+                e.stopPropagation(); // Evitar que el click se propague al enlace padre
+                
                 const productData = {
                     id: parseInt(btn.dataset.productId),
                     name: btn.dataset.productName,
@@ -435,9 +437,10 @@ class Cart {
                     image: btn.dataset.productImage || null
                 };
                 
+                console.log('🛒 Add to cart clicked:', productData);
                 this.addProduct(productData);
             }
-        });
+        }, true); // Usar capture phase para interceptar antes que otros handlers
 
         // Evento para ir al carrito
         document.addEventListener('click', (e) => {
