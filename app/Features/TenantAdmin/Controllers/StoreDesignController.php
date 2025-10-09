@@ -3,7 +3,6 @@
 namespace App\Features\TenantAdmin\Controllers;
 
 use App\Features\TenantAdmin\Models\StoreDesign;
-use App\Features\TenantAdmin\Models\StoreDesignHistory;
 use App\Features\TenantAdmin\Services\StoreDesignImageService;
 use App\Http\Controllers\Controller;
 use App\Shared\Models\Store;
@@ -80,16 +79,6 @@ class StoreDesignController extends Controller
             DB::beginTransaction();
             try {
                 $design = StoreDesign::where('store_id', $store->id)->firstOrFail();
-                
-                // Guardar diseño actual en historial antes de actualizar
-                if ($user = auth()->user()) {
-                    StoreDesignHistory::create([
-                        'store_design_id' => $design->id,
-                        'data' => json_encode($design->toArray()),
-                        'created_by' => $user->id,
-                        'note' => 'Actualización manual del diseño'
-                    ]);
-                }
 
                 // Actualizar diseño
                 $design->update($validated);
@@ -150,15 +139,6 @@ public function update(Request $request)
         DB::beginTransaction();
         try {
             $design = StoreDesign::where('store_id', $store->id)->firstOrFail();
-            
-            if ($user = auth()->user()) {
-                StoreDesignHistory::create([
-                    'store_design_id' => $design->id,
-                    'data' => json_encode($design->toArray()),
-                    'created_by' => $user->id,
-                    'note' => 'Actualización manual del diseño'
-                ]);
-            }
 
             // Manejar logo base64
             if ($request->has('logo_base64') && $request->logo_base64) {
@@ -404,16 +384,6 @@ public function update(Request $request)
 
             DB::beginTransaction();
             try {
-                // Guardar historial
-                if ($user = auth()->user()) {
-                    StoreDesignHistory::create([
-                        'store_design_id' => $design->id,
-                        'data' => json_encode($design->toArray()),
-                        'created_by' => $user->id,
-                        'note' => 'Publicación del diseño'
-                    ]);
-                }
-
                 $updateData = [];
 
                 // Actualizar colores si se proporcionan
@@ -504,53 +474,6 @@ public function update(Request $request)
         }
     }
 
-    /**
-     * Revierte los cambios a una versión anterior
-     */
-    public function revert(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                'history_id' => 'required|exists:store_design_histories,id'
-            ]);
-
-            $store = $request->route('store');
-            $design = StoreDesign::where('store_id', $store->id)->firstOrFail();
-            
-            // Obtener versión del historial
-            $history = StoreDesignHistory::findOrFail($validated['history_id']);
-            $historicalData = json_decode($history->data, true);
-
-            // Guardar diseño actual en historial
-            StoreDesignHistory::create([
-                'store_design_id' => $design->id,
-                'data' => json_encode($design->toArray()),
-                'created_by' => auth()->id(),
-                'note' => 'Respaldo automático antes de revertir'
-            ]);
-
-            // Revertir a versión anterior
-            $design->update($historicalData);
-
-            return response()->json([
-                'message' => 'Diseño revertido correctamente',
-                'design' => $design
-            ]);
-
-        } catch (ValidationException $e) {
-            return response()->json([
-                'message' => 'Error de validación',
-                'errors' => $e->errors()
-            ], 422);
-        } catch (\Exception $e) {
-            Log::error('Error al revertir diseño', [
-                'store_id' => $store->id,
-                'error' => $e->getMessage()
-            ]);
-
-            return response()->json([
-                'message' => 'Error al revertir el diseño'
-            ], 500);
-        }
-    }
+    // ⚠️ Historial de diseño removido para MVP - No es necesario por ahora
+    // public function revert() - Implementar en futuras versiones si se requiere
 } 
