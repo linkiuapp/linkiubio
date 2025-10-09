@@ -17,7 +17,7 @@
 
     <!-- Header -->
     <header class="relative overflow-hidden" style="background: {{ $store->design ? $store->design->header_background_color : '' }}">
-        <div class="px-6 py-12 text-center">
+        <div class="px-6 py-10 text-center">
 
             <!-- Logo -->
             <div class="mb-4">
