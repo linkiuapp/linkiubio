@@ -1210,8 +1210,14 @@ async function submitOrder() {
             
             // Si hay comprobante de pago
             const paymentProof = document.getElementById('payment_proof');
+            console.log('📄 Payment proof input:', paymentProof);
+            console.log('📄 Payment proof files:', paymentProof ? paymentProof.files : 'No input found');
+            
             if (paymentProof && paymentProof.files.length > 0) {
+                console.log('✅ Agregando comprobante:', paymentProof.files[0].name, paymentProof.files[0].size);
                 formData.append('payment_proof', paymentProof.files[0]);
+            } else {
+                console.log('⚠️ No se encontró comprobante de pago');
             }
         }
         

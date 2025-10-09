@@ -262,17 +262,42 @@ class OrderController extends Controller
 
             // Procesar comprobante de pago si se subió
             if ($request->hasFile('payment_proof')) {
+                \Log::info('📄 Processing payment proof upload', [
+                    'order_number' => $order->order_number,
+                    'file_original_name' => $request->file('payment_proof')->getClientOriginalName(),
+                    'file_size' => $request->file('payment_proof')->getSize()
+                ]);
+                
                 $file = $request->file('payment_proof');
                 $filename = $order->order_number . '_' . time() . '.' . $file->getClientOriginalExtension();
                 
-                // Crear directorio si no existe
-                $directory = public_path('storage/orders/payment-proofs');
-                if (!file_exists($directory)) {
-                    mkdir($directory, 0755, true);
-                }
+                // ✅ Guardar usando Storage::disk('public') - Compatible con S3 (Laravel Cloud)
+                $directory = 'orders/payment-proofs';
                 
-                $file->move($directory, $filename);
-                $order->update(['payment_proof_path' => 'orders/payment-proofs/' . $filename]);
+                try {
+                    // putFileAs guarda el archivo y retorna el path relativo
+                    $relativePath = \Illuminate\Support\Facades\Storage::disk('public')->putFileAs($directory, $file, $filename);
+                    
+                    if (!$relativePath) {
+                        throw new \Exception('Error guardando comprobante de pago en storage');
+                    }
+                    
+                    \Log::info('✅ Payment proof uploaded successfully', [
+                        'path' => $relativePath
+                    ]);
+                    
+                    $order->update(['payment_proof_path' => $relativePath]);
+                    
+                } catch (\Exception $e) {
+                    \Log::error('❌ Error uploading payment proof:', [
+                        'order_number' => $order->order_number,
+                        'error' => $e->getMessage()
+                    ]);
+                    // No lanzar excepción para no fallar toda la orden
+                    // El pedido se crea pero sin comprobante
+                }
+            } else {
+                \Log::info('ℹ️ No payment proof uploaded');
             }
 
             // Limpiar carrito
