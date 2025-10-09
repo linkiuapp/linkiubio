@@ -665,25 +665,60 @@ class OrderController extends Controller
             'path' => $order->payment_proof_path
         ]);
 
-        // ✅ Usar Storage::disk('public') para compatibilidad con S3 (Laravel Cloud)
-        if (!Storage::disk('public')->exists($order->payment_proof_path)) {
-            \Log::error('❌ File not found in storage:', [
-                'path' => $order->payment_proof_path,
-                'disk' => 'public'
+        // ✅ Intentar múltiples ubicaciones para compatibilidad con archivos antiguos
+        $possiblePaths = [
+            $order->payment_proof_path, // Path directo (nuevo sistema)
+            'public/' . $order->payment_proof_path, // Path con public/ (sistema antiguo)
+        ];
+        
+        $fileContent = null;
+        $mimeType = null;
+        $foundPath = null;
+        
+        // Intentar en disco 'public' (S3)
+        foreach ($possiblePaths as $path) {
+            if (Storage::disk('public')->exists($path)) {
+                \Log::info('✅ File found in public disk:', ['path' => $path]);
+                $foundPath = $path;
+                $fileContent = Storage::disk('public')->get($path);
+                $mimeType = Storage::disk('public')->mimeType($path);
+                break;
+            }
+        }
+        
+        // Si no se encuentra en 'public', intentar en disco 'local' (fallback para archivos antiguos)
+        if (!$fileContent) {
+            \Log::info('🔍 File not found in public disk, trying local disk...');
+            
+            foreach ($possiblePaths as $path) {
+                if (Storage::disk('local')->exists($path)) {
+                    \Log::info('✅ File found in local disk:', ['path' => $path]);
+                    $foundPath = $path;
+                    $fileContent = Storage::disk('local')->get($path);
+                    $mimeType = Storage::disk('local')->mimeType($path);
+                    break;
+                }
+            }
+        }
+        
+        if (!$fileContent) {
+            \Log::error('❌ File not found in any storage:', [
+                'attempted_paths' => $possiblePaths,
+                'public_disk_checked' => true,
+                'local_disk_checked' => true
             ]);
-            abort(404, 'Comprobante no encontrado en el almacenamiento');
+            abort(404, 'Comprobante no encontrado. Es posible que el archivo se haya subido antes de la migración a S3 y no esté disponible.');
         }
 
-        // Obtener el contenido del archivo desde S3
+        // Enviar archivo
         try {
-            $fileContent = Storage::disk('public')->get($order->payment_proof_path);
-            $mimeType = Storage::disk('public')->mimeType($order->payment_proof_path);
             $filename = 'Comprobante_' . $order->order_number . '.' . pathinfo($order->payment_proof_path, PATHINFO_EXTENSION);
             
             \Log::info('✅ Sending file:', [
                 'filename' => $filename,
                 'mime_type' => $mimeType,
-                'size' => strlen($fileContent)
+                'size' => strlen($fileContent),
+                'found_in_path' => $foundPath
             ]);
             
             return response($fileContent, 200)
