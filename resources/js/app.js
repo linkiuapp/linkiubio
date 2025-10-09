@@ -96,6 +96,9 @@ try {
     import('./components/wizard-state-manager.js')
     console.log('🟢 wizard-state-manager.js imported');
     
+    import('./notifications.js')
+    console.log('🟢 notifications.js imported');
+    
 } catch (error) {
     console.error('❌ Error importing component files:', error);
 }
