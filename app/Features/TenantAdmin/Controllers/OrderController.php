@@ -597,25 +597,26 @@ class OrderController extends Controller
     {
         $filename = $orderNumber . '_' . time() . '.' . $file->getClientOriginalExtension();
         
-        // Guardar archivo evitando finfo (método directo PHP)
+        // ✅ Guardar usando Storage::disk('public') - Compatible con S3 (Laravel Cloud)
         $directory = 'orders/payment-proofs';
-        $publicPath = storage_path('app/public');
-        $fullDirectoryPath = $publicPath . '/' . $directory;
-        $fullFilePath = $fullDirectoryPath . '/' . $filename;
         
-        // Crear directorio si no existe
-        if (!file_exists($fullDirectoryPath)) {
-            mkdir($fullDirectoryPath, 0755, true);
-        }
-        
-        // Copiar archivo directamente
-        if (!copy($file->getPathname(), $fullFilePath)) {
+        try {
+            // putFileAs guarda el archivo y retorna el path relativo
+            $relativePath = Storage::disk('public')->putFileAs($directory, $file, $filename);
+            
+            if (!$relativePath) {
+                throw new \Exception('Error guardando comprobante de pago en storage');
+            }
+            
+            return $relativePath; // Devolver path relativo (ej: orders/payment-proofs/ABC123_123456789.jpg)
+            
+        } catch (\Exception $e) {
+            \Log::error('Error subiendo comprobante de pago:', [
+                'order_number' => $orderNumber,
+                'error' => $e->getMessage()
+            ]);
             throw new \Exception('Error guardando comprobante de pago');
         }
-        
-        $fullPath = $directory . '/' . $filename;
-        
-        return $fullPath; // Devolver path completo como en frontend
     }
 
     /**
@@ -638,12 +639,28 @@ class OrderController extends Controller
             abort(404);
         }
 
-        $filePath = storage_path('app/public/' . $order->payment_proof_path);
-        
-        if (!file_exists($filePath)) {
-            abort(404);
+        // ✅ Usar Storage::disk('public') para compatibilidad con S3 (Laravel Cloud)
+        if (!Storage::disk('public')->exists($order->payment_proof_path)) {
+            abort(404, 'Comprobante no encontrado');
         }
 
-        return response()->download($filePath, 'Comprobante_' . $order->order_number . '.' . pathinfo($order->payment_proof_path, PATHINFO_EXTENSION));
+        // Obtener el contenido del archivo desde S3
+        try {
+            $fileContent = Storage::disk('public')->get($order->payment_proof_path);
+            $mimeType = Storage::disk('public')->mimeType($order->payment_proof_path);
+            $filename = 'Comprobante_' . $order->order_number . '.' . pathinfo($order->payment_proof_path, PATHINFO_EXTENSION);
+            
+            return response($fileContent, 200)
+                ->header('Content-Type', $mimeType)
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+                
+        } catch (\Exception $e) {
+            \Log::error('Error descargando comprobante:', [
+                'order_id' => $order->id,
+                'path' => $order->payment_proof_path,
+                'error' => $e->getMessage()
+            ]);
+            abort(500, 'Error al descargar el comprobante');
+        }
     }
 } 
