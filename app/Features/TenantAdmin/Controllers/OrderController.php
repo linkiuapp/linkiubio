@@ -630,18 +630,48 @@ class OrderController extends Controller
     /**
      * Download payment proof
      */
-    public function downloadPaymentProof($storeSlug, Order $order)
+    public function downloadPaymentProof(Request $request, $storeSlug, $orderId)
     {
-        $store = request()->route('store');
+        $store = $request->route('store');
         
-        // Verificar que el pedido pertenece a la tienda
-        if ($order->store_id !== $store->id || !$order->payment_proof_path) {
-            abort(404);
+        \Log::info('📥 Download payment proof request:', [
+            'store_slug' => $storeSlug,
+            'store_id' => $store->id,
+            'order_id' => $orderId
+        ]);
+        
+        // Buscar la orden manualmente
+        $order = Order::where('id', $orderId)
+            ->where('store_id', $store->id)
+            ->first();
+        
+        if (!$order) {
+            \Log::warning('⚠️ Order not found:', [
+                'order_id' => $orderId,
+                'store_id' => $store->id
+            ]);
+            abort(404, 'Pedido no encontrado');
         }
+        
+        if (!$order->payment_proof_path) {
+            \Log::warning('⚠️ No payment proof path:', [
+                'order_id' => $order->id,
+                'order_number' => $order->order_number
+            ]);
+            abort(404, 'Este pedido no tiene comprobante de pago');
+        }
+        
+        \Log::info('📄 Payment proof path:', [
+            'path' => $order->payment_proof_path
+        ]);
 
         // ✅ Usar Storage::disk('public') para compatibilidad con S3 (Laravel Cloud)
         if (!Storage::disk('public')->exists($order->payment_proof_path)) {
-            abort(404, 'Comprobante no encontrado');
+            \Log::error('❌ File not found in storage:', [
+                'path' => $order->payment_proof_path,
+                'disk' => 'public'
+            ]);
+            abort(404, 'Comprobante no encontrado en el almacenamiento');
         }
 
         // Obtener el contenido del archivo desde S3
@@ -650,17 +680,24 @@ class OrderController extends Controller
             $mimeType = Storage::disk('public')->mimeType($order->payment_proof_path);
             $filename = 'Comprobante_' . $order->order_number . '.' . pathinfo($order->payment_proof_path, PATHINFO_EXTENSION);
             
+            \Log::info('✅ Sending file:', [
+                'filename' => $filename,
+                'mime_type' => $mimeType,
+                'size' => strlen($fileContent)
+            ]);
+            
             return response($fileContent, 200)
                 ->header('Content-Type', $mimeType)
                 ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
                 
         } catch (\Exception $e) {
-            \Log::error('Error descargando comprobante:', [
+            \Log::error('❌ Error descargando comprobante:', [
                 'order_id' => $order->id,
                 'path' => $order->payment_proof_path,
-                'error' => $e->getMessage()
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
             ]);
-            abort(500, 'Error al descargar el comprobante');
+            abort(500, 'Error al descargar el comprobante: ' . $e->getMessage());
         }
     }
 } 
