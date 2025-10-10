@@ -47,7 +47,7 @@
             <input type="hidden" name="tab" value="{{ $tab }}">
             
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-900">🔍 Filtros y Búsqueda</h3>
+                <h3 class="text-lg font-semibold text-gray-900">Filtros y Búsqueda</h3>
                 @if(request()->has('search') || request()->has('category') || request()->has('urgency') || request()->has('date_from') || request()->has('date_to'))
                 <a href="{{ route('superlinkiu.store-requests.index', ['tab' => $tab]) }}" 
                    class="text-sm text-primary-200 hover:text-primary-300 flex items-center gap-1">
@@ -97,13 +97,13 @@
                     <select name="urgency" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-200">
                         <option value="">Todas</option>
                         <option value="critical" {{ request('urgency') === 'critical' ? 'selected' : '' }}>
-                            🔴 Críticas (>24h)
+                            Críticas (>24h)
                         </option>
                         <option value="urgent" {{ request('urgency') === 'urgent' ? 'selected' : '' }}>
-                            🟠 Urgentes (6-24h)
+                            Urgentes (6-24h)
                         </option>
                         <option value="normal" {{ request('urgency') === 'normal' ? 'selected' : '' }}>
-                            🟢 Normales (<6h)
+                            Normales (<6h)
                         </option>
                     </select>
                 </div>
@@ -213,23 +213,9 @@
                                 </div>
                                 <div class="ml-4 flex flex-col gap-2">
                                     <a href="{{ route('superlinkiu.store-requests.show', $store->id) }}" 
-                                       class="btn-primary-sm">
+                                       class="px-4 py-2 bg-primary-200 text-white rounded-lg hover:bg-primary-300 transition-colors text-center text-sm font-medium">
                                         Ver Detalle
                                     </a>
-                                    @if($tab === 'pending')
-                                        <form action="{{ route('superlinkiu.store-requests.approve', $store->id) }}" method="POST" class="inline">
-                                            @csrf
-                                            <button type="submit" class="btn-success-sm w-full">
-                                                Aprobar
-                                            </button>
-                                        </form>
-                                        <form action="{{ route('superlinkiu.store-requests.reject', $store->id) }}" method="POST" class="inline">
-                                            @csrf
-                                            <button type="submit" class="btn-danger-sm w-full">
-                                                Rechazar
-                                            </button>
-                                        </form>
-                                    @endif
                                 </div>
                             </div>
                         </div>

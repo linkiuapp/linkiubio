@@ -22,8 +22,14 @@ class CheckStoreApprovalStatus
             return $next($request);
         }
         
+        // Verificar si el campo approval_status existe en el store
+        if (!isset($store->approval_status)) {
+            // Si no existe el campo, asumir que la tienda está aprobada (legacy)
+            return $next($request);
+        }
+        
         // Verificar approval_status
-        $approvalStatus = $store->approval_status ?? 'approved';
+        $approvalStatus = $store->approval_status;
         
         // Si está pendiente de aprobación
         if ($approvalStatus === 'pending_approval') {

@@ -199,7 +199,7 @@
         <!-- Step 2: Business Information (NEW) -->
         <div x-show="currentStep === 1" class="p-6">
             <div class="mb-6">
-                <h2 class="text-xl font-semibold text-gray-900 mb-2">📋 Información del Negocio</h2>
+                <h2 class="text-xl font-semibold text-gray-900 mb-2">Información del Negocio</h2>
                 <p class="text-gray-600">Selecciona el tipo de negocio y proporciona el documento de identidad fiscal</p>
             </div>
 
@@ -209,40 +209,20 @@
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         Categoría del Negocio <span class="text-red-500">*</span>
                     </label>
-                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    <select name="business_category_id" x-model="formData.business_category_id"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
+                        <option value="">Seleccionar categoría...</option>
                         @foreach($categories as $category)
-                        <div class="border rounded-lg p-4 cursor-pointer transition-all hover:shadow-md relative"
-                             :class="formData.business_category_id == '{{ $category->id }}' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'"
-                             @click="formData.business_category_id = '{{ $category->id }}'">
-                            <div class="flex items-start justify-between mb-2">
-                                <div class="flex items-center gap-2">
-                                    @if($category->icon)
-                                    <img src="{{ $category->icon }}" alt="{{ $category->name }}" class="w-8 h-8 object-contain">
-                                    @else
-                                    <span class="text-2xl">🏢</span>
-                                    @endif
-                                    <h4 class="font-semibold text-gray-900">{{ $category->name }}</h4>
-                                </div>
-                                <input type="radio" name="business_category_id" value="{{ $category->id }}" 
-                                       x-model="formData.business_category_id" class="text-blue-600">
-                            </div>
-                            @if($category->description)
-                            <p class="text-xs text-gray-600 mb-2">{{ $category->description }}</p>
-                            @endif
-                            
-                            <!-- Auto-approval badge -->
+                        <option value="{{ $category->id }}">
+                            {{ $category->name }}
                             @if(!$category->requires_manual_approval)
-                            <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-green-100 text-green-800">
-                                ✓ Auto-aprobación
-                            </span>
+                                (Auto-aprobación)
                             @else
-                            <span class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full bg-yellow-100 text-yellow-800">
-                                ⏳ Revisión manual
-                            </span>
+                                (Revisión manual)
                             @endif
-                        </div>
+                        </option>
                         @endforeach
-                    </div>
+                    </select>
                     <p class="text-xs text-gray-500 mt-2">
                         <strong>Auto-aprobación:</strong> Si tu documento es válido, tu tienda será activada inmediatamente.<br>
                         <strong>Revisión manual:</strong> Un administrador revisará tu solicitud en menos de 6 horas.
