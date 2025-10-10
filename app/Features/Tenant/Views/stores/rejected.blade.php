@@ -10,7 +10,7 @@
     <div class="max-w-2xl w-full">
         {{-- Logo --}}
         <div class="text-center mb-8">
-            <img src="{{ asset('assets/Logo-original.png') }}" alt="Linkiu" class="h-12 mx-auto mb-4">
+            <img src="{{ asset('assets/images/Logo_Linkiu.svg') }}" alt="Linkiu" class="h-16 mx-auto mb-4">
         </div>
 
         {{-- Card Principal --}}

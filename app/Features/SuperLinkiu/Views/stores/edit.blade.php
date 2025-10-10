@@ -158,6 +158,24 @@
 
                         <div>
                             <label class="block text-sm font-medium text-black-300 mb-2">
+                                Categoría de Negocio
+                            </label>
+                            <select name="business_category_id"
+                                class="w-full px-4 py-2 border border-accent-200 rounded-lg focus:border-primary-200 focus:ring-1 focus:ring-primary-200 focus:outline-none @error('business_category_id') border-error-200 @enderror">
+                                <option value="">Sin categoría</option>
+                                @foreach(\App\Shared\Models\BusinessCategory::active()->ordered()->get() as $category)
+                                    <option value="{{ $category->id }}" {{ old('business_category_id', $store->business_category_id) == $category->id ? 'selected' : '' }}>
+                                        {{ $category->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('business_category_id')
+                                <p class="text-xs text-error-300 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-black-300 mb-2">
                                 Estado
                             </label>
                             <select name="status"
