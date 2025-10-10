@@ -12,10 +12,13 @@ class CheckStoreApprovalStatus
      */
     public function handle(Request $request, Closure $next)
     {
-        $store = $request->route('store');
+        // Intentar obtener el store del contexto del tenant
+        $store = $request->attributes->get('current_store') 
+                 ?? $request->route('store') 
+                 ?? auth()->user()?->store;
         
-        // Si no hay store o no es un objeto Store, continuar
-        if (!$store || !is_object($store) || !method_exists($store, 'getAttribute')) {
+        // Si no hay store, continuar
+        if (!$store || !is_object($store)) {
             return $next($request);
         }
         
@@ -24,16 +27,16 @@ class CheckStoreApprovalStatus
         
         // Si está pendiente de aprobación
         if ($approvalStatus === 'pending_approval') {
-            return redirect()
-                ->route('tenant.store-pending')
-                ->with('store', $store);
+            return response()->view('tenant::stores.pending-approval', [
+                'store' => $store
+            ]);
         }
         
         // Si fue rechazada
         if ($approvalStatus === 'rejected') {
-            return redirect()
-                ->route('tenant.store-rejected')
-                ->with('store', $store);
+            return response()->view('tenant::stores.rejected', [
+                'store' => $store
+            ]);
         }
         
         // Si está aprobada, continuar normalmente

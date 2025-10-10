@@ -41,6 +41,113 @@
         </div>
     </div>
 
+    {{-- Filtros y Búsqueda --}}
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
+        <form method="GET" action="{{ route('superlinkiu.store-requests.index') }}" class="space-y-4">
+            <input type="hidden" name="tab" value="{{ $activeTab }}">
+            
+            <div class="flex items-center justify-between mb-4">
+                <h3 class="text-lg font-semibold text-gray-900">🔍 Filtros y Búsqueda</h3>
+                @if(request()->has('search') || request()->has('category') || request()->has('urgency') || request()->has('date_from') || request()->has('date_to'))
+                <a href="{{ route('superlinkiu.store-requests.index', ['tab' => $activeTab]) }}" 
+                   class="text-sm text-primary-200 hover:text-primary-300 flex items-center gap-1">
+                    <x-solar-refresh-outline class="w-4 h-4" />
+                    Limpiar Filtros
+                </a>
+                @endif
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {{-- Búsqueda --}}
+                <div class="lg:col-span-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Buscar
+                    </label>
+                    <div class="relative">
+                        <input type="text" 
+                               name="search" 
+                               value="{{ request('search') }}"
+                               placeholder="Nombre, documento, email..."
+                               class="w-full px-4 py-2 pl-10 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-200">
+                        <x-solar-magnifer-outline class="w-5 h-5 text-gray-400 absolute left-3 top-2.5" />
+                    </div>
+                </div>
+                
+                {{-- Filtro por Categoría --}}
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Categoría
+                    </label>
+                    <select name="category" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-200">
+                        <option value="">Todas</option>
+                        @foreach($categories as $category)
+                        <option value="{{ $category->id }}" {{ request('category') == $category->id ? 'selected' : '' }}>
+                            {{ $category->name }}
+                        </option>
+                        @endforeach
+                    </select>
+                </div>
+                
+                {{-- Filtro por Urgencia (solo para pending) --}}
+                @if($activeTab === 'pending')
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Urgencia
+                    </label>
+                    <select name="urgency" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-200">
+                        <option value="">Todas</option>
+                        <option value="critical" {{ request('urgency') === 'critical' ? 'selected' : '' }}>
+                            🔴 Críticas (>24h)
+                        </option>
+                        <option value="urgent" {{ request('urgency') === 'urgent' ? 'selected' : '' }}>
+                            🟠 Urgentes (6-24h)
+                        </option>
+                        <option value="normal" {{ request('urgency') === 'normal' ? 'selected' : '' }}>
+                            🟢 Normales (<6h)
+                        </option>
+                    </select>
+                </div>
+                @endif
+            </div>
+            
+            {{-- Filtros de Fecha --}}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-4 border-t border-gray-200">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Desde
+                    </label>
+                    <input type="date" 
+                           name="date_from" 
+                           value="{{ request('date_from') }}"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-200">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                        Hasta
+                    </label>
+                    <input type="date" 
+                           name="date_to" 
+                           value="{{ request('date_to') }}"
+                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-200 focus:border-primary-200">
+                </div>
+            </div>
+            
+            {{-- Botón de aplicar filtros --}}
+            <div class="flex items-center gap-3 pt-4">
+                <button type="submit" class="btn-primary px-6 py-2 rounded-lg flex items-center gap-2">
+                    <x-solar-filter-outline class="w-4 h-4" />
+                    Aplicar Filtros
+                </button>
+                
+                @if(request()->has('search') || request()->has('category') || request()->has('urgency') || request()->has('date_from') || request()->has('date_to'))
+                <span class="text-sm text-gray-600">
+                    {{ $stores->total() }} resultado(s) encontrado(s)
+                </span>
+                @endif
+            </div>
+        </form>
+    </div>
+
     {{-- Tabs --}}
     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
         <div class="border-b border-gray-200">
@@ -131,7 +238,7 @@
 
                 {{-- Pagination --}}
                 <div class="mt-6">
-                    {{ $stores->appends(['tab' => $activeTab])->links() }}
+                    {{ $stores->links() }}
                 </div>
             @endif
         </div>
