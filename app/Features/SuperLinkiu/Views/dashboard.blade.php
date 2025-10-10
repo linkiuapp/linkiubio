@@ -100,6 +100,131 @@
         </div>
     </div>
 
+    <!-- ✅ Widget de Solicitudes Pendientes -->
+    @if($pendingStats['total'] > 0)
+    <div class="mb-6">
+        <div class="border border-accent-100 rounded-lg bg-gradient-to-r from-warning-100 via-accent-50 to-accent-100 overflow-hidden relative">
+            <!-- Badge flotante con prioridad -->
+            @if($pendingStats['critical'] > 0)
+            <div class="absolute top-4 right-4 bg-red-500 text-white px-3 py-1 rounded-full text-xs font-bold animate-pulse">
+                🚨 {{ $pendingStats['critical'] }} CRÍTICA(S)
+            </div>
+            @elseif($pendingStats['urgent'] > 0)
+            <div class="absolute top-4 right-4 bg-orange-500 text-white px-3 py-1 rounded-full text-xs font-bold">
+                ⚠️ {{ $pendingStats['urgent'] }} URGENTE(S)
+            </div>
+            @endif
+            
+            <div class="p-6">
+                <div class="flex items-start justify-between mb-6">
+                    <div>
+                        <h3 class="text-xl font-bold text-black-400 mb-2 flex items-center gap-2">
+                            <span class="w-10 h-10 bg-warning-200 rounded-full flex items-center justify-center">
+                                <x-solar-document-add-outline class="w-5 h-5 text-warning-500" />
+                            </span>
+                            Solicitudes de Tiendas Pendientes
+                        </h3>
+                        <p class="text-sm text-black-300">
+                            {{ $pendingStats['total'] }} solicitud(es) esperando revisión
+                            @if($pendingStats['oldest'])
+                                • La más antigua: <strong>{{ $pendingStats['oldest']->created_at->diffForHumans() }}</strong>
+                            @endif
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Estadísticas en grid -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <!-- Total Pendientes -->
+                    <div class="bg-white rounded-lg p-4 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-black-300 mb-1">Total Pendientes</p>
+                                <p class="text-3xl font-bold text-warning-500">{{ $pendingStats['total'] }}</p>
+                            </div>
+                            <div class="w-12 h-12 bg-warning-100 rounded-full flex items-center justify-center">
+                                <x-solar-clock-circle-outline class="w-6 h-6 text-warning-500" />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Críticas (>24h) -->
+                    <div class="bg-white rounded-lg p-4 shadow-sm @if($pendingStats['critical'] > 0) ring-2 ring-red-300 @endif">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-black-300 mb-1">Críticas (>24h)</p>
+                                <p class="text-3xl font-bold text-red-500">{{ $pendingStats['critical'] }}</p>
+                            </div>
+                            <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center">
+                                <x-solar-danger-triangle-outline class="w-6 h-6 text-red-500" />
+                            </div>
+                        </div>
+                        @if($pendingStats['critical'] > 0)
+                        <p class="text-xs text-red-600 mt-2 font-semibold">⚠️ Requiere atención inmediata</p>
+                        @endif
+                    </div>
+                    
+                    <!-- Urgentes (>6h) -->
+                    <div class="bg-white rounded-lg p-4 shadow-sm @if($pendingStats['urgent'] > 0) ring-2 ring-orange-300 @endif">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-black-300 mb-1">Urgentes (>6h)</p>
+                                <p class="text-3xl font-bold text-orange-500">{{ $pendingStats['urgent'] }}</p>
+                            </div>
+                            <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                                <x-solar-alarm-outline class="w-6 h-6 text-orange-500" />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Tiempo Promedio -->
+                    <div class="bg-white rounded-lg p-4 shadow-sm">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-black-300 mb-1">Tiempo Promedio</p>
+                                <p class="text-3xl font-bold text-blue-500">{{ $pendingStats['avg_hours'] }}h</p>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                <x-solar-hourglass-outline class="w-6 h-6 text-blue-500" />
+                            </div>
+                        </div>
+                        <p class="text-xs text-black-300 mt-2">
+                            @if($pendingStats['avg_hours'] > 6)
+                                <span class="text-orange-600 font-semibold">⚠️ Por encima del objetivo (6h)</span>
+                            @else
+                                <span class="text-green-600 font-semibold">✓ Dentro del objetivo (6h)</span>
+                            @endif
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Botones de acción -->
+                <div class="flex items-center gap-3">
+                    <a href="{{ route('superlinkiu.store-requests.index') }}" 
+                       class="btn-primary px-6 py-3 rounded-lg flex items-center gap-2 font-semibold">
+                        <x-solar-document-text-outline class="w-5 h-5" />
+                        Revisar Solicitudes ({{ $pendingStats['total'] }})
+                    </a>
+                    
+                    @if($pendingStats['critical'] > 0)
+                    <a href="{{ route('superlinkiu.store-requests.index', ['tab' => 'pending']) }}" 
+                       class="btn bg-red-500 hover:bg-red-600 text-white px-6 py-3 rounded-lg flex items-center gap-2 font-semibold animate-pulse">
+                        <x-solar-danger-triangle-outline class="w-5 h-5" />
+                        Atender Críticas ({{ $pendingStats['critical'] }})
+                    </a>
+                    @endif
+                    
+                    <button onclick="window.location.reload()" 
+                            class="btn-outline-secondary px-4 py-3 rounded-lg flex items-center gap-2">
+                        <x-solar-refresh-outline class="w-4 h-4" />
+                        Actualizar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     <!-- Alertas de Monitoreo -->
     @if(count($alerts) > 0)
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">

@@ -43,3 +43,17 @@ Schedule::command('stores:suspend-overdue')
     ->dailyAt('10:00')
     ->name('suspend-overdue-stores')
     ->description('Suspend stores with invoices overdue for more than 7 days');
+
+// ✅ Programar verificación de solicitudes de tiendas pendientes (cada hora)
+Schedule::command('stores:check-pending-requests')
+    ->hourly()
+    ->name('check-pending-store-requests')
+    ->description('Check pending store requests and alert if >6h or >24h without review');
+
+// ✅ Programar limpieza de solicitudes rechazadas antiguas (cada semana)
+Schedule::command('stores:cleanup-old-requests --days=90')
+    ->weekly()
+    ->sundays()
+    ->at('02:00')
+    ->name('cleanup-old-store-requests')
+    ->description('Clean up rejected store requests older than 90 days');

@@ -18,6 +18,7 @@ class StoreApprovalController extends Controller
         
         $query = Store::with(['plan', 'businessCategory', 'admins']);
         
+        // ✅ Filtro por tab (pending/approved/rejected)
         switch ($tab) {
             case 'pending':
                 $query->where('approval_status', 'pending_approval')
@@ -33,17 +34,69 @@ class StoreApprovalController extends Controller
                 break;
         }
         
-        $stores = $query->paginate(20)->appends(['tab' => $tab]);
+        // ✅ Búsqueda por nombre, documento o email
+        if ($search = $request->get('search')) {
+            $query->where(function($q) use ($search) {
+                $q->where('name', 'like', "%{$search}%")
+                  ->orWhere('business_document_number', 'like', "%{$search}%")
+                  ->orWhere('business_type', 'like', "%{$search}%")
+                  ->orWhereHas('admins', function($adminQuery) use ($search) {
+                      $adminQuery->where('email', 'like', "%{$search}%")
+                                 ->orWhere('name', 'like', "%{$search}%");
+                  });
+            });
+        }
         
-        $stats = [
-            'pending' => Store::where('approval_status', 'pending_approval')->count(),
-            'approved_today' => Store::where('approval_status', 'approved')
-                ->whereDate('approved_at', today())->count(),
-            'rejected_today' => Store::where('approval_status', 'rejected')
-                ->whereDate('rejected_at', today())->count(),
-        ];
+        // ✅ Filtro por categoría
+        if ($categoryId = $request->get('category')) {
+            $query->where('business_category_id', $categoryId);
+        }
         
-        return view('superlinkiu::store-requests.index', compact('stores', 'tab', 'stats'));
+        // ✅ Filtro por tiempo de espera (solo para pending)
+        if ($tab === 'pending' && $urgency = $request->get('urgency')) {
+            $now = now();
+            switch ($urgency) {
+                case 'critical': // >24h
+                    $query->where('created_at', '<', $now->copy()->subHours(24));
+                    break;
+                case 'urgent': // 6-24h
+                    $query->whereBetween('created_at', [
+                        $now->copy()->subHours(24),
+                        $now->copy()->subHours(6)
+                    ]);
+                    break;
+                case 'normal': // <6h
+                    $query->where('created_at', '>', $now->copy()->subHours(6));
+                    break;
+            }
+        }
+        
+        // ✅ Filtro por rango de fechas
+        if ($dateFrom = $request->get('date_from')) {
+            $query->whereDate('created_at', '>=', $dateFrom);
+        }
+        if ($dateTo = $request->get('date_to')) {
+            $query->whereDate('created_at', '<=', $dateTo);
+        }
+        
+        $stores = $query->paginate(20)->appends($request->except('page'));
+        
+        // Estadísticas
+        $pendingCount = Store::where('approval_status', 'pending_approval')->count();
+        $approvedCount = Store::where('approval_status', 'approved')->count();
+        $rejectedCount = Store::where('approval_status', 'rejected')->count();
+        
+        // Categorías para filtros
+        $categories = BusinessCategory::active()->ordered()->get();
+        
+        return view('superlinkiu::store-requests.index', compact(
+            'stores', 
+            'tab', 
+            'pendingCount', 
+            'approvedCount', 
+            'rejectedCount',
+            'categories'
+        ));
     }
 
     public function show(Store $store)
@@ -61,6 +114,19 @@ class StoreApprovalController extends Controller
             
             $store = Store::findOrFail($request->store_id);
             
+            // ✅ LOG: Aprobación de tienda
+            \Log::info('✅ STORE APPROVAL: Aprobando tienda manualmente', [
+                'store_id' => $store->id,
+                'store_name' => $store->name,
+                'business_type' => $store->business_type,
+                'business_document_type' => $store->business_document_type,
+                'business_document_number' => $store->business_document_number,
+                'business_category_id' => $request->business_category_id,
+                'approved_by' => auth()->user()->email,
+                'admin_notes' => $request->admin_notes,
+                'time_pending_hours' => $store->created_at->diffInHours(now())
+            ]);
+            
             $store->update([
                 'approval_status' => 'approved',
                 'approved_at' => now(),
@@ -72,6 +138,11 @@ class StoreApprovalController extends Controller
             
             if ($request->filled('plan_id')) {
                 $store->update(['plan_id' => $request->plan_id]);
+                
+                \Log::info('📋 STORE APPROVAL: Plan actualizado', [
+                    'store_id' => $store->id,
+                    'new_plan_id' => $request->plan_id
+                ]);
             }
             
             DB::commit();
@@ -115,6 +186,21 @@ class StoreApprovalController extends Controller
             $store = Store::findOrFail($request->store_id);
             
             $reapplyDays = $request->boolean('allow_reapply', true) ? 15 : null;
+            
+            // ❌ LOG: Rechazo de tienda
+            \Log::warning('❌ STORE REJECTION: Rechazando tienda', [
+                'store_id' => $store->id,
+                'store_name' => $store->name,
+                'business_type' => $store->business_type,
+                'business_document_type' => $store->business_document_type,
+                'business_document_number' => $store->business_document_number,
+                'rejection_reason' => $request->rejection_reason,
+                'rejection_message' => $request->rejection_message,
+                'allow_reapply' => $request->boolean('allow_reapply', true),
+                'can_reapply_at' => $reapplyDays ? now()->addDays($reapplyDays)->format('Y-m-d') : null,
+                'rejected_by' => auth()->user()->email,
+                'time_pending_hours' => $store->created_at->diffInHours(now())
+            ]);
             
             $store->update([
                 'approval_status' => 'rejected',

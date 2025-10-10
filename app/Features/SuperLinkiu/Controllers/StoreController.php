@@ -143,7 +143,8 @@ class StoreController extends Controller
     {
         $plans = Plan::active()->get();
         $templates = $this->templateService->getAllTemplates();
-        return view('superlinkiu::stores.create-wizard', compact('plans', 'templates'));
+        $categories = \App\Shared\Models\BusinessCategory::active()->ordered()->get();
+        return view('superlinkiu::stores.create-wizard', compact('plans', 'templates', 'categories'));
     }
 
     public function store(CreateStoreRequest $request)
@@ -151,10 +152,26 @@ class StoreController extends Controller
         try {
             $result = $this->storeService->createStore($request->validated(), $request);
             
-            return redirect()
-                ->route('superlinkiu.stores.index')
-                ->with('success', 'Tienda creada exitosamente.')
-                ->with('admin_credentials', $result['admin_credentials']);
+            // ✅ Diferenciar mensaje según approval_status
+            $store = $result['store'];
+            $approvalStatus = $store->approval_status ?? 'approved';
+            
+            if ($approvalStatus === 'approved') {
+                // Auto-aprobado: Mostrar credenciales
+                return redirect()
+                    ->route('superlinkiu.stores.index')
+                    ->with('success', '✅ Tienda creada y aprobada automáticamente.')
+                    ->with('admin_credentials', $result['admin_credentials'])
+                    ->with('store_auto_approved', true);
+            } else {
+                // Pending: Notificar que está en revisión
+                return redirect()
+                    ->route('superlinkiu.stores.index')
+                    ->with('info', '⏳ Solicitud de tienda creada. Estado: Pendiente de revisión.')
+                    ->with('store_pending_review', true)
+                    ->with('store_name', $store->name)
+                    ->with('store_id', $store->id);
+            }
                 
         } catch (\Exception $e) {
             return back()

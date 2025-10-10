@@ -29,6 +29,19 @@ class DashboardController extends Controller
                     : 0
             ];
         });
+        
+        // ✅ Estadísticas de solicitudes de tiendas (sin caché para datos en tiempo real)
+        $pendingRequests = Store::where('approval_status', 'pending_approval')->get();
+        $pendingStats = [
+            'total' => $pendingRequests->count(),
+            'critical' => $pendingRequests->filter(fn($s) => $s->created_at->diffInHours(now()) > 24)->count(),
+            'urgent' => $pendingRequests->filter(fn($s) => $s->created_at->diffInHours(now()) > 6 && $s->created_at->diffInHours(now()) <= 24)->count(),
+            'normal' => $pendingRequests->filter(fn($s) => $s->created_at->diffInHours(now()) <= 6)->count(),
+            'avg_hours' => $pendingRequests->count() > 0 
+                ? round($pendingRequests->avg(fn($s) => $s->created_at->diffInHours(now())), 1) 
+                : 0,
+            'oldest' => $pendingRequests->sortBy('created_at')->first()
+        ];
 
         // Estadísticas por plan
         $storesByPlan = Store::select('plan_id', DB::raw('count(*) as total'))
@@ -128,6 +141,7 @@ class DashboardController extends Controller
 
         return view('superlinkiu::dashboard', compact(
             'stats',
+            'pendingStats',
             'storesByPlan',
             'monthlyRevenue',
             'revenueGrowth',

@@ -592,6 +592,21 @@ class StoreService
      */
     private function determineApprovalStatus(array $data): array
     {
+        // ✅ Si el SuperAdmin fuerza la aprobación directa, aprobar sin validaciones
+        if (isset($data['force_approval']) && $data['force_approval'] == '1') {
+            Log::info('🔐 APPROVAL: SuperAdmin forzó aprobación directa → APPROVED', [
+                'forced_by' => auth()->user()->email ?? 'system',
+                'store_name' => $data['name'] ?? 'N/A'
+            ]);
+            
+            return [
+                'approval_status' => 'approved',
+                'document_verified' => true,
+                'approved_at' => now(),
+                'approved_by' => auth()->id()
+            ];
+        }
+        
         // Si no hay categoría o documento, dejar como pending por defecto
         if (!isset($data['business_category_id']) || !isset($data['business_document_number'])) {
             Log::info('🔐 APPROVAL: Tienda sin categoría o documento → PENDING', [
