@@ -44,12 +44,12 @@
     {{-- Filtros y Búsqueda --}}
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-6">
         <form method="GET" action="{{ route('superlinkiu.store-requests.index') }}" class="space-y-4">
-            <input type="hidden" name="tab" value="{{ $activeTab }}">
+            <input type="hidden" name="tab" value="{{ $tab }}">
             
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-gray-900">🔍 Filtros y Búsqueda</h3>
                 @if(request()->has('search') || request()->has('category') || request()->has('urgency') || request()->has('date_from') || request()->has('date_to'))
-                <a href="{{ route('superlinkiu.store-requests.index', ['tab' => $activeTab]) }}" 
+                <a href="{{ route('superlinkiu.store-requests.index', ['tab' => $tab]) }}" 
                    class="text-sm text-primary-200 hover:text-primary-300 flex items-center gap-1">
                     <x-solar-refresh-outline class="w-4 h-4" />
                     Limpiar Filtros
@@ -89,7 +89,7 @@
                 </div>
                 
                 {{-- Filtro por Urgencia (solo para pending) --}}
-                @if($activeTab === 'pending')
+                @if($tab === 'pending')
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">
                         Urgencia
@@ -153,15 +153,15 @@
         <div class="border-b border-gray-200">
             <nav class="flex space-x-4 px-6" aria-label="Tabs">
                 <a href="{{ route('superlinkiu.store-requests.index', ['tab' => 'pending']) }}" 
-                   class="py-4 px-1 border-b-2 font-medium text-sm {{ $activeTab === 'pending' ? 'border-primary-200 text-primary-200' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                   class="py-4 px-1 border-b-2 font-medium text-sm {{ $tab === 'pending' ? 'border-primary-200 text-primary-200' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
                     Pendientes @if($pendingCount > 0)<span class="ml-2 bg-warning-300 text-white text-xs px-2 py-0.5 rounded-full">{{ $pendingCount }}</span>@endif
                 </a>
                 <a href="{{ route('superlinkiu.store-requests.index', ['tab' => 'approved']) }}" 
-                   class="py-4 px-1 border-b-2 font-medium text-sm {{ $activeTab === 'approved' ? 'border-primary-200 text-primary-200' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                   class="py-4 px-1 border-b-2 font-medium text-sm {{ $tab === 'approved' ? 'border-primary-200 text-primary-200' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
                     Aprobadas
                 </a>
                 <a href="{{ route('superlinkiu.store-requests.index', ['tab' => 'rejected']) }}" 
-                   class="py-4 px-1 border-b-2 font-medium text-sm {{ $activeTab === 'rejected' ? 'border-primary-200 text-primary-200' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
+                   class="py-4 px-1 border-b-2 font-medium text-sm {{ $tab === 'rejected' ? 'border-primary-200 text-primary-200' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300' }}">
                     Rechazadas
                 </a>
             </nav>
@@ -172,7 +172,7 @@
             @if($stores->isEmpty())
                 <div class="text-center py-12">
                     <x-solar-document-outline class="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                    <p class="text-gray-500 text-lg">No hay solicitudes {{ $activeTab === 'pending' ? 'pendientes' : ($activeTab === 'approved' ? 'aprobadas' : 'rechazadas') }}</p>
+                    <p class="text-gray-500 text-lg">No hay solicitudes {{ $tab === 'pending' ? 'pendientes' : ($tab === 'approved' ? 'aprobadas' : 'rechazadas') }}</p>
                 </div>
             @else
                 <div class="space-y-4">
@@ -182,7 +182,7 @@
                                 <div class="flex-1">
                                     <div class="flex items-center gap-3 mb-2">
                                         <h3 class="text-lg font-semibold text-gray-900">{{ $store->name }}</h3>
-                                        @if($activeTab === 'pending')
+                                        @if($tab === 'pending')
                                             @php
                                                 $hoursElapsed = $store->created_at->diffInHours(now());
                                                 $urgencyClass = $hoursElapsed > 24 ? 'bg-danger-100 text-danger-700' : ($hoursElapsed > 6 ? 'bg-warning-100 text-warning-700' : 'bg-info-100 text-info-700');
@@ -216,7 +216,7 @@
                                        class="btn-primary-sm">
                                         Ver Detalle
                                     </a>
-                                    @if($activeTab === 'pending')
+                                    @if($tab === 'pending')
                                         <form action="{{ route('superlinkiu.store-requests.approve', $store->id) }}" method="POST" class="inline">
                                             @csrf
                                             <button type="submit" class="btn-success-sm w-full">
