@@ -148,6 +148,59 @@ class EmailConfiguration extends Model
                             'new_plan' => 'Plan nuevo',
                             'change_date' => 'Fecha del cambio'
                         ]
+                    ],
+                    'store_pending_review' => [
+                        'name' => 'Solicitud en revisión',
+                        'description' => 'Se envía cuando una solicitud de tienda queda pendiente de revisión',
+                        'required_vars' => [
+                            'admin_name' => 'Nombre del administrador',
+                            'store_name' => 'Nombre de la tienda',
+                            'business_type' => 'Tipo de negocio',
+                            'business_document_type' => 'Tipo de documento',
+                            'business_document_number' => 'Número de documento',
+                            'estimated_time' => 'Tiempo estimado de revisión',
+                            'support_email' => 'Email de soporte'
+                        ]
+                    ],
+                    'store_approved' => [
+                        'name' => 'Tienda aprobada',
+                        'description' => 'Se envía cuando una solicitud de tienda es aprobada',
+                        'required_vars' => [
+                            'admin_name' => 'Nombre del administrador',
+                            'store_name' => 'Nombre de la tienda',
+                            'admin_email' => 'Email del administrador',
+                            'password' => 'Contraseña de acceso',
+                            'login_url' => 'URL de acceso al panel',
+                            'store_url' => 'URL de la tienda',
+                            'plan_name' => 'Nombre del plan',
+                            'support_email' => 'Email de soporte'
+                        ]
+                    ],
+                    'store_rejected' => [
+                        'name' => 'Tienda rechazada',
+                        'description' => 'Se envía cuando una solicitud de tienda es rechazada',
+                        'required_vars' => [
+                            'admin_name' => 'Nombre del administrador',
+                            'store_name' => 'Nombre de la tienda',
+                            'rejection_reason' => 'Motivo del rechazo',
+                            'rejection_message' => 'Mensaje detallado',
+                            'can_reapply_date' => 'Fecha en que puede re-aplicar',
+                            'appeal_email' => 'Email para apelar'
+                        ]
+                    ],
+                    'new_store_request' => [
+                        'name' => 'Nueva solicitud (SuperAdmin)',
+                        'description' => 'Notifica al SuperAdmin sobre nuevas solicitudes de tienda',
+                        'required_vars' => [
+                            'store_name' => 'Nombre de la tienda',
+                            'business_type' => 'Tipo de negocio',
+                            'business_document_type' => 'Tipo de documento',
+                            'business_document_number' => 'Número de documento',
+                            'admin_name' => 'Nombre del administrador',
+                            'admin_email' => 'Email del administrador',
+                            'created_at' => 'Fecha de creación',
+                            'review_url' => 'URL para revisar'
+                        ]
                     ]
                 ]
             ],

@@ -99,9 +99,9 @@ class StoreApprovalController extends Controller
         ));
     }
 
-    public function show(Store $store)
+    public function show($storeId)
     {
-        $store->load(['plan', 'businessCategory', 'admins', 'approvedBy']);
+        $store = Store::with(['plan', 'businessCategory', 'admins', 'approvedBy'])->findOrFail($storeId);
         $categories = BusinessCategory::active()->ordered()->get();
         
         return view('superlinkiu::store-requests.show', compact('store', 'categories'));

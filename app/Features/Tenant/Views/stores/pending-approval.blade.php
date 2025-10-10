@@ -11,7 +11,7 @@
     <div class="max-w-2xl w-full">
         {{-- Logo --}}
         <div class="text-center mb-8">
-            <img src="{{ asset('assets/images/Logo_Linkiu.svg') }}" alt="Linkiu" class="h-12 mx-auto mb-4">
+            <img src="{{ asset('assets/Logo-original.png') }}" alt="Linkiu" class="h-12 mx-auto mb-4">
         </div>
 
         {{-- Card Principal --}}
@@ -41,7 +41,7 @@
                             <dt class="text-sm font-medium text-gray-600">Categoría</dt>
                             <dd class="text-sm font-semibold text-gray-900">
                                 @if($store->businessCategory)
-                                    {{ $store->businessCategory->icon }} {{ $store->businessCategory->name }}
+                                    {{ $store->businessCategory->name }}
                                 @else
                                     {{ $store->business_type ?? 'No especificado' }}
                                 @endif
