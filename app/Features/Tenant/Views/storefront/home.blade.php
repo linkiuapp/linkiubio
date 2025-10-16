@@ -11,7 +11,7 @@
                      :style="getTransform()">
                     
                     @foreach($sliders as $index => $slider)
-                        <div class="w-1/2 sm:w-1/3 flex-shrink-0 relative flex justify-center px-1">
+                        <div class="flex-shrink-0 relative flex justify-center">
                             @if($slider->url && $slider->url_type !== 'none')
                                 @if($slider->url_type === 'external')
                                     <a href="{{ $slider->url }}" 
@@ -27,7 +27,7 @@
                             @endif
                             
                             <!-- Imagen del slider -->
-                            <div class="w-[170px] h-[100px] max-w-full bg-accent-100 rounded-lg overflow-hidden relative">
+                            <div class="w-[170px] h-[100px] bg-accent-100 rounded-lg overflow-hidden relative">
                                 @if($slider->image_url)
                                     <img src="{{ $slider->image_url }}" 
                                          alt="{{ $slider->name }}" 
@@ -59,7 +59,7 @@
                     @if($sliders->count() > 1)
                         {{-- Duplicar 2 para móvil, 3 para desktop (tomamos 3 para cubrir ambos casos) --}}
                         @foreach($sliders->take(3) as $index => $slider)
-                            <div class="w-1/2 sm:w-1/3 flex-shrink-0 relative flex justify-center px-1">
+                            <div class="flex-shrink-0 relative flex justify-center">
                                 @if($slider->url && $slider->url_type !== 'none')
                                     @if($slider->url_type === 'external')
                                         <a href="{{ $slider->url }}" 
@@ -75,7 +75,7 @@
                                 @endif
                                 
                                 <!-- Imagen del slider -->
-                                <div class="w-full aspect-[17/10] max-w-full bg-accent-100 rounded-lg overflow-hidden relative">
+                                <div class="w-[170px] h-[100px] bg-accent-100 rounded-lg overflow-hidden relative">
                                     @if($slider->image_url)
                                         <img src="{{ $slider->image_url }}" 
                                              alt="{{ $slider->name }}" 
@@ -354,12 +354,17 @@ function sliderComponent(sliders, duration = 5) {
         },
         
         getTransform() {
+            // Con tamaño fijo de 170px + gap de 8px (móvil) o 12px (desktop)
+            const slideWidth = 170; // w-[170px]
+            const mobileGap = 8; // gap-2 = 8px
+            const desktopGap = 12; // gap-3 = 12px
+            
             if (this.isMobile) {
-                // Móvil: desplazar 50% + gap (2 slides visibles)
-                return `transform: translateX(calc(-${this.currentSlide * 50}% - ${this.currentSlide * 8}px))`;
+                const totalWidth = slideWidth + mobileGap;
+                return `transform: translateX(-${this.currentSlide * totalWidth}px)`;
             } else {
-                // Desktop: desplazar 33.333% + gap (3 slides visibles)
-                return `transform: translateX(calc(-${this.currentSlide * 33.333}% - ${this.currentSlide * 12}px))`;
+                const totalWidth = slideWidth + desktopGap;
+                return `transform: translateX(-${this.currentSlide * totalWidth}px)`;
             }
         },
         
