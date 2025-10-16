@@ -20,7 +20,7 @@ module.exports = {
       },
 
 
-      // Escala tipográfica optimizada
+
       fontSize: {
         'xs': ['10px', { lineHeight: '12px', letterSpacing: '0.025em' }],
         'sm': ['12px', { lineHeight: '14px', letterSpacing: '0.025em' }],

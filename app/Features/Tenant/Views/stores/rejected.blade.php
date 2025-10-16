@@ -6,7 +6,7 @@
     <title>Solicitud Rechazada - {{ $store->name }}</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-gradient-to-br from-red-50 to-orange-100 min-h-screen flex items-center justify-center p-4">
+<body class="bg-gradient-to-br from-error-50 to-error-100 min-h-screen flex items-center justify-center p-4">
     <div class="max-w-2xl w-full">
         {{-- Logo --}}
         <div class="text-center mb-8">
@@ -16,9 +16,9 @@
         {{-- Card Principal --}}
         <div class="bg-white rounded-2xl shadow-xl overflow-hidden">
             {{-- Header --}}
-            <div class="bg-gradient-to-r from-danger-300 to-danger-400 p-8 text-center">
+            <div class="bg-gradient-to-r from-error-300 to-error-400 p-8 text-center">
                 <div class="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full mb-4">
-                    <svg class="w-12 h-12 text-danger-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="w-12 h-12 text-error-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>
                 </div>

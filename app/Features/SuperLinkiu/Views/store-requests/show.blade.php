@@ -295,11 +295,11 @@
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Motivo del rechazo *</label>
                                 <select name="rejection_reason" required class="w-full px-3 py-2 border border-gray-300 rounded-lg">
                                     <option value="">Selecciona un motivo</option>
-                                    <option value="Documentación incompleta">Documentación incompleta</option>
-                                    <option value="Documento inválido">Documento inválido</option>
-                                    <option value="Categoría no permitida">Categoría no permitida</option>
-                                    <option value="Información sospechosa">Información sospechosa</option>
-                                    <option value="Otro">Otro</option>
+                                    <option value="rut_invalido">Documento inválido o no verificable</option>
+                                    <option value="tipo_no_permitido">Tipo de negocio no permitido en la plataforma</option>
+                                    <option value="informacion_incompleta">Información incompleta o inconsistente</option>
+                                    <option value="duplicado">Ya existe una tienda registrada con estos datos</option>
+                                    <option value="otro">Otro motivo</option>
                                 </select>
                             </div>
                             <div>

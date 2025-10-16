@@ -38,6 +38,17 @@ class TenantIdentificationMiddleware
                 abort(404, 'Tienda no encontrada');
             }
             
+            // ✅ VALIDACIÓN: Solo para rutas públicas (frontend Tenant)
+            // Las rutas /admin/* NO pasan por esta validación
+            $isAdminRoute = $request->is('*/admin*') || $request->is('*/admin/*');
+            
+            if (!$isAdminRoute) {
+                // Si la tienda NO está aprobada, mostrar 404 creativo
+                if ($store->approval_status !== 'approved') {
+                    return response()->view('tenant::errors.404-store', [], 404);
+                }
+            }
+            
             // Establecer el tenant actual
             $this->tenantService->setTenant($store);
             

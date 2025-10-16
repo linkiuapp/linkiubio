@@ -58,6 +58,10 @@ class Store extends Model
     protected $casts = [
         'verified' => 'boolean',
         'last_active_at' => 'datetime',
+        'approved_at' => 'datetime',
+        'rejected_at' => 'datetime',
+        'can_reapply_at' => 'datetime',
+        'document_verified' => 'boolean',
     ];
 
     /**

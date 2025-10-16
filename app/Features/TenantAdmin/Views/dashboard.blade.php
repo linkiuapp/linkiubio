@@ -5,6 +5,59 @@
     
     @section('content')
 
+        {{-- Banner de Estado de Aprobación --}}
+        @if($store->approval_status === 'pending_approval')
+        <div class="mb-6 bg-gradient-to-r from-warning-100 to-warning-50 border-l-4 border-warning-300 rounded-lg p-6 shadow-sm">
+            <div class="flex items-start gap-4">
+                <div class="flex-shrink-0">
+                    <div class="w-12 h-12 bg-warning-300 rounded-full flex items-center justify-center">
+                        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-lg font-bold text-warning-500 mb-2">
+                        ⏰ Tu tienda está en revisión
+                    </h3>
+                    <p class="text-sm text-black-400 mb-3">
+                        Estamos revisando tu solicitud. Este proceso usualmente toma <strong>24-48 horas</strong>.
+                        Te notificaremos por email cuando tu tienda esté aprobada y lista para publicar.
+                    </p>
+                    <div class="bg-white rounded-lg p-4 mb-3">
+                        <h4 class="text-sm font-semibold text-black-400 mb-2">Mientras tanto, puedes:</h4>
+                        <ul class="space-y-1 text-sm text-black-300">
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-success-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Configurar los detalles de tu tienda
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-success-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Agregar productos y categorías
+                            </li>
+                            <li class="flex items-center gap-2">
+                                <svg class="w-4 h-4 text-success-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+                                </svg>
+                                Personalizar el diseño de tu tienda
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="flex items-center gap-2 text-xs text-warning-500">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>⚠️ No compartas el link público de tu tienda hasta que sea aprobada</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        @endif
+
         <div class="grid grid-cols-10 grid-rows-6 gap-3">
 
             <!-- Widget de estado de la tienda -->
