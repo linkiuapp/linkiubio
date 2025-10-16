@@ -339,7 +339,7 @@
                                     <!-- Payment Proof Upload -->
                                     <div>
                                         <label for="payment_proof" class="block text-sm font-medium text-black-500 mb-2">
-                                            Comprobante de Pago (Opcional)
+                                            Comprobante de Pago
                                         </label>
                                         <div class="border-2 border-dashed border-accent-200 rounded-lg p-6 text-center hover:border-primary-300 transition-colors">
                                             <input 

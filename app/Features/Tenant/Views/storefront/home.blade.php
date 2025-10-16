@@ -27,7 +27,7 @@
                             @endif
                             
                             <!-- Imagen del slider -->
-                            <div class="w-full aspect-[17/10] max-w-full bg-accent-100 rounded-lg overflow-hidden relative">
+                            <div class="w-[170px] h-[100px] max-w-full bg-accent-100 rounded-lg overflow-hidden relative">
                                 @if($slider->image_url)
                                     <img src="{{ $slider->image_url }}" 
                                          alt="{{ $slider->name }}" 
@@ -122,7 +122,7 @@
 
     <!-- Categorías -->
     <div>
-        <h2 class="text-lg font-bold text-black-400 mb-4">Categorías</h2>
+        <h2 class="text-body-large font-bold text-black-400 mb-4">Categorías</h2>
         
         @if($categories->count() > 0)
             <div class="grid grid-cols-4 gap-3">
@@ -163,7 +163,7 @@
 
     <!-- Top 3 más vendidos -->
     <div>
-        <h2 class="text-lg font-bold text-black-400 mb-4">Top 3 más vendidos</h2>
+        <h2 class="text-body-large font-bold text-black-400 mb-4">Top 3 más vendidos</h2>
         
         @if($topProducts->count() > 0)
             <div class="space-y-3">
@@ -241,7 +241,7 @@
 
     <!-- Lo más nuevo -->
     <div>
-        <h2 class="text-lg font-bold text-black-400 mb-4">Lo más nuevo</h2>
+        <h2 class="text-body-large font-bold text-black-400 mb-4">Lo más nuevo</h2>
         
         @if($newProducts->count() > 0)
             <div class="space-y-3">

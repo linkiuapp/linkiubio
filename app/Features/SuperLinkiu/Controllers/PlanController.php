@@ -103,6 +103,13 @@ class PlanController extends Controller
             });
         }
 
+        // Filtrar características vacías
+        if (isset($validated['features_list'])) {
+            $validated['features_list'] = array_values(array_filter($validated['features_list'], function($feature) {
+                return !empty(trim($feature));
+            }));
+        }
+
         // Remover plan_image del array ya que se procesó como image_url
         unset($validated['plan_image']);
 
@@ -203,6 +210,13 @@ class PlanController extends Controller
             $validated['prices'] = array_filter($validated['prices'], function($price) {
                 return $price !== null && $price !== '';
             });
+        }
+
+        // Filtrar características vacías
+        if (isset($validated['features_list'])) {
+            $validated['features_list'] = array_values(array_filter($validated['features_list'], function($feature) {
+                return !empty(trim($feature));
+            }));
         }
 
         $plan->update($validated);

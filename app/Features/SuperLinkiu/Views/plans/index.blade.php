@@ -6,7 +6,7 @@
 <div class="container-fluid">
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-lg font-bold text-black-400">Gestión de Planes</h1>
+        <h1 class="text-body-large font-bold text-black-400">Gestión de Planes</h1>
         <a href="{{ route('superlinkiu.plans.create') }}" class="btn-primary px-4 py-2 rounded-lg flex items-center gap-2">
             <x-solar-add-circle-outline class="w-5 h-5" />
             Nuevo Plan

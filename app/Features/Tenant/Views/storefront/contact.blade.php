@@ -8,7 +8,7 @@
             <nav class="flex text-small font-regular text-info-300">
                 <a href="{{ route('tenant.home', $store->slug) }}" class="hover:text-info-200 transition-colors">Inicio</a>
                 <span class="mx-2">/</span>
-                <span class="text-secondary-300 font-medium">Contacto</span>
+                <span class="text-secondary-300 font-medium">Sedes</span>
             </nav>
             
             <!-- Title -->
@@ -101,10 +101,7 @@
                                        target="_blank"
                                        class="flex items-center gap-3 p-3 bg-success-50 rounded-lg hover:bg-success-100 transition-colors">
                                         <div class="w-5 h-5 flex-shrink-0">
-                                            <svg class="w-full h-full text-success-300" fill="currentColor" viewBox="0 0 24 24">
-                                                <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 2.079.549 4.03 1.506 5.719L0 24l6.573-1.525c1.647.872 3.516 1.373 5.512 1.373 6.624 0 11.99-5.367 11.99-11.99C24.075 5.367 18.641.001 12.017.001z"/>
-                                                <path fill="#fff" d="M18.832 14.615c-.297.832-1.792 1.573-2.53 1.679-.732.105-1.69.094-2.73-.64-1.33-.938-2.197-2.303-2.197-2.303s-.469-.625-.719-1.105c-.25-.48-.469-1.042-.312-1.667.156-.625.781-1.146 1.042-1.406.26-.26.573-.375.781-.375.209 0 .417.008.594.016.187.011.447-.071.698.533.26.625.885 2.188.958 2.344.073.156.125.344.031.563-.094.218-.146.344-.292.531-.146.188-.302.417-.438.563-.146.146-.302.302-.125.594.177.292.781 1.302 1.688 2.115 1.156.104 1.417 1.219 1.5 1.531.083.313.083.583-.021.781z"/>
-                                            </svg>
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m3 21l1.65-3.8a9 9 0 1 1 3.4 2.9z"/><path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0za5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1"/></g></svg>
                                         </div>
                                         <span class="text-sm text-success-500 font-medium">WhatsApp</span>
                                     </a>
@@ -163,32 +160,19 @@
                                            target="_blank"
                                            class="w-8 h-8 bg-accent-200 rounded-lg flex items-center justify-center hover:bg-primary-100 transition-colors">
                                             @if($social->platform === 'facebook')
-                                                <svg class="w-4 h-4 text-blue-600" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                                                </svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 10v4h3v7h4v-7h3l1-4h-4V8a1 1 0 0 1 1-1h3V3h-3a5 5 0 0 0-5 5v2z"/></svg>
                                             @elseif($social->platform === 'instagram')
-                                                <svg class="w-4 h-4 text-pink-600" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
-                                                </svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M4 8a4 4 0 0 1 4-4h8a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4H8a4 4 0 0 1-4-4z"/><path d="M9 12a3 3 0 1 0 6 0a3 3 0 0 0-6 0m7.5-4.5v.01"/></g></svg>
                                             @elseif($social->platform === 'whatsapp')
-                                                <svg class="w-4 h-4 text-green-600" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M12.017 0C5.396 0 .029 5.367.029 11.987c0 2.079.549 4.03 1.506 5.719L0 24l6.573-1.525c1.647.872 3.516 1.373 5.512 1.373 6.624 0 11.99-5.367 11.99-11.99C24.075 5.367 18.641.001 12.017.001z"/>
-                                                    <path fill="#fff" d="M18.832 14.615c-.297.832-1.792 1.573-2.53 1.679-.732.105-1.69.094-2.73-.64-1.33-.938-2.197-2.303-2.197-2.303s-.469-.625-.719-1.105c-.25-.48-.469-1.042-.312-1.667.156-.625.781-1.146 1.042-1.406.26-.26.573-.375.781-.375.209 0 .417.008.594.016.187.011.447-.071.698.533.26.625.885 2.188.958 2.344.073.156.125.344.031.563-.094.218-.146.344-.292.531-.146.188-.302.417-.438.563-.146.146-.302.302-.125.594.177.292.781 1.302 1.688 2.115 1.156.104 1.417 1.219 1.5 1.531.083.313.083.583-.021.781z"/>
-                                                </svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="m3 21l1.65-3.8a9 9 0 1 1 3.4 2.9z"/><path d="M9 10a.5.5 0 0 0 1 0V9a.5.5 0 0 0-1 0za5 5 0 0 0 5 5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0 0 1"/></g></svg>
                                             @elseif($social->platform === 'tiktok')
-                                                <svg class="w-4 h-4 text-black-400" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M12.53.02C13.84 0 15.14.01 16.44 0c.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/>
-                                                </svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 7.917v4.034A9.95 9.95 0 0 1 16 10v4.5a6.5 6.5 0 1 1-8-6.326V12.5a2.5 2.5 0 1 0 4 2V3h4.083A6.005 6.005 0 0 0 21 7.917"/></svg>
                                             @elseif($social->platform === 'youtube')
-                                                <svg class="w-4 h-4 text-red-600" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
-                                                </svg>
-                                            @elseif($social->platform === 'twitter' || $social->platform === 'x')
-                                                <svg class="w-4 h-4 text-black-400" fill="currentColor" viewBox="0 0 24 24">
-                                                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
-                                                </svg>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><g fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"><path d="M2 8a4 4 0 0 1 4-4h12a4 4 0 0 1 4 4v8a4 4 0 0 1-4 4H6a4 4 0 0 1-4-4z"/><path d="m10 9l5 3l-5 3z"/></g></svg>
+                                            @elseif($social->platform === 'linkiu')
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24"><path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m9 15l6-6m-4-3l.463-.536a5 5 0 0 1 7.071 7.072L18 13m-5 5l-.397.534a5.07 5.07 0 0 1-7.127 0a4.97 4.97 0 0 1 0-7.071L6 11"/></svg>
                                             @else
-                                                <x-solar-link-outline class="w-4 h-4 text-black-400" />
+                                                <x-solar-link-circle-outline class="w-4 h-4 text-black-400" />
                                             @endif
                                         </a>
                                     @endforeach

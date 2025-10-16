@@ -7,7 +7,7 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h1 class="text-3xl text-black-500 mb-0">{{ $plan->name }}</h1>
+            <h1 class="text-body-large font-bold text-black-500 mb-0">{{ $plan->name }}</h1>
             <p class="text-black-300 mt-1">Información detallada del plan</p>
         </div>
         <div class="flex gap-2">
@@ -28,7 +28,7 @@
             <!-- Información Básica -->
             <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
                 <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                    <h2 class="text-3xl text-black-500 mb-0">Información Básica</h2>
+                    <h2 class="text-body-large font-bold text-black-500 mb-0">Información Básica</h2>
                 </div>
                 <div class="p-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -73,7 +73,7 @@
             @if($plan->prices)
             <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
                 <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                    <h2 class="text-3xl text-black-500 mb-0">Precios por Período</h2>
+                    <h2 class="text-body-large font-bold text-black-500 mb-0">Precios por Período</h2>
                 </div>
                 <div class="p-6">
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -96,7 +96,7 @@
             <!-- Límites del Plan -->
             <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
                 <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                    <h2 class="text-3xl text-black-500 mb-0">Límites del Plan</h2>
+                    <h2 class="text-body-large font-bold text-black-500 mb-0">Límites del Plan</h2>
                 </div>
                 <div class="p-6">
                     <!-- 📦 PRODUCTOS Y CATÁLOGO -->
@@ -236,7 +236,7 @@
             @if($features && count($features) > 0)
             <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
                 <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                    <h2 class="text-3xl text-black-500 mb-0">Características Incluidas</h2>
+                    <h2 class="text-body-large font-bold text-black-500 mb-0">Características Incluidas</h2>
                 </div>
                 <div class="p-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -257,7 +257,7 @@
             <!-- Estado del Plan -->
             <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
                 <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                    <h2 class="text-3xl text-black-500 mb-0">Estado</h2>
+                    <h2 class="text-body-large font-bold text-black-500 mb-0">Estado</h2>
                 </div>
                 <div class="p-6 space-y-4">
                     <div class="flex items-center justify-between">
@@ -302,7 +302,7 @@
             <!-- Soporte -->
             <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
                 <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                    <h2 class="text-3xl text-black-500 mb-0">Soporte</h2>
+                    <h2 class="text-body-large font-bold text-black-500 mb-0">Soporte</h2>
                 </div>
                 <div class="p-6 space-y-4">
                     <div>
@@ -319,7 +319,7 @@
             <!-- Estadísticas -->
             <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
                 <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                    <h2 class="text-3xl text-black-500 mb-0">Estadísticas</h2>
+                    <h2 class="text-body-large font-bold text-black-500 mb-0">Estadísticas</h2>
                 </div>
                 <div class="p-6 space-y-4">
                     <div class="flex items-center justify-between">
@@ -340,11 +340,11 @@
             <!-- Acciones -->
             <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
                 <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                    <h2 class="text-3xl text-black-500 mb-0">Acciones</h2>
+                    <h2 class="text-body-large font-bold text-black-500 mb-0">Acciones</h2>
                 </div>
                 <div class="p-6 space-y-3">
                     <a href="{{ route('superlinkiu.plans.edit', $plan) }}" 
-                       class="w-full bg-primary-50 hover:bg-primary-100 text-primary-300 py-2 rounded-lg text-center transition-colors block">
+                       class="w-full bg-primary-300 hover:bg-primary-400 text-accent-50 py-2 rounded-lg text-center transition-colors block">
                         <x-solar-pen-outline class="w-4 h-4 inline mr-2" />
                         Editar Plan
                     </a>
@@ -355,7 +355,7 @@
                             @method('DELETE')
                             <button type="submit"
                                     onclick="return confirm('¿Estás seguro de eliminar este plan?')"
-                                    class="w-full bg-error-50 hover:bg-error-100 text-error-300 py-2 rounded-lg transition-colors">
+                                    class="w-full bg-error-300 hover:bg-error-500 text-accent-50 py-2 rounded-lg transition-colors">
                                 <x-solar-trash-bin-trash-outline class="w-4 h-4 inline mr-2" />
                                 Eliminar Plan
                             </button>

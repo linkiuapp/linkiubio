@@ -11,8 +11,8 @@
     <div class="max-w-6xl mx-auto">
         <!-- Header -->
         <div class="text-center mb-8">
-            <h1 class="text-2xl font-bold text-black-500 mb-2">Finalizar Compra</h1>
-            <p class="text-black-300">Completa tu información para procesar tu pedido</p>
+            <h1 class="text-h5 font-bold text-black-500 mb-2">Finalizar compra</h1>
+            <p class="text-body-regular text-black-500">Completa tu información para procesar tu pedido</p>
         </div>
 
         <!-- Main Checkout Layout - Single Column -->
@@ -25,24 +25,24 @@
             <div id="card-step1" class="bg-accent-50 rounded-xl p-6 border border-accent-200 shadow-sm">
                 <div class="flex items-center mb-4">
                     <div class="w-8 h-8 bg-primary-300 text-accent-50 rounded-full flex items-center justify-center text-sm font-bold mr-3">1</div>
-                    <h3 class="text-lg font-semibold text-black-500">Datos Personales</h3>
+                    <h3 class="text-body-large font-semibold text-black-500">Datos Personales</h3>
                 </div>
                 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
                     <div>
-                        <label for="customer_name" class="block text-sm font-medium text-black-500 mb-2">Nombre Completo *</label>
+                        <label for="customer_name" class="block text-caption font-medium text-black-500 mb-2">Nombre Completo *</label>
                         <input 
                             type="text" 
                             id="customer_name" 
                             name="customer_name" 
                             class="w-full px-4 py-3 border border-accent-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-colors"
-                            placeholder="Tu nombre completo"
+                            placeholder="Nombre completo"
                         >
                         <div id="name_error" class="hidden mt-1 text-sm text-error-300"></div>
                     </div>
                     
                     <div>
-                        <label for="customer_phone" class="block text-sm font-medium text-black-500 mb-2">Número de Celular *</label>
+                        <label for="customer_phone" class="block text-caption font-medium text-black-500 mb-2">Número de Celular *</label>
                         <input 
                             type="tel" 
                             id="customer_phone" 
@@ -68,7 +68,7 @@
             <div id="card-step2" class="bg-accent-50 rounded-xl p-6 border border-accent-200 shadow-sm hidden">
                 <div class="flex items-center mb-4">
                     <div class="w-8 h-8 bg-primary-300 text-accent-50 rounded-full flex items-center justify-center text-sm font-bold mr-3">2</div>
-                    <h3 class="text-lg font-semibold text-black-500">Método de Envío</h3>
+                    <h3 class="text-body-large font-semibold text-black-500">Método de Envío</h3>
                 </div>
                 
                 <div id="shipping-methods-container" class="space-y-3 mb-6">
@@ -157,7 +157,7 @@
             <div id="card-step3" class="bg-accent-50 rounded-xl p-6 border border-accent-200 shadow-sm hidden">
                 <div class="flex items-center mb-4">
                     <div class="w-8 h-8 bg-primary-300 text-accent-50 rounded-full flex items-center justify-center text-sm font-bold mr-3">3</div>
-                    <h3 class="text-lg font-semibold text-black-500">Método de Pago</h3>
+                    <h3 class="text-body-large font-semibold text-black-500">Método de Pago</h3>
                 </div>
                 
                 <div class="space-y-4 mb-6">
@@ -189,7 +189,7 @@
             
             <!-- Resumen integrado al final -->
             <div class="border-t border-accent-200 pt-6 mt-6">
-                <h3 class="text-lg font-semibold text-black-500 mb-4">Resumen del Pedido</h3>
+                <h3 class="text-body-large font-semibold text-black-500 mb-4">Resumen del Pedido</h3>
                 
                 <!-- Products List -->
                 <div id="order-products" class="space-y-3 mb-4">
@@ -203,7 +203,7 @@
                 <div class="border-t border-accent-200 pt-4 mb-4">
                     <div class="flex items-center gap-2 mb-3">
                         <span class="text-lg">🎟️</span>
-                        <h4 class="text-sm font-medium text-black-500">Cupón de Descuento</h4>
+                        <h4 class="text-caption font-medium text-black-500">Cupón de Descuento</h4>
                     </div>
                     
                     <div class="flex gap-2">
@@ -252,7 +252,7 @@
                     <!-- Línea separadora -->
                     <div class="border-t border-accent-200 pt-3">
                         <div class="flex justify-between items-center">
-                            <span class="text-lg font-semibold text-black-500">Total a pagar:</span>
+                            <span class="text-body-large font-semibold text-black-500">Total a pagar:</span>
                             <span class="text-lg font-bold text-primary-300" id="summary-total">$0</span>
                         </div>
                     </div>
@@ -992,21 +992,21 @@ function renderPaymentMethods() {
                             name="payment_method" 
                             value="efectivo"
                             data-method-id="${method.id}"
-                            class="mr-3 text-primary-300 focus:ring-primary-300 w-4 h-4"
+                            class="mr-3 text-info-300 focus:ring-info-300 w-4 h-4"
                         >
-                        <div class="flex items-center justify-center w-12 h-12 bg-primary-50 rounded-lg mr-3">
-                            <span class="text-2xl">${method.icon}</span>
+                        <div class="flex items-center justify-center w-12 h-12 bg-accent-100 rounded-lg">
+                            <span class="text-xl">${method.icon}</span>
                         </div>
                         <div class="flex-1">
-                            <h4 class="font-semibold text-black-500">${method.name}</h4>
-                            <p class="text-sm text-black-300">${method.instructions || 'Paga en efectivo al recibir tu pedido'}</p>
+                            <h4 class="text-body-regular font-semibold text-black-500">${method.name}</h4>
+                            <p class="text-small text-black-500">${method.instructions || 'Paga en efectivo al recibir tu pedido'}</p>
                         </div>
                     </label>
                     
                     <!-- Efectivo Fields -->
-                    <div id="cash-fields-${method.id}" class="hidden mt-4 pl-16">
+                    <div id="cash-fields-${method.id}" class="hidden mt-4">
                         <div class="bg-accent-100 border border-accent-200 rounded-lg p-4">
-                            <label for="cash_amount" class="block text-sm font-medium text-black-500 mb-2">
+                            <label for="cash_amount" class="block text-caption font-medium text-black-500 mb-2">
                                 ¿Con cuánto vas a pagar? *
                             </label>
                             <input 
@@ -1038,42 +1038,42 @@ function renderPaymentMethods() {
                             name="payment_method" 
                             value="transferencia"
                             data-method-id="${method.id}"
-                            class="mr-3 text-primary-300 focus:ring-primary-300 w-4 h-4"
+                            class="mr-3 text-info-300 focus:ring-info-300 w-4 h-4"
                         >
-                        <div class="flex items-center justify-center w-12 h-12 bg-primary-50 rounded-lg mr-3">
-                            <span class="text-2xl">${method.icon}</span>
+                        <div class="flex items-center justify-center w-12 h-12 bg-accent-100 rounded-lg mr-3">
+                            <span class="text-xl">${method.icon}</span>
                         </div>
                         <div class="flex-1">
-                            <h4 class="font-semibold text-black-500">${method.name}</h4>
-                            <p class="text-sm text-black-300">${method.instructions || 'Transfiere a nuestras cuentas bancarias'}</p>
+                            <h4 class="text-body-regular font-semibold text-black-500">${method.name}</h4>
+                            <p class="text-small text-black-500">${method.instructions || 'Transfiere a nuestras cuentas bancarias'}</p>
                         </div>
                     </label>
                     
                     <!-- Transferencia Fields -->
-                    <div id="transfer-fields-${method.id}" class="hidden mt-4 sm:pl-16 space-y-3">
+                    <div id="transfer-fields-${method.id}" class="hidden mt-4">
                         ${accounts.map(account => `
                             <div class="bg-gradient-to-r from-info-50 to-primary-50 border border-info-200 rounded-lg p-3 sm:p-4 shadow-sm">
-                                <h4 class="font-bold text-info-400 mb-3 flex items-center text-sm">
-                                    <span class="text-base mr-2">🏦</span>
+                                <h4 class="font-bold text-info-300 mb-3 flex items-center text-body-large">
+                                    <x-solar-card-transfer-outline class="w-5 h-5 inline-block mr-2" />
                                     ${account.bank_name}
                                 </h4>
                                 <div class="space-y-2">
                                     <!-- Tipo de Cuenta -->
                                     <div class="bg-accent-50 rounded-lg p-2 border border-accent-200">
                                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
-                                            <span class="text-xs text-black-400 font-medium">Tipo:</span>
-                                            <span class="text-xs sm:text-sm font-bold text-black-500 bg-primary-100 px-2 py-0.5 rounded-full inline-block">${account.account_type || 'Cuenta Corriente'}</span>
+                                            <span class="text-caption text-black-500 font-medium">Tipo:</span>
+                                            <span class="text-body-small sm:text-body-small font-bold text-black-500 px-2 py-0.5 rounded-full inline-block">${account.account_type || 'Cuenta Corriente'}</span>
                                         </div>
                                     </div>
                                     
                                     <!-- Número de Cuenta -->
                                     <div class="bg-accent-50 rounded-lg p-2 border border-accent-200">
                                         <div class="space-y-2">
-                                            <span class="text-xs text-black-400 font-medium block">Número de Cuenta:</span>
+                                            <span class="text-caption text-black-500 font-medium block">Número de Cuenta:</span>
                                             <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                                                <span class="text-xs sm:text-sm font-mono font-bold text-primary-300 bg-primary-100 px-2 py-1 rounded-lg tracking-wider break-all" id="account-${account.id}">${account.account_number}</span>
-                                                <button type="button" onclick="copyToClipboard('account-${account.id}')" class="text-xs bg-primary-200 hover:bg-primary-300 text-primary-400 px-2 py-1 rounded-lg font-semibold transition-colors whitespace-nowrap">
-                                                    📋 Copiar
+                                                <span class="text-body-small sm:text-body-small font-bold text-black-500 bg-accent-100 px-3 py-2 rounded-full tracking-wider break-all" id="account-${account.id}">${account.account_number}</span>
+                                                <button type="button" onclick="copyToClipboard('account-${account.id}')" class="text-body-small bg-accent-200 hover:bg-success-300 hover:text-black-500 text-black-500 px-3 py-2 rounded-full font-semibold transition-colors whitespace-nowrap">
+                                                    Copiar
                                                 </button>
                                             </div>
                                         </div>
@@ -1082,8 +1082,8 @@ function renderPaymentMethods() {
                                     <!-- Titular -->
                                     <div class="bg-accent-50 rounded-lg p-2 border border-accent-200">
                                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
-                                            <span class="text-xs text-black-400 font-medium">Titular:</span>
-                                            <span class="text-xs sm:text-sm font-bold text-black-500">${account.account_holder}</span>
+                                            <span class="text-caption text-black-500 font-medium">Titular:</span>
+                                            <span class="text-body-small sm:text-body-small font-bold text-black-500">${account.account_holder}</span>
                                         </div>
                                     </div>
                                     
@@ -1091,11 +1091,11 @@ function renderPaymentMethods() {
                                         <!-- Documento -->
                                         <div class="bg-accent-50 rounded-lg p-2 border border-accent-200">
                                             <div class="space-y-2">
-                                                <span class="text-xs text-black-400 font-medium block">Documento:</span>
+                                                <span class="text-caption text-black-500 font-medium block">Documento:</span>
                                                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                                                    <span class="text-xs sm:text-sm font-mono font-bold text-info-400 bg-info-100 px-2 py-1 rounded-lg break-all" id="document-${account.id}">${account.document_number}</span>
-                                                    <button type="button" onclick="copyToClipboard('document-${account.id}')" class="text-xs bg-info-200 hover:bg-info-300 text-info-400 px-2 py-1 rounded-lg font-semibold transition-colors whitespace-nowrap">
-                                                        📋 Copiar
+                                                    <span class="text-body-small sm:text-body-small font-bold text-black-500 bg-accent-100 px-3 py-2 rounded-full break-all" id="document-${account.id}">${account.document_number}</span>
+                                                    <button type="button" onclick="copyToClipboard('document-${account.id}')" class="text-body-small bg-accent-200 hover:bg-success-300 hover:text-black-500 text-black-500 px-3 py-2 rounded-full font-semibold transition-colors whitespace-nowrap">
+                                                        Copiar
                                                     </button>
                                                 </div>
                                             </div>
@@ -1105,8 +1105,8 @@ function renderPaymentMethods() {
                             </div>
                         `).join('')}
                         
-                        <div class="bg-accent-100 border border-accent-200 rounded-lg p-3">
-                            <label for="payment_proof" class="block text-sm font-medium text-black-500 mb-2">
+                        <div class="bg-accent-100 border border-accent-200 rounded-lg p-3 mt-2">
+                            <label for="payment_proof" class="block text-caption font-medium text-black-500 mb-2">
                                 Comprobante ${method.require_proof ? '*' : '(Opcional)'}
                             </label>
                             <input 

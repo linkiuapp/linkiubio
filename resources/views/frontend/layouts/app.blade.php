@@ -26,7 +26,7 @@
                         <img src="{{ $store->design->logo_url }}" 
                              alt="Logo" 
                              class="w-18 h-18 rounded-full object-cover"
-                             style="width: 150px; height: 150px;">
+                             style="width: 100px; height: 100px;">
                     @endif
                 </div>
             </div>
@@ -47,12 +47,12 @@
             </div>
 
             <!-- Nombre de la tienda -->
-            <h1 class="text-h5 font-bold mb-2" style="color: {{ $store->design ? $store->design->header_text_color : '#ffffff' }}">
+            <h1 class="text-h6 font-bold text-center capitalize" style="color: {{ $store->design ? $store->design->header_text_color : '#ffffff' }}">
                 {{ $store->name ?? 'Linkiu Rest' }}
             </h1>
 
             <!-- Descripción -->
-            <p class="text-body-regular font-medium" style="color: {{ $store->design ? $store->design->header_description_color : '#e9d5ff' }}">
+            <p class="text-body-regular font-regular" style="color: {{ $store->design ? $store->design->header_description_color : '#e9d5ff' }}">
                 {{ $store->description ?? 'Comidas Rápidas en Sincelejo' }}
             </p>
         </div>
@@ -66,34 +66,35 @@
             <a href="{{ route('tenant.contact', $store->slug) }}" 
                class="flex flex-col items-center py-3 px-4 {{ request()->routeIs('tenant.contact') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
                 <x-lucide-store class="w-6 h-6 mb-1" />
-                <span class="text-small font-regular">Sedes</span>
+                <span class="text-caption font-regular">Sedes</span>
             </a>
 
             <!-- Catálogo -->
             <a href="{{ route('tenant.catalog', $store->slug) }}" 
                class="flex flex-col items-center py-3 px-4 {{ request()->routeIs('tenant.catalog') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
                 <x-lucide-shopping-basket class="w-6 h-6 mb-1" />
-                <span class="text-small font-regular">Catálogo</span>
+                <span class="text-caption font-regular">Catálogo</span>
             </a>
 
             <!-- Inicio -->
             <a href="{{ route('tenant.home', $store->slug) }}" 
-               class="flex flex-col items-center py-3 px-4 {{ request()->routeIs('tenant.home') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
+               class="flex flex-col items-center py-3 px-5 {{ request()->routeIs('tenant.home') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
                 <x-lucide-home class="w-6 h-6 mb-1" />
-                <span class="text-small font-regular">Inicio</span>
+                <span class="text-caption font-regular">Inicio</span>
             </a>
 
             <!-- Promos -->
             <a href="{{ route('tenant.promotions', $store->slug) }}" 
                class="flex flex-col items-center py-3 px-4 {{ request()->routeIs('tenant.promotions') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
                 <x-lucide-badge-percent class="w-6 h-6 mb-1" />
-                <span class="text-small font-regular">Promos</span>
+                <span class="text-caption font-regular">Promos</span>
             </a>
 
             <!-- Favoritos -->
             <a href="#" class="flex flex-col items-center py-3 px-4 {{ request()->routeIs('tenant.favorites') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
-                <x-lucide-heart class="w-6 h-6 mb-1" />
-                <span class="text-small font-regular">Favoritos</span>
+                <x-lucide-calendar-days class="w-6 h-6 mb-1" />
+                <span class="text-caption font-regular">Reservas</span>
+                <small class="text-small font-regular">(Próximamente)</small>
             </a>
         </div>
     </nav>

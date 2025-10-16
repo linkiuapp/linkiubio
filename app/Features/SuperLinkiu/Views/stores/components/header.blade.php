@@ -2,8 +2,8 @@
 {{-- HEADER - Título y acciones principales --}}
 {{-- ================================================================ --}}
 
-<div class="flex justify-between items-center mb-6">
-    <h1 class="text-lg font-bold text-black-400">Gestión de Tiendas</h1>
+<div class="flex justify-between items-center mb-6 px-4">
+    <h1 class="text-body-large font-bold text-black-400">Gestión de Tiendas</h1>
     
     <div class="flex gap-3">
         <button @click="exportData('excel')" 

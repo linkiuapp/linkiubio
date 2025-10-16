@@ -7,10 +7,10 @@
     {{-- Header --}}
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900">Categorías de Negocio</h1>
-            <p class="text-sm text-gray-600 mt-1">Gestiona las categorías de negocio y configura la aprobación automática</p>
+            <h1 class="text-body-large font-bold text-black-500">Categorías de Negocio</h1>
+            <p class="text-body-regular text-black-300 mt-1">Gestiona las categorías de negocio y configura la aprobación automática</p>
         </div>
-        <button @click="openCreateModal()" class="btn-primary">
+        <button @click="openCreateModal()" class="btn-primary flex items-center gap-2">
             <x-solar-add-circle-outline class="w-5 h-5 mr-2" />
             Nueva Categoría
         </button>
@@ -76,12 +76,13 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <form action="{{ route('superlinkiu.business-categories.toggle-status', $category) }}" method="POST">
-                                    @csrf
-                                    <button type="submit" class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {{ $category->is_active ? 'bg-success-300' : 'bg-gray-300' }}">
-                                        <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {{ $category->is_active ? 'translate-x-6' : 'translate-x-1' }}"></span>
-                                    </button>
-                                </form>
+                                <button type="button" 
+                                        @click="toggleStatus({{ $category->id }}, {{ $category->is_active ? 'true' : 'false' }})"
+                                        class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {{ $category->is_active ? 'bg-success-300' : 'bg-gray-300' }}"
+                                        :class="{'bg-success-300': categoryStates[{{ $category->id }}], 'bg-gray-300': !categoryStates[{{ $category->id }}]}">
+                                    <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {{ $category->is_active ? 'translate-x-6' : 'translate-x-1' }}"
+                                          :class="{'translate-x-6': categoryStates[{{ $category->id }}], 'translate-x-1': !categoryStates[{{ $category->id }}]}"></span>
+                                </button>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                                 {{ $category->stores_count ?? 0 }}
@@ -223,6 +224,7 @@ document.addEventListener('alpine:init', () => {
         showModal: false,
         isEditing: false,
         editingId: null,
+        categoryStates: @json($categories->pluck('is_active', 'id')->toArray()),
         form: {
             name: '',
             icon: '',
@@ -259,6 +261,36 @@ document.addEventListener('alpine:init', () => {
 
         closeModal() {
             this.showModal = false;
+        },
+
+        async toggleStatus(categoryId, currentStatus) {
+            try {
+                const response = await fetch(`/superlinkiu/business-categories/${categoryId}/toggle-status`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    this.categoryStates[categoryId] = data.is_active;
+                    
+                    // Mostrar notificación de éxito
+                    this.$dispatch('notify', {
+                        type: 'success',
+                        message: data.message
+                    });
+                } else {
+                    throw new Error(data.message || 'Error al cambiar el estado');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al cambiar el estado de la categoría: ' + error.message);
+            }
         }
     }));
 });

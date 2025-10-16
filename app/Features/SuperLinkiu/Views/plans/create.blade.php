@@ -7,7 +7,7 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h1 class="text-3xl text-black-500 mb-0">Crear Nuevo Plan</h1>
+            <h1 class="text-body-large font-bold text-black-500 mb-0">Crear Nuevo Plan</h1>
             <p class="text-black-300 mt-1">Configura un nuevo plan de suscripción</p>
         </div>
         <a href="{{ route('superlinkiu.plans.index') }}" class="bg-accent-100 hover:bg-accent-200 text-black-400 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
@@ -19,7 +19,7 @@
     <!-- Formulario -->
     <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
         <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-            <h2 class="text-3xl text-black-500 mb-0">Información del Plan</h2>
+            <h2 class="text-body-large font-bold text-black-500 mb-0">Información del Plan</h2>
         </div>
         
         <form action="{{ route('superlinkiu.plans.store') }}" method="POST" class="p-6" x-data="createPlan">

@@ -35,7 +35,7 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h1 class="text-lg font-bold text-black-400">Crear Nueva Tienda</h1>
+            <h1 class="text-body-large font-bold text-black-400">Crear Nueva Tienda</h1>
             <p class="text-sm text-black-300 mt-1">Completa el formulario para crear una nueva tienda</p>
         </div>
         <div class="flex items-center gap-3">
@@ -47,7 +47,7 @@
                         Crear y aprobar directamente
                     </span>
                 </label>
-                <div x-show="forceApproval" class="ml-2 px-2 py-1 bg-green-100 text-green-800 text-xs font-bold rounded">
+                <div x-show="forceApproval" class="ml-2 px-2 py-1 bg-success-300 text-black-400 text-xs font-bold rounded">
                     ✓ APROBACIÓN DIRECTA
                 </div>
             </div>
@@ -59,35 +59,35 @@
     </div>
     
     <!-- Info sobre modo de creación -->
-    <div x-show="forceApproval" class="bg-green-50 border border-green-200 rounded-lg p-4 mb-6" x-transition>
+    <div x-show="forceApproval" class="bg-success-50 border border-success-200 rounded-lg p-4 mb-6" x-transition>
         <div class="flex items-start gap-3">
-            <x-solar-shield-check-outline class="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+            <x-solar-shield-check-outline class="w-5 h-5 text-success-300 flex-shrink-0 mt-0.5" />
             <div class="text-sm">
-                <p class="font-semibold text-green-800 mb-1">Modo: Aprobación Directa</p>
+                <p class="font-semibold text-success-300 mb-1">Modo: Aprobación Directa</p>
                 <p class="text-green-700">La tienda será creada y <strong>aprobada automáticamente</strong>, sin importar la categoría o validación del documento. El admin recibirá sus credenciales inmediatamente.</p>
             </div>
         </div>
     </div>
     
-    <div x-show="!forceApproval" class="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6" x-transition>
+    <div x-show="!forceApproval" class="bg-info-50 border border-info-200 rounded-lg p-4 mb-6" x-transition>
         <div class="flex items-start gap-3">
-            <x-solar-document-add-outline class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" />
+            <x-solar-document-add-outline class="w-5 h-5 text-info-300 flex-shrink-0 mt-0.5" />
             <div class="text-sm">
-                <p class="font-semibold text-blue-800 mb-1">Modo: Aprobación Condicional</p>
-                <p class="text-blue-700">La tienda seguirá el flujo normal: <strong>auto-aprobación</strong> si el documento es válido y la categoría lo permite, o <strong>revisión manual</strong> si no cumple los requisitos.</p>
+                <p class="font-semibold text-info-300 mb-1">Modo: Aprobación Condicional</p>
+                <p class="text-info-300">La tienda seguirá el flujo normal: <strong>auto-aprobación</strong> si el documento es válido y la categoría lo permite, o <strong>revisión manual</strong> si no cumple los requisitos.</p>
             </div>
         </div>
     </div>
 
     <!-- Progress Bar -->
-    <div class="bg-accent rounded-lg shadow-sm p-6 mb-6">
-        <div class="flex items-center justify-between mb-4">
+    <div class="bg-accent-50 rounded-lg shadow-sm p-6">
+        <div class="flex items-center justify-between">
             <div class="flex items-center space-x-4">
                 <template x-for="(step, index) in steps" :key="step.id">
                     <div class="flex items-center">
                         <div class="flex items-center justify-center w-8 h-8 rounded-full text-sm font-medium"
-                             :class="index < currentStep ? 'bg-green-500 text-accent' : 
-                                     index === currentStep ? 'bg-blue-500 text-accent' : 
+                             :class="index < currentStep ? 'bg-success-300 text-accent-50' : 
+                                     index === currentStep ? 'bg-info-300 text-accent-50' : 
                                      'bg-gray-200 text-gray-600'">
                             <span x-text="index + 1"></span>
                         </div>
@@ -139,29 +139,32 @@
         <!-- Step 1: Plan Selection -->
         <div x-show="currentStep === 0" class="p-6">
             <div class="mb-6">
-                <h2 class="text-xl font-semibold text-gray-900 mb-2">Seleccionar Plan y Período</h2>
+                <h2 class="text-body-large font-bold text-black-400 mb-2">Seleccionar Plan y Período</h2>
                 <p class="text-gray-600">Elige el plan que mejor se adapte a las necesidades de la tienda</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
                 @foreach($plans as $plan)
-                <div class="border rounded-lg p-6 cursor-pointer transition-all hover:shadow-md"
-                     :class="formData.plan_id == '{{ $plan->id }}' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'"
+                <div class="border rounded-lg p-6 cursor-pointer transition-all hover:shadow-md bg-accent-50"
+                     :class="formData.plan_id == '{{ $plan->id }}' ? 'border-info-300 bg-info-50' : 'border-accent-100'"
                      @click="formData.plan_id = '{{ $plan->id }}'">
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-semibold">{{ $plan->name }}</h3>
-                        <input type="radio" name="plan_id" value="{{ $plan->id }}" x-model="formData.plan_id" class="text-blue-600">
+                        <h3 class="text-body-large font-bold text-black-400">{{ $plan->name }}</h3>
+                        <input type="radio" name="plan_id" value="{{ $plan->id }}" x-model="formData.plan_id" class="text-info-300">
                     </div>
-                    <div class="text-2xl font-bold text-blue-600 mb-2">{{ $plan->getPriceFormatted() }}</div>
-                    <p class="text-gray-600 text-sm mb-4">{{ $plan->description ?? 'Plan ' . $plan->name }}</p>
-                    <ul class="text-sm text-gray-600 space-y-1">
-                        <li>✓ Tienda personalizada</li>
-                        <li>✓ Soporte técnico</li>
-                        <li>✓ SSL incluido</li>
-                        @if($plan->name !== 'Básico')
-                        <li>✓ Funciones avanzadas</li>
-                        @endif
-                    </ul>
+                    <div class="text-h6 font-bold text-info-300 mb-2">{{ $plan->getPriceFormatted() }}</div>
+                    @if($plan->features_list && is_array($plan->features_list) && count($plan->features_list) > 0)
+                        <ul class="text-black-300 text-sm mb-4 space-y-1 list-disc list-inside">
+                            @foreach($plan->features_list as $feature)
+                                <li class="flex items-start">
+                                    <x-solar-check-circle-outline class="w-4 h-4 text-success-300 mr-2 mt-0.5 flex-shrink-0" />
+                                    <span>{{ $feature }}</span>
+                                </li>
+                            @endforeach
+                        </ul>
+                    @else
+                        <p class="text-black-300 text-sm mb-4">{{ $plan->description ?? 'Sin características definidas' }}</p>
+                    @endif
                 </div>
                 @endforeach
             </div>
@@ -169,37 +172,37 @@
             <div class="mb-6">
                 <label class="block text-sm font-medium text-gray-700 mb-2">Período de Facturación</label>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                    <div class="border rounded-lg p-4 cursor-pointer transition-all hover:shadow-md"
-                         :class="formData.billing_period === 'monthly' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'"
+                    <div class="border rounded-lg p-4 cursor-pointer transition-all hover:shadow-md bg-accent-50"
+                         :class="formData.billing_period === 'monthly' ? 'border-info-300 bg-info-50' : 'border-gray-200'"
                          @click="formData.billing_period = 'monthly'">
                         <input type="radio" name="billing_period" value="monthly" x-model="formData.billing_period" class="mb-2">
                         <div class="font-semibold">Mensual</div>
                         <div class="text-sm text-gray-600">Facturación cada mes</div>
                     </div>
-                    <div class="border rounded-lg p-4 cursor-pointer transition-all hover:shadow-md"
-                         :class="formData.billing_period === 'quarterly' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'"
+                    <div class="border rounded-lg p-4 cursor-pointer transition-all hover:shadow-md bg-accent-50"
+                         :class="formData.billing_period === 'quarterly' ? 'border-info-300 bg-info-50' : 'border-gray-200'"
                          @click="formData.billing_period = 'quarterly'">
                         <input type="radio" name="billing_period" value="quarterly" x-model="formData.billing_period" class="mb-2">
                         <div class="font-semibold">Trimestral</div>
                         <div class="text-sm text-gray-600">Facturación cada 3 meses</div>
                         <div class="text-xs text-green-600 font-medium">5% descuento</div>
                     </div>
-                    <div class="border rounded-lg p-4 cursor-pointer transition-all hover:shadow-md"
-                         :class="formData.billing_period === 'yearly' ? 'border-blue-500 bg-blue-50' : 'border-gray-200'"
-                         @click="formData.billing_period = 'yearly'">
-                        <input type="radio" name="billing_period" value="yearly" x-model="formData.billing_period" class="mb-2">
-                        <div class="font-semibold">Anual</div>
-                        <div class="text-sm text-gray-600">Facturación cada año</div>
-                        <div class="text-xs text-green-600 font-medium">15% descuento</div>
+                    <div class="border rounded-lg p-4 cursor-pointer transition-all hover:shadow-md bg-accent-50"
+                         :class="formData.billing_period === 'biannual' ? 'border-info-300 bg-info-50' : 'border-gray-200'"
+                         @click="formData.billing_period = 'biannual'">
+                        <input type="radio" name="billing_period" value="biannual" x-model="formData.billing_period" class="mb-2">
+                        <div class="font-semibold">Semestral</div>
+                        <div class="text-sm text-gray-600">Facturación cada 6 meses</div>
+                        <div class="text-xs text-green-600 font-medium">10% descuento</div>
                     </div>
                 </div>
             </div>
         </div>
 
         <!-- Step 2: Business Information (NEW) -->
-        <div x-show="currentStep === 1" class="p-6">
+        <div x-show="currentStep === 1" class="p-6 bg-accent-50 rounded-lg shadow-sm">
             <div class="mb-6">
-                <h2 class="text-xl font-semibold text-gray-900 mb-2">Información del Negocio</h2>
+                <h2 class="text-body-large font-bold text-black-400 mb-2">Información del Negocio</h2>
                 <p class="text-gray-600">Selecciona el tipo de negocio y proporciona el documento de identidad fiscal</p>
             </div>
 
@@ -207,7 +210,7 @@
                 <!-- Business Category -->
                 <div class="md:col-span-2">
                     <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Categoría del Negocio <span class="text-red-500">*</span>
+                        Categoría del Negocio <span class="text-error-300">*</span>
                     </label>
                     <select name="business_category_id" x-model="formData.business_category_id"
                             class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
@@ -277,13 +280,31 @@
                            x-text="documentValidationMessage"></p>
                     </div>
                 </div>
+                <div class="md:col-span-1">
+                    <label class="block text-sm font-medium text-black-300 mb-2">
+                        Dirección Fiscal
+                    </label>
+                    <input type="text" name="fiscal_address" x-model="formData.fiscal_address" rows="3"
+                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></input>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-black-300 mb-2">
+                        Régimen Tributario
+                    </label>
+                    <select name="tax_regime" x-model="formData.tax_regime"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="">Seleccionar régimen</option>
+                        <option value="simplificado">Régimen Simplificado</option>
+                        <option value="comun">Régimen Común</option>
+                        <option value="gran_contribuyente">Gran Contribuyente</option>
+                    </select>
+                </div>
 
                 <!-- Info box -->
                 <div class="md:col-span-2 bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <div class="flex items-start gap-3">
-                        <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
-                        </svg>
+                        <x-solar-info-circle-outline class="w-5 h-5 text-info-300 flex-shrink-0 mt-0.5" />
                         <div class="text-sm text-blue-800">
                             <p class="font-semibold mb-1">¿Por qué pedimos esta información?</p>
                             <ul class="list-disc list-inside space-y-1 text-xs">
@@ -299,27 +320,27 @@
         </div>
 
         <!-- Step 3: Store Configuration -->
-        <div x-show="currentStep === 2" class="p-6">
+        <div x-show="currentStep === 2" class="p-6 bg-accent-50 rounded-lg shadow-sm">
             <div class="mb-6">
-                <h2 class="text-xl font-semibold text-gray-900 mb-2">Configuración de la Tienda</h2>
-                <p class="text-gray-600">Nombre, URL y configuración básica de la tienda</p>
+                <h2 class="text-body-large font-bold text-black-400 mb-2">Configuración de la Tienda</h2>
+                <p class="text-body-smalltext-gray-600">Nombre, URL y configuración básica de la tienda</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Nombre de la Tienda <span class="text-red-500">*</span>
+                    <label class="block text-sm font-medium text-black-300 mb-2">
+                        Nombre de la Tienda <span class="text-error-300">*</span>
                     </label>
                     <input type="text" name="name" x-model="formData.name"
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required>
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        URL de la Tienda (Slug) <span class="text-red-500">*</span>
+                    <label class="block text-sm font-medium text-black-300 mb-2">
+                        URL de la Tienda (Slug) <span class="text-error-300">*</span>
                     </label>
                     <div class="flex items-center">
-                        <span class="text-sm text-gray-500 mr-2">linkiu.bio/</span>
+                        <span class="text-sm text-black-300 mr-2">linkiu.bio/</span>
                         <input type="text" name="slug" x-model="formData.slug"
                                :readonly="!canEditSlug"
                                @input="userHasEditedSlug = true"
@@ -359,15 +380,15 @@
         </div>
 
         <!-- Step 4: Owner Information -->
-        <div x-show="currentStep === 3" class="p-6">
+        <div x-show="currentStep === 3" class="p-6 bg-accent-50 rounded-lg shadow-sm">
             <div class="mb-6">
-                <h2 class="text-xl font-semibold text-gray-900 mb-2">Información del Propietario</h2>
+                <h2 class="text-body-large font-bold text-black-400 mb-2">Información del Propietario</h2>
                 <p class="text-gray-600">Datos del administrador que gestionará la tienda</p>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <label class="block text-sm font-medium text-black-300 mb-2">
                         Nombre del Representante <span class="text-red-500">*</span>
                     </label>
                     <input type="text" name="owner_name" x-model="formData.owner_name" 
@@ -375,7 +396,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <label class="block text-sm font-medium text-black-300 mb-2">
                         Correo del Administrador <span class="text-red-500">*</span>
                     </label>
                     <input type="email" name="admin_email" x-model="formData.admin_email"
@@ -383,7 +404,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <label class="block text-sm font-medium text-black-300 mb-2">
                         Tipo de Documento <span class="text-red-500">*</span>
                     </label>
                     <select name="owner_document_type" x-model="formData.owner_document_type"
@@ -396,7 +417,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <label class="block text-sm font-medium text-black-300 mb-2">
                         Número de Documento <span class="text-red-500">*</span>
                     </label>
                     <input type="text" name="owner_document_number" x-model="formData.owner_document_number"
@@ -404,7 +425,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <label class="block text-sm font-medium text-black-300 mb-2">
                         País <span class="text-red-500">*</span>
                     </label>
                     <input type="text" name="owner_country" x-model="formData.owner_country" value="Colombia"
@@ -412,7 +433,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <label class="block text-sm font-medium text-black-300 mb-2">
                         Departamento <span class="text-red-500">*</span>
                     </label>
                     <input type="text" name="owner_department" x-model="formData.owner_department"
@@ -420,7 +441,7 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <label class="block text-sm font-medium text-black-300 mb-2">
                         Ciudad <span class="text-red-500">*</span>
                     </label>
                     <input type="text" name="owner_city" x-model="formData.owner_city"
@@ -428,64 +449,12 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                    <label class="block text-sm font-medium text-black-300 mb-2">
                         Contraseña del Administrador <span class="text-red-500">*</span>
                     </label>
                     <input type="password" name="admin_password" x-model="formData.admin_password"
                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500" required minlength="8">
                     <p class="text-xs text-gray-500 mt-1">Mínimo 8 caracteres</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Step 5: Fiscal Information (Optional) -->
-        <div x-show="currentStep === 4" class="p-6">
-            <div class="mb-6">
-                <h2 class="text-xl font-semibold text-gray-900 mb-2">Información Fiscal</h2>
-                <p class="text-gray-600">Datos fiscales y de ubicación (opcional)</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Tipo de Documento Fiscal
-                    </label>
-                    <select name="fiscal_document_type" x-model="formData.fiscal_document_type"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">Seleccionar tipo</option>
-                        <option value="nit">NIT</option>
-                        <option value="rut">RUT</option>
-                        <option value="cedula">Cédula</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Número de Documento Fiscal
-                    </label>
-                    <input type="text" name="fiscal_document_number" x-model="formData.fiscal_document_number"
-                           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                </div>
-
-                <div class="md:col-span-2">
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Dirección Fiscal
-                    </label>
-                    <textarea name="fiscal_address" x-model="formData.fiscal_address" rows="3"
-                              class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">
-                        Régimen Tributario
-                    </label>
-                    <select name="tax_regime" x-model="formData.tax_regime"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                        <option value="">Seleccionar régimen</option>
-                        <option value="simplificado">Régimen Simplificado</option>
-                        <option value="comun">Régimen Común</option>
-                        <option value="gran_contribuyente">Gran Contribuyente</option>
-                    </select>
                 </div>
             </div>
         </div>
@@ -526,7 +495,6 @@ function storeWizard() {
             { id: 'business-info', title: 'Información del Negocio' },
             { id: 'store-config', title: 'Configuración de Tienda' },
             { id: 'owner-info', title: 'Información del Propietario' },
-            { id: 'fiscal-info', title: 'Información Fiscal' }
         ],
         plans: @json($plans),
         categories: @json($categories),
@@ -700,7 +668,7 @@ function storeWizard() {
             // Validación básica según tipo
             if (docType === 'NIT') {
                 // Formato: 9 dígitos + guion + 1 dígito (Ej: 900123456-7)
-                const nitPattern = /^\d{9}-\d$/;
+                const nitPattern = /^\d{8,12}-\d$/;
                 if (nitPattern.test(docNumber)) {
                     this.documentValidationMessage = '✓ Formato de NIT válido';
                     this.documentValidationSuccess = true;
@@ -730,7 +698,7 @@ function storeWizard() {
                 }
             } else if (docType === 'RUT') {
                 // RUT: 9 dígitos + guion + 1 dígito
-                const rutPattern = /^\d{9}-\d$/;
+                const rutPattern = /^\d{8,12}-\d$/;
                 if (rutPattern.test(docNumber)) {
                     this.documentValidationMessage = '✓ Formato de RUT válido';
                     this.documentValidationSuccess = true;

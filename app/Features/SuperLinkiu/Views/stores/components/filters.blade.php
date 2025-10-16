@@ -4,7 +4,7 @@
 
 <div class="bg-accent-50 rounded-lg p-0 overflow-hidden mb-6">
     <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-        <h2 class="text-3xl text-black-500 mb-0">Filtros de Búsqueda</h2>
+        <h2 class="text-body-regular text-black-500 mb-0 font-bold">Filtros de Búsqueda</h2>
     </div>
     
     <div class="p-6">

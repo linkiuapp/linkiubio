@@ -7,7 +7,7 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h1 class="text-3xl text-black-500 mb-0">Editar Plan: {{ $plan->name }}</h1>
+            <h1 class="text-body-large font-bold text-black-500 mb-0">Editar Plan: {{ $plan->name }}</h1>
             <p class="text-black-300 mt-1">Modifica la configuración del plan</p>
         </div>
         <div class="flex gap-2">
@@ -25,10 +25,10 @@
     <!-- Formulario -->
     <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
         <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-            <h2 class="text-3xl text-black-500 mb-0">Información del Plan</h2>
+            <h2 class="text-body-large font-bold text-black-500 mb-0">Información del Plan</h2>
         </div>
         
-        <form action="{{ route('superlinkiu.plans.update', $plan) }}" method="POST" class="p-6" x-data="editPlan">
+        <form action="{{ route('superlinkiu.plans.update', $plan) }}" method="POST" class="p-6">
             @csrf
             @method('PUT')
             
@@ -81,7 +81,7 @@
 
             <!-- Precios por Período -->
             <div class="mb-8">
-                <h3 class="text-lg font-semibold text-black-400 mb-4">Precios por Período</h3>
+                <h3 class="text-body-large font-bold text-black-400 mb-4">Precios por Período</h3>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-black-400 mb-2">
@@ -124,7 +124,7 @@
 
             <!-- Límites del Plan -->
             <div class="mb-8">
-                <h3 class="text-lg font-semibold text-black-400 mb-4">Límites del Plan</h3>
+                <h3 class="text-body-large font-bold text-black-400 mb-4">Límites del Plan</h3>
                 <!-- 📦 PRODUCTOS -->
                 <div class="mb-6">
                     <h4 class="text-base font-medium text-black-400 mb-3 flex items-center gap-2">
@@ -313,7 +313,7 @@
 
             <!-- Soporte -->
             <div class="mb-8">
-                <h3 class="text-lg font-semibold text-black-400 mb-4">Configuración de Soporte</h3>
+                <h3 class="text-body-large font-bold text-black-400 mb-4">Configuración de Soporte</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-black-400 mb-2">
@@ -347,17 +347,19 @@
 
             <!-- Características del Plan -->
             <div class="mb-8">
-                <h3 class="text-lg font-semibold text-black-400 mb-4">Características del Plan</h3>
+                <h3 class="text-body-large font-bold text-black-400 mb-4">Características del Plan</h3>
                 @php
-                    $existingFeatures = $plan->features_list;
-                    if (is_string($existingFeatures)) {
-                        $existingFeatures = json_decode($existingFeatures, true) ?: [];
-                    }
-                    $existingFeatures = is_array($existingFeatures) ? $existingFeatures : [];
-                    $features = old('features_list', $existingFeatures);
+                    // El accessor del modelo ya convierte a array, simplificamos
+                    $features = old('features_list', $plan->features_list ?? []);
+                    // Filtrar valores vacíos o null
+                    $features = array_filter($features, function($item) {
+                        return !empty($item);
+                    });
+                    // Reindexar el array
+                    $features = array_values($features);
                 @endphp
-                <div x-data="{ features: @json($features) }">
-                    <div class="space-y-2 mb-4">
+                <div x-data="{ features: {{ json_encode($features) }} }">
+                    <div class="space-y-2 mb-4" x-show="features.length > 0">
                         <template x-for="(feature, index) in features" :key="index">
                             <div class="flex items-center gap-2">
                                 <input type="text" 
@@ -373,6 +375,9 @@
                             </div>
                         </template>
                     </div>
+                    <div x-show="features.length === 0" class="p-4 bg-accent-100 border border-accent-200 rounded-lg text-center text-black-300 mb-4">
+                        No hay características agregadas. Haz clic en el botón para agregar la primera.
+                    </div>
                     <button type="button" 
                             @click="features.push('')"
                             class="bg-primary-50 hover:bg-primary-100 text-primary-300 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
@@ -384,7 +389,7 @@
 
             <!-- Configuración Adicional -->
             <div class="mb-8">
-                <h3 class="text-lg font-semibold text-black-400 mb-4">Configuración Adicional</h3>
+                <h3 class="text-body-large font-bold text-black-400 mb-4">Configuración Adicional</h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <label class="block text-sm font-medium text-black-400 mb-2">
@@ -437,7 +442,7 @@
 
             <!-- Opciones -->
             <div class="mb-8">
-                <h3 class="text-lg font-semibold text-black-400 mb-4">Opciones del Plan</h3>
+                <h3 class="text-body-large font-bold text-black-400 mb-4">Opciones del Plan</h3>
                 <div class="space-y-4">
                     <label class="flex items-center">
                         <input type="checkbox" 

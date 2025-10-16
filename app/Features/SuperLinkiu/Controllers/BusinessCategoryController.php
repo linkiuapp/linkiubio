@@ -109,7 +109,7 @@ class BusinessCategoryController extends Controller
             'success' => true,
             'is_active' => $businessCategory->is_active,
             'message' => $businessCategory->is_active ? 'Categoría activada' : 'Categoría desactivada'
-        ]);
+        ], 200, [], JSON_UNESCAPED_UNICODE);
     }
 
     /**

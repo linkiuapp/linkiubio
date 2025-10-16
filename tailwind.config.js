@@ -8,6 +8,7 @@ module.exports = {
     // Feature-based Architecture - Incluir archivos Blade en Features y Shared
     './app/Features/**/*.blade.php',
     './app/Shared/**/*.blade.php',
+    
   ],
   theme: {
     extend: {
