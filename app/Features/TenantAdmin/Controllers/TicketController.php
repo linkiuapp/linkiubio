@@ -253,11 +253,23 @@ class TicketController extends Controller
                 throw new \Exception('Error guardando archivo');
             }
             
+            \Log::info('📁 File saved successfully:', [
+                'temp_path' => $tempPath,
+                'final_path' => $finalPath,
+                'file_exists' => file_exists($finalPath)
+            ]);
+            
             // Limpiar archivo temporal
             unlink($tempPath);
             
             // $path ya incluye 'tickets/' al inicio, no duplicar
             $filePath = $path . '/' . $filename;
+            
+            \Log::info('💾 Path stored in DB:', [
+                'file_path' => $filePath,
+                'path_variable' => $path,
+                'filename' => $filename
+            ]);
 
             // Obtener MIME type de forma segura (sin finfo)
             $extension = strtolower($file->getClientOriginalExtension());
