@@ -331,11 +331,12 @@
         const productPrice = "${{ number_format($product->price, 0, ',', '.') }}";
         const productUrl = "{{ url()->current() }}";
         const storeName = "{{ $store->name }}";
-        
+        const productDescription = "{{ $product->description }}";
         // Usar códigos Unicode para emojis que funcionan bien en WhatsApp
         const message = `¡Hey! Te comparto este pedido que estoy pensando hacer:\n\n` +
                 `🍴 ${productName}\n` +
-                `💰 ${productPrice}\n\n` +
+                `💰 ${productPrice}\n` +
+                `🗨️ ${productDescription}\n\n` +
                 `👉 Ver producto: ${productUrl}\n` +
                 `Lo encontré en ${storeName}, ¿qué opinas?`;
 
