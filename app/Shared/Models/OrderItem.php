@@ -195,15 +195,24 @@ class OrderItem extends Model
         $priceModifier = 0;
 
         if ($variantDetails) {
-            // Si hay variantes seleccionadas, buscar modificadores de precio
-            foreach ($variantDetails as $key => $value) {
-                // Buscar en las variantes del producto si hay modificadores
-                $variant = $product->variants()
-                    ->where('variant_options', 'like', "%\"$key\":\"%$value%")
-                    ->first();
-                
-                if ($variant) {
-                    $priceModifier += $variant->price_modifier;
+            // Nueva estructura de variables: array de arrays con option_id, option_name, price_modifier
+            foreach ($variantDetails as $variableId => $options) {
+                if (is_array($options)) {
+                    foreach ($options as $option) {
+                        // Sumar el modificador de precio de cada opción seleccionada
+                        if (isset($option['price_modifier'])) {
+                            $priceModifier += floatval($option['price_modifier']);
+                        }
+                    }
+                } else {
+                    // Formato antiguo: buscar en las variantes del producto
+                    $variant = $product->variants()
+                        ->where('variant_options', 'like', "%\"$variableId\":\"%$options%")
+                        ->first();
+                    
+                    if ($variant) {
+                        $priceModifier += $variant->price_modifier;
+                    }
                 }
             }
             
