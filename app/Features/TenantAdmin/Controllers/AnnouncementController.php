@@ -214,7 +214,7 @@ class AnnouncementController extends Controller
     /**
      * Get recent announcements for notifications.
      */
-    public function getRecentAnnouncements(Request $request): JsonResponse
+public function getRecentAnnouncements(Request $request): JsonResponse
     {
         $store = $request->route('store');
         $storePlan = strtolower($store->plan->name ?? $store->plan->slug ?? 'explorer');
@@ -247,4 +247,46 @@ class AnnouncementController extends Controller
 
         return response()->json($announcements);
     }
-} 
+
+    /**
+     * Get popup announcements (critical with show_popup=true)
+     */
+    public function getPopups(Request $request): JsonResponse
+    {
+        $store = $request->route('store');
+        $storePlan = strtolower($store->plan->name ?? $store->plan->slug ?? 'explorer');
+        
+        // Solo anuncios críticos con popup activo y no leídos
+        $popups = PlatformAnnouncement::active()
+            ->forPlan($storePlan)
+            ->forStore($store->id)
+            ->popups() // show_popup = true
+            ->byType('critical') // Solo críticos
+            ->whereDoesntHave('reads', function ($q) use ($store) {
+                $q->where('store_id', $store->id);
+            })
+            ->ordered()
+            ->get()
+            ->map(function ($announcement) use ($store) {
+                return [
+                    'id' => $announcement->id,
+                    'title' => $announcement->title,
+                    'content' => $announcement->content,
+                    'type' => $announcement->type,
+                    'type_icon' => $announcement->type_icon,
+                    'type_color' => $announcement->type_color,
+                    'priority' => $announcement->priority,
+                    'banner_image_url' => $announcement->banner_image_url,
+                    'banner_link' => $announcement->banner_link,
+                    'published_at' => $announcement->published_at ? 
+                        $announcement->published_at->format('d/m/Y H:i') : 'Inmediato',
+                    'show_url' => route('tenant.admin.announcements.show', [
+                        'store' => $store->slug,
+                        'announcement' => $announcement->id
+                    ])
+                ];
+            });
+
+        return response()->json($popups);
+    }
+}

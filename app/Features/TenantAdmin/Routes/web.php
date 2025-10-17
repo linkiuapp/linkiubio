@@ -234,6 +234,7 @@ Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreAppro
         
         // API Routes for AJAX
         Route::get('/api/banners', [AnnouncementController::class, 'getBanners'])->name('api.banners');
+        Route::get('/api/popups', [AnnouncementController::class, 'getPopups'])->name('api.popups');
         Route::get('/api/notification-count', [AnnouncementController::class, 'getNotificationCount'])->name('api.notification-count');
         Route::get('/api/recent', [AnnouncementController::class, 'getRecentAnnouncements'])->name('api.recent');
     });

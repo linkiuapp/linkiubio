@@ -73,6 +73,7 @@ class NewAnnouncement implements ShouldBroadcast
             'type_label' => $typeLabels[$this->announcement->type] ?? 'Anuncio',
             'priority' => $this->announcement->priority,
             'is_urgent' => $isUrgent,
+            'show_popup' => $this->announcement->show_popup, // ✅ Agregar campo popup
             'created_at' => $this->announcement->created_at->format('d/m/Y H:i')
         ];
     }

@@ -212,8 +212,9 @@ function setupAnnouncementsListener() {
     try {
         window.Echo.channel('platform.announcements')
             .listen('new.announcement', (data) => {
-                console.log('📢 Nuevo anuncio:', data);
+                console.log('📢 Nuevo anuncio recibido via Pusher:', data);
 
+                // Siempre mostrar toast
                 showToast(
                     '📢 ' + data.title,
                     data.message,
@@ -227,9 +228,31 @@ function setupAnnouncementsListener() {
                 );
 
                 playNotificationSound();
+
+                // 🚨 NUEVO: Si es popup crítico, disparar modal
+                if (data.show_popup && data.type === 'critical') {
+                    console.log('🚨 Anuncio crítico con popup - Disparando modal...');
+                    
+                    // Dispatch custom event para Alpine.js
+                    window.dispatchEvent(new CustomEvent('show-announcement-popup', {
+                        detail: {
+                            id: data.id,
+                            title: data.title,
+                            content: data.message,
+                            type: data.type,
+                            type_icon: data.type_icon,
+                            type_color: 'error', // critical = error color
+                            priority: data.priority,
+                            published_at: data.created_at,
+                            banner_image_url: null, // Pusher no envía imagen
+                            banner_link: null,
+                            show_url: window.location.origin + '/admin/' + window.store.slug + '/announcements/' + data.id
+                        }
+                    }));
+                }
             });
 
-        console.log('✅ Announcements listener configured');
+        console.log('✅ Announcements listener configured (with popup support)');
     } catch (error) {
         console.error('❌ Error setting up announcements listener:', error);
     }
