@@ -335,16 +335,44 @@ class TicketController extends Controller
         // El path viene como: tickets/store-slug/ticket-id/filename.ext
         // o: tickets/store-slug/ticket-id/responses/response-id/filename.ext
         
-        // Intentar en storage/app (local)
-        if (Storage::disk('local')->exists($path)) {
-            $fileContent = Storage::disk('local')->get($path);
-            $mimeType = Storage::disk('local')->mimeType($path);
+        \Log::info('📥 Download ticket attachment request (TenantAdmin):', [
+            'path' => $path,
+            'storage_path' => storage_path('app/' . $path),
+            'exists_local' => Storage::disk('local')->exists($path),
+            'exists_file_exists' => file_exists(storage_path('app/' . $path)),
+        ]);
+        
+        // Intentar primero con file_exists directo
+        $fullPath = storage_path('app/' . $path);
+        if (file_exists($fullPath)) {
+            \Log::info('✅ File found with file_exists() (TenantAdmin)');
+            
+            $fileContent = file_get_contents($fullPath);
+            $mimeType = mime_content_type($fullPath);
             $filename = basename($path);
             
             return response($fileContent)
                 ->header('Content-Type', $mimeType)
                 ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
         }
+        
+        // Si no, intentar con Storage facade
+        if (Storage::disk('local')->exists($path)) {
+            $fileContent = Storage::disk('local')->get($path);
+            $mimeType = Storage::disk('local')->mimeType($path);
+            $filename = basename($path);
+            
+            \Log::info('✅ File found with Storage facade (TenantAdmin)');
+            
+            return response($fileContent)
+                ->header('Content-Type', $mimeType)
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        }
+        
+        \Log::warning('❌ File not found (TenantAdmin):', [
+            'path' => $path,
+            'full_path' => $fullPath
+        ]);
         
         abort(404, 'Archivo no encontrado');
     }
