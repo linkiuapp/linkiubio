@@ -45,14 +45,25 @@ class Ticket extends Model
         // Usar ruta específica para descargar adjuntos
         // Detectar si estamos en SuperLinkiu o TenantAdmin
         if (request()->is('superlinkiu/*')) {
-            return route('superlinkiu.tickets.attachment', ['path' => $attachment['path']]);
+            $url = route('superlinkiu.tickets.attachment', ['path' => $attachment['path']]);
+            \Log::info('🔗 Generated URL for SuperLinkiu:', [
+                'attachment_path' => $attachment['path'],
+                'generated_url' => $url
+            ]);
+            return $url;
         } else {
             // TenantAdmin necesita el slug de la tienda
             $store = view()->shared('currentStore');
-            return route('tenant.admin.tickets.attachment', [
+            $url = route('tenant.admin.tickets.attachment', [
                 'store' => $store->slug,
                 'path' => $attachment['path']
             ]);
+            \Log::info('🔗 Generated URL for TenantAdmin:', [
+                'attachment_path' => $attachment['path'],
+                'store_slug' => $store->slug,
+                'generated_url' => $url
+            ]);
+            return $url;
         }
     }
 
