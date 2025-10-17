@@ -105,16 +105,143 @@
             @endif
         </div>
 
+        <!-- Variables del Producto (si aplica) -->
+        @if($product->type === 'variable' && $product->variableAssignments->count() > 0)
+            <div class="border-t border-accent-200 pt-4 space-y-4" id="product-variables">
+                <h3 class="text-sm font-semibold text-black-400">Personaliza tu producto</h3>
+                
+                @foreach($product->variableAssignments as $assignment)
+                    @php
+                        $variable = $assignment->variable;
+                        $label = $assignment->custom_label ?: $variable->name;
+                        $isRequired = $assignment->is_required;
+                    @endphp
+                    
+                    <div class="space-y-2">
+                        <label class="text-sm font-medium text-black-400">
+                            {{ $label }}
+                            @if($isRequired)
+                                <span class="text-error-300">*</span>
+                            @else
+                                <span class="text-xs text-black-300">(opcional)</span>
+                            @endif
+                        </label>
+
+                        @if($variable->type === 'radio')
+                            {{-- Selección única (radio) --}}
+                            <div class="space-y-2">
+                                @foreach($variable->activeOptions as $option)
+                                    <label class="flex items-center gap-3 p-3 border border-accent-200 rounded-lg cursor-pointer hover:border-primary-200 transition-all"
+                                           onclick="selectOption(this, {{ $variable->id }}, {{ $option->id }}, '{{ $option->name }}', {{ $option->price_modifier }}, 'radio')">
+                                        <input type="radio" 
+                                               name="variable_{{ $variable->id }}" 
+                                               value="{{ $option->id }}"
+                                               class="w-4 h-4 text-primary-300"
+                                               {{ $isRequired && $loop->first ? 'checked' : '' }}
+                                               data-variable-id="{{ $variable->id }}"
+                                               data-option-id="{{ $option->id }}"
+                                               data-price-modifier="{{ $option->price_modifier }}">
+                                        <div class="flex-1 flex items-center justify-between">
+                                            <div class="flex items-center gap-2">
+                                                @if($option->color_hex)
+                                                    <div class="w-5 h-5 rounded-full border border-accent-200" 
+                                                         style="background-color: {{ $option->color_hex }};"></div>
+                                                @endif
+                                                <span class="text-sm text-black-400">{{ $option->name }}</span>
+                                            </div>
+                                            @if($option->price_modifier != 0)
+                                                <span class="text-xs font-medium {{ $option->price_modifier > 0 ? 'text-success-300' : 'text-error-300' }}">
+                                                    {{ $option->formatted_price_modifier }}
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </label>
+                                @endforeach
+                            </div>
+
+                        @elseif($variable->type === 'checkbox')
+                            {{-- Selección múltiple (checkbox) --}}
+                            <div class="space-y-2">
+                                @foreach($variable->activeOptions as $option)
+                                    <label class="flex items-center gap-3 p-3 border border-accent-200 rounded-lg cursor-pointer hover:border-primary-200 transition-all"
+                                           onclick="toggleCheckbox(this, {{ $variable->id }}, {{ $option->id }}, '{{ $option->name }}', {{ $option->price_modifier }})">
+                                        <input type="checkbox" 
+                                               name="variable_{{ $variable->id }}[]" 
+                                               value="{{ $option->id }}"
+                                               class="w-4 h-4 text-primary-300 rounded"
+                                               data-variable-id="{{ $variable->id }}"
+                                               data-option-id="{{ $option->id }}"
+                                               data-price-modifier="{{ $option->price_modifier }}">
+                                        <div class="flex-1 flex items-center justify-between">
+                                            <div class="flex items-center gap-2">
+                                                @if($option->color_hex)
+                                                    <div class="w-5 h-5 rounded-full border border-accent-200" 
+                                                         style="background-color: {{ $option->color_hex }};"></div>
+                                                @endif
+                                                <span class="text-sm text-black-400">{{ $option->name }}</span>
+                                            </div>
+                                            @if($option->price_modifier != 0)
+                                                <span class="text-xs font-medium {{ $option->price_modifier > 0 ? 'text-success-300' : 'text-error-300' }}">
+                                                    {{ $option->formatted_price_modifier }}
+                                                </span>
+                                            @endif
+                                        </div>
+                                    </label>
+                                @endforeach
+                            </div>
+
+                        @elseif($variable->type === 'text')
+                            {{-- Texto libre --}}
+                            <input type="text" 
+                                   name="variable_{{ $variable->id }}"
+                                   placeholder="Escribe aquí..."
+                                   class="w-full p-3 border border-accent-200 rounded-lg focus:border-primary-200 focus:ring-1 focus:ring-primary-200 outline-none text-sm"
+                                   data-variable-id="{{ $variable->id }}"
+                                   {{ $isRequired ? 'required' : '' }}>
+
+                        @elseif($variable->type === 'numeric')
+                            {{-- Numérico --}}
+                            <input type="number" 
+                                   name="variable_{{ $variable->id }}"
+                                   placeholder="Ingresa un número"
+                                   class="w-full p-3 border border-accent-200 rounded-lg focus:border-primary-200 focus:ring-1 focus:ring-primary-200 outline-none text-sm"
+                                   data-variable-id="{{ $variable->id }}"
+                                   min="{{ $variable->min_value }}"
+                                   max="{{ $variable->max_value }}"
+                                   {{ $isRequired ? 'required' : '' }}>
+                        @endif
+                    </div>
+                @endforeach
+
+                <!-- Precio total actualizado -->
+                <div class="flex items-center justify-between p-4 bg-accent-50 rounded-lg">
+                    <span class="text-sm font-medium text-black-400">Precio Total:</span>
+                    <span id="total-price" class="text-lg font-bold text-primary-300">
+                        ${{ number_format($product->price, 0, ',', '.') }}
+                    </span>
+                </div>
+            </div>
+        @endif
+
         <!-- Botón Agregar al Carrito -->
         <div class="pt-2">
-            <button class="w-full bg-secondary-300 hover:bg-secondary-200 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 add-to-cart-btn"
-                    data-product-id="{{ $product->id }}"
-                    data-product-name="{{ $product->name }}"
-                    data-product-price="{{ $product->price }}"
-                    data-product-image="{{ $product->main_image_url }}">
-                <x-solar-cart-plus-outline class="w-5 h-5" />
-                Agregar al Carrito
-            </button>
+            @if($product->type === 'simple')
+                <button class="w-full bg-secondary-300 hover:bg-secondary-200 text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2 add-to-cart-btn"
+                        data-product-id="{{ $product->id }}"
+                        data-product-name="{{ $product->name }}"
+                        data-product-price="{{ $product->price }}"
+                        data-product-image="{{ $product->main_image_url }}">
+                    <x-solar-cart-plus-outline class="w-5 h-5" />
+                    Agregar al Carrito
+                </button>
+            @else
+                <button id="add-variable-product-btn" 
+                        class="w-full bg-secondary-300 hover:bg-secondary-200 disabled:bg-accent-200 disabled:cursor-not-allowed text-white py-3 rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
+                        onclick="addVariableProductToCart()">
+                    <x-solar-cart-plus-outline class="w-5 h-5" />
+                    Agregar al Carrito
+                </button>
+            @endif
         </div>
     </div>
 
@@ -156,6 +283,10 @@
 
 @push('scripts')
 <script>
+    // Precio base del producto
+    const basePrice = {{ $product->price }};
+    let selectedVariables = {};
+
     function changeMainImage(imageUrl, index) {
         // Cambiar imagen principal
         const mainImage = document.getElementById('main-image');
@@ -209,6 +340,168 @@
         const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');
     }
+
+    // Funciones para manejar variables
+    function selectOption(labelElement, variableId, optionId, optionName, priceModifier, type) {
+        // Actualizar el objeto de variables seleccionadas
+        if (type === 'radio') {
+            selectedVariables[variableId] = [{
+                option_id: optionId,
+                option_name: optionName,
+                price_modifier: parseFloat(priceModifier)
+            }];
+        }
+        
+        // Actualizar borde del seleccionado
+        const container = labelElement.parentElement;
+        container.querySelectorAll('label').forEach(label => {
+            label.classList.remove('border-primary-300', 'bg-primary-50');
+            label.classList.add('border-accent-200');
+        });
+        labelElement.classList.remove('border-accent-200');
+        labelElement.classList.add('border-primary-300', 'bg-primary-50');
+        
+        updateTotalPrice();
+    }
+
+    function toggleCheckbox(labelElement, variableId, optionId, optionName, priceModifier) {
+        const checkbox = labelElement.querySelector('input[type="checkbox"]');
+        
+        // Inicializar array si no existe
+        if (!selectedVariables[variableId]) {
+            selectedVariables[variableId] = [];
+        }
+        
+        if (checkbox.checked) {
+            // Agregar opción
+            selectedVariables[variableId].push({
+                option_id: optionId,
+                option_name: optionName,
+                price_modifier: parseFloat(priceModifier)
+            });
+            labelElement.classList.remove('border-accent-200');
+            labelElement.classList.add('border-primary-300', 'bg-primary-50');
+        } else {
+            // Remover opción
+            selectedVariables[variableId] = selectedVariables[variableId].filter(
+                opt => opt.option_id !== optionId
+            );
+            labelElement.classList.remove('border-primary-300', 'bg-primary-50');
+            labelElement.classList.add('border-accent-200');
+        }
+        
+        updateTotalPrice();
+    }
+
+    function updateTotalPrice() {
+        let totalPrice = basePrice;
+        
+        // Sumar los modificadores de precio de todas las opciones seleccionadas
+        Object.values(selectedVariables).forEach(options => {
+            options.forEach(option => {
+                totalPrice += option.price_modifier;
+            });
+        });
+        
+        // Actualizar el precio mostrado
+        const totalPriceElement = document.getElementById('total-price');
+        if (totalPriceElement) {
+            totalPriceElement.textContent = '$' + new Intl.NumberFormat('es-CO', {
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(totalPrice);
+        }
+    }
+
+    function addVariableProductToCart() {
+        // Validar que se hayan seleccionado todas las variables requeridas
+        const requiredVariables = document.querySelectorAll('#product-variables input[required]:not([type="radio"]):not([type="checkbox"])');
+        let allValid = true;
+        
+        requiredVariables.forEach(input => {
+            if (!input.value) {
+                allValid = false;
+                input.classList.add('border-error-300');
+            } else {
+                input.classList.remove('border-error-300');
+            }
+        });
+        
+        // Validar radio buttons y checkboxes requeridos
+        const requiredRadios = document.querySelectorAll('#product-variables input[type="radio"][required]');
+        const radioGroups = {};
+        requiredRadios.forEach(radio => {
+            const name = radio.name;
+            if (!radioGroups[name]) {
+                radioGroups[name] = [];
+            }
+            radioGroups[name].push(radio);
+        });
+        
+        Object.values(radioGroups).forEach(group => {
+            const isChecked = group.some(radio => radio.checked);
+            if (!isChecked) {
+                allValid = false;
+                group[0].closest('.space-y-2').classList.add('border-error-300');
+            }
+        });
+        
+        if (!allValid) {
+            alert('Por favor completa todos los campos requeridos');
+            return;
+        }
+        
+        // Recopilar datos de variables seleccionadas
+        const variants = selectedVariables;
+        
+        // Recopilar valores de text y numeric
+        const textInputs = document.querySelectorAll('#product-variables input[type="text"], #product-variables input[type="number"]');
+        textInputs.forEach(input => {
+            const variableId = input.dataset.variableId;
+            if (input.value) {
+                variants[variableId] = [{
+                    value: input.value,
+                    type: input.type
+                }];
+            }
+        });
+        
+        // Agregar al carrito
+        if (window.cart) {
+            window.cart.addProduct({
+                id: {{ $product->id }},
+                name: "{{ $product->name }}",
+                price: parseFloat(document.getElementById('total-price').textContent.replace(/[^\d]/g, '')),
+                image: "{{ $product->main_image_url }}",
+                variants: variants
+            });
+        } else {
+            console.error('Cart not initialized');
+        }
+    }
+
+    // Calcular precio inicial si hay opciones preseleccionadas
+    document.addEventListener('DOMContentLoaded', function() {
+        // Inicializar variables seleccionadas con las opciones marcadas por defecto
+        const checkedRadios = document.querySelectorAll('#product-variables input[type="radio"]:checked');
+        checkedRadios.forEach(radio => {
+            const variableId = radio.dataset.variableId;
+            const optionId = parseInt(radio.dataset.optionId);
+            const priceModifier = parseFloat(radio.dataset.priceModifier);
+            const optionName = radio.value;
+            
+            selectedVariables[variableId] = [{
+                option_id: optionId,
+                option_name: optionName,
+                price_modifier: priceModifier
+            }];
+            
+            // Marcar visualmente como seleccionado
+            radio.closest('label').classList.add('border-primary-300', 'bg-primary-50');
+        });
+        
+        updateTotalPrice();
+    });
 </script>
 @endpush
 @endsection

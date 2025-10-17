@@ -128,6 +128,29 @@ class Product extends Model
     }
 
     /**
+     * Relación con las asignaciones de variables
+     */
+    public function variableAssignments(): HasMany
+    {
+        return $this->hasMany(ProductVariableAssignment::class)->orderBy('display_order');
+    }
+
+    /**
+     * Relación con las variables asignadas (con datos de la asignación)
+     */
+    public function assignedVariables()
+    {
+        return $this->hasManyThrough(
+            ProductVariable::class,
+            ProductVariableAssignment::class,
+            'product_id',
+            'id',
+            'id',
+            'variable_id'
+        )->with('activeOptions');
+    }
+
+    /**
      * Scopes
      */
     public function scopeActive($query)

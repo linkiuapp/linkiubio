@@ -265,7 +265,7 @@
                     </div>
                 </div>
             </div>
-        </div>3
+        </div>
 
         <!-- Modal de duplicar variable -->
         <div x-show="showDuplicateModal" 

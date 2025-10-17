@@ -440,21 +440,28 @@ class Cart {
     // Actualizar badge de cantidad del producto
     updateProductBadge(productId, cartData) {
         const badge = document.querySelector(`[data-product-badge="${productId}"]`);
-        if (!badge) return;
+        if (!badge) {
+            console.log('⚠️ Badge not found for product:', productId);
+            return;
+        }
         
         // Buscar la cantidad de este producto en el carrito
         const quantity = this.getProductQuantityInCart(productId, cartData);
+        
+        console.log('🔢 Updating badge for product', productId, 'quantity:', quantity);
         
         if (quantity > 0) {
             badge.textContent = quantity;
             badge.style.display = 'flex';
             badge.classList.remove('hidden');
+            console.log('✅ Badge shown for product', productId);
             // Animación de bounce
             badge.classList.add('animate-bounce');
             setTimeout(() => badge.classList.remove('animate-bounce'), 500);
         } else {
             badge.style.display = 'none';
             badge.classList.add('hidden');
+            console.log('❌ Badge hidden for product', productId);
         }
     }
     

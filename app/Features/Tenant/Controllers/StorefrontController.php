@@ -81,7 +81,13 @@ class StorefrontController extends Controller
         $product = Product::where('store_id', $store->id)
             ->where('slug', $productSlug)
             ->where('is_active', true)
-            ->with(['images', 'mainImage', 'categories.icon'])
+            ->with([
+                'images', 
+                'mainImage', 
+                'categories.icon',
+                'variableAssignments.variable.activeOptions',
+                'variants'
+            ])
             ->first();
 
         if (!$product) {
