@@ -185,7 +185,7 @@ function setupTicketResponseListener(storeId) {
                 showToast(
                     '💬 Nueva Respuesta en Ticket',
                     `<strong>Ticket #${data.ticket_number}</strong><br>` +
-                    `${data.response_preview}<br>` +
+                    `${data.message}<br>` +
                     `<a href="${data.ticket_url}" class="text-primary-200 underline">Ver ticket →</a>`,
                     'info',
                     8000
@@ -193,7 +193,7 @@ function setupTicketResponseListener(storeId) {
 
                 showDesktopNotification(
                     '💬 Nueva Respuesta',
-                    `Ticket #${data.ticket_number}: ${data.response_preview}`
+                    `Ticket #${data.ticket_number}: ${data.message}`
                 );
 
                 playNotificationSound();

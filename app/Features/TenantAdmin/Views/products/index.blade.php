@@ -120,6 +120,9 @@
                                 Activar/Desactivar
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-black-400 uppercase tracking-wider">
+                                Compartir
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-black-400 uppercase tracking-wider">
                                 Acciones
                             </th>
                         </tr>
@@ -199,6 +202,17 @@
                                                data-product-id="{{ $product->id }}"
                                                data-url="{{ route('tenant.admin.products.toggle-status', [$store->slug, $product->id]) }}">
                                         <div class="w-11 h-6 bg-accent-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-accent-50 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-accent-50 after:border-accent-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-300"></div>
+                                    </label>
+                                </td>
+                                <td class="px-6 py-4 text-sm">
+                                    <label class="relative inline-flex items-center cursor-pointer">
+                                        <input type="checkbox"
+                                               class="sr-only peer sharing-toggle"
+                                               {{ $product->allow_sharing ? 'checked' : '' }}
+                                               data-product-id="{{ $product->id }}"
+                                               data-url="{{ route('tenant.admin.products.toggle-sharing', [$store->slug, $product->id]) }}"
+                                               onchange="toggleSharing(this)">
+                                        <div class="w-11 h-6 bg-disabled-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-success-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-success-300"></div>
                                     </label>
                                 </td>
                                 <td class="px-6 py-4 text-sm">
@@ -569,6 +583,38 @@
                 });
             }
         });
+
+        // Toggle de compartir (función global)
+        window.toggleSharing = async function(toggleElement) {
+            const url = toggleElement.dataset.url;
+            const newValue = toggleElement.checked;
+            
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({ allow_sharing: newValue })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    console.log('✅ Compartir actualizado:', data.message);
+                    // Opcional: Mostrar toast de confirmación
+                } else {
+                    alert(data.error || 'Error al actualizar');
+                    toggleElement.checked = !newValue;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error al actualizar');
+                toggleElement.checked = !newValue;
+            }
+        };
     </script>
     @endpush
     @endsection

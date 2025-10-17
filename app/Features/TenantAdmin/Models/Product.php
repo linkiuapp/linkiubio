@@ -21,12 +21,14 @@ class Product extends Model
         'sku',
         'main_image_id',
         'is_active',
+        'allow_sharing',
         'store_id',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
         'is_active' => 'boolean',
+        'allow_sharing' => 'boolean',
     ];
 
     /**

@@ -125,15 +125,7 @@
                             </div>
 
                             <!-- Botón agregar al carrito -->
-                            <div class="flex-shrink-0">
-                                <button type="button" class="add-to-cart-btn bg-secondary-300 hover:bg-secondary-200 text-white w-11 h-11 rounded-lg flex items-center justify-center transition-colors" 
-                                        data-product-id="{{ $product->id }}"
-                                        data-product-name="{{ $product->name }}"
-                                        data-product-price="{{ $product->price }}"
-                                        data-product-image="{{ $product->main_image_url }}">
-                                    <x-solar-cart-plus-outline class="w-5 h-5" />
-                                </button>
-                            </div>
+                            <x-add-to-cart-button :product="$product" :store="$store" />
                         </div>
                     </a>
                 @endforeach

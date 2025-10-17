@@ -78,5 +78,11 @@ Route::get('/contacto', [StorefrontController::class, 'contact'])->name('contact
 // Ruta de promociones/cupones
 Route::get('/promociones', [StorefrontController::class, 'promotions'])->name('promotions');
 
+// Ruta de próximamente (reservas y otras funciones futuras)
+Route::get('/proximamente', function() {
+    $store = request()->route('store');
+    return view('tenant::storefront.coming-soon', compact('store'));
+})->name('coming-soon');
+
 // Más rutas del frontend se añadirán aquí en el futuro...
 // Route::get('/buscar', [StorefrontController::class, 'search'])->name('search'); 

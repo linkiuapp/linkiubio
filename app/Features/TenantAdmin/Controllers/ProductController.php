@@ -392,4 +392,39 @@ class ProductController extends Controller
         return redirect()->route('tenant.admin.products.edit', [$store->slug, $product->id])
             ->with('success', 'Imagen principal establecida exitosamente.');
     }
+
+    /**
+     * Toggle allow_sharing del producto
+     */
+    public function toggleSharing(Request $request, $storeSlug, $product): JsonResponse
+    {
+        try {
+            // Obtener la tienda actual
+            $store = view()->shared('currentStore');
+            
+            // Buscar el producto
+            $product = Product::where('id', $product)
+                ->where('store_id', $store->id)
+                ->firstOrFail();
+
+            // Validar input
+            $validated = $request->validate([
+                'allow_sharing' => 'required|boolean'
+            ]);
+
+            // Actualizar
+            $product->update(['allow_sharing' => $validated['allow_sharing']]);
+
+            return response()->json([
+                'success' => true,
+                'allow_sharing' => $product->allow_sharing,
+                'message' => $product->allow_sharing ? 'Compartir activado' : 'Compartir desactivado'
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Error al actualizar: ' . $e->getMessage()
+            ], 500);
+        }
+    }
 } 

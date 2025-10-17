@@ -13,7 +13,7 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-accent-100 max-w-[480px] mx-auto">
+<body class="bg-accent-100 max-w-[480px] mx-auto overflow-x-hidden">
 
     <!-- Header -->
     <header class="relative overflow-hidden" style="background: {{ $store->design ? $store->design->header_background_color : '' }}">
@@ -59,42 +59,42 @@
     </header>
 
     <!-- Menu inferior -->
-    <nav class="w-full max-w-[480px] bg-accent-50 rounded-b-3xl px-4 py-4">
+    <nav class="w-full max-w-[480px] bg-accent-50 rounded-b-3xl px-2 sm:px-4 py-4">
         <div class="flex justify-around items-center">
 
             <!-- Contacto -->
             <a href="{{ route('tenant.contact', $store->slug) }}" 
-               class="flex flex-col items-center py-3 px-4 {{ request()->routeIs('tenant.contact') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
-                <x-lucide-store class="w-6 h-6 mb-1" />
-                <span class="text-caption font-regular">Sedes</span>
+               class="flex flex-col items-center py-2 px-1 sm:px-4 {{ request()->routeIs('tenant.contact') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
+                <x-lucide-store class="w-5 h-5 sm:w-6 sm:h-6 mb-1" />
+                <span class="text-[10px] sm:text-caption font-regular">Sedes</span>
             </a>
 
             <!-- Catálogo -->
             <a href="{{ route('tenant.catalog', $store->slug) }}" 
-               class="flex flex-col items-center py-3 px-4 {{ request()->routeIs('tenant.catalog') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
-                <x-lucide-shopping-basket class="w-6 h-6 mb-1" />
-                <span class="text-caption font-regular">Catálogo</span>
+               class="flex flex-col items-center py-2 px-1 sm:px-4 {{ request()->routeIs('tenant.catalog') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
+                <x-lucide-shopping-basket class="w-5 h-5 sm:w-6 sm:h-6 mb-1" />
+                <span class="text-[10px] sm:text-caption font-regular">Catálogo</span>
             </a>
 
             <!-- Inicio -->
             <a href="{{ route('tenant.home', $store->slug) }}" 
-               class="flex flex-col items-center py-3 px-5 {{ request()->routeIs('tenant.home') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
-                <x-lucide-home class="w-6 h-6 mb-1" />
-                <span class="text-caption font-regular">Inicio</span>
+               class="flex flex-col items-center py-2 px-2 sm:px-5 {{ request()->routeIs('tenant.home') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
+                <x-lucide-home class="w-6 h-6 sm:w-7 sm:h-7 mb-1" />
+                <span class="text-[10px] sm:text-caption font-regular">Inicio</span>
             </a>
 
             <!-- Promos -->
             <a href="{{ route('tenant.promotions', $store->slug) }}" 
-               class="flex flex-col items-center py-3 px-4 {{ request()->routeIs('tenant.promotions') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
-                <x-lucide-badge-percent class="w-6 h-6 mb-1" />
-                <span class="text-caption font-regular">Promos</span>
+               class="flex flex-col items-center py-2 px-1 sm:px-4 {{ request()->routeIs('tenant.promotions') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
+                <x-lucide-badge-percent class="w-5 h-5 sm:w-6 sm:h-6 mb-1" />
+                <span class="text-[10px] sm:text-caption font-regular">Promos</span>
             </a>
 
-            <!-- Favoritos -->
-            <a href="#" class="flex flex-col items-center py-3 px-4 {{ request()->routeIs('tenant.favorites') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
-                <x-lucide-calendar-days class="w-6 h-6 mb-1" />
-                <span class="text-caption font-regular">Reservas</span>
-                <small class="text-small font-regular">(Próximamente)</small>
+            <!-- Reservas -->
+            <a href="{{ route('tenant.coming-soon', $store->slug) }}" 
+               class="flex flex-col items-center py-2 px-1 sm:px-4 {{ request()->routeIs('tenant.coming-soon') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
+                <x-lucide-calendar-days class="w-5 h-5 sm:w-6 sm:h-6 mb-1" />
+                <span class="text-[10px] sm:text-caption font-regular">Reservas</span>
             </a>
         </div>
     </nav>

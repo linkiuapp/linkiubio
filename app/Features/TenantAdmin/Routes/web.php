@@ -109,6 +109,7 @@ Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreAppro
         Route::post('/{product}/toggle-status', [ProductController::class, 'toggleStatus'])->name('toggle-status');
         Route::post('/{product}/duplicate', [ProductController::class, 'duplicate'])->name('duplicate');
         Route::post('/{product}/set-main-image', [ProductController::class, 'setMainImage'])->name('set-main-image');
+        Route::post('/{product}/toggle-sharing', [ProductController::class, 'toggleSharing'])->name('toggle-sharing');
     });
 
     // Sliders Routes

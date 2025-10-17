@@ -60,7 +60,10 @@ class Cart {
             const data = await response.json();
             
             if (data.success) {
-                // Solo mostrar feedback y actualizar UI con datos del servidor
+                // Actualizar badge de cantidad del producto
+                this.updateProductBadge(product.id, data.cart);
+                
+                // Mostrar feedback y actualizar UI con datos del servidor
                 this.showAddedFeedback(product.name);
                 this.updateCartDisplayFromServer(data);
             } else {
@@ -419,6 +422,41 @@ class Cart {
                 }, 300);
             }
         }, hideTime);
+    }
+
+    // Actualizar badge de cantidad del producto
+    updateProductBadge(productId, cartData) {
+        const badge = document.querySelector(`[data-product-badge="${productId}"]`);
+        if (!badge) return;
+        
+        // Buscar la cantidad de este producto en el carrito
+        const quantity = this.getProductQuantityInCart(productId, cartData);
+        
+        if (quantity > 0) {
+            badge.textContent = quantity;
+            badge.classList.remove('hidden');
+            // Animación de bounce
+            badge.classList.add('animate-bounce');
+            setTimeout(() => badge.classList.remove('animate-bounce'), 500);
+        } else {
+            badge.classList.add('hidden');
+        }
+    }
+    
+    // Obtener cantidad de un producto en el carrito
+    getProductQuantityInCart(productId, cartData) {
+        if (!cartData || !cartData.items) return 0;
+        
+        let totalQuantity = 0;
+        cartData.items.forEach(item => {
+            // El item puede tener product_id o variant.product_id
+            const itemProductId = item.product_id || (item.variant && item.variant.product_id);
+            if (itemProductId == productId) {
+                totalQuantity += item.quantity || 1;
+            }
+        });
+        
+        return totalQuantity;
     }
 
     // Inicializar eventos

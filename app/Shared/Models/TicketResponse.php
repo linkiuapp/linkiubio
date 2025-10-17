@@ -77,6 +77,12 @@ class TicketResponse extends Model
         return $this->user && $this->user->isSuperAdmin();
     }
 
+    public function getIsFromStoreAttribute(): bool
+    {
+        // Una respuesta es de la tienda si el usuario es store_admin
+        return $this->user && $this->user->role === 'store_admin';
+    }
+
     // Helper para generar URLs de attachments de respuestas
     public function getAttachmentUrl($attachment): string
     {
