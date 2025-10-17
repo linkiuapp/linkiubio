@@ -242,7 +242,8 @@ class TicketController extends Controller
             }
             
             // Por ahora guardamos en local en lugar de S3 para evitar finfo
-            $localPath = storage_path('app/tickets/' . $path);
+            // $path ya incluye 'tickets/' al inicio
+            $localPath = storage_path('app/' . $path);
             if (!file_exists($localPath)) {
                 mkdir($localPath, 0755, true);
             }
