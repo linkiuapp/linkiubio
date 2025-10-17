@@ -320,12 +320,18 @@ class TicketController extends Controller
     {
         // El path viene como: tickets/store-slug/ticket-id/filename.ext
         // o: tickets/store-slug/ticket-id/responses/response-id/filename.ext
-        $fullPath = storage_path('app/' . $path);
         
-        if (!file_exists($fullPath)) {
-            abort(404, 'Archivo no encontrado');
+        // Intentar en storage/app (local)
+        if (Storage::disk('local')->exists($path)) {
+            $fileContent = Storage::disk('local')->get($path);
+            $mimeType = Storage::disk('local')->mimeType($path);
+            $filename = basename($path);
+            
+            return response($fileContent)
+                ->header('Content-Type', $mimeType)
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
         }
         
-        return response()->download($fullPath);
+        abort(404, 'Archivo no encontrado');
     }
 }
