@@ -74,15 +74,21 @@ class AnnouncementController extends Controller
      */
     public function store(Request $request): RedirectResponse
     {
+        // Obtener nombres de planes válidos dinámicamente
+        $validPlans = Plan::where('is_active', true)
+            ->get()
+            ->map(fn($plan) => strtolower($plan->name))
+            ->toArray();
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'type' => 'required|in:critical,important,info',
-            'priority' => 'required|integer|min:1|max:10',
+            'priority' => 'required|integer|min:1|max:5', // ✅ Actualizado a 5 niveles
             'banner_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'banner_link' => 'nullable|url',
             'target_plans' => 'nullable|array',
-            'target_plans.*' => 'string|in:explorer,master,legend',
+            'target_plans.*' => 'string|in:' . implode(',', $validPlans), // ✅ Validación dinámica
             'target_stores' => 'nullable|array',
             'target_stores.*' => 'integer|exists:stores,id',
             'published_at' => 'nullable|date',
@@ -169,15 +175,21 @@ class AnnouncementController extends Controller
      */
     public function update(Request $request, PlatformAnnouncement $announcement): RedirectResponse
     {
+        // Obtener nombres de planes válidos dinámicamente
+        $validPlans = Plan::where('is_active', true)
+            ->get()
+            ->map(fn($plan) => strtolower($plan->name))
+            ->toArray();
+
         $validated = $request->validate([
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'type' => 'required|in:critical,important,info',
-            'priority' => 'required|integer|min:1|max:10',
+            'priority' => 'required|integer|min:1|max:5', // ✅ Actualizado a 5 niveles
             'banner_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             'banner_link' => 'nullable|url',
             'target_plans' => 'nullable|array',
-            'target_plans.*' => 'string|in:explorer,master,legend',
+            'target_plans.*' => 'string|in:' . implode(',', $validPlans), // ✅ Validación dinámica
             'target_stores' => 'nullable|array',
             'target_stores.*' => 'integer|exists:stores,id',
             'published_at' => 'nullable|date',
