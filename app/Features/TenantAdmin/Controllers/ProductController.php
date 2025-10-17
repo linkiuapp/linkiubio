@@ -6,6 +6,7 @@ use App\Features\TenantAdmin\Models\Product;
 use App\Features\TenantAdmin\Models\ProductImage;
 use App\Features\TenantAdmin\Models\Category;
 use App\Features\TenantAdmin\Models\ProductVariable;
+use App\Features\TenantAdmin\Models\ProductVariableAssignment;
 use App\Features\TenantAdmin\Services\ProductImageService;
 use App\Shared\Models\Store;
 use Illuminate\Http\Request;
@@ -156,6 +157,11 @@ class ProductController extends Controller
             $product->categories()->sync($request->categories);
         }
 
+        // Asignar variables si el producto es tipo 'variable'
+        if ($product->type === 'variable' && $request->has('variables')) {
+            $this->syncProductVariables($product, $request->variables);
+        }
+
         return redirect()->route('tenant.admin.products.index', $store->slug)
             ->with('success', 'Producto creado exitosamente.');
     }
@@ -191,9 +197,9 @@ class ProductController extends Controller
             ->where('store_id', $store->id)
             ->firstOrFail();
         
-        $product->load(['images', 'categories', 'variants']);
+        $product->load(['images', 'categories', 'variants', 'variableAssignments']);
         $categories = Category::where('store_id', $store->id)->get();
-        $variables = ProductVariable::where('store_id', $store->id)->get();
+        $variables = ProductVariable::where('store_id', $store->id)->with('activeOptions')->get();
 
         return view('tenant-admin::products.edit', compact(
             'product',
@@ -259,6 +265,16 @@ class ProductController extends Controller
         // Actualizar categorías si se seleccionaron
         if ($request->has('categories')) {
             $product->categories()->sync($request->categories);
+        }
+
+        // Actualizar variables si el producto es tipo 'variable'
+        if ($product->type === 'variable') {
+            if ($request->has('variables')) {
+                $this->syncProductVariables($product, $request->variables);
+            } else {
+                // Si no hay variables en el request, eliminar todas las asignaciones
+                $product->variableAssignments()->delete();
+            }
         }
 
         return redirect()->route('tenant.admin.products.index', $store->slug)
@@ -425,6 +441,29 @@ class ProductController extends Controller
                 'success' => false,
                 'error' => 'Error al actualizar: ' . $e->getMessage()
             ], 500);
+        }
+    }
+
+    /**
+     * Sincronizar variables del producto
+     */
+    protected function syncProductVariables(Product $product, array $variables)
+    {
+        // Eliminar asignaciones existentes
+        $product->variableAssignments()->delete();
+        
+        // Crear nuevas asignaciones
+        foreach ($variables as $variableId => $data) {
+            // Solo procesar si está marcado como enabled
+            if (isset($data['enabled']) && $data['enabled']) {
+                ProductVariableAssignment::create([
+                    'product_id' => $product->id,
+                    'variable_id' => $variableId,
+                    'is_required' => isset($data['is_required']) && $data['is_required'] ? true : false,
+                    'custom_label' => $data['custom_label'] ?? null,
+                    'display_order' => $data['display_order'] ?? 999,
+                ]);
+            }
         }
     }
 } 
