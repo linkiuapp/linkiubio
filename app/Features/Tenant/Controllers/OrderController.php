@@ -1105,8 +1105,20 @@ class OrderController extends Controller
         }
 
         $formatted = [];
-        foreach ($variants as $key => $value) {
-            $formatted[] = ucfirst($key) . ': ' . $value;
+        foreach ($variants as $variableId => $options) {
+            // Las variables ahora vienen como array de opciones
+            if (is_array($options)) {
+                foreach ($options as $option) {
+                    if (isset($option['option_name'])) {
+                        $formatted[] = $option['option_name'];
+                    } elseif (isset($option['value'])) {
+                        $formatted[] = $option['value'];
+                    }
+                }
+            } else {
+                // Formato antiguo (retrocompatibilidad)
+                $formatted[] = ucfirst($variableId) . ': ' . $options;
+            }
         }
         
         return implode(', ', $formatted);
