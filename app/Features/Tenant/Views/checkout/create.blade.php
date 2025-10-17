@@ -1624,14 +1624,18 @@ async function applyCoupon() {
         if (data.success) {
             console.log('✅ Cupón aplicado:', data);
             
-            // Actualizar resumen del pedido con descuento
+            // Guardar descuento en dataset
             const summaryElement = document.getElementById('order-summary');
             if (summaryElement) {
-                const currentData = summaryElement.dataset;
-                currentData.couponDiscount = data.discount_amount;
-                currentData.couponCode = couponCode;
-                loadOrderSummary();
+                summaryElement.dataset.couponDiscount = data.discount_amount;
+                summaryElement.dataset.couponCode = couponCode;
             }
+            
+            // Actualizar variable global
+            discountAmount = parseFloat(data.discount_amount) || 0;
+            
+            // Actualizar totales directamente
+            updateOrderTotals(cartSubtotal, shippingCost, discountAmount);
             
             // Deshabilitar input y cambiar botón
             couponCodeInput.disabled = true;
@@ -1639,7 +1643,7 @@ async function applyCoupon() {
             applyBtn.classList.remove('bg-primary-300', 'hover:bg-primary-200');
             applyBtn.classList.add('bg-success-300');
             
-            console.log('🎉 Cupón aplicado con éxito');
+            console.log('🎉 Cupón aplicado con éxito - Descuento:', discountAmount);
         } else {
             showCouponError(data.message || 'Cupón no válido');
         }
