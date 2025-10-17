@@ -353,6 +353,23 @@ function setupEvents() {
     // Payment method listeners se configuran en renderPaymentMethods()
     // Cash amount listeners se configuran en renderPaymentMethods()
     
+    // Coupon listeners
+    const applyCouponBtn = document.getElementById('apply-coupon-btn');
+    const couponCodeInput = document.getElementById('coupon_code');
+    
+    if (applyCouponBtn) {
+        applyCouponBtn.addEventListener('click', applyCoupon);
+    }
+    
+    if (couponCodeInput) {
+        couponCodeInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                applyCoupon();
+            }
+        });
+    }
+    
     // Submit order button
     document.getElementById('btn-submit-order').addEventListener('click', submitOrder);
 }
@@ -1554,6 +1571,83 @@ async function calculateShippingCost(department, city) {
     } catch (error) {
         console.error('❌ Error de conexión calculando envío:', error);
         updateShippingCost(0);
+    }
+}
+
+// Aplicar cupón
+async function applyCoupon() {
+    const couponCodeInput = document.getElementById('coupon_code');
+    const couponCode = couponCodeInput.value.trim().toUpperCase();
+    const applyBtn = document.getElementById('apply-coupon-btn');
+    const couponError = document.getElementById('coupon_error');
+    
+    if (!couponCode) {
+        showCouponError('Ingresa un código de cupón');
+        return;
+    }
+    
+    // Disable button
+    const originalText = applyBtn.textContent;
+    applyBtn.disabled = true;
+    applyBtn.textContent = 'Validando...';
+    
+    // Hide previous errors
+    couponError.classList.add('hidden');
+    
+    try {
+        const response = await fetch('{{ route("tenant.cart.apply-coupon", $store->slug) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+            },
+            body: JSON.stringify({
+                coupon_code: couponCode,
+                subtotal: getCurrentSubtotal()
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            console.log('✅ Cupón aplicado:', data);
+            
+            // Actualizar resumen del pedido con descuento
+            const summaryElement = document.getElementById('order-summary');
+            if (summaryElement) {
+                const currentData = summaryElement.dataset;
+                currentData.couponDiscount = data.discount_amount;
+                currentData.couponCode = couponCode;
+                loadOrderSummary();
+            }
+            
+            // Deshabilitar input y cambiar botón
+            couponCodeInput.disabled = true;
+            applyBtn.textContent = '✓ Aplicado';
+            applyBtn.classList.remove('bg-primary-300', 'hover:bg-primary-200');
+            applyBtn.classList.add('bg-success-300');
+            
+            console.log('🎉 Cupón aplicado con éxito');
+        } else {
+            showCouponError(data.message || 'Cupón no válido');
+        }
+    } catch (error) {
+        console.error('❌ Error aplicando cupón:', error);
+        showCouponError('Error de conexión. Intenta nuevamente.');
+    } finally {
+        if (!couponCodeInput.disabled) {
+            applyBtn.disabled = false;
+            applyBtn.textContent = originalText;
+        }
+    }
+}
+
+// Mostrar error de cupón
+function showCouponError(message) {
+    const couponError = document.getElementById('coupon_error');
+    if (couponError) {
+        couponError.textContent = message;
+        couponError.classList.remove('hidden');
     }
 }
 </script>
