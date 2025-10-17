@@ -232,6 +232,9 @@ class TicketController extends Controller
                 $path .= "/responses/{$responseId}";
             }
 
+            // Obtener el tamaño ANTES de mover el archivo
+            $fileSize = $file->getSize();
+
             // Guardar archivo temporalmente en local y luego mover a S3 manualmente
             $tempPath = sys_get_temp_dir() . '/' . $filename;
             if (!move_uploaded_file($file->getPathname(), $tempPath)) {
@@ -273,7 +276,7 @@ class TicketController extends Controller
                 'original_name' => $file->getClientOriginalName(),
                 'filename' => $filename,
                 'path' => $filePath,
-                'size' => $file->getSize(),
+                'size' => $fileSize,
                 'mime_type' => $mimeType,
             ];
         }
