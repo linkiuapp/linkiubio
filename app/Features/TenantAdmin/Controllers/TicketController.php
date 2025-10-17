@@ -255,7 +255,8 @@ class TicketController extends Controller
             // Limpiar archivo temporal
             unlink($tempPath);
             
-            $filePath = 'tickets/' . $path . '/' . $filename;
+            // $path ya incluye 'tickets/' al inicio, no duplicar
+            $filePath = $path . '/' . $filename;
 
             // Obtener MIME type de forma segura (sin finfo)
             $extension = strtolower($file->getClientOriginalExtension());
