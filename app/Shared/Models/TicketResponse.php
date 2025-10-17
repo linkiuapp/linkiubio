@@ -86,8 +86,9 @@ class TicketResponse extends Model
     // Helper para generar URLs de attachments de respuestas
     public function getAttachmentUrl($attachment): string
     {
-        // Usar la URL directa del bucket S3
-        return Storage::disk('public')->url($attachment['path']);
+        // Los archivos se guardan en storage/app/tickets, usar asset() para acceso local
+        // El path ya incluye 'tickets/' al inicio
+        return asset('storage/app/' . $attachment['path']);
     }
 
     public function getFormattedMessageAttribute(): string
