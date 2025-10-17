@@ -313,6 +313,19 @@ class Coupon extends Model
     }
 
     /**
+     * Validar si el cupón es aplicable según el subtotal
+     */
+    public function isApplicable(float $subtotal): bool
+    {
+        // Verificar si hay monto mínimo de compra
+        if ($this->min_purchase_amount && $subtotal < $this->min_purchase_amount) {
+            return false;
+        }
+        
+        return true;
+    }
+
+    /**
      * Validar si el cupón es aplicable a una orden
      */
     public function isApplicableToOrder(array $orderItems): bool
