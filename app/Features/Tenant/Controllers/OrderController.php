@@ -656,7 +656,10 @@ class OrderController extends Controller
             'cart_total' => $cartTotal,
                 'formatted_cart_total' => '$' . number_format($cartTotal, 0, ',', '.'),
                 'debug_session_id' => session()->getId(),
-                'debug_cart_key' => $cartKey
+                'debug_cart_key' => $cartKey,
+                'cart' => [
+                    'items' => array_values($cart) // Convertir a array indexado
+                ]
             ]);
             
         } catch (\Illuminate\Validation\ValidationException $e) {
@@ -707,7 +710,10 @@ class OrderController extends Controller
                     'count' => 0,
                     'cart_count' => 0,
                     'cart_total' => 0,
-                    'formatted_cart_total' => '$0'
+                    'formatted_cart_total' => '$0',
+                    'cart' => [
+                        'items' => []
+                    ]
                 ]);
             }
         
@@ -797,7 +803,10 @@ class OrderController extends Controller
                 'cart_total' => $total,
                 'formatted_cart_total' => '$' . number_format($total, 0, ',', '.'),
                 'debug_session_id' => session()->getId(),
-                'debug_cart_items' => count($cart)
+                'debug_cart_items' => count($cart),
+                'cart' => [
+                    'items' => $items  // Para que el badge funcione
+                ]
             ];
             
             \Log::info('🛒 GET CART RESPONSE:', [

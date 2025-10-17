@@ -466,12 +466,22 @@
             }
         });
         
+        // Calcular precio total
+        let totalPrice = basePrice;
+        Object.values(selectedVariables).forEach(options => {
+            options.forEach(option => {
+                if (option.price_modifier) {
+                    totalPrice += option.price_modifier;
+                }
+            });
+        });
+        
         // Agregar al carrito
         if (window.cart) {
             window.cart.addProduct({
                 id: {{ $product->id }},
                 name: "{{ $product->name }}",
-                price: parseFloat(document.getElementById('total-price').textContent.replace(/[^\d]/g, '')),
+                price: totalPrice,
                 image: "{{ $product->main_image_url }}",
                 variants: variants
             });
