@@ -216,12 +216,13 @@ Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreAppro
         Route::get('/', [TicketController::class, 'index'])->name('index');
         Route::get('/create', [TicketController::class, 'create'])->name('create');
         Route::post('/', [TicketController::class, 'store'])->name('store');
-        Route::get('/{ticket}', [TicketController::class, 'show'])->name('show');
-        Route::post('/{ticket}/add-response', [TicketController::class, 'addResponse'])->name('add-response');
-        Route::post('/{ticket}/update-status', [TicketController::class, 'updateStatus'])->name('update-status');
+        // IMPORTANTE: attachment debe estar ANTES de /{ticket} para evitar conflictos
         Route::get('/attachment/{path}', [TicketController::class, 'downloadAttachment'])
             ->where('path', '.*')
             ->name('attachment');
+        Route::get('/{ticket}', [TicketController::class, 'show'])->name('show');
+        Route::post('/{ticket}/add-response', [TicketController::class, 'addResponse'])->name('add-response');
+        Route::post('/{ticket}/update-status', [TicketController::class, 'updateStatus'])->name('update-status');
     });
 
     // Announcements Routes

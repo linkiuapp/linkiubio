@@ -115,6 +115,12 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
             ->name('invoices.stats');
 
         // Gestión de tickets
+        // IMPORTANTE: attachment debe estar ANTES del resource para evitar conflictos
+        Route::get('tickets/attachment/{path}', [TicketController::class, 'downloadAttachment'])
+            ->where('path', '.*')
+            ->name('tickets.attachment');
+        Route::get('tickets/stats', [TicketController::class, 'getStats'])
+            ->name('tickets.stats');
         Route::resource('tickets', TicketController::class)->names('tickets');
         Route::post('tickets/{ticket}/add-response', [TicketController::class, 'addResponse'])
             ->name('tickets.add-response');
@@ -124,11 +130,6 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
             ->name('tickets.assign');
         Route::post('tickets/{ticket}/priority', [TicketController::class, 'updatePriority'])
             ->name('tickets.update-priority');
-        Route::get('tickets/stats', [TicketController::class, 'getStats'])
-            ->name('tickets.stats');
-        Route::get('tickets/attachment/{path}', [TicketController::class, 'downloadAttachment'])
-            ->where('path', '.*')
-            ->name('tickets.attachment');
 
         // Gestión de anuncios
         Route::resource('announcements', AnnouncementController::class)->names('announcements');
