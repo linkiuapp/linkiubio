@@ -332,12 +332,12 @@
         const productUrl = "{{ url()->current() }}";
         const storeName = "{{ $store->name }}";
         
-        // Usar texto plano sin emojis para evitar problemas de codificación
-        const message = `Hey! Te comparto este pedido que estoy pensando hacer:\n\n` +
-                       `${productName}\n` +
-                       `${productPrice}\n\n` +
-                       `Ver producto: ${productUrl}\n` +
-                       `Lo encontre en ${storeName}, que opinas?`;
+        // Usar códigos Unicode para emojis que funcionan bien en WhatsApp
+        const message = `\u00A1Hey! Te comparto este pedido que estoy pensando hacer:\n\n` +
+                       `\uD83C\uDF74 ${productName}\n` +
+                       `\uD83D\uDCB0 ${productPrice}\n\n` +
+                       `\uD83D\uDC49 Ver producto: ${productUrl}\n\n` +
+                       `Lo encontr\u00E9 en ${storeName}, \u00BFqu\u00E9 opinas?`;
         
         const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');
