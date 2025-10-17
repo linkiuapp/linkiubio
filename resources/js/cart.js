@@ -447,11 +447,13 @@ class Cart {
         
         if (quantity > 0) {
             badge.textContent = quantity;
+            badge.style.display = 'flex';
             badge.classList.remove('hidden');
             // Animación de bounce
             badge.classList.add('animate-bounce');
             setTimeout(() => badge.classList.remove('animate-bounce'), 500);
         } else {
+            badge.style.display = 'none';
             badge.classList.add('hidden');
         }
     }
@@ -471,8 +473,10 @@ class Cart {
             
             if (quantity > 0) {
                 badge.textContent = quantity;
+                badge.style.display = 'flex';
                 badge.classList.remove('hidden');
             } else {
+                badge.style.display = 'none';
                 badge.classList.add('hidden');
             }
         });
@@ -482,6 +486,7 @@ class Cart {
     hideAllProductBadges() {
         const badges = document.querySelectorAll('[data-product-badge]');
         badges.forEach(badge => {
+            badge.style.display = 'none';
             badge.classList.add('hidden');
         });
     }
