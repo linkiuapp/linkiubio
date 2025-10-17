@@ -1392,7 +1392,19 @@ async function loadOrderSummary() {
             // Mostrar productos usando la función correcta
             if (cartItems.length > 0) {
                 displayOrderProducts(cartItems);
-                updateOrderTotals(cartSubtotal, 0, 0); // subtotal, shipping, discount
+                
+                // Leer descuento del cupón si existe
+                const summaryElement = document.getElementById('order-summary');
+                const couponDiscount = summaryElement && summaryElement.dataset.couponDiscount 
+                    ? parseFloat(summaryElement.dataset.couponDiscount) 
+                    : 0;
+                
+                // Actualizar variable global
+                discountAmount = couponDiscount;
+                
+                console.log('💰 Descuento de cupón:', couponDiscount);
+                
+                updateOrderTotals(cartSubtotal, shippingCost, couponDiscount);
             } else {
                 // Redirigir si no hay productos
                 window.location.href = '{{ route("tenant.cart.index", $store->slug) }}';
