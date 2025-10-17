@@ -332,11 +332,12 @@
         const productUrl = "{{ url()->current() }}";
         const storeName = "{{ $store->name }}";
         
-        const message = `¡Hey! Te comparto este pedido que estoy pensando hacer:\n\n` +
-                       `🍴 ${productName}\n` +
-                       `💰 ${productPrice}\n\n` +
-                       `👉 Ver producto: ${productUrl}\n\n` +
-                       `Lo encontré en ${storeName}, ¿qué opinas?`;
+        // Usar texto plano sin emojis para evitar problemas de codificación
+        const message = `Hey! Te comparto este pedido que estoy pensando hacer:\n\n` +
+                       `${productName}\n` +
+                       `${productPrice}\n\n` +
+                       `Ver producto: ${productUrl}\n` +
+                       `Lo encontre en ${storeName}, que opinas?`;
         
         const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`;
         window.open(whatsappUrl, '_blank');

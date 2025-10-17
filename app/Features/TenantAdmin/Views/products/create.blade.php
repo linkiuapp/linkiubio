@@ -195,32 +195,6 @@
             </div>
             @endif
 
-            <!-- Variables (solo si hay) -->
-            @if($variables->count() > 0)
-            <div class="bg-accent-50 rounded-lg p-0 overflow-hidden" id="variables-section" style="display: none;">
-                <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                    <h3 class="text-lg font-semibold text-black-500">Variables del Producto</h3>
-                    <p class="text-sm text-black-300">Solo para productos variables</p>
-                </div>
-                <div class="p-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        @foreach($variables as $variable)
-                        <label class="flex items-center gap-3 p-3 border border-accent-200 rounded-lg hover:bg-accent-100 cursor-pointer">
-                            <input type="checkbox" 
-                                   name="variables[]" 
-                                   value="{{ $variable->id }}"
-                                   class="rounded border-accent-300 text-primary-300 focus:ring-primary-200">
-                            <div class="flex-1">
-                                <span class="text-sm font-medium text-black-400">{{ $variable->name }}</span>
-                                <p class="text-xs text-black-300">{{ $variable->type_name }}</p>
-                            </div>
-                        </label>
-                        @endforeach
-                    </div>
-                </div>
-            </div>
-            @endif
-
             <!-- Asignación de Variables (solo para productos variables) -->
             <div class="bg-accent-50 rounded-lg p-0 overflow-hidden" id="variables-section" style="display: none;">
                 <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
