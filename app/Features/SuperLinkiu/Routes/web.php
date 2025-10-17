@@ -126,6 +126,9 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
             ->name('tickets.update-priority');
         Route::get('tickets/stats', [TicketController::class, 'getStats'])
             ->name('tickets.stats');
+        Route::get('tickets/attachment/{path}', [TicketController::class, 'downloadAttachment'])
+            ->where('path', '.*')
+            ->name('tickets.attachment');
 
         // Gestión de anuncios
         Route::resource('announcements', AnnouncementController::class)->names('announcements');

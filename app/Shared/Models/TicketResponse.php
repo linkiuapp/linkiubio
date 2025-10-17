@@ -86,9 +86,18 @@ class TicketResponse extends Model
     // Helper para generar URLs de attachments de respuestas
     public function getAttachmentUrl($attachment): string
     {
-        // Los archivos se guardan en storage/app/tickets, usar asset() para acceso local
-        // El path ya incluye 'tickets/' al inicio
-        return asset('storage/app/' . $attachment['path']);
+        // Usar ruta específica para descargar adjuntos
+        // Detectar si estamos en SuperLinkiu o TenantAdmin
+        if (request()->is('superlinkiu/*')) {
+            return route('superlinkiu.tickets.attachment', ['path' => $attachment['path']]);
+        } else {
+            // TenantAdmin necesita el slug de la tienda
+            $store = view()->shared('currentStore');
+            return route('tenant.admin.tickets.attachment', [
+                'store' => $store->slug,
+                'path' => $attachment['path']
+            ]);
+        }
     }
 
     public function getFormattedMessageAttribute(): string

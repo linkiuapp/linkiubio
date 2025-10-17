@@ -219,6 +219,9 @@ Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreAppro
         Route::get('/{ticket}', [TicketController::class, 'show'])->name('show');
         Route::post('/{ticket}/add-response', [TicketController::class, 'addResponse'])->name('add-response');
         Route::post('/{ticket}/update-status', [TicketController::class, 'updateStatus'])->name('update-status');
+        Route::get('/attachment/{path}', [TicketController::class, 'downloadAttachment'])
+            ->where('path', '.*')
+            ->name('attachment');
     });
 
     // Announcements Routes

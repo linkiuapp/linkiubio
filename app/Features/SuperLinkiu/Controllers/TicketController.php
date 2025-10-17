@@ -538,4 +538,20 @@ class TicketController extends Controller
             ]);
         }
     }
+
+    /**
+     * Descargar adjunto de ticket
+     */
+    public function downloadAttachment($path)
+    {
+        // El path viene como: tickets/store-slug/ticket-id/filename.ext
+        // o: tickets/store-slug/ticket-id/responses/response-id/filename.ext
+        $fullPath = storage_path('app/' . $path);
+        
+        if (!file_exists($fullPath)) {
+            abort(404, 'Archivo no encontrado');
+        }
+        
+        return response()->download($fullPath);
+    }
 } 
