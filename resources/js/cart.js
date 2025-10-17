@@ -223,12 +223,16 @@ class Cart {
             
             if (data.success) {
                 this.updateCartDisplayFromServer(data);
+                // Actualizar todos los badges de productos
+                this.updateAllProductBadges(data.cart);
             } else {
                 // Si no hay carrito en servidor, mostrar carrito vacío
                 this.updateCartDisplayFromServer({
                     cart_count: 0,
                     formatted_cart_total: '$0'
                 });
+                // Ocultar todos los badges
+                this.hideAllProductBadges();
             }
         } catch (error) {
             console.error('Error syncing with server:', error);
@@ -237,6 +241,8 @@ class Cart {
                 cart_count: 0,
                 formatted_cart_total: '$0'
             });
+            // Ocultar todos los badges
+            this.hideAllProductBadges();
         }
     }
 
@@ -323,6 +329,13 @@ class Cart {
         const priceText = cartFloat.querySelector('.cart-total-price');
         if (priceText) {
             priceText.textContent = serverData.formatted_cart_total || '$0';
+        }
+
+        // Actualizar todos los badges de productos en la página
+        if (serverData.cart) {
+            this.updateAllProductBadges(serverData.cart);
+        } else {
+            this.hideAllProductBadges();
         }
 
         // Mostrar carrito (siempre visible)
@@ -441,6 +454,36 @@ class Cart {
         } else {
             badge.classList.add('hidden');
         }
+    }
+    
+    // Actualizar todos los badges de productos en la página
+    updateAllProductBadges(cartData) {
+        if (!cartData || !cartData.items) {
+            this.hideAllProductBadges();
+            return;
+        }
+        
+        // Buscar todos los badges en la página
+        const badges = document.querySelectorAll('[data-product-badge]');
+        badges.forEach(badge => {
+            const productId = badge.dataset.productBadge;
+            const quantity = this.getProductQuantityInCart(productId, cartData);
+            
+            if (quantity > 0) {
+                badge.textContent = quantity;
+                badge.classList.remove('hidden');
+            } else {
+                badge.classList.add('hidden');
+            }
+        });
+    }
+    
+    // Ocultar todos los badges
+    hideAllProductBadges() {
+        const badges = document.querySelectorAll('[data-product-badge]');
+        badges.forEach(badge => {
+            badge.classList.add('hidden');
+        });
     }
     
     // Obtener cantidad de un producto en el carrito
