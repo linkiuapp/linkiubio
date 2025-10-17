@@ -552,9 +552,24 @@ class TicketController extends Controller
             'path' => $path,
             'storage_path' => storage_path('app/' . $path),
             'exists_local' => Storage::disk('local')->exists($path),
+            'exists_file_exists' => file_exists(storage_path('app/' . $path)),
         ]);
         
-        // Intentar en storage/app (local)
+        // Intentar primero con file_exists directo
+        $fullPath = storage_path('app/' . $path);
+        if (file_exists($fullPath)) {
+            \Log::info('✅ File found with file_exists()');
+            
+            $fileContent = file_get_contents($fullPath);
+            $mimeType = mime_content_type($fullPath);
+            $filename = basename($path);
+            
+            return response($fileContent)
+                ->header('Content-Type', $mimeType)
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+        }
+        
+        // Si no, intentar con Storage facade
         if (Storage::disk('local')->exists($path)) {
             $fileContent = Storage::disk('local')->get($path);
             $mimeType = Storage::disk('local')->mimeType($path);
