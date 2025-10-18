@@ -13,6 +13,17 @@ export default defineConfig({
         }),
     ],
     build: {
+        minify: 'terser',
+        terserOptions: {
+            compress: {
+                drop_console: true,    // Elimina console.log en producción
+                drop_debugger: true,   // Elimina debugger statements
+                pure_funcs: ['console.log', 'console.info', 'console.debug'],
+            },
+            format: {
+                comments: false,       // Elimina comentarios
+            }
+        },
         rollupOptions: {
             output: {
                 manualChunks: undefined,

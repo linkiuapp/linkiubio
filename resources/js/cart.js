@@ -562,7 +562,6 @@ function initializeCart() {
     
     // Verificar CSRF token
     const csrfToken = document.querySelector('meta[name="csrf-token"]');
-    console.log('🔐 CSRF token found?', csrfToken !== null);
     
     if (isStorefront) {
         try {

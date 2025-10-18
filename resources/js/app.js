@@ -25,7 +25,6 @@ console.log('🟢 Pusher imported successfully');
 
 // Configurar Pusher DIRECTAMENTE (sin Laravel Echo para evitar auth automática)
 console.log('🚀 Initializing Pusher...');
-console.log('📊 VITE_PUSHER_APP_KEY:', import.meta.env.VITE_PUSHER_APP_KEY);
 console.log('📊 VITE_PUSHER_APP_CLUSTER:', import.meta.env.VITE_PUSHER_APP_CLUSTER);
 
 try {
@@ -99,6 +98,10 @@ try {
     import('./notifications.js')
     console.log('🟢 notifications.js imported');
     
+    // 🛡️ Sistema de seguridad (auto-inicializa en producción)
+    import('./security.js')
+    console.log('🛡️ security.js imported');
+    
 } catch (error) {
     console.error('❌ Error importing component files:', error);
 }
@@ -153,9 +156,7 @@ document.addEventListener('alpine:init', () => {
                 
                 // Token CSRF
                 const csrfToken = document.querySelector('meta[name="csrf-token"]');
-                console.log('🔐 CSRF TOKEN: Meta tag encontrado:', csrfToken ? 'SÍ' : 'NO');
                 if (csrfToken) {
-                    console.log('🔐 CSRF TOKEN: Valor:', csrfToken.content);
                     const csrfInput = document.createElement('input');
                     csrfInput.type = 'hidden';
                     csrfInput.name = '_token';
@@ -166,7 +167,6 @@ document.addEventListener('alpine:init', () => {
                     // Intentar obtener de otro lugar
                     const altToken = document.querySelector('input[name="_token"]');
                     if (altToken) {
-                        console.log('🔐 CSRF TOKEN: Encontrado en input alternativo');
                         const csrfInput = document.createElement('input');
                         csrfInput.type = 'hidden';
                         csrfInput.name = '_token';

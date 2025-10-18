@@ -336,7 +336,6 @@ document.addEventListener('alpine:init', () => {
             let csrfToken;
             try {
                 csrfToken = StoreUtils.getCsrfToken();
-                console.log('🔐 CSRF Token obtained successfully');
             } catch (error) {
                 console.error('❌ CSRF Token error:', error);
                 toggle.checked = !newState;
@@ -346,7 +345,6 @@ document.addEventListener('alpine:init', () => {
 
             try {
                 console.log('📡 Making API call to:', url);
-                console.log('🔐 Using CSRF token:', csrfToken ? 'PRESENT' : 'MISSING');
                 
                 const response = await StoreUtils.apiCall(url, {
                     method: 'POST'
