@@ -103,23 +103,17 @@
         
         // 🚀 Inicializar sistema de notificaciones
         function initDesktopNotifications() {
-            console.log('🔔 Inicializando notificaciones de escritorio...');
-            
             // Solicitar permisos inmediatamente
             if (Notification.permission === 'default') {
                 Notification.requestPermission().then(permission => {
-                    console.log('📱 Permiso de notificaciones:', permission);
                     if (permission === 'granted') {
                         showWelcomeNotification();
                         startOrderPolling();
                     }
                 });
             } else if (Notification.permission === 'granted') {
-                console.log('✅ Permisos ya concedidos');
                 showWelcomeNotification();
                 startOrderPolling();
-            } else {
-                console.log('❌ Permisos denegados');
             }
         }
         
@@ -137,8 +131,6 @@
         
         // ⏰ Iniciar polling cada 15 segundos (AGRESIVO)
         function startOrderPolling() {
-            console.log('⏰ Iniciando polling de pedidos...');
-            
             // Cargar conteo inicial
             loadInitialCount();
             
@@ -149,14 +141,12 @@
             
             // También verificar cuando la pestaña vuelve a tener focus
             window.addEventListener('focus', () => {
-                console.log('👁️ Pestaña enfocada - verificando pedidos...');
                 checkForNewOrders();
             });
             
             // Verificar cuando la pestaña se vuelve visible
             document.addEventListener('visibilitychange', () => {
                 if (!document.hidden) {
-                    console.log('👁️ Pestaña visible - verificando pedidos...');
                     checkForNewOrders();
                 }
             });
@@ -172,11 +162,10 @@
                     const data = await response.json();
                     if (data.success) {
                         lastOrderCount = data.count;
-                        console.log('📊 Conteo inicial de pedidos:', lastOrderCount);
                     }
                 }
             } catch (error) {
-                console.error('❌ Error cargando conteo inicial:', error);
+                // Error silencioso
             }
         }
         
@@ -184,21 +173,16 @@
         async function checkForNewOrders() {
             if (!storeSlug) return;
             
-            const timestamp = new Date().toLocaleTimeString();
-            console.log(`🔍 ${timestamp} - Verificando pedidos... (Tab visible: ${!document.hidden})`);
-            
             try {
                 const response = await fetch(`/${storeSlug}/admin/orders/api/count`);
                 if (response.ok) {
                     const data = await response.json();
                     if (data.success) {
                         const currentCount = data.count;
-                        console.log(`📊 ${timestamp} - Conteo actual: ${currentCount}, Anterior: ${lastOrderCount}`);
                         
                         // Si hay nuevos pedidos
                         if (currentCount > lastOrderCount && lastOrderCount > 0) {
                             const newOrdersCount = currentCount - lastOrderCount;
-                            console.log(`🚨 ${timestamp} - ¡${newOrdersCount} NUEVOS PEDIDOS DETECTADOS!`);
                             showNewOrderNotification(newOrdersCount, data.latest_order);
                         }
                         

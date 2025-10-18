@@ -114,14 +114,17 @@ class AnnouncementController extends Controller
         $announcement = PlatformAnnouncement::create($validated);
 
         // 🔔 Disparar evento de nuevo anuncio para notificar a todos los admins de tiendas
-        // TEMPORALMENTE DESHABILITADO - Pusher no está configurado en producción
-        // if ($announcement->is_active) {
-        //     try {
-        //         event(new \App\Events\NewAnnouncement($announcement));
-        //     } catch (\Exception $e) {
-        //         \Log::warning('Failed to broadcast announcement: ' . $e->getMessage());
-        //     }
-        // }
+        if ($announcement->is_active) {
+            try {
+                event(new \App\Events\NewAnnouncement($announcement));
+            } catch (\Exception $e) {
+                // No fallar la creación si Pusher tiene problemas
+                \Log::warning('Broadcast announcement failed (non-critical)', [
+                    'announcement_id' => $announcement->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
 
         return redirect()
             ->route('superlinkiu.announcements.index')
@@ -318,15 +321,6 @@ class AnnouncementController extends Controller
         if (!$relativePath) {
             throw new \Exception('Error guardando banner en storage');
         }
-        
-        // 🔍 Logging para debug
-        \Log::info('📸 Banner guardado', [
-            'filename' => $filename,
-            'relative_path' => $relativePath,
-            'full_path' => Storage::disk('public')->path($relativePath),
-            'exists' => Storage::disk('public')->exists($relativePath),
-            'url' => Storage::disk('public')->url($relativePath)
-        ]);
 
         // ✅ Retornar PATH RELATIVO (igual que ProductImageService)
         return $relativePath;

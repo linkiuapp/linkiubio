@@ -122,7 +122,7 @@
                         const data = await response.json();
                         this.verified = data.verified;
                     } catch (error) {
-                        console.log('Error checking verification status:', error);
+                        // Error silencioso - no afecta funcionalidad
                     }
                 }
             }
