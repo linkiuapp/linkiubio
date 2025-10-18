@@ -367,10 +367,6 @@
 
 @push('scripts')
 <script>
-// ===== NOTIFICACIONES GLOBALES =====
-// Las notificaciones se manejan automáticamente desde el layout principal
-</script>
-<script>
 document.addEventListener('alpine:init', () => {
     Alpine.data('ordersManager', () => ({
         showDeleteModal: false,
