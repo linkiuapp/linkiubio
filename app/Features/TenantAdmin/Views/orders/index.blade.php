@@ -479,17 +479,6 @@ window.cancelOrder = function(orderId, orderNumber) {
     }
 };
 
-// ===== NOTIFICACIONES GLOBALES =====
-// Las notificaciones se manejan automáticamente desde el layout principal
-            if (data.success) {
-                lastOrderCount = data.count;
-            }
-        }
-    } catch (error) {
-        // Error silencioso
-    }
-}
-
 // Verificar nuevos pedidos
 async function checkForNewOrders() {
     try {
