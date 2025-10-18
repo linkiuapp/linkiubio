@@ -312,7 +312,16 @@ class AnnouncementController extends Controller
         $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
 
         // ✅ Guardar en storage/app/public (correcto)
-        $file->storeAs('public/announcements/banners', $filename);
+        $path = $file->storeAs('announcements/banners', $filename, 'public');
+        
+        // 🔍 Logging para debug
+        \Log::info('📸 Banner guardado', [
+            'filename' => $filename,
+            'path' => $path,
+            'full_path' => Storage::disk('public')->path($path),
+            'exists' => Storage::disk('public')->exists($path),
+            'url' => asset('storage/' . $path)
+        ]);
 
         return $filename;
     }
