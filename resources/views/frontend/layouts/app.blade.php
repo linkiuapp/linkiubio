@@ -136,24 +136,5 @@
 
     @stack('scripts')
 
-    <!-- Cart Debugging -->
-    <script>
-        console.log('🏪 Frontend layout loaded');
-        console.log('🛒 Checking cart initialization...');
-        console.log('📍 Current URL:', window.location.pathname);
-        console.log('🏷️ Store slug:', document.querySelector('meta[name="store-slug"]')?.content);
-        console.log('🔐 CSRF token:', document.querySelector('meta[name="csrf-token"]')?.content);
-        
-        // Verificar si el carrito está disponible después de 2 segundos
-        setTimeout(() => {
-            console.log('🛒 Cart available?', typeof window.cart);
-            if (window.cart) {
-                console.log('✅ Cart initialized successfully');
-            } else {
-                console.log('❌ Cart not initialized');
-            }
-        }, 2000);
-    </script>
-
 </body>
 </html> 

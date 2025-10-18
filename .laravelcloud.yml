@@ -1,9 +1,10 @@
 # Laravel Cloud Configuration
 # Updated: Force cache clear and use committed assets
 
-# Build assets during deployment (SKIP - usando assets commiteados)
+# Build commands - OVERRIDE panel settings
 build:
-  - echo "Using pre-built assets from repository"
+  - composer install --no-dev --optimize-autoloader
+  - echo "✅ Using pre-built assets from repository - skipping npm build"
 
 # Post-deployment commands
 deploy:
