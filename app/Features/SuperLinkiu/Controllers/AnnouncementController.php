@@ -311,8 +311,13 @@ class AnnouncementController extends Controller
         // Generar nombre único
         $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
 
-        // ✅ Guardar en storage/app/public (correcto)
-        $path = $file->storeAs('announcements/banners', $filename, 'public');
+        // ✅ Usar mismo método que ProductImageService (putFileAs)
+        $directory = 'announcements/banners';
+        $path = Storage::disk('public')->putFileAs($directory, $file, $filename);
+        
+        if (!$path) {
+            throw new \Exception('Error guardando banner en storage');
+        }
         
         // 🔍 Logging para debug
         \Log::info('📸 Banner guardado', [
