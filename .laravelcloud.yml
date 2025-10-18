@@ -9,7 +9,8 @@ build:
 # Post-deployment commands
 deploy:
   - php artisan migrate --force
-  - php artisan storage:link
+  - rm -f public/storage
+  - php artisan storage:link --force
   - php artisan announcements:migrate-banners
   - php artisan cache:clear
   - php artisan config:clear
