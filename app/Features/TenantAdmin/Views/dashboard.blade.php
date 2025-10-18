@@ -298,8 +298,8 @@
 
     @push('scripts')
     <script>
-    function recentOrdersWidget() {
-        return {
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('recentOrdersWidget', () => ({
             updating: false,
             
             async updateOrderStatus(orderId, newStatus, selectElement) {
@@ -339,7 +339,6 @@
                         this.showToast(data.message || 'Error al actualizar el estado', 'error');
                     }
                 } catch (error) {
-                    console.error('Error:', error);
                     selectElement.value = originalValue;
                     this.showToast('Error al actualizar el estado', 'error');
                 } finally {
@@ -350,11 +349,11 @@
             showToast(message, type = 'info') {
                 alert(`${type.toUpperCase()}: ${message}`);
             }
-        }
-    }
+        }));
+    });
     
-    function announcementBanners() {
-        return {
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('announcementBanners', () => ({
             banners: [],
             currentSlide: 0,
             autoplayInterval: null,
@@ -370,7 +369,7 @@
                         this.startAutoplay();
                     }
                 } catch (error) {
-                    console.error('Error loading banners:', error);
+                    // Error silencioso
                 }
             },
             
@@ -408,8 +407,8 @@
                 this.stopAutoplay();
                 this.startAutoplay();
             }
-        }
-    }
+        }));
+    });
     </script>
     @endpush
 </x-tenant-admin-layout> 
