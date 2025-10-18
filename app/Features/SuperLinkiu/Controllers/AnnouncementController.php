@@ -114,14 +114,14 @@ class AnnouncementController extends Controller
         $announcement = PlatformAnnouncement::create($validated);
 
         // 🔔 Disparar evento de nuevo anuncio para notificar a todos los admins de tiendas
-        if ($announcement->is_active) {
-            try {
-                event(new \App\Events\NewAnnouncement($announcement));
-            } catch (\Exception $e) {
-                // Log pero no fallar la creación
-                \Log::warning('Failed to broadcast announcement: ' . $e->getMessage());
-            }
-        }
+        // TEMPORALMENTE DESHABILITADO - Pusher no está configurado en producción
+        // if ($announcement->is_active) {
+        //     try {
+        //         event(new \App\Events\NewAnnouncement($announcement));
+        //     } catch (\Exception $e) {
+        //         \Log::warning('Failed to broadcast announcement: ' . $e->getMessage());
+        //     }
+        // }
 
         return redirect()
             ->route('superlinkiu.announcements.index')
