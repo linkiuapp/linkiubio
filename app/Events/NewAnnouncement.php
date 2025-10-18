@@ -8,10 +8,32 @@ use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Contracts\Queue\ShouldQueue;
 
-class NewAnnouncement implements ShouldBroadcast
+class NewAnnouncement implements ShouldBroadcast, ShouldQueue
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
+    
+    /**
+     * The number of times the job may be attempted.
+     */
+    public $tries = 3;
+    
+    /**
+     * Determine if the event should broadcast.
+     * Si Pusher falla, no debe romper la creación del anuncio
+     */
+    public function shouldBroadcast(): bool
+    {
+        try {
+            // Solo broadcast si Pusher está configurado correctamente
+            return config('broadcasting.default') === 'pusher' 
+                && !empty(config('broadcasting.connections.pusher.key'));
+        } catch (\Exception $e) {
+            \Log::warning('Broadcasting check failed: ' . $e->getMessage());
+            return false;
+        }
+    }
 
     public $announcement;
 

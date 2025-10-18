@@ -115,7 +115,12 @@ class AnnouncementController extends Controller
 
         // 🔔 Disparar evento de nuevo anuncio para notificar a todos los admins de tiendas
         if ($announcement->is_active) {
-            event(new \App\Events\NewAnnouncement($announcement));
+            try {
+                event(new \App\Events\NewAnnouncement($announcement));
+            } catch (\Exception $e) {
+                // Log pero no fallar la creación
+                \Log::warning('Failed to broadcast announcement: ' . $e->getMessage());
+            }
         }
 
         return redirect()
