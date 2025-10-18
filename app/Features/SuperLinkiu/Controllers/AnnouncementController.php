@@ -313,22 +313,23 @@ class AnnouncementController extends Controller
 
         // ✅ Usar mismo método que ProductImageService (putFileAs)
         $directory = 'announcements/banners';
-        $path = Storage::disk('public')->putFileAs($directory, $file, $filename);
+        $relativePath = Storage::disk('public')->putFileAs($directory, $file, $filename);
         
-        if (!$path) {
+        if (!$relativePath) {
             throw new \Exception('Error guardando banner en storage');
         }
         
         // 🔍 Logging para debug
         \Log::info('📸 Banner guardado', [
             'filename' => $filename,
-            'path' => $path,
-            'full_path' => Storage::disk('public')->path($path),
-            'exists' => Storage::disk('public')->exists($path),
-            'url' => asset('storage/' . $path)
+            'relative_path' => $relativePath,
+            'full_path' => Storage::disk('public')->path($relativePath),
+            'exists' => Storage::disk('public')->exists($relativePath),
+            'url' => Storage::disk('public')->url($relativePath)
         ]);
 
-        return $filename;
+        // ✅ Retornar PATH RELATIVO (igual que ProductImageService)
+        return $relativePath;
     }
 
     /**

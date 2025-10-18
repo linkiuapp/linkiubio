@@ -139,12 +139,34 @@ class PlatformAnnouncement extends Model
 
     public function getBannerImageUrlAttribute(): ?string
     {
-        if (!$this->banner_image) {
+        $path = $this->banner_image;
+        
+        if (empty($path)) {
             return null;
         }
-
-        // ✅ Usar método estándar para generar URLs
-        return asset('storage/announcements/banners/' . $this->banner_image);
+        
+        // Si ya es una URL completa (datos antiguos), devolverla tal cual
+        if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            return $path;
+        }
+        
+        // Si es solo el filename (datos antiguos), construir path completo
+        if (!str_contains($path, '/')) {
+            $path = 'announcements/banners/' . $path;
+        }
+        
+        // ✅ Usar Storage::url() para generar URL (compatible con S3 y local)
+        try {
+            return Storage::disk('public')->url($path);
+        } catch (\Exception $e) {
+            \Log::error('Error generando URL de banner', [
+                'announcement_id' => $this->id,
+                'banner_path' => $path,
+                'error' => $e->getMessage()
+            ]);
+            // Fallback a asset() para compatibilidad
+            return asset('storage/' . $path);
+        }
     }
 
     public function getIsExpiredAttribute(): bool
