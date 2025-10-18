@@ -500,7 +500,6 @@
                 },
                 
                 async init() {
-                    console.log('🚨 Inicializando sistema de popups críticos...');
                     await this.loadPopups();
                 },
                 
@@ -514,16 +513,13 @@
                         this.popups = data;
                         
                         if (this.popups.length > 0) {
-                            console.log(`🚨 ${this.popups.length} popup(s) crítico(s) pendiente(s)`);
                             // Pequeño delay para mejor UX
                             setTimeout(() => {
                                 this.currentPopupIndex = 0;
                             }, 500);
-                        } else {
-                            console.log('✅ No hay popups pendientes');
                         }
                     } catch (error) {
-                        console.error('❌ Error loading popups:', error);
+                        // Error silencioso
                     } finally {
                         this.loading = false;
                     }
@@ -540,10 +536,8 @@
                                 'Accept': 'application/json'
                             }
                         });
-                        
-                        console.log(`✅ Popup ${this.currentPopup.id} marcado como leído`);
                     } catch (error) {
-                        console.error('❌ Error marking as read:', error);
+                        // Error silencioso
                     }
                     
                     // Ir al siguiente o cerrar
@@ -555,15 +549,12 @@
                 },
                 
                 closePopup() {
-                    console.log('🚪 Cerrando popups');
                     this.popups = [];
                     this.currentPopupIndex = 0;
                 },
                 
                 // 🔔 Mostrar popup desde Pusher (tiempo real)
                 showPopupFromPusher(announcementData) {
-                    console.log('🔔 Popup recibido via Pusher:', announcementData);
-                    
                     // Agregar al final de la cola si no existe
                     if (!this.popups.find(p => p.id === announcementData.id)) {
                         this.popups.push(announcementData);
