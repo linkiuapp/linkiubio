@@ -457,13 +457,13 @@ document.addEventListener('DOMContentLoaded', function() {
     // }
 
     // Inicializar Form Wizard Manager si existe en la página
-    if (document.querySelector('.form-wizard, .form-wizard-labeled')) {
-        new FormWizardManager();
-    }
+    // if (document.querySelector('.form-wizard, .form-wizard-labeled')) {
+    //     new FormWizardManager();
+    // }
 });
 
 // Exportar para uso global
 window.ImageUploadManager = ImageUploadManager;
 // window.InvoiceManager = InvoiceManager; // COMENTADO - no está definido
-window.FormWizardManager = FormWizardManager;
+// window.FormWizardManager = FormWizardManager; // COMENTADO - no está definido
 window.formatFileSize = formatFileSize; 
