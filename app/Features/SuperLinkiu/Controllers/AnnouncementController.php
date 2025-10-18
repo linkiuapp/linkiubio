@@ -306,14 +306,8 @@ class AnnouncementController extends Controller
         // Generar nombre único
         $filename = time() . '_' . Str::random(10) . '.' . $file->getClientOriginalExtension();
 
-        // ✅ Crear directorio si no existe
-        $destinationPath = public_path('storage/announcements/banners');
-        if (!file_exists($destinationPath)) {
-            mkdir($destinationPath, 0755, true);
-        }
-
-        // ✅ GUARDAR con move() - Método estándar obligatorio
-        $file->move($destinationPath, $filename);
+        // ✅ Guardar en storage/app/public (correcto)
+        $file->storeAs('public/announcements/banners', $filename);
 
         return $filename;
     }
@@ -323,11 +317,8 @@ class AnnouncementController extends Controller
      */
     private function deleteBannerImage(string $filename): void
     {
-        // ✅ Eliminar archivo usando método estándar
-        $filePath = public_path('storage/announcements/banners/' . $filename);
-        if (file_exists($filePath)) {
-            unlink($filePath);
-        }
+        // ✅ Eliminar usando Storage facade
+        \Storage::disk('public')->delete('announcements/banners/' . $filename);
     }
 
     /**
@@ -335,25 +326,19 @@ class AnnouncementController extends Controller
      */
     private function duplicateBannerImage(string $originalFilename): string
     {
-        // ✅ Verificar archivo original usando método estándar
-        $originalPath = public_path('storage/announcements/banners/' . $originalFilename);
-        
-        if (!file_exists($originalPath)) {
+        // ✅ Verificar archivo original usando Storage
+        if (!\Storage::disk('public')->exists('announcements/banners/' . $originalFilename)) {
             throw new \Exception('Archivo original no encontrado');
         }
 
         $extension = pathinfo($originalFilename, PATHINFO_EXTENSION);
         $newFilename = time() . '_' . Str::random(10) . '.' . $extension;
-        $newPath = public_path('storage/announcements/banners/' . $newFilename);
 
-        // ✅ Crear directorio si no existe
-        $destinationDir = dirname($newPath);
-        if (!file_exists($destinationDir)) {
-            mkdir($destinationDir, 0755, true);
-        }
-
-        // ✅ Copiar archivo usando método estándar
-        copy($originalPath, $newPath);
+        // ✅ Copiar archivo usando Storage
+        \Storage::disk('public')->copy(
+            'announcements/banners/' . $originalFilename,
+            'announcements/banners/' . $newFilename
+        );
 
         return $newFilename;
     }
