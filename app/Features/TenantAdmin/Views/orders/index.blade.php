@@ -378,7 +378,7 @@ document.addEventListener('alpine:init', () => {
         cancelOrderNumber: '',
 
         init() {
-            console.log('Orders Manager initialized');
+            // Inicialización silenciosa
         },
 
         cancelOrder(orderId, orderNumber) {
@@ -417,7 +417,6 @@ document.addEventListener('alpine:init', () => {
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
                     alert('Error de conexión');
                 });
             }
@@ -451,7 +450,6 @@ function updateOrderStatus(orderId, newStatus) {
         }
     })
     .catch(error => {
-        console.error('Error:', error);
         alert('Error de conexión');
     });
 }
@@ -492,7 +490,7 @@ window.cancelOrder = function(orderId, orderNumber) {
             }
         }
     } catch (error) {
-        console.error('Error cargando conteo inicial:', error);
+        // Error silencioso
     }
 }
 
@@ -523,7 +521,7 @@ async function checkForNewOrders() {
             }
         }
     } catch (error) {
-        console.error('Error verificando nuevos pedidos:', error);
+        // Error silencioso
     }
 }
 
