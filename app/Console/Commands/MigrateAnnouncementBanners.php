@@ -18,18 +18,32 @@ class MigrateAnnouncementBanners extends Command
         $oldPath = public_path('storage/announcements/banners');
         $migrated = 0;
         $skipped = 0;
+        $notFound = 0;
+
+        // Crear directorio en storage/app/public si no existe
+        try {
+            Storage::disk('public')->makeDirectory('announcements/banners');
+            $this->info('✅ Directorio de destino verificado/creado');
+        } catch (\Exception $e) {
+            $this->error('❌ Error creando directorio: ' . $e->getMessage());
+        }
 
         // Verificar si existe el directorio antiguo
         if (!File::exists($oldPath)) {
-            $this->info('✅ No hay archivos en la ubicación antigua.');
+            $this->warn("⚠️  No existe directorio antiguo: {$oldPath}");
+            $this->info('💡 Todas las nuevas imágenes se guardarán en storage/app/public/announcements/banners/');
             return 0;
         }
 
-        // Crear directorio en storage/app/public si no existe
-        Storage::disk('public')->makeDirectory('announcements/banners');
-
         // Obtener todos los archivos
         $files = File::files($oldPath);
+        
+        if (count($files) === 0) {
+            $this->info('✅ No hay archivos en la ubicación antigua para migrar.');
+            return 0;
+        }
+
+        $this->info("📂 Encontrados " . count($files) . " archivos para migrar...");
 
         foreach ($files as $file) {
             $filename = $file->getFilename();
@@ -44,21 +58,22 @@ class MigrateAnnouncementBanners extends Command
 
             // Copiar archivo a la nueva ubicación
             try {
-                Storage::disk('public')->put(
-                    $newPath,
-                    File::get($file->getPathname())
-                );
-                $this->info("✅ Migrado: {$filename}");
+                $content = File::get($file->getPathname());
+                Storage::disk('public')->put($newPath, $content);
+                $this->info("✅ Migrado: {$filename} (" . number_format(strlen($content) / 1024, 2) . " KB)");
                 $migrated++;
             } catch (\Exception $e) {
                 $this->error("❌ Error al migrar {$filename}: " . $e->getMessage());
+                $notFound++;
             }
         }
 
         $this->info("\n📊 Resumen:");
-        $this->info("   Migrados: {$migrated}");
-        $this->info("   Omitidos: {$skipped}");
-        $this->info("\n💡 Puedes verificar los archivos en: storage/app/public/announcements/banners/");
+        $this->info("   ✅ Migrados: {$migrated}");
+        $this->info("   ⚠️  Omitidos: {$skipped}");
+        $this->info("   ❌ Errores: {$notFound}");
+        $this->info("\n💡 Ubicación final: storage/app/public/announcements/banners/");
+        $this->info("💡 Accesibles vía: /storage/announcements/banners/[filename]");
 
         return 0;
     }
