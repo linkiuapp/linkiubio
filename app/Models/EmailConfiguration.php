@@ -55,6 +55,18 @@ class EmailConfiguration extends Model
         'template_invoice_overdue',
         'template_invoice_overdue_vars',
         
+        // Templates Nuevos
+        'template_ticket_created_tenant',
+        'template_ticket_created_tenant_vars',
+        'template_ticket_created_superadmin',
+        'template_ticket_created_superadmin_vars',
+        'template_subscription_expiring_soon',
+        'template_subscription_expiring_soon_vars',
+        'template_password_changed_confirmation',
+        'template_password_changed_confirmation_vars',
+        'template_resend_store_credentials',
+        'template_resend_store_credentials_vars',
+        
         'test_emails',
         'stats'
     ];
@@ -77,6 +89,11 @@ class EmailConfiguration extends Model
         'template_invoice_generated_vars' => 'array',
         'template_payment_confirmed_vars' => 'array',
         'template_invoice_overdue_vars' => 'array',
+        'template_ticket_created_tenant_vars' => 'array',
+        'template_ticket_created_superadmin_vars' => 'array',
+        'template_subscription_expiring_soon_vars' => 'array',
+        'template_password_changed_confirmation_vars' => 'array',
+        'template_resend_store_credentials_vars' => 'array',
         'test_emails' => 'array',
         'stats' => 'array'
     ];
@@ -99,15 +116,17 @@ class EmailConfiguration extends Model
                 'title' => 'Gestión de Tiendas',
                 'templates' => [
                     'store_created' => [
-                        'name' => 'Nueva tienda creada',
-                        'description' => 'Se envía cuando se crea una nueva tienda',
+                        'name' => 'Nueva tienda creada (SuperAdmin)',
+                        'description' => 'Se envía cuando SuperAdmin crea una tienda manualmente (NO por solicitud)',
                         'required_vars' => [
+                            'admin_name' => 'Nombre del administrador',
                             'store_name' => 'Nombre de la tienda',
-                            'owner_name' => 'Nombre del dueño',
                             'admin_email' => 'Email del administrador',
                             'admin_password' => 'Contraseña generada',
                             'login_url' => 'URL para iniciar sesión',
-                            'plan_name' => 'Nombre del plan contratado'
+                            'store_url' => 'URL de la tienda',
+                            'plan_name' => 'Nombre del plan contratado',
+                            'support_email' => 'Email de soporte'
                         ]
                     ],
                     'store_verified' => [
@@ -163,16 +182,17 @@ class EmailConfiguration extends Model
                         ]
                     ],
                     'store_approved' => [
-                        'name' => 'Tienda aprobada',
-                        'description' => 'Se envía cuando una solicitud de tienda es aprobada',
+                        'name' => 'Solicitud de tienda aprobada',
+                        'description' => 'Se envía cuando SuperAdmin aprueba una solicitud de tienda pendiente',
                         'required_vars' => [
                             'admin_name' => 'Nombre del administrador',
                             'store_name' => 'Nombre de la tienda',
                             'admin_email' => 'Email del administrador',
-                            'password' => 'Contraseña de acceso',
+                            'admin_password' => 'Contraseña de acceso',
                             'login_url' => 'URL de acceso al panel',
                             'store_url' => 'URL de la tienda',
                             'plan_name' => 'Nombre del plan',
+                            'approval_date' => 'Fecha de aprobación',
                             'support_email' => 'Email de soporte'
                         ]
                     ],
@@ -207,6 +227,36 @@ class EmailConfiguration extends Model
             'tickets' => [
                 'title' => 'Tickets de Soporte',
                 'templates' => [
+                    'ticket_created_tenant' => [
+                        'name' => 'Ticket creado (Tenant Admin)',
+                        'description' => 'Confirmación al Tenant Admin cuando crea un ticket',
+                        'required_vars' => [
+                            'user_name' => 'Nombre del usuario',
+                            'store_name' => 'Nombre de la tienda',
+                            'ticket_number' => 'Número del ticket',
+                            'ticket_title' => 'Título del ticket',
+                            'ticket_content' => 'Contenido del ticket',
+                            'priority' => 'Prioridad',
+                            'created_at' => 'Fecha de creación',
+                            'estimated_response_time' => 'Tiempo estimado de respuesta',
+                            'ticket_url' => 'URL del ticket'
+                        ]
+                    ],
+                    'ticket_created_superadmin' => [
+                        'name' => 'Nuevo ticket (SuperAdmin)',
+                        'description' => 'Notifica al SuperAdmin cuando se crea un nuevo ticket',
+                        'required_vars' => [
+                            'store_name' => 'Nombre de la tienda',
+                            'user_name' => 'Nombre del usuario',
+                            'user_email' => 'Email del usuario',
+                            'ticket_number' => 'Número del ticket',
+                            'ticket_title' => 'Título del ticket',
+                            'ticket_content' => 'Contenido del ticket (primeros 200 caracteres)',
+                            'priority' => 'Prioridad',
+                            'created_at' => 'Fecha de creación',
+                            'ticket_url' => 'URL para revisar ticket'
+                        ]
+                    ],
                     'ticket_response' => [
                         'name' => 'Nueva respuesta en ticket',
                         'description' => 'Se envía cuando hay una respuesta en un ticket',
@@ -274,6 +324,51 @@ class EmailConfiguration extends Model
                             'days_overdue' => 'Días de atraso',
                             'payment_url' => 'URL para pagar',
                             'suspension_date' => 'Fecha de posible suspensión'
+                        ]
+                    ],
+                    'subscription_expiring_soon' => [
+                        'name' => 'Suscripción por vencer',
+                        'description' => 'Alerta al admin de tienda cuando su suscripción está por vencer (7 días antes)',
+                        'required_vars' => [
+                            'admin_name' => 'Nombre del admin',
+                            'store_name' => 'Nombre de la tienda',
+                            'plan_name' => 'Nombre del plan',
+                            'expiration_date' => 'Fecha de vencimiento',
+                            'days_remaining' => 'Días restantes',
+                            'renewal_amount' => 'Monto de renovación',
+                            'payment_url' => 'URL para pagar',
+                            'support_email' => 'Email de soporte',
+                            'support_phone' => 'Teléfono de soporte'
+                        ]
+                    ]
+                ]
+            ],
+            'security' => [
+                'title' => 'Seguridad y Accesos',
+                'templates' => [
+                    'password_changed_confirmation' => [
+                        'name' => 'Contraseña cambiada',
+                        'description' => 'Confirma que la contraseña fue actualizada exitosamente',
+                        'required_vars' => [
+                            'user_name' => 'Nombre del usuario',
+                            'change_date' => 'Fecha del cambio',
+                            'ip_address' => 'IP desde donde se cambió',
+                            'device_info' => 'Información del dispositivo',
+                            'support_email' => 'Email de soporte si no fue el usuario'
+                        ]
+                    ],
+                    'resend_store_credentials' => [
+                        'name' => 'Reenviar accesos de tienda',
+                        'description' => 'Reenvía las credenciales de acceso a la tienda (desde edición de tienda en SuperAdmin)',
+                        'required_vars' => [
+                            'admin_name' => 'Nombre del admin',
+                            'store_name' => 'Nombre de la tienda',
+                            'admin_email' => 'Email del admin',
+                            'login_url' => 'URL de acceso al panel',
+                            'store_url' => 'URL de la tienda',
+                            'plan_name' => 'Nombre del plan',
+                            'note' => 'Nota adicional (ej: "Tus credenciales fueron reenviadas por solicitud del SuperAdmin")',
+                            'support_email' => 'Email de soporte'
                         ]
                     ]
                 ]
