@@ -224,7 +224,7 @@ class StoreObserver
                     'first_name' => explode(' ', $storeAdmin->name)[0],
                     'invoice_number' => $invoice->invoice_number,
                     'amount' => '$' . number_format($invoice->amount, 0, ',', '.'),
-                    'due_date' => $invoice->due_date->format('d/m/Y'),
+                    'due_date' => \Carbon\Carbon::parse($invoice->due_date)->format('d/m/Y'),
                     'store_name' => $store->name,
                     'invoice_url' => route('tenant.admin.invoices.show', [
                         'store' => $store->slug,

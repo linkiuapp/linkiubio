@@ -2388,14 +2388,15 @@ class StoreController extends Controller
                 $admin = $store->admins()->findOrFail($request->admin_id);
 
                 \App\Jobs\SendEmailJob::dispatch('template', $admin->email, [
-                    'template_key' => 'store_credentials',
+                    'template_key' => 'resend_store_credentials', // ✅ Corregido
                     'variables' => [
-                        'store_name' => $store->name,
                         'admin_name' => $admin->name,
+                        'store_name' => $store->name,
                         'admin_email' => $admin->email,
-                        'password' => 'Para nueva contraseña, contacta soporte',
                         'login_url' => route('tenant.admin.login', $store->slug),
                         'store_url' => url($store->slug),
+                        'plan_name' => $store->plan->name ?? 'Explorer',
+                        'note' => 'Tus credenciales fueron reenviadas por solicitud del SuperAdmin.',
                         'support_email' => 'soporte@linkiu.email'
                     ]
                 ]);

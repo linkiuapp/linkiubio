@@ -149,6 +149,10 @@ class SendEmailJob implements ShouldQueue
             'invoice_generated' => $config->template_invoice_generated,
             'payment_confirmed' => $config->template_payment_confirmed,
             'invoice_overdue' => $config->template_invoice_overdue,
+            
+            // Security Templates
+            'password_changed_confirmation' => $config->template_password_changed_confirmation,
+            'resend_store_credentials' => $config->template_resend_store_credentials,
         ];
 
         return $mapping[$templateKey] ?? null;
@@ -180,6 +184,10 @@ class SendEmailJob implements ShouldQueue
             'invoice_generated' => 'billing',
             'payment_confirmed' => 'billing',
             'invoice_overdue' => 'billing',
+            
+            // Security
+            'password_changed_confirmation' => 'store_management',
+            'resend_store_credentials' => 'store_management',
         ];
 
         return $categoryMapping[$templateKey] ?? 'store_management';
