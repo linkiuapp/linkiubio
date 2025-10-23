@@ -378,41 +378,43 @@ class TicketController extends Controller
     {
         try {
             // Get store admin email
-            $storeAdminEmail = $ticket->store->admin_email ?? $ticket->store->email;
+            $storeAdmin = $ticket->store->admins()->first();
             
-            if ($storeAdminEmail) {
-                \App\Jobs\SendEmailJob::dispatch(
-                    'template',
-                    $storeAdminEmail,
-                    [
-                        'template_key' => 'ticket_created',
-                        'variables' => [
-                            'ticket_id' => $ticket->ticket_number,
-                            'ticket_subject' => $ticket->title,
-                            'customer_name' => $ticket->store->name,
-                            'status' => $ticket->status_label
-                        ]
-                    ]
-                );
+            if (!$storeAdmin) {
+                \Log::warning('📧 No se pudo enviar email de ticket creado por SuperAdmin (sin admin)', [
+                    'ticket_id' => $ticket->id,
+                    'store_id' => $ticket->store_id
+                ]);
+                return;
             }
-
-            // Also notify support team
-            $supportEmail = \App\Services\EmailService::getContextEmail('support');
-            if ($supportEmail && $supportEmail !== $storeAdminEmail) {
-                \App\Jobs\SendEmailJob::dispatch(
-                    'template',
-                    $supportEmail,
-                    [
-                        'template_key' => 'ticket_created',
-                        'variables' => [
-                            'ticket_id' => $ticket->ticket_number,
-                            'ticket_subject' => $ticket->title,
-                            'customer_name' => $ticket->store->name,
-                            'status' => $ticket->status_label
-                        ]
+            
+            \App\Jobs\SendEmailJob::dispatch(
+                'template',
+                $storeAdmin->email,
+                [
+                    'template_key' => 'ticket_created_superadmin', // ✅ Template correcto
+                    'variables' => [
+                        'store_name' => $ticket->store->name,
+                        'user_name' => $storeAdmin->name,
+                        'user_email' => $storeAdmin->email,
+                        'ticket_number' => $ticket->ticket_number,
+                        'ticket_title' => $ticket->title,
+                        'ticket_content' => \Str::limit($ticket->description, 200),
+                        'priority' => $ticket->priority_label,
+                        'created_at' => $ticket->created_at->format('d/m/Y H:i'),
+                        'ticket_url' => route('tenant.admin.tickets.show', [
+                            'store' => $ticket->store->slug,
+                            'ticket' => $ticket->id
+                        ])
                     ]
-                );
-            }
+                ]
+            );
+            
+            \Log::info('📧 Email de ticket creado por SuperAdmin enviado', [
+                'ticket_id' => $ticket->id,
+                'ticket_number' => $ticket->ticket_number,
+                'store_admin_email' => $storeAdmin->email
+            ]);
 
         } catch (\Exception $e) {
             \Log::error('Error sending ticket created notification', [
