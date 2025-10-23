@@ -145,15 +145,16 @@ class StoreApprovalController extends Controller
                 ]);
             }
             
-            // Generar factura si no existe ya
-            $this->generateInvoiceForApprovedStore($store);
+            // Generar factura si no existe ya (SIN enviar email todavía)
+            $invoice = $this->generateInvoiceForApprovedStore($store, false);
             
             DB::commit();
             
-            // Enviar email si se solicitó
-            if ($request->boolean('send_welcome_email', true)) {
-                $admin = $store->admins()->first();
-                if ($admin) {
+            // 📧 ENVIAR EMAILS EN ORDEN CORRECTO
+            $admin = $store->admins()->first();
+            if ($admin) {
+                // 1️⃣ Primero: Email de aprobación
+                if ($request->boolean('send_welcome_email', true)) {
                     \App\Jobs\SendEmailJob::dispatch('template', $admin->email, [
                         'template_key' => 'store_approved',
                         'variables' => [
@@ -161,11 +162,30 @@ class StoreApprovalController extends Controller
                             'admin_name' => $admin->name,
                             'store_name' => $store->name,
                             'admin_email' => $admin->email,
-                            'password' => '(contraseña ya establecida)',
+                            'admin_password' => '(contraseña ya establecida)',
                             'login_url' => route('tenant.admin.login', $store->slug),
                             'store_url' => url($store->slug),
                             'plan_name' => $store->plan->name ?? 'Explorer',
+                            'approval_date' => now()->format('d/m/Y'),
                             'support_email' => 'soporte@linkiu.bio'
+                        ]
+                    ]);
+                }
+                
+                // 2️⃣ Segundo: Email de factura generada (si existe factura)
+                if ($invoice) {
+                    \App\Jobs\SendEmailJob::dispatch('template', $admin->email, [
+                        'template_key' => 'invoice_generated',
+                        'variables' => [
+                            'first_name' => explode(' ', $admin->name)[0],
+                            'invoice_number' => $invoice->invoice_number,
+                            'amount' => '$' . number_format($invoice->amount, 0, ',', '.'),
+                            'due_date' => $invoice->due_date->format('d/m/Y'),
+                            'store_name' => $store->name,
+                            'invoice_url' => route('tenant.admin.invoices.show', [
+                                'store' => $store->slug,
+                                'invoice' => $invoice->id
+                            ])
                         ]
                     ]);
                 }
@@ -256,8 +276,12 @@ class StoreApprovalController extends Controller
 
     /**
      * Generar factura para tienda aprobada manualmente
+     * 
+     * @param Store $store
+     * @param bool $sendEmail - Si es false, solo crea la factura sin enviar email
+     * @return \App\Shared\Models\Invoice|null
      */
-    private function generateInvoiceForApprovedStore(Store $store): void
+    private function generateInvoiceForApprovedStore(Store $store, bool $sendEmail = true): ?\App\Shared\Models\Invoice
     {
         try {
             // Verificar si ya tiene factura
@@ -265,7 +289,7 @@ class StoreApprovalController extends Controller
                 \Log::info('📋 STORE APPROVAL: Tienda ya tiene factura, no se genera nueva', [
                     'store_id' => $store->id
                 ]);
-                return;
+                return $store->invoices()->latest()->first();
             }
 
             // Verificar que tenga plan
@@ -273,7 +297,7 @@ class StoreApprovalController extends Controller
                 \Log::warning('📋 STORE APPROVAL: Tienda sin plan, no se puede generar factura', [
                     'store_id' => $store->id
                 ]);
-                return;
+                return null;
             }
 
             // Crear suscripción si no existe
@@ -328,37 +352,22 @@ class StoreApprovalController extends Controller
                 ]
             ]);
 
-            // Enviar email de factura generada
-            $storeAdmin = $store->admins()->first();
-            if ($storeAdmin) {
-                \App\Jobs\SendEmailJob::dispatch('template', $storeAdmin->email, [
-                    'template_key' => 'invoice_generated',
-                    'variables' => [
-                        'first_name' => explode(' ', $storeAdmin->name)[0],
-                        'invoice_number' => $invoice->invoice_number,
-                        'amount' => '$' . number_format($invoice->amount, 0, ',', '.'),
-                        'due_date' => $invoice->due_date->format('d/m/Y'),
-                        'store_name' => $store->name,
-                        'invoice_url' => route('tenant.admin.invoices.show', [
-                            'store' => $store->slug,
-                            'invoice' => $invoice->id
-                        ])
-                    ]
-                ]);
-            }
-
-            \Log::info('✅ STORE APPROVAL: Factura generada y email enviado', [
+            \Log::info('✅ STORE APPROVAL: Factura generada', [
                 'store_id' => $store->id,
                 'invoice_id' => $invoice->id,
                 'invoice_number' => $invoice->invoice_number,
-                'amount' => $amount
+                'amount' => $amount,
+                'send_email' => $sendEmail ? 'Sí (después del commit)' : 'No'
             ]);
+
+            return $invoice;
 
         } catch (\Exception $e) {
             \Log::error('❌ STORE APPROVAL: Error generando factura', [
                 'store_id' => $store->id,
                 'error' => $e->getMessage()
             ]);
+            return null;
         }
     }
 }
