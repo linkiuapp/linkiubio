@@ -430,9 +430,19 @@ document.addEventListener('alpine:init', () => {
                         open2.disabled = false;
                         close2.disabled = false;
                         
-                        // Autocompletar horario principal si está vacío
-                        if (!open1.value) open1.value = '09:00';
-                        if (!close1.value) close1.value = '18:00';
+                        // Autocompletar horario principal si está vacío O si tiene valores inválidos
+                        if (!open1.value || open1.value === '' || open1.value === '00:00') {
+                            open1.value = '09:00';
+                        }
+                        if (!close1.value || close1.value === '' || close1.value === '00:00') {
+                            close1.value = '18:00';
+                        }
+                        
+                        // Validar que la hora de apertura sea menor que la de cierre
+                        if (open1.value >= close1.value) {
+                            open1.value = '09:00';
+                            close1.value = '18:00';
+                        }
                     }
                 });
                 
