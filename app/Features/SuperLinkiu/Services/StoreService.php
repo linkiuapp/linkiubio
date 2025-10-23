@@ -526,16 +526,14 @@ class StoreService
     {
         try {
             if ($store->approval_status === 'approved') {
-                // ✅ APROBADA: Enviar credenciales
+                // ✅ AUTO-APROBADA: Enviar email de "Nueva tienda creada"
                 \App\Jobs\SendEmailJob::dispatch('template', $storeAdmin->email, [
-                    'template_key' => 'store_approved',
+                    'template_key' => 'store_created', // ✅ Corregido: store_created para auto-aprobación
                     'variables' => [
-                        'first_name' => $storeAdmin->name,
                         'admin_name' => $storeAdmin->name,
                         'store_name' => $store->name,
-                        'owner_name' => $storeAdmin->name,
                         'admin_email' => $storeAdmin->email,
-                        'password' => $password,
+                        'admin_password' => $password,
                         'login_url' => route('tenant.admin.login', $store->slug),
                         'store_url' => url($store->slug),
                         'plan_name' => $store->plan->name ?? 'Plan básico',
@@ -543,7 +541,7 @@ class StoreService
                     ]
                 ]);
 
-                Log::info('📧 STORE SERVICE: Email de aprobación automática enviado', [
+                Log::info('📧 STORE SERVICE: Email de nueva tienda creada enviado (auto-aprobación)', [
                     'store_id' => $store->id,
                     'admin_email' => $storeAdmin->email
                 ]);

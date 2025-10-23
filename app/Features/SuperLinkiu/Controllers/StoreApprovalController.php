@@ -145,6 +145,9 @@ class StoreApprovalController extends Controller
                 ]);
             }
             
+            // Generar factura si no existe ya
+            $this->generateInvoiceForApprovedStore($store);
+            
             DB::commit();
             
             // Enviar email si se solicitó
@@ -249,6 +252,114 @@ class StoreApprovalController extends Controller
             'otro' => 'Otro motivo (ver mensaje)',
             default => ucfirst(str_replace('_', ' ', $reason))
         };
+    }
+
+    /**
+     * Generar factura para tienda aprobada manualmente
+     */
+    private function generateInvoiceForApprovedStore(Store $store): void
+    {
+        try {
+            // Verificar si ya tiene factura
+            if ($store->invoices()->exists()) {
+                \Log::info('📋 STORE APPROVAL: Tienda ya tiene factura, no se genera nueva', [
+                    'store_id' => $store->id
+                ]);
+                return;
+            }
+
+            // Verificar que tenga plan
+            if (!$store->plan_id || !$store->plan) {
+                \Log::warning('📋 STORE APPROVAL: Tienda sin plan, no se puede generar factura', [
+                    'store_id' => $store->id
+                ]);
+                return;
+            }
+
+            // Crear suscripción si no existe
+            if (!$store->subscription) {
+                $billingCycle = request('billing_period', 'monthly');
+                $periodStart = now();
+                $periodDays = match($billingCycle) {
+                    'monthly' => 30,
+                    'quarterly' => 90,
+                    'biannual' => 180,
+                    default => 30
+                };
+                $periodEnd = $periodStart->copy()->addDays($periodDays);
+
+                $subscription = \App\Shared\Models\Subscription::create([
+                    'store_id' => $store->id,
+                    'plan_id' => $store->plan_id,
+                    'status' => \App\Shared\Models\Subscription::STATUS_ACTIVE,
+                    'billing_cycle' => $billingCycle,
+                    'current_period_start' => $periodStart->toDateString(),
+                    'current_period_end' => $periodEnd->toDateString(),
+                    'next_billing_date' => $periodEnd->toDateString(),
+                    'next_billing_amount' => $store->plan->getPriceForPeriod($billingCycle),
+                    'metadata' => [
+                        'created_from' => 'manual_approval',
+                        'approved_by' => auth()->id()
+                    ]
+                ]);
+            } else {
+                $subscription = $store->subscription;
+                $billingCycle = $subscription->billing_cycle;
+            }
+
+            // Generar factura
+            $issueDate = now();
+            $dueDate = $issueDate->copy()->addDays(15);
+            $amount = $store->plan->getPriceForPeriod($billingCycle);
+
+            $invoice = \App\Shared\Models\Invoice::create([
+                'store_id' => $store->id,
+                'subscription_id' => $subscription->id,
+                'plan_id' => $store->plan_id,
+                'amount' => $amount,
+                'period' => $billingCycle,
+                'status' => 'pending',
+                'issue_date' => $issueDate->toDateString(),
+                'due_date' => $dueDate->toDateString(),
+                'notes' => 'Factura generada tras aprobación manual de tienda',
+                'metadata' => [
+                    'generated_from' => 'manual_approval',
+                    'approved_by' => auth()->id()
+                ]
+            ]);
+
+            // Enviar email de factura generada
+            $storeAdmin = $store->admins()->first();
+            if ($storeAdmin) {
+                \App\Jobs\SendEmailJob::dispatch('template', $storeAdmin->email, [
+                    'template_key' => 'invoice_generated',
+                    'variables' => [
+                        'first_name' => explode(' ', $storeAdmin->name)[0],
+                        'invoice_number' => $invoice->invoice_number,
+                        'amount' => '$' . number_format($invoice->amount, 0, ',', '.'),
+                        'due_date' => $invoice->due_date->format('d/m/Y'),
+                        'store_name' => $store->name,
+                        'invoice_url' => route('tenant.admin.invoices.show', [
+                            'store' => $store->slug,
+                            'invoice' => $invoice->id
+                        ])
+                    ]
+                ]);
+            }
+
+            \Log::info('✅ STORE APPROVAL: Factura generada y email enviado', [
+                'store_id' => $store->id,
+                'invoice_id' => $invoice->id,
+                'invoice_number' => $invoice->invoice_number,
+                'amount' => $amount
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('❌ STORE APPROVAL: Error generando factura', [
+                'store_id' => $store->id,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 }
 

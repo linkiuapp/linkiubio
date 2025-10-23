@@ -146,19 +146,16 @@ class BillingNotificationService
             'template',
             $storeAdminEmail,
             [
-                'template_key' => 'payment_received',
+                'template_key' => 'payment_confirmed', // ✅ Corregido de 'payment_received' a 'payment_confirmed'
                 'variables' => [
-                    'store_name' => $invoice->store->name,
                     'invoice_number' => $invoice->invoice_number,
-                    'amount' => $invoice->getFormattedAmount(),
+                    'amount' => '$' . number_format($invoice->amount, 0, ',', '.'),
                     'payment_date' => $invoice->paid_date->format('d/m/Y'),
+                    'payment_method' => 'Transferencia bancaria', // Método por defecto
+                    'next_due_date' => $invoice->store->subscription ? 
+                        $invoice->store->subscription->next_billing_date->format('d/m/Y') : 'Por definir',
+                    'store_name' => $invoice->store->name,
                     'plan_name' => $invoice->plan->name,
-                    'period' => $invoice->getPeriodLabel(),
-                    'next_billing_date' => $invoice->store->subscription ? 
-                        $invoice->store->subscription->next_billing_date->format('d/m/Y') : 'Próximamente',
-                    'service_status' => 'Tu tienda continúa activa y operativa.',
-                    'thank_you_message' => '¡Gracias por tu pago puntual!',
-                    'dashboard_url' => $this->getDashboardUrl($invoice->store)
                 ]
             ]
         );
