@@ -175,10 +175,7 @@ class StoreObserver
                 ]
             ]);
 
-            // 3. ENVIAR EMAIL DE FACTURA GENERADA
-            $this->sendInvoiceGeneratedEmail($store, $invoice);
-
-            // 4. LOG DEL PROCESO
+            // 3. LOG DEL PROCESO (Email se enviará desde StoreService después de crear admin)
             Log::info("✅ Auto-billing setup completed for store {$store->id}", [
                 'store_name' => $store->name,
                 'plan_name' => $store->plan->name,
@@ -198,52 +195,6 @@ class StoreObserver
                 'store_name' => $store->name,
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
-            ]);
-        }
-    }
-
-    /**
-     * Enviar email de factura generada
-     */
-    private function sendInvoiceGeneratedEmail(Store $store, $invoice): void
-    {
-        try {
-            $storeAdmin = $store->admins()->first();
-            
-            if (!$storeAdmin) {
-                Log::warning('📧 STORE OBSERVER: No se pudo enviar email de factura (sin admin)', [
-                    'store_id' => $store->id,
-                    'invoice_id' => $invoice->id
-                ]);
-                return;
-            }
-            
-            \App\Jobs\SendEmailJob::dispatch('template', $storeAdmin->email, [
-                'template_key' => 'invoice_generated',
-                'variables' => [
-                    'first_name' => explode(' ', $storeAdmin->name)[0],
-                    'invoice_number' => $invoice->invoice_number,
-                    'amount' => '$' . number_format($invoice->amount, 0, ',', '.'),
-                    'due_date' => \Carbon\Carbon::parse($invoice->due_date)->format('d/m/Y'),
-                    'store_name' => $store->name,
-                    'invoice_url' => route('tenant.admin.invoices.show', [
-                        'store' => $store->slug,
-                        'invoice' => $invoice->id
-                    ])
-                ]
-            ]);
-
-            Log::info('📧 STORE OBSERVER: Email de factura generada enviado', [
-                'store_id' => $store->id,
-                'invoice_id' => $invoice->id,
-                'admin_email' => $storeAdmin->email
-            ]);
-
-        } catch (\Exception $e) {
-            Log::error('📧 STORE OBSERVER: Error enviando email de factura', [
-                'store_id' => $store->id,
-                'invoice_id' => $invoice->id,
-                'error' => $e->getMessage()
             ]);
         }
     }

@@ -83,6 +83,11 @@ class StoreService
             // 📧 ENVIAR EMAILS SEGÚN ESTADO DE APROBACIÓN
             $this->sendStoreCreationEmails($store, $storeAdmin, $data['admin_password']);
 
+            // 📧 ENVIAR EMAIL DE FACTURA GENERADA (si existe)
+            if ($store->approval_status === 'approved') {
+                $this->sendInvoiceEmailIfExists($store, $storeAdmin);
+            }
+
             // 📡 BROADCAST SI ES SOLICITUD PENDIENTE
             if ($store->approval_status === 'pending_approval') {
                 event(new StoreRequestCreated($store));
@@ -897,5 +902,50 @@ class StoreService
         ];
 
         return $labels[$status] ?? ucfirst($status);
+    }
+
+    /**
+     * Enviar email de factura generada si existe
+     */
+    private function sendInvoiceEmailIfExists(Store $store, User $storeAdmin): void
+    {
+        try {
+            // Buscar la factura más reciente de la tienda
+            $invoice = $store->invoices()->latest()->first();
+            
+            if (!$invoice) {
+                Log::info('📧 STORE SERVICE: No hay factura para enviar email', [
+                    'store_id' => $store->id
+                ]);
+                return;
+            }
+
+            \App\Jobs\SendEmailJob::dispatch('template', $storeAdmin->email, [
+                'template_key' => 'invoice_generated',
+                'variables' => [
+                    'first_name' => explode(' ', $storeAdmin->name)[0],
+                    'invoice_number' => $invoice->invoice_number,
+                    'amount' => '$' . number_format($invoice->amount, 0, ',', '.'),
+                    'due_date' => $invoice->due_date->format('d/m/Y'),
+                    'store_name' => $store->name,
+                    'invoice_url' => route('tenant.admin.invoices.show', [
+                        'store' => $store->slug,
+                        'invoice' => $invoice->id
+                    ])
+                ]
+            ]);
+
+            Log::info('📧 STORE SERVICE: Email de factura generada enviado', [
+                'store_id' => $store->id,
+                'invoice_id' => $invoice->id,
+                'admin_email' => $storeAdmin->email
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('📧 STORE SERVICE: Error enviando email de factura', [
+                'store_id' => $store->id,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 }
