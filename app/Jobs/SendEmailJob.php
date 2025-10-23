@@ -134,6 +134,12 @@ class SendEmailJob implements ShouldQueue
             'store_reactivated' => $config->template_store_reactivated,
             'plan_changed' => $config->template_plan_changed,
             
+            // Store Approval Templates (FALTABAN ESTOS)
+            'store_pending_review' => $config->template_store_pending_review,
+            'store_approved' => $config->template_store_approved,
+            'store_rejected' => $config->template_store_rejected,
+            'new_store_request' => $config->template_new_store_request_superadmin,
+            
             // Ticket Templates
             'ticket_response' => $config->template_ticket_response,
             'ticket_resolved' => $config->template_ticket_resolved,
@@ -159,6 +165,10 @@ class SendEmailJob implements ShouldQueue
             'store_verified' => 'store_management',
             'store_suspended' => 'store_management',
             'store_reactivated' => 'store_management',
+            'store_pending_review' => 'store_management',
+            'store_approved' => 'store_management',
+            'store_rejected' => 'store_management',
+            'new_store_request' => 'store_management',
             
             // Tickets
             'ticket_response' => 'tickets',
