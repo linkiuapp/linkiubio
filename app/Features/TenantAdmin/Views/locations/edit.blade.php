@@ -412,11 +412,28 @@ document.addEventListener('alpine:init', () => {
             document.querySelectorAll('.schedule-closed-checkbox').forEach(checkbox => {
                 checkbox.addEventListener('change', function() {
                     const day = this.dataset.day;
-                    const inputs = document.querySelectorAll(`[name^="day_${day}_open"], [name^="day_${day}_close"]`);
+                    const open1 = document.querySelector(`[name="day_${day}_open_1"]`);
+                    const close1 = document.querySelector(`[name="day_${day}_close_1"]`);
+                    const open2 = document.querySelector(`[name="day_${day}_open_2"]`);
+                    const close2 = document.querySelector(`[name="day_${day}_close_2"]`);
                     
-                    inputs.forEach(input => {
-                        input.disabled = this.checked;
-                    });
+                    if (this.checked) {
+                        // Día cerrado: deshabilitar campos
+                        open1.disabled = true;
+                        close1.disabled = true;
+                        open2.disabled = true;
+                        close2.disabled = true;
+                    } else {
+                        // Día abierto: habilitar campos
+                        open1.disabled = false;
+                        close1.disabled = false;
+                        open2.disabled = false;
+                        close2.disabled = false;
+                        
+                        // Autocompletar horario principal si está vacío
+                        if (!open1.value) open1.value = '09:00';
+                        if (!close1.value) close1.value = '18:00';
+                    }
                 });
                 
                 // Trigger initial state
