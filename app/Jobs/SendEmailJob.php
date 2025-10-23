@@ -141,9 +141,13 @@ class SendEmailJob implements ShouldQueue
             'new_store_request' => $config->template_new_store_request_superadmin,
             
             // Ticket Templates
+            'ticket_created_tenant' => $config->template_ticket_created_tenant,
+            'ticket_created_superadmin' => $config->template_ticket_created_superadmin,
             'ticket_response' => $config->template_ticket_response,
             'ticket_resolved' => $config->template_ticket_resolved,
             'ticket_assigned' => $config->template_ticket_assigned,
+            'ticket_auto_closed' => $config->template_ticket_auto_closed,
+            'ticket_reopened' => $config->template_ticket_reopened,
             
             // Billing Templates
             'invoice_generated' => $config->template_invoice_generated,
@@ -175,9 +179,13 @@ class SendEmailJob implements ShouldQueue
             'new_store_request' => 'store_management',
             
             // Tickets
+            'ticket_created_tenant' => 'tickets',
+            'ticket_created_superadmin' => 'tickets',
             'ticket_response' => 'tickets',
             'ticket_resolved' => 'tickets',
             'ticket_assigned' => 'tickets',
+            'ticket_auto_closed' => 'tickets',
+            'ticket_reopened' => 'tickets',
             
             // Billing
             'plan_changed' => 'billing',

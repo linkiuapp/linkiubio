@@ -57,3 +57,9 @@ Schedule::command('stores:cleanup-old-requests --days=90')
     ->at('02:00')
     ->name('cleanup-old-store-requests')
     ->description('Clean up rejected store requests older than 90 days');
+
+// 🎫 Programar cierre automático de tickets inactivos (diariamente)
+Schedule::command('tickets:auto-close-inactive --days=7')
+    ->dailyAt('00:00')
+    ->name('auto-close-inactive-tickets')
+    ->description('Auto-close resolved tickets after 7 days of inactivity');

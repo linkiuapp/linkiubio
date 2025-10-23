@@ -242,6 +242,34 @@ class Ticket extends Model
         return $this->save();
     }
 
+    public function reopen($userId = null, $reason = null): bool
+    {
+        $oldStatus = $this->status;
+        
+        $this->status = 'open';
+        $this->resolved_at = null;
+        $this->closed_at = null;
+        
+        $saved = $this->save();
+        
+        if ($saved) {
+            // Agregar nota de reapertura
+            $message = "Ticket reabierto desde estado '{$this->getStatusLabelFromValue($oldStatus)}'";
+            if ($reason) {
+                $message .= ". Razón: {$reason}";
+            }
+            
+            $this->addResponse(
+                $userId,
+                $message,
+                'status_change',
+                false // Nota interna
+            );
+        }
+        
+        return $saved;
+    }
+
     public function assignTo($userId): bool
     {
         $this->assigned_to = $userId;
@@ -249,6 +277,18 @@ class Ticket extends Model
             $this->status = 'in_progress';
         }
         return $this->save();
+    }
+    
+    // Helper para obtener el label de un status
+    private function getStatusLabelFromValue($status): string
+    {
+        return match($status) {
+            'open' => 'Abierto',
+            'in_progress' => 'En Progreso',
+            'resolved' => 'Resuelto',
+            'closed' => 'Cerrado',
+            default => 'Desconocido'
+        };
     }
 
     public function addResponse($userId, $message, $responseType = 'response', $isPublic = true): TicketResponse

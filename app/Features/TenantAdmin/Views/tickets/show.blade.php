@@ -277,12 +277,74 @@
         </div>
     @else
         <div class="bg-accent-50 rounded-lg p-6 text-center">
-            <div class="flex flex-col items-center gap-2">
+            <div class="flex flex-col items-center gap-4">
                 <x-solar-lock-outline class="w-12 h-12 text-black-200" />
-                <p class="text-black-300">Este ticket está {{ $ticket->status_label }} y no acepta más respuestas</p>
+                <p class="text-black-300">Este ticket está {{ $ticket->status_label }}</p>
+                
+                @if(in_array($ticket->status, ['resolved', 'closed']))
+                    <div class="mt-2">
+                        <p class="text-sm text-black-300 mb-3">¿El problema persiste o tienes más preguntas?</p>
+                        <button x-on:click="showReopenModal = true" 
+                                class="btn-warning px-6 py-2 rounded-lg flex items-center gap-2 mx-auto hover:scale-105 transition-transform">
+                            <x-solar-restart-outline class="w-5 h-5" />
+                            🔄 Reabrir Ticket
+                        </button>
+                    </div>
+                @endif
             </div>
         </div>
     @endif
+
+    <!-- Modal para reabrir ticket -->
+    <div x-show="showReopenModal" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+         style="display: none;">
+        
+        <div x-on:click.away="showReopenModal = false" 
+             class="bg-accent-50 rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 class="text-lg font-semibold text-black-400 mb-4">¿Reabrir este ticket?</h3>
+            
+            <p class="text-black-300 text-sm mb-4">
+                El ticket volverá al estado "Abierto" y nuestro equipo de soporte será notificado.
+                Podrás continuar la conversación agregando nuevas respuestas.
+            </p>
+            
+            <form id="reopenForm" method="POST" action="{{ route('tenant.admin.tickets.reopen', ['store' => $store->slug, 'ticket' => $ticket]) }}">
+                @csrf
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-black-300 mb-2">
+                        Razón de reapertura (opcional)
+                    </label>
+                    <textarea name="reason" 
+                              rows="3"
+                              placeholder="Ej: El problema volvió a ocurrir..."
+                              class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-warning-200"
+                              maxlength="500"></textarea>
+                    <p class="text-black-200 text-xs mt-1">Máximo 500 caracteres</p>
+                </div>
+                
+                <div class="flex justify-end gap-3 pt-4 border-t border-accent-100">
+                    <button type="button" 
+                            x-on:click="showReopenModal = false"
+                            class="btn-outline-secondary px-4 py-2 rounded-lg">
+                        Cancelar
+                    </button>
+                    <button type="submit" 
+                            class="btn-warning px-6 py-2 rounded-lg flex items-center gap-2">
+                        <x-solar-restart-outline class="w-4 h-4" />
+                        Reabrir Ticket
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <!-- Modal para cambiar estado -->
     <div x-show="showStatusModal" 
@@ -297,19 +359,18 @@
         
         <div x-on:click.away="showStatusModal = false" 
              class="bg-accent-50 rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 class="text-lg font-semibold text-black-400 mb-4">Cambiar Estado del Ticket</h3>
+            <h3 class="text-lg font-semibold text-black-400 mb-4">¿Tu problema fue resuelto?</h3>
+            
+            <p class="text-black-300 text-sm mb-4">
+                Si tu problema fue solucionado, puedes cerrar este ticket. 
+                Si el problema persiste, siempre puedes reabrirlo desde tu panel.
+            </p>
             
             <div class="space-y-3">
-                <button x-on:click="updateStatus('resolved')" 
-                        class="w-full btn-success px-4 py-2 rounded-lg flex items-center gap-2">
-                    <x-solar-check-circle-outline class="w-4 h-4" />
-                    Marcar como Resuelto
-                </button>
-                
                 <button x-on:click="updateStatus('closed')" 
-                        class="w-full btn-secondary px-4 py-2 rounded-lg flex items-center gap-2">
-                    <x-solar-lock-outline class="w-4 h-4" />
-                    Cerrar Ticket
+                        class="w-full btn-success px-4 py-2 rounded-lg flex items-center gap-2 hover:scale-105 transition-transform">
+                    <x-solar-check-circle-outline class="w-5 h-5" />
+                    ✅ Sí, mi problema está resuelto
                 </button>
             </div>
             
@@ -327,6 +388,7 @@
 function ticketDetail() {
     return {
         showStatusModal: false,
+        showReopenModal: false,
         
         async updateStatus(status) {
             try {

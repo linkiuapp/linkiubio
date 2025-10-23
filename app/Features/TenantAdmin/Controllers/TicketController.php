@@ -123,9 +123,12 @@ class TicketController extends Controller
             $ticket->update(['attachments' => $attachments]);
         }
 
+        // Enviar email de confirmación al Tenant Admin
+        $this->sendTicketCreatedEmail($ticket);
+
         return redirect()
             ->route('tenant.admin.tickets.show', ['store' => $store->slug, 'ticket' => $ticket])
-            ->with('success', 'Ticket creado exitosamente.');
+            ->with('success', 'Ticket creado exitosamente. Recibirás una confirmación por email.');
     }
 
     public function addResponse(Request $request, $storeSlug, Ticket $ticket): RedirectResponse
@@ -185,17 +188,19 @@ class TicketController extends Controller
         }
 
         $validated = $request->validate([
-            'status' => 'required|in:open,in_progress,resolved,closed',
+            'status' => 'required|in:open,in_progress,closed', // Solo closed ahora
         ]);
 
         $oldStatus = $ticket->status;
         $newStatus = $validated['status'];
 
         switch ($newStatus) {
-            case 'resolved':
-                $ticket->markAsResolved(auth()->id());
-                break;
             case 'closed':
+                // Marcar primero como resuelto si no lo está
+                if ($ticket->status !== 'resolved') {
+                    $ticket->markAsResolved(auth()->id());
+                }
+                // Luego cerrar
                 $ticket->markAsClosed(auth()->id());
                 break;
             default:
@@ -217,6 +222,130 @@ class TicketController extends Controller
             'status' => $ticket->fresh()->status,
             'status_label' => $ticket->fresh()->status_label,
         ]);
+    }
+
+    public function reopen(Request $request, $storeSlug, Ticket $ticket): RedirectResponse
+    {
+        $store = $request->route('store');
+        
+        // Verificar que el ticket pertenece a la tienda actual
+        if ($ticket->store_id !== $store->id) {
+            abort(403);
+        }
+
+        // Validar que el ticket esté cerrado o resuelto
+        if (!in_array($ticket->status, ['resolved', 'closed'])) {
+            return redirect()->back()->with('error', 'Solo se pueden reabrir tickets cerrados o resueltos.');
+        }
+
+        $validated = $request->validate([
+            'reason' => 'nullable|string|max:500',
+        ]);
+
+        // Reabrir el ticket
+        $ticket->reopen(auth()->id(), $validated['reason'] ?? null);
+
+        // Enviar email de reapertura
+        $this->sendTicketReopenedEmail($ticket, $validated['reason'] ?? null);
+
+        return redirect()
+            ->route('tenant.admin.tickets.show', ['store' => $storeSlug, 'ticket' => $ticket])
+            ->with('success', '✅ Ticket reabierto exitosamente. Puedes continuar agregando respuestas.');
+    }
+
+    private function sendTicketCreatedEmail(Ticket $ticket): void
+    {
+        try {
+            $storeAdmin = $ticket->store->admins()->first();
+            
+            if (!$storeAdmin) {
+                Log::warning('📧 No se pudo enviar email de creación de ticket (sin admin)', [
+                    'ticket_id' => $ticket->id
+                ]);
+                return;
+            }
+
+            $estimatedTime = match($ticket->priority) {
+                'urgent' => '2-4 horas',
+                'high' => '4-8 horas',
+                'medium' => '1-2 días',
+                'low' => '2-3 días',
+                default => '24-48 horas'
+            };
+
+            \App\Jobs\SendEmailJob::dispatch('template', $storeAdmin->email, [
+                'template_key' => 'ticket_created_tenant',
+                'variables' => [
+                    'user_name' => $storeAdmin->name,
+                    'store_name' => $ticket->store->name,
+                    'ticket_number' => $ticket->ticket_number,
+                    'ticket_title' => $ticket->title,
+                    'ticket_content' => \Str::limit($ticket->description, 200),
+                    'priority' => $ticket->priority_label,
+                    'created_at' => $ticket->created_at->format('d/m/Y H:i'),
+                    'estimated_response_time' => $estimatedTime,
+                    'ticket_url' => route('tenant.admin.tickets.show', [
+                        'store' => $ticket->store->slug,
+                        'ticket' => $ticket->id
+                    ])
+                ]
+            ]);
+
+            Log::info('📧 Email de creación de ticket enviado', [
+                'ticket_id' => $ticket->id,
+                'ticket_number' => $ticket->ticket_number,
+                'admin_email' => $storeAdmin->email
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('❌ Error enviando email de creación de ticket', [
+                'ticket_id' => $ticket->id,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+
+    private function sendTicketReopenedEmail(Ticket $ticket, ?string $reason): void
+    {
+        try {
+            $storeAdmin = $ticket->store->admins()->first();
+            
+            if (!$storeAdmin) {
+                Log::warning('📧 No se pudo enviar email de reapertura (sin admin)', [
+                    'ticket_id' => $ticket->id
+                ]);
+                return;
+            }
+
+            \App\Jobs\SendEmailJob::dispatch('template', $storeAdmin->email, [
+                'template_key' => 'ticket_reopened',
+                'variables' => [
+                    'user_name' => $storeAdmin->name,
+                    'store_name' => $ticket->store->name,
+                    'ticket_number' => $ticket->ticket_number,
+                    'ticket_title' => $ticket->title,
+                    'reopened_date' => now()->format('d/m/Y H:i'),
+                    'reopen_reason' => $reason ?: 'No se especificó razón',
+                    'ticket_url' => route('tenant.admin.tickets.show', [
+                        'store' => $ticket->store->slug,
+                        'ticket' => $ticket->id
+                    ]),
+                    'superadmin_note' => 'Nuestro equipo de soporte ha sido notificado y responderá a la brevedad.'
+                ]
+            ]);
+
+            Log::info('📧 Email de reapertura enviado', [
+                'ticket_id' => $ticket->id,
+                'ticket_number' => $ticket->ticket_number,
+                'admin_email' => $storeAdmin->email
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('❌ Error enviando email de reapertura', [
+                'ticket_id' => $ticket->id,
+                'error' => $e->getMessage()
+            ]);
+        }
     }
 
     private function handleAttachments(array $files, Ticket $ticket, string $storeSlug, ?int $responseId = null): array

@@ -240,7 +240,7 @@
                                     <option value="">Mantener estado actual</option>
                                     <option value="in_progress">En Progreso</option>
                                     <option value="resolved">Resuelto</option>
-                                    <option value="closed">Cerrado</option>
+                                    <!-- Super Admin no puede cerrar tickets (solo Tenant Admin) -->
                                 </select>
                             </div>
                         </div>
@@ -277,11 +277,14 @@
                     <div>
                         <label class="block text-sm font-medium text-black-300 mb-2">Estado</label>
                         <select x-model="currentStatus" @change="updateStatus()" 
-                                class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:border-primary-200 focus:ring-1 focus:ring-primary-200 focus:outline-none">
+                                class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:border-primary-200 focus:ring-1 focus:ring-primary-200 focus:outline-none"
+                                {{ $ticket->status === 'closed' ? 'disabled' : '' }}>
                             <option value="open" {{ $ticket->status === 'open' ? 'selected' : '' }}>Abierto</option>
                             <option value="in_progress" {{ $ticket->status === 'in_progress' ? 'selected' : '' }}>En Progreso</option>
                             <option value="resolved" {{ $ticket->status === 'resolved' ? 'selected' : '' }}>Resuelto</option>
-                            <option value="closed" {{ $ticket->status === 'closed' ? 'selected' : '' }}>Cerrado</option>
+                            @if($ticket->status === 'closed')
+                                <option value="closed" selected disabled>Cerrado (solo Tenant puede reabrir)</option>
+                            @endif
                         </select>
                     </div>
 

@@ -192,7 +192,7 @@ class TicketController extends Controller
             'message' => 'required|string',
             'response_type' => 'required|in:response,internal_note,status_change',
             'is_public' => 'boolean',
-            'change_status' => 'nullable|in:open,in_progress,resolved,closed',
+            'change_status' => 'nullable|in:open,in_progress,resolved', // ❌ Super Admin no puede cerrar
         ]);
 
         $isPublic = $request->boolean('is_public', true);
@@ -226,12 +226,10 @@ class TicketController extends Controller
                 case 'resolved':
                     $ticket->markAsResolved(auth()->id());
                     break;
-                case 'closed':
-                    $ticket->markAsClosed(auth()->id());
-                    break;
                 case 'open':
                     $ticket->update(['status' => 'open']);
                     break;
+                // Super Admin no puede cerrar tickets
             }
         }
 
@@ -249,7 +247,7 @@ class TicketController extends Controller
     public function updateStatus(Request $request, Ticket $ticket): JsonResponse
     {
         $validated = $request->validate([
-            'status' => 'required|in:open,in_progress,resolved,closed',
+            'status' => 'required|in:open,in_progress,resolved', // ❌ Super Admin no puede cerrar
         ]);
 
         $oldStatus = $ticket->status;
@@ -261,9 +259,6 @@ class TicketController extends Controller
                 break;
             case 'resolved':
                 $ticket->markAsResolved(auth()->id());
-                break;
-            case 'closed':
-                $ticket->markAsClosed(auth()->id());
                 break;
             default:
                 $ticket->update(['status' => $newStatus]);

@@ -66,6 +66,10 @@ class EmailConfiguration extends Model
         'template_password_changed_confirmation_vars',
         'template_resend_store_credentials',
         'template_resend_store_credentials_vars',
+        'template_ticket_auto_closed',
+        'template_ticket_auto_closed_vars',
+        'template_ticket_reopened',
+        'template_ticket_reopened_vars',
         
         'test_emails',
         'stats'
@@ -94,6 +98,8 @@ class EmailConfiguration extends Model
         'template_subscription_expiring_soon_vars' => 'array',
         'template_password_changed_confirmation_vars' => 'array',
         'template_resend_store_credentials_vars' => 'array',
+        'template_ticket_auto_closed_vars' => 'array',
+        'template_ticket_reopened_vars' => 'array',
         'test_emails' => 'array',
         'stats' => 'array'
     ];
@@ -286,6 +292,34 @@ class EmailConfiguration extends Model
                             'ticket_title' => 'Título del ticket',
                             'assigned_to' => 'Asignado a',
                             'priority' => 'Prioridad'
+                        ]
+                    ],
+                    'ticket_auto_closed' => [
+                        'name' => 'Ticket cerrado automáticamente',
+                        'description' => 'Se envía cuando un ticket se cierra automáticamente después de 7 días de inactividad',
+                        'required_vars' => [
+                            'user_name' => 'Nombre del usuario',
+                            'store_name' => 'Nombre de la tienda',
+                            'ticket_number' => 'Número del ticket',
+                            'ticket_title' => 'Título del ticket',
+                            'closed_date' => 'Fecha de cierre',
+                            'days_inactive' => 'Días de inactividad',
+                            'reopen_message' => 'Mensaje sobre cómo reabrir',
+                            'ticket_url' => 'URL del ticket'
+                        ]
+                    ],
+                    'ticket_reopened' => [
+                        'name' => 'Ticket reabierto',
+                        'description' => 'Se envía cuando un ticket cerrado/resuelto es reabierto por el Tenant Admin',
+                        'required_vars' => [
+                            'user_name' => 'Nombre del usuario que reabrió',
+                            'store_name' => 'Nombre de la tienda',
+                            'ticket_number' => 'Número del ticket',
+                            'ticket_title' => 'Título del ticket',
+                            'reopened_date' => 'Fecha de reapertura',
+                            'reopen_reason' => 'Razón de la reapertura (opcional)',
+                            'ticket_url' => 'URL del ticket',
+                            'superadmin_note' => 'Nota para Super Admin'
                         ]
                     ]
                 ]
