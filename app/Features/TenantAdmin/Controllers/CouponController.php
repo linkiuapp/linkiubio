@@ -363,9 +363,9 @@ class CouponController extends Controller
     /**
      * Remove the specified coupon from storage.
      */
-    public function destroy(Request $request, Coupon $coupon)
+    public function destroy(Request $request, $storeSlug, Coupon $coupon)
     {
-        $store = view()->shared('currentStore');
+        $store = $request->route('store');
         
         // Ensure coupon belongs to current store
         if ($coupon->store_id !== $store->id) {
