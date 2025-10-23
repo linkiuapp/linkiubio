@@ -291,12 +291,14 @@ class LocationController extends Controller
             $schedules = [];
             for ($i = 0; $i <= 6; $i++) {
                 $dayKey = "day_{$i}";
+                $isClosed = $request->has("{$dayKey}_closed");
+                
                 $schedules[$i] = [
-                    'is_closed' => $request->has("{$dayKey}_closed"),
-                    'open_time_1' => $request->input("{$dayKey}_open_1"),
-                    'close_time_1' => $request->input("{$dayKey}_close_1"),
-                    'open_time_2' => $request->input("{$dayKey}_open_2"),
-                    'close_time_2' => $request->input("{$dayKey}_close_2"),
+                    'is_closed' => $isClosed,
+                    'open_time_1' => $isClosed ? null : $request->input("{$dayKey}_open_1"),
+                    'close_time_1' => $isClosed ? null : $request->input("{$dayKey}_close_1"),
+                    'open_time_2' => $isClosed ? null : $request->input("{$dayKey}_open_2"),
+                    'close_time_2' => $isClosed ? null : $request->input("{$dayKey}_close_2"),
                 ];
             }
             $data['schedules'] = $schedules;
