@@ -291,11 +291,11 @@ class TicketController extends Controller
                 ]
             ]);
 
-            Log::info('📧 Email de creación de ticket enviado', [
+            /*Log::info('📧 Email de creación de ticket enviado', [
                 'ticket_id' => $ticket->id,
                 'ticket_number' => $ticket->ticket_number,
                 'admin_email' => $storeAdmin->email
-            ]);
+            ]);*/
 
         } catch (\Exception $e) {
             Log::error('❌ Error enviando email de creación de ticket', [
