@@ -57,6 +57,22 @@ class BusinessCategory extends Model
     }
 
     /**
+     * Relación: Categorías tienen múltiples iconos
+     */
+    public function icons()
+    {
+        return $this->belongsToMany(
+            CategoryIcon::class,
+            'business_category_icon',
+            'business_category_id',
+            'category_icon_id'
+        )
+        ->withPivot('sort_order')
+        ->withTimestamps()
+        ->orderBy('business_category_icon.sort_order');
+    }
+
+    /**
      * Relación con el usuario que creó la categoría
      */
     public function creator(): BelongsTo

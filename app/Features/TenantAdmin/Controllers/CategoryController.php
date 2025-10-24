@@ -81,8 +81,20 @@ class CategoryController extends Controller
                 ->with('error', "Has alcanzado el límite de categorías ({$categoryLimit}) para tu plan {$store->plan->name}. Actualiza tu plan para crear más categorías.");
         }
         
-        // Obtener iconos activos
-        $icons = CategoryIcon::active()->orderBy('sort_order')->get();
+        // Obtener iconos filtrados por categoría de negocio de la tienda
+        $businessCategoryId = $store->business_category_id;
+        
+        $icons = CategoryIcon::active()
+            ->where(function($query) use ($businessCategoryId) {
+                // Iconos globales (aparecen para todos)
+                $query->where('is_global', true)
+                    // O iconos específicos de esta categoría de negocio
+                    ->orWhereHas('businessCategories', function($q) use ($businessCategoryId) {
+                        $q->where('business_categories.id', $businessCategoryId);
+                    });
+            })
+            ->orderBy('display_name')
+            ->get();
         
         // Obtener categorías principales para seleccionar como padre
         $parentCategories = Category::where('store_id', $store->id)
@@ -179,8 +191,20 @@ class CategoryController extends Controller
             abort(404);
         }
         
-        // Obtener iconos activos
-        $icons = CategoryIcon::active()->orderBy('sort_order')->get();
+        // Obtener iconos filtrados por categoría de negocio de la tienda
+        $businessCategoryId = $store->business_category_id;
+        
+        $icons = CategoryIcon::active()
+            ->where(function($query) use ($businessCategoryId) {
+                // Iconos globales (aparecen para todos)
+                $query->where('is_global', true)
+                    // O iconos específicos de esta categoría de negocio
+                    ->orWhereHas('businessCategories', function($q) use ($businessCategoryId) {
+                        $q->where('business_categories.id', $businessCategoryId);
+                    });
+            })
+            ->orderBy('display_name')
+            ->get();
         
         // Obtener categorías principales (excluyendo la actual y sus hijos)
         $excludeIds = [$category->id];

@@ -93,6 +93,15 @@ use App\Shared\Models\BillingSetting;
                 </a>
             </li>
 
+            <!-- Gestión de Usuarios -->
+            <li>
+                <a href="{{ route('superlinkiu.user-management.index') }}" 
+                   class="item-sidebar {{ request()->routeIs('superlinkiu.user-management.*') ? 'item-sidebar-active' : '' }}">
+                    <x-solar-users-group-rounded-outline class="w-4 h-4 mr-2" />
+                    Gestión de Usuarios
+                </a>
+            </li>
+
             <!-- Planes y Facturación -->
             <li x-data="{ planesOpen: false }">
                 <button @click="planesOpen = !planesOpen" class="item-sidebar w-full flex justify-between">
@@ -123,47 +132,6 @@ use App\Shared\Models\BillingSetting;
                         <a href="{{ route('superlinkiu.billing-settings.index') }}" class="item-sidebar {{ request()->routeIs('superlinkiu.billing-settings.*') ? 'item-sidebar-active' : '' }}">
                             <x-solar-settings-outline class="w-4 h-4 mr-2" />
                             Configurar Facturas
-                        </a>
-                    </li>
-                </ul>
-            </li>
-
-            <!-- Gestión de usuarios -->
-            <li x-data="{ usuariosOpen: false }">
-                <button @click="usuariosOpen = !usuariosOpen" class="item-sidebar w-full flex justify-between">
-                    <div class="flex items-center">
-                        <x-solar-users-group-two-rounded-outline class="w-4 h-4 mr-2" />
-                        <span>Gestión de usuarios</span>
-                    </div>
-                    <x-solar-alt-arrow-down-outline 
-                        class="w-4 h-4 transition-transform"
-                        x-bind:class="{ 'rotate-180': usuariosOpen }"
-                    />
-                </button>
-                
-                <ul x-show="usuariosOpen" class="pl-4 mt-1 space-y-1">
-                    <li>
-                        <a href="#" class="item-sidebar">
-                            <x-solar-users-group-two-rounded-outline class="w-4 h-4 mr-2" />
-                            Listado de usuarios
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="item-sidebar">
-                            <x-solar-shield-user-outline class="w-4 h-4 mr-2" />
-                            Roles y permisos
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="item-sidebar">
-                            <x-solar-lock-password-outline class="w-4 h-4 mr-2" />
-                            Verificación de usuarios
-                        </a>
-                    </li>
-                    <li>
-                        <a href="#" class="item-sidebar">
-                            <x-solar-lock-password-outline class="w-4 h-4 mr-2" />
-                            Impersonación de usuarios
                         </a>
                     </li>
                 </ul>

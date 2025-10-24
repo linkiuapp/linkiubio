@@ -12,12 +12,30 @@ class CategoryIcon extends Model
         'image_path',
         'display_name',
         'is_active',
+        'is_global',
         'sort_order',
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
+        'is_global' => 'boolean',
     ];
+
+    /**
+     * Relación: Iconos pertenecen a múltiples categorías de negocio
+     */
+    public function businessCategories()
+    {
+        return $this->belongsToMany(
+            BusinessCategory::class,
+            'business_category_icon',
+            'category_icon_id',
+            'business_category_id'
+        )
+        ->withPivot('sort_order')
+        ->withTimestamps()
+        ->orderBy('business_category_icon.sort_order');
+    }
 
     /**
      * Scope para obtener solo iconos activos
@@ -25,6 +43,14 @@ class CategoryIcon extends Model
     public function scopeActive($query)
     {
         return $query->where('is_active', true);
+    }
+
+    /**
+     * Scope para obtener solo iconos globales
+     */
+    public function scopeGlobal($query)
+    {
+        return $query->where('is_global', true);
     }
 
     /**

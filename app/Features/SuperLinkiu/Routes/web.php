@@ -48,6 +48,11 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
         Route::post('business-categories/reorder', 
             [\App\Features\SuperLinkiu\Controllers\BusinessCategoryController::class, 'reorder'])
             ->name('business-categories.reorder');
+
+        // User Management
+        Route::resource('user-management', \App\Features\SuperLinkiu\Controllers\UserManagementController::class)
+            ->except(['show'])
+            ->names('user-management');
         
         // Store Approval Requests
         Route::prefix('store-requests')->name('store-requests.')->group(function () {

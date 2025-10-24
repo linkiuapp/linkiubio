@@ -16,17 +16,31 @@ class CategoryIconController extends Controller
      */
     public function index()
     {
-        $icons = CategoryIcon::orderBy('sort_order')
+        // Obtener todos los iconos (sin paginación para el filtrado por JavaScript)
+        $icons = CategoryIcon::with('businessCategories')
             ->orderBy('display_name')
-            ->paginate(20);
+            ->get();
 
-        $totalIcons = CategoryIcon::count();
-        $activeIcons = CategoryIcon::where('is_active', true)->count();
+        // Estadísticas
+        $totalIcons = $icons->count();
+        $activeIcons = $icons->where('is_active', true)->count();
+        $globalIcons = $icons->where('is_global', true)->count();
+
+        // Categorías de negocio con conteo de iconos
+        $businessCategories = \App\Shared\Models\BusinessCategory::active()
+            ->ordered()
+            ->withCount('icons')
+            ->get();
+
+        $categoriesWithIcons = $businessCategories->where('icons_count', '>', 0)->count();
 
         return view('superlinkiu::category-icons.index', compact(
             'icons',
             'totalIcons', 
-            'activeIcons'
+            'activeIcons',
+            'globalIcons',
+            'businessCategories',
+            'categoriesWithIcons'
         ));
     }
 
@@ -35,7 +49,11 @@ class CategoryIconController extends Controller
      */
     public function create()
     {
-        return view('superlinkiu::category-icons.create');
+        $businessCategories = \App\Shared\Models\BusinessCategory::active()
+            ->ordered()
+            ->get();
+
+        return view('superlinkiu::category-icons.create', compact('businessCategories'));
     }
 
     /**
@@ -43,15 +61,22 @@ class CategoryIconController extends Controller
      */
     public function store(Request $request)
     {
-
-
         $request->validate([
             'display_name' => ['required', 'string', 'max:255'],
             'name' => ['nullable', 'string', 'max:255', 'unique:category_icons,name'],
-            'icon_file' => ['required', 'file', 'mimes:svg,png,jpg,jpeg', 'max:2048'],
+            'icon_file' => ['required', 'file', 'mimes:svg,png,jpg,jpeg,webp', 'max:2048'],
             'is_active' => ['boolean'],
-            'sort_order' => ['nullable', 'integer', 'min:0'],
+            'is_global' => ['boolean'],
+            'business_categories' => ['nullable', 'array'],
+            'business_categories.*' => ['exists:business_categories,id'],
         ]);
+
+        // Validar que tenga al menos una categoría O sea global
+        if (!$request->boolean('is_global') && empty($request->business_categories)) {
+            return back()
+                ->withErrors(['business_categories' => 'Debes seleccionar al menos una categoría de negocio o marcar el icono como global.'])
+                ->withInput();
+        }
 
         try {
             // Auto-generar name si no se proporciona
@@ -80,21 +105,27 @@ class CategoryIconController extends Controller
                 throw new \Exception('No se recibió el archivo de imagen');
             }
 
-            // Determinar sort_order
-            $maxSortOrder = CategoryIcon::max('sort_order') ?? 0;
-            $sortOrder = $request->sort_order ?: ($maxSortOrder + 1);
-
             // Crear el icono
             $categoryIcon = CategoryIcon::create([
                 'name' => $name,
                 'display_name' => $request->display_name,
                 'image_path' => $imagePath,
                 'is_active' => $request->boolean('is_active', true),
-                'sort_order' => $sortOrder,
+                'is_global' => $request->boolean('is_global', false),
+                'sort_order' => 0, // Se puede ordenar después con drag & drop
             ]);
 
             if (!$categoryIcon) {
                 throw new \Exception('Error al guardar el icono en la base de datos');
+            }
+
+            // Asociar con categorías de negocio (si no es global)
+            if (!$request->boolean('is_global') && !empty($request->business_categories)) {
+                $syncData = [];
+                foreach ($request->business_categories as $index => $categoryId) {
+                    $syncData[$categoryId] = ['sort_order' => $index];
+                }
+                $categoryIcon->businessCategories()->sync($syncData);
             }
 
             return redirect()
@@ -114,7 +145,14 @@ class CategoryIconController extends Controller
      */
     public function edit(CategoryIcon $categoryIcon)
     {
-        return view('superlinkiu::category-icons.edit', compact('categoryIcon'));
+        $businessCategories = \App\Shared\Models\BusinessCategory::active()
+            ->ordered()
+            ->get();
+
+        // IDs de categorías ya asociadas
+        $selectedCategories = $categoryIcon->businessCategories()->pluck('business_categories.id')->toArray();
+
+        return view('superlinkiu::category-icons.edit', compact('categoryIcon', 'businessCategories', 'selectedCategories'));
     }
 
     /**
@@ -125,17 +163,26 @@ class CategoryIconController extends Controller
         $request->validate([
             'display_name' => ['required', 'string', 'max:255'],
             'name' => ['required', 'string', 'max:255', Rule::unique('category_icons')->ignore($categoryIcon->id)],
-            'icon_file' => ['nullable', 'file', 'mimes:svg,png,jpg,jpeg', 'max:2048'],
+            'icon_file' => ['nullable', 'file', 'mimes:svg,png,jpg,jpeg,webp', 'max:2048'],
             'is_active' => ['boolean'],
-            'sort_order' => ['nullable', 'integer', 'min:0'],
+            'is_global' => ['boolean'],
+            'business_categories' => ['nullable', 'array'],
+            'business_categories.*' => ['exists:business_categories,id'],
         ]);
+
+        // Validar que tenga al menos una categoría O sea global
+        if (!$request->boolean('is_global') && empty($request->business_categories)) {
+            return back()
+                ->withErrors(['business_categories' => 'Debes seleccionar al menos una categoría de negocio o marcar el icono como global.'])
+                ->withInput();
+        }
 
         try {
             $data = [
                 'name' => $request->name,
                 'display_name' => $request->display_name,
                 'is_active' => $request->boolean('is_active'),
-                'sort_order' => $request->sort_order ?: $categoryIcon->sort_order,
+                'is_global' => $request->boolean('is_global', false),
             ];
 
             // Manejar nuevo archivo si se sube
@@ -157,6 +204,18 @@ class CategoryIconController extends Controller
             }
 
             $categoryIcon->update($data);
+
+            // Sincronizar categorías de negocio (si no es global)
+            if (!$request->boolean('is_global') && !empty($request->business_categories)) {
+                $syncData = [];
+                foreach ($request->business_categories as $index => $categoryId) {
+                    $syncData[$categoryId] = ['sort_order' => $index];
+                }
+                $categoryIcon->businessCategories()->sync($syncData);
+            } else {
+                // Si es global, eliminar todas las asociaciones
+                $categoryIcon->businessCategories()->detach();
+            }
 
             return redirect()
                 ->route('superlinkiu.category-icons.index')
