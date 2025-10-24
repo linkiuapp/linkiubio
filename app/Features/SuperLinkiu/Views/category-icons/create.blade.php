@@ -137,7 +137,7 @@
                     </div>
 
                     <!-- Basic Information -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="space-y-6">
                         <!-- Display Name -->
                         <div class="space-y-2">
                             <label for="display_name" class="block text-sm font-semibold text-black-400">
@@ -160,82 +160,103 @@
                             @enderror
                         </div>
 
-                        <!-- Internal Name -->
-                        <div class="space-y-2">
-                            <label for="name" class="block text-sm font-semibold text-black-400">
-                                Nombre Interno (Slug)
-                            </label>
-                            <input type="text" 
-                                   name="name" 
-                                   id="name"
-                                   value="{{ old('name') }}"
-                                   class="w-full px-4 py-3 rounded-lg bg-accent-100 border border-accent-200 
-                                          focus:ring-2 focus:ring-primary-200 focus:border-primary-200 transition-colors
-                                          @error('name') border-error-200 focus:ring-error-200 @enderror"
-                                   placeholder="Se genera automáticamente">
-                            <p class="text-xs text-black-300 flex items-center gap-1">
-                                <x-solar-info-circle-outline class="w-3 h-3" />
-                                Déjalo vacío para generar automáticamente desde el nombre
-                            </p>
-                            @error('name')
-                                <p class="text-sm text-error-400 flex items-center gap-2">
-                                    <x-solar-info-circle-outline class="w-4 h-4" />
-                                    {{ $message }}
-                                </p>
-                            @enderror
-                        </div>
+                        <!-- Internal Name (opcional, se genera automáticamente) -->
+                        <input type="hidden" name="name" id="name" value="{{ old('name') }}">
                     </div>
 
-                    <!-- Configuration -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- Status -->
-                        <div class="space-y-3">
-                            <label class="block text-sm font-semibold text-black-400">Estado Inicial</label>
-                            <div class="flex items-center gap-3 p-4 bg-accent-100 rounded-lg">
-                                <label class="relative inline-flex items-center cursor-pointer">
-                                    <input type="hidden" name="is_active" value="0">
-                                    <input type="checkbox" 
-                                           name="is_active" 
-                                           value="1"
-                                           class="sr-only peer"
-                                           {{ old('is_active', true) ? 'checked' : '' }}>
-                                    <div class="w-11 h-6 bg-accent-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-200 rounded-full peer 
-                                                peer-checked:after:translate-x-full peer-checked:after:border-accent-50 
-                                                after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
-                                                after:bg-accent-50 after:rounded-full after:h-5 after:w-5 after:transition-all 
-                                                peer-checked:bg-success-300"></div>
-                                </label>
+                    <!-- Categorías de Negocio -->
+                    <div class="space-y-3" x-data="{ isGlobal: {{ old('is_global') ? 'true' : 'false' }} }">
+                        <label class="block text-sm font-semibold text-black-400">
+                            Categorías de Negocio <span class="text-error-400">*</span>
+                        </label>
+
+                        <!-- Checkbox Global -->
+                        <div class="bg-primary-50 border border-primary-100 rounded-lg p-4 mb-4">
+                            <label class="flex items-start gap-3 cursor-pointer">
+                                <input type="hidden" name="is_global" value="0">
+                                <input type="checkbox" 
+                                       name="is_global" 
+                                       value="1"
+                                       x-model="isGlobal"
+                                       class="mt-0.5 rounded border-primary-200 text-primary-300 focus:ring-primary-200"
+                                       {{ old('is_global') ? 'checked' : '' }}>
                                 <div>
-                                    <span class="text-sm font-medium text-black-400">Icono activo</span>
-                                    <p class="text-xs text-black-300">Los iconos inactivos no aparecen en las tiendas</p>
+                                    <span class="text-sm font-semibold text-primary-400 flex items-center gap-2">
+                                        <x-solar-star-bold class="w-4 h-4" />
+                                        Icono Global (aparece en todas las categorías)
+                                    </span>
+                                    <p class="text-xs text-primary-300 mt-1">
+                                        Usa esto para iconos universales como "Destacado", "Nuevo", "Oferta", etc.
+                                    </p>
                                 </div>
+                            </label>
+                        </div>
+
+                        <!-- Multiselect de Categorías -->
+                        <div x-show="!isGlobal" x-transition class="space-y-3">
+                            <div class="bg-accent-100 rounded-lg p-4 max-h-64 overflow-y-auto">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    @foreach($businessCategories as $category)
+                                        <label class="flex items-start gap-3 p-3 bg-accent-50 rounded-lg hover:bg-accent-200 cursor-pointer transition-colors">
+                                            <input type="checkbox" 
+                                                   name="business_categories[]" 
+                                                   value="{{ $category->id }}"
+                                                   class="mt-0.5 rounded border-accent-300 text-primary-300 focus:ring-primary-200"
+                                                   {{ in_array($category->id, old('business_categories', [])) ? 'checked' : '' }}>
+                                            <div class="flex-1">
+                                                <span class="text-sm font-medium text-black-400">{{ $category->name }}</span>
+                                                @if($category->icon)
+                                                    <span class="text-xs text-black-300">{{ $category->icon }}</span>
+                                                @endif
+                                            </div>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+                            
+                            <div class="flex gap-2">
+                                <button type="button" 
+                                        onclick="document.querySelectorAll('input[name=\'business_categories[]\']').forEach(cb => cb.checked = true)"
+                                        class="text-xs px-3 py-1.5 bg-primary-100 text-primary-400 rounded-lg hover:bg-primary-200">
+                                    Seleccionar todas
+                                </button>
+                                <button type="button" 
+                                        onclick="document.querySelectorAll('input[name=\'business_categories[]\']').forEach(cb => cb.checked = false)"
+                                        class="text-xs px-3 py-1.5 bg-accent-200 text-black-400 rounded-lg hover:bg-accent-300">
+                                    Deseleccionar todas
+                                </button>
                             </div>
                         </div>
 
-                        <!-- Sort Order -->
-                        <div class="space-y-2">
-                            <label for="sort_order" class="block text-sm font-semibold text-black-400">
-                                Orden de Visualización
-                            </label>
-                            <input type="number" 
-                                   name="sort_order" 
-                                   id="sort_order"
-                                   value="{{ old('sort_order') }}"
-                                   class="w-full px-4 py-3 rounded-lg bg-accent-100 border border-accent-200 
-                                          focus:ring-2 focus:ring-primary-200 focus:border-primary-200 transition-colors
-                                          @error('sort_order') border-error-200 focus:ring-error-200 @enderror"
-                                   placeholder="Se asigna automáticamente"
-                                   min="0">
-                            <p class="text-xs text-black-300 flex items-center gap-1">
-                                <x-solar-info-circle-outline class="w-3 h-3" />
-                                Menor número aparece primero • Se asigna automáticamente si se deja vacío
+                        @error('business_categories')
+                            <p class="text-sm text-error-400 flex items-center gap-2">
+                                <x-solar-info-circle-outline class="w-4 h-4" />
+                                {{ $message }}
                             </p>
-                            @error('sort_order')
-                                <p class="text-sm text-error-400 flex items-center gap-2">
-                                    <x-solar-info-circle-outline class="w-4 h-4" />
-                                    {{ $message }}
-                                </p>
-                            @enderror
+                        @enderror
+                    </div>
+
+                    <!-- Status -->
+                    <div class="space-y-3">
+                        <label class="block text-sm font-semibold text-black-400">Estado Inicial</label>
+                        <div class="flex items-center gap-3 p-4 bg-accent-100 rounded-lg">
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="hidden" name="is_active" value="0">
+                                <input type="checkbox" 
+                                       name="is_active" 
+                                       value="1"
+                                       class="sr-only peer"
+                                       {{ old('is_active', true) ? 'checked' : '' }}>
+                                <div class="w-11 h-6 bg-accent-200 peer-focus:outline-none peer-focus:ring-2 peer-focus:ring-primary-200 rounded-full peer 
+                                            peer-checked:after:translate-x-full peer-checked:after:border-accent-50 
+                                            after:content-[''] after:absolute after:top-[2px] after:left-[2px] 
+                                            after:bg-accent-50 after:rounded-full after:h-5 after:w-5 after:transition-all 
+                                            peer-checked:bg-success-300"></div>
+                            </label>
+                            <div>
+                                <span class="text-sm font-medium text-black-400">Icono activo</span>
+                                <p class="text-xs text-black-300">Los iconos inactivos no aparecen en las tiendas</p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -260,6 +281,22 @@
 
 @push('scripts')
 <script>
+    // Auto-generar slug desde display_name
+    document.getElementById('display_name').addEventListener('input', function(e) {
+        const slug = e.target.value
+            .toLowerCase()
+            .replace(/[áàäâ]/g, 'a')
+            .replace(/[éèëê]/g, 'e')
+            .replace(/[íìïî]/g, 'i')
+            .replace(/[óòöô]/g, 'o')
+            .replace(/[úùüû]/g, 'u')
+            .replace(/ñ/g, 'n')
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/^-+|-+$/g, '');
+        
+        document.getElementById('name').value = slug;
+    });
+
     // Simple vanilla JavaScript for file preview (no Alpine.js)
     function handleFileSelect(input) {
         const file = input.files[0];
@@ -284,7 +321,7 @@
             };
             reader.readAsDataURL(file);
         } else if (file) {
-            alert('Por favor selecciona un archivo de imagen válido (SVG, PNG, JPG)');
+            alert('Por favor selecciona un archivo de imagen válido (SVG, PNG, JPG, WebP)');
             clearPreview();
         }
     }

@@ -33,13 +33,25 @@
             <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
                 <div class="p-6 space-y-6">
                     <!-- Selector de icono -->
-                    <div>
+                    <div x-data="{ searchIcon: '' }">
                         <label class="block text-sm font-medium text-black-400 mb-3">
                             Icono de la categoría <span class="text-error-200">*</span>
                         </label>
+                        
+                        <!-- Barra de búsqueda -->
+                        <div class="relative mb-4">
+                            <input type="text" 
+                                   x-model="searchIcon"
+                                   placeholder="Buscar icono... 🔍"
+                                   class="w-full px-4 py-2.5 pl-10 rounded-lg border-2 border-accent-200 focus:border-primary-200 focus:ring-2 focus:ring-primary-100 transition-colors">
+                            <x-solar-magnifer-outline class="w-5 h-5 absolute left-3 top-3 text-black-300" />
+                        </div>
+
                         <div class="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 gap-3">
                             @foreach($icons as $icon)
-                                <label class="relative cursor-pointer">
+                                <label class="relative cursor-pointer icon-option"
+                                       x-show="searchIcon === '' || '{{ strtolower($icon->display_name) }}'.includes(searchIcon.toLowerCase())"
+                                       data-name="{{ strtolower($icon->display_name) }}">
                                     <input type="radio" 
                                            name="icon_id" 
                                            value="{{ $icon->id }}" 
@@ -53,12 +65,23 @@
                                              alt="{{ $icon->display_name }}" 
                                              class="w-full h-full object-contain">
                                     </div>
-                                    <span class="absolute bottom-0 left-0 right-0 text-center text-xs text-black-300 mt-4 mb-2">
+                                    <span class="absolute -bottom-5 left-0 right-0 text-center text-xs text-black-300 truncate px-1">
                                         {{ $icon->display_name }}
                                     </span>
                                 </label>
                             @endforeach
                         </div>
+
+                        <!-- Mensaje cuando no se encuentran iconos -->
+                        <div x-show="[...document.querySelectorAll('.icon-option')].filter(el => el.style.display !== 'none').length === 0" 
+                             class="text-center py-8">
+                            <p class="text-sm text-black-300">No se encontraron iconos con ese nombre</p>
+                        </div>
+
+                        <p class="text-xs text-black-300 mt-6">
+                            Mostrando {{ $icons->count() }} icono(s) disponibles para tu categoría de negocio
+                        </p>
+
                         @error('icon_id')
                             <p class="mt-2 text-sm text-error-200">{{ $message }}</p>
                         @enderror

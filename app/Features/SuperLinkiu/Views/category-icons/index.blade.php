@@ -2,7 +2,7 @@
 @section('title', 'Iconos de Categorías')
 
 @section('content')
-<div class="flex-1 space-y-6">
+<div class="flex-1 space-y-6" x-data="iconManager()">
     <!-- Header Section -->
     <div class="flex items-center justify-between">
         <div>
@@ -18,7 +18,7 @@
     </div>
 
     <!-- Stats Cards Row -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
         <!-- Total Iconos -->
         <div class="bg-accent-50 rounded-xl p-6 shadow-sm border border-accent-100">
             <div class="flex items-center justify-between">
@@ -45,15 +45,28 @@
             </div>
         </div>
 
-        <!-- Iconos Inactivos -->
+        <!-- Iconos Globales -->
         <div class="bg-accent-50 rounded-xl p-6 shadow-sm border border-accent-100">
             <div class="flex items-center justify-between">
                 <div class="flex-1">
-                    <p class="text-sm font-medium text-black-300 mb-1">Iconos Inactivos</p>
-                    <p class="text-2xl font-bold text-warning-300">{{ $totalIcons - $activeIcons }}</p>
+                    <p class="text-sm font-medium text-black-300 mb-1">Iconos Globales</p>
+                    <p class="text-2xl font-bold text-info-300">{{ $globalIcons }}</p>
+                </div>
+                <div class="w-12 h-12 bg-info-100 rounded-lg flex items-center justify-center">
+                    <x-solar-star-bold class="w-6 h-6 text-info-300" />
+                </div>
+            </div>
+        </div>
+
+        <!-- Categorías con Iconos -->
+        <div class="bg-accent-50 rounded-xl p-6 shadow-sm border border-accent-100">
+            <div class="flex items-center justify-between">
+                <div class="flex-1">
+                    <p class="text-sm font-medium text-black-300 mb-1">Categorías con Iconos</p>
+                    <p class="text-2xl font-bold text-warning-300">{{ $categoriesWithIcons }}</p>
                 </div>
                 <div class="w-12 h-12 bg-warning-100 rounded-lg flex items-center justify-center">
-                    <x-solar-pause-circle-outline class="w-6 h-6 text-warning-300" />
+                    <x-solar-folder-with-files-outline class="w-6 h-6 text-warning-300" />
                 </div>
             </div>
         </div>
@@ -61,15 +74,41 @@
 
     <!-- Main Content Card -->
     <div class="bg-accent-50 rounded-xl shadow-sm border border-accent-100 overflow-hidden">
-        <!-- Card Header -->
-        <div class="px-6 py-4 border-b border-accent-100 bg-gradient-to-r from-accent-50 to-accent-100">
-            <div class="flex items-center justify-between">
-                <h2 class="text-xl font-semibold text-black-500">Gestión de Iconos</h2>
-                <div class="flex items-center gap-3">
-                    <span class="text-sm text-black-300 bg-accent-200 px-3 py-1 rounded-full">
-                        {{ $icons->total() }} icono{{ $icons->total() !== 1 ? 's' : '' }} total
-                    </span>
-                </div>
+        <!-- Barra de búsqueda y filtros -->
+        <div class="px-6 py-4 border-b border-accent-100 bg-accent-50">
+            <div class="relative">
+                <input type="text" 
+                       x-model="searchQuery"
+                       @input="filterIcons()"
+                       placeholder="Buscar iconos... (ej: hamburguesa, laptop)"
+                       class="w-full px-4 py-3 pl-12 rounded-lg border-2 border-accent-200 focus:border-primary-200 focus:ring-2 focus:ring-primary-100 transition-colors">
+                <x-solar-magnifer-outline class="w-5 h-5 absolute left-4 top-3.5 text-black-300" />
+            </div>
+        </div>
+
+        <!-- Tabs de Categorías -->
+        <div class="px-6 py-3 border-b border-accent-100 bg-gradient-to-r from-accent-50 to-accent-100 overflow-x-auto">
+            <div class="flex gap-2 min-w-max">
+                <button @click="selectedCategory = 'all'; filterIcons()" 
+                        :class="selectedCategory === 'all' ? 'bg-primary-200 text-accent-50' : 'bg-accent-200 text-black-400 hover:bg-accent-300'"
+                        class="px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">
+                    Todos ({{ $totalIcons }})
+                </button>
+                
+                <button @click="selectedCategory = 'global'; filterIcons()" 
+                        :class="selectedCategory === 'global' ? 'bg-info-300 text-accent-50' : 'bg-accent-200 text-black-400 hover:bg-accent-300'"
+                        class="px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap flex items-center gap-2">
+                    <x-solar-star-bold class="w-4 h-4" />
+                    Globales ({{ $globalIcons }})
+                </button>
+
+                @foreach($businessCategories as $category)
+                    <button @click="selectedCategory = {{ $category->id }}; filterIcons()" 
+                            :class="selectedCategory === {{ $category->id }} ? 'bg-primary-200 text-accent-50' : 'bg-accent-200 text-black-400 hover:bg-accent-300'"
+                            class="px-4 py-2 rounded-lg font-medium text-sm transition-colors whitespace-nowrap">
+                        {{ $category->icon ?? '📦' }} {{ $category->name }} ({{ $category->icons_count ?? 0 }})
+                    </button>
+                @endforeach
             </div>
         </div>
 
@@ -77,14 +116,17 @@
         @if($icons->count() > 0)
             <div class="p-6">
                 <!-- Icons Grid -->
-                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6" id="sortable-icons">
+                <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6">
                     @foreach($icons as $icon)
-                        <div class="icon-card bg-accent-100 rounded-xl p-4 border-2 border-accent-200 hover:border-primary-200 hover:shadow-md transition-all duration-200 cursor-move group"
+                        <div class="icon-card bg-accent-100 rounded-xl p-4 border-2 border-accent-200 hover:border-primary-200 hover:shadow-md transition-all duration-200 group"
                              data-icon-id="{{ $icon->id }}"
-                             data-sort-order="{{ $icon->sort_order }}">
+                             data-icon-name="{{ strtolower($icon->display_name . ' ' . $icon->name) }}"
+                             data-is-global="{{ $icon->is_global ? 'true' : 'false' }}"
+                             data-categories="{{ $icon->businessCategories->pluck('id')->implode(',') }}">
                             
                             <!-- Icon Preview -->
-                            <div class="aspect-square bg-accent-50 rounded-lg p-3 mb-3 flex items-center justify-center overflow-hidden group-hover:bg-primary-50 transition-colors">
+                            <div @click="viewIcon({{ $icon->id }})" 
+                                 class="aspect-square bg-accent-50 rounded-lg p-3 mb-3 flex items-center justify-center overflow-hidden group-hover:bg-primary-50 transition-colors cursor-pointer">
                                 @if($icon->image_url)
                                     <img src="{{ $icon->image_url }}" 
                                          alt="{{ $icon->display_name }}" 
@@ -104,7 +146,12 @@
 
                             <!-- Status Badge -->
                             <div class="flex justify-center mb-3">
-                                @if($icon->is_active)
+                                @if($icon->is_global)
+                                    <span class="px-2 py-1 text-xs bg-info-100 text-info-400 rounded-full font-medium flex items-center gap-1">
+                                        <x-solar-star-bold class="w-3 h-3" />
+                                        Global
+                                    </span>
+                                @elseif($icon->is_active)
                                     <span class="px-2 py-1 text-xs bg-success-100 text-success-400 rounded-full font-medium">Activo</span>
                                 @else
                                     <span class="px-2 py-1 text-xs bg-warning-100 text-warning-400 rounded-full font-medium">Inactivo</span>
@@ -112,9 +159,9 @@
                             </div>
 
                             <!-- Actions Row -->
-                            <div class="flex items-center justify-between gap-2">
+                            <div class="flex items-center justify-center gap-2">
                                 <!-- Toggle Switch -->
-                                <label class="relative inline-flex items-center cursor-pointer">
+                                <label class="relative inline-flex items-center cursor-pointer" title="Activar/Desactivar">
                                     <input type="checkbox" 
                                            class="sr-only peer icon-toggle"
                                            {{ $icon->is_active ? 'checked' : '' }}
@@ -127,32 +174,35 @@
                                                 peer-checked:bg-success-300"></div>
                                 </label>
 
-                                <!-- Action Buttons -->
-                                <div class="flex items-center gap-1">
-                                    <a href="{{ route('superlinkiu.category-icons.edit', $icon->id) }}" 
-                                       class="p-1.5 text-primary-300 hover:text-primary-400 hover:bg-primary-50 rounded-lg transition-colors"
-                                       title="Editar">
-                                        <x-solar-pen-2-outline class="w-4 h-4" />
-                                    </a>
+                                <!-- Edit Button -->
+                                <a href="{{ route('superlinkiu.category-icons.edit', $icon->id) }}" 
+                                   class="p-1.5 text-primary-300 hover:text-primary-400 hover:bg-primary-50 rounded-lg transition-colors"
+                                   title="Editar">
+                                    <x-solar-pen-2-outline class="w-4 h-4" />
+                                </a>
 
-                                    <button onclick="deleteIcon({{ $icon->id }}, '{{ $icon->display_name }}')"
-                                            class="p-1.5 text-error-300 hover:text-error-400 hover:bg-error-50 rounded-lg transition-colors"
-                                            title="Eliminar">
-                                        <x-solar-trash-bin-trash-outline class="w-4 h-4" />
-                                    </button>
-                                </div>
+                                <!-- Delete Button -->
+                                <button @click="deleteIcon({{ $icon->id }}, '{{ $icon->display_name }}')"
+                                        class="p-1.5 text-error-300 hover:text-error-400 hover:bg-error-50 rounded-lg transition-colors"
+                                        title="Eliminar">
+                                    <x-solar-trash-bin-trash-outline class="w-4 h-4" />
+                                </button>
                             </div>
                         </div>
                     @endforeach
                 </div>
-            </div>
 
-            <!-- Pagination -->
-            @if($icons->hasPages())
-                <div class="px-6 py-4 border-t border-accent-100 bg-accent-100">
-                    {{ $icons->links() }}
+                <!-- Mensaje cuando no hay resultados de búsqueda -->
+                <div x-show="noResults" x-transition class="py-12 text-center">
+                    <div class="w-20 h-20 bg-black-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <x-solar-magnifer-outline class="w-10 h-10 text-black-300" />
+                    </div>
+                    <h3 class="text-lg font-semibold text-black-400 mb-2">No se encontraron iconos</h3>
+                    <p class="text-black-300 mb-6">
+                        Intenta con otro término de búsqueda o categoría
+                    </p>
                 </div>
-            @endif
+            </div>
         @else
             <!-- Empty State -->
             <div class="p-12 text-center">
@@ -171,66 +221,121 @@
             </div>
         @endif
     </div>
+
+    <!-- Modal de eliminación -->
+    <div x-show="showDeleteModal" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 overflow-y-auto" 
+         style="display: none;">
+        <div class="flex items-center justify-center min-h-screen px-4">
+            <!-- Background overlay -->
+            <div x-show="showDeleteModal" @click="showDeleteModal = false"
+                 class="fixed inset-0 bg-black-500/75 backdrop-blur-sm"></div>
+
+            <!-- Modal -->
+            <div x-show="showDeleteModal"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 scale-100"
+                 class="relative bg-accent-50 rounded-lg shadow-xl max-w-md w-full p-6">
+                
+                <div class="flex items-start gap-4">
+                    <div class="flex-shrink-0 w-12 h-12 rounded-full bg-error-50 flex items-center justify-center">
+                        <x-solar-trash-bin-trash-bold class="w-6 h-6 text-error-300" />
+                    </div>
+                    <div class="flex-1">
+                        <h3 class="text-lg font-semibold text-black-400 mb-2">Eliminar Icono</h3>
+                        <p class="text-sm text-black-300">
+                            ¿Estás seguro de eliminar el icono "<span x-text="deleteIconName"></span>"? 
+                            Esta acción no se puede deshacer.
+                        </p>
+                    </div>
+                </div>
+                
+                <div class="mt-6 flex gap-3 justify-end">
+                    <button @click="showDeleteModal = false" class="btn-outline-secondary">
+                        Cancelar
+                    </button>
+                    <button @click="confirmDelete()" class="btn-primary bg-error-300 hover:bg-error-400">
+                        Eliminar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 @push('scripts')
 <script>
-    // Toggle activar/desactivar icono
-    document.addEventListener('DOMContentLoaded', function() {
-        const toggles = document.querySelectorAll('.icon-toggle');
-        
-        toggles.forEach(toggle => {
-            toggle.addEventListener('change', function() {
-                const iconId = this.dataset.iconId;
-                const url = this.dataset.url;
-                const isChecked = this.checked;
-                
-                fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
-                    },
-                    body: JSON.stringify({})
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Actualizar badge de estado
-                        const card = document.querySelector(`[data-icon-id="${iconId}"]`);
-                        const badge = card.querySelector('span.px-2');
-                        
-                        if (data.is_active) {
-                            badge.className = 'px-2 py-1 text-xs bg-success-100 text-success-400 rounded-full font-medium';
-                            badge.textContent = 'Activo';
-                        } else {
-                            badge.className = 'px-2 py-1 text-xs bg-warning-100 text-warning-400 rounded-full font-medium';
-                            badge.textContent = 'Inactivo';
-                        }
-                        
-                        // Mostrar notificación
-                        showNotification(data.message, 'success');
-                    } else {
-                        // Revertir toggle
-                        this.checked = !isChecked;
-                        showNotification(data.message, 'error');
-                    }
-                })
-                .catch(error => {
-                    // Revertir toggle
-                    this.checked = !isChecked;
-                    showNotification('Error de conexión', 'error');
-                });
-            });
-        });
-    });
+document.addEventListener('alpine:init', () => {
+    Alpine.data('iconManager', () => ({
+        searchQuery: '',
+        selectedCategory: 'all',
+        showDeleteModal: false,
+        deleteIconId: null,
+        deleteIconName: '',
+        noResults: false,
 
-    // Función para eliminar icono
-    function deleteIcon(iconId, iconName) {
-        if (confirm(`¿Estás seguro de que deseas eliminar el icono "${iconName}"?\n\nEsta acción no se puede deshacer.`)) {
+        init() {
+            // Inicializar
+        },
+
+        filterIcons() {
+            const cards = document.querySelectorAll('.icon-card');
+            let visibleCount = 0;
+
+            cards.forEach(card => {
+                const name = card.dataset.iconName;
+                const isGlobal = card.dataset.isGlobal === 'true';
+                const categories = card.dataset.categories.split(',').map(id => parseInt(id));
+
+                // Filtro de búsqueda
+                const matchesSearch = this.searchQuery === '' || name.includes(this.searchQuery.toLowerCase());
+
+                // Filtro de categoría
+                let matchesCategory = false;
+                if (this.selectedCategory === 'all') {
+                    matchesCategory = true;
+                } else if (this.selectedCategory === 'global') {
+                    matchesCategory = isGlobal;
+                } else {
+                    matchesCategory = categories.includes(this.selectedCategory);
+                }
+
+                // Mostrar/ocultar
+                if (matchesSearch && matchesCategory) {
+                    card.style.display = '';
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+
+            this.noResults = visibleCount === 0 && (this.searchQuery !== '' || this.selectedCategory !== 'all');
+        },
+
+        viewIcon(iconId) {
+            // Por ahora solo redirige a editar
+            window.location.href = `/superlinkiu/category-icons/${iconId}/edit`;
+        },
+
+        deleteIcon(iconId, iconName) {
+            this.deleteIconId = iconId;
+            this.deleteIconName = iconName;
+            this.showDeleteModal = true;
+        },
+
+        async confirmDelete() {
+            if (!this.deleteIconId) return;
+
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = `/superlinkiu/category-icons/${iconId}`;
+            form.action = `/superlinkiu/category-icons/${this.deleteIconId}`;
             
             const methodInput = document.createElement('input');
             methodInput.type = 'hidden';
@@ -246,32 +351,54 @@
             form.appendChild(tokenInput);
             document.body.appendChild(form);
             form.submit();
-        }
-    }
 
-    // Función para mostrar notificaciones
-    function showNotification(message, type) {
-        // Crear notificación temporal
-        const notification = document.createElement('div');
-        notification.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg shadow-lg text-accent-50 font-medium transition-all transform translate-x-full`;
-        notification.className += type === 'success' ? ' bg-success-400' : ' bg-error-400';
-        notification.textContent = message;
+            this.showDeleteModal = false;
+        }
+    }));
+});
+
+// Toggle activar/desactivar icono
+document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('icon-toggle')) {
+        const iconId = e.target.dataset.iconId;
+        const url = e.target.dataset.url;
+        const isChecked = e.target.checked;
         
-        document.body.appendChild(notification);
-        
-        // Mostrar
-        setTimeout(() => {
-            notification.classList.remove('translate-x-full');
-        }, 100);
-        
-        // Ocultar después de 3 segundos
-        setTimeout(() => {
-            notification.classList.add('translate-x-full');
-            setTimeout(() => {
-                document.body.removeChild(notification);
-            }, 300);
-        }, 3000);
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            },
+            body: JSON.stringify({})
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Actualizar badge de estado
+                const card = document.querySelector(`[data-icon-id="${iconId}"]`);
+                const badge = card.querySelector('span.px-2');
+                
+                if (data.is_active) {
+                    badge.className = 'px-2 py-1 text-xs bg-success-100 text-success-400 rounded-full font-medium';
+                    badge.textContent = 'Activo';
+                } else {
+                    badge.className = 'px-2 py-1 text-xs bg-warning-100 text-warning-400 rounded-full font-medium';
+                    badge.textContent = 'Inactivo';
+                }
+            } else {
+                // Revertir toggle
+                e.target.checked = !isChecked;
+                alert(data.message || 'Error al cambiar el estado');
+            }
+        })
+        .catch(error => {
+            // Revertir toggle
+            e.target.checked = !isChecked;
+            alert('Error de conexión');
+        });
     }
+});
 </script>
 @endpush
-@endsection 
+@endsection
