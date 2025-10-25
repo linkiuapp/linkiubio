@@ -18,6 +18,7 @@ use App\Features\TenantAdmin\Controllers\AnnouncementController;
 use App\Features\TenantAdmin\Controllers\OrderController;
 use App\Features\TenantAdmin\Controllers\BillingController;
 use App\Features\TenantAdmin\Controllers\CouponController;
+use App\Features\TenantAdmin\Controllers\PreviewController;
 
 
 /*

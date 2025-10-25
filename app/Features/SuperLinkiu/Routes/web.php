@@ -29,7 +29,8 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
         // Gestión de tiendas
         Route::get('stores/create-wizard', [StoreController::class, 'createWizard'])
             ->name('stores.create-wizard');
-        Route::resource('stores', StoreController::class)->names('stores');
+        
+        // Rutas específicas ANTES del resource (para evitar conflictos)
         Route::post('stores/bulk-action', [StoreController::class, 'bulkAction'])
             ->name('stores.bulk-action');
         Route::post('stores/{store}/toggle-verified', [StoreController::class, 'toggleVerified'])
@@ -38,6 +39,11 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
             ->name('stores.update-status');
         Route::post('stores/{store}/extend-plan', [StoreController::class, 'extendPlan'])
             ->name('stores.extend-plan');
+        Route::post('stores/{store}/generate-admin-token', [StoreController::class, 'generateAdminToken'])
+            ->name('stores.generate-admin-token');
+            
+        // Resource routes (deben ir después de las rutas específicas)
+        Route::resource('stores', StoreController::class)->names('stores');
             
         // Business Categories
         Route::resource('business-categories', \App\Features\SuperLinkiu\Controllers\BusinessCategoryController::class)

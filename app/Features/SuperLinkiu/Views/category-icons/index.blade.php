@@ -6,12 +6,12 @@
     <!-- Header Section -->
     <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-3xl font-semibold text-black-400">Iconos de Categorías</h1>
+            <h1 class="text-lg font-bold text-black-400">Iconos de Categorías</h1>
             <p class="text-black-300 mt-1">Gestiona los iconos disponibles para las categorías de las tiendas</p>
         </div>
-        <div class="flex items-center gap-3">
-            <a href="{{ route('superlinkiu.category-icons.create') }}" class="btn-primary">
-                <x-solar-add-circle-outline class="w-4 h-4 mr-2" />
+        <div class="flex items-center gap-4">
+            <a href="{{ route('superlinkiu.category-icons.create') }}" class="btn-primary flex items-center gap-2">
+                <x-solar-add-circle-outline class="w-5 h-5" />
                 Nuevo Icono
             </a>
         </div>
