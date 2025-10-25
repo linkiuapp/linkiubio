@@ -2495,4 +2495,62 @@ class StoreController extends Controller
             ], 500);
         }
     }
+
+    /**
+     * Generate temporary token for SuperAdmin to preview store as admin
+     */
+    public function generateAdminToken(Store $store)
+    {
+        try {
+            // Validar que el usuario actual sea super_admin
+            if (auth()->user()->role !== 'super_admin') {
+                return response()->json([
+                    'error' => 'No autorizado'
+                ], 403);
+            }
+
+            // Buscar el admin de la tienda
+            $storeAdmin = $store->admins()->first();
+
+            if (!$storeAdmin) {
+                return response()->json([
+                    'error' => 'Esta tienda no tiene admin asignado'
+                ], 404);
+            }
+
+            // Generar token temporal (válido 15 minutos - suficiente para hacer clic)
+            $token = Str::random(64);
+            
+            cache()->put(
+                "admin_preview_token:{$token}", 
+                [
+                    'store_admin_id' => $storeAdmin->id,
+                    'super_admin_id' => auth()->id(),
+                    'store_id' => $store->id,
+                    'store_name' => $store->name,
+                ],
+                now()->addMinutes(15)
+            );
+
+            Log::info('Admin preview token generated', [
+                'super_admin_id' => auth()->id(),
+                'store_id' => $store->id,
+                'store_admin_id' => $storeAdmin->id,
+            ]);
+
+            return response()->json([
+                'url' => route('linkiu.admin-preview', ['token' => $token])
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Error generating admin token', [
+                'store_id' => $store->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'error' => 'Error al generar token de acceso'
+            ], 500);
+        }
+    }
 }

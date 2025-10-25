@@ -506,14 +506,7 @@
         }
     });
 
-    // Función para login como admin de tienda
-    function loginAsStore(storeId) {
-        if (confirm('¿Deseas entrar como administrador de esta tienda?')) {
-            // Implementar lógica de login as
-            console.log('Login as store:', storeId);
-            // window.location.href = `/superlinkiu/stores/${storeId}/login-as`;
-        }
-    }
+    // La función loginAsStore() está definida en el componente Alpine 'storeManagement' en resources/js/app.js
 </script>
 @endpush
 @endsection  

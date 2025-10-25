@@ -123,7 +123,6 @@ Contraseña: {{ session('admin_credentials')['password'] ?? '' }}
 
 // Toggle functionality
 
-
         document.addEventListener('change', function(e) {
     if (e.target.classList.contains('verified-toggle')) {
         const url = e.target.dataset.url;

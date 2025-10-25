@@ -191,9 +191,38 @@ document.addEventListener('alpine:init', () => {
             }
         },
         
-        loginAsStore(storeId) {
+        async loginAsStore(storeId) {
             console.log('🔑 LOGIN AS STORE: Función llamada para tienda ID:', storeId);
-            alert('Funcionalidad "Login como Admin de Tienda" aún no implementada.\n\nPROXIMO TODO: Implementar ruta y controlador para esta función.');
+            
+            if (!confirm('¿Deseas entrar como administrador de esta tienda?\n\nSe abrirá una nueva pestaña con el dashboard del admin.')) {
+                return;
+            }
+
+            try {
+                // Llamar al backend para generar token
+                const response = await fetch(`/superlinkiu/stores/${storeId}/generate-admin-token`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    }
+                });
+
+                const data = await response.json();
+
+                if (data.url) {
+                    // Abrir en nueva pestaña
+                    console.log('✅ TOKEN GENERADO: Abriendo nueva pestaña...', data.url);
+                    window.open(data.url, '_blank');
+                } else if (data.error) {
+                    alert('Error: ' + data.error);
+                    console.error('❌ ERROR:', data.error);
+                }
+            } catch (error) {
+                console.error('❌ ERROR al generar token:', error);
+                alert('Error al abrir la tienda. Por favor intenta de nuevo.');
+            }
         },
         
         init() {
@@ -207,3 +236,55 @@ window.Alpine = Alpine
 Alpine.start()
 
 console.log('🟢 Alpine started successfully')
+
+// Función global para login as store (disponible en window)
+window.handleLoginAsStore = async function(storeSlug) {
+    console.log('🔑 GLOBAL LOGIN AS STORE: Función llamada para tienda SLUG:', storeSlug);
+    
+    const message = '¿Deseas entrar como administrador de esta tienda?\n\n' +
+        '⚠️ IMPORTANTE: Se cerrará tu sesión de SuperAdmin en esta pestaña.\n\n' +
+        '💡 RECOMENDACIÓN: Abre esta pestaña en modo incógnito primero\n' +
+        '   (Ctrl+Shift+N en Chrome/Edge) para mantener tu sesión.\n\n' +
+        '¿Continuar de todos modos?';
+    
+    if (!confirm(message)) {
+        return;
+    }
+
+    try {
+        // Llamar al backend para generar token
+        const response = await fetch(`/superlinkiu/stores/${storeSlug}/generate-admin-token`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        });
+
+        const data = await response.json();
+
+        if (data.url) {
+            // Abrir en nueva pestaña
+            console.log('✅ TOKEN GENERADO: Abriendo nueva pestaña...', data.url);
+            
+            // Intentar abrir en ventana nueva (NO incógnito, pero sí nueva ventana)
+            const width = 1200;
+            const height = 800;
+            const left = (screen.width - width) / 2;
+            const top = (screen.height - height) / 2;
+            
+            window.open(
+                data.url, 
+                'preview_' + Date.now(),
+                `width=${width},height=${height},left=${left},top=${top},menubar=yes,toolbar=yes,location=yes,status=yes,scrollbars=yes,resizable=yes`
+            );
+        } else if (data.error) {
+            alert('Error: ' + data.error);
+            console.error('❌ ERROR:', data.error);
+        }
+    } catch (error) {
+        console.error('❌ ERROR al generar token:', error);
+        alert('Error al abrir la tienda. Por favor intenta de nuevo.');
+    }
+};

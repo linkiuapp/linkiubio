@@ -105,7 +105,8 @@
                                     title="Editar">
                                     <x-solar-pen-2-outline class="table-action-icon" />
                                 </a>
-                                <button @click="loginAsStore({{ $store->id }})"
+                                <button type="button" 
+                                    onclick="event.preventDefault(); event.stopPropagation(); window.handleLoginAsStore('{{ $store->slug }}');"
                                     class="table-action-login"
                                     title="Entrar como admin">
                                     <x-solar-login-3-outline class="table-action-icon" />
