@@ -73,6 +73,21 @@ class SimpleShippingController extends Controller
             'allow_unlisted_cities' => 'boolean',
             'unlisted_cities_cost' => 'nullable|numeric|min:0|max:999999',
             'unlisted_cities_message' => 'nullable|string|max:200',
+        ], [
+            'pickup_instructions.max' => 'Las instrucciones de recogida no pueden exceder 500 caracteres',
+            'local_cost.numeric' => 'El costo de envío local debe ser un número',
+            'local_cost.min' => 'El costo de envío local no puede ser negativo',
+            'local_cost.max' => 'El costo de envío local es demasiado alto',
+            'local_free_from.numeric' => 'El monto de envío gratis debe ser un número',
+            'local_free_from.min' => 'El monto de envío gratis no puede ser negativo',
+            'local_city.max' => 'El nombre de la ciudad no puede exceder 100 caracteres',
+            'local_instructions.max' => 'Las instrucciones no pueden exceder 500 caracteres',
+            'national_free_from.numeric' => 'El monto de envío gratis debe ser un número',
+            'national_free_from.min' => 'El monto no puede ser negativo',
+            'national_instructions.max' => 'Las instrucciones no pueden exceder 500 caracteres',
+            'unlisted_cities_cost.numeric' => 'El costo debe ser un número',
+            'unlisted_cities_cost.min' => 'El costo no puede ser negativo',
+            'unlisted_cities_message.max' => 'El mensaje no puede exceder 200 caracteres',
         ]);
 
         try {
@@ -106,6 +121,19 @@ class SimpleShippingController extends Controller
             'delivery_time' => ['required', 'string', Rule::in(array_keys(SimpleShipping::DELIVERY_TIMES))],
             'cities' => 'required|array|min:1|max:20',
             'cities.*' => 'required|string|max:100',
+        ], [
+            'name.required' => 'El nombre de la zona es obligatorio',
+            'name.max' => 'El nombre no puede exceder 100 caracteres',
+            'cost.required' => 'El costo de envío es obligatorio',
+            'cost.numeric' => 'El costo debe ser un número',
+            'cost.min' => 'El costo no puede ser negativo',
+            'cost.max' => 'El costo es demasiado alto',
+            'delivery_time.required' => 'El tiempo de entrega es obligatorio',
+            'cities.required' => 'Debes agregar al menos una ciudad',
+            'cities.min' => 'Debes agregar al menos una ciudad',
+            'cities.max' => 'No puedes agregar más de 20 ciudades por zona',
+            'cities.*.required' => 'El nombre de la ciudad es obligatorio',
+            'cities.*.max' => 'El nombre de la ciudad no puede exceder 100 caracteres',
         ]);
 
         try {
@@ -198,6 +226,15 @@ class SimpleShippingController extends Controller
             'cost' => 'required|numeric|min:0|max:999999',
             'delivery_time' => ['required', 'string', Rule::in(array_keys(SimpleShipping::DELIVERY_TIMES))],
             'cities' => 'required',
+        ], [
+            'name.required' => 'El nombre de la zona es obligatorio',
+            'name.max' => 'El nombre no puede exceder 100 caracteres',
+            'cost.required' => 'El costo de envío es obligatorio',
+            'cost.numeric' => 'El costo debe ser un número',
+            'cost.min' => 'El costo no puede ser negativo',
+            'cost.max' => 'El costo es demasiado alto',
+            'delivery_time.required' => 'El tiempo de entrega es obligatorio',
+            'cities.required' => 'Debes agregar al menos una ciudad',
         ]);
         
         // Manejar cities si viene como string JSON (desde FormData)

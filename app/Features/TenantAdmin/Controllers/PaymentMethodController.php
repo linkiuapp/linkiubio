@@ -229,6 +229,11 @@ class PaymentMethodController extends Controller
             // Update active status
             $method->update(['is_active' => $request->is_active]);
             
+            // Marcar paso de onboarding como completado si se activa un método
+            if ($request->is_active) {
+                \App\Shared\Models\StoreOnboardingStep::markAsCompleted($store->id, 'payments');
+            }
+            
             // Clear cache
             $this->paymentMethodService->clearPaymentMethodsCache($store->id);
             
@@ -478,6 +483,12 @@ class PaymentMethodController extends Controller
             'available_for_delivery' => 'nullable|boolean',
             'is_default' => 'nullable|boolean',
             'cash_change_available' => 'nullable|boolean',
+        ], [
+            'type.required' => 'El tipo de método de pago es obligatorio',
+            'type.in' => 'El tipo de método seleccionado no es válido',
+            'name.required' => 'El nombre del método de pago es obligatorio',
+            'name.max' => 'El nombre no puede exceder 100 caracteres',
+            'instructions.max' => 'Las instrucciones no pueden exceder 500 caracteres',
         ]);
         
         if ($validator->fails()) {
@@ -513,7 +524,7 @@ class PaymentMethodController extends Controller
             }
             
             return redirect()->route('tenant.admin.payment-methods.index', ['store' => $store->slug])
-                ->with('success', 'Método de pago creado exitosamente.');
+                ->with('swal_success', 'Método de pago creado exitosamente');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Error al crear el método de pago: ' . $e->getMessage())->withInput();
         }
@@ -616,6 +627,10 @@ class PaymentMethodController extends Controller
             'available_for_delivery' => 'nullable|boolean',
             'is_default' => 'nullable|boolean',
             'cash_change_available' => 'nullable|boolean',
+        ], [
+            'name.required' => 'El nombre del método de pago es obligatorio',
+            'name.max' => 'El nombre no puede exceder 100 caracteres',
+            'instructions.max' => 'Las instrucciones no pueden exceder 500 caracteres',
         ]);
         
         if ($validator->fails()) {
@@ -649,7 +664,7 @@ class PaymentMethodController extends Controller
             }
             
             return redirect()->route('tenant.admin.payment-methods.show', ['store' => $store->slug, 'paymentMethod' => $paymentMethod->id])
-                ->with('success', 'Método de pago actualizado exitosamente.');
+                ->with('swal_success', 'Método de pago actualizado exitosamente');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Error al actualizar el método de pago: ' . $e->getMessage())->withInput();
         }

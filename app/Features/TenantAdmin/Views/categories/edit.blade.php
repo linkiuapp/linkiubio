@@ -213,18 +213,18 @@
                 <div class="bg-accent-100 px-6 py-4 flex justify-between items-center">
                     <div class="flex items-center gap-3">
                         <a href="{{ route('tenant.admin.categories.index', $store->slug) }}" 
-                           class="btn-outline-secondary">
+                           class="btn-secondary px-4 py-2 rounded-lg flex items-center justify-center gap-2">
                             Cancelar
                         </a>
                         @if($category->products_count == 0)
                             <button type="button" 
                                     onclick="if(confirm('¿Estás seguro de eliminar esta categoría?')) { document.getElementById('delete-form').submit(); }"
-                                    class="btn-outline-error">
+                                    class="btn-error px-4 py-2 rounded-lg flex items-center justify-center gap-2">
                                 Eliminar
                             </button>
                         @endif
                     </div>
-                    <button type="submit" class="btn-primary">
+                    <button type="submit" class="btn-primary px-4 py-2 rounded-lg flex items-center justify-center gap-2">
                         Guardar Cambios
                     </button>
                 </div>
@@ -245,6 +245,39 @@
         // Actualizar preview del slug
         document.getElementById('slug').addEventListener('input', function(e) {
             document.getElementById('slug-preview').textContent = e.target.value || 'slug';
+        });
+        
+        // Interceptar submit para mostrar SweetAlert2
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const form = this;
+            
+            Swal.fire({
+                title: '¿Actualizar categoría?',
+                text: 'Se guardarán los cambios realizados',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#da27a7',
+                cancelButtonColor: '#ed2e45',
+                confirmButtonText: '✓ Sí, actualizar',
+                cancelButtonText: 'Cancelar',
+                showLoaderOnConfirm: true,
+                allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Actualizando categoría...',
+                        text: 'Por favor espera',
+                        icon: 'info',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        willOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    form.submit();
+                }
+            });
         });
     </script>
     @endpush

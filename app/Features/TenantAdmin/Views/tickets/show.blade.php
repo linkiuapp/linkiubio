@@ -7,8 +7,8 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h1 class="text-lg font-bold text-black-400">Ticket #{{ $ticket->ticket_number }}</h1>
-            <p class="text-sm text-black-300">{{ $ticket->title }}</p>
+            <h1 class="text-body-large font-bold text-black-400">Ticket #{{ $ticket->ticket_number }}</h1>
+            <p class="text-caption font-bold text-black-300">{{ $ticket->title }}</p>
         </div>
         <div class="flex items-center gap-3">
             @if(in_array($ticket->status, ['open', 'in_progress']))
@@ -29,42 +29,42 @@
     <!-- Información del Ticket -->
     <div class="bg-accent-50 rounded-lg p-0 overflow-hidden mb-6">
         <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-            <h2 class="text-lg font-semibold text-black-400 mb-0">Información del Ticket</h2>
+            <h2 class="text-body-large font-semibold text-black-400 mb-0">Información del Ticket</h2>
         </div>
         
         <div class="p-6">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div>
-                    <label class="block text-sm font-medium text-black-300 mb-1">Estado</label>
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $ticket->status_color == 'info' ? 'bg-info-300 text-accent-50' : ($ticket->status_color == 'warning' ? 'bg-warning-300 text-black-500' : ($ticket->status_color == 'success' ? 'bg-success-300 text-accent-50' : 'bg-secondary-300 text-accent-50')) }}">
+                    <label class="block text-caption font-bold font-medium text-black-300 mb-1">Estado</label>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-caption font-bold font-medium {{ $ticket->status_color == 'info' ? 'bg-info-300 text-accent-50' : ($ticket->status_color == 'warning' ? 'bg-warning-300 text-black-500' : ($ticket->status_color == 'success' ? 'bg-success-300 text-accent-50' : 'bg-secondary-300 text-accent-50')) }}">
                         {{ $ticket->status_label }}
                     </span>
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-black-300 mb-1">Prioridad</label>
-                    <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium {{ $ticket->priority_color == 'success' ? 'bg-success-300 text-accent-50' : ($ticket->priority_color == 'info' ? 'bg-info-300 text-accent-50' : ($ticket->priority_color == 'warning' ? 'bg-warning-300 text-black-500' : 'bg-error-300 text-accent-50')) }}">
+                    <label class="block text-caption font-bold font-medium text-black-300 mb-1">Prioridad</label>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-caption font-bold font-medium {{ $ticket->priority_color == 'success' ? 'bg-success-300 text-accent-50' : ($ticket->priority_color == 'info' ? 'bg-info-300 text-accent-50' : ($ticket->priority_color == 'warning' ? 'bg-warning-300 text-black-500' : 'bg-error-300 text-accent-50')) }}">
                         {{ $ticket->priority_label }}
                     </span>
                 </div>
                 
                 <div>
-                    <label class="block text-sm font-medium text-black-300 mb-1">Categoría</label>
+                    <label class="block text-caption font-bold font-medium text-black-300 mb-1">Categoría</label>
                     <span class="text-black-400">{{ $ticket->category_label }}</span>
                 </div>
             </div>
 
             <div class="mt-4 pt-4 border-t border-accent-100">
-                <label class="block text-sm font-medium text-black-300 mb-2">Descripción Original</label>
+                <label class="block text-caption font-bold font-medium text-black-300 mb-2">Descripción Original</label>
                 <p class="text-black-400">{{ $ticket->description }}</p>
                 
                 <!-- Archivos adjuntos del ticket original -->
                 @if($ticket->attachments && count($ticket->attachments) > 0)
                     <div class="mt-3 pt-3 border-t border-accent-200">
-                        <label class="block text-xs font-medium text-black-300 mb-2">Archivos adjuntos:</label>
+                        <label class="block text-caption font-bold font-medium text-black-300 mb-2">Archivos adjuntos:</label>
                         <div class="space-y-1">
                             @foreach($ticket->attachments as $attachment)
-                                <div class="flex items-center gap-2 text-sm">
+                                <div class="flex items-center gap-2 text-caption font-bold">
                                     @if(in_array($attachment['mime_type'], ['image/jpeg', 'image/jpg', 'image/png']))
                                         <x-solar-gallery-outline class="w-4 h-4 text-primary-300" />
                                     @else
@@ -75,7 +75,7 @@
                                        class="text-primary-300 hover:text-primary-400 truncate">
                                         {{ $attachment['original_name'] }}
                                     </a>
-                                    <span class="text-xs text-black-200">
+                                    <span class="text-caption font-bold text-black-200">
                                         ({{ number_format($attachment['size'] / 1024, 1) }} KB)
                                     </span>
                                 </div>
@@ -87,8 +87,8 @@
 
             @if($ticket->metadata)
                 <div class="mt-4 pt-4 border-t border-accent-100">
-                    <label class="block text-sm font-medium text-black-300 mb-2">Información Técnica</label>
-                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+                    <label class="block text-caption font-bold font-medium text-black-300 mb-2">Información Técnica</label>
+                    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 text-caption font-bold">
                         @if(isset($ticket->metadata['browser']))
                             <div>
                                 <span class="text-black-300">Navegador:</span>
@@ -121,10 +121,10 @@
     <div class="bg-accent-50 rounded-lg p-0 overflow-hidden mb-6" x-data="{ showAllMessages: {{ $ticket->responses->count() <= 3 ? 'true' : 'false' }} }">
         <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
             <div class="flex items-center justify-between">
-                <h2 class="text-lg font-semibold text-black-400 mb-0">Conversación ({{ $ticket->responses->count() }} respuestas)</h2>
+                <h2 class="text-body-large font-semibold text-black-400 mb-0">Conversación ({{ $ticket->responses->count() }} respuestas)</h2>
                 @if($ticket->responses->count() > 3)
                     <button x-on:click="showAllMessages = !showAllMessages" 
-                            class="btn-outline-secondary px-3 py-1 text-sm rounded-lg flex items-center gap-2">
+                            class="btn-outline-secondary px-3 py-1 text-caption font-bold rounded-lg flex items-center gap-2">
                         <x-solar-eye-outline class="w-4 h-4" x-show="!showAllMessages" />
                         <x-solar-eye-closed-outline class="w-4 h-4" x-show="showAllMessages" />
                         <span x-text="showAllMessages ? 'Mostrar solo recientes' : 'Mostrar todo el historial'"></span>
@@ -146,7 +146,7 @@
                         <span class="font-medium">{{ $ticket->responses->count() - 3 }} mensajes anteriores ocultos</span>
                     </div>
                     <button x-on:click="showAllMessages = true" 
-                            class="mt-2 text-primary-300 hover:text-primary-400 text-sm font-medium">
+                            class="mt-2 text-primary-300 hover:text-primary-400 text-caption font-bold font-medium">
                         Mostrar todo el historial →
                     </button>
                 </div>
@@ -168,9 +168,9 @@
                             <div class="flex items-center justify-between mb-3">
                                 <div class="flex items-center gap-2">
                                     <div class="w-6 h-6 bg-{{ $response->is_support_team ? 'primary' : 'secondary' }}-200 rounded-full flex items-center justify-center">
-                                        <span class="text-xs text-accent-50">{{ substr($response->user->name ?? 'U', 0, 1) }}</span>
+                                        <span class="text-caption font-bold text-accent-50">{{ substr($response->user->name ?? 'U', 0, 1) }}</span>
                                     </div>
-                                    <span class="text-sm font-medium text-black-400">
+                                    <span class="text-caption font-bold font-medium text-black-400">
                                         @if($response->is_support_team)
                                             🛠️ {{ $response->user->name ?? 'Soporte Linkiu' }}
                                         @else
@@ -178,31 +178,31 @@
                                         @endif
                                     </span>
                                     @if($response->response_type === 'status_change')
-                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-warning-300 text-black-500">
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-caption font-bold font-medium bg-warning-300 text-black-500">
                                             <x-solar-refresh-outline class="w-3 h-3 mr-1" />
                                             Cambio de Estado
                                         </span>
                                     @endif
                                 </div>
-                                <span class="text-xs text-black-300">{{ $response->created_at->format('d/m/Y H:i') }}</span>
+                                <span class="text-caption font-bold text-black-300">{{ $response->created_at->format('d/m/Y H:i') }}</span>
                             </div>
                             
-                            <div class="text-sm text-black-400 whitespace-pre-wrap leading-relaxed">{{ $response->message }}</div>
+                            <div class="text-caption font-bold text-black-400 whitespace-pre-wrap leading-relaxed">{{ $response->message }}</div>
 
                             <!-- Archivos adjuntos -->
                             @if($response->attachments && count($response->attachments) > 0)
                                 <div class="mt-3 pt-3 border-t border-accent-200">
-                                    <label class="block text-xs font-medium text-black-300 mb-2">Archivos adjuntos:</label>
+                                    <label class="block text-caption font-bold font-medium text-black-300 mb-2">Archivos adjuntos:</label>
                                     <div class="space-y-1">
                                         @foreach($response->attachments as $attachment)
-                                            <div class="flex items-center gap-2 text-sm">
+                                            <div class="flex items-center gap-2 text-caption font-bold">
                                                 <x-solar-document-outline class="w-4 h-4 text-black-300" />
                                                                                 <a href="{{ $response->getAttachmentUrl($attachment) }}" 
                                    target="_blank"
                                    class="text-primary-300 hover:text-primary-400 truncate">
                                     {{ $attachment['original_name'] }}
                                 </a>
-                                                <span class="text-xs text-black-200">
+                                                <span class="text-caption font-bold text-black-200">
                                                     ({{ number_format($attachment['size'] / 1024, 1) }} KB)
                                                 </span>
                                             </div>
@@ -228,7 +228,7 @@
     @if(in_array($ticket->status, ['open', 'in_progress']))
         <div class="bg-accent-50 rounded-lg p-0 overflow-hidden" id="response">
             <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                <h2 class="text-lg font-semibold text-black-400 mb-0">Agregar Respuesta</h2>
+                <h2 class="text-body-large font-semibold text-black-400 mb-0">Agregar Respuesta</h2>
             </div>
             
             <form action="{{ route('tenant.admin.tickets.add-response', ['store' => $store->slug, 'ticket' => $ticket]) }}" 
@@ -238,7 +238,7 @@
                 
                 <div class="p-6">
                     <div>
-                        <label class="block text-sm font-medium text-black-300 mb-2">Tu respuesta</label>
+                        <label class="block text-caption font-bold font-medium text-black-300 mb-2">Tu respuesta</label>
                         <textarea name="message" 
                                   rows="4"
                                   placeholder="Escribe tu respuesta..."
@@ -246,22 +246,22 @@
                                   required
                                   maxlength="2000">{{ old('message') }}</textarea>
                         @error('message')
-                            <p class="text-error-300 text-xs mt-1">{{ $message }}</p>
+                            <p class="text-error-300 text-caption font-bold mt-1">{{ $message }}</p>
                         @enderror
-                        <p class="text-black-200 text-xs mt-1">Máximo 2000 caracteres</p>
+                        <p class="text-black-200 text-caption font-bold mt-1">Máximo 2000 caracteres</p>
                     </div>
 
                     <!-- Archivos adjuntos -->
                     <div class="mt-4">
-                        <label class="block text-sm font-medium text-black-300 mb-2">Archivos adjuntos (opcional)</label>
+                        <label class="block text-caption font-bold font-medium text-black-300 mb-2">Archivos adjuntos (opcional)</label>
                         <input type="file" 
                                name="attachments[]" 
                                multiple
                                accept=".jpg,.jpeg,.png,.pdf,.doc,.docx,.txt"
                                class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200">
-                        <p class="text-black-200 text-xs mt-1">Máximo 3 archivos, 5MB cada uno</p>
+                        <p class="text-black-200 text-caption font-bold mt-1">Máximo 3 archivos, 5MB cada uno</p>
                         @error('attachments.*')
-                            <p class="text-error-300 text-xs mt-1">{{ $message }}</p>
+                            <p class="text-error-300 text-caption font-bold mt-1">{{ $message }}</p>
                         @enderror
                     </div>
 
@@ -283,7 +283,7 @@
                 
                 @if(in_array($ticket->status, ['resolved', 'closed']))
                     <div class="mt-2">
-                        <p class="text-sm text-black-300 mb-3">¿El problema persiste o tienes más preguntas?</p>
+                        <p class="text-caption font-bold text-black-300 mb-3">¿El problema persiste o tienes más preguntas?</p>
                         <button x-on:click="showReopenModal = true" 
                                 class="btn-warning px-6 py-2 rounded-lg flex items-center gap-2 mx-auto hover:scale-105 transition-transform">
                             <x-solar-restart-outline class="w-5 h-5" />
@@ -308,9 +308,9 @@
         
         <div x-on:click.away="showReopenModal = false" 
              class="bg-accent-50 rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 class="text-lg font-semibold text-black-400 mb-4">¿Reabrir este ticket?</h3>
+            <h3 class="text-body-large font-semibold text-black-400 mb-4">¿Reabrir este ticket?</h3>
             
-            <p class="text-black-300 text-sm mb-4">
+            <p class="text-black-300 text-caption font-bold mb-4">
                 El ticket volverá al estado "Abierto" y nuestro equipo de soporte será notificado.
                 Podrás continuar la conversación agregando nuevas respuestas.
             </p>
@@ -319,7 +319,7 @@
                 @csrf
                 
                 <div class="mb-4">
-                    <label class="block text-sm font-medium text-black-300 mb-2">
+                    <label class="block text-caption font-bold font-medium text-black-300 mb-2">
                         Razón de reapertura (opcional)
                     </label>
                     <textarea name="reason" 
@@ -327,7 +327,7 @@
                               placeholder="Ej: El problema volvió a ocurrir..."
                               class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-warning-200"
                               maxlength="500"></textarea>
-                    <p class="text-black-200 text-xs mt-1">Máximo 500 caracteres</p>
+                    <p class="text-black-200 text-caption font-bold mt-1">Máximo 500 caracteres</p>
                 </div>
                 
                 <div class="flex justify-end gap-3 pt-4 border-t border-accent-100">
@@ -359,9 +359,9 @@
         
         <div x-on:click.away="showStatusModal = false" 
              class="bg-accent-50 rounded-lg p-6 max-w-md w-full mx-4">
-            <h3 class="text-lg font-semibold text-black-400 mb-4">¿Tu problema fue resuelto?</h3>
+            <h3 class="text-body-large font-semibold text-black-400 mb-4">¿Tu problema fue resuelto?</h3>
             
-            <p class="text-black-300 text-sm mb-4">
+            <p class="text-black-300 text-caption font-bold mb-4">
                 Si tu problema fue solucionado, puedes cerrar este ticket. 
                 Si el problema persiste, siempre puedes reabrirlo desde tu panel.
             </p>

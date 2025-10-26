@@ -7,11 +7,11 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h1 class="text-lg font-bold text-black-400">Crear Ticket de Soporte</h1>
-            <p class="text-sm text-black-300">Envía tu consulta o problema a nuestro equipo</p>
+            <h1 class="text-body-large font-bold text-black-400">Crear Ticket de Soporte</h1>
+            <p class="text-caption text-black-300">Envía tu consulta o problema a nuestro equipo</p>
         </div>
         <a href="{{ route('tenant.admin.tickets.index', ['store' => $store->slug]) }}" 
-           class="btn-outline-secondary px-4 py-2 rounded-lg flex items-center gap-2">
+           class="btn-outline-secondary px-4 py-2 rounded-lg flex items-center gap-2 text-caption font-bold">
             <x-solar-arrow-left-outline class="w-4 h-4" />
             Volver
         </a>
@@ -25,7 +25,7 @@
         <!-- Card principal -->
         <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
             <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                <h2 class="text-lg font-semibold text-black-400 mb-0">Información del Ticket</h2>
+                <h2 class="text-body-large font-semibold text-black-400 mb-0">Información del Ticket</h2>
             </div>
             
             <div class="p-6">
@@ -33,7 +33,7 @@
                     <!-- Columna izquierda -->
                     <div class="space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-black-300 mb-2">
+                            <label class="block text-caption font-bold font-medium text-black-300 mb-2">
                                 Categoría *
                             </label>
                             <select name="category" 
@@ -47,12 +47,12 @@
                                 @endforeach
                             </select>
                             @error('category')
-                                <p class="text-error-300 text-xs mt-1">{{ $message }}</p>
+                                <p class="text-error-300 text-caption font-bold mt-1">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-black-300 mb-2">
+                            <label class="block text-caption font-bold font-medium text-black-300 mb-2">
                                 Prioridad *
                             </label>
                             <select name="priority" 
@@ -65,12 +65,12 @@
                                 <option value="urgent" {{ old('priority') == 'urgent' ? 'selected' : '' }}>Urgente</option>
                             </select>
                             @error('priority')
-                                <p class="text-error-300 text-xs mt-1">{{ $message }}</p>
+                                <p class="text-error-300 text-caption font-bold mt-1">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-black-300 mb-2">
+                            <label class="block text-caption font-bold font-medium text-black-300 mb-2">
                                 Asunto *
                             </label>
                             <input type="text" 
@@ -81,7 +81,7 @@
                                    required
                                    maxlength="255">
                             @error('title')
-                                <p class="text-error-300 text-xs mt-1">{{ $message }}</p>
+                                <p class="text-error-300 text-caption font-bold mt-1">{{ $message }}</p>
                             @enderror
                         </div>
                     </div>
@@ -90,7 +90,7 @@
                     <div class="space-y-4">
                         <div class="bg-accent-100 rounded-lg p-4">
                             <h3 class="font-semibold text-black-400 mb-3">Información Automática</h3>
-                            <div class="space-y-2 text-sm">
+                            <div class="space-y-2 text-caption font-bold">
                                 <div class="flex justify-between">
                                     <span class="text-black-300">Tienda:</span>
                                     <span class="text-black-400">{{ $store->name }}</span>
@@ -111,7 +111,7 @@
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-black-300 mb-2">
+                            <label class="block text-caption font-bold font-medium text-black-300 mb-2">
                                 Archivos Adjuntos
                             </label>
                             <div class="border-2 border-dashed border-accent-200 rounded-lg p-4 text-center"
@@ -126,10 +126,10 @@
                                        x-on:change="handleFileSelect($event)">
                                 <div class="cursor-pointer" x-on:click="$refs.fileInput.click()">
                                     <x-solar-upload-outline class="w-8 h-8 text-black-200 mx-auto mb-2" />
-                                    <p class="text-sm text-black-300">
+                                    <p class="text-caption font-bold text-black-300">
                                         Arrastra archivos aquí o <span class="text-primary-300">haz clic para seleccionar</span>
                                     </p>
-                                    <p class="text-xs text-black-200 mt-1">
+                                    <p class="text-caption font-bold text-black-200 mt-1">
                                         Máximo 3 archivos, 5MB cada uno (JPG, PNG, PDF, DOC, TXT)
                                     </p>
                                 </div>
@@ -141,8 +141,8 @@
                                     <div class="flex items-center justify-between p-2 bg-accent-100 rounded-lg mb-2">
                                         <div class="flex items-center gap-2">
                                             <x-solar-document-outline class="w-4 h-4 text-black-300" />
-                                            <span class="text-sm text-black-400" x-text="file.name"></span>
-                                            <span class="text-xs text-black-200" x-text="formatFileSize(file.size)"></span>
+                                            <span class="text-caption font-bold text-black-400" x-text="file.name"></span>
+                                            <span class="text-caption font-bold text-black-200" x-text="formatFileSize(file.size)"></span>
                                         </div>
                                         <button type="button" 
                                                 x-on:click="removeFile(index)"
@@ -154,7 +154,7 @@
                             </div>
 
                             @error('attachments.*')
-                                <p class="text-error-300 text-xs mt-1">{{ $message }}</p>
+                                <p class="text-error-300 text-caption font-bold mt-1">{{ $message }}</p>
                             @enderror
                         </div>
                     </div>
@@ -162,7 +162,7 @@
 
                 <!-- Descripción (ancho completo) -->
                 <div class="mt-6">
-                    <label class="block text-sm font-medium text-black-300 mb-2">
+                    <label class="block text-caption font-bold font-medium text-black-300 mb-2">
                         Descripción *
                     </label>
                     <textarea name="description" 
@@ -173,11 +173,11 @@
                               maxlength="5000">{{ old('description') }}</textarea>
                     <div class="flex justify-between mt-1">
                         @error('description')
-                            <p class="text-error-300 text-xs">{{ $message }}</p>
+                            <p class="text-error-300 text-caption font-bold">{{ $message }}</p>
                         @else
-                            <p class="text-black-200 text-xs">Sé lo más específico posible para una respuesta más rápida</p>
+                            <p class="text-black-200 text-caption font-bold">Sé lo más específico posible para una respuesta más rápida</p>
                         @enderror
-                        <p class="text-black-200 text-xs">Máximo 5000 caracteres</p>
+                        <p class="text-black-200 text-caption font-bold">Máximo 5000 caracteres</p>
                     </div>
                 </div>
 

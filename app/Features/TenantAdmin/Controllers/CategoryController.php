@@ -143,6 +143,17 @@ class CategoryController extends Controller
             'parent_id' => 'nullable|exists:categories,id',
             'is_active' => 'boolean',
             'sort_order' => 'integer|min:0'
+        ], [
+            'name.required' => 'El nombre de la categoría es obligatorio',
+            'name.max' => 'El nombre no puede exceder 255 caracteres',
+            'slug.max' => 'El slug no puede exceder 255 caracteres',
+            'slug.unique' => 'Ya existe una categoría con este slug en tu tienda',
+            'description.max' => 'La descripción no puede exceder 1000 caracteres',
+            'icon_id.required' => 'El ícono es obligatorio',
+            'icon_id.exists' => 'El ícono seleccionado no existe',
+            'parent_id.exists' => 'La categoría padre seleccionada no existe',
+            'sort_order.integer' => 'El orden debe ser un número entero',
+            'sort_order.min' => 'El orden no puede ser negativo',
         ]);
         
         // Generar slug si no se proporciona
@@ -179,7 +190,7 @@ class CategoryController extends Controller
         
         return redirect()
             ->route('tenant.admin.categories.index', $store->slug)
-            ->with('success', 'Categoría creada exitosamente');
+            ->with('swal_success', 'Categoría creada exitosamente');
     }
 
     /**
@@ -260,6 +271,17 @@ class CategoryController extends Controller
             'parent_id' => 'nullable|exists:categories,id',
             'is_active' => 'boolean',
             'sort_order' => 'integer|min:0'
+        ], [
+            'name.required' => 'El nombre de la categoría es obligatorio',
+            'name.max' => 'El nombre no puede exceder 255 caracteres',
+            'slug.max' => 'El slug no puede exceder 255 caracteres',
+            'slug.unique' => 'Ya existe una categoría con este slug en tu tienda',
+            'description.max' => 'La descripción no puede exceder 1000 caracteres',
+            'icon_id.required' => 'El ícono es obligatorio',
+            'icon_id.exists' => 'El ícono seleccionado no existe',
+            'parent_id.exists' => 'La categoría padre seleccionada no existe',
+            'sort_order.integer' => 'El orden debe ser un número entero',
+            'sort_order.min' => 'El orden no puede ser negativo',
         ]);
         
         // Verificar que no se asigne como padre a sí misma o a sus hijos
@@ -278,7 +300,7 @@ class CategoryController extends Controller
         
         return redirect()
             ->route('tenant.admin.categories.index', $store->slug)
-            ->with('success', 'Categoría actualizada exitosamente');
+            ->with('swal_success', 'Categoría actualizada exitosamente');
     }
 
     /**

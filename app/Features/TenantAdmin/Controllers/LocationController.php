@@ -122,6 +122,24 @@ class LocationController extends Controller
             'whatsapp_message' => 'nullable|string|max:255',
             'schedules' => 'nullable|array',
             'social_links' => 'nullable|array',
+        ], [
+            'name.required' => 'El nombre de la sede es obligatorio',
+            'name.min' => 'El nombre debe tener al menos 3 caracteres',
+            'name.max' => 'El nombre no puede exceder 100 caracteres',
+            'name.unique' => 'Ya existe una sede con este nombre en tu tienda',
+            'description.max' => 'La descripción no puede exceder 500 caracteres',
+            'manager_name.max' => 'El nombre del encargado no puede exceder 100 caracteres',
+            'phone.required' => 'El teléfono es obligatorio',
+            'phone.max' => 'El teléfono no puede exceder 20 caracteres',
+            'whatsapp.max' => 'El WhatsApp no puede exceder 20 caracteres',
+            'department.required' => 'El departamento es obligatorio',
+            'department.max' => 'El departamento no puede exceder 100 caracteres',
+            'city.required' => 'La ciudad es obligatoria',
+            'city.max' => 'La ciudad no puede exceder 100 caracteres',
+            'address.required' => 'La dirección es obligatoria',
+            'address.min' => 'La dirección debe tener al menos 10 caracteres',
+            'address.max' => 'La dirección no puede exceder 255 caracteres',
+            'whatsapp_message.max' => 'El mensaje de WhatsApp no puede exceder 255 caracteres',
         ]);
         
         if ($validator->fails()) {
@@ -167,7 +185,7 @@ class LocationController extends Controller
             \App\Shared\Models\StoreOnboardingStep::markAsCompleted($store->id, 'locations');
             
             return redirect()->route('tenant.admin.locations.index', ['store' => $store->slug])
-                ->with('success', 'Sede creada exitosamente.');
+                ->with('swal_success', 'Sede creada exitosamente');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Error al crear la sede: ' . $e->getMessage())->withInput();
         }
@@ -280,6 +298,24 @@ class LocationController extends Controller
             'whatsapp_message' => 'nullable|string|max:255',
             'schedules' => 'nullable|array',
             'social_links' => 'nullable|array',
+        ], [
+            'name.required' => 'El nombre de la sede es obligatorio',
+            'name.min' => 'El nombre debe tener al menos 3 caracteres',
+            'name.max' => 'El nombre no puede exceder 100 caracteres',
+            'name.unique' => 'Ya existe una sede con este nombre en tu tienda',
+            'description.max' => 'La descripción no puede exceder 500 caracteres',
+            'manager_name.max' => 'El nombre del encargado no puede exceder 100 caracteres',
+            'phone.required' => 'El teléfono es obligatorio',
+            'phone.max' => 'El teléfono no puede exceder 20 caracteres',
+            'whatsapp.max' => 'El WhatsApp no puede exceder 20 caracteres',
+            'department.required' => 'El departamento es obligatorio',
+            'department.max' => 'El departamento no puede exceder 100 caracteres',
+            'city.required' => 'La ciudad es obligatoria',
+            'city.max' => 'La ciudad no puede exceder 100 caracteres',
+            'address.required' => 'La dirección es obligatoria',
+            'address.min' => 'La dirección debe tener al menos 10 caracteres',
+            'address.max' => 'La dirección no puede exceder 255 caracteres',
+            'whatsapp_message.max' => 'El mensaje de WhatsApp no puede exceder 255 caracteres',
         ]);
         
         if ($validator->fails()) {
@@ -317,7 +353,7 @@ class LocationController extends Controller
             $location = $this->locationService->updateLocationWithSchedules($location, $data);
             
             return redirect()->route('tenant.admin.locations.index', ['store' => $store->slug, 'location' => $location->id])
-                ->with('success', 'Sede actualizada exitosamente.');
+                ->with('swal_success', 'Sede actualizada exitosamente');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Error al actualizar la sede: ' . $e->getMessage())->withInput();
         }

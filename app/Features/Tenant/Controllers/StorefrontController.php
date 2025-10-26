@@ -126,9 +126,10 @@ class StorefrontController extends Controller
             return view('tenant::storefront.inactive', compact('store'));
         }
 
-        // Obtener categorías para filtros
+        // Obtener categorías para filtros (solo categorías principales sin padre, o categorías padre)
         $categories = Category::where('store_id', $store->id)
             ->active()
+            ->whereNull('parent_id') // Solo categorías sin padre (principales)
             ->with('icon')
             ->orderBy('name')
             ->get();

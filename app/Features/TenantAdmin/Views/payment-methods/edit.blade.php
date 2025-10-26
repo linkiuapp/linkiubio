@@ -340,30 +340,35 @@ document.addEventListener('alpine:init', () => {
             // Inicialización
         },
         
-        validateForm(event) {
-            let valid = true;
+        async validateForm(event) {
             const form = event.target;
             
             // Validación básica
             if (!form.name.value) {
-                valid = false;
-                this.showNotificationMessage('Por favor, ingrese un nombre para el método de pago', 'error');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Campo requerido',
+                    text: 'Por favor, ingrese un nombre para el método de pago',
+                    confirmButtonColor: '#ed2e45'
+                });
+                return;
             }
             
-            // Si es válido, enviar el formulario
-            if (valid) {
+            // Confirmar actualización
+            const result = await Swal.fire({
+                title: '¿Actualizar método de pago?',
+                text: 'Se guardarán los cambios realizados',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#da27a7',
+                cancelButtonColor: '#9ca3af',
+                confirmButtonText: '✓ Actualizar',
+                cancelButtonText: 'Cancelar'
+            });
+            
+            if (result.isConfirmed) {
                 form.submit();
             }
-        },
-        
-        showNotificationMessage(message, type = 'success') {
-            this.notificationMessage = message;
-            this.notificationType = type;
-            this.showNotification = true;
-            
-            setTimeout(() => {
-                this.showNotification = false;
-            }, 5000);
         }
     }));
 });

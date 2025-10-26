@@ -101,6 +101,20 @@ class VariableController extends Controller
             'options.*.name' => 'required|string|max:255',
             'options.*.price_modifier' => 'numeric',
             'options.*.color_hex' => 'nullable|string|max:7',
+        ], [
+            'name.required' => 'El nombre de la variable es obligatorio',
+            'name.max' => 'El nombre no puede exceder 255 caracteres',
+            'name.unique' => 'Ya existe una variable con este nombre en tu tienda',
+            'type.required' => 'El tipo de variable es obligatorio',
+            'type.in' => 'El tipo de variable debe ser: radio, checkbox, texto o numérico',
+            'min_value.numeric' => 'El valor mínimo debe ser un número',
+            'min_value.min' => 'El valor mínimo no puede ser negativo',
+            'max_value.numeric' => 'El valor máximo debe ser un número',
+            'max_value.min' => 'El valor máximo no puede ser negativo',
+            'options.*.name.required' => 'El nombre de la opción es obligatorio',
+            'options.*.name.max' => 'El nombre de la opción no puede exceder 255 caracteres',
+            'options.*.price_modifier.numeric' => 'El modificador de precio debe ser un número',
+            'options.*.color_hex.max' => 'El código de color no puede exceder 7 caracteres',
         ]);
         
         // Validaciones específicas por tipo
@@ -147,7 +161,7 @@ class VariableController extends Controller
         
         return redirect()
             ->route('tenant.admin.variables.index', $store->slug)
-            ->with('success', 'Variable creada exitosamente');
+            ->with('swal_success', 'Variable creada exitosamente');
     }
 
     /**
@@ -225,6 +239,20 @@ class VariableController extends Controller
             'options.*.name' => 'required|string|max:255',
             'options.*.price_modifier' => 'numeric',
             'options.*.color_hex' => 'nullable|string|max:7',
+        ], [
+            'name.required' => 'El nombre de la variable es obligatorio',
+            'name.max' => 'El nombre no puede exceder 255 caracteres',
+            'name.unique' => 'Ya existe una variable con este nombre en tu tienda',
+            'type.required' => 'El tipo de variable es obligatorio',
+            'type.in' => 'El tipo de variable debe ser: radio, checkbox, texto o numérico',
+            'min_value.numeric' => 'El valor mínimo debe ser un número',
+            'min_value.min' => 'El valor mínimo no puede ser negativo',
+            'max_value.numeric' => 'El valor máximo debe ser un número',
+            'max_value.min' => 'El valor máximo no puede ser negativo',
+            'options.*.name.required' => 'El nombre de la opción es obligatorio',
+            'options.*.name.max' => 'El nombre de la opción no puede exceder 255 caracteres',
+            'options.*.price_modifier.numeric' => 'El modificador de precio debe ser un número',
+            'options.*.color_hex.max' => 'El código de color no puede exceder 7 caracteres',
         ]);
         
         // Validaciones específicas por tipo
@@ -265,7 +293,7 @@ class VariableController extends Controller
         
         return redirect()
             ->route('tenant.admin.variables.index', $store->slug)
-            ->with('success', 'Variable actualizada exitosamente');
+            ->with('swal_success', 'Variable actualizada exitosamente');
     }
 
     /**

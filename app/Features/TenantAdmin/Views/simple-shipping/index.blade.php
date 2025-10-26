@@ -9,13 +9,13 @@
         <div class="border-b border-accent-100 bg-accent-50 py-3 lg:py-4 px-4 lg:px-6">
             <div class="flex items-center justify-between">
                 <div>
-                    <h2 class="text-lg font-semibold text-black-500 mb-2">🚚 Configuración de Envíos</h2>
-                    <p class="text-sm text-black-300">
+                    <h2 class="text-body-large font-bold text-black-500 mb-2">Configuración de Envíos</h2>
+                    <p class="text-caption text-black-300">
                         Sistema simple y flexible para configurar tus métodos de envío
                     </p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button @click="saveAll()" :disabled="saving" class="btn-primary flex items-center gap-2">
+                    <button @click="saveAll()" :disabled="saving" class="btn-primary px-4 py-2 rounded-lg flex items-center justify-center gap-2">
                         <x-solar-diskette-outline class="w-5 h-5" />
                         <span x-text="saving ? 'Guardando...' : 'Guardar Todo'"></span>
                     </button>
@@ -29,15 +29,15 @@
         
         <!-- 🏪 RECOGIDA EN TIENDA -->
         <div class="bg-white rounded-lg border border-accent-200 overflow-hidden">
-            <div class="bg-gradient-to-r from-primary-50 to-info-50 px-4 lg:px-6 py-3 lg:py-4 border-b border-accent-200">
+            <div class="bg-gradient-to-r from-primary-300 to-info-300 px-4 lg:px-6 py-3 lg:py-4 border-b border-accent-200">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 bg-primary-100 rounded-lg flex items-center justify-center">
-                        <span class="text-2xl">🏪</span>
+                    <div class="w-12 h-12 bg-accent-50 rounded-lg flex items-center justify-center">
+                        <x-solar-shop-outline class="w-8 h-8 text-primary-300" />
                     </div>
                     <div>
-                        <h3 class="text-lg font-semibold text-black-500">Recogida en Tienda</h3>
-                        <p class="text-sm text-black-300">Los clientes pueden recoger sus pedidos directamente</p>
+                        <h3 class="text-body-large font-bold text-accent-50">Recogida en Tienda</h3>
+                        <p class="text-caption text-accent-50">Los clientes pueden recoger sus pedidos directamente</p>
                     </div>
                 </div>
                 
@@ -46,8 +46,8 @@
                     <input type="checkbox" 
                            x-model="shipping.pickup_enabled" 
                            class="sr-only peer">
-                    <div class="relative w-11 h-6 bg-accent-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-300"></div>
-                    <span class="ml-3 text-sm font-medium" x-text="shipping.pickup_enabled ? 'Habilitado' : 'Deshabilitado'" :class="shipping.pickup_enabled ? 'text-primary-400' : 'text-black-300'"></span>
+                    <div class="relative w-11 h-6 bg-accent-400 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-primary-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-accent-50 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary-300"></div>
+                    <span class="ml-3 text-caption font-bold" x-text="shipping.pickup_enabled ? 'Habilitado' : 'Deshabilitado'" :class="shipping.pickup_enabled ? 'text-accent-50' : 'text-accent-300'"></span>
                 </label>
             </div>
         </div>
@@ -55,7 +55,7 @@
         <div x-show="shipping.pickup_enabled" x-transition class="p-4 lg:p-6 space-y-3 lg:space-y-4">
             <!-- Tiempo de preparación -->
             <div>
-                <label class="block text-sm font-medium text-black-400 mb-2">⏱️ Tiempo de preparación</label>
+                <label class="block text-caption font-bold text-black-400 mb-2">Tiempo de preparación</label>
                 <select x-model="shipping.pickup_preparation_time" class="w-full px-3 py-2 border border-accent-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent">
                     @foreach(\App\Features\TenantAdmin\Models\SimpleShipping::PREPARATION_TIMES as $key => $label)
                         <option value="{{ $key }}">{{ $label }}</option>
@@ -65,27 +65,27 @@
             
             <!-- Instrucciones -->
             <div>
-                <label class="block text-sm font-medium text-black-400 mb-2">📝 Instrucciones para el cliente</label>
+                <label class="block text-caption font-bold text-black-400 mb-2">Instrucciones para el cliente</label>
                 <textarea x-model="shipping.pickup_instructions" 
                           rows="3" 
                           placeholder="Ej: Puedes recoger tu pedido en nuestra tienda ubicada en..."
-                          class="w-full px-3 py-2 border border-accent-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent resize-none"></textarea>
-                <p class="text-xs text-black-300 mt-1">Máximo 500 caracteres</p>
+                          class="w-full px-3 py-2 border border-accent-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-300 focus:border-transparent resize-none"></textarea>
+                <p class="text-caption text-black-300 mt-1">Máximo 500 caracteres</p>
             </div>
         </div>
         </div>
 
         <!-- 🚚 ENVÍO LOCAL -->
         <div class="bg-white rounded-lg border border-accent-200 overflow-hidden">
-            <div class="bg-gradient-to-r from-secondary-50 to-primary-50 px-4 lg:px-6 py-3 lg:py-4 border-b border-accent-200">
+            <div class="bg-gradient-to-r from-secondary-300 to-primary-300 px-4 lg:px-6 py-3 lg:py-4 border-b border-accent-200">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 bg-secondary-100 rounded-lg flex items-center justify-center">
-                        <span class="text-2xl">🚚</span>
+                    <div class="w-12 h-12 bg-accent-50 rounded-lg flex items-center justify-center">
+                        <x-solar-mailbox-outline class="w-8 h-8 text-secondary-300" />
                     </div>
                     <div>
-                        <h3 class="text-lg font-semibold text-black-500">Envío Local</h3>
-                        <p class="text-sm text-black-300">Entregas dentro de tu ciudad principal</p>
+                        <h3 class="text-body-large font-bold text-accent-50">Envío Local</h3>
+                        <p class="text-caption text-accent-50">Entregas dentro de tu ciudad principal</p>
                     </div>
                 </div>
                 
@@ -94,8 +94,8 @@
                     <input type="checkbox" 
                            x-model="shipping.local_enabled" 
                            class="sr-only peer">
-                    <div class="relative w-11 h-6 bg-accent-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-secondary-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary-300"></div>
-                    <span class="ml-3 text-sm font-medium" x-text="shipping.local_enabled ? 'Habilitado' : 'Deshabilitado'" :class="shipping.local_enabled ? 'text-secondary-400' : 'text-black-300'"></span>
+                    <div class="relative w-11 h-6 bg-accent-400 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-secondary-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-accent-50 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-secondary-300"></div>
+                    <span class="ml-3 text-caption font-bold" x-text="shipping.local_enabled ? 'Habilitado' : 'Deshabilitado'" :class="shipping.local_enabled ? 'text-accent-50' : 'text-accent-300'"></span>
                 </label>
             </div>
         </div>
@@ -104,17 +104,17 @@
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                 <!-- Ciudad principal -->
                 <div>
-                    <label class="block text-sm font-medium text-black-400 mb-2">📍 Tu ciudad principal</label>
+                    <label class="block text-caption font-bold text-black-400 mb-2">Tu ciudad principal</label>
                     <input type="text" 
                            x-model="shipping.local_city" 
                            placeholder="Ej: Sincelejo"
                            class="w-full px-3 py-2 border border-accent-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary-200 focus:border-transparent">
-                    <p class="text-xs text-black-300 mt-1">Los clientes de esta ciudad pagarán tarifa local</p>
+                    <p class="text-caption text-black-300 mt-1">Los clientes de esta ciudad pagarán tarifa local</p>
                 </div>
                 
                 <!-- Costo -->
                 <div>
-                    <label class="block text-sm font-medium text-black-400 mb-2">💰 Costo del envío</label>
+                    <label class="block text-caption font-bold text-black-400 mb-2">Costo del envío</label>
                     <div class="relative">
                         <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-black-300">$</span>
                         <input type="number" 
@@ -128,7 +128,7 @@
                 
                 <!-- Tiempo de preparación -->
                 <div>
-                    <label class="block text-sm font-medium text-black-400 mb-2">⏱️ Tiempo de entrega</label>
+                    <label class="block text-caption font-bold text-black-400 mb-2">Tiempo de entrega</label>
                     <select x-model="shipping.local_preparation_time" class="w-full px-3 py-2 border border-accent-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-secondary-200 focus:border-transparent">
                         @foreach(\App\Features\TenantAdmin\Models\SimpleShipping::PREPARATION_TIMES as $key => $label)
                             <option value="{{ $key }}">{{ $label }}</option>
@@ -139,18 +139,18 @@
             
             <!-- Envío gratis -->
             <div class="bg-success-50 rounded-lg p-4 border border-success-200">
-                <div class="flex items-center gap-3 mb-3">
+                <div class="flex items-center gap-3">
                     <input type="checkbox" 
                            x-model="localFreeShippingEnabled" 
                            class="w-4 h-4 text-success-300 bg-accent-50 border-accent-300 rounded focus:ring-success-300">
-                    <label class="text-sm font-medium text-success-400">🎁 Activar envío gratis por monto</label>
+                    <label class="text-caption font-bold text-black-500">Activar envío gratis por monto</label>
                 </div>
                 
                 <div x-show="localFreeShippingEnabled" x-transition>
                     <div>
-                        <label class="block text-sm font-medium text-success-400 mb-2">Envío gratis desde:</label>
+                        <label class="block text-caption font-bold text-black-500 mb-2">Envío gratis desde:</label>
                         <div class="relative">
-                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-success-300">$</span>
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-black-500">$</span>
                             <input type="number" 
                                    x-model="shipping.local_free_from" 
                                    placeholder="50000"
@@ -164,7 +164,7 @@
             
             <!-- Instrucciones -->
             <div>
-                <label class="block text-sm font-medium text-black-400 mb-2">📝 Instrucciones para el cliente</label>
+                <label class="block text-caption font-bold text-black-400 mb-2">Instrucciones para el cliente</label>
                 <textarea x-model="shipping.local_instructions" 
                           rows="3" 
                           placeholder="Ej: Entregamos en toda la ciudad de Sincelejo en horario de 8AM a 6PM"
@@ -177,16 +177,16 @@
 
     <!-- 📦 ENVÍO NACIONAL -->
     <div class="bg-white rounded-lg border border-accent-200 overflow-hidden">
-        <div class="bg-gradient-to-r from-info-50 to-warning-50 px-4 lg:px-6 py-3 lg:py-4 border-b border-accent-200">
+        <div class="bg-gradient-to-r from-info-300 to-warning-300 px-4 lg:px-6 py-3 lg:py-4 border-b border-accent-200">
             <div class="flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 bg-info-100 rounded-lg flex items-center justify-center">
-                        <span class="text-2xl">📦</span>
+                    <div class="w-12 h-12 bg-accent-50 rounded-lg flex items-center justify-center">
+                        <x-solar-rocket-outline class="w-8 h-8 text-info-300" />
                     </div>
                     <div>
-                        <h3 class="text-lg font-semibold text-black-500">Envío Nacional</h3>
-                        <p class="text-sm text-black-300">Configura zonas con diferentes tarifas</p>
-                        <p class="text-xs text-info-400" x-text="`${zones.length}/${maxZones} zonas configuradas`"></p>
+                        <h3 class="text-body-large font-bold text-accent-50">Envío Nacional</h3>
+                        <p class="text-caption text-accent-50">Configura zonas con diferentes tarifas</p>
+                        <p class="text-caption text-accent-50" x-text="`${zones.length}/${maxZones} zonas configuradas`"></p>
                     </div>
                 </div>
                 
@@ -195,8 +195,8 @@
                     <input type="checkbox" 
                            x-model="shipping.national_enabled" 
                            class="sr-only peer">
-                    <div class="relative w-11 h-6 bg-accent-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-info-100 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-info-300"></div>
-                    <span class="ml-3 text-sm font-medium" x-text="shipping.national_enabled ? 'Habilitado' : 'Deshabilitado'" :class="shipping.national_enabled ? 'text-info-400' : 'text-black-300'"></span>
+                    <div class="relative w-11 h-6 bg-accent-400 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-info-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-accent-50 after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-info-300"></div>
+                    <span class="ml-3 text-caption font-bold" x-text="shipping.national_enabled ? 'Habilitado' : 'Deshabilitado'" :class="shipping.national_enabled ? 'text-accent-50' : 'text-accent-300'"></span>
                 </label>
             </div>
         </div>
@@ -205,24 +205,24 @@
             
             <!-- Envío gratis nacional -->
             <div class="bg-success-50 rounded-lg p-4 border border-success-200">
-                <div class="flex items-center gap-3 mb-3">
+                <div class="flex items-center gap-3">
                     <input type="checkbox" 
                            x-model="nationalFreeShippingEnabled" 
-                           class="w-4 h-4 text-success-300 bg-accent-50 border-accent-300 rounded focus:ring-success-300">
-                    <label class="text-sm font-medium text-success-400">🎁 Activar envío gratis nacional por monto</label>
+                           class="w-4 h-4 text-accent-50 bg-accent-50 border-accent-300 rounded focus:ring-success-300">
+                    <label class="text-caption font-bold text-black-500">Activar envío gratis nacional por monto</label>
                 </div>
                 
                 <div x-show="nationalFreeShippingEnabled" x-transition>
                     <div>
-                        <label class="block text-sm font-medium text-success-400 mb-2">Envío gratis desde:</label>
+                        <label class="block text-caption font-bold text-black-500 mb-2">Envío gratis desde:</label>
                         <div class="relative">
-                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-success-300">$</span>
+                            <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-black-500">$</span>
                             <input type="number" 
                                    x-model="shipping.national_free_from" 
                                    placeholder="100000"
                                    min="0"
                                    step="1000"
-                                   class="w-full pl-8 pr-3 py-2 border border-success-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-success-200 focus:border-transparent">
+                                   class="w-full pl-8 pr-3 py-2 border border-accent-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-success-200 focus:border-transparent">
                         </div>
                     </div>
                 </div>
@@ -230,7 +230,7 @@
 
             <!-- Instrucciones generales -->
             <div>
-                <label class="block text-sm font-medium text-black-400 mb-2">📝 Instrucciones generales para envío nacional</label>
+                <label class="block text-caption font-bold text-black-400 mb-2">Instrucciones generales para envío nacional</label>
                 <textarea x-model="shipping.national_instructions" 
                           rows="2" 
                           placeholder="Ej: Enviamos a nivel nacional mediante empresas de mensajería confiables"
@@ -240,10 +240,10 @@
             <!-- Zonas de envío -->
             <div class="space-y-4">
                 <div class="flex items-center justify-between">
-                    <h4 class="text-base font-semibold text-black-500">🗺️ Zonas de Envío</h4>
+                    <h4 class="text-body-large font-bold text-accent-50">Zonas de Envío</h4>
                     <button @click="addZone()" 
                             :disabled="zones.length >= maxZones"
-                            class="btn-secondary flex items-center gap-2 text-sm"
+                            class="btn-secondary px-4 py-2 rounded-lg flex items-center justify-center gap-2"
                             :class="zones.length >= maxZones ? 'opacity-50 cursor-not-allowed' : ''">
                         <x-solar-add-circle-outline class="w-4 h-4" />
                         Agregar Zona
@@ -253,28 +253,28 @@
                 <!-- Lista de zonas -->
                 <div class="space-y-4" id="zones-container">
                     <template x-for="(zone, index) in zones" :key="zone.id || `new-${index}`">
-                        <div class="border border-accent-200 rounded-lg overflow-hidden" :class="zone.is_editing ? 'border-primary-300 shadow-sm' : ''">
+                        <div class="border border-accent-200 rounded-lg overflow-hidden" :class="zone.is_editing ? 'border-accent-300 shadow-sm' : ''">
                             
                             <!-- Vista normal -->
                             <div x-show="!zone.is_editing" class="p-4">
                                 <div class="flex items-center justify-between">
                                     <div class="flex-1">
                                         <div class="flex items-center gap-3 mb-2">
-                                            <h5 class="font-semibold text-black-500" x-text="zone.name"></h5>
-                                            <span class="px-2 py-1 bg-primary-100 text-primary-400 rounded text-xs font-medium" x-text="formatPrice(zone.cost)"></span>
-                                            <span class="px-2 py-1 bg-info-100 text-info-400 rounded text-xs" x-text="getDeliveryTimeLabel(zone.delivery_time)"></span>
+                                            <h5 class="font-bold text-black-400" x-text="zone.name"></h5>
+                                            <span class="px-2 py-1 bg-success-300 text-black-500 rounded text-xs font-medium" x-text="formatPrice(zone.cost)"></span>
+                                            <span class="px-2 py-1 bg-info-300 text-accent-50 rounded text-xs" x-text="getDeliveryTimeLabel(zone.delivery_time)"></span>
                                         </div>
                                         <div class="flex flex-wrap gap-1">
                                             <template x-for="city in zone.cities" :key="city">
-                                                <span class="px-2 py-1 bg-accent-100 text-black-400 rounded-full text-xs" x-text="city"></span>
+                                                <span class="px-2 py-1 bg-primary-300 text-accent-50 rounded-full text-caption" x-text="city"></span>
                                             </template>
                                         </div>
                                     </div>
                                     <div class="flex items-center gap-2">
-                                        <button @click="editZone(index)" class="text-info-300 hover:text-info-200 p-2">
+                                        <button @click="editZone(index)" class="text-info-300 hover:text-info-200 p-2 rounded-lg">
                                             <x-solar-pen-outline class="w-4 h-4" />
                                         </button>
-                                        <button @click="deleteZone(index)" class="text-error-300 hover:text-error-200 p-2">
+                                        <button @click="deleteZone(index)" class="text-error-300 hover:text-error-200 p-2 rounded-lg">
                                             <x-solar-trash-bin-minimalistic-outline class="w-4 h-4" />
                                         </button>
                                     </div>
@@ -287,7 +287,7 @@
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         <!-- Nombre -->
                                         <div>
-                                            <label class="block text-sm font-medium text-black-400 mb-1">🏷️ Nombre de la zona</label>
+                                            <label class="block text-caption font-bold text-black-400 mb-1">Nombre de la zona</label>
                                             <input type="text" 
                                                    x-model="zone.name" 
                                                    placeholder="Ej: Ciudades Principales"
@@ -296,7 +296,7 @@
                                         
                                         <!-- Costo -->
                                         <div>
-                                            <label class="block text-sm font-medium text-black-400 mb-1">💰 Costo del envío</label>
+                                            <label class="block text-caption font-bold text-black-400 mb-1">Costo del envío</label>
                                             <div class="relative">
                                                 <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-black-300">$</span>
                                                 <input type="number" 
@@ -310,7 +310,7 @@
                                         
                                         <!-- Tiempo -->
                                         <div>
-                                            <label class="block text-sm font-medium text-black-400 mb-1">⏱️ Tiempo de entrega</label>
+                                            <label class="block text-caption font-bold text-black-400 mb-1">Tiempo de entrega</label>
                                             <select x-model="zone.delivery_time" class="w-full px-3 py-2 border border-accent-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-info-200 focus:border-transparent">
                                                 @foreach(\App\Features\TenantAdmin\Models\SimpleShipping::DELIVERY_TIMES as $key => $label)
                                                     <option value="{{ $key }}">{{ $label }}</option>
@@ -321,14 +321,14 @@
                                     
                                     <!-- Cities Input con Tags -->
                                     <div>
-                                        <label class="block text-sm font-medium text-black-400 mb-2">📍 Ciudades incluidas</label>
+                                        <label class="block text-caption font-bold text-black-400 mb-2">Ciudades incluidas</label>
                                         <div class="cities-input-container">
-                                            <div class="flex flex-wrap gap-2 p-3 border border-accent-300 rounded-lg bg-white min-h-[44px]" @click="$refs.cityInput.focus()">
+                                            <div class="flex flex-wrap gap-2 p-3 border border-accent-300 rounded-lg bg-accent-50 min-h-[44px]" @click="$refs.cityInput.focus()">
                                                 <!-- Tags de ciudades -->
                                                 <template x-for="(city, cityIndex) in zone.cities" :key="cityIndex">
-                                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-primary-100 text-primary-400 rounded-lg text-sm">
-                                                        <span x-text="city"></span>
-                                                        <button @click="removeCity(index, cityIndex)" class="text-primary-300 hover:text-primary-200">
+                                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-primary-300 text-accent-50 rounded-lg text-sm">
+                                                        <span x-text="city" class="text-caption text-accent-50"></span>
+                                                        <button @click="removeCity(index, cityIndex)" class="text-accent-50 hover:text-accent-300">
                                                             <x-solar-close-circle-outline class="w-4 h-4" />
                                                         </button>
                                                     </span>
@@ -351,11 +351,11 @@
                                     <div class="flex items-center gap-3">
                                         <button @click="saveZone(index)" 
                                                 :disabled="!isZoneValid(zone)"
-                                                class="btn-primary text-sm"
+                                                class="btn-secondary px-4 py-2 rounded-lg flex items-center justify-center gap-2"
                                                 :class="!isZoneValid(zone) ? 'opacity-50 cursor-not-allowed' : ''">
                                             Guardar Zona
                                         </button>
-                                        <button @click="cancelEditZone(index)" class="btn-secondary text-sm">
+                                        <button @click="cancelEditZone(index)" class="btn-secondary px-4 py-2 rounded-lg flex items-center justify-center gap-2">
                                             Cancelar
                                         </button>
                                     </div>
@@ -366,15 +366,17 @@
                 </div>
 
                 <!-- Estado vacío -->
-                <div x-show="zones.length === 0" class="text-center py-8 border-2 border-dashed border-accent-200 rounded-lg">
-                    <div class="w-16 h-16 bg-accent-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <span class="text-2xl">🗺️</span>
+                <div x-show="zones.length === 0" class="text-center py-8 border-2 border-dashed border-accent-200 rounded-lg items-center justify-center">
+                    <div class="flex flex-col items-center justify-center">
+                        <div class="w-16 h-16 bg-accent-100 rounded-full flex items-center justify-center mx-auto mb-3">
+                            <x-solar-map-point-outline class="w-5 h-5" />
+                        </div>
+                        <h4 class="text-body-large font-bold text-black-400 mb-2">No hay zonas configuradas</h4>
+                        <p class="text-caption text-black-300 mb-4">Agrega zonas para diferentes tarifas de envío nacional</p>
+                        <button @click="addZone()" class="btn-secondary px-4 py-2 rounded-lg flex items-center justify-center gap-2">
+                            Crear Primera Zona
+                        </button>
                     </div>
-                    <h4 class="text-base font-medium text-black-400 mb-2">No hay zonas configuradas</h4>
-                    <p class="text-sm text-black-300 mb-4">Agrega zonas para diferentes tarifas de envío nacional</p>
-                    <button @click="addZone()" class="btn-primary text-sm">
-                        Crear Primera Zona
-                    </button>
                 </div>
             </div>
 
@@ -384,7 +386,7 @@
                     <input type="checkbox" 
                            x-model="shipping.allow_unlisted_cities" 
                            class="w-4 h-4 text-warning-300 bg-accent-50 border-accent-300 rounded focus:ring-warning-300">
-                    <label class="text-sm font-medium text-warning-400">⚠️ Permitir pedidos de ciudades no listadas</label>
+                    <label class="text-caption font-bold text-warning-400">Permitir pedidos de ciudades no listadas</label>
                 </div>
                 
                 <div x-show="shipping.allow_unlisted_cities" x-transition class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -547,7 +549,12 @@ document.addEventListener('alpine:init', () => {
             const zone = this.zones[index];
             
             if (!this.isZoneValid(zone)) {
-                alert('Por favor completa todos los campos requeridos');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Campos incompletos',
+                    text: 'Por favor completa todos los campos requeridos',
+                    confirmButtonColor: '#da27a7'
+                });
                 return;
             }
             
@@ -629,7 +636,18 @@ document.addEventListener('alpine:init', () => {
                 return;
             }
             
-            if (!confirm(`¿Eliminar la zona "${zone.name}"?`)) {
+            const result = await Swal.fire({
+                title: '¿Eliminar zona?',
+                html: `Se eliminará la zona <strong>"${zone.name}"</strong> de forma permanente`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ed2e45',
+                cancelButtonColor: '#9ca3af',
+                confirmButtonText: '✓ Sí, eliminar',
+                cancelButtonText: 'Cancelar'
+            });
+            
+            if (!result.isConfirmed) {
                 return;
             }
             
@@ -674,8 +692,12 @@ document.addEventListener('alpine:init', () => {
         
         // Mostrar modal de error
         showError(message) {
-            this.errorMessage = message;
-            this.showErrorModal = true;
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: message,
+                confirmButtonColor: '#ed2e45'
+            });
         },
         
         // Cities management
@@ -759,15 +781,14 @@ document.addEventListener('alpine:init', () => {
         },
         
         showSuccess(message) {
-            // Simple success notification
-            const notification = document.createElement('div');
-            notification.className = 'fixed top-4 right-4 bg-success-300 text-white p-4 rounded-lg shadow-lg z-50';
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
+            Swal.fire({
+                icon: 'success',
+                title: '¡Éxito!',
+                text: message,
+                confirmButtonColor: '#00c76f',
+                timer: 3000,
+                timerProgressBar: true
+            });
         }
     }));
 });

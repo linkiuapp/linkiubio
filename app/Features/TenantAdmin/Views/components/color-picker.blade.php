@@ -69,40 +69,60 @@
                 <div class="grid grid-cols-5 gap-2">
                     {{-- Primary Colors --}}
                     <button 
-                        @click="setColor('#350692')"
+                        @click="setColor('#da27a7')"
                         class="w-8 h-8 rounded bg-primary-300 hover:ring-2 hover:ring-primary-100"
+                        title="Primary 300"
                     ></button>
                     <button 
-                        @click="setColor('#7432F8')"
+                        @click="setColor('#e04cb6')"
                         class="w-8 h-8 rounded bg-primary-200 hover:ring-2 hover:ring-primary-100"
+                        title="Primary 200"
                     ></button>
                     
                     {{-- Secondary Colors --}}
                     <button 
-                        @click="setColor('#973D00')"
+                        @click="setColor('#001b48')"
                         class="w-8 h-8 rounded bg-secondary-300 hover:ring-2 hover:ring-secondary-100"
+                        title="Secondary 300"
                     ></button>
                     <button 
-                        @click="setColor('#FD6905')"
+                        @click="setColor('#2b4267')"
                         class="w-8 h-8 rounded bg-secondary-200 hover:ring-2 hover:ring-secondary-100"
+                        title="Secondary 200"
                     ></button>
 
-                    {{-- Neutral Colors --}}
+                    {{-- Info Colors --}}
                     <button 
-                        @click="setColor('#DEECFB')"
-                        class="w-8 h-8 rounded bg-accent-400 hover:ring-2 hover:ring-accent-100"
+                        @click="setColor('#0000fe')"
+                        class="w-8 h-8 rounded bg-info-300 hover:ring-2 hover:ring-info-100"
+                        title="Info 300 (Azul)"
                     ></button>
+                    
+                    {{-- Black Colors --}}
                     <button 
-                        @click="setColor('#000273')"
-                        class="w-8 h-8 rounded bg-info-200 hover:ring-2 hover:ring-info-100"
+                        @click="setColor('#1c1c1e')"
+                        class="w-8 h-8 rounded bg-black-300 hover:ring-2 hover:ring-black-100"
+                        title="Black 300"
                     ></button>
+                    
+                    {{-- Error Colors --}}
                     <button 
-                        @click="setColor('#03030B')"
-                        class="w-8 h-8 rounded bg-black-400 hover:ring-2 hover:ring-black-100"
+                        @click="setColor('#ed2e45')"
+                        class="w-8 h-8 rounded bg-error-300 hover:ring-2 hover:ring-error-100"
+                        title="Error 300 (Rojo)"
                     ></button>
+                    
+                    {{-- Success Colors --}}
                     <button 
-                        @click="setColor('#F60F21')"
-                        class="w-8 h-8 rounded bg-error-200 hover:ring-2 hover:ring-error-100"
+                        @click="setColor('#00c76f')"
+                        class="w-8 h-8 rounded bg-success-300 hover:ring-2 hover:ring-success-100"
+                        title="Success 300 (Verde)"
+                    ></button>
+                    {{-- White Colors --}}
+                    <button 
+                        @click="setColor('#fdfdff')"
+                        class="w-8 h-8 rounded bg-accent-50 hover:ring-2 hover:ring-accent-200 border border-black-200"
+                        title="Accent 50 (Blanco)"
                     ></button>
                 </div>
             </div>

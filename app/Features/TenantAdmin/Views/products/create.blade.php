@@ -242,7 +242,31 @@
                                             </label>
                                             
                                             <!-- Opciones de la variable (se muestran al seleccionar) -->
-                                            <div class="mt-3 space-y-2 variable-options" id="options_{{ $variable->id }}" style="display: none;">
+                                            <div class="mt-3 space-y-3 variable-options" id="options_{{ $variable->id }}" style="display: none;">
+                                                <!-- Opciones disponibles para seleccionar -->
+                                                @if($variable->requiresOptions() && $variable->activeOptions->count() > 0)
+                                                    <div class="bg-accent-100 rounded-lg p-3">
+                                                        <label class="text-xs font-semibold text-black-400 mb-2 block">
+                                                            Selecciona las opciones que usará este producto:
+                                                        </label>
+                                                        <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                                                            @foreach($variable->activeOptions as $option)
+                                                                <label class="flex items-center gap-2 cursor-pointer hover:bg-accent-200 p-2 rounded transition-colors">
+                                                                    <input type="checkbox" 
+                                                                           name="variables[{{ $variable->id }}][options][]"
+                                                                           value="{{ $option->id }}"
+                                                                           class="w-4 h-4 text-primary-300 border-accent-300 rounded focus:ring-primary-200">
+                                                                    <span class="text-sm text-black-400">{{ $option->name }}</span>
+                                                                </label>
+                                                            @endforeach
+                                                        </div>
+                                                        <p class="text-xs text-info-300 mt-2">
+                                                            <x-solar-info-circle-outline class="w-3 h-3 inline" />
+                                                            Si no seleccionas ninguna, se usarán todas las opciones disponibles
+                                                        </p>
+                                                    </div>
+                                                @endif
+                                                
                                                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                                                     <!-- Toggle Requerido -->
                                                     <div class="flex items-center gap-2">
@@ -339,6 +363,39 @@
                     optionsDiv.style.display = 'block';
                 } else {
                     optionsDiv.style.display = 'none';
+                }
+            });
+        });
+        
+        // Interceptar submit para mostrar SweetAlert2
+        document.querySelector('form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const form = this;
+            
+            Swal.fire({
+                title: '¿Crear producto?',
+                text: 'Se creará un nuevo producto en tu tienda',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#da27a7',
+                cancelButtonColor: '#ed2e45',
+                confirmButtonText: '✓ Sí, crear',
+                cancelButtonText: 'Cancelar',
+                showLoaderOnConfirm: true,
+                allowOutsideClick: () => !Swal.isLoading()
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: 'Creando producto...',
+                        text: 'Por favor espera',
+                        icon: 'info',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        willOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    form.submit();
                 }
             });
         });

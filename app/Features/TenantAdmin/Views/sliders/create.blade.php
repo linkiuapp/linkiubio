@@ -13,6 +13,14 @@
                 <h1 class="text-lg font-semibold text-black-500">Crear Slider</h1>
             </div>
         </div>
+        <div class="bg-info-50 border border-info-100 rounded-lg p-4 text-info-300 mb-6">
+            <div class="flex items-center gap-3">
+                <x-solar-info-circle-outline class="w-5 h-5 text-info-300 flex-shrink-0" />
+                <p class="text-body-regular text-info-300">
+                    La medidas recomendadas para el slider son de 170x100px.
+                </p>
+            </div>
+        </div>
 
         <!-- Formulario -->
         <form action="{{ route('tenant.admin.sliders.store', $store->slug) }}" method="POST" enctype="multipart/form-data" x-data="sliderForm">
@@ -249,6 +257,45 @@
                 isScheduled: {{ old('is_scheduled') ? 'true' : 'false' }},
                 isPermanent: {{ old('is_permanent') ? 'true' : 'false' }}
             }));
+        });
+        
+        // Interceptar el submit del formulario con SweetAlert2
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    Swal.fire({
+                        title: '¿Crear slider?',
+                        text: 'Se creará un nuevo slider para tu tienda',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#da27a7',
+                        cancelButtonColor: '#ed2e45',
+                        confirmButtonText: '✓ Sí, crear',
+                        cancelButtonText: 'Cancelar',
+                        showLoaderOnConfirm: true,
+                        allowOutsideClick: () => !Swal.isLoading()
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Mostrar loading mientras se sube
+                            Swal.fire({
+                                title: 'Creando slider...',
+                                text: 'Por favor espera',
+                                icon: 'info',
+                                allowOutsideClick: false,
+                                showConfirmButton: false,
+                                willOpen: () => {
+                                    Swal.showLoading();
+                                }
+                            });
+                            // Enviar el formulario
+                            form.submit();
+                        }
+                    });
+                });
+            }
         });
     </script>
     @endpush

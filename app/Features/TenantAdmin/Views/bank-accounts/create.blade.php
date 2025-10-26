@@ -8,13 +8,13 @@
     {{-- HEADER Y ACCIONES PRINCIPALES --}}
     {{-- ================================================================ --}}
     
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex justify-between items-center mb-6 px-6">
         <div>
-            <h1 class="text-lg font-bold text-black-400">Nueva Cuenta Bancaria</h1>
-            <p class="text-sm text-black-300">Método de pago: {{ $paymentMethod->name }}</p>
+            <h1 class="text-body-large font-bold text-black-400">Nueva Cuenta Bancaria</h1>
+            <p class="text-caption text-black-300">Método de pago: {{ $paymentMethod->name }}</p>
         </div>
         <a href="{{ route('tenant.admin.payment-methods.bank-accounts.index', ['store' => $store->slug, 'paymentMethod' => $paymentMethod->id]) }}" 
-            class="btn-outline-secondary px-4 py-2 rounded-lg flex items-center gap-2">
+            class="btn-secondary px-4 py-2 rounded-lg flex items-center gap-2 text-caption font-bold text-accent-50 hover:bg-secondary-300">
             <x-solar-arrow-left-outline class="w-5 h-5" />
             Volver
         </a>
@@ -23,7 +23,7 @@
     {{-- Formulario --}}
     <div class="bg-accent-50 rounded-lg p-0 overflow-hidden mb-6">
         <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-            <h2 class="text-lg font-semibold text-black-400 mb-0">Información de la Cuenta</h2>
+            <h2 class="text-body-large font-bold text-black-400 mb-0">Información de la Cuenta</h2>
         </div>
         <div class="p-6">
             <form action="{{ route('tenant.admin.bank-accounts.store', ['store' => $store->slug, 'paymentMethod' => $paymentMethod->id]) }}" method="POST">
@@ -31,7 +31,7 @@
                 
                 {{-- Sección: Información Bancaria --}}
                 <div class="mb-8">
-                    <h3 class="text-lg font-semibold text-black-400 mb-4 flex items-center gap-2">
+                    <h3 class="text-body-large font-bold text-black-400 mb-4 flex items-center gap-2">
                         <x-solar-card-transfer-outline class="w-5 h-5" />
                         Información Bancaria
                     </h3>
@@ -39,7 +39,7 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         {{-- Banco --}}
                         <div>
-                            <label class="block text-sm font-semibold text-black-300 mb-2">
+                            <label class="block text-caption font-bold text-black-300 mb-2">
                                 Banco <span class="text-error-300">*</span>
                             </label>
                             <input type="text" name="bank_name" id="bank_name" 
@@ -52,7 +52,7 @@
                         
                         {{-- Tipo de Cuenta --}}
                         <div>
-                            <label class="block text-sm font-semibold text-black-300 mb-2">
+                            <label class="block text-caption font-bold text-black-300 mb-2">
                                 Tipo de Cuenta <span class="text-error-300">*</span>
                             </label>
                             <select name="account_type" id="account_type" 
@@ -69,7 +69,7 @@
                         
                         {{-- Número de Cuenta --}}
                         <div>
-                            <label class="block text-sm font-semibold text-black-300 mb-2">
+                            <label class="block text-caption font-bold text-black-300 mb-2">
                                 Número de Cuenta <span class="text-error-300">*</span>
                             </label>
                             <input type="text" name="account_number" id="account_number" 
@@ -85,7 +85,7 @@
                         
                         {{-- Titular de la Cuenta --}}
                         <div>
-                            <label class="block text-sm font-semibold text-black-300 mb-2">
+                            <label class="block text-caption font-bold text-black-300 mb-2">
                                 Titular de la Cuenta <span class="text-error-300">*</span>
                             </label>
                             <input type="text" name="account_holder" id="account_holder" 
@@ -98,7 +98,7 @@
                         
                         {{-- Número de Documento --}}
                         <div>
-                            <label class="block text-sm font-semibold text-black-300 mb-2">
+                            <label class="block text-caption font-bold text-black-300 mb-2">
                                 Número de Documento
                             </label>
                             <input type="text" name="document_number" id="document_number" 
@@ -118,10 +118,10 @@
                                    class="mt-1 h-4 w-4 rounded border-accent-200 text-primary-200 focus:ring-primary-50"
                                    {{ old('is_active', true) ? 'checked' : '' }}>
                             <div>
-                                <label for="is_active" class="block text-sm font-semibold text-black-300">
+                                <label for="is_active" class="block text-caption font-bold text-black-300">
                                     Cuenta Activa
                                 </label>
-                                <p class="text-xs text-black-300">La cuenta estará disponible para recibir pagos</p>
+                                <p class="text-caption text-black-300">La cuenta estará disponible para recibir pagos</p>
                             </div>
                         </div>
                     </div>
@@ -129,10 +129,10 @@
                 
                 <div class="mt-8 flex justify-end">
                     <a href="{{ route('tenant.admin.bank-accounts.index', ['store' => $store->slug, 'paymentMethod' => $paymentMethod->id]) }}" 
-                       class="btn-outline-secondary px-4 py-2 rounded-lg mr-2">
+                       class="btn-secondary px-4 py-2 rounded-lg mr-2 text-caption font-bold text-accent-50">
                         Cancelar
                     </a>
-                    <button type="submit" class="btn-primary px-4 py-2 rounded-lg">
+                    <button type="submit" class="btn-primary px-4 py-2 rounded-lg text-caption font-bold text-accent-50 hover:bg-primary-300">
                         Guardar Cuenta
                     </button>
                 </div>

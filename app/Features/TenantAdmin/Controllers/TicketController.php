@@ -100,6 +100,18 @@ class TicketController extends Controller
             'category' => 'required|exists:ticket_categories,slug',
             'priority' => 'required|in:low,medium,high,urgent',
             'attachments.*' => 'file|max:5120|mimes:jpg,jpeg,png,pdf,doc,docx,txt', // 5MB máximo
+        ], [
+            'title.required' => 'El título es obligatorio',
+            'title.max' => 'El título no puede exceder 255 caracteres',
+            'description.required' => 'La descripción es obligatoria',
+            'description.max' => 'La descripción no puede exceder 5000 caracteres',
+            'category.required' => 'La categoría es obligatoria',
+            'category.exists' => 'La categoría seleccionada no es válida',
+            'priority.required' => 'La prioridad es obligatoria',
+            'priority.in' => 'La prioridad seleccionada no es válida',
+            'attachments.*.file' => 'El archivo adjunto debe ser un archivo válido',
+            'attachments.*.max' => 'Cada archivo no puede exceder 5MB',
+            'attachments.*.mimes' => 'El archivo debe ser: jpg, jpeg, png, pdf, doc, docx o txt',
         ]);
 
         // Agregar información automática
@@ -128,7 +140,7 @@ class TicketController extends Controller
 
         return redirect()
             ->route('tenant.admin.tickets.show', ['store' => $store->slug, 'ticket' => $ticket])
-            ->with('success', 'Ticket creado exitosamente. Recibirás una confirmación por email.');
+            ->with('swal_success', 'Ticket creado exitosamente. Recibirás una confirmación por email.');
     }
 
     public function addResponse(Request $request, $storeSlug, Ticket $ticket): RedirectResponse
@@ -148,6 +160,12 @@ class TicketController extends Controller
         $validated = $request->validate([
             'message' => 'required|string|max:2000',
             'attachments.*' => 'file|max:5120|mimes:jpg,jpeg,png,pdf,doc,docx,txt',
+        ], [
+            'message.required' => 'El mensaje es obligatorio',
+            'message.max' => 'El mensaje no puede exceder 2000 caracteres',
+            'attachments.*.file' => 'El archivo adjunto debe ser un archivo válido',
+            'attachments.*.max' => 'Cada archivo no puede exceder 5MB',
+            'attachments.*.mimes' => 'El archivo debe ser: jpg, jpeg, png, pdf, doc, docx o txt',
         ]);
 
         // Crear la respuesta
@@ -176,7 +194,7 @@ class TicketController extends Controller
 
         return redirect()
             ->route('tenant.admin.tickets.show', ['store' => $storeSlug, 'ticket' => $ticket])
-            ->with('success', 'Respuesta agregada exitosamente.');
+            ->with('swal_success', 'Respuesta agregada exitosamente.');
     }
 
     public function updateStatus(Request $request, $storeSlug, Ticket $ticket): JsonResponse
@@ -240,6 +258,8 @@ class TicketController extends Controller
 
         $validated = $request->validate([
             'reason' => 'nullable|string|max:500',
+        ], [
+            'reason.max' => 'La razón no puede exceder 500 caracteres',
         ]);
 
         // Reabrir el ticket
@@ -250,7 +270,7 @@ class TicketController extends Controller
 
         return redirect()
             ->route('tenant.admin.tickets.show', ['store' => $storeSlug, 'ticket' => $ticket])
-            ->with('success', '✅ Ticket reabierto exitosamente. Puedes continuar agregando respuestas.');
+            ->with('swal_success', 'Ticket reabierto exitosamente. Puedes continuar agregando respuestas.');
     }
 
     private function sendTicketCreatedEmail(Ticket $ticket): void

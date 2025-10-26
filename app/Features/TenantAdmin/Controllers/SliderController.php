@@ -117,6 +117,24 @@ class SliderController extends Controller
             'scheduled_days' => 'nullable|array',
             'scheduled_days.*' => 'boolean',
             'transition_duration' => 'required|in:3,5,7',
+        ], [
+            'name.required' => 'El nombre del slider es obligatorio',
+            'name.max' => 'El nombre no puede exceder 255 caracteres',
+            'name.unique' => 'Ya existe un slider con este nombre en tu tienda',
+            'image.required' => 'La imagen del slider es obligatoria',
+            'image.image' => 'El archivo debe ser una imagen válida',
+            'image.mimes' => 'La imagen debe ser de tipo: jpeg, png, jpg o gif',
+            'image.max' => 'La imagen no puede ser mayor a 2MB',
+            'url.max' => 'La URL no puede exceder 500 caracteres',
+            'url_type.required' => 'El tipo de URL es obligatorio',
+            'url_type.in' => 'El tipo de URL debe ser: interna, externa o ninguna',
+            'start_date.after_or_equal' => 'La fecha de inicio debe ser hoy o posterior',
+            'end_date.after_or_equal' => 'La fecha de fin debe ser igual o posterior a la fecha de inicio',
+            'start_time.date_format' => 'El formato de hora de inicio no es válido (debe ser HH:MM)',
+            'end_time.date_format' => 'El formato de hora de fin no es válido (debe ser HH:MM)',
+            'end_time.after' => 'La hora de fin debe ser posterior a la hora de inicio',
+            'transition_duration.required' => 'La duración de transición es obligatoria',
+            'transition_duration.in' => 'La duración de transición debe ser 3, 5 o 7 segundos',
         ]);
 
         // Validar URL interna si es necesaria
@@ -160,7 +178,7 @@ class SliderController extends Controller
             \App\Shared\Models\StoreOnboardingStep::markAsCompleted($store->id, 'slider');
 
             return redirect()->route('tenant.admin.sliders.index', $store->slug)
-                           ->with('success', 'Slider creado exitosamente.');
+                           ->with('swal_success', 'Slider creado exitosamente');
 
         } catch (\Exception $e) {
             \Log::error('Error creando slider: ' . $e->getMessage());
@@ -229,6 +247,23 @@ class SliderController extends Controller
             'scheduled_days' => 'nullable|array',
             'scheduled_days.*' => 'boolean',
             'transition_duration' => 'required|in:3,5,7',
+        ], [
+            'name.required' => 'El nombre del slider es obligatorio',
+            'name.max' => 'El nombre no puede exceder 255 caracteres',
+            'name.unique' => 'Ya existe un slider con este nombre en tu tienda',
+            'image.image' => 'El archivo debe ser una imagen válida',
+            'image.mimes' => 'La imagen debe ser de tipo: jpeg, png, jpg o gif',
+            'image.max' => 'La imagen no puede ser mayor a 2MB',
+            'url.max' => 'La URL no puede exceder 500 caracteres',
+            'url_type.required' => 'El tipo de URL es obligatorio',
+            'url_type.in' => 'El tipo de URL debe ser: interna, externa o ninguna',
+            'start_date.after_or_equal' => 'La fecha de inicio debe ser hoy o posterior',
+            'end_date.after_or_equal' => 'La fecha de fin debe ser igual o posterior a la fecha de inicio',
+            'start_time.date_format' => 'El formato de hora de inicio no es válido (debe ser HH:MM)',
+            'end_time.date_format' => 'El formato de hora de fin no es válido (debe ser HH:MM)',
+            'end_time.after' => 'La hora de fin debe ser posterior a la hora de inicio',
+            'transition_duration.required' => 'La duración de transición es obligatoria',
+            'transition_duration.in' => 'La duración de transición debe ser 3, 5 o 7 segundos',
         ]);
 
         // Validar URL interna si es necesaria
@@ -277,7 +312,7 @@ class SliderController extends Controller
             $slider->save();
 
             return redirect()->route('tenant.admin.sliders.index', $store->slug)
-                           ->with('success', 'Slider actualizado exitosamente.');
+                           ->with('swal_success', 'Slider actualizado exitosamente');
 
         } catch (\Exception $e) {
             \Log::error('Error actualizando slider: ' . $e->getMessage());

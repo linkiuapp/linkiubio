@@ -67,6 +67,7 @@
                     'categories' => StoreOnboardingStep::isCompleted($store->id, 'categories'),
                     'variables' => StoreOnboardingStep::isCompleted($store->id, 'variables'),
                     'products' => StoreOnboardingStep::isCompleted($store->id, 'products'),
+                    'coupons' => StoreOnboardingStep::isCompleted($store->id, 'coupons'),
                 ];
                 
                 $completedSteps = count(array_filter($onboardingSteps));
@@ -99,7 +100,7 @@
                             @else
                                 <x-solar-pallete-2-outline class="w-4 h-4 mr-2" />
                             @endif
-                            <span class="{{ $onboardingSteps['design'] ? 'line-through' : '' }}">Diseño de la tienda</span>
+                            <span class="{{ $onboardingSteps['design'] ? 'line-through' : '' }}">Personalizar tu tienda</span>
                         </a>
                     </li>
                     
@@ -191,6 +192,19 @@
                                 <x-lucide-package class="w-4 h-4 mr-2" />
                             @endif
                             <span class="{{ $onboardingSteps['products'] ? 'line-through' : '' }}">Productos</span>
+                        </a>
+                    </li>
+                    
+                    <!-- Cupones -->
+                    <li>
+                        <a href="{{ route('tenant.admin.coupons.index', ['store' => $store->slug]) }}" 
+                           class="item-sidebar {{ request()->routeIs('tenant.admin.coupons.*') ? 'item-sidebar-active' : '' }} {{ $onboardingSteps['coupons'] ? 'opacity-95' : '' }}">
+                            @if($onboardingSteps['coupons'])
+                                <x-lucide-check-circle class="w-4 h-4 mr-2 text-success-500" />
+                            @else
+                                <x-lucide-ticket-percent class="w-4 h-4 mr-2" />
+                            @endif
+                            <span class="{{ $onboardingSteps['coupons'] ? 'line-through' : '' }}">Cupones</span>
                         </a>
                     </li>
                 </ul>

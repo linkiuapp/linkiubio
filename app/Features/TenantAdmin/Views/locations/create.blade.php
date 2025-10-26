@@ -8,9 +8,9 @@
     @include('tenant-admin::locations.components.notifications')
 
     {{-- Header --}}
-    <div class="flex justify-between items-center mb-6">
-        <h1 class="text-lg font-bold text-black-400">Crear Nueva Sede</h1>
-        <a href="{{ route('tenant.admin.locations.index', ['store' => $store->slug]) }}" class="btn-outline-secondary px-4 py-2 rounded-lg flex items-center gap-2">
+    <div class="flex justify-between items-center mb-6 px-6">
+        <h1 class="text-body-large font-bold text-black-400">Crear Nueva Sede</h1>
+        <a href="{{ route('tenant.admin.locations.index', ['store' => $store->slug]) }}" class="btn-secondary px-4 py-2 rounded-lg flex items-center justify-center gap-2">
             <x-solar-arrow-left-outline class="w-5 h-5" />
             Volver
         </a>
@@ -22,13 +22,13 @@
         {{-- Card principal con toda la información --}}
         <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
             <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                <h2 class="text-lg font-semibold text-black-400 mb-0">Información de la Sede</h2>
+                <h2 class="text-body-large font-bold text-black-400 mb-0">Información de la Sede</h2>
             </div>
             
             <div class="p-6">
                 {{-- Sección: Información Básica --}}
                 <div class="mb-8">
-                    <h3 class="text-lg font-semibold text-black-400 mb-4 flex items-center gap-2">
+                    <h3 class="text-body-large font-bold text-black-400 mb-4 flex items-center gap-2">
                         <x-solar-info-circle-outline class="w-5 h-5" />
                         Información Básica
                     </h3>
@@ -119,7 +119,7 @@
 
                 {{-- Sección: Contacto y Ubicación --}}
                 <div class="mb-8">
-                    <h3 class="text-lg font-semibold text-black-400 mb-4 flex items-center gap-2">
+                    <h3 class="text-body-large font-semibold text-black-400 mb-4 flex items-center gap-2">
                         <x-solar-map-point-outline class="w-5 h-5" />
                         Contacto y Ubicación
                     </h3>
@@ -220,7 +220,7 @@
 
                 {{-- Sección: Horarios --}}
                 <div class="mb-8">
-                    <h3 class="text-lg font-semibold text-black-400 mb-4 flex items-center gap-2">
+                    <h3 class="text-body-large font-semibold text-black-400 mb-4 flex items-center gap-2">
                         <x-solar-clock-circle-outline class="w-5 h-5" />
                         Horarios de Atención
                     </h3>
@@ -329,7 +329,7 @@
 
                 {{-- Sección: Redes Sociales --}}
                 <div>
-                    <h3 class="text-lg font-semibold text-black-400 mb-4 flex items-center gap-2">
+                    <h3 class="text-body-large font-semibold text-black-400 mb-4 flex items-center gap-2">
                         <x-solar-share-circle-outline class="w-5 h-5" />
                         Redes Sociales
                     </h3>
@@ -358,11 +358,11 @@
             <div class="border-t border-accent-100 bg-accent-50 px-6 py-4">
                 <div class="flex justify-end gap-3">
                     <a href="{{ route('tenant.admin.locations.index', ['store' => $store->slug]) }}"
-                        class="btn-outline-secondary px-6 py-2 rounded-lg">
+                        class="btn-secondary px-6 py-2 rounded-lg flex items-center justify-center gap-2">
                         Cancelar
                     </a>
                     <button type="submit"
-                        class="btn-primary px-6 py-2 rounded-lg flex items-center gap-2">
+                        class="btn-primary px-6 py-2 rounded-lg flex items-center justify-center gap-2">
                         <x-solar-diskette-outline class="w-5 h-5" />
                         Guardar Sede
                     </button>
@@ -442,7 +442,7 @@ document.addEventListener('alpine:init', () => {
             });
         },
         
-        validateForm(event) {
+        async validateForm(event) {
             let valid = true;
             const form = event.target;
             
@@ -455,13 +455,43 @@ document.addEventListener('alpine:init', () => {
                     
                     if (!open1 || !close1) {
                         valid = false;
-                        this.showNotificationMessage(`Por favor, complete el horario principal para ${this.getDayName(day)}`, 'error');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: `Por favor, complete el horario principal para ${this.getDayName(day)}`,
+                            confirmButtonColor: '#ed2e45'
+                        });
                     }
                 }
             });
             
             if (valid) {
-                form.submit();
+                // Mostrar confirmación con SweetAlert2
+                const result = await Swal.fire({
+                    title: '¿Crear sede?',
+                    text: 'Se creará una nueva sede para tu tienda',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonColor: '#da27a7',
+                    cancelButtonColor: '#ed2e45',
+                    confirmButtonText: '✓ Sí, crear',
+                    cancelButtonText: 'Cancelar'
+                });
+                
+                if (result.isConfirmed) {
+                    // Mostrar loading
+                    Swal.fire({
+                        title: 'Creando sede...',
+                        text: 'Por favor espera',
+                        icon: 'info',
+                        allowOutsideClick: false,
+                        showConfirmButton: false,
+                        willOpen: () => {
+                            Swal.showLoading();
+                        }
+                    });
+                    form.submit();
+                }
             }
         },
         

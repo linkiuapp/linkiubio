@@ -14,10 +14,12 @@ class ProductVariableAssignment extends Model
         'display_order',
         'group_name',
         'group_order',
+        'selected_options',
     ];
 
     protected $casts = [
         'is_required' => 'boolean',
+        'selected_options' => 'array',
     ];
 
     /**
@@ -25,7 +27,7 @@ class ProductVariableAssignment extends Model
      */
     public function product()
     {
-        return $this->belongsTo(\App\Models\Product::class);
+        return $this->belongsTo(Product::class);
     }
 
     /**

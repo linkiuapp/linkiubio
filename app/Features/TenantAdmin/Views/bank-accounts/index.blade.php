@@ -8,31 +8,31 @@
     {{-- HEADER Y ACCIONES PRINCIPALES --}}
     {{-- ================================================================ --}}
     
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex justify-between items-center mb-6 px-6">
         <div>
-            <h1 class="text-lg font-bold text-black-400">Gestión de Cuentas Bancarias</h1>
-            <p class="text-sm text-black-300">Método de pago: {{ $paymentMethod->name }}</p>
+            <h1 class="text-body-large font-bold text-black-400">Gestión de Cuentas Bancarias</h1>
+            <p class="text-caption text-black-300">Método de pago: {{ $paymentMethod->name }}</p>
         </div>
         <div class="flex items-center gap-4">
-            <span class="text-sm text-black-300">
+            <span class="text-caption text-black-300">
                 Cuentas: <span class="font-semibold">{{ $currentCount }}/{{ $maxAccounts }}</span> 
                 (Plan {{ $planName }})
             </span>
             <div class="flex gap-2">
-                <a href="{{ route('tenant.admin.payment-methods.show', ['store' => $store->slug, 'paymentMethod' => $paymentMethod->id]) }}" 
-                    class="btn-outline-secondary px-4 py-2 rounded-lg flex items-center gap-2">
+                <a href="{{ route('tenant.admin.payment-methods.index', ['store' => $store->slug]) }}" 
+                    class="btn-secondary px-4 py-2 rounded-lg flex items-center gap-2 text-caption font-bold text-accent-50 hover:bg-secondary-300">
                     <x-solar-arrow-left-outline class="w-5 h-5" />
                     Volver
                 </a>
                 @if($remainingSlots > 0)
                 <a href="{{ route('tenant.admin.payment-methods.bank-accounts.create', ['store' => $store->slug, 'paymentMethod' => $paymentMethod->id]) }}" 
-                    class="btn-primary px-4 py-2 rounded-lg flex items-center gap-2">
+                    class="btn-primary px-4 py-2 rounded-lg flex items-center gap-2 text-caption font-bold text-accent-50 hover:bg-primary-300">
                     <x-solar-add-circle-outline class="w-5 h-5" />
                     Nueva Cuenta
                 </a>
                 @else
                 <button disabled 
-                    class="btn-primary opacity-50 cursor-not-allowed px-4 py-2 rounded-lg flex items-center gap-2">
+                    class="btn-primary opacity-50 cursor-not-allowed px-4 py-2 rounded-lg flex items-center gap-2 text-caption font-bold text-accent-50 hover:bg-primary-300">
                     <x-solar-add-circle-outline class="w-5 h-5" />
                     Límite Alcanzado
                 </button>
@@ -47,16 +47,16 @@
     
     <div class="bg-accent-50 rounded-lg shadow-sm mb-6">
         <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-            <h2 class="text-lg font-semibold text-black-400 mb-0">Límites del Plan</h2>
+            <h2 class="text-body-large font-bold text-black-400 mb-0">Límites del Plan</h2>
         </div>
-        <div class="p-6">
+        <div class="p-6 bg-accent-50">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-black-300">Tu plan {{ $planName }} te permite tener hasta {{ $maxAccounts }} cuentas bancarias</p>
+                    <p class="text-caption text-black-300">Tu plan {{ $planName }} te permite tener hasta {{ $maxAccounts }} cuentas bancarias</p>
                 </div>
                 <div class="text-right">
                     <div class="text-2xl font-bold text-primary-200">{{ $currentCount }} / {{ $maxAccounts }}</div>
-                    <p class="text-sm text-black-300">Cuentas utilizadas</p>
+                    <p class="text-caption text-black-300">Cuentas utilizadas</p>
                 </div>
             </div>
             <div class="mt-4">
@@ -73,7 +73,7 @@
     
     <div class="bg-accent-50 rounded-lg shadow-sm mb-6 overflow-hidden">
         <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-            <h2 class="text-lg font-semibold text-black-400 mb-0">Listado de Cuentas Bancarias</h2>
+            <h2 class="text-body-large font-bold text-black-400 mb-0">Listado de Cuentas Bancarias</h2>
         </div>
         
         <div class="overflow-x-auto">
@@ -82,17 +82,17 @@
                     <div class="inline-flex items-center justify-center w-16 h-16 rounded-full bg-primary-50 mb-4">
                         <x-solar-card-transfer-outline class="w-8 h-8 text-primary-200" />
                     </div>
-                    <h3 class="text-lg font-semibold text-black-400 mb-2">No hay cuentas bancarias configuradas</h3>
-                    <p class="text-sm text-black-300 mb-4">Agrega cuentas bancarias para recibir pagos por transferencia</p>
+                    <h3 class="text-body-large font-bold text-black-400 mb-2">No hay cuentas bancarias configuradas</h3>
+                    <p class="text-caption text-black-300 mb-4">Agrega cuentas bancarias para recibir pagos por transferencia</p>
                     @if($remainingSlots > 0)
                     <a href="{{ route('tenant.admin.bank-accounts.create', ['store' => $store->slug, 'paymentMethod' => $paymentMethod->id]) }}" 
-                        class="btn-primary px-4 py-2 rounded-lg inline-flex items-center gap-2">
+                        class="btn-primary px-4 py-2 rounded-lg inline-flex items-center gap-2 text-caption font-bold text-accent-50 hover:bg-primary-300">
                         <x-solar-add-circle-outline class="w-5 h-5" />
                         Agregar Cuenta Bancaria
                     </a>
                     @else
                     <div class="text-warning-300 mb-2">Has alcanzado el límite de cuentas para tu plan actual</div>
-                    <a href="#" class="btn-outline-primary px-4 py-2 rounded-lg inline-flex items-center gap-2">
+                    <a href="#" class="btn-outline-primary px-4 py-2 rounded-lg inline-flex items-center gap-2 text-caption font-bold text-accent-50 hover:bg-primary-300">
                         <x-solar-star-outline class="w-5 h-5" />
                         Actualiza tu Plan
                     </a>
@@ -101,26 +101,29 @@
             @else
                 <div class="overflow-x-auto">
                     <table class="min-w-full divide-y divide-accent-100">
-                        <thead class="bg-accent-100">
+                        <thead class="bg-accent-50 text-caption font-bold text-black-300">
                             <tr>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-black-300 uppercase tracking-wider">
+                                <th scope="col" class="px-6 py-3 text-left text-caption font-bold text-black-300 uppercase tracking-wider">
                                     Cuenta Bancaria
                                 </th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-black-300 uppercase tracking-wider">
-                                    Información
+                                <th scope="col" class="px-6 py-3 text-left text-caption font-bold text-black-300 uppercase tracking-wider">
+                                    Tipo de Cuenta
                                 </th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-black-300 uppercase tracking-wider">
-                                    Titular
+                                <th scope="col" class="px-6 py-3 text-left text-caption font-bold text-black-300 uppercase tracking-wider">
+                                    Número de Cuenta
                                 </th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-black-300 uppercase tracking-wider">
+                                <th scope="col" class="px-6 py-3 text-left text-caption font-bold text-black-300 uppercase tracking-wider">
+                                    Titular de la Cuenta
+                                </th>
+                                <th scope="col" class="px-6 py-3 text-left text-caption font-bold text-black-300 uppercase tracking-wider">
                                     Estado
                                 </th>
-                                <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-black-300 uppercase tracking-wider">
+                                <th scope="col" class="px-6 py-3 text-left text-caption font-bold text-black-300 uppercase tracking-wider">
                                     Acciones
                                 </th>
                             </tr>
                         </thead>
-                        <tbody class="bg-accent-50 divide-y divide-accent-100">
+                        <tbody class="bg-accent-50 divide-y divide-accent-100 text-caption font-bold text-black-300">
                             @foreach($bankAccounts as $account)
                                 <tr>
                                     <td class="px-4 py-3 whitespace-nowrap">
@@ -152,15 +155,15 @@
                                     </td>
                                     <td class="px-4 py-3 whitespace-nowrap">
                                         @if($account->is_active)
-                                            <span class="badge-soft-success">Activa</span>
+                                            <span class="bg-success-300 text-accent-50 px-2 py-1 rounded-full text-caption font-bold">Activa</span>
                                         @else
-                                            <span class="badge-soft-secondary">Inactiva</span>
+                                            <span class="bg-error-300 text-accent-50 px-2 py-1 rounded-full text-caption font-bold">Inactiva</span>
                                         @endif
                                     </td>
                                     <td class="px-4 py-3 whitespace-nowrap text-right text-sm font-medium">
                                         <div class="flex justify-end gap-2">
                                             <button type="button" 
-                                                    class="{{ $account->is_active ? 'text-success-200 hover:text-success-300' : 'text-secondary-200 hover:text-secondary-300' }}"
+                                                    class="{{ $account->is_active ? 'text-primary-300 hover:text-primary-400' : 'text-secondary-300 hover:text-secondary-400' }}"
                                                     onclick="confirmToggleActive('{{ route('tenant.admin.payment-methods.bank-accounts.toggle-active', ['store' => $store->slug, 'paymentMethod' => $paymentMethod->id, 'bankAccount' => $account->id]) }}', '{{ $account->is_active ? 'desactivar' : 'activar' }}')">
                                                 @if($account->is_active)
                                                     <x-solar-eye-outline class="w-5 h-5" />
@@ -169,11 +172,11 @@
                                                 @endif
                                             </button>
                                             <a href="{{ route('tenant.admin.payment-methods.bank-accounts.edit', ['store' => $store->slug, 'paymentMethod' => $paymentMethod->id, 'bankAccount' => $account->id]) }}" 
-                                               class="text-warning-200 hover:text-warning-300">
+                                               class="text-info-300 hover:text-info-400">
                                                 <x-solar-pen-2-outline class="w-5 h-5" />
                                             </a>
                                             <button type="button" 
-                                                    class="text-error-200 hover:text-error-300"
+                                                    class="text-error-300 hover:text-error-400"
                                                     onclick="confirmDelete('{{ route('tenant.admin.payment-methods.bank-accounts.destroy', ['store' => $store->slug, 'paymentMethod' => $paymentMethod->id, 'bankAccount' => $account->id]) }}')">
                                                 <x-solar-trash-bin-trash-outline class="w-5 h-5" />
                                             </button>
@@ -186,14 +189,14 @@
                 </div>
                 
                 @if($remainingSlots <= 0)
-                <div class="mt-6 p-4 bg-warning-50 border border-warning-100 rounded-lg">
+                <div class="mt-6 p-4 bg-warning-50 border border-warning-100 rounded-lg text-caption font-bold text-black-300">
                     <div class="flex items-start gap-3">
                         <div class="flex-shrink-0">
-                            <x-solar-danger-triangle-outline class="w-5 h-5 text-warning-300" />
+                            <x-solar-info-circle-outline class="w-5 h-5 text-info-300" />
                         </div>
                         <div>
-                            <h4 class="text-sm font-semibold text-black-400">Has alcanzado el límite de cuentas bancarias</h4>
-                            <p class="text-xs text-black-300 mt-1">Tu plan actual permite un máximo de {{ $maxAccounts }} cuentas bancarias. Actualiza tu plan para agregar más cuentas.</p>
+                            <h4 class="text-caption font-bold text-black-400">Has alcanzado el límite de cuentas bancarias</h4>
+                            <p class="text-caption text-black-300 mt-1">Tu plan actual permite un máximo de {{ $maxAccounts }} cuentas bancarias. Actualiza tu plan para agregar más cuentas.</p>
                         </div>
                     </div>
                 </div>
@@ -205,8 +208,19 @@
 
 @push('scripts')
 <script>
-function confirmDelete(url) {
-    if (confirm('¿Estás seguro de que deseas eliminar esta cuenta bancaria? Esta acción no se puede deshacer.')) {
+async function confirmDelete(url) {
+    const result = await Swal.fire({
+        title: '¿Eliminar cuenta bancaria?',
+        html: 'Esta acción <strong>no se puede deshacer</strong>. La cuenta será eliminada permanentemente.',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ed2e45',
+        cancelButtonColor: '#9ca3af',
+        confirmButtonText: '✓ Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    });
+    
+    if (result.isConfirmed) {
         // Create a form and submit it
         const form = document.createElement('form');
         form.method = 'POST';
@@ -231,8 +245,19 @@ function confirmDelete(url) {
     }
 }
 
-function confirmToggleActive(url, action) {
-    if (confirm(`¿Estás seguro de que deseas ${action} esta cuenta bancaria?`)) {
+async function confirmToggleActive(url, action) {
+    const result = await Swal.fire({
+        title: `¿${action.charAt(0).toUpperCase() + action.slice(1)} cuenta bancaria?`,
+        text: `La cuenta será ${action === 'activar' ? 'habilitada' : 'deshabilitada'} para recibir pagos`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#da27a7',
+        cancelButtonColor: '#9ca3af',
+        confirmButtonText: `✓ Sí, ${action}`,
+        cancelButtonText: 'Cancelar'
+    });
+    
+    if (result.isConfirmed) {
         // Create a form and submit it
         const form = document.createElement('form');
         form.method = 'POST';
