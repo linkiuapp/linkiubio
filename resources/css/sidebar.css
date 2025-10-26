@@ -27,7 +27,7 @@
     }
 
     .title-group-sidebar {
-        @apply text-caption font-regular px-2 text-accent-500;
+        @apply text-caption font-regular px-2 text-black-300;
     }
 
 }
