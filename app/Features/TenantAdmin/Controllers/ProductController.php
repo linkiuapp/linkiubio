@@ -161,6 +161,9 @@ class ProductController extends Controller
         if ($product->type === 'variable' && $request->has('variables')) {
             $this->syncProductVariables($product, $request->variables);
         }
+        
+        // Marcar paso de onboarding como completado
+        \App\Shared\Models\StoreOnboardingStep::markAsCompleted($store->id, 'products');
 
         return redirect()->route('tenant.admin.products.index', $store->slug)
             ->with('success', 'Producto creado exitosamente.');

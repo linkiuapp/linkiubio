@@ -163,6 +163,9 @@ class LocationController extends Controller
             // Create location with schedules and social links
             $location = $this->locationService->createLocationWithSchedules($data);
             
+            // Marcar paso de onboarding como completado
+            \App\Shared\Models\StoreOnboardingStep::markAsCompleted($store->id, 'locations');
+            
             return redirect()->route('tenant.admin.locations.index', ['store' => $store->slug])
                 ->with('success', 'Sede creada exitosamente.');
         } catch (\Exception $e) {

@@ -273,6 +273,11 @@ class Store extends Model
         return $this->hasMany(Ticket::class);
     }
 
+    public function onboardingSteps()
+    {
+        return $this->hasMany(StoreOnboardingStep::class);
+    }
+
     /**
      * Get count of unread support responses for this store.
      * Support responses are responses from super_admin users created after

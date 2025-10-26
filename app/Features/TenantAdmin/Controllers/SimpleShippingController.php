@@ -156,6 +156,9 @@ class SimpleShippingController extends Controller
                 'sort_order' => $currentZoneCount,
                 'is_active' => true,
             ]);
+            
+            // Marcar paso de onboarding como completado
+            \App\Shared\Models\StoreOnboardingStep::markAsCompleted($store->id, 'shipping');
 
             return response()->json([
                 'success' => true,

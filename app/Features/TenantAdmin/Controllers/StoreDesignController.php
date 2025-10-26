@@ -164,6 +164,10 @@ public function update(Request $request)
 
             $design->update($validated);
             $design->refresh(); // Recargar el modelo con los datos actualizados
+            
+            // Marcar paso de onboarding como completado
+            \App\Shared\Models\StoreOnboardingStep::markAsCompleted($store->id, 'design');
+            
             DB::commit();
             
             Log::info('Design after update:', $design->toArray());

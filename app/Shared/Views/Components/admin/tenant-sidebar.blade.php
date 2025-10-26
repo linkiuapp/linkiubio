@@ -55,17 +55,18 @@
     <nav class="flex-1 overflow-y-auto px-6 py-4" x-data="sidebarSections()">
         <ul class="space-y-1">
             @php
-                // Calcular progreso del onboarding
+                use App\Shared\Models\StoreOnboardingStep;
+                
+                // Calcular progreso del onboarding usando memoria
                 $onboardingSteps = [
-                    'design' => $store->design !== null,
-                    'slider' => ($store->sliders_count ?? 0) > 0,
-                    'locations' => ($store->locations_count ?? 0) > 0,
-                    'payments' => $store->paymentMethods()->where('is_active', true)->exists(),
-                    'shipping' => \App\Features\TenantAdmin\Models\SimpleShipping::where('store_id', $store->id)->exists() && 
-                                  \App\Features\TenantAdmin\Models\SimpleShipping::where('store_id', $store->id)->first()?->zones()->count() > 0,
-                    'categories' => ($store->categories_count ?? 0) > 0,
-                    'variables' => ($store->variables_count ?? 0) > 0,
-                    'products' => ($store->products_count ?? 0) > 0,
+                    'design' => StoreOnboardingStep::isCompleted($store->id, 'design'),
+                    'slider' => StoreOnboardingStep::isCompleted($store->id, 'slider'),
+                    'locations' => StoreOnboardingStep::isCompleted($store->id, 'locations'),
+                    'payments' => StoreOnboardingStep::isCompleted($store->id, 'payments'),
+                    'shipping' => StoreOnboardingStep::isCompleted($store->id, 'shipping'),
+                    'categories' => StoreOnboardingStep::isCompleted($store->id, 'categories'),
+                    'variables' => StoreOnboardingStep::isCompleted($store->id, 'variables'),
+                    'products' => StoreOnboardingStep::isCompleted($store->id, 'products'),
                 ];
                 
                 $completedSteps = count(array_filter($onboardingSteps));
@@ -75,26 +76,26 @@
             
             <!-- Primeros pasos (solo mostrar si no está todo completo) -->
             @if(!$allCompleted)
-            <li>
-                <button @click="toggleSection('primeros-pasos')" 
-                        class="title-group-sidebar w-full flex justify-between items-center hover:bg-accent-100 px-2 py-1 rounded transition-colors">
-                    <span class="flex items-center gap-2">
-                        Primeros pasos
-                        <span class="text-caption bg-info-300 text-accent-300 px-2 py-0.5 rounded-full font-medium">
-                            {{ $completedSteps }}/{{ $totalSteps }}
-                        </span>
+            <li class="mb-4 bg-accent-200 rounded-lg p-3 border border-dashed border-info-200">
+                <!-- Título fijo sin colapsable -->
+                <div class="flex items-center justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <x-lucide-rocket class="w-5 h-5 text-info-300" />
+                        <span class="text-body-regular font-bold text-info-300">Primeros pasos</span>
+                    </div>
+                    <span class="text-body-small bg-info-300 text-accent-300 px-3 py-1 rounded-full font-bold">
+                        {{ $completedSteps }}/{{ $totalSteps }}
                     </span>
-                    <x-lucide-chevron-down class="w-4 h-4 transition-transform" 
-                                        x-bind:class="{ 'rotate-180': sections['primeros-pasos'] }"/>
-                </button>
+                </div>
                 
-                <ul x-show="sections['primeros-pasos']" x-collapse class="mt-2 space-y-1">
+                <!-- Lista siempre visible -->
+                <ul class="space-y-1">
                     <!-- Diseño de la tienda -->
                     <li>
                         <a href="{{ route('tenant.admin.store-design.index', ['store' => $store->slug]) }}" 
-                           class="item-sidebar {{ request()->routeIs('tenant.admin.store-design.*') ? 'item-sidebar-active' : '' }} {{ $onboardingSteps['design'] ? 'opacity-60' : '' }}">
+                           class="item-sidebar {{ request()->routeIs('tenant.admin.store-design.*') ? 'item-sidebar-active' : '' }} {{ $onboardingSteps['design'] ? 'opacity-95' : '' }}">
                             @if($onboardingSteps['design'])
-                                <x-lucide-check-circle class="w-4 h-4 mr-2 text-success-300" />
+                                <x-lucide-check-circle class="w-4 h-4 mr-2 text-success-500" />
                             @else
                                 <x-solar-pallete-2-outline class="w-4 h-4 mr-2" />
                             @endif
@@ -105,9 +106,9 @@
                     <!-- Slider -->
                     <li>
                         <a href="{{ route('tenant.admin.sliders.index', ['store' => $store->slug]) }}" 
-                           class="item-sidebar {{ request()->routeIs('tenant.admin.sliders.*') ? 'item-sidebar-active' : '' }} {{ $onboardingSteps['slider'] ? 'opacity-60' : '' }}">
+                           class="item-sidebar {{ request()->routeIs('tenant.admin.sliders.*') ? 'item-sidebar-active' : '' }} {{ $onboardingSteps['slider'] ? 'opacity-95' : '' }}">
                             @if($onboardingSteps['slider'])
-                                <x-lucide-check-circle class="w-4 h-4 mr-2 text-success-300" />
+                                <x-lucide-check-circle class="w-4 h-4 mr-2 text-success-500" />
                             @else
                                 <x-lucide-images class="w-4 h-4 mr-2" />
                             @endif
@@ -118,9 +119,9 @@
                     <!-- Sedes -->
                     <li>
                         <a href="{{ route('tenant.admin.locations.index', ['store' => $store->slug]) }}" 
-                           class="item-sidebar {{ request()->routeIs('tenant.admin.locations.*') ? 'item-sidebar-active' : '' }} {{ $onboardingSteps['locations'] ? 'opacity-60' : '' }}">
+                           class="item-sidebar {{ request()->routeIs('tenant.admin.locations.*') ? 'item-sidebar-active' : '' }} {{ $onboardingSteps['locations'] ? 'opacity-95' : '' }}">
                             @if($onboardingSteps['locations'])
-                                <x-lucide-check-circle class="w-4 h-4 mr-2 text-success-300" />
+                                <x-lucide-check-circle class="w-4 h-4 mr-2 text-success-500" />
                             @else
                                 <x-lucide-store class="w-4 h-4 mr-2" />
                             @endif
@@ -131,9 +132,9 @@
                     <!-- Métodos de pago -->
                     <li>
                         <a href="{{ route('tenant.admin.payment-methods.index', ['store' => $store->slug]) }}" 
-                           class="item-sidebar {{ request()->routeIs('tenant.admin.payment-methods.*') ? 'item-sidebar-active' : '' }} {{ $onboardingSteps['payments'] ? 'opacity-60' : '' }}">
+                           class="item-sidebar {{ request()->routeIs('tenant.admin.payment-methods.*') ? 'item-sidebar-active' : '' }} {{ $onboardingSteps['payments'] ? 'opacity-95' : '' }}">
                             @if($onboardingSteps['payments'])
-                                <x-lucide-check-circle class="w-4 h-4 mr-2 text-success-300" />
+                                <x-lucide-check-circle class="w-4 h-4 mr-2 text-success-500" />
                             @else
                                 <x-lucide-dock class="w-4 h-4 mr-2" />
                             @endif
@@ -144,9 +145,9 @@
                     <!-- Gestión de envíos -->
                     <li>
                         <a href="{{ route('tenant.admin.simple-shipping.index', ['store' => $store->slug]) }}" 
-                           class="item-sidebar {{ request()->routeIs('tenant.admin.simple-shipping.*') ? 'item-sidebar-active' : '' }} {{ $onboardingSteps['shipping'] ? 'opacity-60' : '' }}">
+                           class="item-sidebar {{ request()->routeIs('tenant.admin.simple-shipping.*') ? 'item-sidebar-active' : '' }} {{ $onboardingSteps['shipping'] ? 'opacity-95' : '' }}">
                             @if($onboardingSteps['shipping'])
-                                <x-lucide-check-circle class="w-4 h-4 mr-2 text-success-300" />
+                                <x-lucide-check-circle class="w-4 h-4 mr-2 text-success-500" />
                             @else
                                 <x-lucide-truck class="w-4 h-4 mr-2" />
                             @endif
@@ -157,9 +158,9 @@
                     <!-- Categorías -->
                     <li>
                         <a href="{{ route('tenant.admin.categories.index', ['store' => $store->slug]) }}" 
-                           class="item-sidebar {{ request()->routeIs('tenant.admin.categories.*') ? 'item-sidebar-active' : '' }} {{ $onboardingSteps['categories'] ? 'opacity-60' : '' }}">
+                           class="item-sidebar {{ request()->routeIs('tenant.admin.categories.*') ? 'item-sidebar-active' : '' }} {{ $onboardingSteps['categories'] ? 'opacity-95' : '' }}">
                             @if($onboardingSteps['categories'])
-                                <x-lucide-check-circle class="w-4 h-4 mr-2 text-success-300" />
+                                <x-lucide-check-circle class="w-4 h-4 mr-2 text-success-500" />
                             @else
                                 <x-lucide-layout-list class="w-4 h-4 mr-2" />
                             @endif
@@ -170,9 +171,9 @@
                     <!-- Variables -->
                     <li>
                         <a href="{{ route('tenant.admin.variables.index', ['store' => $store->slug]) }}" 
-                           class="item-sidebar {{ request()->routeIs('tenant.admin.variables.*') ? 'item-sidebar-active' : '' }} {{ $onboardingSteps['variables'] ? 'opacity-60' : '' }}">
+                           class="item-sidebar {{ request()->routeIs('tenant.admin.variables.*') ? 'item-sidebar-active' : '' }} {{ $onboardingSteps['variables'] ? 'opacity-95' : '' }}">
                             @if($onboardingSteps['variables'])
-                                <x-lucide-check-circle class="w-4 h-4 mr-2 text-success-300" />
+                                <x-lucide-check-circle class="w-4 h-4 mr-2 text-success-500" />
                             @else
                                 <x-lucide-tag class="w-4 h-4 mr-2" />
                             @endif
@@ -183,9 +184,9 @@
                     <!-- Productos -->
                     <li>
                         <a href="{{ route('tenant.admin.products.index', ['store' => $store->slug]) }}" 
-                           class="item-sidebar {{ request()->routeIs('tenant.admin.products.*') ? 'item-sidebar-active' : '' }} {{ $onboardingSteps['products'] ? 'opacity-60' : '' }}">
+                           class="item-sidebar {{ request()->routeIs('tenant.admin.products.*') ? 'item-sidebar-active' : '' }} {{ $onboardingSteps['products'] ? 'opacity-95' : '' }}">
                             @if($onboardingSteps['products'])
-                                <x-lucide-check-circle class="w-4 h-4 mr-2 text-success-300" />
+                                <x-lucide-check-circle class="w-4 h-4 mr-2 text-success-500" />
                             @else
                                 <x-lucide-package class="w-4 h-4 mr-2" />
                             @endif
@@ -194,7 +195,11 @@
                     </li>
                 </ul>
             </li>
+            
+            <!-- Separador visual -->
+            <li class="my-4 border-t border-disabled-200"></li>
             @endif
+            
             <!-- Favoritos-->
              
                 <p class="title-group-sidebar w-full flex justify-between items-center px-2 py-1 rounded transition-colors">Favoritos</p>

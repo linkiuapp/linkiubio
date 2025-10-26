@@ -129,6 +129,9 @@ class VariableController extends Controller
             'sort_order' => $totalVariables,
         ]);
         
+        // Marcar paso de onboarding como completado
+        \App\Shared\Models\StoreOnboardingStep::markAsCompleted($store->id, 'variables');
+        
         // Crear opciones si las hay
         if (!empty($validated['options'])) {
             foreach ($validated['options'] as $index => $optionData) {

@@ -174,6 +174,9 @@ class CategoryController extends Controller
         
         $category = Category::create($validated);
         
+        // Marcar paso de onboarding como completado
+        \App\Shared\Models\StoreOnboardingStep::markAsCompleted($store->id, 'categories');
+        
         return redirect()
             ->route('tenant.admin.categories.index', $store->slug)
             ->with('success', 'Categoría creada exitosamente');
