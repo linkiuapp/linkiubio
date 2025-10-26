@@ -15,19 +15,19 @@
                 </div>
                 <div class="flex items-center gap-2">
                     <a href="{{ route('tenant.admin.sliders.edit', [$store->slug, $slider->id]) }}" 
-                       class="btn-outline-primary">
+                       class="btn-primary flex items-center justify-center gap-2">
                         <x-solar-pen-new-square-outline class="w-4 h-4 mr-2" />
                         Editar
                     </a>
                     <form action="{{ route('tenant.admin.sliders.toggle-status', [$store->slug, $slider->id]) }}" method="POST" class="inline">
                         @csrf
                         @method('PATCH')
-                        <button type="submit" class="btn-outline-{{ $slider->is_active ? 'warning' : 'success' }}">
+                        <button type="submit" class="btn-{{ $slider->is_active ? 'warning' : 'success' }} flex items-center justify-center gap-2">
                             @if($slider->is_active)
-                                <x-solar-eye-closed-outline class="w-4 h-4 mr-2" />
+                                <x-solar-pause-circle-outline class="w-4 h-4 mr-2" />
                                 Desactivar
                             @else
-                                <x-solar-eye-outline class="w-4 h-4 mr-2" />
+                                <x-solar-play-circle-outline class="w-4 h-4 mr-2" />
                                 Activar
                             @endif
                         </button>
@@ -40,7 +40,7 @@
         <div class="bg-accent-50 rounded-lg p-0 overflow-hidden mb-6">
             <div class="p-6 space-y-4">
                 <div class="mb-4">
-                    <h3 class="text-lg font-medium text-black-500 mb-1">Información Básica</h3>
+                    <h3 class="text-body-large font-medium text-black-500 mb-1">Información Básica</h3>
                     <p class="text-sm text-black-300">Datos principales del slider</p>
                 </div>
                 
@@ -89,7 +89,7 @@
         <div class="bg-accent-50 rounded-lg p-0 overflow-hidden mb-6">
             <div class="p-6">
                 <div class="mb-4">
-                    <h3 class="text-lg font-medium text-black-500 mb-1">Imagen</h3>
+                    <h3 class="text-body-large font-medium text-black-500 mb-1">Imagen</h3>
                     <p class="text-sm text-black-300">Imagen del slider</p>
                 </div>
                 
@@ -113,24 +113,24 @@
         <div class="bg-accent-50 rounded-lg p-0 overflow-hidden mb-6">
             <div class="p-6 space-y-4">
                 <div class="mb-4">
-                    <h3 class="text-lg font-medium text-black-500 mb-1">Enlace</h3>
+                    <h3 class="text-body-large font-medium text-black-500 mb-1">Enlace</h3>
                     <p class="text-sm text-black-300">Configuración del enlace</p>
                 </div>
                 
                 <div>
                     <label class="block text-sm font-medium text-black-400 mb-1">Tipo de enlace</label>
                     @if($slider->url_type === 'none')
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-black-100 text-black-400">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-medium bg-black-50 text-black-300">
                             <x-solar-close-circle-outline class="w-3 h-3 mr-1" />
                             Sin enlace
                         </span>
                     @elseif($slider->url_type === 'internal')
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary-100 text-primary-400">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-medium bg-primary-50 text-primary-300">
                             <x-solar-home-outline class="w-3 h-3 mr-1" />
                             Enlace interno
                         </span>
                     @else
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-info-100 text-info-400">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-medium bg-info-50 text-info-300">
                             <x-solar-link-outline class="w-3 h-3 mr-1" />
                             Enlace externo
                         </span>
@@ -150,19 +150,19 @@
         <div class="bg-accent-50 rounded-lg p-0 overflow-hidden mb-6">
             <div class="p-6 space-y-4">
                 <div class="mb-4">
-                    <h3 class="text-lg font-medium text-black-500 mb-1">Programación</h3>
+                    <h3 class="text-body-large font-medium text-black-500 mb-1">Programación</h3>
                     <p class="text-sm text-black-300">Configuración de horarios</p>
                 </div>
                 
                 <div>
                     <label class="block text-sm font-medium text-black-400 mb-1">Estado</label>
                     @if($slider->is_scheduled)
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning-100 text-warning-400">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning-100 text-warning-500">
                             <x-solar-clock-circle-outline class="w-3 h-3 mr-1" />
                             Programado
                         </span>
                     @else
-                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-100 text-success-400">
+                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-medium bg-success-50 text-success-500">
                             <x-solar-infinity-outline class="w-3 h-3 mr-1" />
                             Siempre activo
                         </span>
@@ -238,16 +238,16 @@
         </div>
 
         <!-- Botones -->
-        <div class="bg-accent-100 px-6 py-4 flex justify-between items-center">
+        <div class="bg-accent-50 px-6 py-4 flex justify-between items-center mb-6 border border-accent-100 rounded-lg">
             <div class="flex items-center gap-3">
                 <a href="{{ route('tenant.admin.sliders.index', $store->slug) }}" 
-                   class="btn-outline-secondary">
+                   class="btn-secondary flex items-center justify-center gap-2">
                     Volver
                 </a>
             </div>
             <div class="flex items-center gap-3">
                 <a href="{{ route('tenant.admin.sliders.edit', [$store->slug, $slider->id]) }}" 
-                   class="btn-primary">
+                   class="btn-primary flex items-center justify-center gap-2">
                     Editar Slider
                 </a>
             </div>

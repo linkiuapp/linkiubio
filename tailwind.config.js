@@ -50,6 +50,7 @@ module.exports = {
         'caption': ['12px', { lineHeight: '120%', letterSpacing: '0.025em' }],
         'small': ['10px', { lineHeight: '120%', letterSpacing: '0.025em' }],
       },
+      
       // Pesos tipográficos
       fontWeight: {
         'light': '300',

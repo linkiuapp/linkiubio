@@ -250,6 +250,34 @@
             }
         });
     </script>
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Script para mostrar mensajes de sesión con SweetAlert2 -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            @if(session('swal_success') || session('success'))
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: '{{ session('swal_success') ?? session('success') }}',
+                    confirmButtonColor: '#00c76f',
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+            @endif
+            
+            @if(session('error'))
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: '{{ session('error') }}',
+                    confirmButtonColor: '#ed2e45'
+                });
+            @endif
+        });
+    </script>
 </head>
 <body class="bg-secondary-50 font-body tenant-admin" data-store-id="{{ $store->id }}">
     <!-- Banner de Modo Preview (SuperAdmin) -->

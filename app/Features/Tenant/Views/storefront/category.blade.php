@@ -23,7 +23,7 @@
         <div class="flex items-center space-x-3">
             <!-- Icono de la categoría -->
             @if($category->icon && $category->icon->image_url)
-                <div class="w-12 h-12 bg-accent-100 rounded-lg p-2 flex items-center justify-center">
+                <div class="w-16 h-16 bg-accent-100 rounded-lg p-2 flex items-center justify-center">
                     <img src="{{ $category->icon->image_url }}" 
                          alt="{{ $category->name }}" 
                          class="w-full h-full object-contain">
@@ -41,27 +41,27 @@
 
     <!-- Subcategorías -->
     @if($subcategories->count() > 0)
-        <div class="space-y-4">
-            <h2 class="text-lg font-bold text-black-400">Subcategorías</h2>
+        <div class="space-y-3">
+            <h2 class="text-base font-semibold text-black-400">Subcategorías</h2>
             
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-4 gap-3">
                 @foreach($subcategories as $subcategory)
                     <a href="{{ route('tenant.category', [$store->slug, $subcategory->slug]) }}" 
-                       class="flex flex-col items-center p-3 bg-accent-50 rounded-lg border border-accent-200 hover:shadow-sm hover:border-primary-200 transition-all group">
+                       class="flex flex-col items-center group">
                         
-                        <!-- Icono de subcategoría -->
-                        <div class="w-10 h-10 mb-2 flex items-center justify-center rounded-lg bg-accent-100 group-hover:bg-primary-50 transition-colors">
-                            @if($subcategory->icon && $subcategory->icon->image_url)
-                                <img src="{{ $subcategory->icon->image_url }}" 
-                                     alt="{{ $subcategory->name }}" 
-                                     class="w-6 h-6 object-contain">
-                            @else
-                                <x-solar-gallery-outline class="w-5 h-5 text-black-300 group-hover:text-primary-300" />
-                            @endif
+                        <!-- Icono de la subcategoría con fondo colorido -->
+                        <div class="w-20 h-20 mb-2 flex items-center justify-center rounded-2xl bg-gradient-to-br from-accent-100 to-accent-200 group-hover:from-primary-50 group-hover:to-primary-100 transition-all duration-200 shadow-sm group-hover:shadow-md">
+                             @if($subcategory->icon && $subcategory->icon->image_url)
+                                 <img src="{{ $subcategory->icon->image_url }}" 
+                                      alt="{{ $subcategory->name }}" 
+                                      class="w-10 h-10 object-contain">
+                             @else
+                                 <x-solar-gallery-outline class="w-8 h-8 text-black-300 group-hover:text-primary-300" />
+                             @endif
                         </div>
-                        
-                        <!-- Nombre de subcategoría -->
-                        <span class="text-xs text-center text-black-400 font-medium group-hover:text-primary-300 transition-colors">
+
+                        <!-- Nombre de la subcategoría -->
+                        <span class="text-xs text-center text-black-400 font-medium group-hover:text-primary-300 transition-colors leading-tight">
                             {{ $subcategory->name }}
                         </span>
                     </a>
@@ -84,7 +84,7 @@
                        class="bg-white rounded-lg p-3 border border-accent-200 hover:border-primary-200 hover:shadow-sm transition-all duration-200 block">
                         <div class="flex items-center gap-3">
                             <!-- Imagen del producto -->
-                            <div class="w-16 h-16 bg-accent-100 rounded-lg flex-shrink-0 overflow-hidden">
+                            <div class="w-20 h-20 bg-accent-100 rounded-lg flex-shrink-0 overflow-hidden">
                                 @if($product->main_image_url)
                                     <img src="{{ $product->main_image_url }}" 
                                          alt="{{ $product->name }}" 

@@ -201,9 +201,12 @@ class CouponController extends Controller
             $coupon->products()->attach($request->products);
         }
         
+        // Marcar paso de onboarding como completado
+        \App\Shared\Models\StoreOnboardingStep::markAsCompleted($store->id, 'coupons');
+        
         return redirect()
             ->route('tenant.admin.coupons.index', $store->slug)
-            ->with('success', 'Cupón creado exitosamente');
+            ->with('swal_success', 'Cupón creado exitosamente');
     }
     
     /**
@@ -357,7 +360,7 @@ class CouponController extends Controller
         
         return redirect()
             ->route('tenant.admin.coupons.index', $store->slug)
-            ->with('success', 'Cupón actualizado exitosamente');
+            ->with('swal_success', 'Cupón actualizado exitosamente');
     }
     
     /**
@@ -381,7 +384,7 @@ class CouponController extends Controller
         
         return redirect()
             ->route('tenant.admin.coupons.index', $store->slug)
-            ->with('success', 'Cupón eliminado exitosamente');
+            ->with('swal_success', 'Cupón eliminado exitosamente');
     }
     
     /**
@@ -400,7 +403,7 @@ class CouponController extends Controller
         
         $status = $coupon->is_active ? 'activado' : 'desactivado';
         
-        return back()->with('success', "Cupón {$status} exitosamente");
+        return back()->with('swal_success', "Cupón {$status} exitosamente");
     }
     
     /**

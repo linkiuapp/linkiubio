@@ -14,7 +14,7 @@
                         class="btn-primary flex items-center gap-2"
                     >
                         <x-solar-check-circle-outline class="w-5 h-5" />
-                        Publicar
+                        Publicar diseño
                     </button>
                 </div>
             </div>
@@ -89,11 +89,11 @@
             <div class="flex-1 bg-accent-50 border-r border-accent-100 overflow-y-auto">
                 <div class="p-4">
                     <div x-data="headerDesign">
-                        <h2 class="text-base font-semibold text-black-500 mb-3">Colores del Header</h2>
+                        <h2 class="text-base font-semibold text-black-500 mb-3">Colores del encabezado</h2>
                         <div class="space-y-4">
                             {{-- Color de Fondo --}}
                             <div class="space-y-2">
-                                <label class="text-sm font-medium text-black-400">Color de Fondo</label>
+                                <label class="text-sm font-medium text-black-400">Color de fondo</label>
                                 <x-tenant-admin::color-picker 
                                     model-name="bgColor"
                                     required
@@ -102,7 +102,7 @@
 
                             {{-- Color del Texto --}}
                             <div class="space-y-2">
-                                <label class="text-sm font-medium text-black-400">Color del Texto</label>
+                                <label class="text-sm font-medium text-black-400">Color del nombre de la tienda</label>
                                 <x-tenant-admin::color-picker 
                                     model-name="textColor"
                                     required
@@ -172,50 +172,13 @@
 
             {{-- Panel derecho: Vista Previa --}}
             <div class="w-[450px] bg-accent-100 overflow-y-auto p-4">
-                <h2 class="text-base font-semibold text-black-500 mb-3">Vista Previa</h2>
+                <h2 class="text-base font-semibold text-black-500 mb-3">Vista previa del encabezado</h2>
                 <div class="rounded-xl overflow-hidden shadow-lg">
                     <x-tenant-admin::header-preview :store="$store" :design="$design" />
                 </div>
             </div>
         </div>
 
-        {{-- Historial (Abajo) --}}
-        <div class="bg-accent-50 border-t border-accent-100 p-4">
-            <div class="max-w-4xl mx-auto">
-                <h2 class="text-base font-semibold text-black-500 mb-3">Historial de Cambios</h2>
-                <div class="space-y-3">
-                    @forelse($history as $version)
-                        <div class="p-3 rounded-lg bg-accent-100">
-                            <div class="flex flex-col gap-2">
-                                <div class="flex items-center justify-between">
-                                    <p class="text-sm text-black-400">
-                                        {{ $version->created_at->diffForHumans() }}
-                                    </p>
-                                    <button 
-                                        x-data
-                                        @click="$dispatch('revert-design', { historyId: {{ $version->id }} })"
-                                        class="btn-secondary text-sm py-1 px-2"
-                                    >
-                                        Restaurar
-                                    </button>
-                                </div>
-                                @if($version->note)
-                                    <p class="text-sm text-black-300">
-                                        {{ $version->note }}
-                                    </p>
-                                @endif
-                            </div>
-                        </div>
-                    @empty
-                        <div class="p-3 rounded-lg bg-accent-100">
-                            <p class="text-sm text-black-300 text-center">
-                                No hay cambios registrados
-                            </p>
-                        </div>
-                    @endforelse
-                </div>
-            </div>
-        </div>
     </div>
     
 
@@ -228,67 +191,114 @@
         window.publishDesign = function() {
             console.log('=== PUBLISH DESIGN FUNCTION CALLED ===');
             
-            try {
-                // Get store slug from the URL
-                const storePath = window.location.pathname.split('/')[1];
-                console.log('Store path:', storePath);
-                
-                // Crear FormData para enviar archivos y datos
-                const formData = new FormData();
-                
-                // Colores: leer primero de los inputs visibles; fallback al store
-                const designStore = window.Alpine?.store('design') || {};
-                const bgInput = document.getElementById('color_input_bgColor');
-                const textInput = document.getElementById('color_input_textColor');
-                const descInputColor = document.getElementById('color_input_descriptionColor');
-                const bgColor = (bgInput?.value || designStore.bgColor || '#FFFFFF');
-                const textColor = (textInput?.value || designStore.textColor || '#000000');
-                const descriptionColor = (descInputColor?.value || designStore.descriptionColor || '#666666');
-                console.log('Colors to publish:', { bgColor, textColor, descriptionColor });
-                formData.append('header_background_color', bgColor);
-                formData.append('header_text_color', textColor);
-                formData.append('header_description_color', descriptionColor);
-                
-                // Nombre/Descripción: inputs visibles primero; fallback al store
-                const storeDesign = window.Alpine?.store('design');
-                const nameInput = document.getElementById('store_name_input');
-                const descInput = document.getElementById('store_description_input');
-                let nameToSend = (nameInput?.value ?? '').toString().trim();
-                let descToSend = (descInput?.value ?? '').toString();
-                if (!nameToSend && storeDesign) nameToSend = (storeDesign.storeName ?? '').toString().trim();
-                if (!descToSend && storeDesign) descToSend = (storeDesign.storeDescription ?? '').toString();
-                formData.append('store_name', nameToSend);
-                formData.append('store_description', descToSend);
-                console.log('Store info found:', { name: nameToSend, description: descToSend });
-                
-                // Realizar petición POST
-                fetch(`/${storePath}/admin/store-design/publish`, {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                        'Accept': 'application/json'
-                    },
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
-                    console.log('Response:', data);
-                    if (data.message) {
-                        showMessage(data.message, 'success');
+            // Mostrar confirmación con SweetAlert2
+            Swal.fire({
+                title: '¿Publicar diseño?',
+                text: 'Los cambios serán visibles para todos los clientes',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#da27a7',
+                cancelButtonColor: '#ed2e45',
+                confirmButtonText: '✓ Sí, publicar',
+                cancelButtonText: 'Cancelar',
+                showLoaderOnConfirm: true,
+                allowOutsideClick: () => !Swal.isLoading(),
+                preConfirm: () => {
+                    try {
+                        // Get store slug from the URL
+                        const storePath = window.location.pathname.split('/')[1];
+                        console.log('Store path:', storePath);
+                        
+                        // Crear FormData para enviar archivos y datos
+                        const formData = new FormData();
+                        
+                        // Colores: leer primero de los inputs visibles; fallback al store
+                        const designStore = window.Alpine?.store('design') || {};
+                        const bgInput = document.getElementById('color_input_bgColor');
+                        const textInput = document.getElementById('color_input_textColor');
+                        const descInputColor = document.getElementById('color_input_descriptionColor');
+                        const bgColor = (bgInput?.value || designStore.bgColor || '#FFFFFF');
+                        const textColor = (textInput?.value || designStore.textColor || '#000000');
+                        const descriptionColor = (descInputColor?.value || designStore.descriptionColor || '#666666');
+                        console.log('Colors to publish:', { bgColor, textColor, descriptionColor });
+                        formData.append('header_background_color', bgColor);
+                        formData.append('header_text_color', textColor);
+                        formData.append('header_description_color', descriptionColor);
+                        
+                        // Nombre/Descripción: inputs visibles primero; fallback al store
+                        const storeDesign = window.Alpine?.store('design');
+                        const nameInput = document.getElementById('store_name_input');
+                        const descInput = document.getElementById('store_description_input');
+                        let nameToSend = (nameInput?.value ?? '').toString().trim();
+                        let descToSend = (descInput?.value ?? '').toString();
+                        if (!nameToSend && storeDesign) nameToSend = (storeDesign.storeName ?? '').toString().trim();
+                        if (!descToSend && storeDesign) descToSend = (storeDesign.storeDescription ?? '').toString();
+                        formData.append('store_name', nameToSend);
+                        formData.append('store_description', descToSend);
+                        console.log('Store info found:', { name: nameToSend, description: descToSend });
+                        
+                        // Realizar petición POST
+                        return fetch(`/${storePath}/admin/store-design/publish`, {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json'
+                            },
+                            body: formData
+                        })
+                        .then(response => {
+                            if (!response.ok) {
+                                throw new Error('Error en la respuesta del servidor');
+                            }
+                            return response.json();
+                        })
+                        .then(data => {
+                            console.log('Response:', data);
+                            if (data.design) {
+                                console.log('Design updated:', data.design);
+                            }
+                            return data;
+                        })
+                        .catch(error => {
+                            console.error('Error:', error);
+                            throw error;
+                        });
+                        
+                    } catch (error) {
+                        console.error('Publish error:', error);
+                        throw error;
                     }
-                    if (data.design) {
-                        console.log('Design updated:', data.design);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showMessage('Error al publicar el diseño', 'error');
+                }
+            }).then((result) => {
+                if (result.isConfirmed && result.value) {
+                    // Éxito
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Publicado!',
+                        text: result.value.message || 'Diseño publicado correctamente',
+                        confirmButtonColor: '#00c76f',
+                        timer: 2000,
+                        timerProgressBar: true
+                    });
+                } else if (result.isDenied || result.dismiss === Swal.DismissReason.cancel) {
+                    // Cancelado
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'Cancelado',
+                        text: 'No se realizaron cambios',
+                        confirmButtonColor: '#0000fe',
+                        timer: 1500
+                    });
+                }
+            }).catch((error) => {
+                // Error
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Error al publicar el diseño',
+                    confirmButtonColor: '#ed2e45'
                 });
-                
-            } catch (error) {
-                console.error('Publish error:', error);
-                showMessage('Error al publicar el diseño', 'error');
-            }
+            });
         };
         
         // Función para mostrar mensajes
@@ -425,7 +435,50 @@
                         this.$store.design[type] = null;
                     }
                     // Enviar el cambio al servidor (eliminar imagen)
-                    this.updateDesign('');
+                    this.deleteImage();
+                },
+                
+                deleteImage() {
+                    const storePath = window.location.pathname.split('/')[1];
+                    const formData = new FormData();
+                    
+                    // Agregar colores actuales del store
+                    formData.append('header_background_color', this.$store.design.bgColor || '#FFFFFF');
+                    formData.append('header_text_color', this.$store.design.textColor || '#000000');
+                    formData.append('header_description_color', this.$store.design.descriptionColor || '#666666');
+                    
+                    // Indicar explícitamente que se debe eliminar la imagen
+                    if (type === 'logo') {
+                        formData.append('logo_url', ''); // String vacío indica eliminación
+                    } else if (type === 'favicon') {
+                        formData.append('favicon_url', ''); // String vacío indica eliminación
+                    }
+                    
+                    fetch(`/${storePath}/admin/store-design/update`, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        },
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        console.log('Image deleted:', data);
+                        if (data.design) {
+                            // Confirmar eliminación
+                            if (type === 'logo') {
+                                this.currentImage = null;
+                                this.$store.design.logo = null;
+                            } else if (type === 'favicon') {
+                                this.currentImage = null;
+                                this.$store.design.favicon = null;
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error deleting image:', error);
+                    });
                 },
                 
                 updateDesign(imageData) {

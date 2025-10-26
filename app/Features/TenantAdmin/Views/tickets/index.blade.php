@@ -7,11 +7,11 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h1 class="text-lg font-bold text-black-400">Soporte y Tickets</h1>
-            <p class="text-sm text-black-300">Gestiona tus consultas y solicitudes de soporte</p>
+            <h1 class="text-body-large font-bold text-black-400">Soporte y Tickets</h1>
+            <p class="text-caption text-black-300">Gestiona tus consultas y solicitudes de soporte</p>
         </div>
         <a href="{{ route('tenant.admin.tickets.create', ['store' => $store->slug]) }}" 
-           class="btn-primary px-4 py-2 rounded-lg flex items-center gap-2">
+           class="btn-primary px-4 py-2 rounded-lg flex items-center gap-2 text-caption font-bold">
             <x-solar-add-circle-outline class="w-5 h-5" />
             Crear Ticket
         </a>
@@ -22,7 +22,7 @@
         <div class="bg-accent-50 rounded-lg p-4">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-black-300">Total</p>
+                    <p class="text-caption font-bold text-black-300">Total</p>
                     <p class="text-2xl font-bold text-black-400">{{ $stats['total'] }}</p>
                 </div>
                 <div class="w-10 h-10 bg-info-100 rounded-lg flex items-center justify-center">
@@ -34,7 +34,7 @@
         <div class="bg-accent-50 rounded-lg p-4">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-black-300">Abiertos</p>
+                    <p class="text-caption font-bold text-black-300">Abiertos</p>
                     <p class="text-2xl font-bold text-info-300">{{ $stats['open'] }}</p>
                 </div>
                 <div class="w-10 h-10 bg-info-100 rounded-lg flex items-center justify-center">
@@ -46,7 +46,7 @@
         <div class="bg-accent-50 rounded-lg p-4">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-black-300">En Progreso</p>
+                    <p class="text-caption font-bold text-black-300">En Progreso</p>
                     <p class="text-2xl font-bold text-warning-300">{{ $stats['in_progress'] }}</p>
                 </div>
                 <div class="w-10 h-10 bg-warning-100 rounded-lg flex items-center justify-center">
@@ -58,7 +58,7 @@
         <div class="bg-accent-50 rounded-lg p-4">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm text-black-300">Resueltos</p>
+                    <p class="text-caption font-bold text-black-300">Resueltos</p>
                     <p class="text-2xl font-bold text-success-300">{{ $stats['resolved'] }}</p>
                 </div>
                 <div class="w-10 h-10 bg-success-100 rounded-lg flex items-center justify-center">
@@ -73,14 +73,14 @@
         <form method="GET" action="{{ route('tenant.admin.tickets.index', ['store' => $store->slug]) }}" 
               class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
             <div>
-                <label class="block text-sm font-medium text-black-300 mb-2">Buscar</label>
+                <label class="block text-caption font-bold font-medium text-black-300 mb-2">Buscar</label>
                 <input type="text" name="search" value="{{ request('search') }}" 
                        placeholder="Número, asunto..."
                        class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 @error('search') border-error-300 @enderror">
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-black-300 mb-2">Estado</label>
+                <label class="block text-caption font-bold font-medium text-black-300 mb-2">Estado</label>
                 <select name="status" class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200">
                     <option value="">Todos los estados</option>
                     <option value="open" {{ request('status') == 'open' ? 'selected' : '' }}>Abierto</option>
@@ -91,7 +91,7 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-black-300 mb-2">Prioridad</label>
+                <label class="block text-caption font-bold font-medium text-black-300 mb-2">Prioridad</label>
                 <select name="priority" class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200">
                     <option value="">Todas las prioridades</option>
                     <option value="low" {{ request('priority') == 'low' ? 'selected' : '' }}>Baja</option>
@@ -102,7 +102,7 @@
             </div>
 
             <div>
-                <label class="block text-sm font-medium text-black-300 mb-2">Categoría</label>
+                <label class="block text-caption font-bold font-medium text-black-300 mb-2">Categoría</label>
                 <select name="category" class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200">
                     <option value="">Todas las categorías</option>
                     @foreach($categories as $slug => $name)
@@ -139,7 +139,7 @@
                 <div class="border border-accent-100 rounded-lg p-4 mb-4 hover:bg-accent-100 transition-colors duration-150">
                     <div class="flex items-center justify-between mb-3">
                         <div class="flex items-center gap-3">
-                            <span class="font-mono text-sm font-semibold text-primary-300">
+                            <span class="font-mono text-caption font-bold font-semibold text-primary-300">
                                 {{ $ticket->ticket_number }}
                             </span>
                             <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $ticket->status_color == 'info' ? 'bg-info-300 text-accent-50' : ($ticket->status_color == 'warning' ? 'bg-warning-300 text-black-500' : ($ticket->status_color == 'success' ? 'bg-success-300 text-accent-50' : 'bg-secondary-300 text-accent-50')) }}">
@@ -165,7 +165,7 @@
 
                     <div class="mb-3">
                         <h3 class="font-semibold text-black-400 mb-1">{{ $ticket->title }}</h3>
-                        <p class="text-sm text-black-300">{{ Str::limit($ticket->description, 150) }}</p>
+                        <p class="text-caption font-bold text-black-300">{{ Str::limit($ticket->description, 150) }}</p>
                     </div>
 
                     <div class="flex items-center justify-between">

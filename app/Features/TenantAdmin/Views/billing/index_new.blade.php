@@ -424,8 +424,8 @@
                 <!-- =============================================== -->
                 <div x-show="activeTab === 'invoices'" x-transition class="space-y-6">
                     <div class="flex items-center justify-between">
-                        <h4 class="text-lg font-semibold text-black-500">Historial de Facturación</h4>
-                        <div class="text-sm text-black-300">
+                        <h4 class="text-body-large font-bold text-black-500">Historial de Facturación</h4>
+                        <div class="text-caption text-black-300">
                             Últimas facturas generadas
                         </div>
                     </div>
@@ -436,25 +436,25 @@
                             <table class="min-w-full divide-y divide-accent-200">
                                 <thead class="bg-accent-100">
                                     <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-black-400 uppercase tracking-wider">
+                                        <th class="px-6 py-3 text-left text-caption font-medium text-black-400 uppercase tracking-wider">
                                             Factura
                                         </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-black-400 uppercase tracking-wider">
+                                        <th class="px-6 py-3 text-left text-caption font-medium text-black-400 uppercase tracking-wider">
                                             Fecha
                                         </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-black-400 uppercase tracking-wider">
+                                        <th class="px-6 py-3 text-left text-caption font-medium text-black-400 uppercase tracking-wider">
                                             Plan
                                         </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-black-400 uppercase tracking-wider">
+                                        <th class="px-6 py-3 text-left text-caption font-medium text-black-400 uppercase tracking-wider">
                                             Período
                                         </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-black-400 uppercase tracking-wider">
+                                        <th class="px-6 py-3 text-left text-caption font-medium text-black-400 uppercase tracking-wider">
                                             Monto
                                         </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-black-400 uppercase tracking-wider">
+                                        <th class="px-6 py-3 text-left text-caption font-medium text-black-400 uppercase tracking-wider">
                                             Estado
                                         </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-black-400 uppercase tracking-wider">
+                                        <th class="px-6 py-3 text-left text-caption font-medium text-black-400 uppercase tracking-wider">
                                             Acciones
                                         </th>
                                     </tr>
@@ -462,30 +462,30 @@
                                 <tbody class="bg-accent-50 divide-y divide-accent-200">
                                     @forelse($invoices ?? [] as $invoice)
                                     <tr class="hover:bg-accent-100 transition-colors">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-black-500">
+                                        <td class="px-6 py-4 whitespace-nowrap text-caption font-medium text-black-500">
                                             #{{ $invoice->invoice_number }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-black-400">
+                                        <td class="px-6 py-4 whitespace-nowrap text-caption text-black-400">
                                             {{ $invoice->created_at->format('d/m/Y') }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-black-400">
+                                            <td class="px-6 py-4 whitespace-nowrap text-caption text-black-400">
                                             {{ $invoice->plan_name }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-black-400">
+                                        <td class="px-6 py-4 whitespace-nowrap text-caption text-black-400">
                                             {{ $invoice->billing_period }}
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-black-500">
+                                        <td class="px-6 py-4 whitespace-nowrap text-caption font-medium text-black-500">
                                             ${{ number_format($invoice->amount, 0, ',', '.') }} COP
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-medium
                                                 @if($invoice->status === 'paid') bg-success-100 text-success-300
-                                                @elseif($invoice->status === 'pending') bg-warning-100 text-warning-300
+                                                @elseif($invoice->status === 'pending') bg-warning-100 text-black-00
                                                 @else bg-error-100 text-error-300 @endif">
                                                 {{ ucfirst($invoice->status_label) }}
                                             </span>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-black-400">
+                                        <td class="px-6 py-4 whitespace-nowrap text-caption text-black-400">
                                             <button class="text-primary-300 hover:text-primary-400 mr-3">
                                                 <x-solar-download-minimalistic-outline class="w-4 h-4" />
                                             </button>

@@ -522,7 +522,7 @@
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
                                                 @if($invoice->status === 'paid') bg-success-100 text-success-300
-                                                @elseif($invoice->status === 'pending') bg-warning-100 text-warning-300
+                                                @elseif($invoice->status === 'pending') bg-warning-100 text-black-500
                                                 @else bg-error-100 text-error-300 @endif">
                                                 @if($invoice->status === 'paid')
                                                     Pagada
@@ -596,11 +596,9 @@
                 <!-- =============================================== -->
                 <div x-show="activeTab === 'change'" x-transition class="space-y-6">
                     <div class="flex items-center justify-between">
-                        <h4 class="text-lg font-semibold text-black-500">Solicitar Cambio de Plan</h4>
-                        <div class="text-sm text-black-300">
-                            Upgrade o downgrade disponible
-                            <!-- Debug button (temporal) -->
-                            <button @click="debugModal()" class="ml-2 text-xs bg-red-100 px-2 py-1 rounded">Debug</button>
+                        <h4 class="text-body-large font-bold text-black-500">Solicitar Cambio de Plan</h4>
+                        <div class="text-caption text-black-300">
+                            Cambio de plan disponible
                         </div>
                     </div>
 
@@ -613,30 +611,24 @@
                             transition-all duration-200 cursor-pointer"
                              @if($plan->id !== $subscription->plan_id) @click="selectPlanForChange({{ $plan->id }}, '{{ $plan->name }}')" @endif>
                             
-                            <!-- Imagen del Plan -->
-                            <div class="text-center mb-4">
-                                <img src="{{ $plan->image_url ?? asset('assets/images/img_plan_default.png') }}" 
-                                     alt="Plan {{ $plan->name }}"
-                                     class="w-16 h-16 mx-auto rounded-lg object-cover">
-                            </div>
                             
                             <!-- Info del Plan -->
                             <div class="text-center">
-                                <h5 class="text-lg font-semibold text-black-500 mb-2">
+                                <h5 class="text-body-large font-bold text-black-500 mb-2">
                                     Plan {{ $plan->name }}
                                     @if($plan->id === $subscription->plan_id)
-                                        <span class="text-xs bg-primary-200 text-accent-50 px-2 py-1 rounded-full ml-2">Actual</span>
+                                        <span class="text-caption font-bold px-2 py-1 rounded-full ml-2 bg-primary-100 text-accent-50">Actual</span>
                                     @endif
                                 </h5>
-                                <div class="text-2xl font-bold text-primary-300 mb-2">
+                                <div class="text-h5 font-bold text-primary-300 mb-2">
                                     ${{ number_format($plan->price, 0, ',', '.') }}
                                 </div>
-                                <div class="text-sm text-black-300 mb-4">
+                                <div class="text-caption font-medium text-black-300 mb-4">
                                     por {{ $plan->duration_in_days }} días
                                 </div>
                                 
                                 <!-- Características destacadas -->
-                                <div class="text-xs text-black-400 space-y-1">
+                                <div class="text-caption font-medium text-black-400 space-y-1">
                                     <p>{{ $plan->max_products }} productos</p>
                                     <p>{{ $plan->max_categories }} categorías</p>
                                     <p>{{ $plan->max_locations }} {{ Str::plural('sede', $plan->max_locations) }}</p>
@@ -644,7 +636,7 @@
                                 
                                 @if($plan->id !== $subscription->plan_id)
                                     <button @click="selectPlanForChange({{ $plan->id }}, '{{ $plan->name }}')"
-                                            class="mt-4 w-full bg-primary-200 hover:bg-primary-300 text-accent-50 px-4 py-2 rounded-lg text-sm transition-colors">
+                                            class="mt-4 w-full bg-primary-200 hover:bg-primary-300 text-accent-50 px-4 py-2 rounded-lg text-caption font-bold transition-colors">
                                         @if($plan->price > $subscription->plan->price)
                                             Upgrade a {{ $plan->name }}
                                         @else
@@ -660,7 +652,7 @@
                     <!-- Solicitudes Pendientes -->
                     @if(isset($pendingRequests) && $pendingRequests->count() > 0)
                     <div class="bg-warning-50 border border-warning-200 rounded-lg p-6">
-                        <h5 class="text-base font-semibold text-warning-400 mb-4">
+                        <h5 class="text-body-large font-bold text-warning-400 mb-4">
                             <x-solar-clock-circle-outline class="w-5 h-5 inline mr-2" />
                             Solicitudes Pendientes
                         </h5>
@@ -669,19 +661,19 @@
                             <div class="bg-accent-50 rounded-lg p-4">
                                 <div class="flex justify-between items-start">
                                     <div>
-                                        <p class="font-medium text-black-500">
+                                        <p class="text-caption font-bold text-black-500">
                                             {{ $request->type === 'upgrade' ? 'Upgrade' : 'Downgrade' }} a Plan {{ $request->requestedPlan->name }}
                                         </p>
-                                        <p class="text-sm text-black-300">
+                                        <p class="text-caption text-black-300">
                                             Solicitado el {{ $request->requested_at->format('d/m/Y H:i') }}
                                         </p>
                                         @if($request->reason)
-                                        <p class="text-sm text-black-400 mt-2">
+                                        <p class="text-caption text-black-400 mt-2">
                                             <strong>Motivo:</strong> {{ $request->reason }}
                                         </p>
                                         @endif
                                     </div>
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning-100 text-warning-400">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-bold bg-warning-100 text-warning-400">
                                         {{ ucfirst($request->status) }}
                                     </span>
                                 </div>
@@ -693,11 +685,11 @@
 
                     <!-- Información Important -->
                     <div class="bg-info-50 border border-info-200 rounded-lg p-6">
-                        <h5 class="text-base font-semibold text-info-400 mb-3">
+                        <h5 class="text-body-large font-bold text-info-400 mb-3">
                             <x-solar-info-circle-outline class="w-5 h-5 inline mr-2" />
                             Información Importante
                         </h5>
-                        <div class="text-sm text-info-300 space-y-2">
+                        <div class="text-caption text-info-300 space-y-2">
                             <p>• <strong>Upgrade:</strong> Los cambios se aplican inmediatamente y se cobra la diferencia prorrateada.</p>
                             <p>• <strong>Downgrade:</strong> Los cambios se aplican al final del período actual para evitar pérdida de funcionalidades.</p>
                             <p>• <strong>Procesamiento:</strong> Las solicitudes son revisadas por nuestro equipo dentro de 24-48 horas.</p>
@@ -720,14 +712,12 @@
          :style="showChangePlanModal ? 'display: flex !important;' : 'display: none !important;'">
         <div class="bg-accent-50 rounded-lg p-6 w-full max-w-md mx-4" @click.stop>
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-black-500">
+                <h3 class="text-body-large font-bold text-black-500">
                     Solicitar Cambio de Plan
                 </h3>
                 <button @click="showChangePlanModal = false; resetModalData()" 
                         class="text-black-300 hover:text-black-500 transition-colors">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
+                    <x-solar-close-circle-outline class="w-6 h-6" />
                 </button>
             </div>
             
@@ -878,25 +868,24 @@
                 </div>
                 <div class="inline-block w-full max-w-4xl px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full sm:p-6">
                     <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-lg font-medium text-gray-900">Vista previa de factura</h3>
-                        <button onclick="closeInvoiceModal()" class="text-gray-400 hover:text-gray-600">
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                            </svg>
+                        <h3 class="text-body-large font-bold text-black-500">Vista previa de factura</h3>
+                        <button onclick="closeInvoiceModal()" class="text-black-300 hover:text-black-500 transition-colors">
+                            <x-solar-close-circle-outline class="w-6 h-6" />
                         </button>
                     </div>
                     <div id="invoice-content" class="max-h-96 overflow-y-auto">
                         <div class="flex items-center justify-center p-8">
-                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-500"></div>
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-300"></div>
                             <span class="ml-2">Cargando factura...</span>
                         </div>
                     </div>
                     <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
-                        <button onclick="closeInvoiceModal()" class="btn-secondary">Cerrar</button>
-                        <a href="${downloadUrl}" class="btn-primary">
-                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                            </svg>
+                        <button onclick="closeInvoiceModal()" class="btn-secondary text-caption font-bold px-4 py-2 rounded-lg flex items-center gap-2">
+                            <x-solar-close-circle-outline class="w-4 h-4 mr-2" />
+                            Cerrar
+                        </button>
+                        <a href="${downloadUrl}" class="btn-primary text-caption font-bold px-4 py-2 rounded-lg flex items-center gap-2">
+                            <x-solar-download-minimalistic-outline class="w-4 h-4 mr-2" />
                             Descargar PDF
                         </a>
                     </div>

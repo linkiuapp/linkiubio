@@ -133,6 +133,13 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
             'sku' => 'nullable|string|max:100',
             'is_active' => 'boolean',
+        ], [
+            'name.required' => 'El nombre del producto es obligatorio',
+            'name.max' => 'El nombre no puede exceder 255 caracteres',
+            'price.required' => 'El precio es obligatorio',
+            'price.numeric' => 'El precio debe ser un número válido',
+            'price.min' => 'El precio no puede ser negativo',
+            'sku.max' => 'El SKU no puede exceder 100 caracteres',
         ]);
 
         // Crear producto
@@ -161,9 +168,12 @@ class ProductController extends Controller
         if ($product->type === 'variable' && $request->has('variables')) {
             $this->syncProductVariables($product, $request->variables);
         }
+        
+        // Marcar paso de onboarding como completado
+        \App\Shared\Models\StoreOnboardingStep::markAsCompleted($store->id, 'products');
 
         return redirect()->route('tenant.admin.products.index', $store->slug)
-            ->with('success', 'Producto creado exitosamente.');
+            ->with('swal_success', 'Producto creado exitosamente');
     }
 
     /**
@@ -278,7 +288,7 @@ class ProductController extends Controller
         }
 
         return redirect()->route('tenant.admin.products.index', $store->slug)
-            ->with('success', 'Producto actualizado exitosamente.');
+            ->with('swal_success', 'Producto actualizado exitosamente');
     }
 
     /**
@@ -462,6 +472,7 @@ class ProductController extends Controller
                     'is_required' => isset($data['is_required']) && $data['is_required'] ? true : false,
                     'custom_label' => $data['custom_label'] ?? null,
                     'display_order' => $data['display_order'] ?? 999,
+                    'selected_options' => isset($data['options']) && is_array($data['options']) ? $data['options'] : null,
                 ]);
             }
         }

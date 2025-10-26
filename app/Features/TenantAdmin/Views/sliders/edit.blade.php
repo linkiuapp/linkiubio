@@ -12,10 +12,10 @@
                 </a>
                 <h1 class="text-lg font-semibold text-black-500">Editar Slider</h1>
             </div>
-            <div class="bg-info-50 border border-info-100 rounded-lg p-4">
+            <div class="bg-info-50 border border-info-100 rounded-lg p-4 text-info-300 mb-6">
                 <div class="flex items-center gap-3">
                     <x-solar-info-circle-outline class="w-5 h-5 text-info-300 flex-shrink-0" />
-                    <p class="text-sm text-info-300">
+                    <p class="text-body-regular text-info-300">
                         Estás usando <strong>{{ $currentCount }}</strong> de <strong>{{ $maxSliders }}</strong> sliders disponibles en tu plan {{ $store->plan->name }}.
                     </p>
                 </div>
@@ -31,7 +31,7 @@
             <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
                 <div class="p-6 space-y-4">
                     <div class="mb-4">
-                        <h3 class="text-lg font-medium text-black-500 mb-1">Información Básica</h3>
+                        <h3 class="text-body-large font-medium text-black-500 mb-1">Información Básica</h3>
                         <p class="text-sm text-black-300">Configura los datos principales del slider</p>
                     </div>
                     
@@ -80,7 +80,7 @@
             <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
                 <div class="p-6">
                     <div class="mb-4">
-                        <h3 class="text-lg font-medium text-black-500 mb-1">Imagen</h3>
+                        <h3 class="text-body-large font-medium text-black-500 mb-1">Imagen</h3>
                         <p class="text-sm text-black-300">Sube la imagen del slider (170x100px)</p>
                     </div>
                     
@@ -122,7 +122,7 @@
             <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
                 <div class="p-6 space-y-4">
                     <div class="mb-4">
-                        <h3 class="text-lg font-medium text-black-500 mb-1">Enlace</h3>
+                        <h3 class="text-body-large font-medium text-black-500 mb-1">Enlace</h3>
                         <p class="text-sm text-black-300">Configura hacia dónde dirigirá el slider</p>
                     </div>
                     
@@ -168,7 +168,7 @@
             <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
                 <div class="p-6 space-y-4">
                     <div class="mb-4">
-                        <h3 class="text-lg font-medium text-black-500 mb-1">Programación</h3>
+                        <h3 class="text-body-large font-medium text-black-500 mb-1">Programación</h3>
                         <p class="text-sm text-black-300">Configura cuándo se mostrará el slider (opcional)</p>
                     </div>
                     
@@ -238,14 +238,14 @@
             </div>
 
             <!-- Botones -->
-            <div class="bg-accent-100 px-6 py-4 flex justify-between items-center">
+            <div class="bg-accent-50 px-6 py-4 flex justify-between items-center mb-6 border border-accent-100 rounded-lg">
                 <div class="flex items-center gap-3">
                     <a href="{{ route('tenant.admin.sliders.index', $store->slug) }}" 
-                       class="btn-outline-secondary">
+                       class="btn-secondary flex items-center justify-center gap-2">
                         Cancelar
                     </a>
                 </div>
-                <button type="submit" class="btn-primary">
+                <button type="submit" class="btn-primary flex items-center justify-center gap-2">
                     Guardar Cambios
                 </button>
             </div>
@@ -259,6 +259,45 @@
                 isScheduled: {{ old('is_scheduled', $slider->is_scheduled) ? 'true' : 'false' }},
                 isPermanent: {{ old('is_permanent', $slider->is_permanent) ? 'true' : 'false' }}
             }));
+        });
+        
+        // Interceptar el submit del formulario con SweetAlert2
+        document.addEventListener('DOMContentLoaded', () => {
+            const form = document.querySelector('form');
+            if (form) {
+                form.addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    
+                    Swal.fire({
+                        title: '¿Actualizar slider?',
+                        text: 'Se guardarán los cambios realizados',
+                        icon: 'question',
+                        showCancelButton: true,
+                        confirmButtonColor: '#da27a7',
+                        cancelButtonColor: '#ed2e45',
+                        confirmButtonText: '✓ Sí, actualizar',
+                        cancelButtonText: 'Cancelar',
+                        showLoaderOnConfirm: true,
+                        allowOutsideClick: () => !Swal.isLoading()
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            // Mostrar loading mientras se actualiza
+                            Swal.fire({
+                                title: 'Actualizando slider...',
+                                text: 'Por favor espera',
+                                icon: 'info',
+                                allowOutsideClick: false,
+                                showConfirmButton: false,
+                                willOpen: () => {
+                                    Swal.showLoading();
+                                }
+                            });
+                            // Enviar el formulario
+                            form.submit();
+                        }
+                    });
+                });
+            }
         });
     </script>
     @endpush

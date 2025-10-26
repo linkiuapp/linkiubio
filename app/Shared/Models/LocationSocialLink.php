@@ -40,7 +40,7 @@ class LocationSocialLink extends Model
     {
         $icons = [
             'instagram' => 'solar-link-linear',
-            'facebook' => 'solar-facebook-circle-linear',
+            'facebook' => 'solar-user-circle-linear',
             'tiktok' => 'solar-music-note-2-linear',
             'youtube' => 'solar-play-circle-linear',
             'whatsapp' => 'solar-chat-round-line-linear',

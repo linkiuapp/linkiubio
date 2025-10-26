@@ -255,9 +255,6 @@
 <script>
 document.addEventListener('alpine:init', () => {
     Alpine.data('locationManagement', () => ({
-        showDeleteModal: false,
-        deleteLocationId: null,
-        deleteLocationName: '',
         showNotification: false,
         notificationMessage: '',
         notificationType: 'success',
@@ -266,47 +263,56 @@ document.addEventListener('alpine:init', () => {
             // Inicialización
         },
         
-        openDeleteModal(id, name) {
-            this.deleteLocationId = id;
-            this.deleteLocationName = name;
-            this.showDeleteModal = true;
-        },
-        
-        closeDeleteModal() {
-            this.showDeleteModal = false;
-            this.deleteLocationId = null;
-            this.deleteLocationName = '';
-        },
-        
-        confirmDelete() {
-            if (!this.deleteLocationId) return;
-            
-            const url = `{{ route('tenant.admin.locations.destroy', ['store' => $store->slug, 'location' => ':id']) }}`.replace(':id', this.deleteLocationId);
-            
-            fetch(url, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
+        async openDeleteModal(id, name) {
+            const result = await Swal.fire({
+                title: '¿Eliminar sede?',
+                html: `Se eliminará la sede <strong>"${name}"</strong> de forma permanente`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#ed2e45',
+                cancelButtonColor: '#9ca3af',
+                confirmButtonText: '✓ Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                showLoaderOnConfirm: true,
+                allowOutsideClick: () => !Swal.isLoading(),
+                preConfirm: async () => {
+                    try {
+                        const url = `{{ route('tenant.admin.locations.destroy', ['store' => $store->slug, 'location' => ':id']) }}`.replace(':id', id);
+                        
+                        const response = await fetch(url, {
+                            method: 'DELETE',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'Accept': 'application/json',
+                                'Content-Type': 'application/json'
+                            }
+                        });
+
+                        const data = await response.json();
+
+                        if (!response.ok || !data.success) {
+                            throw new Error(data.message || 'Error al eliminar la sede');
+                        }
+
+                        return data;
+                    } catch (error) {
+                        Swal.showValidationMessage(error.message);
+                    }
                 }
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    this.showNotificationMessage(data.message, 'success');
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1000);
-                } else {
-                    this.showNotificationMessage(data.message, 'error');
-                }
-                this.closeDeleteModal();
-            })
-            .catch(error => {
-                this.showNotificationMessage('Error al eliminar la sede', 'error');
-                this.closeDeleteModal();
             });
+
+            if (result.isConfirmed) {
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Eliminada!',
+                    text: 'Sede eliminada exitosamente',
+                    confirmButtonColor: '#00c76f',
+                    timer: 2000,
+                    timerProgressBar: true
+                }).then(() => {
+                    window.location.reload();
+                });
+            }
         },
         
         toggleStatus(id, isActive) {

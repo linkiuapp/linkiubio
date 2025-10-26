@@ -10,31 +10,31 @@
     {{-- Header --}}
     <div class="flex justify-between items-center mb-6">
         <div class="flex items-center gap-4">
-            <div class="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center">
-                <span class="text-primary-300 font-bold text-xl">
+            <div class="w-16 h-16 rounded-full bg-primary-300 flex items-center justify-center">
+                <span class="text-accent-50 font-bold text-body-large">
                     {{ strtoupper(substr($location->name, 0, 2)) }}
                 </span>
             </div>
             <div>
-                <h1 class="text-lg font-bold text-black-400">
+                <h1 class="text-body-large font-bold text-black-400 flex items-center gap-2 mb-1">
                     {{ $location->name }}
                     @if($location->is_main)
-                        <span class="badge-soft-primary ml-2">Principal</span>
+                        <span class="bg-primary-300 text-accent-50 px-2 py-1 rounded-full text-caption">Principal</span>
                     @endif
                 </h1>
                 <div class="flex items-center gap-2">
-                    <p class="text-sm text-black-300">{{ $location->city }}, {{ $location->department }}</p>
+                    <p class="text-caption text-black-300">{{ $location->city }}, {{ $location->department }}</p>
                 </div>
             </div>
         </div>
         <div class="flex gap-3">
             <a href="{{ route('tenant.admin.locations.edit', ['store' => $store->slug, 'location' => $location->id]) }}"
-                class="btn-primary px-4 py-2 rounded-lg flex items-center gap-2">
+                class="btn-primary px-4 py-2 rounded-lg flex items-center justify-center gap-2">
                 <x-solar-pen-2-outline class="w-5 h-5" />
                 Editar Sede
             </a>
             <a href="{{ route('tenant.admin.locations.index', ['store' => $store->slug]) }}" 
-                class="btn-outline-secondary px-4 py-2 rounded-lg flex items-center gap-2">
+                class="btn-secondary px-4 py-2 rounded-lg flex items-center justify-center gap-2">
                 <x-solar-arrow-left-outline class="w-5 h-5" />
                 Volver
             </a>
@@ -47,30 +47,30 @@
             {{-- Información básica --}}
             <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
                 <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                    <h2 class="text-lg font-semibold text-black-400 mb-0">Información Básica</h2>
+                    <h2 class="text-body-large font-bold text-black-400 mb-0">Información Básica</h2>
                 </div>
                 <div class="p-6">
                     <dl class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <dt class="text-sm font-semibold text-black-300">Nombre</dt>
+                            <dt class="text-caption font-bold text-black-300">Nombre</dt>
                             <dd class="mt-1 text-sm text-black-400">{{ $location->name }}</dd>
                         </div>
                         
                         @if($location->manager_name)
                         <div>
-                            <dt class="text-sm font-semibold text-black-300">Encargado</dt>
+                            <dt class="text-caption font-bold text-black-300">Encargado</dt>
                             <dd class="mt-1 text-sm text-black-400">{{ $location->manager_name }}</dd>
                         </div>
                         @endif
                         
                         <div>
-                            <dt class="text-sm font-semibold text-black-300">Teléfono</dt>
+                            <dt class="text-caption font-bold text-black-300">Teléfono</dt>
                             <dd class="mt-1 text-sm text-black-400">{{ $location->phone }}</dd>
                         </div>
                         
                         @if($location->whatsapp)
                         <div>
-                            <dt class="text-sm font-semibold text-black-300">WhatsApp</dt>
+                            <dt class="text-caption font-bold text-black-300">WhatsApp</dt>
                             <dd class="mt-1 text-sm text-black-400">
                                 <div class="flex items-center gap-2">
                                     <span>{{ $location->whatsapp }}</span>
@@ -86,23 +86,23 @@
                         @endif
                         
                         <div>
-                            <dt class="text-sm font-semibold text-black-300">Ubicación</dt>
+                            <dt class="text-caption font-bold text-black-300">Ubicación</dt>
                             <dd class="mt-1 text-sm text-black-400">{{ $location->address }}, {{ $location->city }}, {{ $location->department }}</dd>
                         </div>
                         
                         <div>
-                            <dt class="text-sm font-semibold text-black-300">Estado</dt>
+                            <dt class="text-caption font-bold text-black-300">Estado</dt>
                             <dd class="mt-1 text-sm text-black-400 pt-2">
                                 @if($location->is_active)
-                                    <span class="badge-soft-success">Activa</span>
+                                    <span class="badge-soft-success text-caption">Activa</span>
                                 @else
-                                    <span class="badge-soft-secondary">Inactiva</span>
+                                    <span class="badge-soft-secondary text-caption">Inactiva</span>
                                 @endif
                             </dd>
                         </div>
                         
                         <div class="md:col-span-2">
-                            <dt class="text-sm font-semibold text-black-300">Descripción</dt>
+                            <dt class="text-caption font-bold text-black-300">Descripción</dt>
                             <dd class="mt-1 text-sm text-black-400">{{ $location->description ?: 'Sin descripción' }}</dd>
                         </div>
                     </dl>
@@ -112,7 +112,7 @@
             {{-- Horarios --}}
             <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
                 <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                    <h2 class="text-lg font-semibold text-black-400 mb-0">Horarios de Atención</h2>
+                    <h2 class="text-body-large font-bold text-black-400 mb-0">Horarios de Atención</h2>
                 </div>
                 <div class="p-6">
                     <div class="overflow-x-auto">
@@ -199,7 +199,7 @@
             @if($location->socialLinks->count() > 0)
             <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
                 <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                    <h2 class="text-lg font-semibold text-black-400 mb-0">Redes Sociales</h2>
+                    <h2 class="text-body-large font-bold text-black-400 mb-0">Redes Sociales</h2>
                 </div>
                 <div class="p-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -227,7 +227,7 @@
             {{-- Estado actual --}}
             <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
                 <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                    <h2 class="text-lg font-semibold text-black-400 mb-0">Estado Actual</h2>
+                    <h2 class="text-body-large font-bold text-black-400 mb-0">Estado Actual</h2>
                 </div>
                 <div class="p-6">
                     <div class="text-center mb-4">
@@ -268,7 +268,7 @@
             {{-- Acciones rápidas --}}
             <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
                 <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                    <h2 class="text-lg font-semibold text-black-400 mb-0">Acciones Rápidas</h2>
+                    <h2 class="text-body-large font-bold text-black-400 mb-0">Acciones Rápidas</h2>
                 </div>
                 <div class="p-6 space-y-3">
                     @if(!$location->is_main)
@@ -280,7 +280,7 @@
                     @endif
                     
                     <button @click="toggleStatus({{ $location->id }}, {{ $location->is_active ? 'true' : 'false' }})"
-                        class="w-full btn-outline-{{ $location->is_active ? 'warning' : 'success' }} px-4 py-2 rounded-lg flex items-center justify-center gap-2"
+                        class="w-full btn-{{ $location->is_active ? 'warning' : 'success' }} px-4 py-2 rounded-lg flex items-center justify-center gap-2"
                         {{ $location->is_main ? 'disabled' : '' }}>
                         @if($location->is_active)
                             <x-solar-eye-closed-outline class="w-5 h-5" />
@@ -292,7 +292,7 @@
                     </button>
                     
                     <button @click="openDeleteModal({{ $location->id }}, '{{ $location->name }}')"
-                        class="w-full btn-outline-error px-4 py-2 rounded-lg flex items-center justify-center gap-2"
+                        class="w-full btn-error px-4 py-2 rounded-lg flex items-center justify-center gap-2"
                         {{ $location->is_main ? 'disabled' : '' }}>
                         <x-solar-trash-bin-trash-outline class="w-5 h-5" />
                         Eliminar Sede
@@ -419,7 +419,7 @@ document.addEventListener('alpine:init', () => {
         },
         
         incrementWhatsAppClicks() {
-            const url = `{{ route('tenant.admin.locations.whatsapp-click', ['store' => $currentStore->slug, 'location' => $location->id]) }}`;
+            const url = `{{ route('tenant.admin.locations.increment-whatsapp-clicks', ['store' => $currentStore->slug, 'location' => $location->id]) }}`;
             
             fetch(url, {
                 method: 'POST',

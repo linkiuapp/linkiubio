@@ -4,38 +4,6 @@
 
 @section('content')
 <div class="container-fluid" x-data="paymentMethodForm">
-    {{-- Sistema de Notificaciones --}}
-    <div x-show="showNotification" 
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 transform scale-90"
-         x-transition:enter-end="opacity-100 transform scale-100"
-         x-transition:leave="transition ease-in duration-300"
-         x-transition:leave-start="opacity-100 transform scale-100"
-         x-transition:leave-end="opacity-0 transform scale-90"
-         class="fixed top-4 right-4 z-50 p-4 rounded-lg shadow-lg"
-         :class="{
-            'bg-success-50 text-success-300 border border-success-100': notificationType === 'success',
-            'bg-error-50 text-error-300 border border-error-100': notificationType === 'error',
-            'bg-warning-50 text-warning-300 border border-warning-100': notificationType === 'warning'
-         }">
-        <div class="flex items-center gap-3">
-            <div class="flex-shrink-0">
-                <template x-if="notificationType === 'success'">
-                    <x-solar-check-circle-outline class="w-5 h-5" />
-                </template>
-                <template x-if="notificationType === 'error'">
-                    <x-solar-close-circle-outline class="w-5 h-5" />
-                </template>
-                <template x-if="notificationType === 'warning'">
-                    <x-solar-danger-triangle-outline class="w-5 h-5" />
-                </template>
-            </div>
-            <div x-text="notificationMessage"></div>
-            <button @click="showNotification = false" class="ml-auto">
-                <x-solar-close-circle-outline class="w-4 h-4" />
-            </button>
-        </div>
-    </div>
 
     {{-- Header --}}
     <div class="flex justify-between items-center mb-6">
@@ -325,44 +293,47 @@
 <script>
 document.addEventListener('alpine:init', () => {
     Alpine.data('paymentMethodForm', () => ({
-        showNotification: false,
-        notificationMessage: '',
-        notificationType: 'success',
         methodType: '{{ old('type', '') }}',
         
-        init() {
-            // Inicialización
-        },
-        
-        validateForm(event) {
-            let valid = true;
+        async validateForm(event) {
             const form = event.target;
             
             // Validación básica
             if (!form.type.value) {
-                valid = false;
-                this.showNotificationMessage('Por favor, seleccione un tipo de método de pago', 'error');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Campo requerido',
+                    text: 'Por favor, seleccione un tipo de método de pago',
+                    confirmButtonColor: '#ed2e45'
+                });
+                return;
             }
             
             if (!form.name.value) {
-                valid = false;
-                this.showNotificationMessage('Por favor, ingrese un nombre para el método de pago', 'error');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Campo requerido',
+                    text: 'Por favor, ingrese un nombre para el método de pago',
+                    confirmButtonColor: '#ed2e45'
+                });
+                return;
             }
             
-            // Si es válido, enviar el formulario
-            if (valid) {
+            // Confirmar creación
+            const result = await Swal.fire({
+                title: '¿Crear método de pago?',
+                text: 'Se creará el método de pago con la configuración especificada',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#da27a7',
+                cancelButtonColor: '#9ca3af',
+                confirmButtonText: '✓ Crear',
+                cancelButtonText: 'Cancelar'
+            });
+            
+            if (result.isConfirmed) {
                 form.submit();
             }
-        },
-        
-        showNotificationMessage(message, type = 'success') {
-            this.notificationMessage = message;
-            this.notificationType = type;
-            this.showNotification = true;
-            
-            setTimeout(() => {
-                this.showNotification = false;
-            }, 5000);
         }
     }));
 });

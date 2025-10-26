@@ -5,7 +5,7 @@
     <!-- Header con breadcrumbs -->
     <div class="space-y-3">
         <!-- Breadcrumbs -->
-        <nav class="flex text-small font-regular text-info-300">
+        <nav class="flex text-caption font-medium text-info-300">
             <a href="{{ route('tenant.home', $store->slug) }}" class="hover:text-info-200 transition-colors">Inicio</a>
             <span class="mx-2">/</span>
             <span class="text-secondary-300 font-medium">Categorías</span>
@@ -27,7 +27,7 @@
                     
                     <div class="flex items-center space-x-4">
                         <!-- Icono de la categoría -->
-                        <div class="w-12 h-12 bg-accent-100 rounded-lg p-2 flex items-center justify-center flex-shrink-0">
+                        <div class="w-20 h-20 bg-accent-100 rounded-lg p-2 flex items-center justify-center flex-shrink-0">
                             @if($category->icon && $category->icon->image_url)
                                 <img src="{{ $category->icon->image_url }}" 
                                      alt="{{ $category->name }}" 

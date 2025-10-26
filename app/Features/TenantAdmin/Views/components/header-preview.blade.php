@@ -30,7 +30,7 @@
             {{-- Nombre --}}
             <div>
                 <h1 
-                    class="text-xl font-black mb-1"
+                    class="text-xl text-center font-black mb-1 capitalize"
                     :style="{ color: $store.design.textColor }"
                     x-text="$store.design.storeName || '{{ $store->name }}'"
                 >
