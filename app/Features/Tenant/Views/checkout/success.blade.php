@@ -202,6 +202,39 @@ document.addEventListener('DOMContentLoaded', function() {
     // ✅ RESETEAR CARRITO DESPUÉS DE PEDIDO COMPLETADO
     resetCartAfterOrder();
     
+    // 🎉 CONFETTI DE CELEBRACIÓN - Solo en primera carga
+    if (!sessionStorage.getItem('order_confetti_shown_{{ $order->id }}')) {
+        if (typeof window.confetti === 'function') {
+            setTimeout(() => {
+                // Confetti sutil desde arriba
+                window.confetti({
+                    particleCount: 80,
+                    spread: 70,
+                    origin: { y: 0.4 },
+                    colors: ['#da27a7', '#0000fe', '#00c76f', '#e8e6fb'],
+                    startVelocity: 25,
+                    ticks: 50,
+                    gravity: 0.8
+                });
+                
+                // Segundo burst más pequeño
+                setTimeout(() => {
+                    window.confetti({
+                        particleCount: 40,
+                        spread: 50,
+                        origin: { y: 0.4 },
+                        colors: ['#da27a7', '#0000fe', '#00c76f', '#e8e6fb'],
+                        startVelocity: 20,
+                        ticks: 40
+                    });
+                }, 250);
+            }, 300);
+            
+            // Marcar que ya se mostró
+            sessionStorage.setItem('order_confetti_shown_{{ $order->id }}', 'true');
+        }
+    }
+    
     // 🔔 INICIALIZAR PUSHER PARA ESCUCHAR CAMBIOS EN TIEMPO REAL
     initRealtimeNotifications();
     
