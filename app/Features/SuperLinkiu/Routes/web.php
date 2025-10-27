@@ -9,6 +9,7 @@ use App\Features\SuperLinkiu\Controllers\TicketController;
 use App\Features\SuperLinkiu\Controllers\AnnouncementController;
 use App\Features\SuperLinkiu\Controllers\ProfileController;
 use App\Features\SuperLinkiu\Controllers\BillingSettingController;
+use App\Features\SuperLinkiu\Controllers\MasterKeyRecoveryController;
 use Illuminate\Support\Facades\Route;
 
 // Rutas de SuperLinkiu
@@ -174,6 +175,13 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
         Route::get('/profile', [ProfileController::class, 'show'])->name('profile.show');
         Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
         Route::patch('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.update-password');
+
+        // Master Key Recovery Management
+        Route::prefix('master-key-recovery')->name('master-key-recovery.')->group(function () {
+            Route::get('/', [MasterKeyRecoveryController::class, 'index'])->name('index');
+            Route::post('/{id}/approve', [MasterKeyRecoveryController::class, 'approve'])->name('approve');
+            Route::post('/{id}/reject', [MasterKeyRecoveryController::class, 'reject'])->name('reject');
+        });
         Route::delete('/profile/avatar', [ProfileController::class, 'deleteAvatar'])->name('profile.delete-avatar');
         Route::patch('/profile/app-settings', [ProfileController::class, 'updateAppSettings'])->name('profile.update-app-settings');
 

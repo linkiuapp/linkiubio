@@ -364,7 +364,7 @@ class Cart {
                 <div class="flex flex-col gap-1">
                     <span class="text-body-small font-bold text-black-500">¡Hey! Tu producto se agregó al carrito</span>
                     <span class="text-body-small font-medium text-black-500 whitespace-nowrap">
-                        ${totalItems} ${totalItems === 1 ? 'producto' : 'productos'} en carrito · ${totalPrice}
+                        ${totalItems} productos en carrito · ${totalPrice}
                     </span>
                 </div>
             </div>

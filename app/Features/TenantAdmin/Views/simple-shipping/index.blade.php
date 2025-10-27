@@ -274,7 +274,12 @@
                                         <button @click="editZone(index)" class="text-info-300 hover:text-info-200 p-2 rounded-lg">
                                             <x-solar-pen-outline class="w-4 h-4" />
                                         </button>
-                                        <button @click="deleteZone(index)" class="text-error-300 hover:text-error-200 p-2 rounded-lg">
+                                        <button @click="@if($store->isActionProtected('shipping', 'delete_zone'))
+                                                            requireMasterKey('shipping.delete_zone', `Eliminar zona: ${zones[index].name}`, () => deleteZone(index))
+                                                        @else
+                                                            deleteZone(index)
+                                                        @endif" 
+                                                class="text-error-300 hover:text-error-200 p-2 rounded-lg">
                                             <x-solar-trash-bin-minimalistic-outline class="w-4 h-4" />
                                         </button>
                                     </div>

@@ -30,9 +30,9 @@
     <!-- Código de pedido destacado -->
     <div class="bg-gradient-to-r from-primary-50 to-info-50 rounded-xl p-6 border border-primary-200 shadow-sm">
         <div class="text-center">
-            <h2 class="text-sm font-medium text-primary-400 mb-2">CÓDIGO DE PEDIDO</h2>
+            <h2 class="text-caption font-medium text-primary-400 mb-2">CÓDIGO DE PEDIDO</h2>
             <div class="bg-accent-50 rounded-lg p-4 border-2 border-dashed border-primary-300">
-                <p class="text-h5 font-bold text-primary-300 tracking-wider" id="order-code">{{ $order->order_number ?? 'N/A' }}</p>
+                <p class="text-h6 font-bold text-primary-300 tracking-wider" id="order-code">{{ $order->order_number ?? 'N/A' }}</p>
                 <button onclick="copyOrderCode()" class="mt-2 text-body-small bg-accent-200 hover:bg-success-300 hover:text-black-500 text-black-500 px-3 py-2 rounded-full transition-colors">
                     Copiar código
                 </button>
@@ -295,10 +295,8 @@ function renderOrderStatus(order) {
                     <div>
                         <h4 class="font-semibold text-primary-500">Estado Actual</h4>
                         <p class="text-body-small text-primary-500">${currentStep ? currentStep.label : currentStatus}</p>
+                        <p class="text-small text-primary-500"> Actualizado: ${new Date(order.updated_at).toLocaleString('es-ES')}</p>
                     </div>
-                </div>
-                <div class="text-xs text-primary-500">
-                    Actualizado: ${new Date(order.updated_at).toLocaleString('es-ES')}
                 </div>
             </div>
         </div>

@@ -528,7 +528,8 @@ class Order extends Model
             return null;
         }
 
-        return \Illuminate\Support\Facades\Storage::disk('public')->url('orders/payment-proofs/' . $this->payment_proof_path);
+        // El payment_proof_path ya incluye el directorio completo (orders/payment-proofs/filename.jpg)
+        return \Illuminate\Support\Facades\Storage::disk('public')->url($this->payment_proof_path);
     }
 
     /**

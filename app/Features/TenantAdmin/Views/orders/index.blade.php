@@ -15,7 +15,7 @@
                     </p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button onclick="alert('Funcionalidad próximamente disponible')" class="text-black-300 hover:text-black-400 p-2 rounded-lg hover:bg-accent-100" title="Exportar (Próximamente)">
+                    <button onclick="exportOrders()" class="text-black-300 hover:text-black-400 p-2 rounded-lg hover:bg-accent-100" title="Exportar (Próximamente)">
                         <x-solar-download-outline class="w-5 h-5" />
                     </button>
                     <a href="{{ route('tenant.admin.orders.create', $store->slug) }}" 
@@ -30,37 +30,37 @@
         <!-- Estadísticas Grid -->
         <div class="px-6 py-3 border-b border-accent-100 bg-accent-50">
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
-                <div class="text-center p-3 bg-accent-100 rounded-lg">
-                    <div class="text-lg font-semibold text-black-500">{{ $stats['total'] }}</div>
-                    <div class="text-xs text-black-300">Total</div>
+                <div class="text-center p-3 bg-gradient-to-r from-accent-400 to-accent-50 rounded-lg">
+                    <div class="text-h6 font-bold text-black-500">{{ $stats['total'] }}</div>
+                    <div class="text-caption text-black-300">Total</div>
                 </div>
-                <div class="text-center p-3 bg-warning-50 rounded-lg">
-                    <div class="text-lg font-semibold text-warning-300">{{ $stats['pending'] }}</div>
-                    <div class="text-xs text-warning-300">Pendientes</div>
+                <div class="text-center p-3 bg-gradient-to-r from-warning-100 to-accent-50 rounded-lg">
+                    <div class="text-h6 font-bold text-black-500">{{ $stats['pending'] }}</div>
+                    <div class="text-caption text-black-500">Pendientes</div>
                 </div>
-                <div class="text-center p-3 bg-info-50 rounded-lg">
-                    <div class="text-lg font-semibold text-info-200">{{ $stats['confirmed'] }}</div>
-                    <div class="text-xs text-info-200">Confirmados</div>
+                <div class="text-center p-3 bg-gradient-to-r from-info-100 to-accent-50 rounded-lg">
+                    <div class="text-h6 font-bold text-info-200">{{ $stats['confirmed'] }}</div>
+                    <div class="text-caption text-info-200">Confirmados</div>
                 </div>
-                <div class="text-center p-3 bg-secondary-50 rounded-lg">
-                    <div class="text-lg font-semibold text-secondary-200">{{ $stats['preparing'] }}</div>
-                    <div class="text-xs text-secondary-200">Preparando</div>
+                <div class="text-center p-3 bg-gradient-to-r from-secondary-100 to-accent-50 rounded-lg">
+                    <div class="text-h6 font-bold text-secondary-200">{{ $stats['preparing'] }}</div>
+                    <div class="text-caption text-secondary-200">Preparando</div>
                 </div>
-                <div class="text-center p-3 bg-primary-50 rounded-lg">
-                    <div class="text-lg font-semibold text-primary-200">{{ $stats['shipped'] }}</div>
-                    <div class="text-xs text-primary-200">Enviados</div>
+                <div class="text-center p-3 bg-gradient-to-r from-primary-100 to-accent-50 rounded-lg">
+                    <div class="text-h6 font-bold text-primary-200">{{ $stats['shipped'] }}</div>
+                    <div class="text-caption text-primary-200">Enviados</div>
                 </div>
-                <div class="text-center p-3 bg-success-50 rounded-lg">
-                    <div class="text-lg font-semibold text-success-300">{{ $stats['delivered'] }}</div>
-                    <div class="text-xs text-success-300">Entregados</div>
+                <div class="text-center p-3 bg-gradient-to-r from-success-100 to-accent-50 rounded-lg">
+                    <div class="text-h6 font-bold text-black-500">{{ $stats['delivered'] }}</div>
+                    <div class="text-caption text-black-500">Entregados</div>
                 </div>
-                <div class="text-center p-3 bg-error-50 rounded-lg">
-                    <div class="text-lg font-semibold text-error-300">{{ $stats['cancelled'] }}</div>
-                    <div class="text-xs text-error-300">Cancelados</div>
+                <div class="text-center p-3 bg-gradient-to-r from-error-100 to-accent-50 rounded-lg">
+                    <div class="text-h6 font-bold text-error-300">{{ $stats['cancelled'] }}</div>
+                    <div class="text-caption text-error-300">Cancelados</div>
                 </div>
-                <div class="text-center p-3 bg-success-100 rounded-lg">
-                    <div class="text-sm font-semibold text-success-300">${{ number_format($stats['total_revenue'], 0, ',', '.') }}</div>
-                    <div class="text-xs text-success-300">Ingresos</div>
+                <div class="text-center p-3 bg-gradient-to-r from-success-100 to-accent-50 rounded-lg">
+                    <div class="text-h6 font-bold text-black-500">${{ number_format($stats['total_revenue'], 0, ',', '.') }}</div>
+                    <div class="text-caption text-black-500">Ingresos</div>
                 </div>
             </div>
         </div>
@@ -165,8 +165,8 @@
                                         <x-solar-clipboard-list-outline class="w-5 h-5 text-primary-200" />
                                     </div>
                                     <div>
-                                        <p class="font-semibold text-black-500">{{ $order->order_number }}</p>
-                                        <p class="text-xs text-black-200">{{ $order->items_count }} {{ Str::plural('item', $order->items_count) }}</p>
+                                        <a href="{{ route('tenant.admin.orders.show', [$store->slug, $order->id]) }}" class="font-semibold text-info-300 underline">{{ $order->order_number }}</a>
+                                        <p class="text-caption text-black-200">{{ $order->items_count }} {{ $order->items_count == 1 ? 'producto' : 'productos' }}</p>
                                     </div>
                                 </div>
                             </td>
@@ -178,18 +178,28 @@
                                 </div>
                             </td>
                             <td class="px-6 py-4 text-sm">
-                                <span class="text-xs {{ $order->status_color }} px-2 py-1 rounded">
-                                    {{ $order->status_label }}
-                                </span>
+                                <select onchange="handleStatusChange({{ $order->id }}, this.value, this, '{{ $order->order_number }}')" 
+                                        data-original-status="{{ $order->status }}"
+                                        class="w-full px-2 py-1 border border-accent-200 rounded-lg text-caption font-medium focus:outline-none focus:ring-2 focus:ring-primary-200 {{ $order->status_color }} {{ $order->status === 'delivered' ? 'text-black-500' : '' }} cursor-pointer transition-colors">
+                                    <option value="pending" {{ $order->status === 'pending' ? 'selected' : '' }}>Pendiente</option>
+                                    <option value="confirmed" {{ $order->status === 'confirmed' ? 'selected' : '' }}>Confirmado</option>
+                                    <option value="preparing" {{ $order->status === 'preparing' ? 'selected' : '' }}>Preparando</option>
+                                    <option value="shipped" {{ $order->status === 'shipped' ? 'selected' : '' }}>Enviado</option>
+                                    <option value="delivered" {{ $order->status === 'delivered' ? 'selected' : '' }}>Entregado</option>
+                                    <option value="cancelled" {{ $order->status === 'cancelled' ? 'selected' : '' }}>Cancelado</option>
+                                </select>
                             </td>
                             <td class="px-6 py-4 text-sm">
                                 <div>
                                     <p class="text-black-500">{{ $order->payment_method_label }}</p>
                                     @if($order->payment_proof_path)
-                                        <p class="text-xs text-success-300 flex items-center">
-                                            <x-solar-check-circle-outline class="w-3 h-3 mr-1" />
-                                            Con comprobante
-                                        </p>
+                                        <a href="{{ $order->payment_proof_url }}" 
+                                           target="_blank" 
+                                           download
+                                           class="text-xs text-success-300 hover:text-success-400 flex items-center underline transition-colors">
+                                            <x-solar-download-outline class="w-3 h-3 mr-1" />
+                                            Descargar comprobante
+                                        </a>
                                     @endif
                                 </div>
                             </td>
@@ -223,39 +233,14 @@
                                         </a>
                                     @endif
 
-                                    <!-- Cambiar Estado -->
-                                    <div x-data="{ open: false }" class="relative">
-                                        <button @click="open = !open" 
-                                                class="text-secondary-200 hover:text-secondary-300" 
-                                                title="Cambiar estado">
-                                            <x-solar-refresh-outline class="w-5 h-5" />
-                                        </button>
-                                        <div x-show="open" @click.away="open = false" 
-                                             class="absolute right-0 mt-2 w-48 bg-accent-50 rounded-lg shadow-lg border border-accent-200 z-10">
-                                            <div class="py-2">
-                                                @foreach(['pending' => 'Pendiente', 'confirmed' => 'Confirmado', 'preparing' => 'Preparando', 'shipped' => 'Enviado', 'delivered' => 'Entregado', 'cancelled' => 'Cancelado'] as $status => $label)
-                                                    @if($status !== $order->status)
-                                                        <button onclick="updateOrderStatus({{ $order->id }}, '{{ $status }}')" 
-                                                                class="block w-full text-left px-4 py-2 text-sm text-black-400 hover:bg-accent-100">
-                                                            {{ $label }}
-                                                        </button>
-                                                    @endif
-                                                @endforeach
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <!-- Duplicar -->
-                                    <button onclick="duplicateOrder({{ $order->id }})" 
-                                            class="text-warning-300 hover:text-warning-400" 
-                                            title="Duplicar">
-                                        <x-solar-copy-outline class="w-5 h-5" />
-                                    </button>
-
                                     <!-- Cancelar (en lugar de eliminar) -->
                                     @if(!in_array($order->status, ['delivered', 'cancelled']))
-                                        <button onclick="cancelOrder({{ $order->id }}, '{{ $order->order_number }}')" 
-                                                class="text-warning-300 hover:text-warning-400" 
+                                        <button onclick="@if($store->isActionProtected('orders', 'cancel'))
+                                                            requireMasterKey('orders.cancel', 'Cancelar pedido #{{ $order->order_number }}', () => cancelOrder({{ $order->id }}, '{{ $order->order_number }}'))
+                                                        @else
+                                                            cancelOrder({{ $order->id }}, '{{ $order->order_number }}')
+                                                        @endif" 
+                                                class="text-error-300 hover:text-error-400" 
                                                 title="Cancelar pedido">
                                             <x-solar-close-circle-outline class="w-5 h-5" />
                                         </button>
@@ -389,69 +374,181 @@ document.addEventListener('alpine:init', () => {
             this.cancelOrderNumber = '';
         },
 
-        confirmDelete() {
+        async confirmDelete() {
             if (this.cancelOrderId) {
+                this.closeDeleteModal();
+                
                 // Cambiar estado a cancelled en lugar de eliminar
-                fetch(`{{ route('tenant.admin.orders.update-status', [$store->slug, ':id']) }}`.replace(':id', this.cancelOrderId), {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                        'Accept': 'application/json',
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({
-                        status: 'cancelled'
-                    })
-                })
-                .then(response => response.json())
-                .then(data => {
+                try {
+                    const response = await fetch(`{{ route('tenant.admin.orders.update-status', [$store->slug, ':id']) }}`.replace(':id', this.cancelOrderId), {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            status: 'cancelled'
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    
                     if (data.success) {
-                        this.closeDeleteModal();
-                        window.location.reload();
+                        await Swal.fire({
+                            title: '¡Pedido cancelado!',
+                            text: 'El pedido ha sido cancelado correctamente',
+                            icon: 'success',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#da27a7',
+                            timer: 3000,
+                            timerProgressBar: true
+                        });
+                        location.reload();
                     } else {
-                        alert(data.message || 'Error al cancelar pedido');
+                        await Swal.fire({
+                            title: 'Error',
+                            text: data.message || 'No se pudo cancelar el pedido',
+                            icon: 'error',
+                            confirmButtonText: 'OK',
+                            confirmButtonColor: '#da27a7'
+                        });
                     }
-                })
-                .catch(error => {
-                    alert('Error de conexión');
-                });
+                } catch (error) {
+                    await Swal.fire({
+                        title: 'Error de conexión',
+                        text: 'No se pudo conectar con el servidor',
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#da27a7'
+                    });
+                }
             }
         }
     }));
 });
 
-function updateOrderStatus(orderId, newStatus) {
-    if (!confirm('¿Cambiar el estado de este pedido?')) return;
-
-    const notes = prompt('Notas adicionales (opcional):');
+// Manejar cambio de estado con protección de clave maestra
+async function handleStatusChange(orderId, newStatus, selectElement, orderNumber) {
+    // Verificar si el cambio a "delivered" está protegido
+    const isProtected = newStatus === 'delivered' && {{ $store->isActionProtected('orders', 'mark_delivered') ? 'true' : 'false' }};
     
-    fetch(`{{ route('tenant.admin.orders.update-status', [$store->slug, ':id']) }}`.replace(':id', orderId), {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-            'Accept': 'application/json'
-        },
-        body: JSON.stringify({
-            status: newStatus,
-            notes: notes
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            window.location.reload();
-        } else {
-            alert(data.message || 'Error al cambiar estado');
-        }
-    })
-    .catch(error => {
-        alert('Error de conexión');
-    });
+    if (isProtected) {
+        // Solicitar clave maestra
+        requireMasterKey(
+            'orders.mark_delivered',
+            `Marcar pedido #${orderNumber} como entregado`,
+            () => updateOrderStatus(orderId, newStatus, selectElement)
+        );
+    } else {
+        // Ejecutar directamente
+        updateOrderStatus(orderId, newStatus, selectElement);
+    }
 }
 
-function duplicateOrder(orderId) {
-    if (!confirm('¿Duplicar este pedido?')) return;
+async function updateOrderStatus(orderId, newStatus, selectElement) {
+    const statusLabels = {
+        'pending': 'Pendiente',
+        'confirmed': 'Confirmado',
+        'preparing': 'Preparando',
+        'shipped': 'Enviado',
+        'delivered': 'Entregado',
+        'cancelled': 'Cancelado'
+    };
+
+    // Guardar el valor original del select
+    const originalStatus = selectElement ? selectElement.getAttribute('data-original-status') : null;
+
+    const result = await Swal.fire({
+        title: '¿Cambiar estado del pedido?',
+        html: `
+            <p class="text-body-small text-black-400 mb-4">
+                El estado cambiará a: <strong>${statusLabels[newStatus]}</strong>
+            </p>
+            <textarea id="status-notes" class="w-full px-3 py-2 border border-accent-200 rounded-lg text-body-small focus:outline-none focus:ring-2 focus:ring-primary-200" 
+                      placeholder="Notas adicionales (opcional)" rows="3"></textarea>
+        `,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Cambiar Estado',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#da27a7',
+        cancelButtonColor: '#001b48',
+        preConfirm: () => {
+            return document.getElementById('status-notes').value;
+        }
+    });
+
+    if (!result.isConfirmed) {
+        // Revertir el select al valor original
+        if (selectElement && originalStatus) {
+            selectElement.value = originalStatus;
+        }
+        return;
+    }
+
+    const notes = result.value;
+    
+    try {
+        const response = await fetch(`{{ route('tenant.admin.orders.update-status', [$store->slug, ':id']) }}`.replace(':id', orderId), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                status: newStatus,
+                notes: notes
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            await Swal.fire({
+                title: '¡Estado actualizado!',
+                text: 'El estado del pedido ha sido cambiado correctamente',
+                icon: 'success',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#da27a7',
+                timer: 3000,
+                timerProgressBar: true
+            });
+            location.reload();
+        } else {
+            await Swal.fire({
+                title: 'Error',
+                text: data.message || 'No se pudo cambiar el estado del pedido',
+                icon: 'error',
+                confirmButtonText: 'OK',
+                confirmButtonColor: '#da27a7'
+            });
+        }
+    } catch (error) {
+        await Swal.fire({
+            title: 'Error de conexión',
+            text: 'No se pudo conectar con el servidor',
+            icon: 'error',
+            confirmButtonText: 'OK',
+            confirmButtonColor: '#da27a7'
+        });
+    }
+}
+
+async function duplicateOrder(orderId) {
+    const result = await Swal.fire({
+        title: '¿Duplicar este pedido?',
+        text: 'Se creará una copia exacta del pedido',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Duplicar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#da27a7',
+        cancelButtonColor: '#efefef'
+    });
+
+    if (!result.isConfirmed) return;
 
     const form = document.createElement('form');
     form.method = 'POST';
@@ -467,8 +564,14 @@ function duplicateOrder(orderId) {
     form.submit();
 }
 
-function exportOrders() {
-    alert('Funcionalidad de exportación próximamente');
+async function exportOrders() {
+    await Swal.fire({
+        title: 'Próximamente',
+        text: 'La funcionalidad de exportación estará disponible pronto',
+        icon: 'info',
+        confirmButtonText: 'OK',
+        confirmButtonColor: '#da27a7'
+    });
 }
 
 // Función global para cancelOrder desde botones

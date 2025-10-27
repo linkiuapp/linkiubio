@@ -191,6 +191,24 @@
         window.publishDesign = function() {
             console.log('=== PUBLISH DESIGN FUNCTION CALLED ===');
             
+            // Verificar si está protegido
+            const isProtected = {{ $store->isActionProtected('store_design', 'publish') ? 'true' : 'false' }};
+            
+            if (isProtected) {
+                requireMasterKey(
+                    'store_design.publish',
+                    'Publicar diseño de la tienda',
+                    () => window.executePublishDesign()
+                );
+                return;
+            }
+            
+            window.executePublishDesign();
+        };
+        
+        window.executePublishDesign = function() {
+            console.log('=== EXECUTING PUBLISH DESIGN ===');
+            
             // Mostrar confirmación con SweetAlert2
             Swal.fire({
                 title: '¿Publicar diseño?',

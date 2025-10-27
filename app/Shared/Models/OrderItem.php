@@ -163,8 +163,17 @@ class OrderItem extends Model
 
         $display = [];
         foreach ($this->variant_details as $key => $value) {
-            if ($key !== 'precio_modificador') {
-                $display[] = ucfirst($key) . ': ' . $value;
+            // Saltar si es precio_modificador o si el valor es un array
+            if ($key === 'precio_modificador' || is_array($value)) {
+                continue;
+            }
+            
+            // Si el key es numérico o es un array, solo mostrar el valor
+            if (is_numeric($key) || is_array($key)) {
+                $display[] = $value;
+            } else {
+                // Asegurar que tanto key como value son strings
+                $display[] = ucfirst((string)$key) . ': ' . (string)$value;
             }
         }
 

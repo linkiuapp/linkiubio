@@ -229,7 +229,11 @@
                                            class="text-warning-200 hover:text-warning-300" title="Editar">
                                             <x-solar-pen-outline class="w-4 h-4" />
                                         </a>
-                                        <button @click="deleteProduct({{ $product->id }}, '{{ $product->name }}')" 
+                                        <button @click="@if($store->isActionProtected('products', 'delete'))
+                                                            requireMasterKey('products.delete', 'Eliminar producto: {{ $product->name }}', () => deleteProduct({{ $product->id }}, '{{ $product->name }}'))
+                                                        @else
+                                                            deleteProduct({{ $product->id }}, '{{ $product->name }}')
+                                                        @endif" 
                                                 class="text-error-200 hover:text-error-300" title="Eliminar">
                                             <x-solar-trash-bin-minimalistic-outline class="w-4 h-4" />
                                         </button>
