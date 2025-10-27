@@ -614,6 +614,9 @@ document.addEventListener('alpine:init', () => {
             console.log('🗂️ WizardStateManager: Wizard completed, cleaning up draft');
             
             try {
+                // 🎉 Lanzar confetti de celebración
+                this.launchConfetti();
+                
                 // Delete server draft
                 if (this.draftId) {
                     await this.deleteDraft();
@@ -630,6 +633,52 @@ document.addEventListener('alpine:init', () => {
             } catch (error) {
                 console.error('🗂️ WizardStateManager: Error during cleanup:', error);
             }
+        },
+        
+        // 🎉 Lanzar confetti cuando se completa el wizard
+        launchConfetti() {
+            if (typeof window.confetti !== 'function') {
+                console.log('🎉 Confetti library not loaded, skipping animation');
+                return;
+            }
+            
+            const duration = 3000; // 3 segundos
+            const animationEnd = Date.now() + duration;
+            const defaults = { 
+                startVelocity: 30, 
+                spread: 360, 
+                ticks: 60, 
+                zIndex: 9999,
+                colors: ['#da27a7', '#001b48', '#ed2e45', '#0000fe', '#00c76f', '#e8e6fb']
+            };
+
+            function randomInRange(min, max) {
+                return Math.random() * (max - min) + min;
+            }
+
+            const interval = setInterval(function() {
+                const timeLeft = animationEnd - Date.now();
+
+                if (timeLeft <= 0) {
+                    return clearInterval(interval);
+                }
+
+                const particleCount = 50 * (timeLeft / duration);
+                
+                // Lanzar confetti desde dos lados
+                window.confetti({
+                    ...defaults,
+                    particleCount,
+                    origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+                });
+                window.confetti({
+                    ...defaults,
+                    particleCount,
+                    origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+                });
+            }, 250);
+            
+            console.log('🎉 Confetti celebration launched!');
         },
         
         handleConflictResolution(detail) {

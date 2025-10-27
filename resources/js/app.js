@@ -3,10 +3,14 @@ console.log('🟢 Starting app.js execution...');
 
 import Alpine from 'alpinejs'
 import collapse from '@alpinejs/collapse'
+import confetti from 'canvas-confetti'
 
 console.log('🟢 Imports loaded successfully');
 
 import Pusher from 'pusher-js'
+
+// Hacer confetti disponible globalmente
+window.confetti = confetti
 
 // Sistema de carrito - Solo cargar en storefront
 if (window.location.pathname.includes('/admin') === false && 
