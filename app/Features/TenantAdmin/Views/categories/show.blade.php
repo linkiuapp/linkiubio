@@ -63,7 +63,7 @@
                 <!-- Información básica -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <h3 class="text-lg font-semibold text-black-500 mb-4">Información Básica</h3>
+                        <h3 class="text-body-large font-semibold text-black-500 mb-4">Información Básica</h3>
                         <div class="space-y-3">
                             <div>
                                 <span class="text-sm font-medium text-black-400">Nombre:</span>
@@ -87,22 +87,18 @@
                             @if($category->description)
                                 <div>
                                     <span class="text-sm font-medium text-black-400">Descripción:</span>
-                                    <p class="text-black-500">{{ $category->description }}</p>
+                                    <p class="text-black-500 text-body-regular">{{ $category->description }}</p>
                                 </div>
                             @endif
                         </div>
                     </div>
 
                     <div>
-                        <h3 class="text-lg font-semibold text-black-500 mb-4">Configuración</h3>
+                        <h3 class="text-body-large font-semibold text-black-500 mb-4">Configuración</h3>
                         <div class="space-y-3">
                             <div>
                                 <span class="text-sm font-medium text-black-400">Estado:</span>
                                 <p class="text-black-500">{{ $category->is_active ? 'Activa' : 'Inactiva' }}</p>
-                            </div>
-                            <div>
-                                <span class="text-sm font-medium text-black-400">Orden:</span>
-                                <p class="text-black-500">{{ $category->sort_order }}</p>
                             </div>
                             <div>
                                 <span class="text-sm font-medium text-black-400">Tipo:</span>

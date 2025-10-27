@@ -320,50 +320,6 @@ class ProductController extends Controller
     }
 
     /**
-     * Duplicar producto
-     */
-    public function duplicate(Request $request, $store, $product): JsonResponse
-    {
-        // Obtener la tienda actual desde el contexto compartido
-        $store = view()->shared('currentStore');
-        
-        // Buscar el producto manualmente
-        $product = Product::where('id', $product)
-            ->where('store_id', $store->id)
-            ->firstOrFail();
-        
-        // Validar el nombre del nuevo producto
-        $request->validate([
-            'name' => 'required|string|max:255',
-        ]);
-
-        try {
-            $newProduct = $product->replicate();
-            $newProduct->name = $request->name;
-            $newProduct->slug = null; // Reset slug para que se genere uno nuevo
-            $newProduct->sku = null; // Reset SKU to avoid duplicates
-            $newProduct->main_image_id = null; // Reset main image
-            $newProduct->save();
-
-            // Duplicar las relaciones si es necesario
-            if ($product->categories()->exists()) {
-                $newProduct->categories()->sync($product->categories->pluck('id'));
-            }
-
-            return response()->json([
-                'success' => true,
-                'message' => 'Producto duplicado exitosamente.',
-                'product' => $newProduct
-            ]);
-        } catch (\Exception $e) {
-            return response()->json([
-                'success' => false,
-                'error' => 'Error al duplicar el producto: ' . $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
      * Cambiar estado del producto
      */
     public function toggleStatus(Request $request, $store, $product): JsonResponse

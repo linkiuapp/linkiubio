@@ -10,6 +10,7 @@ use App\Features\SuperLinkiu\Controllers\AnnouncementController;
 use App\Features\SuperLinkiu\Controllers\ProfileController;
 use App\Features\SuperLinkiu\Controllers\BillingSettingController;
 use App\Features\SuperLinkiu\Controllers\MasterKeyRecoveryController;
+use App\Features\SuperLinkiu\Controllers\StoreReportController;
 use Illuminate\Support\Facades\Route;
 
 // Rutas de SuperLinkiu
@@ -182,6 +183,17 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
             Route::post('/{id}/approve', [MasterKeyRecoveryController::class, 'approve'])->name('approve');
             Route::post('/{id}/reject', [MasterKeyRecoveryController::class, 'reject'])->name('reject');
         });
+
+        // Store Reports (Reportes de Tiendas)
+        Route::prefix('store-reports')->name('store-reports.')->group(function () {
+            Route::get('/', [StoreReportController::class, 'index'])->name('index');
+            Route::get('/{report}', [StoreReportController::class, 'show'])->name('show');
+            Route::put('/{report}/mark-reviewed', [StoreReportController::class, 'markAsReviewed'])->name('mark-reviewed');
+            Route::put('/{report}/mark-resolved', [StoreReportController::class, 'markAsResolved'])->name('mark-resolved');
+            Route::put('/{report}/update-notes', [StoreReportController::class, 'updateNotes'])->name('update-notes');
+            Route::delete('/{report}', [StoreReportController::class, 'destroy'])->name('destroy');
+        });
+
         Route::delete('/profile/avatar', [ProfileController::class, 'deleteAvatar'])->name('profile.delete-avatar');
         Route::patch('/profile/app-settings', [ProfileController::class, 'updateAppSettings'])->name('profile.update-app-settings');
 

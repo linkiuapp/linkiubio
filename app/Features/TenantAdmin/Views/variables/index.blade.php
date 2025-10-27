@@ -72,11 +72,10 @@
                             <th class="px-6 py-3 text-center">Toggle</th>
                             <th class="px-6 py-3 text-center">Opciones</th>
                             <th class="px-6 py-3 text-center">Productos</th>
-                            <th class="px-6 py-3 text-center">Orden</th>
                             <th class="px-6 py-3 text-right">Acciones</th>
                         </tr>
                     </thead>
-                    <tbody class="bg-accent-50 divide-y divide-accent-100" id="sortableVariables">
+                    <tbody class="bg-accent-50 divide-y divide-accent-100">
                         @forelse($variables as $variable)
                             <tr class="text-black-400 hover:bg-accent-100" data-id="{{ $variable->id }}">
                                 <td class="px-6 py-4">
@@ -142,11 +141,6 @@
                                 </td>
                                 <td class="px-6 py-4 text-sm text-center">
                                     <span class="font-medium">{{ $variable->products_count }}</span>
-                                </td>
-                                <td class="pl-16 py-4 text-sm text-right">
-                                    <span class="drag-handle cursor-move">
-                                        <x-solar-sort-outline class="w-5 h-5 text-black-300" />
-                                    </span>
                                 </td>
                                 <td class="py-4">
                                     <div class="flex items-center justify-center gap-4">
@@ -283,16 +277,6 @@
                 filterType: '',
 
                 init() {
-                    // Inicializar Sortable.js para drag & drop si está disponible
-                    if (typeof Sortable !== 'undefined') {
-                        new Sortable(document.getElementById('sortableVariables'), {
-                            handle: '.drag-handle',
-                            animation: 150,
-                            onEnd: () => {
-                                this.updateOrder();
-                            }
-                        });
-                    }
                 },
 
                 async deleteVariable(id, name) {

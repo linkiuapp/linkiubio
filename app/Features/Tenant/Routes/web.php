@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Features\Tenant\Controllers\StorefrontController;
 use App\Features\Tenant\Controllers\OrderController;
+use App\Features\Tenant\Controllers\PageController;
 
 /*
 |--------------------------------------------------------------------------
@@ -83,6 +84,12 @@ Route::get('/proximamente', function() {
     $store = request()->route('store');
     return view('tenant::storefront.coming-soon', compact('store'));
 })->name('coming-soon');
+
+// Rutas de páginas informativas
+Route::get('/politicas-legales', [PageController::class, 'legalPolicies'])->name('legal-policies');
+Route::get('/acerca-de-nosotros', [PageController::class, 'aboutUs'])->name('about-us');
+Route::get('/reportar-problema', [PageController::class, 'reportProblem'])->name('report-problem');
+Route::post('/reportar-problema', [PageController::class, 'submitReport'])->name('report-problem.submit');
 
 // Más rutas del frontend se añadirán aquí en el futuro...
 // Route::get('/buscar', [StorefrontController::class, 'search'])->name('search'); 

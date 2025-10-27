@@ -221,10 +221,6 @@
                                            class="text-info-200 hover:text-info-300" title="Ver">
                                             <x-solar-eye-outline class="w-4 h-4" />
                                         </a>
-                                        <button @click="duplicateProduct({{ $product->id }}, '{{ $product->name }}')" 
-                                                class="text-secondary-200 hover:text-secondary-300" title="Duplicar">
-                                            <x-solar-copy-outline class="w-4 h-4" />
-                                        </button>
                                         <a href="{{ route('tenant.admin.products.edit', [$store->slug, $product->id]) }}" 
                                            class="text-warning-200 hover:text-warning-300" title="Editar">
                                             <x-solar-pen-outline class="w-4 h-4" />
@@ -271,85 +267,12 @@
         </div>
 
 
-        <!-- Modal de duplicar producto -->
-        <div x-show="showDuplicateModal" 
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0"
-            x-transition:enter-end="opacity-100"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100"
-            x-transition:leave-end="opacity-0"
-            class="fixed inset-0 z-50 overflow-y-auto modal-overlay">
-            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                <!-- Background overlay -->
-                <div x-show="showDuplicateModal"
-                    x-transition:enter="transition ease-out duration-300"
-                    x-transition:enter-start="opacity-0"
-                    x-transition:enter-end="opacity-100"
-                    x-transition:leave="transition ease-in duration-200"
-                    x-transition:leave-start="opacity-100"
-                    x-transition:leave-end="opacity-0"
-                    class="fixed inset-0 transition-opacity" 
-                    @click="closeDuplicateModal()">
-                    <div class="absolute inset-0 bg-black-500/75 backdrop-blur-sm"></div>
-                </div>
-
-                <!-- Modal -->
-                <div x-show="showDuplicateModal"
-                    x-transition:enter="transition ease-out duration-300"
-                    x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                    x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                    x-transition:leave="transition ease-in duration-200"
-                    x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                    x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                    class="inline-block align-bottom bg-accent-50 rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
-                    
-                    <div class="bg-accent-50 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <div class="sm:flex sm:items-start">
-                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-secondary-50 sm:mx-0 sm:h-10 sm:w-10">
-                                <x-solar-copy-outline class="h-6 w-6 text-secondary-300" />
-                            </div>
-                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-                                <h3 class="text-lg leading-6 font-medium text-black-400">
-                                    Duplicar Producto
-                                </h3>
-                                <div class="mt-2">
-                                    <p class="text-sm text-black-300 mb-4">
-                                        Ingresa el nombre para la copia de <span class="font-semibold" x-text="duplicateProductName"></span>
-                                    </p>
-                                    <input type="text" 
-                                        x-model="newProductName"
-                                        class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200"
-                                        placeholder="Nombre del nuevo producto">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="bg-accent-100 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                        <button type="button" 
-                                @click="confirmDuplicate()"
-                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-secondary-300 text-base font-medium text-accent-50 hover:bg-secondary-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-secondary-300 sm:ml-3 sm:w-auto sm:text-sm">
-                            Duplicar
-                        </button>
-                        <button type="button" 
-                                @click="closeDuplicateModal()"
-                                class="mt-3 w-full inline-flex justify-center rounded-md border border-accent-300 shadow-sm px-4 py-2 bg-accent-50 text-base font-medium text-black-400 hover:bg-accent-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-300 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
-                            Cancelar
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
     </div>
 
     @push('scripts')
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('productManagement', () => ({
-                showDuplicateModal: false,
-                duplicateProductId: null,
-                duplicateProductName: '',
-                newProductName: '',
                 selectedProducts: [],
                 filterStatus: '',
                 filterType: '',
@@ -416,53 +339,6 @@
                             window.location.reload();
                         });
                     }
-                },
-
-                duplicateProduct(id, name) {
-                    this.duplicateProductId = id;
-                    this.duplicateProductName = name;
-                    this.newProductName = name + ' (Copia)';
-                    this.showDuplicateModal = true;
-                },
-
-                closeDuplicateModal() {
-                    this.showDuplicateModal = false;
-                    this.duplicateProductId = null;
-                    this.duplicateProductName = '';
-                    this.newProductName = '';
-                },
-
-                async confirmDuplicate() {
-                    if (!this.duplicateProductId || !this.newProductName.trim()) return;
-
-                    try {
-                        const response = await fetch(`/{{ $store->slug }}/admin/products/${this.duplicateProductId}/duplicate`, {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                'Accept': 'application/json',
-                                'Content-Type': 'application/json',
-                            },
-                            body: JSON.stringify({
-                                name: this.newProductName.trim()
-                            })
-                        });
-
-                        const data = await response.json();
-
-                        if (response.ok) {
-                            // ✅ Reload con delay para evitar modal automático  
-                            setTimeout(() => window.location.reload(), 1500);
-                            alert('Producto duplicado correctamente');
-                        } else {
-                            alert(data.error || 'Error al duplicar el producto');
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
-                        alert('Error al duplicar el producto');
-                    }
-
-                    this.closeDuplicateModal();
                 },
 
                 applyFilters() {

@@ -33,11 +33,6 @@
                             <x-solar-pen-outline class="w-4 h-4" />
                             Editar
                         </a>
-                        <button onclick="duplicateProductShow({{ $product->id }})" 
-                                class="btn-secondary flex items-center gap-2">
-                            <x-solar-copy-outline class="w-4 h-4" />
-                            Duplicar
-                        </button>
                     </div>
                 </div>
             </div>
@@ -142,12 +137,6 @@
                             Editar Producto
                         </a>
                         
-                        <button onclick="duplicateProductShow({{ $product->id }})" 
-                                class="w-full btn-secondary flex items-center justify-center gap-2">
-                            <x-solar-copy-outline class="w-4 h-4" />
-                            Duplicar
-                        </button>
-
                         <form method="POST" action="{{ route('tenant.admin.products.toggle-status', [$store->slug, $product->id]) }}" class="w-full">
                             @csrf
                             <button type="submit" class="w-full btn-{{ $product->is_active ? 'warning' : 'success' }} flex items-center justify-center gap-2">
@@ -216,19 +205,6 @@
 
     @push('scripts')
     <script>
-        function duplicateProductShow(productId) {
-            if (confirm('¿Quieres duplicar este producto?')) {
-                const form = document.createElement('form');
-                form.method = 'POST';
-                form.action = `/{{ $store->slug }}/admin/products/${productId}/duplicate`;
-                form.innerHTML = `
-                    @csrf
-                `;
-                document.body.appendChild(form);
-                form.submit();
-            }
-        }
-
         function openImageModal(imageUrl) {
             document.getElementById('modalImage').src = imageUrl;
             document.getElementById('imageModal').classList.remove('hidden');
