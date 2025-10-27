@@ -121,7 +121,10 @@
                         $availableOptions = $variable->activeOptions->whereIn('id', $selectedOptionIds);
                     @endphp
                     
-                    <div class="space-y-2">
+                    <div class="space-y-2" 
+                         data-variable-id="{{ $variable->id }}"
+                         data-variable-name="{{ $label }}"
+                         data-variable-required="{{ $isRequired ? 'true' : 'false' }}">
                         <label class="text-small font-medium text-black-400">
                             {{ $label }}
                             @if($isRequired)
@@ -424,6 +427,7 @@
         // Validar que se hayan seleccionado todas las variables requeridas
         const requiredVariables = document.querySelectorAll('#product-variables input[required]:not([type="radio"]):not([type="checkbox"])');
         let allValid = true;
+        let missingFieldsMessage = '';
         
         requiredVariables.forEach(input => {
             if (!input.value) {
@@ -434,7 +438,7 @@
             }
         });
         
-        // Validar radio buttons y checkboxes requeridos
+        // Validar radio buttons requeridos (variables de tipo selection)
         const requiredRadios = document.querySelectorAll('#product-variables input[type="radio"][required]');
         const radioGroups = {};
         requiredRadios.forEach(radio => {
@@ -449,12 +453,25 @@
             const isChecked = group.some(radio => radio.checked);
             if (!isChecked) {
                 allValid = false;
-                group[0].closest('.space-y-2').classList.add('border-error-300');
+            }
+        });
+        
+        // Validar que haya al menos una opción seleccionada si la variable es requerida
+        const variableContainers = document.querySelectorAll('#product-variables [data-variable-required="true"]');
+        variableContainers.forEach(container => {
+            const variableId = container.dataset.variableId;
+            const hasSelection = selectedVariables[variableId] && selectedVariables[variableId].length > 0;
+            
+            if (!hasSelection) {
+                allValid = false;
+                const variableName = container.dataset.variableName || 'Variable';
+                missingFieldsMessage = `Debes escoger al menos una opción para: ${variableName}`;
             }
         });
         
         if (!allValid) {
-            alert('Por favor completa todos los campos requeridos');
+            // Mostrar alerta bonita estilo carrito
+            showVariableAlert(missingFieldsMessage || 'Debes escoger una opción');
             return;
         }
         
@@ -495,6 +512,41 @@
         } else {
             console.error('Cart not initialized');
         }
+    }
+
+    // Función para mostrar alerta bonita (mismo estilo que "producto agregado")
+    function showVariableAlert(message) {
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-6 left-1/2 transform -translate-x-1/2 bg-warning-300 px-6 py-4 rounded-2xl shadow-2xl z-[9999] transition-all duration-500 -translate-y-32 opacity-0 min-w-[340px]';
+        notification.innerHTML = `
+            <div class="flex items-center gap-4">
+                <div class="flex-shrink-0">
+                    <svg class="w-10 h-10 text-black-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"></path>
+                    </svg>
+                </div>
+                <div class="flex flex-col gap-1">
+                    <span class="text-body-regular font-bold text-black-500">${message}</span>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Animar entrada
+        setTimeout(() => {
+            notification.classList.remove('-translate-y-32', 'opacity-0');
+        }, 100);
+        
+        // Animar salida y eliminar
+        setTimeout(() => {
+            notification.classList.add('-translate-y-32', 'opacity-0');
+            setTimeout(() => {
+                if (notification.parentNode) {
+                    notification.parentNode.removeChild(notification);
+                }
+            }, 300);
+        }, 2500);
     }
 
     // Calcular precio inicial si hay opciones preseleccionadas
