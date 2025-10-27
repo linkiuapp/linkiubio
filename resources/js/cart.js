@@ -63,9 +63,11 @@ class Cart {
                 // Actualizar badge de cantidad del producto
                 this.updateProductBadge(product.id, data.cart);
                 
-                // Mostrar feedback y actualizar UI con datos del servidor
-                this.showAddedFeedback(product.name);
+                // Actualizar UI con datos del servidor PRIMERO
                 this.updateCartDisplayFromServer(data);
+                
+                // Mostrar feedback CON los datos actualizados
+                this.showAddedFeedback(product.name, data.cart);
             } else {
                 this.showError(data.message || 'Error al agregar producto');
             }
@@ -343,12 +345,10 @@ class Cart {
     }
 
     // Mostrar feedback cuando se agrega producto
-    showAddedFeedback(productName) {
-        // Obtener info actualizada del carrito
-        const cartBadge = document.querySelector('.cart-badge');
-        const cartTotal = document.querySelector('.cart-total-price');
-        const totalItems = cartBadge ? cartBadge.textContent : '0';
-        const totalPrice = cartTotal ? cartTotal.textContent : '$0';
+    showAddedFeedback(productName, cartData) {
+        // Usar datos del servidor directamente
+        const totalItems = cartData?.count || 0;
+        const totalPrice = cartData?.formatted_total || '$0';
         
         // Crear notificación temporal
         const notification = document.createElement('div');
@@ -364,7 +364,7 @@ class Cart {
                 <div class="flex flex-col gap-1">
                     <span class="text-body-small font-bold text-black-500">¡Hey! Tu producto se agregó al carrito</span>
                     <span class="text-body-small font-medium text-black-500 whitespace-nowrap">
-                        ${totalItems} productos en carrito · ${totalPrice}
+                        ${totalItems} ${totalItems === 1 ? 'producto' : 'productos'} en carrito · ${totalPrice}
                     </span>
                 </div>
             </div>

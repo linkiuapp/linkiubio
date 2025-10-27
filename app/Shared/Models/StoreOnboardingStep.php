@@ -39,6 +39,15 @@ class StoreOnboardingStep extends Model
                 'completed_at' => now(),
             ]
         );
+        
+        // Verificar si se completaron todos los pasos para celebrar 🎉
+        if (static::allCompleted($storeId)) {
+            // Confetti GRANDE - completó TODO el onboarding
+            session()->put('onboarding_just_completed', true);
+        } else {
+            // Confetti PEQUEÑO - completó solo un paso
+            session()->put('onboarding_step_completed', true);
+        }
     }
 
     /**
