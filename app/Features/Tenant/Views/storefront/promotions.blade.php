@@ -13,8 +13,8 @@
         
         <!-- Title -->
         <div class="space-y-2">
-            <h7 class="text-h7 font-bold text-black-300">🎉 Promociones Activas</h7>
-            <p class="text-body-small font-regular text-black-200">Aprovecha estas ofertas especiales</p>
+            <h2 class="text-body-large font-bold text-black-300">🎉 Promociones Activas</h2>
+            <p class="text-caption font-regular text-black-200">Aprovecha estas ofertas especiales</p>
         </div>
     </div>
 
@@ -30,7 +30,7 @@
                         <div class="flex items-center justify-between">
                             <div class="flex-1">
                                 <!-- Descuento principal -->
-                                <div class="text-2xl font-bold mb-1">
+                                <div class="text-h7 font-bold mb-1">
                                     @if($coupon->discount_type === 'percentage')
                                         {{ $coupon->formatted_discount }} OFF
                                     @else
@@ -39,12 +39,12 @@
                                 </div>
                                 
                                 <!-- Nombre del cupón -->
-                                <div class="text-sm opacity-90">{{ $coupon->name }}</div>
+                                <div class="text-caption font-medium opacity-90">{{ $coupon->name }}</div>
                             </div>
                             
                             <!-- Badge de estado -->
                             <div class="text-right">
-                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium {{ $coupon->status_info['bg'] }} {{ $coupon->status_info['color'] }} border {{ $coupon->status_info['border'] }}">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-small font-medium {{ $coupon->status_info['bg'] }} {{ $coupon->status_info['color'] }} border {{ $coupon->status_info['border'] }}">
                                     {{ $coupon->status_info['text'] }}
                                 </span>
                             </div>
@@ -55,9 +55,9 @@
                     <div class="p-4 space-y-4">
                         <!-- Código del cupón -->
                         <div class="text-center">
-                            <div class="text-sm text-black-300 mb-2">Código de descuento</div>
+                            <div class="text-small font-regular text-black-300 mb-2">Código de descuento</div>
                             <div class="bg-accent-100 border-2 border-dashed border-primary-200 rounded-lg p-3 flex items-center justify-between">
-                                <span class="font-mono text-lg font-bold text-primary-300">{{ $coupon->code }}</span>
+                                <span class="font-mono text-body-large font-bold text-primary-300">{{ $coupon->code }}</span>
                                 <button @click="
                                     navigator.clipboard.writeText('{{ $coupon->code }}');
                                     copied = true;
@@ -143,7 +143,7 @@
                         <!-- Call to action -->
                         <div class="pt-2">
                             <div class="bg-success-50 border border-success-100 rounded-lg p-3 text-center">
-                                <div class="text-success-300 text-sm font-medium">
+                                <div class="text-caption font-medium text-black-500">
                                     ✨ Copia el código y úsalo en tu próxima compra
                                 </div>
                             </div>
@@ -155,22 +155,22 @@
 
         <!-- Información adicional -->
         <div class="bg-accent-100 rounded-lg p-4 border border-accent-200">
-            <h3 class="font-semibold text-black-400 mb-2">📋 Cómo usar tus cupones</h3>
+            <h3 class="text-body-large font-bold text-black-400 mb-2">📋 Cómo usar tus cupones</h3>
             <div class="space-y-2 text-sm text-black-300">
                 <div class="flex items-start gap-2">
-                    <span class="font-bold text-primary-300">1.</span>
+                    <span class="font-bold text-primary-300 text-caption">1.</span>
                     <span>Copia el código de descuento tocando el botón "Copiar"</span>
                 </div>
                 <div class="flex items-start gap-2">
-                    <span class="font-bold text-primary-300">2.</span>
+                    <span class="font-bold text-primary-300 text-caption">2.</span>
                     <span>Agrega productos a tu carrito de compras</span>
                 </div>
                 <div class="flex items-start gap-2">
-                    <span class="font-bold text-primary-300">3.</span>
+                    <span class="font-bold text-primary-300 text-caption">3.</span>
                     <span>En el checkout, pega el código en el campo "Cupón de descuento"</span>
                 </div>
                 <div class="flex items-start gap-2">
-                    <span class="font-bold text-primary-300">4.</span>
+                    <span class="font-bold text-primary-300 text-caption">4.</span>
                     <span>¡Disfruta tu descuento! 🎉</span>
                 </div>
             </div>

@@ -19,11 +19,11 @@
     </nav>
 
     <!-- Header de la categoría -->
-    <div class="space-y-3">
+    <div class="space-y-2">
         <div class="flex items-center space-x-3">
             <!-- Icono de la categoría -->
             @if($category->icon && $category->icon->image_url)
-                <div class="w-16 h-16 bg-accent-100 rounded-lg p-2 flex items-center justify-center">
+                <div class="w-12 h-12 bg-accent-100 rounded-lg p-2 flex items-center justify-center">
                     <img src="{{ $category->icon->image_url }}" 
                          alt="{{ $category->name }}" 
                          class="w-full h-full object-contain">
@@ -31,9 +31,9 @@
             @endif
             
             <div class="flex-1">
-                <h1 class="text-lg font-bold text-black-400">{{ $category->name }}</h1>
+                <h1 class="text-base font-bold text-black-400">{{ $category->name }}</h1>
                 @if($category->description)
-                    <p class="text-black-300 mt-1 text-sm">{{ $category->description }}</p>
+                    <p class="text-black-300 mt-1 text-small font-regular">{{ $category->description }}</p>
                 @endif
             </div>
         </div>
@@ -50,18 +50,18 @@
                        class="flex flex-col items-center group">
                         
                         <!-- Icono de la subcategoría con fondo colorido -->
-                        <div class="w-20 h-20 mb-2 flex items-center justify-center rounded-2xl bg-gradient-to-br from-accent-100 to-accent-200 group-hover:from-primary-50 group-hover:to-primary-100 transition-all duration-200 shadow-sm group-hover:shadow-md">
+                        <div class="w-20 h-20 mb-2 flex items-center justify-center rounded-2xl bg-gradient-to-br from-accent-50 to-accent-100 hover:from-primary-50 hover:to-accent-50 transition-all duration-200 shadow-sm group-hover:shadow-md">
                              @if($subcategory->icon && $subcategory->icon->image_url)
                                  <img src="{{ $subcategory->icon->image_url }}" 
                                       alt="{{ $subcategory->name }}" 
-                                      class="w-10 h-10 object-contain">
+                                      class="w-14 h-14 object-contain">
                              @else
-                                 <x-solar-gallery-outline class="w-8 h-8 text-black-300 group-hover:text-primary-300" />
+                                 <x-solar-gallery-outline class="w-10 h-10 text-black-300 group-hover:text-primary-300" />
                              @endif
                         </div>
 
                         <!-- Nombre de la subcategoría -->
-                        <span class="text-xs text-center text-black-400 font-medium group-hover:text-primary-300 transition-colors leading-tight">
+                        <span class="text-caption font-regular text-center text-black-500 transition-colors leading-tight">
                             {{ $subcategory->name }}
                         </span>
                     </a>
@@ -73,9 +73,9 @@
     <!-- Productos -->
     @if($products->count() > 0)
         <div>
-            <h2 class="text-lg font-bold text-black-400 mb-4">
+            <h2 class="text-base font-semibold text-black-400 mb-3">
                 Productos
-                <span class="text-sm font-normal text-black-300">({{ $products->count() }})</span>
+                <span class="text-small font-regular text-black-300">({{ $products->count() }})</span>
             </h2>
             
             <div class="space-y-3">
@@ -98,14 +98,14 @@
 
                             <!-- Información del producto -->
                             <div class="flex-1 min-w-0">
-                                <h3 class="font-medium text-black-400 text-sm mb-1 line-clamp-1">{{ $product->name }}</h3>
+                                <h3 class="text-caption font-bold text-black-500 mb-1 line-clamp-1">{{ $product->name }}</h3>
                                 
                                 @if($product->description)
-                                    <p class="text-xs text-black-300 mb-2 line-clamp-1">{{ $product->description }}</p>
+                                    <p class="text-small font-regular text-black-300 mb-2 line-clamp-1">{{ $product->description }}</p>
                                 @endif
 
                                 <!-- Precio prominente -->
-                                <div class="text-base font-bold text-primary-300 mb-1">
+                                <div class="text-body-regular font-bold text-primary-300 mb-1">
                                     ${{ number_format($product->price, 0, ',', '.') }}
                                 </div>
 
@@ -113,12 +113,12 @@
                                 @if($product->categories->count() > 1)
                                     <div class="flex flex-wrap gap-1">
                                         @foreach($product->categories->where('id', '!=', $category->id)->take(2) as $cat)
-                                            <span class="px-2 py-0.5 bg-primary-50 text-primary-300 rounded text-xs">
+                                            <span class="px-2 py-0.5 bg-accent-300 text-black-500 rounded text-small">
                                                 {{ $cat->name }}
                                             </span>
                                         @endforeach
                                         @if($product->categories->where('id', '!=', $category->id)->count() > 2)
-                                            <span class="text-xs text-black-200">+{{ $product->categories->where('id', '!=', $category->id)->count() - 2 }}</span>
+                                            <span class="text-small font-regular text-black-200">+{{ $product->categories->where('id', '!=', $category->id)->count() - 2 }}</span>
                                         @endif
                                     </div>
                                 @endif
@@ -139,8 +139,8 @@
                     <x-solar-box-outline class="w-8 h-8 text-black-200" />
                 </div>
                 <div class="space-y-2">
-                    <h3 class="text-lg font-semibold text-black-400">No hay productos en esta categoría</h3>
-                    <p class="text-black-300 max-w-sm mx-auto text-sm">
+                    <h3 class="text-base font-semibold text-black-400">No hay productos en esta categoría</h3>
+                    <p class="text-black-300 max-w-sm mx-auto text-small font-regular">
                         Aún no tenemos productos disponibles en esta categoría. 
                         Explora otras categorías o regresa pronto.
                     </p>

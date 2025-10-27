@@ -17,7 +17,7 @@
             <div class="flex items-center gap-3">
                 <x-solar-info-circle-outline class="w-5 h-5 text-info-300 flex-shrink-0" />
                 <p class="text-body-regular text-info-300">
-                    La medidas recomendadas para el slider son de 170x100px.
+                    Las medidas recomendadas para el slider son de 420x200px.
                 </p>
             </div>
         </div>
@@ -80,7 +80,7 @@
                 <div class="p-6">
                     <div class="mb-4">
                         <h3 class="text-lg font-medium text-black-500 mb-1">Imagen</h3>
-                        <p class="text-sm text-black-300">Sube la imagen del slider (170x100px)</p>
+                        <p class="text-sm text-black-300">Sube la imagen del slider (420x200px)</p>
                     </div>
                     
                     <div class="border-2 border-dashed border-accent-200 rounded-lg p-6 text-center" x-data="{ imagePreview: null }">
@@ -98,7 +98,7 @@
                             <label for="image-upload" class="cursor-pointer">
                                 <x-solar-gallery-outline class="w-12 h-12 text-black-300 mx-auto mb-4" />
                                 <p class="text-sm text-black-400 mb-2">Haz clic para subir una imagen</p>
-                                <p class="text-xs text-black-300">Exactamente 170x100px, máximo 2MB</p>
+                                <p class="text-xs text-black-300">Mínimo 420x200px (se redimensionará automáticamente), máximo 2MB</p>
                             </label>
                         </div>
                         <div x-show="imagePreview" class="space-y-4">

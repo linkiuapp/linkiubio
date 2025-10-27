@@ -397,7 +397,7 @@ class ProductController extends Controller
     /**
      * Establecer imagen principal del producto
      */
-    public function setMainImage(Request $request, $product): RedirectResponse
+    public function setMainImage(Request $request, $store, $product): RedirectResponse
     {
         // Obtener la tienda actual desde el contexto compartido
         $store = view()->shared('currentStore');
@@ -416,7 +416,7 @@ class ProductController extends Controller
         $this->imageService->setMainImage($product, $image);
 
         return redirect()->route('tenant.admin.products.edit', [$store->slug, $product->id])
-            ->with('success', 'Imagen principal establecida exitosamente.');
+            ->with('swal_success', 'Imagen principal establecida exitosamente.');
     }
 
     /**

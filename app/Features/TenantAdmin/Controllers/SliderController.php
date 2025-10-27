@@ -168,7 +168,7 @@ class SliderController extends Controller
             if (!$imagePath) {
                 return redirect()->back()
                                ->withInput()
-                               ->withErrors(['image' => 'Error al procesar la imagen. Verifica que sea válida y tenga las dimensiones correctas (exactamente 170x100px).']);
+                               ->withErrors(['image' => 'Error al procesar la imagen. Verifica que sea válida y tenga dimensiones mínimas de 420x200px (se redimensionará automáticamente).']);
             }
             
             $slider->image_path = $imagePath;
@@ -298,7 +298,7 @@ class SliderController extends Controller
                 if (!$imagePath) {
                     return redirect()->back()
                                    ->withInput()
-                                   ->withErrors(['image' => 'Error al procesar la imagen. Verifica que sea válida y tenga las dimensiones correctas (exactamente 170x100px).']);
+                                   ->withErrors(['image' => 'Error al procesar la imagen. Verifica que sea válida y tenga dimensiones mínimas de 420x200px (se redimensionará automáticamente).']);
                 }
                 
                 $slider->image_path = $imagePath;

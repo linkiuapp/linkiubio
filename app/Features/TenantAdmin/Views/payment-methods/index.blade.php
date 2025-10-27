@@ -469,10 +469,10 @@ document.addEventListener('alpine:init', () => {
                         title: '¡Éxito!',
                         text: `${methodName} ${action} exitosamente`,
                         confirmButtonColor: '#00c76f',
-                        timer: 2000,
-                        timerProgressBar: true
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        window.location.reload();
                     });
-                    window.location.reload();
                 } else {
                     Swal.fire({
                         icon: 'error',
@@ -516,10 +516,10 @@ document.addEventListener('alpine:init', () => {
                         title: '¡Éxito!',
                         text: `${methodName} establecido como predeterminado`,
                         confirmButtonColor: '#00c76f',
-                        timer: 2000,
-                        timerProgressBar: true
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        window.location.reload();
                     });
-                    window.location.reload();
                 } else {
                     Swal.fire({
                         icon: 'error',
@@ -623,10 +623,10 @@ document.addEventListener('alpine:init', () => {
                         title: '¡Éxito!',
                         text: 'Configuración guardada exitosamente',
                         confirmButtonColor: '#00c76f',
-                        timer: 2000,
-                        timerProgressBar: true
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        window.location.reload();
                     });
-                    window.location.reload();
                 } else {
                     Swal.fire({
                         icon: 'error',

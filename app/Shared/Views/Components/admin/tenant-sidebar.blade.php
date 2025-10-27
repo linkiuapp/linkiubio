@@ -2,10 +2,13 @@
     use Illuminate\Support\Facades\Storage;
 @endphp
 
+
+
 <!-- Sidebar Admin de Tienda -->
 <aside class="fixed left-0 top-0 z-40 h-screen sidebar bg-accent-75 shadow-2xl transition-transform duration-300 ease-in-out flex flex-col" 
        x-data="{ sidebarOpen: true }"
        :class="{ '-translate-x-full': !sidebarOpen }">
+       
 
     <!-- User section -->
     <div class="px-6 pt-6 pb-2 flex-shrink-0">

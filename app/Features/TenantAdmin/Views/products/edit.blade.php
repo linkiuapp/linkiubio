@@ -547,11 +547,22 @@
         }
 
         // Función para establecer imagen principal
-        function setMainImage(imageId) {
-            if (confirm('¿Establecer esta imagen como principal?')) {
+        async function setMainImage(imageId) {
+            const result = await Swal.fire({
+                title: '¿Establecer como principal?',
+                text: 'Esta será la imagen principal del producto',
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: '#00c76f',
+                cancelButtonColor: '#ed2e45',
+                confirmButtonText: 'Sí, establecer',
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (result.isConfirmed) {
                 const form = document.createElement('form');
                 form.method = 'POST';
-                form.action = `/{{ $store->slug }}/admin/products/{{ $product->id }}/set-main-image`;
+                form.action = '{{ url($store->slug . "/admin/products/" . $product->id . "/set-main-image") }}';
                 form.innerHTML = `
                     @csrf
                     <input type="hidden" name="image_id" value="${imageId}">

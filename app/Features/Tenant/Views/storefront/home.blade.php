@@ -7,7 +7,7 @@
         <div class="slider-container relative" x-data="sliderComponent({{ $sliders->toJson() }}, {{ $sliders->first()->transition_duration ?? 5 }})">
             <!-- Slider principal -->
             <div class="overflow-hidden rounded-lg">
-                <div class="flex gap-2 sm:gap-3 transition-transform duration-500 ease-in-out" 
+                <div class="flex gap-4 transition-transform duration-500 ease-in-out" 
                      :style="getTransform()">
                     
                     @foreach($sliders as $index => $slider)
@@ -27,11 +27,11 @@
                             @endif
                             
                             <!-- Imagen del slider -->
-                            <div class="w-[170px] h-[100px] bg-accent-100 rounded-lg overflow-hidden relative">
+                            <div class="w-[420px] h-[200px] bg-accent-100 rounded-lg overflow-hidden relative">
                                 @if($slider->image_url)
                                     <img src="{{ $slider->image_url }}" 
                                          alt="{{ $slider->name }}" 
-                                         class="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105">
+                                         class="w-[420px] h-[200px] object-cover object-center transition-transform duration-300 group-hover:scale-105">
                                 @endif
                                 
                                 <!-- Overlay suave (solo si tiene enlace) -->
@@ -55,10 +55,9 @@
                         </div>
                     @endforeach
                     
-                    <!-- Duplicar slides para efecto infinito - duplicar según viewport -->
+                    <!-- Duplicar slides para efecto infinito (1 slide es suficiente ya que se muestra de 1 en 1) -->
                     @if($sliders->count() > 1)
-                        {{-- Duplicar 2 para móvil, 3 para desktop (tomamos 3 para cubrir ambos casos) --}}
-                        @foreach($sliders->take(3) as $index => $slider)
+                        @foreach($sliders->take(1) as $index => $slider)
                             <div class="flex-shrink-0 relative flex justify-center">
                                 @if($slider->url && $slider->url_type !== 'none')
                                     @if($slider->url_type === 'external')
@@ -75,11 +74,11 @@
                                 @endif
                                 
                                 <!-- Imagen del slider -->
-                                <div class="w-[170px] h-[100px] bg-accent-100 rounded-lg overflow-hidden relative">
+                                <div class="w-[420px] h-[200px] bg-accent-100 rounded-lg overflow-hidden relative">
                                     @if($slider->image_url)
                                         <img src="{{ $slider->image_url }}" 
                                              alt="{{ $slider->name }}" 
-                                             class="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105">
+                                             class="w-[420px] h-[200px] object-cover object-center transition-transform duration-300 group-hover:scale-105">
                                     @endif
                                     
                                     <!-- Overlay suave (solo si tiene enlace) -->
@@ -131,18 +130,18 @@
                        class="flex flex-col items-center group">
                         
                         <!-- Icono de la categoría con fondo colorido -->
-                        <div class="w-16 h-16 mb-2 flex items-center justify-center rounded-2xl bg-gradient-to-br from-accent-100 to-accent-200 group-hover:from-primary-50 group-hover:to-primary-100 transition-all duration-200 shadow-sm group-hover:shadow-md">
+                        <div class="w-16 h-16 mb-2 flex items-center justify-center rounded-2xl bg-gradient-to-br from-accent-50 to-accent-100 hover:from-primary-50 hover:to-accent-50 transition-all duration-200 shadow-sm group-hover:shadow-md">
                              @if($category->icon && $category->icon->image_url)
                                  <img src="{{ $category->icon->image_url }}" 
                                       alt="{{ $category->name }}" 
-                                      class="w-10 h-10 object-contain">
+                                      class="w-14 h-14 object-contain">
                              @else
-                                 <x-solar-gallery-outline class="w-8 h-8 text-black-300 group-hover:text-primary-300" />
+                                 <x-solar-gallery-outline class="w-10 h-10 text-black-300 group-hover:text-primary-300" />
                              @endif
                         </div>
                         
                         <!-- Nombre de la categoría -->
-                        <span class="text-xs text-center text-black-400 font-medium group-hover:text-primary-300 transition-colors leading-tight">
+                        <span class="text-caption font-regular text-center text-black-500 transition-colors leading-tight">
                             {{ $category->name }}
                         </span>
                     </a>
@@ -151,7 +150,7 @@
         @else
             <div class="text-center py-8 text-black-300">
                 <x-solar-gallery-outline class="w-12 h-12 mx-auto mb-3 text-black-200" />
-                <p class="text-sm">No hay categorías disponibles</p>
+                <p class="text-caption font-regular text-black-300">No hay categorías disponibles</p>
                 <a href="{{ route('tenant.categories', $store->slug) }}" 
                    class="inline-flex items-center mt-3 px-4 py-2 bg-primary-300 text-accent-50 rounded-lg text-sm hover:bg-primary-200 transition-colors">
                     <x-solar-gallery-outline class="w-4 h-4 mr-2" />
@@ -169,9 +168,9 @@
             <div class="space-y-3">
                 @foreach($topProducts as $product)
                     <a href="{{ route('tenant.product', [$store->slug, $product->slug]) }}" 
-                       class="bg-white rounded-lg p-3 border border-accent-200 hover:border-primary-200 hover:shadow-sm transition-all duration-200 block relative">
+                       class="bg-accent-50 rounded-lg p-3 border border-accent-200 hover:border-primary-200 hover:shadow-sm transition-all duration-200 block relative">
                         <!-- Badge MÁS VENDIDO -->
-                        <div class="absolute -top-2 -left-2 bg-error-300 text-accent-50 text-xs px-2 py-1 rounded-full font-bold z-10 shadow-sm">
+                        <div class="absolute -top-2 -left-2 bg-error-300 text-accent-50 text-small font-bold px-2 py-1 rounded-full z-10 shadow-sm">
                             🔥 MÁS VENDIDO
                         </div>
                         
@@ -191,14 +190,14 @@
 
                             <!-- Información del producto -->
                             <div class="flex-1 min-w-0">
-                                <h3 class="font-medium text-black-400 text-sm mb-1 line-clamp-1">{{ $product->name }}</h3>
+                                <h3 class="text-caption font-bold text-black-500 mb-1 line-clamp-1">{{ $product->name }}</h3>
                                 
                                 @if($product->description)
-                                    <p class="text-xs text-black-300 mb-2 line-clamp-1">{{ $product->description }}</p>
+                                    <p class="text-small font-regular text-black-300 mb-2 line-clamp-1">{{ $product->description }}</p>
                                 @endif
 
                                 <!-- Precio prominente -->
-                                <div class="text-base font-bold text-primary-300 mb-1">
+                                <div class="text-body-regular font-bold text-primary-300 mb-1">
                                     ${{ number_format($product->price, 0, ',', '.') }}
                                 </div>
 
@@ -206,12 +205,12 @@
                                 @if($product->categories->count() > 0)
                                     <div class="flex flex-wrap gap-1">
                                         @foreach($product->categories->take(2) as $category)
-                                            <span class="px-2 py-0.5 bg-primary-50 text-primary-300 rounded text-xs">
+                                            <span class="px-2 py-0.5 bg-accent-300 text-black-500 rounded text-small">
                                                 {{ $category->name }}
                                             </span>
                                         @endforeach
                                         @if($product->categories->count() > 2)
-                                            <span class="text-xs text-black-200">+{{ $product->categories->count() - 2 }}</span>
+                                            <span class="text-small font-regular text-black-200">+{{ $product->categories->count() - 2 }}</span>
                                         @endif
                                     </div>
                                 @endif
@@ -226,7 +225,7 @@
         @else
             <div class="text-center py-8 text-black-300">
                 <x-solar-box-outline class="w-12 h-12 mx-auto mb-3 text-black-200" />
-                <p class="text-sm">No hay productos disponibles</p>
+                <p class="text-caption font-regular text-black-300">No hay productos disponibles</p>
             </div>
         @endif
     </div>
@@ -241,7 +240,7 @@
                     <a href="{{ route('tenant.product', [$store->slug, $product->slug]) }}" 
                        class="bg-white rounded-lg p-3 border border-accent-200 hover:border-primary-200 hover:shadow-sm transition-all duration-200 block relative">
                         <!-- Badge NUEVO -->
-                        <div class="absolute -top-2 -left-2 bg-success-300 text-accent-50 text-xs px-2 py-1 rounded-full font-bold z-10 shadow-sm">
+                        <div class="absolute -top-2 -left-2 bg-black-500 text-accent-50 text-small font-bold px-2 py-1 rounded-full z-10 shadow-sm">
                             ✨ NUEVO
                         </div>
                         
@@ -261,14 +260,14 @@
 
                             <!-- Información del producto -->
                             <div class="flex-1 min-w-0">
-                                <h3 class="font-medium text-black-400 text-sm mb-1 line-clamp-1">{{ $product->name }}</h3>
+                                <h3 class="text-caption font-bold text-black-500 mb-1 line-clamp-1">{{ $product->name }}</h3>
                                 
                                 @if($product->description)
-                                    <p class="text-xs text-black-300 mb-2 line-clamp-1">{{ $product->description }}</p>
+                                    <p class="text-small font-regular text-black-300 mb-2 line-clamp-1">{{ $product->description }}</p>
                                 @endif
 
                                 <!-- Precio prominente -->
-                                <div class="text-base font-bold text-primary-300 mb-1">
+                                <div class="text-body-regular font-bold text-primary-300 mb-1">
                                     ${{ number_format($product->price, 0, ',', '.') }}
                                 </div>
 
@@ -276,12 +275,12 @@
                                 @if($product->categories->count() > 0)
                                     <div class="flex flex-wrap gap-1">
                                         @foreach($product->categories->take(2) as $category)
-                                            <span class="px-2 py-0.5 bg-primary-50 text-primary-300 rounded text-xs">
+                                            <span class="px-2 py-0.5 bg-accent-300 text-black-500 rounded text-small">
                                                 {{ $category->name }}
                                             </span>
                                         @endforeach
                                         @if($product->categories->count() > 2)
-                                            <span class="text-xs text-black-200">+{{ $product->categories->count() - 2 }}</span>
+                                            <span class="text-small font-regular text-black-200">+{{ $product->categories->count() - 2 }}</span>
                                         @endif
                                     </div>
                                 @endif
@@ -296,7 +295,7 @@
         @else
             <div class="text-center py-8 text-black-300">
                 <x-solar-box-outline class="w-12 h-12 mx-auto mb-3 text-black-200" />
-                <p class="text-sm">No hay productos nuevos disponibles</p>
+                <p class="text-caption font-regular text-black-300">No hay productos nuevos disponibles</p>
             </div>
         @endif
     </div>
@@ -338,18 +337,12 @@ function sliderComponent(sliders, duration = 5) {
         },
         
         getTransform() {
-            // Con tamaño fijo de 170px + gap de 8px (móvil) o 12px (desktop)
-            const slideWidth = 170; // w-[170px]
-            const mobileGap = 8; // gap-2 = 8px
-            const desktopGap = 12; // gap-3 = 12px
+            // Con tamaño fijo de 420px + gap de 16px (gap-4)
+            const slideWidth = 420; // w-[420px]
+            const gap = 16; // gap-4 = 16px
+            const totalWidth = slideWidth + gap;
             
-            if (this.isMobile) {
-                const totalWidth = slideWidth + mobileGap;
-                return `transform: translateX(-${this.currentSlide * totalWidth}px)`;
-            } else {
-                const totalWidth = slideWidth + desktopGap;
-                return `transform: translateX(-${this.currentSlide * totalWidth}px)`;
-            }
+            return `transform: translateX(-${this.currentSlide * totalWidth}px)`;
         },
         
         goToSlide(index) {

@@ -13,8 +13,8 @@
             
             <!-- Title -->
             <div class="space-y-2">
-                <h7 class="text-h7 font-bold text-black-300">Nuestras Sedes</h7>
-                <p class="text-body-small font-regular text-black-200">Encuentra la sede más cercana a ti</p>
+                <h2 class="text-body-large font-bold text-black-300">Nuestras Sedes</h2>
+                <p class="text-caption font-regular text-black-200">Encuentra la sede más cercana a ti</p>
             </div>
         </div>
 
@@ -28,14 +28,14 @@
                             <div class="flex items-start justify-between mb-3">
                                 <div class="flex-1">
                                     <div class="flex items-center gap-2 mb-1">
-                                        <h3 class="text-lg font-semibold text-black-400">{{ $location->name }}</h3>
+                                        <h3 class="text-body-large font-bold text-black-400">{{ $location->name }}</h3>
                                         @if($location->is_main)
                                             <span class="bg-primary-300 text-accent-50 text-xs px-2 py-1 rounded-full font-medium">Principal</span>
                                         @endif
                                     </div>
                                     
                                     @if($location->description)
-                                        <p class="text-sm text-black-300 mb-2">{{ $location->description }}</p>
+                                        <p class="text-small font-regular text-black-300 mb-2">{{ $location->description }}</p>
                                     @endif
                                     
                                     <!-- Estado actual con badge -->
