@@ -276,60 +276,77 @@
             
             @if(session('onboarding_step_completed'))
                 // ✨ Confetti PEQUEÑO - Paso individual completado
+                // Solo se muestra UNA VEZ usando sessionStorage
                 if (typeof window.confetti === 'function') {
-                    setTimeout(() => {
-                        window.confetti({
-                            particleCount: 50,
-                            spread: 60,
-                            origin: { y: 0.6 },
-                            colors: ['#da27a7', '#0000fe', '#00c76f'],
-                            startVelocity: 20,
-                            ticks: 40
-                        });
-                    }, 400);
+                    const stepKey = 'confetti_step_shown_{{ now()->timestamp }}';
+                    if (!sessionStorage.getItem(stepKey)) {
+                        setTimeout(() => {
+                            window.confetti({
+                                particleCount: 50,
+                                spread: 60,
+                                origin: { y: 0.6 },
+                                colors: ['#da27a7', '#0000fe', '#00c76f'],
+                                startVelocity: 20,
+                                ticks: 40
+                            });
+                            sessionStorage.setItem(stepKey, 'true');
+                        }, 400);
+                    }
                 }
+                @php
+                    session()->forget('onboarding_step_completed');
+                @endphp
             @endif
             
             @if(session('onboarding_just_completed'))
                 // 🎉 Confetti GRANDE - TODO el onboarding completado
+                // Solo se muestra UNA VEZ usando sessionStorage
                 if (typeof window.confetti === 'function') {
-                    setTimeout(() => {
-                        const duration = 3000;
-                        const animationEnd = Date.now() + duration;
-                        const defaults = { 
-                            startVelocity: 30, 
-                            spread: 360, 
-                            ticks: 60, 
-                            zIndex: 9999,
-                            colors: ['#da27a7', '#001b48', '#ed2e45', '#0000fe', '#00c76f', '#e8e6fb']
-                        };
+                    const finalKey = 'confetti_final_shown_{{ auth()->id() ?? 0 }}';
+                    if (!sessionStorage.getItem(finalKey)) {
+                        setTimeout(() => {
+                            const duration = 3000;
+                            const animationEnd = Date.now() + duration;
+                            const defaults = { 
+                                startVelocity: 30, 
+                                spread: 360, 
+                                ticks: 60, 
+                                zIndex: 9999,
+                                colors: ['#da27a7', '#001b48', '#ed2e45', '#0000fe', '#00c76f', '#e8e6fb']
+                            };
 
-                        function randomInRange(min, max) {
-                            return Math.random() * (max - min) + min;
-                        }
-
-                        const interval = setInterval(function() {
-                            const timeLeft = animationEnd - Date.now();
-
-                            if (timeLeft <= 0) {
-                                return clearInterval(interval);
+                            function randomInRange(min, max) {
+                                return Math.random() * (max - min) + min;
                             }
 
-                            const particleCount = 50 * (timeLeft / duration);
+                            const interval = setInterval(function() {
+                                const timeLeft = animationEnd - Date.now();
+
+                                if (timeLeft <= 0) {
+                                    return clearInterval(interval);
+                                }
+
+                                const particleCount = 50 * (timeLeft / duration);
+                                
+                                window.confetti({
+                                    ...defaults,
+                                    particleCount,
+                                    origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
+                                });
+                                window.confetti({
+                                    ...defaults,
+                                    particleCount,
+                                    origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
+                                });
+                            }, 250);
                             
-                            window.confetti({
-                                ...defaults,
-                                particleCount,
-                                origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 }
-                            });
-                            window.confetti({
-                                ...defaults,
-                                particleCount,
-                                origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 }
-                            });
-                        }, 250);
-                    }, 500);
+                            sessionStorage.setItem(finalKey, 'true');
+                        }, 500);
+                    }
                 }
+                @php
+                    session()->forget('onboarding_just_completed');
+                @endphp
             @endif
             
             @if(session('error'))

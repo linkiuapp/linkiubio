@@ -82,16 +82,6 @@
                 filterType: '',
 
                 init() {
-                    // Inicializar Sortable.js para drag & drop
-                    if (typeof Sortable !== 'undefined') {
-                        new Sortable(document.getElementById('sortableCategories'), {
-                            handle: '.drag-handle',
-                            animation: 150,
-                            onEnd: (evt) => {
-                                this.updateOrder();
-                            }
-                        });
-                    }
                 },
 
                 async deleteCategory(id, name) {
@@ -164,39 +154,6 @@
                     } catch (error) {
                         console.error('Error:', error);
                         alert('Error al cambiar el estado');
-                    }
-                },
-
-                async updateOrder() {
-                    const rows = document.querySelectorAll('#sortableCategories tr');
-                    const categories = [];
-
-                    rows.forEach((row, index) => {
-                        const id = row.dataset.id;
-                        if (id) {
-                            categories.push({
-                                id: parseInt(id),
-                                sort_order: index
-                            });
-                        }
-                    });
-
-                    try {
-                        const response = await fetch(`/{{ $store->slug }}/admin/categories/update-order`, {
-                            method: 'POST',
-                            headers: {
-                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                                'Content-Type': 'application/json',
-                                'Accept': 'application/json',
-                            },
-                            body: JSON.stringify({ categories })
-                        });
-
-                        if (!response.ok) {
-                            console.error('Error al actualizar el orden');
-                        }
-                    } catch (error) {
-                        console.error('Error:', error);
                     }
                 },
 

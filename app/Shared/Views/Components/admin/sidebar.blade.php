@@ -119,6 +119,23 @@ use App\Shared\Models\BillingSetting;
                 </a>
             </li>
 
+            <!-- Reportes de Tiendas -->
+            <li>
+                <a href="{{ route('superlinkiu.store-reports.index') }}" 
+                   class="item-sidebar {{ request()->routeIs('superlinkiu.store-reports.*') ? 'item-sidebar-active' : '' }}">
+                    <x-solar-danger-triangle-outline class="w-4 h-4 mr-2" />
+                    Reportes de Tiendas
+                    @php
+                        $pendingReportsCount = \App\Shared\Models\StoreReport::where('status', 'pending')->count();
+                    @endphp
+                    @if($pendingReportsCount > 0)
+                        <span class="ml-auto text-xs bg-error-300 text-white px-2 py-1 rounded-full font-bold">
+                            {{ $pendingReportsCount }}
+                        </span>
+                    @endif
+                </a>
+            </li>
+
             <!-- Planes y Facturación -->
             <li x-data="{ planesOpen: false }">
                 <button @click="planesOpen = !planesOpen" class="item-sidebar w-full flex justify-between">

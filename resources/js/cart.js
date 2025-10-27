@@ -138,6 +138,24 @@ class Cart {
 
     // Limpiar carrito (ahora vía servidor)
     async clearCart() {
+        // Mostrar confirmación con SweetAlert
+        const result = await Swal.fire({
+            title: '¿Vaciar carrito?',
+            text: 'Se eliminarán todos los productos del carrito',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ed2e45',
+            cancelButtonColor: '#9ca3af',
+            confirmButtonText: 'Sí, vaciar',
+            cancelButtonText: 'Cancelar',
+            reverseButtons: true
+        });
+
+        // Si el usuario cancela, no hacer nada
+        if (!result.isConfirmed) {
+            return;
+        }
+
         try {
             const response = await fetch(this.getCartClearUrl(), {
                 method: 'DELETE',
@@ -149,6 +167,16 @@ class Cart {
             const data = await response.json();
             if (data.success) {
                 this.updateCartDisplayFromServer(data);
+                
+                // Mostrar mensaje de éxito
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Carrito vaciado!',
+                    text: 'Todos los productos fueron eliminados',
+                    confirmButtonColor: '#00c76f',
+                    timer: 2000,
+                    timerProgressBar: true
+                });
             } else {
                 this.showError(data.message || 'Error al vaciar carrito');
             }

@@ -17,11 +17,10 @@
                     <th class="px-6 py-3 text-left">Estado</th>
                     <th class="py-3 text-left">Activar/Desactivar</th>
                     <th class="py-3 text-left">Productos</th>
-                    <th class="px-6 py-3 text-left">Orden</th>
                     <th class="px-6 py-3 text-left">Acciones</th>
                 </tr>
             </thead>
-            <tbody class="bg-accent-50 divide-y divide-accent-100 id="sortableCategories">
+            <tbody class="bg-accent-50 divide-y divide-accent-100">
                 @forelse($categories as $category)
                     <tr class="text-black-400 hover:bg-accent-100">
                         <td class="px-6 py-4 text-center">
@@ -90,14 +89,6 @@
                         <td class="px-6 py-4">
                             <span class="bagde-table-info">
                                 {{ $category->products_count }}
-                            </span>
-                        </td>
-
-                        {{-- ================================================================ --}}
-                        {{-- Orden --}}
-                        <td class="px-6 py-4 text-sm text-black-200">
-                            <span class="drag-handle cursor-move">
-                                <x-solar-sort-outline class="w-5 h-5 text-black-300" />
                             </span>
                         </td>
 

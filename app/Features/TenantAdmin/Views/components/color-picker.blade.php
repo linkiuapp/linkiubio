@@ -65,64 +65,120 @@
         >
             {{-- Preset Colors --}}
             <div class="space-y-3">
-                <h4 class="text-sm font-medium text-black-400">Colores del Tema</h4>
-                <div class="grid grid-cols-5 gap-2">
-                    {{-- Primary Colors --}}
+                <h4 class="text-sm font-medium text-black-400">Colores Predeterminados</h4>
+                <div class="grid grid-cols-6 gap-2">
+                    {{-- Fila 1: Colores cálidos --}}
                     <button 
                         @click="setColor('#da27a7')"
-                        class="w-8 h-8 rounded bg-primary-300 hover:ring-2 hover:ring-primary-100"
-                        title="Primary 300"
+                        style="background-color: #da27a7"
+                        class="w-8 h-8 rounded hover:ring-2 hover:ring-primary-300"
+                        title="Rosa vibrante"
                     ></button>
-                    <button 
-                        @click="setColor('#e04cb6')"
-                        class="w-8 h-8 rounded bg-primary-200 hover:ring-2 hover:ring-primary-100"
-                        title="Primary 200"
-                    ></button>
-                    
-                    {{-- Secondary Colors --}}
-                    <button 
-                        @click="setColor('#001b48')"
-                        class="w-8 h-8 rounded bg-secondary-300 hover:ring-2 hover:ring-secondary-100"
-                        title="Secondary 300"
-                    ></button>
-                    <button 
-                        @click="setColor('#2b4267')"
-                        class="w-8 h-8 rounded bg-secondary-200 hover:ring-2 hover:ring-secondary-100"
-                        title="Secondary 200"
-                    ></button>
-
-                    {{-- Info Colors --}}
-                    <button 
-                        @click="setColor('#0000fe')"
-                        class="w-8 h-8 rounded bg-info-300 hover:ring-2 hover:ring-info-100"
-                        title="Info 300 (Azul)"
-                    ></button>
-                    
-                    {{-- Black Colors --}}
-                    <button 
-                        @click="setColor('#1c1c1e')"
-                        class="w-8 h-8 rounded bg-black-300 hover:ring-2 hover:ring-black-100"
-                        title="Black 300"
-                    ></button>
-                    
-                    {{-- Error Colors --}}
                     <button 
                         @click="setColor('#ed2e45')"
-                        class="w-8 h-8 rounded bg-error-300 hover:ring-2 hover:ring-error-100"
-                        title="Error 300 (Rojo)"
+                        style="background-color: #ed2e45"
+                        class="w-8 h-8 rounded hover:ring-2 hover:ring-error-300"
+                        title="Rojo"
+                    ></button>
+                    <button 
+                        @click="setColor('#ff6b35')"
+                        style="background-color: #ff6b35"
+                        class="w-8 h-8 rounded hover:ring-2 hover:ring-orange-300"
+                        title="Naranja"
+                    ></button>
+                    <button 
+                        @click="setColor('#ffad0d')"
+                        style="background-color: #ffad0d"
+                        class="w-8 h-8 rounded hover:ring-2 hover:ring-warning-300"
+                        title="Amarillo"
+                    ></button>
+                    <button 
+                        @click="setColor('#a855f7')"
+                        style="background-color: #a855f7"
+                        class="w-8 h-8 rounded hover:ring-2 hover:ring-purple-300"
+                        title="Púrpura"
+                    ></button>
+                    <button 
+                        @click="setColor('#ec4899')"
+                        style="background-color: #ec4899"
+                        class="w-8 h-8 rounded hover:ring-2 hover:ring-pink-300"
+                        title="Rosa chicle"
                     ></button>
                     
-                    {{-- Success Colors --}}
+                    {{-- Fila 2: Colores fríos --}}
                     <button 
                         @click="setColor('#00c76f')"
-                        class="w-8 h-8 rounded bg-success-300 hover:ring-2 hover:ring-success-100"
-                        title="Success 300 (Verde)"
+                        style="background-color: #00c76f"
+                        class="w-8 h-8 rounded hover:ring-2 hover:ring-success-300"
+                        title="Verde"
                     ></button>
-                    {{-- White Colors --}}
                     <button 
-                        @click="setColor('#fdfdff')"
-                        class="w-8 h-8 rounded bg-accent-50 hover:ring-2 hover:ring-accent-200 border border-black-200"
-                        title="Accent 50 (Blanco)"
+                        @click="setColor('#10b981')"
+                        style="background-color: #10b981"
+                        class="w-8 h-8 rounded hover:ring-2 hover:ring-emerald-300"
+                        title="Esmeralda"
+                    ></button>
+                    <button 
+                        @click="setColor('#14b8a6')"
+                        style="background-color: #14b8a6"
+                        class="w-8 h-8 rounded hover:ring-2 hover:ring-teal-300"
+                        title="Turquesa"
+                    ></button>
+                    <button 
+                        @click="setColor('#06b6d4')"
+                        style="background-color: #06b6d4"
+                        class="w-8 h-8 rounded hover:ring-2 hover:ring-cyan-300"
+                        title="Cian"
+                    ></button>
+                    <button 
+                        @click="setColor('#0000fe')"
+                        style="background-color: #0000fe"
+                        class="w-8 h-8 rounded hover:ring-2 hover:ring-info-300"
+                        title="Azul eléctrico"
+                    ></button>
+                    <button 
+                        @click="setColor('#001b48')"
+                        style="background-color: #001b48"
+                        class="w-8 h-8 rounded hover:ring-2 hover:ring-secondary-300"
+                        title="Azul marino"
+                    ></button>
+                    
+                    {{-- Fila 3: Neutros y especiales --}}
+                    <button 
+                        @click="setColor('#1c1c1e')"
+                        style="background-color: #1c1c1e"
+                        class="w-8 h-8 rounded hover:ring-2 hover:ring-black-300"
+                        title="Negro"
+                    ></button>
+                    <button 
+                        @click="setColor('#4b5563')"
+                        style="background-color: #4b5563"
+                        class="w-8 h-8 rounded hover:ring-2 hover:ring-gray-400"
+                        title="Gris oscuro"
+                    ></button>
+                    <button 
+                        @click="setColor('#9ca3af')"
+                        style="background-color: #9ca3af"
+                        class="w-8 h-8 rounded hover:ring-2 hover:ring-gray-300"
+                        title="Gris"
+                    ></button>
+                    <button 
+                        @click="setColor('#d1d5db')"
+                        style="background-color: #d1d5db"
+                        class="w-8 h-8 rounded hover:ring-2 hover:ring-gray-200"
+                        title="Gris claro"
+                    ></button>
+                    <button 
+                        @click="setColor('#f3f4f6')"
+                        style="background-color: #f3f4f6"
+                        class="w-8 h-8 rounded hover:ring-2 hover:ring-accent-200 border border-black-200"
+                        title="Blanco hueso"
+                    ></button>
+                    <button 
+                        @click="setColor('#ffffff')"
+                        style="background-color: #ffffff"
+                        class="w-8 h-8 rounded hover:ring-2 hover:ring-accent-200 border border-black-200"
+                        title="Blanco"
                     ></button>
                 </div>
             </div>

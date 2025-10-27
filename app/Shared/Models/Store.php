@@ -594,4 +594,18 @@ class Store extends Model
 
         return array_keys(array_filter($this->protected_actions[$module]));
     }
+
+    /**
+     * ========================================
+     * RELACIONES
+     * ========================================
+     */
+
+    /**
+     * Relación con reportes de la tienda
+     */
+    public function reports()
+    {
+        return $this->hasMany(StoreReport::class);
+    }
 } 
