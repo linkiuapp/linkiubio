@@ -277,7 +277,9 @@
                         title: '¡Publicado!',
                         text: result.value.message || 'Diseño publicado correctamente',
                         confirmButtonColor: '#00c76f',
-                        confirmButtonText: 'OK'
+                        confirmButtonText: 'OK',
+                        timer: 2000,
+                        timerProgressBar: true
                     }).then(() => {
                         location.reload();
                     });

@@ -283,7 +283,9 @@
                             title: '¡Éxito!',
                             text: data.message,
                             confirmButtonColor: '#00c76f',
-                            confirmButtonText: 'OK'
+                            confirmButtonText: 'OK',
+                            timer: 2000,
+                            timerProgressBar: true
                         });
                         
                         location.reload();

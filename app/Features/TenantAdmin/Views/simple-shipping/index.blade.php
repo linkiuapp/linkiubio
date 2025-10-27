@@ -786,7 +786,9 @@ document.addEventListener('alpine:init', () => {
                 title: '¡Éxito!',
                 text: message,
                 confirmButtonColor: '#00c76f',
-                confirmButtonText: 'OK'
+                confirmButtonText: 'OK',
+                timer: 2000,
+                timerProgressBar: true
             }).then(() => {
                 location.reload();
             });
