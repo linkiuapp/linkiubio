@@ -320,11 +320,12 @@
         </div>
 
         <!-- Acciones -->
-        <div class="flex gap-3 justify-end">
-            <a href="{{ route('tenant.admin.orders.show', [$store->slug, $order->id]) }}" class="px-4 py-2 border border-accent-300 text-black-400 rounded-lg hover:bg-accent-100 transition-colors">
+        <div class="flex gap-3 justify-end ">
+            <a href="{{ route('tenant.admin.orders.show', [$store->slug, $order->id]) }}" class="btn-error px-4 py-2 text-accent-50 rounded-lg hover:bg-error-400 transition-colors flex items-center gap-2">
+                <x-solar-close-circle-outline class="w-5 h-5 mr-2" />
                 Cancelar
             </a>
-            <button type="submit" class="btn-primary">
+            <button type="submit" class="btn-primary flex items-center gap-2">
                 <x-solar-check-circle-outline class="w-5 h-5 mr-2" />
                 Actualizar Pedido
             </button>

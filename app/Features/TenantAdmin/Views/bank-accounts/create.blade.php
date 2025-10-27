@@ -26,7 +26,11 @@
             <h2 class="text-body-large font-bold text-black-400 mb-0">Información de la Cuenta</h2>
         </div>
         <div class="p-6">
-            <form action="{{ route('tenant.admin.bank-accounts.store', ['store' => $store->slug, 'paymentMethod' => $paymentMethod->id]) }}" method="POST">
+            <form action="{{ route('tenant.admin.bank-accounts.store', ['store' => $store->slug, 'paymentMethod' => $paymentMethod->id]) }}" 
+                  method="POST"
+                  @if($store->isActionProtected('bank_accounts', 'create'))
+                      @submit.prevent="requireMasterKey('bank_accounts.create', 'Crear cuenta bancaria', () => $el.submit())"
+                  @endif>
                 @csrf
                 
                 {{-- Sección: Información Bancaria --}}

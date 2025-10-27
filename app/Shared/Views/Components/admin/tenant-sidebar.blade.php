@@ -421,6 +421,15 @@
                         </a>
                     </li>
 
+                    <!-- Clave Maestra -->
+                    <li>
+                        <a href="{{ route('tenant.admin.master-key.index', ['store' => $store->slug]) }}"
+                           class="item-sidebar {{ request()->routeIs('tenant.admin.master-key.*') ? 'item-sidebar-active' : '' }}">
+                            <x-solar-lock-keyhole-outline class="w-4 h-4 mr-2" />
+                            Clave Maestra
+                        </a>
+                    </li>
+
                     <!-- Perfil del Negocio -->
                     <li>
                         <a href="{{ route('tenant.admin.business-profile.index', ['store' => $store->slug]) }}"

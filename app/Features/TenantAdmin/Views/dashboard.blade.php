@@ -128,7 +128,7 @@
                                                         <option 
                                                             value="{{ $status }}" 
                                                             :selected="order.status === '{{ $status }}'"
-                                                            class="text-xs"
+                                                            class="text-caption"
                                                         >
                                                             {{ $label }}
                                                         </option>

@@ -288,3 +288,76 @@ window.handleLoginAsStore = async function(storeSlug) {
         alert('Error al abrir la tienda. Por favor intenta de nuevo.');
     }
 };
+
+// ==========================================
+// Sistema de Clave Maestra
+// ==========================================
+
+/**
+ * Solicitar clave maestra antes de ejecutar una acción
+ * @param {string} action - La acción a proteger (ej: 'orders.delete')
+ * @param {string} actionLabel - Etiqueta descriptiva de la acción
+ * @param {function} callback - Función a ejecutar si la clave es correcta
+ */
+window.requireMasterKey = async function(action, actionLabel, callback) {
+    // Obtener el slug de la tienda desde la URL
+    const storeSlug = window.location.pathname.split('/')[1];
+    
+    // Paso 1: Pedir clave maestra
+    const result = await Swal.fire({
+        title: '🔐 Clave Maestra Requerida',
+        html: `
+            <div class="text-body-small text-black-400 mb-4">
+                <p>Esta acción está protegida:</p>
+                <p class="font-bold text-black-500 mt-2">${actionLabel}</p>
+                <p class="mt-3">Ingresa la clave maestra para continuar</p>
+            </div>
+        `,
+        input: 'password',
+        inputPlaceholder: 'Ingresa la clave maestra',
+        inputAttributes: {
+            autocapitalize: 'off',
+            autocomplete: 'off',
+            maxlength: 8,
+            class: 'text-center text-h6 tracking-widest'
+        },
+        showCancelButton: true,
+        confirmButtonText: 'Verificar',
+        cancelButtonText: 'Cancelar',
+        confirmButtonColor: '#da27a7',
+        cancelButtonColor: '#001b48',
+        showLoaderOnConfirm: true,
+        preConfirm: async (key) => {
+            try {
+                // Verificar clave con backend
+                const response = await fetch(`/${storeSlug}/admin/master-key/verify`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({ key, action })
+                });
+                
+                const data = await response.json();
+                
+                if (!response.ok || !data.success) {
+                    throw new Error(data.message || 'Clave incorrecta');
+                }
+                
+                return data;
+            } catch (error) {
+                Swal.showValidationMessage(error.message);
+            }
+        },
+        allowOutsideClick: () => !Swal.isLoading()
+    });
+
+    if (!result.isConfirmed) {
+        return; // Usuario canceló
+    }
+
+    // Paso 2: Clave correcta, ejecutar callback
+    callback();
+};

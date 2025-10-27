@@ -53,6 +53,10 @@ class Store extends Model
         'can_reapply_at',
         'admin_notes',
         'business_category_id',
+        
+        // Clave maestra
+        'master_key',
+        'protected_actions',
     ];
 
     protected $casts = [
@@ -62,6 +66,7 @@ class Store extends Model
         'rejected_at' => 'datetime',
         'can_reapply_at' => 'datetime',
         'document_verified' => 'boolean',
+        'protected_actions' => 'array',
     ];
 
     /**
@@ -507,5 +512,85 @@ class Store extends Model
     public function drafts()
     {
         return $this->hasMany(\App\Models\StoreDraft::class);
+    }
+
+    // ==========================================
+    // Métodos de Clave Maestra
+    // ==========================================
+
+    /**
+     * Verificar si la tienda tiene clave maestra configurada
+     */
+    public function hasMasterKey(): bool
+    {
+        return !empty($this->master_key);
+    }
+
+    /**
+     * Verificar si una acción específica está protegida
+     */
+    public function isActionProtected(string $module, string $action): bool
+    {
+        if (!$this->hasMasterKey()) {
+            return false;
+        }
+
+        if (!$this->protected_actions) {
+            return false;
+        }
+
+        return $this->protected_actions[$module][$action] ?? false;
+    }
+
+    /**
+     * Verificar si la clave maestra es correcta
+     */
+    public function verifyMasterKey(string $key): bool
+    {
+        if (!$this->hasMasterKey()) {
+            return false;
+        }
+
+        return \Illuminate\Support\Facades\Hash::check($key, $this->master_key);
+    }
+
+    /**
+     * Establecer o actualizar la clave maestra
+     */
+    public function setMasterKey(string $key): bool
+    {
+        $this->master_key = \Illuminate\Support\Facades\Hash::make($key);
+        return $this->save();
+    }
+
+    /**
+     * Eliminar la clave maestra
+     */
+    public function removeMasterKey(): bool
+    {
+        $this->master_key = null;
+        $this->protected_actions = null;
+        return $this->save();
+    }
+
+    /**
+     * Actualizar las acciones protegidas
+     */
+    public function updateProtectedActions(array $actions): bool
+    {
+        $this->protected_actions = $actions;
+        return $this->save();
+    }
+
+    /**
+     * Obtener todas las acciones protegidas de un módulo
+     */
+    public function getProtectedActionsByModule(string $module): array
+    {
+        if (!$this->protected_actions || !isset($this->protected_actions[$module])) {
+            return [];
+        }
+
+        return array_keys(array_filter($this->protected_actions[$module]));
     }
 } 

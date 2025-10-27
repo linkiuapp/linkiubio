@@ -177,7 +177,11 @@
                                             </a>
                                             <button type="button" 
                                                     class="text-error-300 hover:text-error-400"
-                                                    onclick="confirmDelete('{{ route('tenant.admin.payment-methods.bank-accounts.destroy', ['store' => $store->slug, 'paymentMethod' => $paymentMethod->id, 'bankAccount' => $account->id]) }}')">
+                                                    onclick="@if($store->isActionProtected('bank_accounts', 'delete'))
+                                                                requireMasterKey('bank_accounts.delete', 'Eliminar cuenta: {{ $account->bank_name }} - •••{{ substr($account->account_number, -4) }}', () => confirmDelete('{{ route('tenant.admin.payment-methods.bank-accounts.destroy', ['store' => $store->slug, 'paymentMethod' => $paymentMethod->id, 'bankAccount' => $account->id]) }}'))
+                                                            @else
+                                                                confirmDelete('{{ route('tenant.admin.payment-methods.bank-accounts.destroy', ['store' => $store->slug, 'paymentMethod' => $paymentMethod->id, 'bankAccount' => $account->id]) }}')
+                                                            @endif">
                                                 <x-solar-trash-bin-trash-outline class="w-5 h-5" />
                                             </button>
                                         </div>

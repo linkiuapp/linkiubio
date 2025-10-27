@@ -102,6 +102,23 @@ use App\Shared\Models\BillingSetting;
                 </a>
             </li>
 
+            <!-- Recuperación Clave Maestra -->
+            <li>
+                <a href="{{ route('superlinkiu.master-key-recovery.index') }}" 
+                   class="item-sidebar {{ request()->routeIs('superlinkiu.master-key-recovery.*') ? 'item-sidebar-active' : '' }}">
+                    <x-solar-lock-keyhole-outline class="w-4 h-4 mr-2" />
+                    Recuperación Clave Maestra
+                    @php
+                        $pendingRecoveryCount = \App\Shared\Models\MasterKeyRecoveryRequest::where('status', 'pending')->count();
+                    @endphp
+                    @if($pendingRecoveryCount > 0)
+                        <span class="ml-auto text-xs bg-warning-300 text-white px-2 py-1 rounded-full font-bold">
+                            {{ $pendingRecoveryCount }}
+                        </span>
+                    @endif
+                </a>
+            </li>
+
             <!-- Planes y Facturación -->
             <li x-data="{ planesOpen: false }">
                 <button @click="planesOpen = !planesOpen" class="item-sidebar w-full flex justify-between">

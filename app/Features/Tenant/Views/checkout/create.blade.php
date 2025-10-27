@@ -18,11 +18,11 @@
         <!-- Main Checkout Layout - Single Column -->
         <div class="max-w-2xl mx-auto">
             <!-- Checkout Form -->
-            <div class="bg-accent-50 rounded-xl p-6 border border-accent-200">
+            <div class="bg-accent-50 rounded-xl p-2 border border-accent-200">
                 <div class="space-y-6">
             
             <!-- CARD 1: DATOS PERSONALES -->
-            <div id="card-step1" class="bg-accent-50 rounded-xl p-6 border border-accent-200 shadow-sm">
+            <div id="card-step1" class="bg-accent-50 rounded-xl p-4">
                 <div class="flex items-center mb-4">
                     <div class="w-8 h-8 bg-primary-300 text-accent-50 rounded-full flex items-center justify-center text-sm font-bold mr-3">1</div>
                     <h3 class="text-body-large font-semibold text-black-500">Datos Personales</h3>
@@ -65,7 +65,7 @@
             </div>
 
             <!-- CARD 2: MÉTODO DE ENVÍO -->
-            <div id="card-step2" class="bg-accent-50 rounded-xl p-6 border border-accent-200 shadow-sm hidden">
+            <div id="card-step2" class="bg-accent-50 rounded-xl p-4 hidden">
                 <div class="flex items-center mb-4">
                     <div class="w-8 h-8 bg-primary-300 text-accent-50 rounded-full flex items-center justify-center text-sm font-bold mr-3">2</div>
                     <h3 class="text-body-large font-semibold text-black-500">Método de Envío</h3>
@@ -87,7 +87,7 @@
                             id="customer_address" 
                             name="customer_address" 
                             rows="2"
-                            class="w-full px-4 py-3 border border-accent-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-colors resize-none"
+                            class="w-full px-4 py-3 border border-accent-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-colors resize-none text-small"
                             placeholder="Calle, carrera, número, apartamento, referencias..."
                         ></textarea>
                     </div>
@@ -101,7 +101,7 @@
                             <select 
                                 id="department" 
                                 name="department" 
-                                class="w-full px-4 py-3 border border-accent-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-colors"
+                                class="w-full px-4 py-3 border border-accent-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-colors text-small"
                             >
                                 <option value="">Selecciona tu departamento</option>
                                 @foreach(['Amazonas', 'Antioquia', 'Arauca', 'Atlántico', 'Bolívar', 'Boyacá', 'Caldas', 'Caquetá', 'Casanare', 'Cauca', 'Cesar', 'Chocó', 'Córdoba', 'Cundinamarca', 'Guainía', 'Guaviare', 'Huila', 'La Guajira', 'Magdalena', 'Meta', 'Nariño', 'Norte de Santander', 'Putumayo', 'Quindío', 'Risaralda', 'San Andrés y Providencia', 'Santander', 'Sucre', 'Tolima', 'Valle del Cauca', 'Vaupés', 'Vichada'] as $dept)
@@ -116,7 +116,7 @@
                                 type="text" 
                                 id="city" 
                                 name="city" 
-                                class="w-full px-4 py-3 border border-accent-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-colors"
+                                class="w-full px-4 py-3 border border-accent-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-colors text-small"
                                 placeholder="Escribe tu ciudad"
                             >
                         </div>
@@ -128,7 +128,7 @@
                             id="customer_address_national" 
                             name="customer_address" 
                             rows="2"
-                            class="w-full px-4 py-3 border border-accent-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-colors resize-none"
+                            class="w-full px-4 py-3 border border-accent-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-colors resize-none text-small"
                             placeholder="Calle, carrera, número, apartamento, referencias..."
                         ></textarea>
                     </div>
@@ -154,16 +154,16 @@
             </div>
 
             <!-- CARD 3: MÉTODO DE PAGO -->
-            <div id="card-step3" class="bg-accent-50 rounded-xl p-6 border border-accent-200 shadow-sm hidden">
+            <div id="card-step3" class="bg-accent-50 rounded-xl p-4 hidden">
                 <div class="flex items-center mb-4">
-                    <div class="w-8 h-8 bg-primary-300 text-accent-50 rounded-full flex items-center justify-center text-sm font-bold mr-3">3</div>
+                    <div class="w-8 h-8 bg-primary-300 text-accent-50 rounded-full flex items-center justify-center text-small font-bold mr-3">3</div>
                     <h3 class="text-body-large font-semibold text-black-500">Método de Pago</h3>
                 </div>
                 
                 <div class="space-y-4 mb-6">
                     <!-- Los métodos de pago se cargan dinámicamente aquí -->
                     <div class="text-center py-4">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-300 mx-auto"></div>
+                        <div class="animate-spin rounded-full h-8 w-8 mx-auto"></div>
                         <p class="text-sm text-black-300 mt-2">Cargando métodos de pago...</p>
                     </div>
                 </div>
@@ -188,7 +188,7 @@
             </div>
             
             <!-- Resumen integrado al final -->
-            <div class="border-t border-accent-200 pt-6 mt-6">
+            <div class="border-t border-accent-200 pt-6 mt-6 px-4">
                 <h3 class="text-body-large font-semibold text-black-500 mb-4">Resumen del Pedido</h3>
                 
                 <!-- Products List -->
@@ -230,17 +230,17 @@
                 <!-- Sección de productos eliminada - ya está en "Resumen del Pedido" -->
 
                 <!-- Totals -->
-                <div class="border-t border-accent-200 pt-4 space-y-3">
+                <div class="border-t border-accent-200 pt-4 space-y-3 mb-4">
                     <!-- Subtotal productos -->
                     <div class="flex justify-between items-center">
-                        <span class="text-sm text-black-400">Subtotal productos:</span>
-                        <span class="text-sm font-medium text-black-500" id="summary-subtotal">$0</span>
+                        <span class="text-caption text-black-400">Subtotal productos:</span>
+                        <span class="text-caption font-medium text-black-500" id="summary-subtotal">$0</span>
                     </div>
                     
                     <!-- Envío -->
                     <div class="flex justify-between items-center">
-                        <span class="text-sm text-black-400">Costo de envío:</span>
-                        <span class="text-sm font-medium text-black-500" id="summary-shipping">Calculando...</span>
+                        <span class="text-caption text-black-400">Costo de envío:</span>
+                        <span class="text-caption font-medium text-black-500" id="summary-shipping">Calculando...</span>
                     </div>
                     
                     <!-- Descuento cupón (oculto por defecto) -->
@@ -869,12 +869,12 @@ function renderShippingMethods() {
                         class="mr-3 w-4 h-4 text-primary-500 border-accent-300 focus:ring-primary-300"
                     >
                     <div class="flex-1">
-                        <div class="flex items-center justify-between">
-                            <span class="font-medium text-black-600">${method.icon || '🏪'} ${method.name || 'Recogida en Tienda'}</span>
-                            <span class="text-primary-500 font-medium">${method.formatted_cost || 'GRATIS'}</span>
+                        <div class="flex flex-col gap-1">
+                            <span class="text-body-small font-medium text-black-600">${method.icon || '🏪'} ${method.name || 'Recogida en Tienda'}</span>
+                            <span class="text-caption text-primary-500 font-bold">${method.formatted_cost || 'GRATIS'}</span>
                         </div>
-                        <p class="text-sm text-black-400 mt-1">${method.instructions || 'Recoge tu pedido en nuestra tienda'}</p>
-                        <p class="text-sm text-black-300 mt-1">⏱️ Listo en: ${method.preparation_label || method.preparation_time || '1 hora'}</p>
+                        <p class="text-small text-black-400 mt-1">${method.instructions || 'Recoge tu pedido en nuestra tienda'}</p>
+                        <p class="text-small text-black-300 mt-1">⏱️ Listo en: ${method.preparation_label || method.preparation_time || '1 hora'}</p>
                     </div>
                 </label>
             `;
@@ -893,12 +893,12 @@ function renderShippingMethods() {
                         class="mr-3 w-4 h-4 text-primary-500 border-accent-300 focus:ring-primary-300"
                     >
                     <div class="flex-1">
-                        <div class="flex items-center justify-between">
-                            <span class="font-medium text-black-600">${method.icon || '🚚'} ${method.name || 'Envío Local'}</span>
-                            <span class="text-primary-500 font-medium">${method.formatted_cost}</span>
+                        <div class="flex flex-col gap-1">
+                            <span class="text-body-small font-medium text-black-600">${method.icon || '🚚'} ${method.name || 'Envío Local'}</span>
+                            <span class="text-caption text-primary-500 font-bold">${method.formatted_cost}</span>
                         </div>
-                        <p class="text-sm text-black-400 mt-1">${method.instructions || 'Entrega en tu ciudad'}</p>
-                        <p class="text-sm text-black-300 mt-1">⏱️ Tiempo: ${method.preparation_label || method.preparation_time || '2-4 horas'}</p>
+                        <p class="text-small text-black-400 mt-1">${method.instructions || 'Entrega en tu ciudad'}</p>
+                        <p class="text-small text-black-300 mt-1">⏱️ Tiempo: ${method.preparation_label || method.preparation_time || '2-4 horas'}</p>
                     </div>
                 </label>
             `;
@@ -916,12 +916,12 @@ function renderShippingMethods() {
                         class="mr-3 w-4 h-4 text-primary-500 border-accent-300 focus:ring-primary-300"
                     >
                     <div class="flex-1">
-                        <div class="flex items-center justify-between">
-                            <span class="font-medium text-black-600">${method.icon || '🌍'} ${method.name || 'Envío Nacional'}</span>
-                            <span class="text-primary-500 font-medium">${method.formatted_cost || 'Según destino'}</span>
+                        <div class="flex flex-col gap-1">
+                            <span class="text-body-small font-medium text-black-600">${method.icon || '🌍'} ${method.name || 'Envío Nacional'}</span>
+                            <span class="text-caption text-primary-500 font-bold">${method.formatted_cost || 'Según destino'}</span>
                         </div>
-                        <p class="text-sm text-black-400 mt-1">${method.instructions || 'Envío a todo el país'}</p>
-                        <p class="text-sm text-black-300 mt-1">⏱️ Tiempo: ${method.preparation_label || '3-7 días hábiles'}</p>
+                        <p class="text-small text-black-400 mt-1">${method.instructions || 'Envío a todo el país'}</p>
+                        <p class="text-small text-black-300 mt-1">⏱️ Tiempo: ${method.preparation_label || '3-7 días hábiles'}</p>
                     </div>
                 </label>
             `;
@@ -1002,8 +1002,8 @@ function renderPaymentMethods() {
     paymentMethods.forEach(method => {
         if (method.type === 'cash') {
             html += `
-                <div class="border border-accent-200 rounded-lg p-4 hover:border-primary-300 transition-colors">
-                    <label class="flex items-center cursor-pointer">
+                <div class="border border-accent-200 rounded-lg transition-colors">
+                    <label class="flex items-center cursor-pointer gap-3 p-4">
                         <input 
                             type="radio" 
                             name="payment_method" 
@@ -1015,7 +1015,7 @@ function renderPaymentMethods() {
                             <span class="text-xl">${method.icon}</span>
                         </div>
                         <div class="flex-1">
-                            <h4 class="text-body-regular font-semibold text-black-500">${method.name}</h4>
+                            <h4 class="text-body-small font-semibold text-black-500">${method.name}</h4>
                             <p class="text-small text-black-500">${method.instructions || 'Paga en efectivo al recibir tu pedido'}</p>
                         </div>
                     </label>
@@ -1048,7 +1048,7 @@ function renderPaymentMethods() {
             const accounts = method.bank_accounts || [];
             
             html += `
-                <div class="border border-accent-200 rounded-lg p-4 hover:border-primary-300 transition-colors">
+                <div class="border border-accent-200 rounded-lg p-2 transition-colors">
                     <label class="flex items-center cursor-pointer">
                         <input 
                             type="radio" 
@@ -1061,7 +1061,7 @@ function renderPaymentMethods() {
                             <span class="text-xl">${method.icon}</span>
                         </div>
                         <div class="flex-1">
-                            <h4 class="text-body-regular font-semibold text-black-500">${method.name}</h4>
+                            <h4 class="text-body-small font-semibold text-black-500">${method.name}</h4>
                             <p class="text-small text-black-500">${method.instructions || 'Transfiere a nuestras cuentas bancarias'}</p>
                         </div>
                     </label>
@@ -1069,8 +1069,8 @@ function renderPaymentMethods() {
                     <!-- Transferencia Fields -->
                     <div id="transfer-fields-${method.id}" class="hidden mt-4">
                         ${accounts.map(account => `
-                            <div class="bg-gradient-to-r from-info-50 to-primary-50 border border-info-200 rounded-lg p-3 sm:p-4 shadow-sm">
-                                <h4 class="font-bold text-info-300 mb-3 flex items-center text-body-large">
+                            <div class="bg-gradient-to-r from-info-50 to-primary-50 border border-info-200 rounded-lg p-2 sm:p-4 shadow-sm mb-3">
+                                <h4 class="font-bold text-info-300 mb-3 flex items-center text-body-small">
                                     <x-solar-card-transfer-outline class="w-5 h-5 inline-block mr-2" />
                                     ${account.bank_name}
                                 </h4>
@@ -1078,18 +1078,18 @@ function renderPaymentMethods() {
                                     <!-- Tipo de Cuenta -->
                                     <div class="bg-accent-50 rounded-lg p-2 border border-accent-200">
                                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
-                                            <span class="text-caption text-black-500 font-medium">Tipo:</span>
-                                            <span class="text-body-small sm:text-body-small font-bold text-black-500 px-2 py-0.5 rounded-full inline-block">${account.account_type || 'Cuenta Corriente'}</span>
+                                            <span class="text-small text-black-500 font-medium">Tipo:</span>
+                                            <span class="text-caption sm:text-body-small font-bold text-black-500 px-2 py-0.5 rounded-full inline-block">${account.account_type || 'Cuenta Corriente'}</span>
                                         </div>
                                     </div>
                                     
                                     <!-- Número de Cuenta -->
                                     <div class="bg-accent-50 rounded-lg p-2 border border-accent-200">
                                         <div class="space-y-2">
-                                            <span class="text-caption text-black-500 font-medium block">Número de Cuenta:</span>
-                                            <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                                                <span class="text-body-small sm:text-body-small font-bold text-black-500 bg-accent-100 px-3 py-2 rounded-full tracking-wider break-all" id="account-${account.id}">${account.account_number}</span>
-                                                <button type="button" onclick="copyToClipboard('account-${account.id}')" class="text-body-small bg-accent-200 hover:bg-success-300 hover:text-black-500 text-black-500 px-3 py-2 rounded-full font-semibold transition-colors whitespace-nowrap">
+                                            <span class="text-small text-black-500 font-medium block">Número de Cuenta:</span>
+                                            <div class="flex sm:flex-row items-start sm:items-center justify-between gap-2">
+                                                <span class="text-caption sm:text-body-small font-bold text-black-500 bg-accent-100 px-3 py-2 rounded-full tracking-wider break-all" id="account-${account.id}">${account.account_number}</span>
+                                                <button type="button" onclick="copyToClipboard('account-${account.id}')" class="text-caption bg-accent-200 hover:bg-success-300 hover:text-black-500 text-black-500 px-3 py-2 rounded-full font-semibold transition-colors whitespace-nowrap">
                                                     Copiar
                                                 </button>
                                             </div>
@@ -1099,8 +1099,8 @@ function renderPaymentMethods() {
                                     <!-- Titular -->
                                     <div class="bg-accent-50 rounded-lg p-2 border border-accent-200">
                                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
-                                            <span class="text-caption text-black-500 font-medium">Titular:</span>
-                                            <span class="text-body-small sm:text-body-small font-bold text-black-500">${account.account_holder}</span>
+                                            <span class="text-small text-black-500 font-medium">Titular:</span>
+                                            <span class="text-caption sm:text-body-small font-bold text-black-500">${account.account_holder}</span>
                                         </div>
                                     </div>
                                     
@@ -1108,10 +1108,10 @@ function renderPaymentMethods() {
                                         <!-- Documento -->
                                         <div class="bg-accent-50 rounded-lg p-2 border border-accent-200">
                                             <div class="space-y-2">
-                                                <span class="text-caption text-black-500 font-medium block">Documento:</span>
-                                                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
-                                                    <span class="text-body-small sm:text-body-small font-bold text-black-500 bg-accent-100 px-3 py-2 rounded-full break-all" id="document-${account.id}">${account.document_number}</span>
-                                                    <button type="button" onclick="copyToClipboard('document-${account.id}')" class="text-body-small bg-accent-200 hover:bg-success-300 hover:text-black-500 text-black-500 px-3 py-2 rounded-full font-semibold transition-colors whitespace-nowrap">
+                                                <span class="text-small text-black-500 font-medium block">Documento:</span>
+                                                <div class="flex sm:flex-row items-start sm:items-center justify-between gap-2">
+                                                    <span class="text-caption sm:text-body-small font-bold text-black-500 bg-accent-100 px-3 py-2 rounded-full break-all" id="document-${account.id}">${account.document_number}</span>
+                                                    <button type="button" onclick="copyToClipboard('document-${account.id}')" class="text-caption bg-accent-200 hover:bg-success-300 hover:text-black-500 text-black-500 px-3 py-2 rounded-full font-semibold transition-colors whitespace-nowrap">
                                                         Copiar
                                                     </button>
                                                 </div>
@@ -1123,7 +1123,7 @@ function renderPaymentMethods() {
                         `).join('')}
                         
                         <div class="bg-accent-100 border border-accent-200 rounded-lg p-3 mt-2">
-                            <label for="payment_proof" class="block text-caption font-medium text-black-500 mb-2">
+                            <label for="payment_proof" class="block text-small font-medium text-black-500 mb-2">
                                 Comprobante ${method.require_proof ? '*' : '(Opcional)'}
                             </label>
                             <input 
@@ -1132,9 +1132,9 @@ function renderPaymentMethods() {
                                 name="payment_proof" 
                                 accept=".jpg,.jpeg,.png,.pdf"
                                 ${method.require_proof ? 'required' : ''}
-                                class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:ring-1 focus:ring-primary-300 focus:border-transparent transition-colors text-sm"
+                                class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:ring-1 focus:ring-primary-300 focus:border-transparent transition-colors text-small"
                             >
-                            <p class="text-xs text-black-300 mt-1">
+                            <p class="text-small text-black-300 mt-1">
                                 ${method.require_proof ? 
                                     'JPG, PNG o PDF - OBLIGATORIO' : 
                                     'JPG, PNG o PDF - OPCIONAL'
