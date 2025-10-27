@@ -20,13 +20,13 @@
         <div class="px-6 py-10 text-center">
 
             <!-- Logo -->
-            <div class="mb-4">
+            <div class="mb-2">
                 <div class="mx-auto flex items-center justify-center">
                     @if($store->design && $store->design->logo_url)
                         <img src="{{ $store->design->logo_url }}" 
                              alt="Logo" 
                              class="w-18 h-18 rounded-full object-cover"
-                             style="width: 100px; height: 100px;">
+                             style="width: 150px; height: 150px;">
                     @endif
                 </div>
             </div>
@@ -64,37 +64,37 @@
 
             <!-- Contacto -->
             <a href="{{ route('tenant.contact', $store->slug) }}" 
-               class="flex flex-col items-center py-2 px-1 sm:px-4 {{ request()->routeIs('tenant.contact') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
+               class="flex flex-col items-center py-2 px-3 min-w-[72px] {{ request()->routeIs('tenant.contact') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
                 <x-lucide-store class="w-5 h-5 sm:w-6 sm:h-6 mb-1" />
-                <span class="text-[10px] sm:text-caption font-regular">Sedes</span>
+                <span class="text-body-small sm:text-body-regular font-regular">Sedes</span>
             </a>
 
             <!-- Catálogo -->
             <a href="{{ route('tenant.catalog', $store->slug) }}" 
-               class="flex flex-col items-center py-2 px-1 sm:px-4 {{ request()->routeIs('tenant.catalog') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
+               class="flex flex-col items-center py-2 px-3 min-w-[72px] {{ request()->routeIs('tenant.catalog') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
                 <x-lucide-shopping-basket class="w-5 h-5 sm:w-6 sm:h-6 mb-1" />
-                <span class="text-[10px] sm:text-caption font-regular">Catálogo</span>
+                <span class="text-body-small sm:text-body-regular font-regular">Catálogo</span>
             </a>
 
             <!-- Inicio -->
             <a href="{{ route('tenant.home', $store->slug) }}" 
-               class="flex flex-col items-center py-2 px-2 sm:px-5 {{ request()->routeIs('tenant.home') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
+               class="flex flex-col items-center py-2 px-3 min-w-[72px] {{ request()->routeIs('tenant.home') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
                 <x-lucide-home class="w-6 h-6 sm:w-7 sm:h-7 mb-1" />
-                <span class="text-[10px] sm:text-caption font-regular">Inicio</span>
+                <span class="text-body-small sm:text-body-regular font-regular">Inicio</span>
             </a>
 
             <!-- Promos -->
             <a href="{{ route('tenant.promotions', $store->slug) }}" 
-               class="flex flex-col items-center py-2 px-1 sm:px-4 {{ request()->routeIs('tenant.promotions') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
+               class="flex flex-col items-center py-2 px-3 min-w-[72px] {{ request()->routeIs('tenant.promotions') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
                 <x-lucide-badge-percent class="w-5 h-5 sm:w-6 sm:h-6 mb-1" />
-                <span class="text-[10px] sm:text-caption font-regular">Promos</span>
+                <span class="text-body-small sm:text-body-regular font-regular">Promos</span>
             </a>
 
             <!-- Reservas -->
             <a href="{{ route('tenant.coming-soon', $store->slug) }}" 
-               class="flex flex-col items-center py-2 px-1 sm:px-4 {{ request()->routeIs('tenant.coming-soon') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
+               class="flex flex-col items-center py-2 px-3 min-w-[72px] {{ request()->routeIs('tenant.coming-soon') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
                 <x-lucide-calendar-days class="w-5 h-5 sm:w-6 sm:h-6 mb-1" />
-                <span class="text-[10px] sm:text-caption font-regular">Reservas</span>
+                <span class="text-body-small sm:text-body-regular font-regular">Reservas</span>
             </a>
         </div>
     </nav>

@@ -1,47 +1,42 @@
-<!-- Carrito flotante centrado -->
-<div id="cart-float" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 w-[95%] sm:w-full max-w-[480px] bg-accent-50 border border-accent-200 rounded-xl shadow-lg z-[1000] transition-all duration-300">
-    <div class="px-4 sm:px-6 py-3 sm:py-4">
-        <div class="flex items-center justify-between gap-4">
-            <!-- Icono carrito con badge -->
-            <div class="relative flex-shrink-0">
-                <div class="w-12 h-12 bg-primary-300 rounded-full flex items-center justify-center">
-                    <x-solar-bag-2-outline class="w-6 h-6 text-accent-50" />
-                </div>
-                <!-- Badge contador -->
-                <div class="cart-badge absolute -top-1 -right-1 bg-error-300 text-accent-50 text-xs font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1" style="display: none;">
-                    0
-                </div>
+<!-- Carrito flotante tipo Pill -->
+<div id="cart-float" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-accent-50 border-2 border-accent-200 rounded-full shadow-xl z-[1000] px-4 py-3">
+    <div class="flex items-center gap-4">
+        <!-- Icono carrito con badge -->
+        <div class="relative flex-shrink-0">
+            <div class="w-10 h-10 bg-primary-300 rounded-full flex items-center justify-center">
+                <x-solar-bag-2-outline class="w-5 h-5 text-accent-50" />
             </div>
-            
-            <!-- Información del carrito -->
-            <div class="flex-1 min-w-0 text-center">
-                <p class="cart-count-text text-xs sm:text-sm font-medium text-black-400 mb-1">
-                    0 productos
-                </p>
-                <p class="cart-total-price text-lg sm:text-xl font-bold text-black-500">
-                    $0
-                </p>
-            </div>
-            
-            <!-- Botones de acción -->
-            <div class="flex-shrink-0 flex gap-2">
-                <a href="{{ route('tenant.cart.index', $store->slug ?? 'store') }}" 
-                   class="view-cart-btn bg-accent-200 hover:bg-accent-300 text-black-500 px-3 sm:px-4 py-2 sm:py-3 rounded-xl text-xs sm:text-sm font-medium transition-colors flex items-center gap-1">
-                    <span>Ver</span>
-                </a>
-                <a href="{{ route('tenant.checkout.create', $store->slug ?? 'store') }}" 
-                   class="checkout-btn bg-secondary-300 hover:bg-secondary-200 text-accent-50 px-3 sm:px-4 py-2 sm:py-3 rounded-xl text-xs sm:text-sm font-semibold transition-colors flex items-center gap-1">
-                    <span>Comprar</span>
-                    <x-solar-arrow-right-outline class="w-3 h-3 sm:w-4 sm:h-4" />
-                </a>
+            <!-- Badge contador -->
+            <div class="cart-badge absolute -top-1 -right-1 bg-error-300 text-accent-50 text-caption font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1.5" style="display: none;">
+                0
             </div>
         </div>
         
-        <!-- Estado vacío (mensaje alentador) -->
-        <div class="cart-empty-state mt-3" style="display: none;">
-            <p class="text-xs text-black-300 text-center">
-                ¡Agrega productos para empezar tu pedido! 🛒
+        <!-- Información del carrito -->
+        <div class="flex items-center gap-3">
+            <p class="cart-count-text text-caption font-bold text-black-400 whitespace-nowrap">
+                0 productos
             </p>
+            <span class="text-disabled-200">•</span>
+            <p class="cart-total-price text-body-small font-bold text-black-500 whitespace-nowrap">
+                $0
+            </p>
+        </div>
+        
+        <!-- Separador vertical -->
+        <div class="w-px h-8 bg-accent-200"></div>
+        
+        <!-- Botones de acción -->
+        <div class="flex items-center gap-2">
+            <a href="{{ route('tenant.cart.index', $store->slug ?? 'store') }}" 
+               class="view-cart-btn bg-accent-200 text-black-500 px-4 py-2 rounded-full text-caption font-bold whitespace-nowrap">
+                Ver
+            </a>
+            <a href="{{ route('tenant.checkout.create', $store->slug ?? 'store') }}" 
+               class="checkout-btn bg-secondary-300 text-accent-50 px-4 py-2 rounded-full text-caption font-bold flex items-center gap-1.5 whitespace-nowrap">
+                <span>Comprar</span>
+                <x-solar-arrow-right-outline class="w-4 h-4" />
+            </a>
         </div>
     </div>
 </div>

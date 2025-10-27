@@ -268,10 +268,9 @@
                     title: '¡Éxito!',
                     text: '{{ session('swal_success') ?? session('success') }}',
                     confirmButtonColor: '#00c76f',
-                    confirmButtonText: 'OK'
-                }).then(() => {
-                    // Recargar la página después de cerrar el SweetAlert
-                    location.reload();
+                    confirmButtonText: 'OK',
+                    timer: 3000,
+                    timerProgressBar: true
                 });
             @endif
             

@@ -509,7 +509,9 @@
                             title: '¡Éxito!',
                             text: data.message || 'Estado actualizado correctamente',
                             confirmButtonColor: '#00c76f',
-                            confirmButtonText: 'OK'
+                            confirmButtonText: 'OK',
+                            timer: 2000,
+                            timerProgressBar: true
                         }).then(() => {
                             location.reload();
                         });

@@ -469,7 +469,9 @@ document.addEventListener('alpine:init', () => {
                         title: '¡Éxito!',
                         text: `${methodName} ${action} exitosamente`,
                         confirmButtonColor: '#00c76f',
-                        confirmButtonText: 'OK'
+                        confirmButtonText: 'OK',
+                        timer: 2000,
+                        timerProgressBar: true
                     }).then(() => {
                         window.location.reload();
                     });
@@ -516,7 +518,9 @@ document.addEventListener('alpine:init', () => {
                         title: '¡Éxito!',
                         text: `${methodName} establecido como predeterminado`,
                         confirmButtonColor: '#00c76f',
-                        confirmButtonText: 'OK'
+                        confirmButtonText: 'OK',
+                        timer: 2000,
+                        timerProgressBar: true
                     }).then(() => {
                         window.location.reload();
                     });
@@ -623,7 +627,9 @@ document.addEventListener('alpine:init', () => {
                         title: '¡Éxito!',
                         text: 'Configuración guardada exitosamente',
                         confirmButtonColor: '#00c76f',
-                        confirmButtonText: 'OK'
+                        confirmButtonText: 'OK',
+                        timer: 2000,
+                        timerProgressBar: true
                     }).then(() => {
                         window.location.reload();
                     });

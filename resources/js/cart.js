@@ -344,15 +344,29 @@ class Cart {
 
     // Mostrar feedback cuando se agrega producto
     showAddedFeedback(productName) {
+        // Obtener info actualizada del carrito
+        const cartBadge = document.querySelector('.cart-badge');
+        const cartTotal = document.querySelector('.cart-total-price');
+        const totalItems = cartBadge ? cartBadge.textContent : '0';
+        const totalPrice = cartTotal ? cartTotal.textContent : '$0';
+        
         // Crear notificación temporal
         const notification = document.createElement('div');
-        notification.className = 'fixed top-4 right-4 bg-success-300 text-accent-50 px-4 py-2 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-x-full';
+        notification.className = 'fixed top-6 left-1/2 transform -translate-x-1/2 bg-success-100 px-6 py-4 rounded-2xl shadow-2xl z-[9999] transition-all duration-500 -translate-y-32 opacity-0 min-w-[500px]';
         notification.innerHTML = `
-            <div class="flex items-center gap-2">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                </svg>
-                <span class="text-sm font-medium">Agregado al carrito</span>
+            <div class="flex items-center gap-4">
+                <div class="flex-shrink-0">
+                    <svg class="w-10 h-10 text-black-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+ 
+                <div class="flex flex-col gap-1">
+                    <span class="text-body-regular font-bold text-black-500">¡Hey! Tu producto ha sido agregado al carrito</span>
+                    <span class="text-body-small font-medium text-black-500 whitespace-nowrap">
+                        ${totalItems} ${totalItems === 1 ? 'producto' : 'productos'} en carrito · ${totalPrice}
+                    </span>
+                </div>
             </div>
         `;
         
@@ -360,18 +374,18 @@ class Cart {
         
         // Animar entrada
         setTimeout(() => {
-            notification.classList.remove('translate-x-full');
+            notification.classList.remove('-translate-y-32', 'opacity-0');
         }, 100);
         
         // Animar salida y eliminar
         setTimeout(() => {
-            notification.classList.add('translate-x-full');
+            notification.classList.add('-translate-y-32', 'opacity-0');
             setTimeout(() => {
                 if (notification.parentNode) {
                     notification.parentNode.removeChild(notification);
                 }
             }, 300);
-        }, 2000);
+        }, 2500);
     }
 
     // Mostrar error con manejo robusto
