@@ -52,15 +52,15 @@ Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreAppro
         Route::post('/change-password', [\App\Features\TenantAdmin\Controllers\ProfileController::class, 'changePassword'])->name('change-password');
     });
     
-// Master Key Routes (Clave Maestra)
-Route::prefix('master-key')->name('master-key.')->group(function () {
-    Route::get('/', [MasterKeyController::class, 'index'])->name('index');
-    Route::post('/store', [MasterKeyController::class, 'store'])->name('store');
-    Route::post('/update-actions', [MasterKeyController::class, 'updateActions'])->name('update-actions');
-    Route::post('/verify', [MasterKeyController::class, 'verify'])->name('verify');
-    Route::delete('/destroy', [MasterKeyController::class, 'destroy'])->name('destroy');
-    Route::post('/request-recovery', [MasterKeyController::class, 'requestRecovery'])->name('request-recovery');
-});
+    // Master Key Routes (Clave Maestra)
+    Route::prefix('master-key')->name('master-key.')->group(function () {
+        Route::get('/', [MasterKeyController::class, 'index'])->name('index');
+        Route::post('/store', [MasterKeyController::class, 'store'])->name('store');
+        Route::post('/update-actions', [MasterKeyController::class, 'updateActions'])->name('update-actions');
+        Route::post('/verify', [MasterKeyController::class, 'verify'])->name('verify');
+        Route::delete('/destroy', [MasterKeyController::class, 'destroy'])->name('destroy');
+        Route::post('/request-recovery', [MasterKeyController::class, 'requestRecovery'])->name('request-recovery');
+    });
     
     // Business Profile Routes
     Route::prefix('business-profile')->name('business-profile.')->group(function () {
@@ -71,6 +71,7 @@ Route::prefix('master-key')->name('master-key.')->group(function () {
         Route::post('/update-seo', [BusinessProfileController::class, 'updateSeo'])->name('update-seo');
         Route::post('/update-policies', [BusinessProfileController::class, 'updatePolicies'])->name('update-policies');
         Route::post('/update-about', [BusinessProfileController::class, 'updateAbout'])->name('update-about');
+        Route::post('/update-whatsapp', [BusinessProfileController::class, 'updateWhatsApp'])->name('update-whatsapp');
     });
 
     // Store Design Routes

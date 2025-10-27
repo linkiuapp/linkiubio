@@ -115,4 +115,37 @@ class BusinessProfileController extends Controller
 
         return back()->with('success', 'Información "Acerca de nosotros" actualizada correctamente.');
     }
+
+    public function updateWhatsApp(Request $request, $store)
+    {
+        \Log::info('updateWhatsApp called', ['store_slug' => $store, 'request' => $request->all()]);
+        
+        // Obtener la tienda por slug
+        if (is_string($store)) {
+            $store = Store::where('slug', $store)->firstOrFail();
+        }
+        
+        $validator = Validator::make($request->all(), [
+            'owner_phone' => 'required|string|regex:/^[0-9]{10}$/|min:10|max:10',
+        ], [
+            'owner_phone.required' => 'El número de WhatsApp es obligatorio',
+            'owner_phone.regex' => 'El número debe tener exactamente 10 dígitos numéricos',
+            'owner_phone.min' => 'El número debe tener exactamente 10 dígitos',
+            'owner_phone.max' => 'El número debe tener exactamente 10 dígitos',
+        ]);
+
+        if ($validator->fails()) {
+            \Log::info('Validation failed', ['errors' => $validator->errors()]);
+            return back()->withErrors($validator)->withInput();
+        }
+
+        // Actualizar el número de WhatsApp
+        $store->update([
+            'owner_phone' => $request->owner_phone
+        ]);
+
+        \Log::info('WhatsApp updated successfully', ['store_id' => $store->id, 'phone' => $request->owner_phone]);
+
+        return back()->with('swal_success', '✅ Número de WhatsApp configurado correctamente. Ya recibirás notificaciones de pedidos y pagos.');
+    }
 } 

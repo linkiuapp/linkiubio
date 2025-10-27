@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Shared\Models\Order;
 use App\Shared\Models\OrderItem;
 use App\Features\TenantAdmin\Models\Product;
+use App\Services\WhatsAppNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
@@ -458,6 +459,21 @@ class OrderController extends Controller
 
             // 🔔 Disparar evento de cambio de estado para notificar al cliente
             event(new \App\Events\OrderStatusChanged($order, $oldStatus, $validated['status']));
+
+            // 📱 Enviar notificación WhatsApp al cliente
+            try {
+                $whatsapp = app(WhatsAppNotificationService::class);
+                if ($whatsapp->isEnabled()) {
+                    $whatsapp->notifyOrderStatusChanged($order, $oldStatus, $validated['status']);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Error enviando notificación WhatsApp de cambio de estado', [
+                    'order_id' => $order->id,
+                    'old_status' => $oldStatus,
+                    'new_status' => $validated['status'],
+                    'error' => $e->getMessage()
+                ]);
+            }
 
             return response()->json([
                 'success' => true,

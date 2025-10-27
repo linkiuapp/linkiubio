@@ -16,6 +16,7 @@ class Store extends Model
         'plan_id',
         'name',
         'slug',
+        'owner_phone',
         'status',
         'verified',
         'document_type',

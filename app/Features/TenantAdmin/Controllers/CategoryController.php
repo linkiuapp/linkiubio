@@ -25,6 +25,7 @@ class CategoryController extends Controller
         // Obtener categorías con relaciones
         $categories = Category::where('store_id', $store->id)
             ->with(['icon', 'parent', 'children'])
+            ->withCount('products')
             ->orderBy('sort_order')
             ->orderBy('name')
             ->paginate(20);
