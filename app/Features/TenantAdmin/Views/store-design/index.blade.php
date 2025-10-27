@@ -277,8 +277,9 @@
                         title: '¡Publicado!',
                         text: result.value.message || 'Diseño publicado correctamente',
                         confirmButtonColor: '#00c76f',
-                        timer: 2000,
-                        timerProgressBar: true
+                        confirmButtonText: 'OK'
+                    }).then(() => {
+                        location.reload();
                     });
                 } else if (result.isDenied || result.dismiss === Swal.DismissReason.cancel) {
                     // Cancelado

@@ -268,8 +268,10 @@
                     title: '¡Éxito!',
                     text: '{{ session('swal_success') ?? session('success') }}',
                     confirmButtonColor: '#00c76f',
-                    timer: 3000,
-                    timerProgressBar: true
+                    confirmButtonText: 'OK'
+                }).then(() => {
+                    // Recargar la página después de cerrar el SweetAlert
+                    location.reload();
                 });
             @endif
             
@@ -278,7 +280,8 @@
                     icon: 'error',
                     title: 'Error',
                     text: '{{ session('error') }}',
-                    confirmButtonColor: '#ed2e45'
+                    confirmButtonColor: '#ed2e45',
+                    confirmButtonText: 'OK'
                 });
             @endif
         });
