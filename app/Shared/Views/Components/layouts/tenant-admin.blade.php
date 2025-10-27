@@ -58,27 +58,32 @@
             }
         };
         
-        $appFavicon = $getLatestAppFavicon();
+        // Priorizar el favicon de la tienda si existe
         $faviconSrc = asset('favicon.ico'); // Default fallback
         
-        if ($appFavicon) {
-            try {
-                // Temporalmente simplificado para evitar problemas con fileinfo
-                $faviconSrc = asset('storage/' . $appFavicon);
-                /*
-                if (config('filesystems.disks.s3.bucket')) {
-                    $faviconSrc = \Storage::disk('public')->url($appFavicon);
-                } else {
+        if ($store->design && $store->design->favicon_url) {
+            $faviconSrc = $store->design->favicon_url;
+        } else {
+            $appFavicon = $getLatestAppFavicon();
+            if ($appFavicon) {
+                try {
+                    // Temporalmente simplificado para evitar problemas con fileinfo
+                    $faviconSrc = asset('storage/' . $appFavicon);
+                    /*
+                    if (config('filesystems.disks.s3.bucket')) {
+                        $faviconSrc = \Storage::disk('public')->url($appFavicon);
+                    } else {
+                        $faviconSrc = asset('storage/' . $appFavicon);
+                    }
+                    */
+                } catch (\Exception $e) {
+                    Log::error('Error generating favicon URL: ' . $e->getMessage());
                     $faviconSrc = asset('storage/' . $appFavicon);
                 }
-                */
-            } catch (\Exception $e) {
-                Log::error('Error generating favicon URL: ' . $e->getMessage());
-                $faviconSrc = asset('storage/' . $appFavicon);
             }
         }
     @endphp
-    <link rel="icon" type="image/x-icon" href="{{ $store->design && $store->design->is_published && $store->design->favicon_url ? $store->design->favicon_url : $faviconSrc }}">
+    <link rel="icon" type="image/x-icon" href="{{ $faviconSrc }}">
     
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

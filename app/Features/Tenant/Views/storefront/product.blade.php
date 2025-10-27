@@ -54,8 +54,8 @@
             <!-- Título, precio y compartir -->
             <div class="flex items-start justify-between gap-3">
                 <div class="flex-1">
-                    <h1 class="text-lg font-semibold text-black-400 mb-1">{{ $product->name }}</h1>
-                    <div class="text-xl font-bold text-primary-300">
+                    <h1 class="text-body-large font-bold text-black-400 mb-1">{{ $product->name }}</h1>
+                    <div class="text-body-large font-bold text-primary-300">
                         ${{ number_format($product->price, 0, ',', '.') }}
                     </div>
                 </div>
@@ -77,11 +77,11 @@
                 <div class="flex flex-wrap gap-2">
                     @foreach($product->categories as $category)
                         <a href="{{ route('tenant.category', [$store->slug, $category->slug]) }}" 
-                           class="flex items-center gap-1 px-2 py-1 bg-primary-50 text-primary-300 rounded-lg text-xs hover:bg-primary-100 transition-colors">
+                           class="flex items-center gap-1 px-2 py-1 bg-accent-300 text-black-500 rounded-lg text-small hover:bg-primary-100 transition-colors">
                             @if($category->icon && $category->icon->image_url)
                                 <img src="{{ $category->icon->image_url }}" 
                                      alt="{{ $category->name }}" 
-                                     class="w-3 h-3 object-contain">
+                                     class="w-4 h-4 object-contain">
                             @endif
                             {{ $category->name }}
                         </a>
@@ -92,14 +92,14 @@
             <!-- Descripción -->
             @if($product->description)
                 <div class="space-y-2">
-                    <h3 class="text-sm font-medium text-black-400">Descripción</h3>
-                    <p class="text-sm text-black-300 leading-relaxed">{{ $product->description }}</p>
+                    <h3 class="text-small font-medium text-black-400">Descripción</h3>
+                    <p class="text-small font-regular text-black-300 leading-relaxed">{{ $product->description }}</p>
                 </div>
             @endif
 
             <!-- SKU -->
             @if($product->sku)
-                <div class="text-xs text-black-200">
+                <div class="text-small font-regular text-black-200">
                     SKU: {{ $product->sku }}
                 </div>
             @endif
@@ -108,29 +108,33 @@
         <!-- Variables del Producto (si aplica) -->
         @if($product->type === 'variable' && $product->variableAssignments->count() > 0)
             <div class="border-t border-accent-200 pt-4 space-y-4" id="product-variables">
-                <h3 class="text-sm font-semibold text-black-400">Personaliza tu producto</h3>
+                <h3 class="text-body-large font-bold text-black-400">Personaliza tu producto</h3>
                 
                 @foreach($product->variableAssignments as $assignment)
                     @php
                         $variable = $assignment->variable;
                         $label = $assignment->custom_label ?: $variable->name;
                         $isRequired = $assignment->is_required;
+                        
+                        // Obtener solo las opciones seleccionadas para este producto
+                        $selectedOptionIds = $assignment->selected_options ?? [];
+                        $availableOptions = $variable->activeOptions->whereIn('id', $selectedOptionIds);
                     @endphp
                     
                     <div class="space-y-2">
-                        <label class="text-sm font-medium text-black-400">
+                        <label class="text-small font-medium text-black-400">
                             {{ $label }}
                             @if($isRequired)
                                 <span class="text-error-300">*</span>
                             @else
-                                <span class="text-xs text-black-300">(opcional)</span>
+                                <span class="text-small font-regular text-black-300">(opcional)</span>
                             @endif
                         </label>
 
                         @if($variable->type === 'radio')
                             {{-- Selección única (radio) --}}
                             <div class="space-y-2">
-                                @foreach($variable->activeOptions as $option)
+                                @foreach($availableOptions as $option)
                                     <label class="flex items-center gap-3 p-3 border border-accent-200 rounded-lg cursor-pointer hover:border-primary-200 transition-all"
                                            onclick="selectOption(this, {{ $variable->id }}, {{ $option->id }}, '{{ $option->name }}', {{ $option->price_modifier }}, 'radio')">
                                         <input type="radio" 
@@ -147,10 +151,10 @@
                                                     <div class="w-5 h-5 rounded-full border border-accent-200" 
                                                          style="background-color: {{ $option->color_hex }};"></div>
                                                 @endif
-                                                <span class="text-sm text-black-400">{{ $option->name }}</span>
+                                                <span class="text-small font-regular text-black-400">{{ $option->name }}</span>
                                             </div>
                                             @if($option->price_modifier != 0)
-                                                <span class="text-xs font-medium {{ $option->price_modifier > 0 ? 'text-success-300' : 'text-error-300' }}">
+                                                <span class="text-small font-medium {{ $option->price_modifier > 0 ? 'text-success-300' : 'text-error-300' }}">
                                                     {{ $option->formatted_price_modifier }}
                                                 </span>
                                             @endif
@@ -162,7 +166,7 @@
                         @elseif($variable->type === 'checkbox')
                             {{-- Selección múltiple (checkbox) --}}
                             <div class="space-y-2">
-                                @foreach($variable->activeOptions as $option)
+                                @foreach($availableOptions as $option)
                                     <label class="flex items-center gap-3 p-3 border border-accent-200 rounded-lg cursor-pointer hover:border-primary-200 transition-all"
                                            onclick="toggleCheckbox(this, {{ $variable->id }}, {{ $option->id }}, '{{ $option->name }}', {{ $option->price_modifier }})">
                                         <input type="checkbox" 
@@ -178,10 +182,10 @@
                                                     <div class="w-5 h-5 rounded-full border border-accent-200" 
                                                          style="background-color: {{ $option->color_hex }};"></div>
                                                 @endif
-                                                <span class="text-sm text-black-400">{{ $option->name }}</span>
+                                                <span class="text-small font-regular text-black-400">{{ $option->name }}</span>
                                             </div>
                                             @if($option->price_modifier != 0)
-                                                <span class="text-xs font-medium {{ $option->price_modifier > 0 ? 'text-success-300' : 'text-error-300' }}">
+                                                <span class="text-small font-medium {{ $option->price_modifier > 0 ? 'text-success-300' : 'text-error-300' }}">
                                                     {{ $option->formatted_price_modifier }}
                                                 </span>
                                             @endif
@@ -215,8 +219,8 @@
 
                 <!-- Precio total actualizado -->
                 <div class="flex items-center justify-between p-4 bg-accent-50 rounded-lg">
-                    <span class="text-sm font-medium text-black-400">Precio Total:</span>
-                    <span id="total-price" class="text-lg font-bold text-primary-300">
+                    <span class="text-body-large font-medium text-black-400">Precio Total:</span>
+                    <span id="total-price" class="text-body-large font-bold text-primary-300">
                         ${{ number_format($product->price, 0, ',', '.') }}
                     </span>
                 </div>

@@ -29,7 +29,7 @@ class SliderImageService
                 return null;
             }
             
-            // ✅ Guardar usando Storage::disk('public') - Compatible con S3 (Laravel Cloud)
+            // ✅ Guardar usando Storage::disk('public') - Compatible con S3/MinIO
             $directory = 'sliders/' . $slider->store_id;
             $path = $directory . '/' . $filename;
             
@@ -76,8 +76,8 @@ class SliderImageService
 
         [$width, $height] = $imageInfo;
         
-        // Exactamente 170x100px
-        if ($width !== 170 || $height !== 100) {
+        // Permitir imágenes con dimensiones mínimas de 420x200px (se redimensionarán automáticamente)
+        if ($width < 420 || $height < 200) {
             return false;
         }
 
@@ -126,17 +126,43 @@ class SliderImageService
                 return null;
             }
 
-            // Como ya validamos que es exactamente 170x100, no necesitamos redimensionar
-            // Solo optimizar y convertir a JPEG
+            // Obtener dimensiones originales
+            $originalWidth = imagesx($sourceImage);
+            $originalHeight = imagesy($sourceImage);
+
+            // Dimensiones finales del slider: 420x200px
+            $targetWidth = 420;
+            $targetHeight = 200;
+
+            // Crear imagen destino
+            $resizedImage = imagecreatetruecolor($targetWidth, $targetHeight);
+
+            // Mantener transparencia para PNG/GIF
+            if ($mimeType === 'image/png' || $mimeType === 'image/gif') {
+                imagealphablending($resizedImage, false);
+                imagesavealpha($resizedImage, true);
+                $transparent = imagecolorallocatealpha($resizedImage, 0, 0, 0, 127);
+                imagefilledrectangle($resizedImage, 0, 0, $targetWidth, $targetHeight, $transparent);
+            }
+
+            // Redimensionar imagen
+            imagecopyresampled(
+                $resizedImage,
+                $sourceImage,
+                0, 0, 0, 0,
+                $targetWidth, $targetHeight,
+                $originalWidth, $originalHeight
+            );
             
             // Crear buffer de salida
             ob_start();
-            imagejpeg($sourceImage, null, 85); // 85% de calidad
+            imagejpeg($resizedImage, null, 85); // 85% de calidad
             $imageData = ob_get_contents();
             ob_end_clean();
 
             // Liberar memoria
             imagedestroy($sourceImage);
+            imagedestroy($resizedImage);
 
             return $imageData;
 

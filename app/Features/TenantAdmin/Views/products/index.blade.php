@@ -504,17 +504,34 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // ✅ Sin reload automático - el toggle ya se actualizó visualmente
-                        console.log('Estado actualizado correctamente');
+                        Swal.fire({
+                            icon: 'success',
+                            title: '¡Éxito!',
+                            text: data.message || 'Estado actualizado correctamente',
+                            confirmButtonColor: '#00c76f',
+                            confirmButtonText: 'OK'
+                        }).then(() => {
+                            location.reload();
+                        });
                     } else {
-                        alert(data.error || 'Error al cambiar el estado');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.error || 'Error al cambiar el estado',
+                            confirmButtonColor: '#ed2e45'
+                        });
                         // Revertir el toggle si hay error
                         e.target.checked = !e.target.checked;
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    alert('Error al cambiar el estado');
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Error al cambiar el estado',
+                        confirmButtonColor: '#ed2e45'
+                    });
                     // Revertir el toggle si hay error
                     e.target.checked = !e.target.checked;
                 });

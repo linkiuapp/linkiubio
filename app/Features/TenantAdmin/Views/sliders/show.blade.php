@@ -98,7 +98,7 @@
                         <img src="{{ Storage::disk('public')->url($slider->image_path) }}" 
                              alt="{{ $slider->name }}" 
                              class="max-w-full h-auto mx-auto rounded-lg shadow-sm border border-accent-200">
-                        <p class="text-xs text-black-300 mt-2">170x100px</p>
+                        <p class="text-xs text-black-300 mt-2">420x200px</p>
                     </div>
                 @else
                     <div class="text-center py-8">

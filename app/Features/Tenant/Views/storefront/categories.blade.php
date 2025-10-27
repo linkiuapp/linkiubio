@@ -13,8 +13,8 @@
         
         <!-- Title -->
         <div class="space-y-2">
-            <h7 class="text-h7 font-bold text-black-300">Categorías</h7>
-            <p class="text-body-small font-regular text-black-200">Explora nuestras categorías de productos</p>
+            <h2 class="text-body-regular font-bold text-black-300">Categorías</h2>
+            <p class="text-caption font-regular text-black-200">Explora nuestras categorías de productos</p>
         </div>
     </div>
 
@@ -27,7 +27,7 @@
                     
                     <div class="flex items-center space-x-4">
                         <!-- Icono de la categoría -->
-                        <div class="w-20 h-20 bg-accent-100 rounded-lg p-2 flex items-center justify-center flex-shrink-0">
+                        <div class="w-16 h-16 bg-accent-100 rounded-lg p-2 flex items-center justify-center flex-shrink-0">
                             @if($category->icon && $category->icon->image_url)
                                 <img src="{{ $category->icon->image_url }}" 
                                      alt="{{ $category->name }}" 
@@ -42,18 +42,16 @@
 
                         <!-- Información de la categoría -->
                         <div class="flex-1 min-w-0">
-                            <h3 class="text-lg font-semibold text-black-500 truncate">{{ $category->name }}</h3>
+                            <h3 class="text-bady-large font-bold text-black-500 truncate">{{ $category->name }}</h3>
                             
                             @if($category->description)
-                                <p class="text-sm text-black-300 mt-1 line-clamp-2">{{ $category->description }}</p>
+                                <p class="text-small font-regular text-black-300 mt-1 line-clamp-2">{{ $category->description }}</p>
                             @endif
 
                             <!-- Subcategorías info -->
                             @if($category->children->count() > 0)
-                                <div class="flex items-center mt-2 text-xs text-primary-400">
-                                    <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                                    </svg>
+                                <div class="flex items-center mt-2 text-small font-regular text-primary-400">
+                                    <x-solar-bag-heart-outline class="w-4 h-4 mr-1" />
                                     <span>{{ $category->children->count() }} subcategoría{{ $category->children->count() !== 1 ? 's' : '' }}</span>
                                 </div>
                             @endif

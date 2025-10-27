@@ -1,4 +1,5 @@
 <div class="main-wrapper">
+
     <nav class="navbar">
         <div class="py-4 px-2">
             <div class="flex items-center justify-between">

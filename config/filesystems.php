@@ -38,7 +38,19 @@ return [
             'report' => false,
         ],
 
-        'public' => [
+        'public' => env('APP_ENV') === 'local' ? [
+            // MinIO (S3) en local
+            'driver' => 's3',
+            'key' => env('MINIO_ACCESS_KEY', 'minioadmin'),
+            'secret' => env('MINIO_SECRET_KEY', 'minioadmin'),
+            'region' => 'us-east-1',
+            'bucket' => env('MINIO_BUCKET', 'local.linkiu'),
+            'url' => env('MINIO_URL', 'http://127.0.0.1:9000/local.linkiu'),
+            'endpoint' => env('MINIO_ENDPOINT', 'http://127.0.0.1:9000'),
+            'use_path_style_endpoint' => true,
+            'throw' => false,
+        ] : [
+            // Local storage en staging/production
             'driver' => 'local',
             'root' => storage_path('app/public'),
             'url' => env('APP_URL').'/storage',
@@ -47,7 +59,7 @@ return [
             'report' => false,
         ],
 
-        // Configuración simplificada para almacenamiento local
+        // Configuración simplificada para almacenamiento local (staging/production)
         's3' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
@@ -57,6 +69,19 @@ return [
             'report' => false,
             // Mantener "bucket" para compatibilidad con código existente
             'bucket' => 'local-storage',
+        ],
+
+        // Configuración para MinIO local (solo desarrollo)
+        'minio' => [
+            'driver' => 's3',
+            'key' => env('MINIO_ACCESS_KEY', 'minioadmin'),
+            'secret' => env('MINIO_SECRET_KEY', 'minioadmin'),
+            'region' => 'us-east-1',
+            'bucket' => env('MINIO_BUCKET', 'local.linkiu'),
+            'url' => env('MINIO_URL', 'http://127.0.0.1:9000/local.linkiu'),
+            'endpoint' => env('MINIO_ENDPOINT', 'http://127.0.0.1:9000'),
+            'use_path_style_endpoint' => true,
+            'throw' => false,
         ],
 
     ],

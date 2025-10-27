@@ -53,9 +53,10 @@ class StorefrontController extends Controller
             ->limit(3)
             ->get();
 
-        // Categorías activas con sus iconos
+        // Categorías activas con sus iconos (solo padres y sin hijos - no subcategorías)
         $categories = Category::where('store_id', $store->id)
             ->where('is_active', true)
+            ->whereNull('parent_id') // Solo categorías sin padre (principales)
             ->with('icon')
             ->orderBy('name')
             ->get();

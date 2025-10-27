@@ -244,6 +244,67 @@
                 closeImageModal();
             }
         });
+
+        // Interceptar formulario de toggle status
+        document.querySelector('form[action*="toggle-status"]').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const isActive = {{ $product->is_active ? 'true' : 'false' }};
+            const action = isActive ? 'desactivar' : 'activar';
+            
+            const result = await Swal.fire({
+                title: `¿${action.charAt(0).toUpperCase() + action.slice(1)} producto?`,
+                text: `El producto será ${action}do`,
+                icon: 'question',
+                showCancelButton: true,
+                confirmButtonColor: isActive ? '#ffad0d' : '#00c76f',
+                cancelButtonColor: '#ed2e45',
+                confirmButtonText: `Sí, ${action}`,
+                cancelButtonText: 'Cancelar'
+            });
+
+            if (result.isConfirmed) {
+                const url = this.action;
+                
+                try {
+                    const response = await fetch(url, {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        }
+                    });
+                    
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        await Swal.fire({
+                            icon: 'success',
+                            title: '¡Éxito!',
+                            text: data.message,
+                            confirmButtonColor: '#00c76f',
+                            confirmButtonText: 'OK'
+                        });
+                        
+                        location.reload();
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.error || 'Error al cambiar el estado',
+                            confirmButtonColor: '#ed2e45'
+                        });
+                    }
+                } catch (error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Error al procesar la solicitud',
+                        confirmButtonColor: '#ed2e45'
+                    });
+                }
+            }
+        });
     </script>
     @endpush
     @endsection
