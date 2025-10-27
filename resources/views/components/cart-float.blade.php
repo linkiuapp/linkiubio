@@ -1,41 +1,38 @@
-<!-- Carrito flotante tipo Pill -->
-<div id="cart-float" class="fixed bottom-6 left-1/2 transform -translate-x-1/2 bg-accent-50 border-2 border-accent-200 rounded-full shadow-xl z-[1000] px-4 py-3">
-    <div class="flex items-center gap-4">
+<!-- Carrito flotante tipo Pill - Mobile First -->
+<div id="cart-float" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 w-[95%] max-w-[420px] bg-accent-50 border-2 border-accent-200 rounded-full shadow-xl z-[1000] px-3 py-2.5 sm:px-4 sm:py-3">
+    <div class="flex items-center justify-between gap-2 sm:gap-3">
         <!-- Icono carrito con badge -->
         <div class="relative flex-shrink-0">
-            <div class="w-10 h-10 bg-primary-300 rounded-full flex items-center justify-center">
-                <x-solar-bag-2-outline class="w-5 h-5 text-accent-50" />
+            <div class="w-9 h-9 sm:w-10 sm:h-10 bg-primary-300 rounded-full flex items-center justify-center">
+                <x-solar-bag-2-outline class="w-4 h-4 sm:w-5 sm:h-5 text-accent-50" />
             </div>
             <!-- Badge contador -->
-            <div class="cart-badge absolute -top-1 -right-1 bg-error-300 text-accent-50 text-caption font-bold rounded-full min-w-[20px] h-5 flex items-center justify-center px-1.5" style="display: none;">
+            <div class="cart-badge absolute -top-1 -right-1 bg-error-300 text-accent-50 text-[10px] sm:text-caption font-bold rounded-full min-w-[18px] h-[18px] sm:min-w-[20px] sm:h-5 flex items-center justify-center px-1" style="display: none;">
                 0
             </div>
         </div>
         
         <!-- Información del carrito -->
-        <div class="flex items-center gap-3">
-            <p class="cart-count-text text-caption font-bold text-black-400 whitespace-nowrap">
+        <div class="flex-1 flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 min-w-0">
+            <p class="cart-count-text text-[12px] sm:text-caption font-bold text-black-400 truncate">
                 0 productos
             </p>
-            <span class="text-disabled-200">•</span>
-            <p class="cart-total-price text-body-small font-bold text-black-500 whitespace-nowrap">
+            <span class="hidden sm:inline text-disabled-200">•</span>
+            <p class="cart-total-price text-body-small sm:text-body-small font-bold text-black-500 truncate">
                 $0
             </p>
         </div>
         
-        <!-- Separador vertical -->
-        <div class="w-px h-8 bg-accent-200"></div>
-        
-        <!-- Botones de acción -->
-        <div class="flex items-center gap-2">
+        <!-- Botones de acción - Responsive -->
+        <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
             <a href="{{ route('tenant.cart.index', $store->slug ?? 'store') }}" 
-               class="view-cart-btn bg-accent-200 text-black-500 px-4 py-2 rounded-full text-caption font-bold whitespace-nowrap">
+               class="view-cart-btn bg-accent-200 text-black-500 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-[14px] sm:text-caption font-medium">
                 Ver
             </a>
             <a href="{{ route('tenant.checkout.create', $store->slug ?? 'store') }}" 
-               class="checkout-btn bg-secondary-300 text-accent-50 px-4 py-2 rounded-full text-caption font-bold flex items-center gap-1.5 whitespace-nowrap">
+               class="checkout-btn bg-secondary-300 text-accent-50 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-[14px] sm:text-caption font-medium flex items-center gap-1">
                 <span>Comprar</span>
-                <x-solar-arrow-right-outline class="w-4 h-4" />
+                <x-solar-arrow-right-outline class="w-3 h-3 sm:w-4 sm:h-4" />
             </a>
         </div>
     </div>

@@ -352,7 +352,7 @@ class Cart {
         
         // Crear notificación temporal
         const notification = document.createElement('div');
-        notification.className = 'fixed top-6 left-1/2 transform -translate-x-1/2 bg-success-100 px-6 py-4 rounded-2xl shadow-2xl z-[9999] transition-all duration-500 -translate-y-32 opacity-0 min-w-[500px]';
+        notification.className = 'fixed top-6 left-1/2 transform -translate-x-1/2 bg-success-300 px-6 py-4 rounded-2xl shadow-2xl z-[9999] transition-all duration-500 -translate-y-32 opacity-0 min-w-[380px]';
         notification.innerHTML = `
             <div class="flex items-center gap-4">
                 <div class="flex-shrink-0">
@@ -362,7 +362,7 @@ class Cart {
                 </div>
  
                 <div class="flex flex-col gap-1">
-                    <span class="text-body-regular font-bold text-black-500">¡Hey! Tu producto ha sido agregado al carrito</span>
+                    <span class="text-body-small font-bold text-black-500">¡Hey! Tu producto se agregó al carrito</span>
                     <span class="text-body-small font-medium text-black-500 whitespace-nowrap">
                         ${totalItems} ${totalItems === 1 ? 'producto' : 'productos'} en carrito · ${totalPrice}
                     </span>
