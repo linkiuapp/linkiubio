@@ -235,11 +235,7 @@
 
                                     <!-- Cancelar (en lugar de eliminar) -->
                                     @if(!in_array($order->status, ['delivered', 'cancelled']))
-                                        <button onclick="@if($store->isActionProtected('orders', 'cancel'))
-                                                            requireMasterKey('orders.cancel', 'Cancelar pedido #{{ $order->order_number }}', () => cancelOrder({{ $order->id }}, '{{ $order->order_number }}'))
-                                                        @else
-                                                            cancelOrder({{ $order->id }}, '{{ $order->order_number }}')
-                                                        @endif" 
+                                        <button @click="cancelOrderHandler({{ $order->id }}, '{{ $order->order_number }}')" 
                                                 class="text-error-300 hover:text-error-400" 
                                                 title="Cancelar pedido">
                                             <x-solar-close-circle-outline class="w-5 h-5" />
@@ -372,6 +368,65 @@ document.addEventListener('alpine:init', () => {
             this.showDeleteModal = false;
             this.cancelOrderId = null;
             this.cancelOrderNumber = '';
+        },
+
+        // Handler para cancelar con clave maestra
+        async cancelOrderHandler(orderId, orderNumber) {
+            const isProtected = {{ $store->isActionProtected('orders', 'cancel') ? 'true' : 'false' }};
+            
+            if (isProtected) {
+                requireMasterKey('orders.cancel', `Cancelar pedido #${orderNumber}`, async () => {
+                    await this.executeCancelOrder(orderId, orderNumber);
+                });
+            } else {
+                this.cancelOrder(orderId, orderNumber);
+            }
+        },
+
+        // Ejecutar cancelación directa (sin modal)
+        async executeCancelOrder(orderId, orderNumber) {
+            try {
+                const response = await fetch(`{{ route('tenant.admin.orders.update-status', [$store->slug, ':id']) }}`.replace(':id', orderId), {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ status: 'cancelled' })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    await Swal.fire({
+                        title: '¡Pedido cancelado!',
+                        text: 'El pedido ha sido cancelado correctamente',
+                        icon: 'success',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#da27a7',
+                        timer: 3000,
+                        timerProgressBar: true
+                    });
+                    location.reload();
+                } else {
+                    await Swal.fire({
+                        title: 'Error',
+                        text: data.message || 'No se pudo cancelar el pedido',
+                        icon: 'error',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#da27a7'
+                    });
+                }
+            } catch (error) {
+                await Swal.fire({
+                    title: 'Error de conexión',
+                    text: 'No se pudo conectar con el servidor',
+                    icon: 'error',
+                    confirmButtonText: 'OK',
+                    confirmButtonColor: '#da27a7'
+                });
+            }
         },
 
         async confirmDelete() {

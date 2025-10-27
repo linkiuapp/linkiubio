@@ -74,6 +74,19 @@ class Category extends Model
     }
 
     /**
+     * Relación con los productos (muchos a muchos)
+     */
+    public function products()
+    {
+        return $this->belongsToMany(
+            Product::class,
+            'product_categories',
+            'category_id',
+            'product_id'
+        )->withTimestamps();
+    }
+
+    /**
      * Scope para categorías activas
      */
     public function scopeActive($query)

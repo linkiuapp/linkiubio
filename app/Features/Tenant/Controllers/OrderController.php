@@ -11,6 +11,7 @@ use App\Features\TenantAdmin\Models\PaymentMethod;
 use App\Features\TenantAdmin\Models\BankAccount;
 use App\Features\TenantAdmin\Models\SimpleShipping;
 use App\Features\TenantAdmin\Models\SimpleShippingZone;
+use App\Services\WhatsAppNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
@@ -288,6 +289,19 @@ class OrderController extends Controller
                     
                     $order->update(['payment_proof_path' => $relativePath]);
                     
+                    // 📱 Notificar al admin sobre el comprobante
+                    try {
+                        $whatsapp = app(WhatsAppNotificationService::class);
+                        if ($whatsapp->isEnabled()) {
+                            $whatsapp->notifyAdminPaymentProofUploaded($order, $store);
+                        }
+                    } catch (\Exception $e) {
+                        \Log::error('Error enviando notificación de comprobante', [
+                            'order_id' => $order->id,
+                            'error' => $e->getMessage()
+                        ]);
+                    }
+                    
                 } catch (\Exception $e) {
                     \Log::error('❌ Error uploading payment proof:', [
                         'order_number' => $order->order_number,
@@ -307,6 +321,22 @@ class OrderController extends Controller
 
             // 🔔 Disparar evento de nuevo pedido para notificar al admin
             event(new \App\Events\NewOrderCreated($order));
+
+            // 📱 Enviar notificaciones WhatsApp
+            try {
+                $whatsapp = app(WhatsAppNotificationService::class);
+                if ($whatsapp->isEnabled()) {
+                    // Notificar al cliente
+                    $whatsapp->notifyOrderCreated($order);
+                    // Notificar al admin
+                    $whatsapp->notifyAdminNewOrder($order, $store);
+                }
+            } catch (\Exception $e) {
+                \Log::error('Error enviando notificaciones WhatsApp', [
+                    'order_id' => $order->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
 
             // Respuesta para AJAX
             if ($request->expectsJson()) {

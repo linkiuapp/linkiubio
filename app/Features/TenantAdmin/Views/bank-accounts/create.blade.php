@@ -21,7 +21,7 @@
     </div>
 
     {{-- Formulario --}}
-    <div class="bg-accent-50 rounded-lg p-0 overflow-hidden mb-6">
+    <div class="bg-accent-50 rounded-lg p-0 overflow-hidden mb-6" x-data="{}">
         <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
             <h2 class="text-body-large font-bold text-black-400 mb-0">Información de la Cuenta</h2>
         </div>

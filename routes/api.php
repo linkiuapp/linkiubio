@@ -27,6 +27,7 @@ Route::get('/store/{slug}/status', function($slug) {
 });
 
 // API para test de email (sistema unificado) - sin auth para testing
-Route::post('/email/test', [\App\Http\Controllers\Api\EmailTestController::class, 'sendTest']);
-Route::post('/email/validate', [\App\Http\Controllers\Api\EmailTestController::class, 'validateConfig']);
-Route::get('/email/config', [\App\Http\Controllers\Api\EmailTestController::class, 'getConfig']); 
+// DESHABILITADO: EmailTestController no existe
+// Route::post('/email/test', [\App\Http\Controllers\Api\EmailTestController::class, 'sendTest']);
+// Route::post('/email/validate', [\App\Http\Controllers\Api\EmailTestController::class, 'validateConfig']);
+// Route::get('/email/config', [\App\Http\Controllers\Api\EmailTestController::class, 'getConfig']); 
