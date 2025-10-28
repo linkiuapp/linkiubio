@@ -55,6 +55,19 @@ class SecurityHeaders
             );
         }
 
+        // ⚡ Cache-Control para Edge Network
+        // Solo agregar headers de cache a recursos estáticos
+        if (!$request->is('*/admin/*') && !$request->is('*api*') && !auth()->check()) {
+            // Assets estáticos (CSS, JS, imágenes) - Cache por 1 año
+            if (preg_match('/\.(css|js|jpg|jpeg|png|gif|svg|ico|woff|woff2|ttf|eot)$/', $request->path())) {
+                $response->headers->set('Cache-Control', 'public, max-age=31536000, immutable');
+            }
+            // Páginas públicas (landing, catálogo) - Cache por 5 minutos
+            elseif ($request->is('*/') || $request->is('*/cat*')) {
+                $response->headers->set('Cache-Control', 'public, max-age=300');
+            }
+        }
+
         return $response;
     }
 
