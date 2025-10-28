@@ -141,7 +141,7 @@
                         </div>
                         
                         <!-- Nombre de la categoría -->
-                        <span class="text-caption font-regular text-center text-black-500 transition-colors leading-tight">
+                        <span class="text-small font-bold text-center text-black-500 transition-colors leading-tight">
                             {{ $category->name }}
                         </span>
                     </a>

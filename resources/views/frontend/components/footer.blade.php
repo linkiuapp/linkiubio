@@ -1,5 +1,5 @@
 <!-- Footer -->
-<footer class="bg-accent-50 border-t border-accent-200 mt-12">
+<footer class="bg-accent-50 border-t border-accent-200 mt-12 pb-20">
     <div class="max-w-[480px] mx-auto px-6 py-8">
         <!-- Links principales -->
         <div class="flex flex-col gap-4 mb-6">
@@ -36,14 +36,14 @@
 
         <!-- Info adicional -->
         <div class="text-center space-y-2">
-            <p class="text-body-small text-black-300">
+            <p class="text-body-small text-black-300 capitalize">
                 {{ $store->name }}
             </p>
             <p class="text-caption text-black-200">
                 © {{ date('Y') }} Todos los derechos reservados
             </p>
             <p class="text-caption text-black-200">
-                Powered by <span class="font-semibold text-primary-300">Linkiu</span>
+                Powered by <span class="font-semibold text-primary-300"><a href="https://linkiu.bio" target="_blank">Linkiu S.a.s</a></span>
             </p>
         </div>
     </div>

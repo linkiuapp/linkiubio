@@ -12,6 +12,7 @@ use App\Shared\Models\Store;
 use App\Features\TenantAdmin\Models\Product;
 use App\Features\TenantAdmin\Models\Category;
 use App\Shared\Models\Order;
+use App\CouponUsageLog;
 
 class Coupon extends Model
 {

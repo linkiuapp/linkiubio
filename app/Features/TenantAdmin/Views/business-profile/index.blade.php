@@ -285,6 +285,7 @@
                                               class="w-full px-3 py-2 border border-accent-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-success-200 focus:border-transparent resize-none">{{ old('privacy_policy', $policies->privacy_policy) }}</textarea>
                                 </div>
                                 
+                                
                                 <div>
                                     <label class="block text-sm font-medium text-black-400 mb-2">Términos y Condiciones</label>
                                     <textarea name="terms_conditions" rows="6" 

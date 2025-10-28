@@ -71,7 +71,7 @@
                         </div>
 
                         <!-- Nombre de la categoría -->
-                        <span class="text-caption font-regular text-center text-black-500 transition-colors leading-tight">
+                        <span class="text-small font-bold text-center text-black-500 transition-colors leading-tight">
                             {{ $category->name }}
                         </span>
                     </a>
@@ -116,7 +116,7 @@
 
                         <!-- Información del producto -->
                         <div class="flex-1 min-w-0">
-                            <h3 class="text-caption font-bold text-black-500 mb-1 line-clamp-1">{{ $product->name }}</h3>
+                            <h3 class="text-small font-bold text-black-500 mb-1 line-clamp-1">{{ $product->name }}</h3>
 
                             @if($product->description)
                                 <p class="text-small font-regular text-black-300 mb-2 line-clamp-1">{{ $product->description }}</p>

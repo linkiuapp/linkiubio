@@ -57,7 +57,7 @@
                 <button 
                     type="button" 
                     id="btn-continue-step1" 
-                    class="w-full bg-primary-300 hover:bg-primary-200 text-accent-50 py-2 px-4 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                    class="w-full bg-primary-300 hover:bg-primary-200 text-accent-50 py-2 px-4 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-body-regular"
                     disabled
                 >
                     Continuar al Paso 2
@@ -87,7 +87,7 @@
                             id="customer_address" 
                             name="customer_address" 
                             rows="2"
-                            class="w-full px-4 py-3 border border-accent-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-colors resize-none text-small"
+                            class="w-full px-4 py-3 border border-accent-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-colors resize-none text-caption"
                             placeholder="Calle, carrera, número, apartamento, referencias..."
                         ></textarea>
                     </div>
@@ -101,7 +101,7 @@
                             <select 
                                 id="department" 
                                 name="department" 
-                                class="w-full px-4 py-3 border border-accent-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-colors text-small"
+                                class="w-full px-4 py-3 border border-accent-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-colors text-caption"
                             >
                                 <option value="">Selecciona tu departamento</option>
                                 @foreach(['Amazonas', 'Antioquia', 'Arauca', 'Atlántico', 'Bolívar', 'Boyacá', 'Caldas', 'Caquetá', 'Casanare', 'Cauca', 'Cesar', 'Chocó', 'Córdoba', 'Cundinamarca', 'Guainía', 'Guaviare', 'Huila', 'La Guajira', 'Magdalena', 'Meta', 'Nariño', 'Norte de Santander', 'Putumayo', 'Quindío', 'Risaralda', 'San Andrés y Providencia', 'Santander', 'Sucre', 'Tolima', 'Valle del Cauca', 'Vaupés', 'Vichada'] as $dept)
@@ -111,24 +111,24 @@
                         </div>
                         
                         <div>
-                            <label for="city" class="block text-sm font-medium text-black-500 mb-2">Ciudad *</label>
+                            <label for="city" class="block text-caption font-medium text-black-500 mb-2">Ciudad *</label>
                             <input 
                                 type="text" 
                                 id="city" 
                                 name="city" 
-                                class="w-full px-4 py-3 border border-accent-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-colors text-small"
+                                class="w-full px-4 py-3 border border-accent-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-colors text-caption"
                                 placeholder="Escribe tu ciudad"
                             >
                         </div>
                     </div>
                     
                     <div>
-                        <label for="customer_address_national" class="block text-sm font-medium text-black-500 mb-2">Dirección Completa *</label>
+                        <label for="customer_address_national" class="block text-caption font-medium text-black-500 mb-2">Dirección Completa *</label>
                         <textarea 
                             id="customer_address_national" 
                             name="customer_address" 
                             rows="2"
-                            class="w-full px-4 py-3 border border-accent-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-colors resize-none text-small"
+                            class="w-full px-4 py-3 border border-accent-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-colors resize-none text-caption"
                             placeholder="Calle, carrera, número, apartamento, referencias..."
                         ></textarea>
                     </div>
@@ -138,14 +138,14 @@
                     <button 
                         type="button" 
                         id="btn-back-step2" 
-                        class="px-4 py-2 bg-accent-100 hover:bg-accent-200 text-black-400 rounded-lg font-medium transition-colors border border-accent-200 text-sm"
+                        class="px-4 py-2 bg-accent-100 hover:bg-accent-200 text-black-400 rounded-lg font-medium transition-colors border border-accent-200 text-body-regular"
                     >
                         Volver
                     </button>
                     <button 
                         type="button" 
                         id="btn-continue-step2" 
-                        class="flex-1 bg-primary-300 hover:bg-primary-200 text-accent-50 py-2 px-4 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
+                        class="flex-1 bg-primary-300 hover:bg-primary-200 text-accent-50 py-2 px-4 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-body-regular"
                         disabled
                     >
                         Continuar al Paso 3

@@ -80,7 +80,7 @@
                                             class="sr-only peer verified-toggle"
                                             {{ $store->verified ? 'checked' : '' }}
                                             data-store-id="{{ $store->id }}"
-                                            data-url="{{ route('superlinkiu.stores.toggle-verified', $store->slug) }}">
+                                            data-url="{{ route('superlinkiu.stores.toggle-verified', $store) }}">
                                         <div class="table-toggle"></div>
                                     </label>
                         </td>

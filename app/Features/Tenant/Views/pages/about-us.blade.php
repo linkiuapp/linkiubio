@@ -11,8 +11,8 @@
 
     <!-- Header -->
     <div class="space-y-2">
-        <h1 class="text-h6 font-bold text-black-400">Acerca de Nosotros</h1>
-        <p class="text-body-small text-black-300">Conoce nuestra historia</p>
+        <h1 class="text-body-large font-bold text-black-400">Acerca de Nosotros</h1>
+        <p class="text-caption text-black-300">Conoce nuestra historia</p>
     </div>
 
     <!-- Contenido -->
@@ -22,9 +22,13 @@
             Nuestra Historia
         </h2>
         
-        @if(!empty($store->our_history))
-            <div class="prose prose-sm max-w-none text-black-300 space-y-4">
-                {!! nl2br(e($store->our_history)) !!}
+        @php
+            $policies = $store->policies;
+        @endphp
+        
+        @if(!empty($policies->about_us))
+            <div class="text-black-300 break-words word-wrap" style="word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
+                {!! nl2br(e($policies->about_us)) !!}
             </div>
         @else
             <div class="bg-info-50 border border-info-200 rounded-lg p-6">
@@ -41,40 +45,6 @@
         @endif
     </div>
 
-    <!-- Info adicional -->
-    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        @if($store->email)
-            <div class="bg-accent-50 rounded-lg p-4 border border-accent-200">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-info-100 rounded-full flex items-center justify-center">
-                        <x-solar-letter-outline class="w-5 h-5 text-info-300" />
-                    </div>
-                    <div>
-                        <p class="text-caption text-black-300 font-medium">Email</p>
-                        <a href="mailto:{{ $store->email }}" class="text-body-small text-info-300 hover:underline">
-                            {{ $store->email }}
-                        </a>
-                    </div>
-                </div>
-            </div>
-        @endif
-
-        @if($store->phone)
-            <div class="bg-accent-50 rounded-lg p-4 border border-accent-200">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-success-100 rounded-full flex items-center justify-center">
-                        <x-solar-phone-outline class="w-5 h-5 text-success-300" />
-                    </div>
-                    <div>
-                        <p class="text-caption text-black-300 font-medium">Teléfono</p>
-                        <a href="tel:{{ $store->phone }}" class="text-body-small text-success-300 hover:underline">
-                            {{ $store->phone }}
-                        </a>
-                    </div>
-                </div>
-            </div>
-        @endif
-    </div>
 
     <!-- Botón de regreso -->
     <div class="flex justify-center pt-6">
