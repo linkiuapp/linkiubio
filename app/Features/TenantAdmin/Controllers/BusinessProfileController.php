@@ -21,7 +21,8 @@ class BusinessProfileController extends Controller
         }
         
         // Cargar las políticas si existen, si no crear un registro vacío
-        $policies = $store->policies ?: new StorePolicy();
+        // Usar first() para obtener el primer registro o null, luego el operador null coalescing
+        $policies = $store->policies()->first() ?? new StorePolicy();
         
         return view('tenant-admin::business-profile.index', compact('store', 'policies'));
     }
@@ -67,11 +68,18 @@ class BusinessProfileController extends Controller
 
         $store->update($updateData);
 
-        return back()->with('success', 'Información SEO actualizada correctamente.');
+        return back()->with('swal_success', '✅ Información SEO actualizada correctamente.');
     }
 
-    public function updatePolicies(Request $request, Store $store)
+    public function updatePolicies(Request $request, $store)
     {
+        // Obtener el store desde el middleware
+        $store = view()->shared('currentStore');
+        
+        if (!$store) {
+            return back()->withErrors(['error' => 'Store not found']);
+        }
+
         $validator = Validator::make($request->all(), [
             'privacy_policy' => 'nullable|string',
             'terms_conditions' => 'nullable|string',
@@ -94,11 +102,18 @@ class BusinessProfileController extends Controller
             ]
         );
 
-        return back()->with('success', 'Políticas actualizadas correctamente.');
+        return back()->with('swal_success', '✅ Políticas legales actualizadas correctamente.');
     }
 
-    public function updateAbout(Request $request, Store $store)
+    public function updateAbout(Request $request, $store)
     {
+        // Obtener el store desde el middleware
+        $store = view()->shared('currentStore');
+        
+        if (!$store) {
+            return back()->withErrors(['error' => 'Store not found']);
+        }
+
         $validator = Validator::make($request->all(), [
             'about_us' => 'nullable|string',
         ]);
@@ -113,7 +128,7 @@ class BusinessProfileController extends Controller
             ['about_us' => $request->about_us]
         );
 
-        return back()->with('success', 'Información "Acerca de nosotros" actualizada correctamente.');
+        return back()->with('swal_success', '✅ Información de Acerca de Nosotros actualizada correctamente.');
     }
 
     public function updateWhatsApp(Request $request, $store)

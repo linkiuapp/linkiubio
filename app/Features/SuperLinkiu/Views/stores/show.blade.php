@@ -451,4 +451,78 @@
     </div>
 </div>
 
-@endsection 
+@endsection
+
+@push('scripts')
+<script>
+// Toggle functionality
+document.addEventListener('change', function(e) {
+    if (e.target.classList.contains('verified-toggle')) {
+        const url = e.target.dataset.url;
+        const originalChecked = e.target.checked;
+        
+        fetch(url, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Accept': 'application/json',
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Actualizar todos los toggles de esta tienda en la página
+                const storeId = e.target.dataset.storeId;
+                const allToggles = document.querySelectorAll(`[data-store-id="${storeId}"].verified-toggle`);
+                allToggles.forEach(toggle => {
+                    toggle.checked = data.verified;
+                });
+                
+                // Actualizar el texto
+                const statusText = e.target.closest('.flex').querySelector('span');
+                if (statusText) {
+                    statusText.textContent = data.verified ? 'Verificada' : 'No verificada';
+                }
+                
+                // Mostrar notificación de éxito
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: data.message || 'Estado de verificación actualizado',
+                    confirmButtonColor: '#00c76f',
+                    confirmButtonText: 'OK',
+                    timer: 2000,
+                    timerProgressBar: true
+                });
+            } else {
+                // Revertir el estado del toggle en caso de error
+                e.target.checked = !originalChecked;
+                
+                // Mostrar error
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || 'Error al cambiar el estado',
+                    confirmButtonColor: '#ed2e45',
+                    confirmButtonText: 'OK'
+                });
+            }
+        })
+        .catch(error => {
+            // Revertir el estado del toggle en caso de error de red
+            e.target.checked = !originalChecked;
+            
+            Swal.fire({
+                icon: 'error',
+                title: 'Error de conexión',
+                text: 'No se pudo conectar con el servidor',
+                confirmButtonColor: '#ed2e45',
+                confirmButtonText: 'OK'
+            });
+            console.error('Error:', error);
+        });
+    }
+});
+</script>
+@endpush 

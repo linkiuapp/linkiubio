@@ -312,25 +312,61 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Event listener para vaciar carrito
     document.getElementById('clear-cart-btn').addEventListener('click', async function() {
-        if (confirm('¿Estás seguro de que quieres vaciar el carrito?')) {
-            try {
-                const response = await fetch('{{ route("tenant.cart.clear", $store->slug) }}', {
-                    method: 'DELETE',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                    }
-                });
+        Swal.fire({
+            title: '¿Vaciar carrito?',
+            text: 'Se eliminarán todos los productos del carrito',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ed2e45',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Sí, vaciar',
+            cancelButtonText: 'Cancelar'
+        }).then(async (result) => {
+            if (result.isConfirmed) {
+                try {
+                    const response = await fetch('{{ route("tenant.cart.clear", $store->slug) }}', {
+                        method: 'DELETE',
+                        headers: {
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                        }
+                    });
 
-                const data = await response.json();
-                if (data.success) {
-                    loadCart();
-                    // El carrito flotante se actualiza automáticamente vía cart.js
+                    const data = await response.json();
+                    if (data.success) {
+                        loadCart();
+                        // El carrito flotante se actualiza automáticamente vía cart.js
+                        
+                        // Mostrar SweetAlert de éxito
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Carrito vaciado',
+                            text: 'Se han eliminado todos los productos del carrito',
+                            confirmButtonColor: '#00c76f',
+                            confirmButtonText: 'OK',
+                            timer: 2000,
+                            timerProgressBar: true
+                        });
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.message || 'Error al vaciar el carrito',
+                            confirmButtonColor: '#ed2e45',
+                            confirmButtonText: 'OK'
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error clearing cart:', error);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Error al vaciar el carrito',
+                        confirmButtonColor: '#ed2e45',
+                        confirmButtonText: 'OK'
+                    });
                 }
-            } catch (error) {
-                console.error('Error clearing cart:', error);
-                showError('Error al vaciar carrito');
             }
-        }
+        });
     });
 
     // Checkout button is now a direct link - no JavaScript needed

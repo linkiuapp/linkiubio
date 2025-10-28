@@ -253,11 +253,19 @@ class OrderController extends Controller
                     $order->recalculateTotals();
                     
                     // Registrar uso del cupón
-                    $coupon->usageCount()->create([
+                    $coupon->usageLogs()->create([
                         'order_id' => $order->id,
+                        'session_id' => session()->getId(),
                         'discount_applied' => $discountAmount,
-                        'used_at' => now()
+                        'order_subtotal' => $order->subtotal,
+                        'metadata' => [
+                            'ip' => request()->ip(),
+                            'user_agent' => request()->userAgent()
+                        ]
                     ]);
+                    
+                    // Incrementar contador de usos del cupón
+                    $coupon->incrementUsage();
                 }
             }
 

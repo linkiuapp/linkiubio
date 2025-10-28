@@ -14,11 +14,11 @@
         
         <!-- Información del carrito -->
         <div class="flex-1 flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 min-w-0">
-            <p class="cart-count-text text-[12px] sm:text-caption font-bold text-black-400 truncate">
+            <p class="cart-count-text text-[14px] sm:text-caption font-bold text-black-400 truncate">
                 0 productos
             </p>
             <span class="hidden sm:inline text-disabled-200">•</span>
-            <p class="cart-total-price text-body-small sm:text-body-small font-bold text-black-500 truncate">
+            <p class="cart-total-price text-[16px] sm:text-caption font-bold text-black-500 truncate">
                 $0
             </p>
         </div>
@@ -26,11 +26,11 @@
         <!-- Botones de acción - Responsive -->
         <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
             <a href="{{ route('tenant.cart.index', $store->slug ?? 'store') }}" 
-               class="view-cart-btn bg-accent-200 text-black-500 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-[14px] sm:text-caption font-medium">
+               class="view-cart-btn bg-accent-200 text-black-500 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-[16px] sm:text-caption font-medium">
                 Ver
             </a>
             <a href="{{ route('tenant.checkout.create', $store->slug ?? 'store') }}" 
-               class="checkout-btn bg-secondary-300 text-accent-50 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-[14px] sm:text-caption font-medium flex items-center gap-1">
+               class="checkout-btn bg-secondary-300 text-accent-50 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-[16px] sm:text-caption font-medium flex items-center gap-1">
                 <span>Comprar</span>
                 <x-solar-arrow-right-outline class="w-3 h-3 sm:w-4 sm:h-4" />
             </a>
@@ -38,8 +38,6 @@
     </div>
 </div>
 
-<!-- Spacer para que el contenido no quede oculto debajo del carrito -->
-<div class="h-24"></div>
 
 <script>
     // Script adicional para mejorar la experiencia del carrito

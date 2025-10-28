@@ -11,13 +11,16 @@
 
     <!-- Header -->
     <div class="space-y-2">
-        <h1 class="text-h6 font-bold text-black-400">Políticas Legales</h1>
-        <p class="text-body-small text-black-300">Conoce nuestras políticas y términos</p>
+        <h1 class="text-body-large font-bold text-black-400">Políticas Legales</h1>
+        <p class="text-caption text-black-300">Conoce nuestras políticas y términos</p>
     </div>
 
     <!-- Contenido -->
     <div class="space-y-6">
         @php
+            // Obtener políticas desde la relación policies
+            $policies = $store->policies;
+            
             $sections = [
                 ['title' => 'Política de Privacidad', 'key' => 'privacy_policy'],
                 ['title' => 'Términos y Condiciones', 'key' => 'terms_conditions'],
@@ -33,9 +36,9 @@
                     {{ $section['title'] }}
                 </h2>
                 
-                @if(!empty($store->{$section['key']}))
-                    <div class="prose prose-sm max-w-none text-black-300">
-                        {!! nl2br(e($store->{$section['key']})) !!}
+                @if(!empty($policies->{$section['key']}))
+                    <div class="text-black-300 break-words word-wrap" style="word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
+                        {!! nl2br(e($policies->{$section['key']})) !!}
                     </div>
                 @else
                     <div class="bg-info-50 border border-info-200 rounded-lg p-4">

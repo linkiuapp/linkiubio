@@ -12,6 +12,9 @@
     @endif
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    <!-- SweetAlert2 -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
 <body class="bg-accent-100 max-w-[480px] mx-auto overflow-x-hidden">
 
@@ -100,12 +103,12 @@
     </nav>
 
     <!-- Contenido principal -->
-    <main class="min-h-screen pb-20">
+    <main>
         @yield('content')
+        
+        <!-- Footer -->
+        @include('frontend.components.footer')
     </main>
-
-    <!-- Footer -->
-    @include('frontend.components.footer')
 
     <script>
         function verificationBadge() {

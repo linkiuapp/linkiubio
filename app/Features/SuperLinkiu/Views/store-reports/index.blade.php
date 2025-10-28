@@ -7,8 +7,8 @@
     <!-- Header -->
     <div class="flex justify-between items-center mb-6">
         <div>
-            <h1 class="text-h5 font-bold text-black-400">Reportes de Tiendas</h1>
-            <p class="text-body-small text-black-300 mt-1">Gestiona los reportes enviados por los clientes</p>
+            <h1 class="text-body-large font-bold text-black-400">Reportes de Tiendas</h1>
+            <p class="text-caption text-black-300 mt-1">Gestiona los reportes enviados por los clientes</p>
         </div>
     </div>
 
@@ -17,7 +17,7 @@
         <div class="bg-accent-50 rounded-xl p-6 border border-accent-200">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-body-small text-black-300 mb-1">Total</p>
+                    <p class="text-caption text-black-300 mb-1">Total</p>
                     <p class="text-h5 font-bold text-black-400">{{ $stats['total'] }}</p>
                 </div>
                 <div class="w-12 h-12 bg-info-100 rounded-full flex items-center justify-center">
@@ -29,7 +29,7 @@
         <div class="bg-warning-50 rounded-xl p-6 border border-warning-200">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-body-small text-black-300 mb-1">Pendientes</p>
+                    <p class="text-caption text-black-300 mb-1">Pendientes</p>
                     <p class="text-h5 font-bold text-warning-300">{{ $stats['pending'] }}</p>
                 </div>
                 <div class="w-12 h-12 bg-warning-100 rounded-full flex items-center justify-center">
@@ -158,8 +158,8 @@
                                     #{{ $report->id }}
                                 </td>
                                 <td class="px-6 py-4 text-sm text-black-400">
-                                    <a href="{{ route('superlinkiu.stores.show', $report->store_id) }}" 
-                                       class="text-info-300 hover:text-info-200 font-medium">
+                                    <a href="{{ route('superlinkiu.stores.show', $report->store->slug) }}" 
+                                       class="text-primary-300 hover:text-primary-400 font-medium">
                                         {{ $report->store->name }}
                                     </a>
                                 </td>

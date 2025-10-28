@@ -58,15 +58,10 @@
 
 @push('scripts')
 <script>
-console.log('🟢 STORES INDEX: Scripts cargados correctamente');
-
 // Funciones helper específicas para la vista
 function copyToClipboard(text) {
-    console.log('📋 COPY: Intentando copiar texto al portapapeles');
-    
     if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(() => {
-            console.log('✅ COPY: Texto copiado exitosamente');
             try {
                 if (window.Alpine && Alpine.store && Alpine.store('notifications')) {
                     Alpine.store('notifications').show('Contraseña copiada al portapapeles', 'success');
@@ -74,16 +69,13 @@ function copyToClipboard(text) {
                     alert('Contraseña copiada al portapapeles');
                 }
             } catch (error) {
-                console.error('❌ COPY: Error mostrando notificación:', error);
                 alert('Contraseña copiada al portapapeles');
             }
         }).catch((error) => {
-            console.error('❌ COPY: Error copiando al portapapeles:', error);
             // Fallback para navegadores que no soportan clipboard API
             fallbackCopy(text);
         });
     } else {
-        console.warn('⚠️ COPY: Clipboard API no disponible, usando fallback');
         fallbackCopy(text);
     }
 }
@@ -100,16 +92,13 @@ function fallbackCopy(text) {
         textArea.select();
         document.execCommand('copy');
         document.body.removeChild(textArea);
-        console.log('✅ COPY FALLBACK: Texto copiado exitosamente');
         alert('Contraseña copiada al portapapeles');
     } catch (error) {
-        console.error('❌ COPY FALLBACK: Error en fallback:', error);
         alert('Error al copiar. Selecciona y copia manualmente.');
     }
 }
 
 function copyCredentials() {
-    console.log('📋 COPY CREDENTIALS: Iniciando copia de credenciales');
     const credentials = `
 Tienda: {{ session('admin_credentials')['store_name'] ?? '' }}
 URL: {{ session('admin_credentials')['store_slug'] ?? '' }}
@@ -146,34 +135,41 @@ Contraseña: {{ session('admin_credentials')['password'] ?? '' }}
                     toggle.checked = data.verified;
                 });
                 
-                // Mostrar notificación de éxito
-                if (typeof ShowNotification === 'function') {
-                    ShowNotification(data.message, 'success');
-                } else {
-                    console.log(data.message);
-                }
+                // Mostrar SweetAlert
+                Swal.fire({
+                    icon: 'success',
+                    title: '¡Éxito!',
+                    text: data.message || 'Estado de verificación actualizado',
+                    confirmButtonColor: '#00c76f',
+                    confirmButtonText: 'OK',
+                    timer: 2000,
+                    timerProgressBar: true
+                });
             } else {
                 // Revertir el estado del toggle en caso de error
                 e.target.checked = !originalChecked;
                 
                 // Mostrar error
-                if (typeof ShowNotification === 'function') {
-                    ShowNotification(data.message || 'Error al cambiar el estado', 'error');
-                } else {
-                    alert(data.message || 'Error al cambiar el estado');
-                }
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.message || 'Error al cambiar el estado',
+                    confirmButtonColor: '#ed2e45',
+                    confirmButtonText: 'OK'
+                });
             }
         })
         .catch(error => {
             // Revertir el estado del toggle en caso de error de red
             e.target.checked = !originalChecked;
             
-            if (typeof ShowNotification === 'function') {
-                ShowNotification('Error de conexión', 'error');
-            } else {
-                alert('Error de conexión');
-            }
-            console.error('Error:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error de conexión',
+                text: 'No se pudo conectar con el servidor',
+                confirmButtonColor: '#ed2e45',
+                confirmButtonText: 'OK'
+            });
         });
     }
 });
