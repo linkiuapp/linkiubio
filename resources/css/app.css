@@ -29,9 +29,90 @@
     body {
         font-family: 'Inter', sans-serif;
     }
+
+    .lucide{stroke-width: 2;}
 }
 
-
+/* Base: tipografía y colores globales */
+@layer base {
+    html, body { @apply font-sans antialiased; }
+  }
+  
+  /* ===== Tipografía (Mobile → Desktop con clamp) ===== */
+  @layer components {
+    /* HEADINGS */
+    /* H1: 32px → 48px | Bold | lh 1.2 */
+    .h1 {
+      @apply font-bold;
+      font-size: clamp(1.875rem, 4vw + 1rem, 3rem); /* ~30px–48px */
+      line-height: 1.2;
+    }
+    /* H2: 24px → 36px | Semibold | lh 1.25 */
+    .h2 {
+      @apply font-semibold;
+      font-size: clamp(1.5rem, 3.6vw, 2.25rem);
+      line-height: 1.25;
+    }
+    /* H3 (Semibold): 20px → 28px | lh 1.3 */
+    .h3 {
+      @apply font-semibold;
+      font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+      line-height: 1.3;
+    }
+    /* H3 (Medium): 20px → 28px | lh 1.3 */
+    .h3-medium {
+      @apply font-medium;
+      font-size: clamp(1.25rem, 2.5vw, 1.75rem);
+      line-height: 1.3;
+    }
+    /* H4: 18px → 24px | Medium | lh 1.35 */
+    .h4 {
+      @apply font-medium;
+      font-size: clamp(1.125rem, 2vw, 1.5rem);
+      line-height: 1.35;
+    }
+  
+    /* BODY */
+    /* body-large (Regular): 16px → 18px | lh 1.55 */
+    .body-lg {
+      @apply font-normal;
+      font-size: clamp(1rem, 1.2vw, 1.125rem);
+      line-height: 1.55;
+    }
+    /* body-large (Medium): 16px → 18px | lh 1.55 */
+    .body-lg-medium {
+      @apply font-medium;
+      font-size: clamp(1rem, 1.2vw, 1.125rem);
+      line-height: 1.55;
+    }
+    /* body-large (Bold): 16px → 18px | lh 1.5 */
+    .body-lg-bold {
+      @apply font-bold;
+      font-size: clamp(1rem, 1.2vw, 1.125rem);
+      line-height: 1.5;
+    }
+  
+    /* body-small (Regular): 14px → 16px | lh 1.5 */
+    .body-small {
+      @apply font-normal;
+      font-size: clamp(0.875rem, 1vw, 1rem);
+      line-height: 1.5;
+    }
+  
+    /* CAPTION */
+    /* caption (Medium): 12px → 14px | lh 1.4 */
+    .caption {
+      @apply font-medium;
+      font-size: clamp(0.75rem, 0.8vw, 0.875rem);
+      line-height: 1.4;
+    }
+    /* caption (Semibold): 12px → 14px | lh 1.4 */
+    .caption-strong {
+      @apply font-semibold;
+      font-size: clamp(0.75rem, 0.8vw, 0.875rem);
+      line-height: 1.4;
+    }
+  }
 
 /* Sidebar Styles */
 .sidebar {

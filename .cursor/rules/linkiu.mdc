@@ -1,0 +1,27 @@
+---
+alwaysApply: true
+---
+# Flujo de desarrollo con ramas
+- Todo desarrollo y pruebas iniciales se hacen en local.
+- Los cambios se suben primero a la rama `staging`.
+- QA y pruebas manuales se ejecutan en `staging`.
+- Solo tras aprobación de QA, se hace merge a `production`.
+- Está prohibido hacer commits directos en `production`.
+
+# Frontend (Blade + Vite + Alpine)
+- Mantener consistencia de estilos con Tailwind (no CSS inline).
+
+# Seguridad
+- Nunca dejar `dd()`, `dump()` ni `console.log` en commits.
+- Logs y archivos de prueba no llegan a `productions`.
+- Todo input debe sanitizarse/validarse antes de usarse.
+- Variables sensibles siempre en `.env` y documentadas en `.env.example`.
+
+# Estándares adicionales
+- Commits en formato Conventional Commits:
+  - feat: nueva funcionalidad
+  - fix: corrección de bug
+  - chore: mantenimiento o dependencias
+  - refactor: cambio interno sin modificar funcionalidad
+  - test: pruebas
+  - docs: documentación

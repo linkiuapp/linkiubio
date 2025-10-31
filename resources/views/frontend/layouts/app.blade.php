@@ -16,11 +16,11 @@
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 </head>
-<body class="bg-accent-100 max-w-[480px] mx-auto overflow-x-hidden">
+<body class="bg-brandWhite-50 md:max-w-[480px] max-w-full mx-auto overflow-x-hidden">
 
     <!-- Header -->
     <header class="relative overflow-hidden" style="background: {{ $store->design ? $store->design->header_background_color : '' }}">
-        <div class="px-6 py-10 text-center">
+        <div class="px-6 py-16 text-center">
 
             <!-- Logo -->
             <div class="mb-2">
@@ -28,76 +28,73 @@
                     @if($store->design && $store->design->logo_url)
                         <img src="{{ $store->design->logo_url }}" 
                              alt="Logo" 
-                             class="w-18 h-18 rounded-full object-cover"
-                             style="width: 150px; height: 150px;">
+                             class="w-18 h-18 rounded-full object-cover border-4 border-brandWhite-300"
+                             style="width: 130px; height: 130px; md:width: 150px; md:height: 150px;">
                     @endif
                 </div>
             </div>
 
-            <!-- Badge Verificado -->
-            <div class="mb-2" x-data="verificationBadge" x-init="startPolling()">
+            <!-- Nombre de la tienda y badge de verificación -->
+            <div x-data="verificationBadge" x-init="startPolling()" class="flex items-center gap-2 justify-center mb-2">
+                <h1 class="h1 capitalize" style="color: {{ $store->design ? $store->design->header_text_color : '#ffffff' }}">
+                    {{ $store->name ?? 'Linkiu Store' }}
+                </h1>
                 @if($store->verified)
-                    <div x-show="verified" class="inline-flex items-center bg-success-50 border border-success-300 text-success-400 px-2 py-1 rounded-full text-small font-regular">
-                        <x-lucide-badge-check class="w-4 h-4 mr-2" />
-                        Tienda Verificada
-                    </div>
+                <div x-show="verified" x-init="startPolling()" class="bg-brandSuccess-50 rounded-full p-1">
+                    <i data-lucide="badge-check" class="w-16px h-16px text-brandSuccess-400"></i>
+                </div>
                 @else
-                    <div x-show="!verified" class="inline-flex items-center bg-secondary-50 border border-secondary-300 text-secondary-400 px-2 py-1 rounded-full text-small font-regular">
-                        <x-lucide-shield-off class="w-4 h-4 mr-2" />
-                        Tienda No Verificada
+                    <div x-show="!verified" x-init="startPolling()" class="bg-brandError-50 rounded-full p-2">
+                        <i data-lucide="shield-off"></i>
                     </div>
                 @endif
             </div>
-
-            <!-- Nombre de la tienda -->
-            <h1 class="text-h6 font-bold text-center capitalize" style="color: {{ $store->design ? $store->design->header_text_color : '#ffffff' }}">
-                {{ $store->name ?? 'Linkiu Rest' }}
-            </h1>
+            
 
             <!-- Descripción -->
-            <p class="text-body-regular font-regular" style="color: {{ $store->design ? $store->design->header_description_color : '#e9d5ff' }}">
+            <p class="body-small text-center" style="color: {{ $store->design ? $store->design->header_description_color : '#e9d5ff' }}">
                 {{ $store->description ?? 'Comidas Rápidas en Sincelejo' }}
             </p>
         </div>
     </header>
 
     <!-- Menu inferior -->
-    <nav class="w-full max-w-[480px] bg-accent-50 rounded-b-3xl px-2 sm:px-4 py-4">
-        <div class="flex justify-around items-center">
+    <nav class="w-full max-w-[480px] bg-brandWhite-100 rounded-b-3xl px-4 sm:px-4 py-4 items-center justify-center">
+        <div class="flex justify-center items-center gap-2">
 
-            <!-- Contacto -->
+            <!-- Contacto (Sedes) -->
             <a href="{{ route('tenant.contact', $store->slug) }}" 
-               class="flex flex-col items-center py-2 px-3 min-w-[72px] {{ request()->routeIs('tenant.contact') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
-                <x-lucide-store class="w-5 h-5 sm:w-6 sm:h-6 mb-1" />
-                <span class="text-body-small sm:text-body-regular font-regular">Sedes</span>
+               class="flex flex-col items-center py-3 px-3 min-w-[72px] {{ request()->routeIs('tenant.contact') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
+                <i data-lucide="building-2" class="w-32px h-32px sm:w-40px sm:h-40px"></i>
+                <span class="body-small sm:body-lg">Sedes</span>
             </a>
 
             <!-- Catálogo -->
             <a href="{{ route('tenant.catalog', $store->slug) }}" 
-               class="flex flex-col items-center py-2 px-3 min-w-[72px] {{ request()->routeIs('tenant.catalog') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
-                <x-lucide-shopping-basket class="w-5 h-5 sm:w-6 sm:h-6 mb-1" />
-                <span class="text-body-small sm:text-body-regular font-regular">Catálogo</span>
+               class="flex flex-col items-center py-3 px-3 min-w-[72px] {{ request()->routeIs('tenant.catalog') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
+                <i data-lucide="shopping-basket" class="w-32px h-32px sm:w-40px sm:h-40px"></i>
+                <span class="body-small sm:body-lg">Catálogo</span>
             </a>
 
             <!-- Inicio -->
             <a href="{{ route('tenant.home', $store->slug) }}" 
-               class="flex flex-col items-center py-2 px-3 min-w-[72px] {{ request()->routeIs('tenant.home') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
-                <x-lucide-home class="w-6 h-6 sm:w-7 sm:h-7 mb-1" />
-                <span class="text-body-small sm:text-body-regular font-regular">Inicio</span>
+               class="flex flex-col items-center py-3 px-3 min-w-[72px] {{ request()->routeIs('tenant.home') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
+                <i data-lucide="store" class="w-32px h-32px sm:w-40px sm:h-40px"></i>
+                <span class="body-small sm:body-lg">Inicio</span>
             </a>
 
             <!-- Promos -->
             <a href="{{ route('tenant.promotions', $store->slug) }}" 
-               class="flex flex-col items-center py-2 px-3 min-w-[72px] {{ request()->routeIs('tenant.promotions') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
-                <x-lucide-badge-percent class="w-5 h-5 sm:w-6 sm:h-6 mb-1" />
-                <span class="text-body-small sm:text-body-regular font-regular">Promos</span>
+               class="flex flex-col items-center py-3 px-3 min-w-[72px] {{ request()->routeIs('tenant.promotions') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
+                <i data-lucide="badge-percent" class="w-32px h-32px sm:w-40px sm:h-40px"></i>
+                <span class="body-small sm:body-lg">Promos</span>
             </a>
 
             <!-- Reservas -->
             <a href="{{ route('tenant.coming-soon', $store->slug) }}" 
-               class="flex flex-col items-center py-2 px-3 min-w-[72px] {{ request()->routeIs('tenant.coming-soon') ? 'text-accent-75 bg-primary-300 rounded-xl' : 'text-secondary-300 hover:text-secondary-300 hover:bg-accent-100 hover:rounded-xl' }} transition-colors">
-                <x-lucide-calendar-days class="w-5 h-5 sm:w-6 sm:h-6 mb-1" />
-                <span class="text-body-small sm:text-body-regular font-regular">Reservas</span>
+               class="flex flex-col items-center py-3 px-3 min-w-[72px] {{ request()->routeIs('tenant.coming-soon') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
+                <i data-lucide="calendar-heart" class="w-32px h-32px sm:w-40px sm:h-40px"></i>
+                <span class="body-small sm:body-lg">Reservas</span>
             </a>
         </div>
     </nav>
@@ -110,6 +107,7 @@
         @include('frontend.components.footer')
     </main>
 
+    <!-- Verificación de la tienda -->
     <script>
         function verificationBadge() {
             return {

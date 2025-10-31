@@ -470,11 +470,6 @@
 </div>
 
 @push('scripts')
-{{-- 🚀 VALIDACIONES EN TIEMPO REAL --}}
-<script src="{{ asset('js/stores/real-time-validation.js') }}"></script>
-{{-- 🛡️ MANEJO DE ERRORES --}}
-<script src="{{ asset('js/stores/error-handling.js') }}"></script>
-
 {{-- Campo oculto para store_id en validaciones --}}
 <input type="hidden" name="_store_id" value="{{ $store->id }}">
 
@@ -643,7 +638,7 @@ document.addEventListener('send-credentials', function(event) {
     
     if (confirm(`¿Reenviar credenciales de acceso a ${adminEmail}?`)) {
         // Hacer petición AJAX para reenviar credenciales
-        fetch('/superlinkiu/api/stores/send-credentials-email', {
+        fetch('{{ route("superlinkiu.api.stores.send-credentials-email") }}', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -657,24 +652,31 @@ document.addEventListener('send-credentials', function(event) {
         .then(response => response.json())
         .then(data => {
             if (data.success) {
-                // Mostrar notificación de éxito
-                const toast = document.createElement('div');
-                toast.className = 'fixed top-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50';
-                toast.textContent = `✅ Credenciales enviadas a ${adminEmail}`;
-                document.body.appendChild(toast);
-                
-                setTimeout(() => {
-                    if (toast.parentNode) {
-                        toast.parentNode.removeChild(toast);
-                    }
-                }, 4000);
+                // Mostrar notificación de éxito con SweetAlert2
+                Swal.fire({
+                    icon: 'success',
+                    title: '✅ Enviado',
+                    text: `Credenciales enviadas a ${adminEmail}`,
+                    timer: 3000,
+                    showConfirmButton: false
+                });
             } else {
-                alert('❌ Error al enviar credenciales: ' + (data.message || 'Error desconocido'));
+                Swal.fire({
+                    icon: 'error',
+                    title: '❌ Error',
+                    text: data.message || 'Error al enviar credenciales',
+                    confirmButtonColor: '#ed2e45'
+                });
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('❌ Error al enviar credenciales');
+            Swal.fire({
+                icon: 'error',
+                title: '❌ Error de conexión',
+                text: 'No se pudo conectar con el servidor',
+                confirmButtonColor: '#ed2e45'
+            });
         });
     }
 });

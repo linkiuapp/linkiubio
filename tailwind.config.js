@@ -68,6 +68,80 @@ module.exports = {
       },
       colors: {
 
+
+        // ---- Escala de blancos (renombrada)
+        brandWhite: {
+          50:  '#fdfdff',
+          100: '#f2f1fd',
+          200: '#eceafc',
+          300: '#e8e6fb',
+          400: '#8e8c99',
+        },
+
+        // ---- Neutrales
+        brandNeutral: {
+          50:  '#e8e8e8',
+          100: '#9f9fa1',
+          200: '#77777a',
+          300: '#3d3c40',
+          400: '#151419',
+          500: '#0d0c0f',
+        },
+
+        // ---- Success (verde emerald)
+        brandSuccess: {
+          50:  '#d1fae5',
+          100: '#6ee7b7',
+          200: '#10b981',
+          300: '#047857',
+          400: '#064e3b',
+        },
+
+        // ---- Warning (amber)
+        brandWarning: {
+          50:  '#fef3c7',
+          100: '#fcd34d',
+          200: '#f59e0b',
+          300: '#b45309',
+          400: '#78350f',
+        },
+
+        // ---- Error (rojo)
+        brandError: {
+          50:  '#fee2e2',
+          100: '#fca5a5',
+          200: '#ef4444',
+          300: '#b91c1c',
+          400: '#7f1d1d',
+        },
+
+        // ---- Info (cyan/blue)
+        brandInfo: {
+          50:  '#e0f2fe',
+          100: '#7dd3fc',
+          200: '#0ea5e9',
+          300: '#0369a1',
+          400: '#0c4a6e',
+        },
+
+        // ---- Brand Primary (indigo/violet)
+        brandPrimary: {
+          50:  '#e0e7ff',
+          100: '#a5b4fc',
+          200: '#6366f1',
+          300: '#4338ca',
+          400: '#312e81',
+        },
+
+        // ---- Brand Secondary (pink/magenta)
+        brandSecondary: {
+          50:  '#fbcfe8',
+          100: '#f472b6',
+          200: '#ec4899',
+          300: '#be185d',
+          400: '#831843',
+        },
+
         primary: {
           50: '#fbe9f6',
           75: '#f0a6db',
