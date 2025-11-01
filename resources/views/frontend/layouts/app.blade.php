@@ -15,6 +15,9 @@
     
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
+    <!-- Lordicon -->
+    <script src="https://cdn.lordicon.com/lordicon.js"></script>
 </head>
 <body class="bg-brandWhite-50 md:max-w-[480px] max-w-full mx-auto overflow-x-hidden">
 
@@ -40,13 +43,17 @@
                     {{ $store->name ?? 'Linkiu Store' }}
                 </h1>
                 @if($store->verified)
-                <div x-show="verified" x-init="startPolling()" class="bg-brandSuccess-50 rounded-full p-1">
-                    <i data-lucide="badge-check" class="w-16px h-16px text-brandSuccess-400"></i>
-                </div>
-                @else
-                    <div x-show="!verified" x-init="startPolling()" class="bg-brandError-50 rounded-full p-2">
-                        <i data-lucide="shield-off"></i>
+                <a href="{{ route('tenant.verified', $store->slug) }}">
+                    <div x-show="verified" x-init="startPolling()" class="bg-brandSuccess-50 rounded-full p-1">
+                        <i data-lucide="badge-check" class="w-16px h-16px text-brandSuccess-400"></i>
                     </div>
+                </a>
+                @else
+                <a href="{{ route('tenant.verified', $store->slug) }}">
+                    <div x-show="!verified" x-init="startPolling()" class="bg-brandNeutral-50 rounded-full p-2">
+                        <i data-lucide="badge-x" class="w-16px h-16px text-brandNeutral-400"></i>
+                    </div>
+                </a>
                 @endif
             </div>
             
@@ -59,40 +66,40 @@
     </header>
 
     <!-- Menu inferior -->
-    <nav class="w-full max-w-[480px] bg-brandWhite-100 rounded-b-3xl px-4 sm:px-4 py-4 items-center justify-center">
-        <div class="flex justify-center items-center gap-2">
+    <nav class="max-w-full md:max-w-[480px] bg-brandWhite-100 rounded-b-3xl px-6 sm:px-10 py-4 flex">
+        <div class="flex items-center justify-center gap-1 w-full md:w-auto">
 
             <!-- Contacto (Sedes) -->
             <a href="{{ route('tenant.contact', $store->slug) }}" 
-               class="flex flex-col items-center py-3 px-3 min-w-[72px] {{ request()->routeIs('tenant.contact') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
+               class="flex flex-col gap-1 justify-center items-center py-3 px-2 min-w-[70px] {{ request()->routeIs('tenant.contact') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
                 <i data-lucide="building-2" class="w-32px h-32px sm:w-40px sm:h-40px"></i>
                 <span class="body-small sm:body-lg">Sedes</span>
             </a>
 
             <!-- Catálogo -->
             <a href="{{ route('tenant.catalog', $store->slug) }}" 
-               class="flex flex-col items-center py-3 px-3 min-w-[72px] {{ request()->routeIs('tenant.catalog') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
+               class="flex flex-col gap-1 justify-center items-center py-3 px-2 min-w-[70px] {{ request()->routeIs('tenant.catalog') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
                 <i data-lucide="shopping-basket" class="w-32px h-32px sm:w-40px sm:h-40px"></i>
                 <span class="body-small sm:body-lg">Catálogo</span>
             </a>
 
             <!-- Inicio -->
             <a href="{{ route('tenant.home', $store->slug) }}" 
-               class="flex flex-col items-center py-3 px-3 min-w-[72px] {{ request()->routeIs('tenant.home') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
+               class="flex flex-col gap-1 jusitfy-center items-center py-3 px-2 min-w-[70px] {{ request()->routeIs('tenant.home') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
                 <i data-lucide="store" class="w-32px h-32px sm:w-40px sm:h-40px"></i>
                 <span class="body-small sm:body-lg">Inicio</span>
             </a>
 
             <!-- Promos -->
             <a href="{{ route('tenant.promotions', $store->slug) }}" 
-               class="flex flex-col items-center py-3 px-3 min-w-[72px] {{ request()->routeIs('tenant.promotions') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
+               class="flex flex-col gap-1 justify-center items-center py-3 px-2 min-w-[70px] {{ request()->routeIs('tenant.promotions') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
                 <i data-lucide="badge-percent" class="w-32px h-32px sm:w-40px sm:h-40px"></i>
                 <span class="body-small sm:body-lg">Promos</span>
             </a>
 
             <!-- Reservas -->
             <a href="{{ route('tenant.coming-soon', $store->slug) }}" 
-               class="flex flex-col items-center py-3 px-3 min-w-[72px] {{ request()->routeIs('tenant.coming-soon') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
+               class="flex flex-col gap-1 justify-center items-center py-3 px-2 min-w-[70px] {{ request()->routeIs('tenant.coming-soon') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
                 <i data-lucide="calendar-heart" class="w-32px h-32px sm:w-40px sm:h-40px"></i>
                 <span class="body-small sm:body-lg">Reservas</span>
             </a>

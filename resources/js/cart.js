@@ -380,20 +380,15 @@ class Cart {
         
         // Crear notificación temporal
         const notification = document.createElement('div');
-        notification.className = 'fixed top-6 left-1/2 transform -translate-x-1/2 bg-success-300 px-6 py-4 rounded-2xl shadow-2xl z-[9999] transition-all duration-500 -translate-y-32 opacity-0 min-w-[380px]';
+        notification.className = 'fixed top-6 left-1/2 transform -translate-x-1/2 bg-brandSuccess-100 px-6 py-4 rounded-2xl shadow-2xl z-[9999] transition-all duration-500 -translate-y-32 opacity-0 min-w-[300px]';
         notification.innerHTML = `
             <div class="flex items-center gap-4">
                 <div class="flex-shrink-0">
-                    <svg class="w-10 h-10 text-black-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                    </svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-icon lucide-circle-check"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
                 </div>
  
                 <div class="flex flex-col gap-1">
-                    <span class="text-body-small font-bold text-black-500">¡Hey! Tu producto se agregó al carrito</span>
-                    <span class="text-body-small font-medium text-black-500 whitespace-nowrap">
-                        ${totalItems} ${totalItems === 1 ? 'producto' : 'productos'} en carrito · ${totalPrice}
-                    </span>
+                    <span class="caption-strong text-brandNeutral-500">¡Hey! Tu producto se agregó al carrito</span>
                 </div>
             </div>
         `;
