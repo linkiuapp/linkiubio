@@ -1,16 +1,16 @@
 {
   "resources/css/app.css": {
-    "file": "assets/app-1ApS6ju7.css",
+    "file": "assets/app-BpjUVtTl.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/css/wizard.css": {
-    "file": "assets/wizard-DzZ7haHE.css",
+    "file": "assets/wizard-itUS7YHq.css",
     "src": "resources/css/wizard.css",
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-B89eFZec.js",
+    "file": "assets/app-DB3QkEDt.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -30,7 +30,7 @@
     ]
   },
   "resources/js/cart.js": {
-    "file": "assets/cart-Btan5Z32.js",
+    "file": "assets/cart-Ca0QYLy7.js",
     "name": "cart",
     "src": "resources/js/cart.js",
     "isDynamicEntry": true

@@ -2,35 +2,59 @@
 
 @section('content')
 <div class="p-4 space-y-6">
+
     <!-- Header -->
     <div class="space-y-3">
+        
         <!-- Breadcrumbs -->
-        <nav class="flex text-small font-regular text-info-300">
-            <a href="{{ route('tenant.home', $store->slug) }}" class="hover:text-info-200 transition-colors">Inicio</a>
+        <nav class="flex caption text-brandInfo-300">
+            <a href="{{ route('tenant.home', $store->slug) }}" class="hover:text-brandInfo-400 transition-colors">Inicio</a>
             <span class="mx-2">/</span>
-            <span class="text-secondary-300 font-medium">Promociones</span>
+            <span class="text-brandNeutral-400 caption">Promociones</span>
         </nav>
         
         <!-- Title -->
         <div class="space-y-2">
-            <h2 class="text-body-large font-bold text-black-300">🎉 Promociones Activas</h2>
-            <p class="text-caption font-regular text-black-200">Aprovecha estas ofertas especiales</p>
+            <h3 class="h3 text-brandNeutral-400">Nuestras Promociones</h3>
+        </div>
+
+        <!-- Información adicional -->
+        <div class="bg-brandInfo-50 rounded-lg p-4">
+            <h3 class="body-lg-bold text-brandInfo-400 mb-2">¿Cómo usar nuestros cupones?</h3>
+            <div class="space-y-2 caption text-brandInfo-400">
+                <div class="flex items-start gap-2">
+                    <span class="caption-strong text-brandInfo-400">1.</span>
+                    <span>Copia el código de descuento tocando el botón "Copiar"</span>
+                </div>
+                <div class="flex items-start gap-2">
+                    <span class="caption-strong text-brandInfo-400">2.</span>
+                    <span>Agrega productos a tu carrito de compras</span>
+                </div>
+                <div class="flex items-start gap-2">
+                    <span class="caption-strong text-brandInfo-400">3.</span>
+                    <span>En el checkout, pega el código en el campo "Cupón de descuento"</span>
+                </div>
+                <div class="flex items-start gap-2">
+                    <span class="caption-strong text-brandInfo-400">4.</span>
+                    <span>¡Disfruta tu descuento! 🎉</span>
+                </div>
+            </div>
         </div>
     </div>
 
     @if($coupons->count() > 0)
+    
         <!-- Lista de promociones -->
         <div class="space-y-4">
             @foreach($coupons as $coupon)
-                <div class="bg-accent-50 rounded-lg border border-accent-200 overflow-hidden shadow-sm" 
-                     x-data="{ copied: false }">
+                <div class="bg-brandWhite-100 rounded-lg overflow-hidden shadow-sm" x-data="{ copied: false }">
                     
                     <!-- Header del cupón con descuento destacado -->
-                    <div class="bg-gradient-to-r from-primary-300 to-secondary-300 p-4 text-accent-50">
+                    <div class="bg-gradient-to-r from-brandSecondary-300 to-brandPrimary-300 p-4 text-accent-50">
                         <div class="flex items-center justify-between">
                             <div class="flex-1">
                                 <!-- Descuento principal -->
-                                <div class="text-h7 font-bold mb-1">
+                                <div class="h1 mb-1">
                                     @if($coupon->discount_type === 'percentage')
                                         {{ $coupon->formatted_discount }} OFF
                                     @else
@@ -39,12 +63,11 @@
                                 </div>
                                 
                                 <!-- Nombre del cupón -->
-                                <div class="text-caption font-medium opacity-90">{{ $coupon->name }}</div>
+                                <div class="caption">{{ $coupon->name }}</div>
                             </div>
-                            
                             <!-- Badge de estado -->
                             <div class="text-right">
-                                <span class="inline-flex items-center px-2 py-1 rounded-full text-small font-medium {{ $coupon->status_info['bg'] }} {{ $coupon->status_info['color'] }} border {{ $coupon->status_info['border'] }}">
+                                <span class="inline-flex items-center rounded-full bg-brandsuccess-50 border border-brandSuccess-400 px-2 py-1 caption-strong text-brandSuccess-400 {{ $coupon->status_info['bg'] }} {{ $coupon->status_info['color'] }} border {{ $coupon->status_info['border'] }}">
                                     {{ $coupon->status_info['text'] }}
                                 </span>
                             </div>
@@ -53,46 +76,47 @@
 
                     <!-- Contenido del cupón -->
                     <div class="p-4 space-y-4">
+                        
                         <!-- Código del cupón -->
-                        <div class="text-center">
-                            <div class="text-small font-regular text-black-300 mb-2">Código de descuento</div>
-                            <div class="bg-accent-100 border-2 border-dashed border-primary-200 rounded-lg p-3 flex items-center justify-between">
-                                <span class="font-mono text-body-large font-bold text-primary-300">{{ $coupon->code }}</span>
-                                <button @click="
-                                    navigator.clipboard.writeText('{{ $coupon->code }}');
-                                    copied = true;
-                                    setTimeout(() => copied = false, 2000);
-                                " 
-                                class="bg-primary-300 hover:bg-primary-200 text-accent-50 px-3 py-1 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
-                                    <template x-if="!copied">
-                                        <div class="flex items-center gap-2">
-                                            <x-solar-copy-outline class="w-4 h-4" />
-                                            <span>Copiar</span>
-                                        </div>
-                                    </template>
-                                    <template x-if="copied">
-                                        <div class="flex items-center gap-2 text-success-50">
-                                            <x-solar-check-circle-outline class="w-4 h-4" />
-                                            <span>¡Copiado!</span>
-                                        </div>
-                                    </template>
+                        <div>
+                            <div class="body-lg-bold text-brandNeutral-400 mb-2">Código de descuento</div>
+                            <div class="bg-brandWhite-50 border-2 border-dashed border-dashed-rounded border-brandPrimary-400 rounded-full p-3 flex items-center justify-between">
+                                <span class="font-mono h2 text-brandPrimary-300">{{ $coupon->code }}</span>
+                                <button 
+                                    @click="
+                                        navigator.clipboard.writeText('{{ $coupon->code }}');
+                                        copied = true;
+                                        setTimeout(() => copied = false, 2000);
+                                        showCopiedNotification('{{ $coupon->code }}');
+                                    " 
+                                    class="body-lg-regular bg-brandPrimary-300 hover:bg-brandPrimary-400 text-brandWhite-50 px-3 py-1 rounded-full transition-colors flex items-center gap-2"
+                                    type="button"
+                                >
+                                    <div class="flex items-center gap-2" x-show="!copied">
+                                        <i data-lucide="copy" class="w-16px h-16px"></i>
+                                        <span>Copiar</span>
+                                    </div>
+                                    <div class="flex items-center gap-2" x-show="copied" style="display: none;">
+                                        <i data-lucide="circle-check" class="w-16px h-16px"></i>
+                                        <span>¡Copiado!</span>
+                                    </div>
                                 </button>
                             </div>
                         </div>
 
                         <!-- Descripción -->
                         @if($coupon->description)
-                            <div class="text-sm text-black-300 text-center">
+                            <div class="body-lg-regular text-brandNeutral-400 text-center">
                                 {{ $coupon->description }}
                             </div>
                         @endif
 
                         <!-- Aplicabilidad -->
                         @if($coupon->type !== 'global')
-                            <div class="bg-info-50 border border-info-100 rounded-lg p-3">
-                                <div class="flex items-center gap-2 text-info-300">
-                                    <x-solar-info-circle-outline class="w-4 h-4 flex-shrink-0" />
-                                    <span class="text-sm font-medium">
+                            <div class="bg-brandInfo-50 border border-brandInfo-100 rounded-lg p-3">
+                                <div class="flex items-center gap-2 text-brandInfo-300">
+                                    <i data-lucide="info" class="w-16px h-16px"></i>
+                                    <span class="body-lg-regular">
                                         @if($coupon->type === 'categories')
                                             Válido para categorías específicas
                                         @else
@@ -106,24 +130,24 @@
                         <!-- Condiciones y validez -->
                         <div class="space-y-2">
                             @if($coupon->conditions_text)
-                                <div class="flex items-center gap-2 text-black-300">
-                                    <x-solar-document-text-outline class="w-4 h-4 flex-shrink-0" />
-                                    <span class="text-sm">{{ $coupon->conditions_text }}</span>
+                                <div class="flex items-center gap-2 text-brandNeutral-400">
+                                    <i data-lucide="file-text" class="w-8px h-8px"></i>
+                                    <span class="caption">{{ $coupon->conditions_text }}</span>
                                 </div>
                             @endif
 
                             @if($coupon->expiry_text)
-                                <div class="flex items-center gap-2 text-black-300">
-                                    <x-solar-calendar-outline class="w-4 h-4 flex-shrink-0" />
-                                    <span class="text-sm">{{ $coupon->expiry_text }}</span>
+                                <div class="flex items-center gap-2 text-brandNeutral-400">
+                                    <i data-lucide="calendar" class="w-8px h-8px"></i>
+                                    <span class="caption">{{ $coupon->expiry_text }}</span>
                                 </div>
                             @endif
 
                             <!-- Días y horarios específicos -->
                             @if($coupon->days_of_week || $coupon->start_time || $coupon->end_time)
-                                <div class="flex items-center gap-2 text-black-300">
-                                    <x-solar-clock-circle-outline class="w-4 h-4 flex-shrink-0" />
-                                    <span class="text-sm">
+                                <div class="flex items-center gap-2 text-brandNeutral-400">
+                                    <i data-lucide="clock" class="w-8px h-8px"></i>
+                                    <span class="caption">
                                         @if($coupon->days_of_week)
                                             @php
                                                 $dayNames = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
@@ -142,10 +166,9 @@
 
                         <!-- Call to action -->
                         <div class="pt-2">
-                            <div class="bg-success-50 border border-success-100 rounded-lg p-3 text-center">
-                                <div class="text-caption font-medium text-black-500">
-                                    ✨ Copia el código y úsalo en tu próxima compra
-                                </div>
+                            <div class="bg-brandSuccess-50 border border-brandSuccess-100 rounded-lg p-3 text-center flex items-center justify-center gap-2">
+                                <i data-lucide="star" class="w-5 h-5 text-brandSuccess-400"></i>
+                                <span class="caption-strong text-brandSuccess-400">Copia el código y úsalo en tu próxima compra</span>
                             </div>
                         </div>
                     </div>
@@ -153,45 +176,17 @@
             @endforeach
         </div>
 
-        <!-- Información adicional -->
-        <div class="bg-accent-100 rounded-lg p-4 border border-accent-200">
-            <h3 class="text-body-large font-bold text-black-400 mb-2">📋 Cómo usar tus cupones</h3>
-            <div class="space-y-2 text-sm text-black-300">
-                <div class="flex items-start gap-2">
-                    <span class="font-bold text-primary-300 text-caption">1.</span>
-                    <span>Copia el código de descuento tocando el botón "Copiar"</span>
-                </div>
-                <div class="flex items-start gap-2">
-                    <span class="font-bold text-primary-300 text-caption">2.</span>
-                    <span>Agrega productos a tu carrito de compras</span>
-                </div>
-                <div class="flex items-start gap-2">
-                    <span class="font-bold text-primary-300 text-caption">3.</span>
-                    <span>En el checkout, pega el código en el campo "Cupón de descuento"</span>
-                </div>
-                <div class="flex items-start gap-2">
-                    <span class="font-bold text-primary-300 text-caption">4.</span>
-                    <span>¡Disfruta tu descuento! 🎉</span>
-                </div>
-            </div>
-        </div>
-
     @else
+
         <!-- Estado vacío -->
-        <div class="text-center py-12">
-            <div class="w-20 h-20 bg-secondary-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                <x-lucide-ticket class="w-10 h-10 text-secondary-200" />
-            </div>
-            <h3 class="text-h7 font-bold text-black-300 mb-2">No hay promociones activas</h3>
-            <p class="text-body-small font-regular text-black-200 mb-6">
-                Por el momento no tenemos promociones disponibles, pero mantente atento porque pronto habrán nuevas ofertas.
-            </p>
-            
-            <!-- Botón para continuar comprando -->
-            <a href="{{ route('tenant.home', $store->slug) }}" 
-               class="inline-flex items-center gap-2 bg-primary-300 hover:bg-primary-200 text-accent-50 px-6 py-3 rounded-lg font-medium transition-colors">
-                <x-lucide-shopping-cart class="w-5 h-5" />
+        <div class="flex flex-col items-center justify-center py-8">
+            <div class="flex flex-col items-center justify-center">
+                <img src="https://cdn.jsdelivr.net/gh/linkiuapp/medialink@main/Assets_Fronted/img_linkiu_v1_coupon.svg" alt="img_linkiu_v1_coupon" class="h-32 w-auto" loading="lazy">
+                <p class="body-lg-bold text-center text-brandNeutral-400 mt-4">No hay promociones activas</p>
+                <a href="{{ route('tenant.home', $store->slug) }}" 
+                   class="rounded-full gap-2 inline-flex mt-2 px-4 py-2 bg-brandPrimary-300 text-brandWhite-100 rounded-full body-lg-medium hover:bg-brandPrimary-400 transition-colors">
                 Continuar comprando
+                <i data-lucide="arrow-up-right" class="w-24px h-24px sm:w-32px sm:h-32px"></i>
             </a>
         </div>
     @endif
@@ -199,6 +194,43 @@
 
 @push('scripts')
 <script>
+    // Función para mostrar notificación de cupón copiado
+    window.showCopiedNotification = function(couponCode) {
+        // Crear notificación temporal
+        const notification = document.createElement('div');
+        notification.className = 'fixed top-6 left-1/2 transform -translate-x-1/2 bg-brandSuccess-100 px-6 py-4 rounded-2xl shadow-2xl z-[9999] transition-all duration-500 -translate-y-32 opacity-0 min-w-[320px]';
+        notification.innerHTML = `
+            <div class="flex items-center gap-4">
+                <div class="flex-shrink-0">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check text-brandSuccess-400"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                </div>
+ 
+                <div class="flex flex-col gap-1">
+                    <span class="caption-strong text-brandNeutral-500">¡Ufff! Cupón copiado exitosamente</span>
+                    <span class="caption text-brandNeutral-400">Código: <strong>${couponCode}</strong></span>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Animar entrada
+        setTimeout(() => {
+            notification.style.transform = 'translate(-50%, 0)';
+            notification.style.opacity = '1';
+        }, 10);
+        
+        // Remover después de 3 segundos
+        setTimeout(() => {
+            notification.style.transform = 'translate(-50%, -8rem)';
+            notification.style.opacity = '0';
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 500);
+        }, 3000);
+    };
+
     // Auto-scroll to copied coupon for better UX
     document.addEventListener('alpine:init', () => {
         Alpine.data('couponCard', () => ({
@@ -209,9 +241,8 @@
                     await navigator.clipboard.writeText(code);
                     this.copied = true;
                     setTimeout(() => this.copied = false, 2000);
-                    
-                    // Opcional: mostrar toast notification
-                    // this.showToast('Código copiado exitosamente');
+                    // Mostrar notificación
+                    showCopiedNotification(code);
                 } catch (err) {
                     console.error('Error al copiar:', err);
                     // Fallback para dispositivos que no soportan clipboard API
@@ -229,6 +260,8 @@
                 
                 this.copied = true;
                 setTimeout(() => this.copied = false, 2000);
+                // Mostrar notificación
+                showCopiedNotification(text);
             }
         }));
     });
