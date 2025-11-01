@@ -136,9 +136,10 @@
                              @if($category->icon && $category->icon->image_url)
                                  <img src="{{ $category->icon->image_url }}" 
                                       alt="{{ $category->name }}" 
-                                      class="w-56px h-56px object-contain">
+                                      class="w-56px h-56px object-contain aspect-square"
+                                      style="aspect-ratio: 1 / 1;"
                              @else
-                                 <x-solar-gallery-outline class="w-10 h-10 text-black-300 group-hover:text-primary-300" />
+                                 <i data-lucide="image" class="w-10 h-10 text-brandNeutral-400 group-hover:text-brandPrimary-300"></i>
                              @endif
                         </div>
                         

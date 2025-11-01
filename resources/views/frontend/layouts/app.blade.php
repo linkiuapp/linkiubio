@@ -29,34 +29,30 @@
             <div class="mb-2">
                 <div class="mx-auto flex items-center justify-center">
                     @if($store->design && $store->design->logo_url)
-                        <img src="{{ $store->design->logo_url }}" 
-                             alt="Logo" 
-                             class="w-18 h-18 rounded-full object-cover border-4 border-brandWhite-300"
-                             style="width: 130px; height: 130px; md:width: 150px; md:height: 150px;">
+                        <div class="relative inline-block">
+                            <img src="{{ $store->design->logo_url }}" 
+                                 alt="Logo" 
+                                 class="w-[130px] h-[130px] md:w-[150px] md:h-[150px] rounded-full object-cover border-4 border-brandWhite-300">
+                            @if($store->verified)
+                                <a href="{{ route('tenant.verified', $store->slug) }}" class="absolute bottom-2 right-2 bg-brandSuccess-50 rounded-full p-1 shadow-lg" title="Tienda verificada">
+                                    <i data-lucide="badge-check" class="w-16px h-16px text-brandSuccess-400"></i>
+                                </a>
+                            @else
+                                <a href="{{ route('tenant.verified', $store->slug) }}" class="absolute bottom-2 right-2 bg-brandNeutral-50 rounded-full p-2 shadow-lg" title="Tienda no verificada">
+                                    <i data-lucide="badge-x" class="w-16px h-16px text-brandNeutral-400"></i>
+                                </a>
+                            @endif
+                        </div>
                     @endif
                 </div>
             </div>
 
             <!-- Nombre de la tienda y badge de verificación -->
-            <div x-data="verificationBadge" x-init="startPolling()" class="flex items-center gap-2 justify-center mb-2">
+            <div class="flex items-center gap-2 justify-center mb-2">
                 <h1 class="h1 capitalize" style="color: {{ $store->design ? $store->design->header_text_color : '#ffffff' }}">
                     {{ $store->name ?? 'Linkiu Store' }}
                 </h1>
-                @if($store->verified)
-                <a href="{{ route('tenant.verified', $store->slug) }}">
-                    <div x-show="verified" x-init="startPolling()" class="bg-brandSuccess-50 rounded-full p-1">
-                        <i data-lucide="badge-check" class="w-16px h-16px text-brandSuccess-400"></i>
-                    </div>
-                </a>
-                @else
-                <a href="{{ route('tenant.verified', $store->slug) }}">
-                    <div x-show="!verified" x-init="startPolling()" class="bg-brandNeutral-50 rounded-full p-2">
-                        <i data-lucide="badge-x" class="w-16px h-16px text-brandNeutral-400"></i>
-                    </div>
-                </a>
-                @endif
-            </div>
-            
+            </div>            
 
             <!-- Descripción -->
             <p class="body-small text-center" style="color: {{ $store->design ? $store->design->header_description_color : '#e9d5ff' }}">
