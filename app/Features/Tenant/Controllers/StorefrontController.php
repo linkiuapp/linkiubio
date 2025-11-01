@@ -553,12 +553,14 @@ class StorefrontController extends Controller
         
         // Verificar si está próximo a vencer (menos de 3 días)
         if ($coupon->end_date && $coupon->end_date->diffInDays($now) <= 3) {
+            // No funciona porque los nombres de las clases de Tailwind personalizados llevan el prefijo "brand"
+            // Debe ser brandWarning, no warning: "text-brandWarning-400", etc.
             return [
                 'status' => 'expiring',
                 'text' => '¡Últimos días!',
-                'color' => 'text-warning-300',
-                'bg' => 'bg-warning-50',
-                'border' => 'border-warning-200'
+                'color' => 'text-brandWarning-400',
+                'bg' => 'bg-brandWarning-50',
+                'border' => 'border-brandWarning-400'
             ];
         }
 
@@ -567,18 +569,18 @@ class StorefrontController extends Controller
             return [
                 'status' => 'limited',
                 'text' => '¡Pocas unidades!',
-                'color' => 'text-error-300',
-                'bg' => 'bg-error-50',
-                'border' => 'border-error-200'
+                'color' => 'text-brandError-400',
+                'bg' => 'bg-brandError-50',
+                'border' => 'border-brandError-400'
             ];
         }
 
         return [
             'status' => 'available',
             'text' => 'Disponible',
-            'color' => 'text-success-300',
-            'bg' => 'bg-success-50',
-            'border' => 'border-success-200'
+            'color' => 'text-brandSuccess-400',
+            'bg' => 'bg-brandSuccess-50',
+            'border' => 'border-brandSuccess-400'
         ];
     }
 

@@ -10,6 +10,21 @@ module.exports = {
     './app/Shared/**/*.blade.php',
     
   ],
+  safelist: [
+    // Clases de estado de cupones generadas dinámicamente desde PHP
+    'text-brandWarning-400',
+    'bg-brandWarning-50',
+    'border-brandWarning-400',
+    'text-brandError-400',
+    'bg-brandError-50',
+    'border-brandError-400',
+    'text-brandSuccess-400',
+    'bg-brandSuccess-50',
+    'border-brandSuccess-400',
+    'text-brandInfo-400',
+    'bg-brandInfo-50',
+    'border-brandInfo-400',
+  ],
   theme: {
     extend: {
       // Tipografías personalizadas

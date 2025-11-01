@@ -380,11 +380,11 @@ class Cart {
         
         // Crear notificación temporal
         const notification = document.createElement('div');
-        notification.className = 'fixed top-6 left-1/2 transform -translate-x-1/2 bg-brandSuccess-100 px-6 py-4 rounded-2xl shadow-2xl z-[9999] transition-all duration-500 -translate-y-32 opacity-0 min-w-[300px]';
+        notification.className = 'fixed top-6 left-1/2 transform -translate-x-1/2 bg-brandSuccess-100 px-6 py-4 rounded-2xl shadow-2xl z-[9999] transition-all duration-500 -translate-y-32 opacity-0 min-w-[320px]';
         notification.innerHTML = `
             <div class="flex items-center gap-4">
                 <div class="flex-shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-icon lucide-circle-check"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-icon lucide-circle-check"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
                 </div>
  
                 <div class="flex flex-col gap-1">

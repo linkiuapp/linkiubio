@@ -22,12 +22,12 @@
             </a>
 
             <a href="{{ route('tenant.report-problem', $store->slug) }}" 
-               class="flex items-center justify-between py-3 px-4 bg-brandError-50 hover:bg-brandError-100 rounded-lg transition-colors group">
+               class="flex items-center justify-between py-3 px-4 bg-brandError-50 hover:bg-brandError-300 rounded-lg transition-colors group">
                 <div class="flex items-center gap-3">
-                    <i data-lucide="life-buoy" class="w-6 h-6 sm:w-24px sm:h-24px text-brandError-400"></i>
+                    <i data-lucide="life-buoy" class="w-6 h-6 sm:w-24px sm:h-24px text-brandError-400 group-hover:text-brandError-50"></i>
                     <span class="body-lg-medium text-brandError-400 hover:text-brandError-50">¿Problemas con la tienda?</span>
                 </div>
-                <i data-lucide="arrow-up-right" class="w-6 h-6 sm:w-24px sm:h-24px text-brandError-400"></i>
+                <i data-lucide="arrow-up-right" class="w-6 h-6 sm:w-24px sm:h-24px text-brandError-400 group-hover:text-brandError-50"></i>
             </a>
         </div>
 

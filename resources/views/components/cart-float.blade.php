@@ -1,5 +1,5 @@
 <!-- Carrito flotante tipo Pill - Mobile First -->
-<div id="cart-float" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 w-[360px] h-[88px] bg-brandWhite-50 rounded-full shadow-xl z-[1000] px-3 py-2 sm:px-4 sm:py-3 flex items-center">
+<div id="cart-float" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 w-[360px] h-[88px] sm:w-[480px] bg-brandWhite-50 rounded-full shadow-xl z-[1000] px-3 py-2 sm:px-4 sm:py-3 flex items-center">
     <div class="flex items-center justify-between gap-2 sm:gap-3 w-full">
         <!-- Icono carrito con badge -->
         <div class="relative flex-shrink-0">
@@ -25,15 +25,15 @@
                 0 productos
             </p>
             <span class="hidden sm:inline text-brandNeutral-400">•</span>
-            <p class="cart-total-price h3 text-brandNeutral-400 truncate">
+            <p class="cart-total-price h3 sm:h4 text-brandNeutral-400 truncate">
                 $0
             </p>
         </div>
         
         <!-- Botones de acción - Responsive -->
         <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-            <a href="{{ route('tenant.checkout.create', $store->slug ?? 'store') }}" 
-               class="checkout-btn bg-brandPrimary-300 text-brandWhite-100 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full body-lg-medium flex items-center gap-1">
+            <a href="{{ route('tenant.cart.index', $store->slug ?? 'store') }}"
+               class="view-cart-btn bg-brandPrimary-300 text-brandWhite-100 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full body-lg-medium flex items-center gap-1">
                 <span>Ver Carrito</span>
                 <i data-lucide="arrow-right" class="w-[16px] h-[16px] sm:w-[24px] sm:h-[24px] text-brandWhite-50"></i>
             </a>

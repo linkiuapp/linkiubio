@@ -4,25 +4,25 @@
 <div class="p-4 space-y-6">
     <!-- Header -->
     <div class="space-y-3">
-        <nav class="flex text-small font-regular text-info-300">
-            <a href="{{ route('tenant.home', $store->slug) }}" class="hover:text-info-200 transition-colors">Inicio</a>
+        <nav class="flex caption text-brandInfo-300">
+            <a href="{{ route('tenant.home', $store->slug) }}" class="hover:text-brandInfo-400 transition-colors">Inicio</a>
             <span class="mx-2">/</span>
-            <span class="text-secondary-300 font-medium">Catálogo</span>
+            <span class="text-brandNeutral-400 caption">Catálogo</span>
         </nav>
         
         <div class="space-y-1">
-            <h1 class="text-lg font-semibold text-black-300">Catálogo</h1>
-            <p class="text-sm text-black-200">Encuentra todos nuestros productos</p>
+            <h1 class="h3 text-brandNeutral-400">Catálogo</h1>
+            <p class="caption text-brandNeutral-400">Encuentra todos nuestros productos</p>
         </div>
     </div>
 
     <!-- Buscador con Auto-resultados -->
-    <div class="bg-accent-50 rounded-xl p-4">
+    <div class="bg-brandWhite-100 rounded-full p-4">
         <form method="GET" action="{{ route('tenant.catalog', $store->slug) }}">
             <!-- Input con autocomplete -->
             <div class="relative" id="search-container">
-                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <x-solar-minimalistic-magnifer-outline class="h-4 w-4 text-black-300" />
+                <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                    <i data-lucide="search" class="w-16px h-16px text-brandNeutral-400 pr-2"></i>
                 </div>
                 <input type="text" 
                        name="search" 
@@ -30,160 +30,140 @@
                        value="{{ request('search') }}"
                        placeholder="Buscar productos..."
                        autocomplete="off"
-                       class="w-full pl-10 pr-3 py-2.5 bg-accent-100 border border-accent-200 rounded-lg text-sm text-black-400 placeholder-black-300 focus:outline-none focus:ring-1 focus:ring-primary-200 focus:border-transparent transition-all">
+                       class="w-full pl-10 pr-3 py-2.5 bg-brandWhite-300 rounded-full text-body-lg-regular text-brandNeutral-400 placeholder-brandNeutral-400 focus:outline-none focus:ring-1 focus:ring-brandPrimary-200 focus:border-transparent transition-all">
                 
                 <!-- Botón limpiar solo si hay búsqueda -->
                 @if(request('search'))
                     <button type="button" 
                             onclick="clearSearch()"
                             class="absolute inset-y-0 right-0 pr-3 flex items-center">
-                        <x-solar-close-circle-outline class="h-4 w-4 text-black-300 hover:text-black-400" />
+                        <i data-lucide="circle-x" class="w-16px h-16px text-brandNeutral-400 hover:text-brandNeutral-500"></i>
                     </button>
                 @endif
 
                 <!-- Dropdown de resultados -->
                 <div id="search-results" 
-                     class="absolute top-full left-0 right-0 mt-1 bg-white border border-accent-200 rounded-lg shadow-lg z-10 hidden max-h-64 overflow-y-auto">
+                     class="absolute top-full left-0 right-0 mt-1 bg-brandWhite-100 border border-brandNeutral-200 rounded-full shadow-lg z-10 hidden max-h-64 overflow-y-auto">
                 </div>
             </div>
         </form>
     </div>
 
     <!-- Grid de Categorías -->
-    <div class="space-y-3">
-        <h2 class="text-base font-semibold text-black-400">Categorías</h2>
+    <div>
+        <h3 class="h3 text-brandNeutral-400 mb-4">Categorías</h3>
         
         @if($categories->count() > 0)
-            <div class="grid grid-cols-4 gap-3">
+            <div class="grid grid-cols-4 gap-2">
                 @foreach($categories as $category)
                     <a href="{{ route('tenant.category', ['store' => $store->slug, 'categorySlug' => $category->slug]) }}" 
                        class="flex flex-col items-center group">
                         
                         <!-- Icono de la categoría con fondo colorido -->
-                        <div class="w-20 h-20 mb-2 flex items-center justify-center rounded-2xl bg-gradient-to-br from-accent-50 to-accent-100 hover:from-primary-50 hover:to-accent-50 transition-all duration-200 shadow-sm group-hover:shadow-md">
+                        <div class="w-78px h-78 mb-2 p-2 flex items-center justify-center rounded-2xl bg-gradient-to-br from-brandWhite-100 to-brandWhite-100 hover:from-brandPrimary-100 hover:to-brandWhite-100 transition-all duration-200">
                              @if($category->icon && $category->icon->image_url)
                                  <img src="{{ $category->icon->image_url }}" 
                                       alt="{{ $category->name }}" 
-                                      class="w-14 h-14 object-contain">
+                                      class="w-56px h-56px object-contain aspect-square"
+                                      style="aspect-ratio: 1 / 1;">
                              @else
-                                 <x-solar-gallery-outline class="w-10 h-10 text-black-300 group-hover:text-primary-300" />
+                                 <i data-lucide="image" class="w-56px h-56px text-brandNeutral-400 group-hover:text-brandPrimary-300"></i>
                              @endif
                         </div>
-
+                        
                         <!-- Nombre de la categoría -->
-                        <span class="text-small font-bold text-center text-black-500 transition-colors leading-tight">
+                        <span class="caption text-center text-brandNeutral-400 transition-colors leading-tight">
                             {{ $category->name }}
                         </span>
                     </a>
                 @endforeach
             </div>
         @else
-            <div class="text-center py-6 text-black-300">
-                <x-solar-gallery-outline class="w-10 h-10 mx-auto mb-2 text-black-200" />
-                <p class="text-sm">No hay categorías disponibles</p>
+            <div class="flex flex-col items-center justify-center py-8">
+                <img src="https://cdn.jsdelivr.net/gh/linkiuapp/medialink@main/Assets_Fronted/img_linkiu_v1_gallery.svg" alt="img_linkiu_v1_gallery" class="h-32 w-auto" loading="lazy">
+                <p class="body-lg-bold text-center text-brandNeutral-400">No hay categorías disponibles</p>
             </div>
         @endif
     </div>
 
     <!-- Resultados -->
     @if(request('search'))
-        <div class="bg-info-50 border border-info-200 rounded-lg p-3">
-            <p class="text-xs text-info-300">
-                Resultados para "<strong>{{ request('search') }}</strong>" - {{ $products->total() }} productos
+        <div class="bg-brandInfo-50 border border-brandInfo-200 rounded-lg p-3">
+            <p class="caption text-brandInfo-300">
+                Resultados para "<span class="caption-strong text-brandInfo-400">{{ request('search') }}</span>" - {{ $products->total() }} productos
             </p>
         </div>
     @endif
 
     <!-- Grid de Productos -->
     @if($products->count() > 0)
-        <div class="grid grid-cols-1 gap-3">
-            @foreach($products as $product)
-                <a href="{{ route('tenant.product', [$store->slug, $product->slug]) }}" 
-                   class="bg-white rounded-lg p-3 border border-accent-200 hover:border-primary-200 hover:shadow-sm transition-all duration-200 block">
-                    <div class="flex items-center gap-3">
-                        <!-- Imagen del producto -->
-                        <div class="w-16 h-16 bg-accent-100 rounded-lg flex-shrink-0 overflow-hidden">
-                            @if($product->main_image_url)
-                                <img src="{{ $product->main_image_url }}" 
-                                     alt="{{ $product->name }}" 
-                                     class="w-full h-full object-cover">
-                            @else
-                                <div class="w-full h-full flex items-center justify-center text-black-200">
-                                    <x-solar-gallery-outline class="w-6 h-6" />
-                                </div>
-                            @endif
-                        </div>
+            <div class="space-y-6">
+                @foreach($products as $product)
+                    <a href="{{ route('tenant.product', [$store->slug, $product->slug]) }}" 
+                       class="bg-brandWhite-100 hover:bg-brandPrimary-50 rounded-lg p-4 hover:shadow-sm transition-all duration-200 block relative">
 
-                        <!-- Información del producto -->
-                        <div class="flex-1 min-w-0">
-                            <h3 class="text-small font-bold text-black-500 mb-1 line-clamp-1">{{ $product->name }}</h3>
-
-                            @if($product->description)
-                                <p class="text-small font-regular text-black-300 mb-2 line-clamp-1">{{ $product->description }}</p>
-                            @endif
-
-                            <!-- Precio prominente -->
-                            <div class="text-body-regular font-bold text-primary-300 mb-1">
-                                ${{ number_format($product->price, 0, ',', '.') }}
+                        <div class="flex items-center gap-3">
+                            <!-- Imagen del producto -->
+                            <div class="w-[78px] h-[78px] rounded-lg flex-shrink-0 overflow-hidden">
+                                @if($product->main_image_url)
+                                    <img src="{{ $product->main_image_url }}" 
+                                         alt="{{ $product->name }}" 
+                                         class="w-full h-full object-cover">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center text-brandNeutral-400">
+                                        <i data-lucide="image" class="w-56px h-56px text-brandNeutral-400"></i>
+                                    </div>
+                                @endif
                             </div>
 
-                            <!-- Categorías pequeñas -->
-                            @if($product->categories->count() > 0)
-                                <div class="flex flex-wrap gap-1">
-                                    @foreach($product->categories->take(2) as $category)
-                                        <span class="px-2 py-0.5 bg-accent-300 text-black-500 rounded text-small">
-                                            {{ $category->name }}
-                                        </span>
-                                    @endforeach
-                                    @if($product->categories->count() > 2)
-                                        <span class="text-small font-regular text-black-200">+{{ $product->categories->count() - 2 }}</span>
-                                    @endif
+                            <!-- Información del producto -->
+                            <div class="flex-1 min-w-0">
+                                <h3 class="body-lg-bold text-brandNeutral-400 line-clamp-1">{{ $product->name }}</h3>
+                                
+                                @if($product->description)
+                                    <p class="caption text-brandNeutral-400 line-clamp-1">{{ $product->description }}</p>
+                                @endif
+
+                                <!-- Precio prominente -->
+                                <div class="body-lg-bold text-brandNeutral-400 mb-1">
+                                    ${{ number_format($product->price, 0, ',', '.') }}
                                 </div>
-                            @endif
+
+                                <!-- Categorías pequeñas -->
+                                @if($product->categories->count() > 0)
+                                    <div class="flex flex-wrap gap-1">
+                                        @foreach($product->categories->take(1) as $category)
+                                            <span class="px-2 py-0.5 bg-brandSuccess-50 text-brandSuccess-400 rounded-full caption">
+                                                {{ $category->name }}
+                                            </span>
+                                        @endforeach
+                                        @if($product->categories->count() > 1)
+                                            <span class="bg-brandSuccess-50 px-2 py-0.5 caption items-center text-brandSuccess-400 rounded-full">+{{ $product->categories->count() - +1 }}</span>
+                                        @endif
+                                    </div>
+                                @endif
+
+                            </div>
+
+                            <!-- Botón agregar al carrito -->
+                             <div class="flex flex-col gap-2">
+                                <x-add-to-cart-button :product="$product" :store="$store" />
+                                <div class="bg-brandError-50 p-2 rounded-lg">
+                                <i data-lucide="heart-plus" class="w-16px h-16px text-brandError-400"></i>
+                                </div>
+                             </div>
+
+                            
                         </div>
-
-                        <!-- Botón agregar al carrito -->
-                        <x-add-to-cart-button :product="$product" :store="$store" />
-                    </div>
-                </a>
-            @endforeach
-        </div>
-
-        <!-- Paginación -->
-        @if($products->hasPages())
-            <div class="flex justify-center">
-                {{ $products->appends(request()->query())->links() }}
+                    </a>
+                @endforeach
             </div>
+        @else
+        <div class="flex flex-col items-center justify-center">
+            <img src="https://cdn.jsdelivr.net/gh/linkiuapp/medialink@main/Assets_Fronted/img_linkiu_v1_ghost.svg" alt="img_linkiu_v1_ghost" class="h-32 w-auto" loading="lazy">
+            <p class="body-lg-bold text-center text-brandNeutral-400">No hay productos disponibles</p>
+        </div>
         @endif
-    @else
-        <!-- Estado vacío -->
-        <div class="text-center py-8 space-y-3">
-            <div class="w-16 h-16 bg-accent-100 rounded-full flex items-center justify-center mx-auto">
-                <x-solar-box-outline class="w-8 h-8 text-black-200" />
-            </div>
-            <h3 class="text-base font-medium text-black-400">
-                @if(request('search'))
-                    No encontramos productos
-                @else
-                    No hay productos disponibles
-                @endif
-            </h3>
-            <p class="text-sm text-black-300 max-w-sm mx-auto">
-                @if(request('search'))
-                    Intenta con otros términos de búsqueda.
-                @else
-                    Esta tienda aún no tiene productos.
-                @endif
-            </p>
-            @if(request('search'))
-                <a href="{{ route('tenant.catalog', $store->slug) }}" 
-                   class="inline-flex items-center mt-3 px-3 py-2 bg-primary-300 text-white rounded-lg text-sm hover:bg-primary-200 transition-colors">
-                    <x-solar-refresh-outline class="w-4 h-4 mr-1" />
-                    Ver todos
-                </a>
-            @endif
-        </div>
-    @endif
 </div>
 
 @push('scripts')
