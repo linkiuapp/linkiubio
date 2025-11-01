@@ -29,7 +29,7 @@
             <div class="mb-2">
                 <div class="mx-auto flex items-center justify-center">
                     @if($store->design && $store->design->logo_url)
-                        <div class="relative inline-block">
+                        <div class="relative inline-block border-4 border-brandWhite-300 rounded-full">
                             <img src="{{ $store->design->logo_url }}" 
                                  alt="Logo" 
                                  class="w-[130px] h-[130px] md:w-[150px] md:h-[150px] rounded-full object-cover border-6 border-brandWhite-300">
