@@ -6,6 +6,9 @@ import collapse from '@alpinejs/collapse'
 import confetti from 'canvas-confetti'
 import { createIcons, icons } from 'lucide';
 createIcons({ icons });
+// Hacer disponible globalmente para inicializar iconos dinámicos
+window.createIcons = createIcons;
+window.lucideIcons = icons;
 
 console.log('🟢 Imports loaded successfully');
 
