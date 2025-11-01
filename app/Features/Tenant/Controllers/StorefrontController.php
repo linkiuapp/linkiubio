@@ -238,6 +238,23 @@ class StorefrontController extends Controller
     }
 
     /**
+     * Show verification information page
+     */
+    public function verified(Request $request)
+    {
+        // El middleware ya identificó la tienda
+        $store = view()->shared('currentStore');
+        $store->load('design');
+
+        // Si la tienda está inactiva, mostrar mensaje
+        if ($store->status !== 'active') {
+            return view('tenant::storefront.inactive', compact('store'));
+        }
+
+        return view('tenant::storefront.verified', compact('store'));
+    }
+
+    /**
      * Show all categories page
      */
     public function categories(Request $request)

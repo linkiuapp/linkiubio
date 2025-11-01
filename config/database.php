@@ -57,9 +57,18 @@ return [
             'prefix_indexes' => true,
             'strict' => true,
             'engine' => 'MyISAM',
+            // 🔥 Connection Pool Optimizations
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
+                // Pool size limit (max concurrent connections)
+                PDO::ATTR_TIMEOUT => 10,
+                // Buffer size for queries (mejora rendimiento)
+                PDO::MYSQL_ATTR_USE_BUFFERED_QUERY => true,
+                // Detecta cambios de charset automáticamente
+                PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci",
             ]) : [],
+            // Pool persistence (reutiliza conexiones)
+            'persistent' => env('DB_PERSISTENT', false),
         ],
 
         'mariadb' => [
@@ -141,14 +150,16 @@ return [
     |
     */
 
-    'redis' => [
+        'redis' => [
 
         'client' => env('REDIS_CLIENT', 'phpredis'),
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
             'prefix' => env('REDIS_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_database_'),
-            'persistent' => env('REDIS_PERSISTENT', false),
+            // 🔥 Pool optimization: Conexiones persistentes (reutiliza conexiones TCP)
+            'persistent' => env('REDIS_PERSISTENT', true),
+            'read_timeout' => 60,
         ],
 
         'default' => [

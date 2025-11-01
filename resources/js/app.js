@@ -4,6 +4,8 @@ console.log('🟢 Starting app.js execution...');
 import Alpine from 'alpinejs'
 import collapse from '@alpinejs/collapse'
 import confetti from 'canvas-confetti'
+import { createIcons, icons } from 'lucide';
+createIcons({ icons });
 
 console.log('🟢 Imports loaded successfully');
 

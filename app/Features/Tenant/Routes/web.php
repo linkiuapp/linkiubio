@@ -21,6 +21,9 @@ Route::get('/', [StorefrontController::class, 'index'])->name('home');
 // API para verificar estado de verificación en tiempo real
 Route::get('/verification-status', [StorefrontController::class, 'verificationStatus'])->name('verification-status');
 
+// Página de información de verificación
+Route::get('/verificada', [StorefrontController::class, 'verified'])->name('verified');
+
 // Catálogo de productos con buscador
 Route::get('/catalogo', [StorefrontController::class, 'catalog'])->name('catalog');
 

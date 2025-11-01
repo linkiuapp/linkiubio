@@ -1,38 +1,41 @@
 <!-- Carrito flotante tipo Pill - Mobile First -->
-<div id="cart-float" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 w-[95%] max-w-[420px] bg-accent-50 border-2 border-accent-200 rounded-full shadow-xl z-[1000] px-3 py-2.5 sm:px-4 sm:py-3">
-    <div class="flex items-center justify-between gap-2 sm:gap-3">
+<div id="cart-float" class="fixed bottom-4 left-1/2 transform -translate-x-1/2 w-[360px] h-[88px] bg-brandWhite-50 rounded-full shadow-xl z-[1000] px-3 py-2 sm:px-4 sm:py-3 flex items-center">
+    <div class="flex items-center justify-between gap-2 sm:gap-3 w-full">
         <!-- Icono carrito con badge -->
         <div class="relative flex-shrink-0">
-            <div class="w-9 h-9 sm:w-10 sm:h-10 bg-primary-300 rounded-full flex items-center justify-center">
-                <x-solar-bag-2-outline class="w-4 h-4 sm:w-5 sm:h-5 text-accent-50" />
+            <div class="w-[56px] h-[56px] bg-brandSecondary-300 rounded-full flex items-center justify-center">
+                <!-- Animación cuando se agrega producto -->
+                <lord-icon
+                    src="https://cdn.lordicon.com/qfijwmqj.json"
+                    trigger="loop"
+                    stroke="bold"
+                    colors="primary:#f2f1fd,secondary:#f2f1fd"
+                    style="width:40px;height:40px">
+                </lord-icon>
             </div>
             <!-- Badge contador -->
-            <div class="cart-badge absolute -top-1 -right-1 bg-error-300 text-accent-50 text-[10px] sm:text-caption font-bold rounded-full min-w-[18px] h-[18px] sm:min-w-[20px] sm:h-5 flex items-center justify-center px-1" style="display: none;">
+            <div class="pl-24px cart-badge absolute -top-1 -right-1 border-2 border-brandWhite-300 bg-brandError-300 text-brandError-50 body-lg-bold rounded-full min-w-[24px] h-[24px] sm:min-w-[20px] sm:h-5 flex items-center justify-center px-1" style="display: none;">
                 0
             </div>
         </div>
         
         <!-- Información del carrito -->
         <div class="flex-1 flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2 min-w-0">
-            <p class="cart-count-text text-[14px] sm:text-caption font-bold text-black-400 truncate">
+            <p class="cart-count-text caption text-brandNeutral-400 truncate">
                 0 productos
             </p>
-            <span class="hidden sm:inline text-disabled-200">•</span>
-            <p class="cart-total-price text-[16px] sm:text-caption font-bold text-black-500 truncate">
+            <span class="hidden sm:inline text-brandNeutral-400">•</span>
+            <p class="cart-total-price h3 text-brandNeutral-400 truncate">
                 $0
             </p>
         </div>
         
         <!-- Botones de acción - Responsive -->
         <div class="flex items-center gap-1.5 sm:gap-2 flex-shrink-0">
-            <a href="{{ route('tenant.cart.index', $store->slug ?? 'store') }}" 
-               class="view-cart-btn bg-accent-200 text-black-500 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-[16px] sm:text-caption font-medium">
-                Ver
-            </a>
             <a href="{{ route('tenant.checkout.create', $store->slug ?? 'store') }}" 
-               class="checkout-btn bg-secondary-300 text-accent-50 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full text-[16px] sm:text-caption font-medium flex items-center gap-1">
-                <span>Comprar</span>
-                <x-solar-arrow-right-outline class="w-3 h-3 sm:w-4 sm:h-4" />
+               class="checkout-btn bg-brandPrimary-300 text-brandWhite-100 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full body-lg-medium flex items-center gap-1">
+                <span>Ver Carrito</span>
+                <i data-lucide="arrow-right" class="w-[16px] h-[16px] sm:w-[24px] sm:h-[24px] text-brandWhite-50"></i>
             </a>
         </div>
     </div>
