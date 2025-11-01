@@ -288,12 +288,12 @@
                                 <!-- Categorías pequeñas -->
                                 @if($product->categories->count() > 0)
                                     <div class="flex flex-wrap gap-1">
-                                        @foreach($product->categories->take(2) as $category)
+                                        @foreach($product->categories->take(1) as $category)
                                             <span class="px-2 py-0.5 bg-brandSuccess-50 text-brandSuccess-400 rounded caption">
                                                 {{ $category->name }}
                                             </span>
                                         @endforeach
-                                        @if($product->categories->count() > 2)
+                                        @if($product->categories->count() > 1)
                                             <span class="bg-brandSuccess-50 px-2 py-0.5 caption items-center text-brandSuccess-400 rounded-full">+{{ $product->categories->count() - 2 }}</span>
                                         @endif
                                     </div>

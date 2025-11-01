@@ -88,7 +88,7 @@
 
     <!-- Resultados -->
     @if(request('search'))
-        <div class="bg-brandInfo-50 border border-brandInfo-200 rounded-lg p-3">
+        <div class="bg-brandInfo-50 rounded-lg p-3">
             <p class="caption text-brandInfo-300">
                 Resultados para "<span class="caption-strong text-brandInfo-400">{{ request('search') }}</span>" - {{ $products->total() }} productos
             </p>
