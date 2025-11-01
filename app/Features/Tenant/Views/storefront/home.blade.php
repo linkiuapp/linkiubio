@@ -137,9 +137,9 @@
                                  <img src="{{ $category->icon->image_url }}" 
                                       alt="{{ $category->name }}" 
                                       class="w-56px h-56px object-contain aspect-square"
-                                      style="aspect-ratio: 1 / 1;"
+                                      style="aspect-ratio: 1 / 1;">
                              @else
-                                 <i data-lucide="image" class="w-10 h-10 text-brandNeutral-400 group-hover:text-brandPrimary-300"></i>
+                                 <i data-lucide="image" class="w-56px h-56px text-brandNeutral-400 group-hover:text-brandPrimary-300"></i>
                              @endif
                         </div>
                         

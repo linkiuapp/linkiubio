@@ -34,8 +34,8 @@
                                  alt="Logo" 
                                  class="w-[130px] h-[130px] md:w-[150px] md:h-[150px] rounded-full object-cover border-4 border-brandWhite-300">
                             @if($store->verified)
-                                <a href="{{ route('tenant.verified', $store->slug) }}" class="absolute bottom-2 right-2 bg-brandSuccess-50 rounded-full p-1 shadow-lg" title="Tienda verificada">
-                                    <i data-lucide="badge-check" class="w-16px h-16px text-brandSuccess-400"></i>
+                                <a href="{{ route('tenant.verified', $store->slug) }}" class="absolute bottom-2 border-2 border-brandInfo-300 right-2 bg-brandInfo-50 rounded-full p-1 shadow-lg" title="Tienda verificada">
+                                    <i data-lucide="badge-check" class="w-16px h-16px text-brandInfo-400"></i>
                                 </a>
                             @else
                                 <a href="{{ route('tenant.verified', $store->slug) }}" class="absolute bottom-2 right-2 bg-brandNeutral-50 rounded-full p-2 shadow-lg" title="Tienda no verificada">
