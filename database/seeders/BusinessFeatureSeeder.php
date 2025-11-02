@@ -100,9 +100,17 @@ class BusinessFeatureSeeder extends Seeder
             FeatureKey::ORDERS,
             FeatureKey::PRODUCTS,
             FeatureKey::CATEGORIES,
+            FeatureKey::VARIABLES,
+            FeatureKey::PAYMENTS,
+            FeatureKey::BRANCHES,
+            FeatureKey::COUPONS,
+            FeatureKey::SLIDER,
             FeatureKey::ACCOUNT,
             FeatureKey::BUSINESS_PROFILE,
             FeatureKey::STORE_DESIGN,
+            FeatureKey::BILLING,
+            FeatureKey::ADS,
+            FeatureKey::TICKETS,
         ];
         
         return in_array($featureKey, $defaultFeatures);

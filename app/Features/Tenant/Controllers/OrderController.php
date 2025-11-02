@@ -66,9 +66,31 @@ class OrderController extends Controller
             }
         }
 
-        // Obtener configuración de envíos (NUEVO SISTEMA)
-        $simpleShipping = SimpleShipping::getOrCreateForStore($store->id);
-        $shippingMethods = $simpleShipping->getAvailableOptions();
+        // Verificar si shipping está habilitado
+        $shippingEnabled = featureEnabled($store, 'shipping');
+        
+        // Obtener métodos de envío según feature
+        if ($shippingEnabled) {
+            // Si shipping está habilitado, cargar configuración normal
+            $simpleShipping = SimpleShipping::getOrCreateForStore($store->id);
+            $shippingMethods = $simpleShipping->getAvailableOptions();
+        } else {
+            // Si shipping NO está habilitado, solo mostrar pickup
+            $shippingMethods = [
+                [
+                    'id' => 'pickup',
+                    'type' => 'pickup',
+                    'name' => 'Recogida en Tienda',
+                    'cost' => 0,
+                    'formatted_cost' => 'GRATIS',
+                    'icon' => '🏪',
+                    'instructions' => 'Recoge tu pedido en nuestra tienda física',
+                    'preparation_time' => '1h',
+                    'preparation_label' => '1 hora',
+                    'pickup_address' => $store->address ?? 'Nuestra tienda'
+                ]
+            ];
+        }
 
         // Departamentos de Colombia (estático para MVP)
         $departments = [
@@ -80,7 +102,7 @@ class OrderController extends Controller
             'Valle del Cauca', 'Vaupés', 'Vichada'
         ];
 
-        return view('tenant::checkout.create', compact('products', 'subtotal', 'shippingMethods', 'departments', 'store'));
+        return view('tenant::checkout.create', compact('products', 'subtotal', 'shippingMethods', 'departments', 'store', 'shippingEnabled'));
     }
 
     /**
@@ -211,25 +233,37 @@ class OrderController extends Controller
             // Calcular subtotal primero
             $order->recalculateTotals();
             
-            // Calcular shipping cost si es envío nacional
+            // Verificar si shipping está habilitado
+            $shippingEnabled = featureEnabled($store, 'shipping');
+            
+            // Calcular shipping cost solo si shipping está habilitado
             $shippingCost = 0;
-            if ($realDeliveryType === 'nacional' && isset($validated['city'])) {
-                $simpleShipping = SimpleShipping::getOrCreateForStore($store->id);
-                $simpleShipping->load('activeZones');
-                
-                $shippingResult = $simpleShipping->calculateShippingCost($validated['city'], $order->subtotal);
-                if ($shippingResult['available']) {
-                    $shippingCost = $shippingResult['cost'];
-                }
-            } elseif ($realDeliveryType === 'local') {
-                $simpleShipping = SimpleShipping::getOrCreateForStore($store->id);
-                if ($simpleShipping->local_enabled) {
-                    $shippingCost = $simpleShipping->local_cost;
+            if ($shippingEnabled) {
+                if ($realDeliveryType === 'nacional' && isset($validated['city'])) {
+                    $simpleShipping = SimpleShipping::getOrCreateForStore($store->id);
+                    $simpleShipping->load('activeZones');
                     
-                    // Aplicar envío gratis si aplica
-                    if ($simpleShipping->local_free_from > 0 && $order->subtotal >= $simpleShipping->local_free_from) {
-                        $shippingCost = 0;
+                    $shippingResult = $simpleShipping->calculateShippingCost($validated['city'], $order->subtotal);
+                    if ($shippingResult['available']) {
+                        $shippingCost = $shippingResult['cost'];
                     }
+                } elseif ($realDeliveryType === 'local') {
+                    $simpleShipping = SimpleShipping::getOrCreateForStore($store->id);
+                    if ($simpleShipping->local_enabled) {
+                        $shippingCost = $simpleShipping->local_cost;
+                        
+                        // Aplicar envío gratis si aplica
+                        if ($simpleShipping->local_free_from > 0 && $order->subtotal >= $simpleShipping->local_free_from) {
+                            $shippingCost = 0;
+                        }
+                    }
+                }
+            } else {
+                // Si shipping no está habilitado, forzar pickup con costo 0
+                if ($realDeliveryType !== 'pickup') {
+                    $order->update(['delivery_type' => 'pickup']);
+                    $realDeliveryType = 'pickup';
+                    $shippingCost = 0;
                 }
             }
             
@@ -468,14 +502,34 @@ class OrderController extends Controller
         $store = $request->route('store');
         
         try {
-            // Usar el NUEVO sistema
-            $shipping = SimpleShipping::getOrCreateForStore($store->id);
-            $shipping->load('activeZones');
+            // Verificar si shipping está habilitado
+            $shippingEnabled = featureEnabled($store, 'shipping');
             
-            $methods = $shipping->getAvailableOptions();
+            if ($shippingEnabled) {
+                // Usar el NUEVO sistema
+                $shipping = SimpleShipping::getOrCreateForStore($store->id);
+                $shipping->load('activeZones');
+                $methods = $shipping->getAvailableOptions();
+            } else {
+                // Si shipping NO está habilitado, solo retornar pickup
+                $methods = [
+                    [
+                        'id' => 'pickup',
+                        'type' => 'pickup',
+                        'name' => 'Recogida en Tienda',
+                        'cost' => 0,
+                        'formatted_cost' => 'GRATIS',
+                        'icon' => '🏪',
+                        'instructions' => 'Recoge tu pedido en nuestra tienda física',
+                        'preparation_time' => '1h',
+                        'preparation_label' => '1 hora',
+                        'pickup_address' => $store->address ?? 'Nuestra tienda'
+                    ]
+                ];
+            }
 
-        return response()->json([
-            'success' => true,
+            return response()->json([
+                'success' => true,
                 'methods' => $methods
             ]);
             

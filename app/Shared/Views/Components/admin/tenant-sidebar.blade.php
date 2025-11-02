@@ -146,7 +146,8 @@
                         </a>
                     </li>
                     
-                    <!-- Gestión de envíos -->
+                    {{-- Gestión de envíos - Solo si el feature está habilitado --}}
+                    @if(featureEnabled($store, 'shipping'))
                     <li>
                         <a href="{{ route('tenant.admin.simple-shipping.index', ['store' => $store->slug]) }}" 
                            class="item-sidebar {{ request()->routeIs('tenant.admin.simple-shipping.*') ? 'item-sidebar-active' : '' }} {{ $onboardingSteps['shipping'] ? 'opacity-95' : '' }}">
@@ -158,6 +159,7 @@
                             <span class="{{ $onboardingSteps['shipping'] ? 'line-through' : '' }}">Gestión de Envíos</span>
                         </a>
                     </li>
+                    @endif
                     
                     <!-- Categorías -->
                     <li>
@@ -306,7 +308,8 @@
                     </a>
                 </li>
 
-                <!-- Configuración de Envíos (NUEVO SISTEMA) -->
+                {{-- Configuración de Envíos - Solo si el feature está habilitado --}}
+                @if(featureEnabled($store, 'shipping'))
                 <li>
                     <a href="{{ route('tenant.admin.simple-shipping.index', ['store' => $store->slug]) }}" 
                         class="item-sidebar {{ request()->routeIs('tenant.admin.simple-shipping.*') ? 'item-sidebar-active' : '' }}">
@@ -334,6 +337,7 @@
                         </span>
                     </a>
                 </li>
+                @endif
 
                 <!-- Métodos de Pago -->
                 <li>
