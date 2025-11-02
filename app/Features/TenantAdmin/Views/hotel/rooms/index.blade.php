@@ -107,7 +107,7 @@
                                         Editar
                                     </button>
                                     <form method="POST" action="{{ route('tenant.admin.hotel.rooms.destroy', [$store->slug, $room->id]) }}" 
-                                          onsubmit="return confirm('¿Eliminar esta habitación?')">
+                                          onsubmit="event.preventDefault(); deleteRoom(this); return false;">
                                         @csrf
                                         @method('DELETE')
                                         <button type="submit" 
@@ -208,6 +208,23 @@
 
 @push('scripts')
 <script>
+async function deleteRoom(form) {
+    const result = await Swal.fire({
+        title: '¿Eliminar habitación?',
+        text: 'Esta acción no se puede deshacer',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ed2e45',
+        cancelButtonColor: '#9ca3af',
+        confirmButtonText: '✓ Sí, eliminar',
+        cancelButtonText: 'Cancelar'
+    });
+    
+    if (result.isConfirmed) {
+        form.submit();
+    }
+}
+
 document.addEventListener('alpine:init', () => {
     Alpine.data('roomsManager', () => ({
         showCreateModal: false,

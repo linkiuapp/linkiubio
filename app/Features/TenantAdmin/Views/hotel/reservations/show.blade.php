@@ -470,7 +470,7 @@
                         </form>
                         
                         <form method="POST" action="{{ route('tenant.admin.hotel.reservations.cancel', ['store' => $store->slug, 'hotelReservation' => $hotelReservation->id]) }}" 
-                              onsubmit="return confirm('¿Está seguro de cancelar esta reserva?')">
+                              onsubmit="event.preventDefault(); cancelReservation(this); return false;">
                             @csrf
                             <div class="mb-2">
                                 <label class="block text-xs text-black-400 mb-1">Motivo de Cancelación</label>
@@ -494,7 +494,7 @@
                         
                         @if($hotelReservation->deposit_amount > 0 && !$hotelReservation->deposit_paid)
                         <form method="POST" action="{{ route('tenant.admin.hotel.reservations.mark-deposit-paid', ['store' => $store->slug, 'hotelReservation' => $hotelReservation->id]) }}" 
-                              onsubmit="return confirm('¿Marcar el anticipo de ${{ number_format($hotelReservation->deposit_amount, 0, ',', '.') }} como pagado?')">
+                              onsubmit="event.preventDefault(); markDepositPaid(this, {{ $hotelReservation->deposit_amount }}); return false;">
                             @csrf
                             <button type="submit" class="w-full px-4 py-2 bg-success-200 hover:bg-success-300 text-accent-50 rounded-lg text-sm transition-colors flex items-center justify-center gap-2">
                                 <i data-lucide="check-circle" class="w-4 h-4"></i>
@@ -504,7 +504,7 @@
                         @endif
                         
                         <form method="POST" action="{{ route('tenant.admin.hotel.reservations.cancel', ['store' => $store->slug, 'hotelReservation' => $hotelReservation->id]) }}" 
-                              onsubmit="return confirm('¿Está seguro de cancelar esta reserva?')">
+                              onsubmit="event.preventDefault(); cancelReservation(this); return false;">
                             @csrf
                             <div class="mb-2">
                                 <label class="block text-xs text-black-400 mb-1">Motivo de Cancelación</label>
@@ -528,7 +528,7 @@
                         
                         @if($hotelReservation->deposit_amount > 0 && !$hotelReservation->deposit_paid)
                         <form method="POST" action="{{ route('tenant.admin.hotel.reservations.mark-deposit-paid', ['store' => $store->slug, 'hotelReservation' => $hotelReservation->id]) }}" 
-                              onsubmit="return confirm('¿Marcar el anticipo de ${{ number_format($hotelReservation->deposit_amount, 0, ',', '.') }} como pagado?')">
+                              onsubmit="event.preventDefault(); markDepositPaid(this, {{ $hotelReservation->deposit_amount }}); return false;">
                             @csrf
                             <button type="submit" class="w-full px-4 py-2 bg-success-200 hover:bg-success-300 text-accent-50 rounded-lg text-sm transition-colors flex items-center justify-center gap-2">
                                 <i data-lucide="check-circle" class="w-4 h-4"></i>
@@ -542,6 +542,57 @@
         </div>
     </div>
 </div>
+@push('scripts')
+<script>
+async function cancelReservation(form) {
+    const cancellationReason = form.querySelector('textarea[name="cancellation_reason"]')?.value?.trim();
+    
+    if (!cancellationReason) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Error',
+            text: 'Por favor ingresa un motivo de cancelación',
+            confirmButtonColor: '#ed2e45'
+        });
+        return;
+    }
+    
+    const result = await Swal.fire({
+        title: '¿Cancelar reserva?',
+        text: 'Esta acción no se puede deshacer',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ed2e45',
+        cancelButtonColor: '#9ca3af',
+        confirmButtonText: '✓ Sí, cancelar',
+        cancelButtonText: 'Cancelar'
+    });
+    
+    if (result.isConfirmed) {
+        form.submit();
+    }
+}
+
+async function markDepositPaid(form, amount) {
+    const formattedAmount = '$' + amount.toLocaleString('es-CO');
+    
+    const result = await Swal.fire({
+        title: '¿Marcar anticipo como pagado?',
+        html: `Se marcará el anticipo de <strong>${formattedAmount}</strong> como pagado`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#00c76f',
+        cancelButtonColor: '#9ca3af',
+        confirmButtonText: '✓ Sí, marcar',
+        cancelButtonText: 'Cancelar'
+    });
+    
+    if (result.isConfirmed) {
+        form.submit();
+    }
+}
+</script>
+@endpush
 @endsection
 </x-tenant-admin-layout>
 

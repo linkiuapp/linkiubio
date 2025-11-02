@@ -395,10 +395,10 @@
                 {{-- Consumo en Local (Restaurantes) --}}
                 @if(featureEnabled($store, 'consumo_local'))
                 <li>
-                    <a href="#" class="item-sidebar opacity-50 cursor-not-allowed" title="Disponible cuando se implemente REQ-004">
+                    <a href="{{ route('tenant.admin.dine-in.tables.index', ['store' => $store->slug, 'type' => 'mesa']) }}" 
+                       class="item-sidebar {{ request()->routeIs('tenant.admin.dine-in.*') && request()->get('type') === 'mesa' ? 'item-sidebar-active' : '' }}">
                         <x-lucide-scan-barcode class="w-4 h-4 mr-2" />
                         Consumo en Local
-                        <span class="ml-auto text-xs bg-warning-100 text-warning-500 px-2 py-0.5 rounded">Próximamente</span>
                     </a>
                 </li>
                 @endif
@@ -414,13 +414,13 @@
                 </li>
                 @endif
 
-                {{-- Servicio a Habitación (Hoteles) --}}
-                @if(featureEnabled($store, 'consumo_hotel'))
+                {{-- Servicio a Habitación (Hoteles) - Requiere consumo_hotel Y reservas_hotel --}}
+                @if(featureEnabled($store, 'consumo_hotel') && featureEnabled($store, 'reservas_hotel'))
                 <li>
-                    <a href="#" class="item-sidebar opacity-50 cursor-not-allowed" title="Disponible cuando se implemente REQ-004">
+                    <a href="{{ route('tenant.admin.dine-in.tables.index', ['store' => $store->slug, 'type' => 'habitacion']) }}" 
+                       class="item-sidebar {{ request()->routeIs('tenant.admin.dine-in.*') && request()->get('type') === 'habitacion' ? 'item-sidebar-active' : '' }}">
                         <x-lucide-concierge-bell class="w-4 h-4 mr-2" />
                         Servicio a Habitación
-                        <span class="ml-auto text-xs bg-warning-100 text-warning-500 px-2 py-0.5 rounded">Próximamente</span>
                     </a>
                 </li>
                 @endif

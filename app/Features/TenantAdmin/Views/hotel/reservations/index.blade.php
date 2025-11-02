@@ -254,7 +254,7 @@
                                     
                                     @if($reservation->deposit_amount > 0 && !$reservation->deposit_paid && in_array($reservation->status, ['pending', 'confirmed', 'checked_in']))
                                         <form method="POST" action="{{ route('tenant.admin.hotel.reservations.mark-deposit-paid', [$store->slug, $reservation->id]) }}" 
-                                              onsubmit="return confirm('¿Marcar anticipo de ${{ number_format($reservation->deposit_amount, 0, ',', '.') }} como pagado?')" class="inline">
+                                              onsubmit="event.preventDefault(); markDepositPaidInline(this, {{ $reservation->deposit_amount }}); return false;" class="inline">
                                             @csrf
                                             <button type="submit" 
                                                     title="Marcar anticipo como pagado"
@@ -267,7 +267,7 @@
                                     
                                     @if(in_array($reservation->status, ['pending', 'confirmed']))
                                         <form method="POST" action="{{ route('tenant.admin.hotel.reservations.cancel', [$store->slug, $reservation->id]) }}" 
-                                              onsubmit="return confirm('¿Cancelar esta reserva?')" class="inline">
+                                              onsubmit="event.preventDefault(); cancelReservationInline(this); return false;" class="inline">
                                             @csrf
                                             <button type="submit" 
                                                     class="px-3 py-1.5 bg-error-100 hover:bg-error-200 text-error-400 rounded-lg text-xs transition-colors">
@@ -303,6 +303,46 @@
         @endif
     </div>
 </div>
+
+@push('scripts')
+<script>
+async function markDepositPaidInline(form, amount) {
+    const formattedAmount = '$' + amount.toLocaleString('es-CO');
+    
+    const result = await Swal.fire({
+        title: '¿Marcar anticipo como pagado?',
+        html: `Se marcará el anticipo de <strong>${formattedAmount}</strong> como pagado`,
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonColor: '#00c76f',
+        cancelButtonColor: '#9ca3af',
+        confirmButtonText: '✓ Sí, marcar',
+        cancelButtonText: 'Cancelar'
+    });
+    
+    if (result.isConfirmed) {
+        form.submit();
+    }
+}
+
+async function cancelReservationInline(form) {
+    const result = await Swal.fire({
+        title: '¿Cancelar reserva?',
+        text: 'Esta acción no se puede deshacer',
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#ed2e45',
+        cancelButtonColor: '#9ca3af',
+        confirmButtonText: '✓ Sí, cancelar',
+        cancelButtonText: 'Cancelar'
+    });
+    
+    if (result.isConfirmed) {
+        form.submit();
+    }
+}
+</script>
+@endpush
 @endsection
 </x-tenant-admin-layout>
 

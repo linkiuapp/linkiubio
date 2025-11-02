@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Contracts\View\View;
 
 class ReservationController extends Controller
 {
@@ -22,7 +23,53 @@ class ReservationController extends Controller
     }
 
     /**
-     * Mostrar formulario de reserva
+     * Prepágina para seleccionar tipo de reserva (si ambos están activos)
+     */
+    public function selectType(Request $request): View
+    {
+        // Obtener store del route o de view shared (el middleware tenant.identify lo resuelve)
+        $store = $request->route('store');
+        
+        // Si no está resuelto, intentar desde view shared (como hacen otros controladores)
+        if (!$store || is_string($store)) {
+            $store = view()->shared('currentStore');
+        }
+        
+        // Si aún no hay store, intentar resolverlo manualmente
+        if (!$store || !($store instanceof \App\Shared\Models\Store)) {
+            $storeSlug = $request->route('store');
+            if (is_string($storeSlug)) {
+                $store = \App\Shared\Models\Store::where('slug', $storeSlug)->first();
+            }
+        }
+        
+        if (!$store || !($store instanceof \App\Shared\Models\Store)) {
+            abort(404, 'Tienda no encontrada');
+        }
+        
+        $hasMesaReservations = featureEnabled($store, 'reservas_mesas');
+        $hasHotelReservations = featureEnabled($store, 'reservas_hotel');
+        
+        // Si solo uno está activo, redirigir directamente
+        if ($hasMesaReservations && !$hasHotelReservations) {
+            return redirect()->route('tenant.reservations.index', $store->slug);
+        }
+        
+        if ($hasHotelReservations && !$hasMesaReservations) {
+            return redirect()->route('tenant.hotel-reservations.index', $store->slug);
+        }
+        
+        // Si ninguno está activo, 404
+        if (!$hasMesaReservations && !$hasHotelReservations) {
+            abort(404, 'Reservas no disponibles');
+        }
+        
+        // Si ambos están activos, mostrar prepágina
+        return view('tenant::reservations.select-type', compact('store'));
+    }
+
+    /**
+     * Mostrar formulario de reserva de mesa
      */
     public function index(Request $request)
     {

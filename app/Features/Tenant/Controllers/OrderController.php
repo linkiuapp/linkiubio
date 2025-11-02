@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Shared\Models\Order;
 use App\Shared\Models\OrderItem;
 use App\Shared\Models\Store;
+use App\Shared\Models\Table;
 use App\Features\TenantAdmin\Models\Product;
 use App\Features\TenantAdmin\Models\PaymentMethod;
 use App\Features\TenantAdmin\Models\BankAccount;
@@ -69,6 +70,11 @@ class OrderController extends Controller
         // Verificar si shipping está habilitado
         $shippingEnabled = featureEnabled($store, 'shipping');
         
+        // Verificar features de consumo
+        $consumoLocalEnabled = featureEnabled($store, 'consumo_local');
+        $consumoHotelEnabled = featureEnabled($store, 'consumo_hotel');
+        $reservasHotelEnabled = featureEnabled($store, 'reservas_hotel');
+        
         // Obtener métodos de envío según feature
         if ($shippingEnabled) {
             // Si shipping está habilitado, cargar configuración normal
@@ -91,6 +97,37 @@ class OrderController extends Controller
                 ]
             ];
         }
+        
+        // Agregar opciones de consumo si están habilitadas
+        if ($consumoLocalEnabled) {
+            $shippingMethods[] = [
+                'id' => 'dine_in',
+                'type' => 'dine_in',
+                'name' => 'Consumo en Local',
+                'cost' => 0,
+                'formatted_cost' => 'GRATIS',
+                'icon' => '🍽️',
+                'instructions' => 'Consume en el local (mesa)',
+                'preparation_time' => 'inmediato',
+                'preparation_label' => 'Inmediato',
+                'order_type' => 'dine_in'
+            ];
+        }
+        
+        if ($consumoHotelEnabled && $reservasHotelEnabled) {
+            $shippingMethods[] = [
+                'id' => 'room_service',
+                'type' => 'room_service',
+                'name' => 'Servicio a Habitación',
+                'cost' => 0,
+                'formatted_cost' => 'GRATIS',
+                'icon' => '🏨',
+                'instructions' => 'Servicio directo a tu habitación',
+                'preparation_time' => '30min',
+                'preparation_label' => '30 minutos',
+                'order_type' => 'room_service'
+            ];
+        }
 
         // Departamentos de Colombia (estático para MVP)
         $departments = [
@@ -106,40 +143,146 @@ class OrderController extends Controller
     }
 
     /**
+     * API: Obtener mesas disponibles para consumo en local
+     */
+    public function getAvailableTables(Request $request): JsonResponse
+    {
+        $store = $request->route('store');
+        
+        // Obtener mesas disponibles (status: available o reserved, tipo: mesa, activas)
+        $tables = Table::where('store_id', $store->id)
+            ->where('type', Table::TYPE_MESA)
+            ->where('is_active', true)
+            ->whereIn('status', [Table::STATUS_AVAILABLE, Table::STATUS_RESERVED])
+            ->orderBy('table_number')
+            ->get(['id', 'table_number', 'capacity', 'status']);
+        
+        return response()->json([
+            'success' => true,
+            'tables' => $tables->map(function($table) {
+                return [
+                    'id' => $table->id,
+                    'table_number' => $table->table_number,
+                    'capacity' => $table->capacity,
+                    'status' => $table->status,
+                    'status_label' => Table::STATUSES[$table->status] ?? 'Desconocido',
+                ];
+            })
+        ]);
+    }
+
+    /**
+     * API: Obtener habitaciones disponibles para servicio a habitación
+     */
+    public function getAvailableRooms(Request $request): JsonResponse
+    {
+        $store = $request->route('store');
+        
+        // Verificar que reservas_hotel esté activo
+        if (!featureEnabled($store, 'reservas_hotel')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Reservas de hotel no están habilitadas'
+            ], 403);
+        }
+        
+        // Obtener habitaciones desde la tabla rooms (solo available y reserved)
+        $rooms = \App\Shared\Models\Room::where('store_id', $store->id)
+            ->whereIn('status', ['available', 'reserved']) // Solo estados disponibles y reservados (no occupied)
+            ->with('roomType')
+            ->orderBy('room_number')
+            ->get();
+        
+        // Convertir a formato compatible con el frontend
+        $roomsFormatted = $rooms->map(function($room) {
+            // Mapear estado de Room a estado de Table para consistencia
+            $statusMapping = [
+                'available' => 'available',
+                'reserved' => 'reserved',
+                'occupied' => 'occupied',
+                'maintenance' => 'reserved',
+                'blocked' => 'reserved',
+            ];
+            
+            $mappedStatus = $statusMapping[$room->status] ?? 'available';
+            
+            return [
+                'id' => $room->id,
+                'room_number' => $room->room_number,
+                'room_type_name' => $room->roomType->name ?? 'N/A',
+                'capacity' => $room->roomType->max_occupancy ?? 2,
+                'status' => $mappedStatus,
+                'status_label' => $mappedStatus === 'available' ? 'Disponible' : 'Reservada',
+            ];
+        });
+        
+        return response()->json([
+            'success' => true,
+            'rooms' => $roomsFormatted
+        ]);
+    }
+
+    /**
      * Process checkout and create order
      */
     public function store(Request $request)
     {
         $store = $request->route('store');
 
-        // Debug: Verificar headers de la petición
-        \Log::info('OrderController@store - Headers:', [
-            'Accept' => $request->header('Accept'),
-            'Content-Type' => $request->header('Content-Type'),
-            'X-Requested-With' => $request->header('X-Requested-With'),
-            'expectsJson' => $request->expectsJson(),
-            'wantsJson' => $request->wantsJson(),
-            'ajax' => $request->ajax()
+        // Determinar si es dine_in o room_service
+        // Puede venir como order_type directamente en el request
+        $orderTypeInput = $request->input('order_type');
+        $isDineIn = in_array($orderTypeInput, ['dine_in', 'room_service']);
+        
+        // Log para debugging
+        \Log::info('OrderController@store - Dine-In Checkout', [
+            'store_id' => $store->id,
+            'isDineIn' => $isDineIn,
+            'order_type' => $request->input('order_type'),
+            'request_data' => $request->except(['_token']),
+            'cart_items' => $request->session()->get('cart', [])
         ]);
-
-        // Validación con manejo de errores para AJAX
+        
+        // Validación con manejo de errores
         try {
-            $validated = $request->validate([
+            $validationRules = [
                 'customer_name' => 'required|string|max:255',
-                'customer_phone' => 'required|string|max:20',
-                'customer_address' => 'required_if:delivery_type,local,nacional,domicilio|string|max:500',
-                'department' => 'required_if:delivery_type,nacional|string|max:100',
-                'city' => 'required_if:delivery_type,local,nacional,domicilio|string|max:100',
-                'delivery_type' => 'required|in:pickup,local,nacional,domicilio',
-                'payment_method' => 'required|in:efectivo,transferencia,contra_entrega',
-                'payment_method_id' => 'required|exists:payment_methods,id',
+                'customer_phone' => $isDineIn ? 'nullable|string|max:20' : 'required|string|max:20',
+                'delivery_type' => $isDineIn ? 'nullable' : 'required|in:pickup,local,nacional,domicilio',
+                'payment_method' => 'required|in:efectivo,transferencia,contra_entrega,card',
+                'payment_method_id' => $isDineIn ? 'nullable' : 'required|exists:payment_methods,id',
                 'cash_amount' => 'nullable|numeric|min:1',
                 'coupon_code' => 'nullable|string|max:50',
-                'shipping_zone_id' => 'nullable|exists:simple_shipping_zones,id',
                 'notes' => 'nullable|string|max:500',
-                'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120' // 5MB máximo
+                'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120', // 5MB máximo
+            ];
+            
+            // Reglas para dine_in/room_service
+            if ($isDineIn) {
+                $validationRules['order_type'] = 'required|in:dine_in,room_service';
+                $validationRules['table_number'] = 'nullable|string|max:50';
+                $validationRules['service_charge'] = 'nullable|numeric|min:0';
+                $validationRules['tip_amount'] = 'nullable|numeric|min:0';
+                $validationRules['tip_percentage'] = 'nullable|integer|min:0|max:100';
+            } else {
+                // Reglas para pedidos normales
+                $validationRules['customer_address'] = 'required_if:delivery_type,local,nacional,domicilio|string|max:500';
+                $validationRules['department'] = 'required_if:delivery_type,nacional|string|max:100';
+                $validationRules['city'] = 'required_if:delivery_type,local,nacional,domicilio|string|max:100';
+                $validationRules['shipping_zone_id'] = 'nullable|exists:simple_shipping_zones,id';
+            }
+            
+            $validated = $request->validate($validationRules);
+            
+            \Log::info('OrderController@store - Validation passed', [
+                'validated' => $validated
             ]);
         } catch (\Illuminate\Validation\ValidationException $e) {
+            \Log::error('OrderController@store - Validation failed', [
+                'errors' => $e->errors(),
+                'request_data' => $request->except(['_token'])
+            ]);
+            
             if ($request->expectsJson()) {
                 return response()->json([
                     'success' => false,
@@ -148,40 +291,71 @@ class OrderController extends Controller
                 ], 422);
             }
             
+            // Si es dine_in/room_service, redirigir al checkout de dine-in
+            if ($isDineIn) {
+                return redirect()
+                    ->route('tenant.dine-in.checkout', $store->slug)
+                    ->withErrors($e->errors())
+                    ->withInput();
+            }
+            
             return back()->withErrors($e->errors())->withInput();
         }
 
         DB::beginTransaction();
         try {
             // Obtener carrito
-        $cartItems = $request->session()->get('cart', []);
+            $cartItems = $request->session()->get('cart', []);
             
-        if (empty($cartItems)) {
-                throw new \Exception('El carrito está vacío');
+            \Log::info('OrderController@store - Cart check', [
+                'cart_items_count' => count($cartItems),
+                'cart_items' => array_keys($cartItems)
+            ]);
+            
+            if (empty($cartItems)) {
+                \Log::warning('OrderController@store - Empty cart');
+                throw new \Exception('El carrito está vacío. Por favor agrega productos antes de enviar el pedido.');
             }
 
+            // Determinar order_type
+            $orderType = $isDineIn ? $validated['order_type'] : (($validated['delivery_type'] ?? 'pickup') === 'pickup' ? 'pickup' : 'delivery');
+            
             // Crear orden
-            $order = Order::create([
+            $orderData = [
                 'store_id' => $store->id,
                 'order_number' => Order::generateOrderNumber($store->id),
                 'customer_name' => $validated['customer_name'],
-                'customer_phone' => $validated['customer_phone'],
-                'customer_address' => $validated['customer_address'] ?? null,
-                'department' => $validated['department'] ?? null,
-                'city' => $validated['city'] ?? null,
-                'delivery_type' => $validated['delivery_type'],
+                'customer_phone' => $validated['customer_phone'] ?? null,
+                'delivery_type' => $isDineIn ? 'pickup' : ($validated['delivery_type'] ?? 'pickup'),
+                'order_type' => $orderType,
                 'payment_method' => $validated['payment_method'],
-                'payment_method_id' => $validated['payment_method_id'],
+                'payment_method_id' => $isDineIn ? null : $validated['payment_method_id'],
                 'cash_amount' => $validated['cash_amount'] ?? null,
                 'coupon_code' => $validated['coupon_code'] ?? null,
                 'notes' => $validated['notes'] ?? null,
                 'status' => 'pending',
                 'subtotal' => 0, // Se calculará después
-                'shipping_cost' => 0, // Se calculará después
+                'shipping_cost' => 0, // Siempre 0 para dine_in/room_service
                 'coupon_discount' => 0, // Se calculará después
                 'total' => 0, // Se calculará después
                 'created_at' => now(),
-            ]);
+            ];
+            
+            // Campos para dine_in/room_service
+            if ($isDineIn) {
+                $orderData['table_number'] = $validated['table_number'] ?? null;
+                $orderData['room_number'] = $orderType === 'room_service' ? $validated['table_number'] : null;
+                $orderData['service_charge'] = $validated['service_charge'] ?? 0;
+                $orderData['tip_amount'] = $validated['tip_amount'] ?? 0;
+                $orderData['tip_percentage'] = $validated['tip_percentage'] ?? null;
+            } else {
+                // Campos para pedidos normales
+                $orderData['customer_address'] = $validated['customer_address'] ?? null;
+                $orderData['department'] = $validated['department'] ?? null;
+                $orderData['city'] = $validated['city'] ?? null;
+            }
+            
+            $order = Order::create($orderData);
 
             // Agregar productos a la orden
             foreach ($cartItems as $item) {
@@ -201,70 +375,76 @@ class OrderController extends Controller
                 $order->items()->create($orderItemData);
             }
 
-            // Mapear delivery_type para la base de datos (ENUM solo permite 'domicilio' y 'pickup')
-            $dbDeliveryType = $validated['delivery_type'];
-            if ($validated['delivery_type'] === 'local' || $validated['delivery_type'] === 'nacional') {
-                $dbDeliveryType = 'domicilio'; // En BD se guarda como 'domicilio'
-            }
-            
-            // Determinar el tipo real para la lógica de shipping
-            $realDeliveryType = $validated['delivery_type'];
-            if ($validated['delivery_type'] === 'domicilio') {
-                // Si viene 'domicilio', determinar si es local o nacional según la ciudad
-                if (isset($validated['department']) && !empty($validated['department'])) {
-                    $realDeliveryType = 'nacional';
-                } else {
-                    $realDeliveryType = 'local';
-                }
-            }
-            
-            // Actualizar en la orden (usar el valor compatible con ENUM)
-            // Agregar metadata del tipo real en las notas si es necesario
-            $orderNotes = $validated['notes'] ?? '';
-            if ($realDeliveryType !== $dbDeliveryType) {
-                $orderNotes = "[SHIPPING_TYPE:{$realDeliveryType}] " . $orderNotes;
-            }
-            
-            $order->update([
-                'delivery_type' => $dbDeliveryType,
-                'notes' => $orderNotes
-            ]);
-            
             // Calcular subtotal primero
             $order->recalculateTotals();
             
-            // Verificar si shipping está habilitado
-            $shippingEnabled = featureEnabled($store, 'shipping');
-            
-            // Calcular shipping cost solo si shipping está habilitado
-            $shippingCost = 0;
-            if ($shippingEnabled) {
-                if ($realDeliveryType === 'nacional' && isset($validated['city'])) {
-                    $simpleShipping = SimpleShipping::getOrCreateForStore($store->id);
-                    $simpleShipping->load('activeZones');
-                    
-                    $shippingResult = $simpleShipping->calculateShippingCost($validated['city'], $order->subtotal);
-                    if ($shippingResult['available']) {
-                        $shippingCost = $shippingResult['cost'];
+            // Solo procesar shipping si NO es dine_in/room_service
+            if (!$isDineIn) {
+                // Mapear delivery_type para la base de datos (ENUM solo permite 'domicilio' y 'pickup')
+                $dbDeliveryType = $validated['delivery_type'] ?? 'pickup';
+                if ($validated['delivery_type'] === 'local' || $validated['delivery_type'] === 'nacional') {
+                    $dbDeliveryType = 'domicilio'; // En BD se guarda como 'domicilio'
+                }
+                
+                // Determinar el tipo real para la lógica de shipping
+                $realDeliveryType = $validated['delivery_type'] ?? 'pickup';
+                if ($validated['delivery_type'] === 'domicilio') {
+                    // Si viene 'domicilio', determinar si es local o nacional según la ciudad
+                    if (isset($validated['department']) && !empty($validated['department'])) {
+                        $realDeliveryType = 'nacional';
+                    } else {
+                        $realDeliveryType = 'local';
                     }
-                } elseif ($realDeliveryType === 'local') {
-                    $simpleShipping = SimpleShipping::getOrCreateForStore($store->id);
-                    if ($simpleShipping->local_enabled) {
-                        $shippingCost = $simpleShipping->local_cost;
+                }
+                
+                // Actualizar en la orden (usar el valor compatible con ENUM)
+                // Agregar metadata del tipo real en las notas si es necesario
+                $orderNotes = $validated['notes'] ?? '';
+                if ($realDeliveryType !== $dbDeliveryType) {
+                    $orderNotes = "[SHIPPING_TYPE:{$realDeliveryType}] " . $orderNotes;
+                }
+                
+                $order->update([
+                    'delivery_type' => $dbDeliveryType,
+                    'notes' => $orderNotes
+                ]);
+                
+                // Verificar si shipping está habilitado
+                $shippingEnabled = featureEnabled($store, 'shipping');
+                
+                // Calcular shipping cost solo si shipping está habilitado
+                $shippingCost = 0;
+                if ($shippingEnabled) {
+                    if ($realDeliveryType === 'nacional' && isset($validated['city'])) {
+                        $simpleShipping = SimpleShipping::getOrCreateForStore($store->id);
+                        $simpleShipping->load('activeZones');
                         
-                        // Aplicar envío gratis si aplica
-                        if ($simpleShipping->local_free_from > 0 && $order->subtotal >= $simpleShipping->local_free_from) {
-                            $shippingCost = 0;
+                        $shippingResult = $simpleShipping->calculateShippingCost($validated['city'], $order->subtotal);
+                        if ($shippingResult['available']) {
+                            $shippingCost = $shippingResult['cost'];
                         }
+                    } elseif ($realDeliveryType === 'local') {
+                        $simpleShipping = SimpleShipping::getOrCreateForStore($store->id);
+                        if ($simpleShipping->local_enabled) {
+                            $shippingCost = $simpleShipping->local_cost;
+                            
+                            // Aplicar envío gratis si aplica
+                            if ($simpleShipping->local_free_from > 0 && $order->subtotal >= $simpleShipping->local_free_from) {
+                                $shippingCost = 0;
+                            }
+                        }
+                    }
+                } else {
+                    // Si shipping no está habilitado, forzar pickup con costo 0
+                    if ($realDeliveryType !== 'pickup') {
+                        $order->update(['delivery_type' => 'pickup']);
+                        $realDeliveryType = 'pickup';
+                        $shippingCost = 0;
                     }
                 }
             } else {
-                // Si shipping no está habilitado, forzar pickup con costo 0
-                if ($realDeliveryType !== 'pickup') {
-                    $order->update(['delivery_type' => 'pickup']);
-                    $realDeliveryType = 'pickup';
-                    $shippingCost = 0;
-                }
+                // Para dine_in/room_service, shipping cost siempre es 0
+                $shippingCost = 0;
             }
             
             // Actualizar shipping cost
@@ -356,8 +536,23 @@ class OrderController extends Controller
                 \Log::info('ℹ️ No payment proof uploaded');
             }
 
-            // Limpiar carrito
+            // Actualizar estado de mesa/habitación si es dine_in/room_service
+            if ($isDineIn && isset($validated['table_number'])) {
+                $table = \App\Shared\Models\Table::where('store_id', $store->id)
+                    ->where('table_number', $validated['table_number'])
+                    ->where('type', $orderType === 'dine_in' ? 'mesa' : 'habitacion')
+                    ->first();
+                
+                if ($table) {
+                    $table->occupy($order->id);
+                }
+            }
+
+            // Limpiar carrito y sesión de dine_in
             $request->session()->forget('cart');
+            $request->session()->forget('dine_in_table_id');
+            $request->session()->forget('dine_in_table_number');
+            $request->session()->forget('dine_in_type');
 
             DB::commit();
 
@@ -401,10 +596,13 @@ class OrderController extends Controller
         } catch (\Exception $e) {
             DB::rollback();
             
-            \Log::error('Error creando orden:', [
+            \Log::error('OrderController@store - Error creating order', [
                 'store_id' => $store->id,
+                'isDineIn' => $isDineIn ?? false,
                 'error' => $e->getMessage(),
-                'trace' => $e->getTraceAsString()
+                'error_class' => get_class($e),
+                'trace' => $e->getTraceAsString(),
+                'request_data' => $request->except(['_token'])
             ]);
             
             if ($request->expectsJson()) {
@@ -414,8 +612,16 @@ class OrderController extends Controller
                 ], 500);
             }
             
+            // Si es dine_in/room_service, redirigir al checkout de dine-in
+            if (isset($isDineIn) && $isDineIn) {
+                return redirect()
+                    ->route('tenant.dine-in.checkout', $store->slug)
+                    ->with('error', $e->getMessage())
+                    ->withInput();
+            }
+            
             return back()
-                ->with('error', 'Error procesando el pedido. Por favor intenta nuevamente.')
+                ->with('error', $e->getMessage())
                 ->withInput();
         }
     }

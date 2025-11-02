@@ -23,6 +23,9 @@ class Order extends Model
         'department',
         'city',
         'delivery_type',
+        'order_type',
+        'table_number',
+        'room_number',
         'shipping_cost',
         'payment_method',
         'payment_method_id',
@@ -30,6 +33,9 @@ class Order extends Model
         'payment_proof_path',
         'subtotal',
         'coupon_discount',
+        'service_charge',
+        'tip_amount',
+        'tip_percentage',
         'total',
         'notes',
         'store_id'
@@ -39,6 +45,9 @@ class Order extends Model
         'shipping_cost' => 'decimal:2',
         'subtotal' => 'decimal:2',
         'coupon_discount' => 'decimal:2',
+        'service_charge' => 'decimal:2',
+        'tip_amount' => 'decimal:2',
+        'tip_percentage' => 'integer',
         'total' => 'decimal:2',
         'cash_amount' => 'decimal:2',
         'created_at' => 'datetime',
@@ -141,6 +150,19 @@ class Order extends Model
         self::PAYMENT_METHOD_EFECTIVO => 'Efectivo'
     ];
 
+    // Constantes de tipo de orden
+    const ORDER_TYPE_DELIVERY = 'delivery';
+    const ORDER_TYPE_PICKUP = 'pickup';
+    const ORDER_TYPE_DINE_IN = 'dine_in';
+    const ORDER_TYPE_ROOM_SERVICE = 'room_service';
+
+    const ORDER_TYPES = [
+        self::ORDER_TYPE_DELIVERY => 'Envío a Domicilio',
+        self::ORDER_TYPE_PICKUP => 'Recoger en Tienda',
+        self::ORDER_TYPE_DINE_IN => 'Consumo en Local',
+        self::ORDER_TYPE_ROOM_SERVICE => 'Servicio a Habitación',
+    ];
+
     /**
      * Boot del modelo
      */
@@ -224,6 +246,21 @@ class Order extends Model
     public function scopeByDeliveryType(Builder $query, string $type): Builder
     {
         return $query->where('delivery_type', $type);
+    }
+
+    public function scopeByOrderType(Builder $query, string $orderType): Builder
+    {
+        return $query->where('order_type', $orderType);
+    }
+
+    public function scopeDineIn(Builder $query): Builder
+    {
+        return $query->where('order_type', self::ORDER_TYPE_DINE_IN);
+    }
+
+    public function scopeRoomService(Builder $query): Builder
+    {
+        return $query->where('order_type', self::ORDER_TYPE_ROOM_SERVICE);
     }
 
     public function scopeByDateRange(Builder $query, $startDate, $endDate): Builder
@@ -438,7 +475,11 @@ class Order extends Model
 
     public function calculateTotal(): float
     {
-        return $this->subtotal + $this->shipping_cost - $this->coupon_discount;
+        return $this->subtotal 
+            + $this->shipping_cost 
+            + ($this->service_charge ?? 0)
+            + ($this->tip_amount ?? 0)
+            - $this->coupon_discount;
     }
 
     public function recalculateTotals(): void

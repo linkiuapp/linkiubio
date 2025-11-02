@@ -2,6 +2,39 @@
 
 @section('content')
 <div class="p-4 space-y-6">
+    <!-- Banner de Mesa/Habitación Activa -->
+    @php
+        $dineInTableId = session('dine_in_table_id');
+        $dineInTableNumber = session('dine_in_table_number');
+        $dineInType = session('dine_in_type');
+    @endphp
+    
+    @if($dineInTableId && $dineInTableNumber)
+        <div class="bg-brandPrimary-50 border border-brandPrimary-300 rounded-lg p-4 mb-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    @if($dineInType === 'mesa')
+                        <i data-lucide="utensils" class="w-6 h-6 text-brandPrimary-300"></i>
+                    @else
+                        <i data-lucide="bed" class="w-6 h-6 text-brandPrimary-300"></i>
+                    @endif
+                    <div>
+                        <p class="caption-strong text-brandPrimary-400">
+                            Ordenando para {{ $dineInType === 'mesa' ? 'Mesa' : 'Habitación' }} #{{ $dineInTableNumber }}
+                        </p>
+                        <p class="caption text-brandNeutral-400">Tu pedido será entregado en tu {{ $dineInType === 'mesa' ? 'mesa' : 'habitación' }}</p>
+                    </div>
+                </div>
+                <a 
+                    href="{{ route('tenant.dine-in.checkout', $store->slug) }}" 
+                    class="bg-brandPrimary-300 hover:bg-brandPrimary-200 text-brandWhite-100 px-4 py-2 rounded-full caption transition-colors"
+                >
+                    Ver Pedido
+                </a>
+            </div>
+        </div>
+    @endif
+
     <!-- Header -->
     <div class="space-y-3">
         <nav class="flex caption text-brandInfo-300">

@@ -81,6 +81,48 @@
                         </div>
                     </div>
                     
+                    <!-- Selector de Mesa (para Consumo en Local) -->
+                    <div id="table-selector-container" class="hidden space-y-4 mb-4">
+                        <div>
+                            <label for="selected_table_number" class="block caption text-brandNeutral-400 mb-2">
+                                Selecciona tu Mesa *
+                            </label>
+                            <select 
+                                id="selected_table_number" 
+                                name="selected_table_number"
+                                class="w-full px-4 py-3 border border-brandWhite-300 rounded-lg caption focus:border-brandPrimary-300 focus:ring-1 focus:ring-brandPrimary-300"
+                                required
+                            >
+                                <option value="">-- Selecciona una mesa --</option>
+                                <!-- Se cargarán dinámicamente -->
+                            </select>
+                            <p class="caption text-brandNeutral-300 mt-1">
+                                Elige la mesa donde deseas consumir
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Selector de Habitación (para Servicio a Habitación) -->
+                    <div id="room-selector-container" class="hidden space-y-4 mb-4">
+                        <div>
+                            <label for="selected_room_number" class="block caption text-brandNeutral-400 mb-2">
+                                Selecciona tu Habitación *
+                            </label>
+                            <select 
+                                id="selected_room_number" 
+                                name="selected_room_number"
+                                class="w-full px-4 py-3 border border-brandWhite-300 rounded-lg caption focus:border-brandPrimary-300 focus:ring-1 focus:ring-brandPrimary-300"
+                                required
+                            >
+                                <option value="">-- Selecciona una habitación --</option>
+                                <!-- Se cargarán dinámicamente -->
+                            </select>
+                            <p class="caption text-brandNeutral-300 mt-1">
+                                Elige la habitación a la que deseas que se envíe el servicio
+                            </p>
+                        </div>
+                    </div>
+                    
                     <!-- Address Fields for Local Shipping (only address) -->
                     <div id="address-fields-local" class="hidden space-y-4">
                     <div>
@@ -411,6 +453,30 @@ function enableStep2Button() {
     
     if (!deliveryType) {
         btn.disabled = true;
+        return;
+    }
+    
+    // Verificar si es dine_in o room_service (requieren mesa/habitación, no dirección)
+    const orderType = deliveryType.dataset.orderType;
+    if (orderType === 'dine_in') {
+        // Para dine_in: validar que se haya seleccionado una mesa
+        const tableSelect = document.getElementById('selected_table_number');
+        if (tableSelect && tableSelect.value) {
+            btn.disabled = false;
+        } else {
+            btn.disabled = true;
+        }
+        return;
+    }
+    
+    if (orderType === 'room_service') {
+        // Para room_service: validar que se haya seleccionado una habitación
+        const roomSelect = document.getElementById('selected_room_number');
+        if (roomSelect && roomSelect.value) {
+            btn.disabled = false;
+        } else {
+            btn.disabled = true;
+        }
         return;
     }
     
@@ -867,6 +933,54 @@ function renderShippingMethods() {
                 </label>
             `;
         }
+        
+        // Consumo en Local
+        if (method.type === 'dine_in' || method.id === 'dine_in') {
+            html += `
+                <label class="flex items-center p-4 border border-brandWhite-300 rounded-lg cursor-pointer hover:bg-brandWhite-50 transition-colors">
+                    <input 
+                        type="radio" 
+                        name="delivery_type" 
+                        value="pickup"
+                        data-shipping-type="pickup"
+                        data-order-type="dine_in"
+                        class="mr-3 w-4 h-4 text-brandPrimary-500 border-brandWhite-300 focus:ring-brandPrimary-300"
+                    >
+                    <div class="flex-1">
+                        <div class="flex flex-col gap-1">
+                            <span class="caption text-brandNeutral-400">${method.icon || '🍽️'} ${method.name || 'Consumo en Local'}</span>
+                            <span class="caption-strong text-brandNeutral-400">${method.formatted_cost || 'GRATIS'}</span>
+                        </div>
+                        <p class="caption text-brandNeutral-400 mt-1">${method.instructions || 'Consume en el local (mesa)'}</p>
+                        <p class="caption text-brandNeutral-400 mt-1">⏱️ Tiempo: ${method.preparation_label || 'Inmediato'}</p>
+                    </div>
+                </label>
+            `;
+        }
+        
+        // Servicio a Habitación
+        if (method.type === 'room_service' || method.id === 'room_service') {
+            html += `
+                <label class="flex items-center p-4 border border-brandWhite-300 rounded-lg cursor-pointer hover:bg-brandWhite-50 transition-colors">
+                    <input 
+                        type="radio" 
+                        name="delivery_type" 
+                        value="pickup"
+                        data-shipping-type="pickup"
+                        data-order-type="room_service"
+                        class="mr-3 w-4 h-4 text-brandPrimary-500 border-brandWhite-300 focus:ring-brandPrimary-300"
+                    >
+                    <div class="flex-1">
+                        <div class="flex flex-col gap-1">
+                            <span class="caption text-brandNeutral-400">${method.icon || '🏨'} ${method.name || 'Servicio a Habitación'}</span>
+                            <span class="caption-strong text-brandNeutral-400">${method.formatted_cost || 'GRATIS'}</span>
+                        </div>
+                        <p class="caption text-brandNeutral-400 mt-1">${method.instructions || 'Servicio directo a tu habitación'}</p>
+                        <p class="caption text-brandNeutral-400 mt-1">⏱️ Tiempo: ${method.preparation_label || '30 minutos'}</p>
+                    </div>
+                </label>
+            `;
+        }
     });
     
     if (!html) {
@@ -880,12 +994,32 @@ function renderShippingMethods() {
         radio.addEventListener('change', (e) => {
             const addressFieldsLocal = document.getElementById('address-fields-local');
             const addressFieldsNational = document.getElementById('address-fields-national');
+            const tableContainer = document.getElementById('table-selector-container');
+            const roomContainer = document.getElementById('room-selector-container');
             
-            // Ocultar ambos campos primero
+            // Ocultar todos los campos primero
             addressFieldsLocal.classList.add('hidden');
             addressFieldsNational.classList.add('hidden');
+            if (tableContainer) tableContainer.classList.add('hidden');
+            if (roomContainer) roomContainer.classList.add('hidden');
             
-            if (e.target.value === 'domicilio') {
+            // Si es dine_in o room_service, mostrar selector correspondiente
+            const orderType = e.target.dataset.orderType;
+            if (orderType === 'dine_in') {
+                // Mostrar selector de mesas
+                if (tableContainer) {
+                    tableContainer.classList.remove('hidden');
+                    loadAvailableTables(); // Cargar mesas disponibles
+                }
+                enableStep2Button(); // Validará cuando se seleccione una mesa
+            } else if (orderType === 'room_service') {
+                // Mostrar selector de habitaciones
+                if (roomContainer) {
+                    roomContainer.classList.remove('hidden');
+                    loadAvailableRooms(); // Cargar habitaciones disponibles
+                }
+                enableStep2Button(); // Validará cuando se seleccione una habitación
+            } else if (e.target.value === 'domicilio') {
                 const shippingType = e.target.dataset.shippingType;
                 
                 if (shippingType === 'local') {
@@ -901,8 +1035,11 @@ function renderShippingMethods() {
                     // Limpiar campo local
                     document.getElementById('customer_address').value = '';
                 }
+                enableStep2Button();
+            } else if (e.target.value === 'pickup') {
+                // Para pickup, no se necesitan campos de dirección
+                enableStep2Button();
             }
-            enableStep2Button();
         });
     });
 }
@@ -921,6 +1058,94 @@ async function loadPaymentMethods() {
         }
     } catch (error) {
         // Error silencioso - métodos de pago no disponibles
+    }
+}
+
+// Cargar mesas disponibles para consumo en local
+async function loadAvailableTables() {
+    const url = '{{ route("tenant.checkout.available-tables", $store->slug) }}';
+    const select = document.getElementById('selected_table_number');
+    
+    if (!select) return;
+    
+    try {
+        // Mostrar loading
+        select.innerHTML = '<option value="">Cargando mesas...</option>';
+        select.disabled = true;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.success && data.tables) {
+            select.innerHTML = '<option value="">-- Selecciona una mesa --</option>';
+            
+            data.tables.forEach(table => {
+                const option = document.createElement('option');
+                option.value = table.table_number;
+                option.textContent = `Mesa ${table.table_number} - Capacidad: ${table.capacity} personas (${table.status_label})`;
+                select.appendChild(option);
+            });
+            
+            if (data.tables.length === 0) {
+                select.innerHTML = '<option value="">No hay mesas disponibles</option>';
+            }
+            
+            select.disabled = false;
+            
+            // Agregar listener para validar cuando se seleccione
+            select.addEventListener('change', enableStep2Button);
+        } else {
+            select.innerHTML = '<option value="">Error al cargar mesas</option>';
+            select.disabled = false;
+        }
+    } catch (error) {
+        console.error('Error cargando mesas:', error);
+        select.innerHTML = '<option value="">Error al cargar mesas</option>';
+        select.disabled = false;
+    }
+}
+
+// Cargar habitaciones disponibles para servicio a habitación
+async function loadAvailableRooms() {
+    const url = '{{ route("tenant.checkout.available-rooms", $store->slug) }}';
+    const select = document.getElementById('selected_room_number');
+    
+    if (!select) return;
+    
+    try {
+        // Mostrar loading
+        select.innerHTML = '<option value="">Cargando habitaciones...</option>';
+        select.disabled = true;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.success && data.rooms) {
+            select.innerHTML = '<option value="">-- Selecciona una habitación --</option>';
+            
+            data.rooms.forEach(room => {
+                const option = document.createElement('option');
+                option.value = room.room_number;
+                option.textContent = `Habitación ${room.room_number} - ${room.room_type_name} - Capacidad: ${room.capacity} personas (${room.status_label})`;
+                select.appendChild(option);
+            });
+            
+            if (data.rooms.length === 0) {
+                select.innerHTML = '<option value="">No hay habitaciones disponibles</option>';
+            }
+            
+            select.disabled = false;
+            
+            // Agregar listener para validar cuando se seleccione
+            select.addEventListener('change', enableStep2Button);
+        } else {
+            select.innerHTML = '<option value="">Error al cargar habitaciones</option>';
+            select.disabled = false;
+        }
+    } catch (error) {
+        console.error('Error cargando habitaciones:', error);
+        select.innerHTML = '<option value="">Error al cargar habitaciones</option>';
+        select.disabled = false;
     }
 }
 
@@ -1178,6 +1403,24 @@ async function submitOrder() {
         const deliveryType = document.querySelector('input[name="delivery_type"]:checked');
         if (deliveryType) {
             formData.append('delivery_type', deliveryType.value);
+            
+            // Verificar si es dine_in o room_service (desde data-order-type)
+            const orderType = deliveryType.dataset.orderType;
+            if (orderType === 'dine_in') {
+                // Agregar order_type y table_number
+                formData.append('order_type', orderType);
+                const tableNumber = document.getElementById('selected_table_number')?.value;
+                if (tableNumber) {
+                    formData.append('table_number', tableNumber);
+                }
+            } else if (orderType === 'room_service') {
+                // Agregar order_type y room_number (usando table_number en el backend)
+                formData.append('order_type', orderType);
+                const roomNumber = document.getElementById('selected_room_number')?.value;
+                if (roomNumber) {
+                    formData.append('table_number', roomNumber); // El backend espera table_number para room_service también
+                }
+            }
             
             if (deliveryType.value === 'domicilio') {
                 const shippingType = deliveryType.dataset.shippingType;

@@ -6,6 +6,7 @@ use App\Features\Tenant\Controllers\OrderController;
 use App\Features\Tenant\Controllers\PageController;
 use App\Features\Tenant\Controllers\ReservationController;
 use App\Features\Tenant\Controllers\HotelReservationController;
+use App\Features\Tenant\Controllers\DineInController;
 
 /*
 |--------------------------------------------------------------------------
@@ -90,7 +91,10 @@ Route::get('/proximamente', function() {
     return view('tenant::storefront.coming-soon', compact('store'));
 })->name('coming-soon');
 
-// Reservaciones (protegidas por feature:reservas_mesas)
+// Prepágina de selección de tipo de reserva (si ambos están activos)
+Route::middleware(['feature:reservas_mesas,reservas_hotel'])->get('/reservaciones/tipo', [ReservationController::class, 'selectType'])->name('reservations.select-type');
+
+// Reservaciones de Mesa (protegidas por feature:reservas_mesas)
 Route::middleware(['feature:reservas_mesas'])->prefix('reservaciones')->name('reservations.')->group(function () {
     Route::get('/', [ReservationController::class, 'index'])->name('index');
     Route::post('/', [ReservationController::class, 'store'])->name('store');
@@ -115,6 +119,30 @@ Route::middleware(['feature:reservas_hotel'])->prefix('reservas-hotel')->name('h
         Route::post('/available-room-types', [HotelReservationController::class, 'getAvailableRoomTypes'])->name('available-room-types');
         Route::post('/calculate-pricing', [HotelReservationController::class, 'calculatePricing'])->name('calculate-pricing');
     });
+});
+
+// Dine-In / Room Service (protegidas por feature:consumo_local o consumo_hotel)
+// IMPORTANTE: {number} debe ser un parámetro literal, no model binding
+Route::prefix('mesa')->name('dine-in.')->group(function () {
+    Route::get('/{number}', [DineInController::class, 'detectTable'])
+        ->where('number', '[0-9]+') // Solo números
+        ->name('table');
+});
+
+Route::prefix('habitacion')->name('dine-in.')->group(function () {
+    Route::get('/{number}', [DineInController::class, 'detectTable'])
+        ->where('number', '[0-9]+') // Solo números
+        ->name('room');
+});
+
+Route::prefix('dine-in')->name('dine-in.')->group(function () {
+    Route::get('/checkout', [DineInController::class, 'checkout'])->name('checkout');
+});
+
+// API Routes para checkout (mesas y habitaciones disponibles)
+Route::prefix('checkout')->name('checkout.')->group(function () {
+    Route::get('/available-tables', [OrderController::class, 'getAvailableTables'])->name('available-tables');
+    Route::get('/available-rooms', [OrderController::class, 'getAvailableRooms'])->name('available-rooms');
 });
 
 // Rutas de páginas informativas

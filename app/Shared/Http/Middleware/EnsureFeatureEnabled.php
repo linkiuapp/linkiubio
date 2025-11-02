@@ -24,11 +24,14 @@ class EnsureFeatureEnabled
     public function handle(Request $request, Closure $next, string $featureKey): Response
     {
         try {
+            // Soportar múltiples features separados por coma (OR logic: al menos uno debe estar habilitado)
+            $features = array_map('trim', explode(',', $featureKey));
+            
             // Log al inicio para verificar que el middleware se ejecuta
-            // Usar error_log para asegurar que se escriba inmediatamente
-            error_log('EnsureFeatureEnabled: Starting - Feature: ' . $featureKey . ' - URL: ' . $request->fullUrl());
+            error_log('EnsureFeatureEnabled: Starting - Features: ' . implode(', ', $features) . ' - URL: ' . $request->fullUrl());
             \Log::info('EnsureFeatureEnabled: Starting', [
-                'feature' => $featureKey,
+                'features' => $features,
+                'original_feature_key' => $featureKey,
                 'url' => $request->fullUrl(),
                 'route_name' => $request->route()?->getName(),
                 'route_params' => $request->route()?->parameters()
@@ -90,19 +93,29 @@ class EnsureFeatureEnabled
             'store_slug' => $store->slug
         ]);
 
-        $isEnabled = $this->featureResolver->isEnabled($store, $featureKey);
+        // Verificar si AL MENOS uno de los features está habilitado (OR logic)
+        $isEnabled = false;
+        $enabledFeatures = [];
+        foreach ($features as $feature) {
+            if ($this->featureResolver->isEnabled($store, $feature)) {
+                $isEnabled = true;
+                $enabledFeatures[] = $feature;
+                break; // Al menos uno está habilitado, eso es suficiente
+            }
+        }
         
         \Log::info('EnsureFeatureEnabled: Feature check result', [
-            'feature' => $featureKey,
+            'features' => $features,
             'store_id' => $store->id,
             'store_slug' => $store->slug,
             'is_enabled' => $isEnabled,
+            'enabled_features' => $enabledFeatures,
             'url' => $request->fullUrl()
         ]);
 
         if (!$isEnabled) {
-            \Log::warning('EnsureFeatureEnabled: Feature disabled - aborting', [
-                'feature' => $featureKey,
+            \Log::warning('EnsureFeatureEnabled: No features enabled - aborting', [
+                'features' => $features,
                 'store_id' => $store->id,
                 'url' => $request->fullUrl()
             ]);
@@ -110,7 +123,7 @@ class EnsureFeatureEnabled
         }
         
         \Log::info('EnsureFeatureEnabled: Feature enabled - continuing', [
-            'feature' => $featureKey,
+            'enabled_features' => $enabledFeatures,
             'store_id' => $store->id,
             'next_action' => 'calling $next($request)'
         ]);
@@ -128,7 +141,8 @@ class EnsureFeatureEnabled
             \Log::error('EnsureFeatureEnabled: Exception caught', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString(),
-                'feature' => $featureKey,
+                'features' => $features ?? [],
+                'original_feature_key' => $featureKey,
                 'url' => $request->fullUrl()
             ]);
             throw $e;

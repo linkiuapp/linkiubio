@@ -79,6 +79,7 @@ class TableReservationController extends Controller
         $store = view()->shared('currentStore');
         
         $tables = Table::where('store_id', $store->id)
+            ->where('type', 'mesa') // SOLO mesas, nunca habitaciones
             ->where('is_active', true)
             ->ordered()
             ->get();
@@ -328,6 +329,7 @@ class TableReservationController extends Controller
         
         $settings = $this->reservationService->getSettings($store);
         $tables = Table::where('store_id', $store->id)
+            ->where('type', 'mesa') // SOLO mesas, nunca habitaciones
             ->ordered()
             ->get();
         
@@ -426,6 +428,7 @@ class TableReservationController extends Controller
         
         // Verificar que no exista otra mesa con el mismo número en esta tienda
         $existingTable = Table::where('store_id', $store->id)
+            ->where('type', 'mesa') // Solo buscar entre mesas
             ->where('table_number', $request->input('table_number'))
             ->first();
             
@@ -440,6 +443,7 @@ class TableReservationController extends Controller
             'store_id' => $store->id,
             'table_number' => $request->input('table_number'),
             'capacity' => $request->input('capacity'),
+            'type' => 'mesa', // Asegurar que las mesas de reservas tengan type = 'mesa'
             'is_active' => true
         ]);
         
@@ -475,6 +479,7 @@ class TableReservationController extends Controller
         
         // Verificar que no exista otra mesa con el mismo número en esta tienda (excepto la actual)
         $existingTable = Table::where('store_id', $store->id)
+            ->where('type', 'mesa') // Solo buscar entre mesas
             ->where('table_number', $request->input('table_number'))
             ->where('id', '!=', $table->id)
             ->first();

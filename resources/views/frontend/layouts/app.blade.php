@@ -94,7 +94,14 @@
             </a>
 
             <!-- Reservas (cambia según categoría de negocio) -->
-            @if(featureEnabled($store, 'reservas_mesas'))
+            @if(featureEnabled($store, 'reservas_mesas') && featureEnabled($store, 'reservas_hotel'))
+                {{-- Si ambos están activos, mostrar prepágina de selección --}}
+                <a href="{{ route('tenant.reservations.select-type', $store->slug) }}" 
+                   class="flex flex-col gap-1 justify-center items-center py-3 px-2 min-w-[70px] {{ request()->routeIs('tenant.reservations.*') || request()->routeIs('tenant.hotel-reservations.*') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
+                    <i data-lucide="calendar-heart" class="w-32px h-32px sm:w-40px sm:h-40px"></i>
+                    <span class="body-small sm:body-lg">Reservas</span>
+                </a>
+            @elseif(featureEnabled($store, 'reservas_mesas'))
                 <a href="{{ route('tenant.reservations.index', $store->slug) }}" 
                    class="flex flex-col gap-1 justify-center items-center py-3 px-2 min-w-[70px] {{ request()->routeIs('tenant.reservations.*') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
                     <i data-lucide="calendar-heart" class="w-32px h-32px sm:w-40px sm:h-40px"></i>

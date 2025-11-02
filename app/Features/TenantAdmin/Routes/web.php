@@ -24,6 +24,8 @@ use App\Features\TenantAdmin\Controllers\TableReservationController;
 use App\Features\TenantAdmin\Controllers\RoomTypeController;
 use App\Features\TenantAdmin\Controllers\RoomController;
 use App\Features\TenantAdmin\Controllers\HotelReservationController;
+use App\Features\TenantAdmin\Controllers\TableController;
+use App\Features\TenantAdmin\Controllers\DineInSettingController;
 
 
 /*
@@ -312,6 +314,28 @@ Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreAppro
         // Configuración de Hotel
         Route::get('/settings', [HotelReservationController::class, 'settings'])->name('settings');
         Route::put('/settings', [HotelReservationController::class, 'updateSettings'])->name('update-settings');
+    });
+
+    // Dine-In / Room Service Routes (protegidas por feature:consumo_local o consumo_hotel)
+    Route::middleware(['feature:consumo_local,consumo_hotel'])->prefix('dine-in')->name('dine-in.')->group(function () {
+        // Dashboard en tiempo real
+        Route::get('/dashboard', [TableController::class, 'dashboard'])->name('dashboard');
+        Route::get('/api/status', [TableController::class, 'getStatus'])->name('api.status');
+        
+        // Gestión de mesas/habitaciones
+        Route::prefix('tables')->name('tables.')->group(function () {
+            Route::get('/', [TableController::class, 'index'])->name('index');
+            Route::post('/', [TableController::class, 'store'])->name('store');
+            Route::put('/{id}', [TableController::class, 'update'])->name('update');
+            Route::delete('/{id}', [TableController::class, 'destroy'])->name('destroy');
+            Route::post('/{id}/generate-qr', [TableController::class, 'generateQR'])->name('generate-qr');
+            Route::post('/{id}/liberate', [TableController::class, 'liberate'])->name('liberate');
+        });
+        
+        // Configuración
+        Route::prefix('settings')->name('settings.')->group(function () {
+            Route::put('/', [TableController::class, 'updateSettings'])->name('update');
+        });
     });
 
     // Announcements Routes
