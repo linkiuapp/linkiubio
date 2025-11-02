@@ -22,6 +22,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             SuperAdminSeeder::class,
             PlansSeeder::class,
+            BusinessFeatureSeeder::class,
             StoresSeeder::class,
             EmailSettingSeeder::class,
             EmailTemplateSeeder::class,
