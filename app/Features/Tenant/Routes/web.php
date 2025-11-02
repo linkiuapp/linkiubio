@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Features\Tenant\Controllers\StorefrontController;
 use App\Features\Tenant\Controllers\OrderController;
 use App\Features\Tenant\Controllers\PageController;
+use App\Features\Tenant\Controllers\ReservationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -87,6 +88,20 @@ Route::get('/proximamente', function() {
     $store = request()->route('store');
     return view('tenant::storefront.coming-soon', compact('store'));
 })->name('coming-soon');
+
+// Reservaciones (protegidas por feature:reservas_mesas)
+Route::middleware(['feature:reservas_mesas'])->prefix('reservaciones')->name('reservations.')->group(function () {
+    Route::get('/', [ReservationController::class, 'index'])->name('index');
+    Route::post('/', [ReservationController::class, 'store'])->name('store');
+    // Ruta success sin parámetros en la URL (igual que checkout) - usa query parameter
+    Route::get('/exito', [ReservationController::class, 'success'])->name('success');
+    
+    // API Routes para validación en tiempo real
+    Route::prefix('api')->name('api.')->group(function () {
+        Route::post('/available-slots', [ReservationController::class, 'getAvailableSlots'])->name('available-slots');
+        Route::post('/check-availability', [ReservationController::class, 'checkAvailability'])->name('check-availability');
+    });
+});
 
 // Rutas de páginas informativas
 Route::get('/politicas-legales', [PageController::class, 'legalPolicies'])->name('legal-policies');

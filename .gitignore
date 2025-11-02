@@ -30,3 +30,11 @@
 Homestead.json
 Homestead.yaml
 Thumbs.db
+# Requerimientos locales (no versionar solo este archivo)
+docs/local/requerimientos-local.md
+
+# — Opción alternativa: ignorar todos los .md en docs/local
+# docs/local/*.md
+
+# — Opción alternativa: ignorar toda la carpeta
+# docs/local/

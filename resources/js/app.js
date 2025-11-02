@@ -10,6 +10,11 @@ createIcons({ icons });
 window.createIcons = createIcons;
 window.lucideIcons = icons;
 
+// Importar datepicker - se inicializará automáticamente cuando detecte inputs
+import './datepicker.js';
+// Importar timepicker personalizado
+import './timepicker.js';
+
 console.log('🟢 Imports loaded successfully');
 
 import Pusher from 'pusher-js'

@@ -93,12 +93,35 @@
                 <span class="body-small sm:body-lg">Promos</span>
             </a>
 
-            <!-- Reservas -->
-            <a href="{{ route('tenant.coming-soon', $store->slug) }}" 
-               class="flex flex-col gap-1 justify-center items-center py-3 px-2 min-w-[70px] {{ request()->routeIs('tenant.coming-soon') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
-                <i data-lucide="calendar-heart" class="w-32px h-32px sm:w-40px sm:h-40px"></i>
-                <span class="body-small sm:body-lg">Reservas</span>
-            </a>
+            <!-- Reservas (cambia según categoría de negocio) -->
+            @if(featureEnabled($store, 'reservas_mesas'))
+                <a href="{{ route('tenant.reservations.index', $store->slug) }}" 
+                   class="flex flex-col gap-1 justify-center items-center py-3 px-2 min-w-[70px] {{ request()->routeIs('tenant.reservations.*') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
+                    <i data-lucide="calendar-heart" class="w-32px h-32px sm:w-40px sm:h-40px"></i>
+                    <span class="body-small sm:body-lg">Reservas</span>
+                </a>
+            @elseif(featureEnabled($store, 'reservas_hotel'))
+                {{-- Ruta placeholder - se activará con REQ-003 --}}
+                <a href="{{ route('tenant.coming-soon', $store->slug) }}" 
+                   class="flex flex-col gap-1 justify-center items-center py-3 px-2 min-w-[70px] {{ request()->routeIs('tenant.reservations.hotel.*') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
+                    <i data-lucide="calendar-heart" class="w-32px h-32px sm:w-40px sm:h-40px"></i>
+                    <span class="body-small sm:body-lg">Reservas</span>
+                </a>
+            @elseif(featureEnabled($store, 'favoritos'))
+                {{-- Ruta placeholder - se implementará después --}}
+                <a href="{{ route('tenant.coming-soon', $store->slug) }}" 
+                   class="flex flex-col gap-1 justify-center items-center py-3 px-2 min-w-[70px] {{ request()->routeIs('tenant.favorites.*') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
+                    <i data-lucide="heart" class="w-32px h-32px sm:w-40px sm:h-40px"></i>
+                    <span class="body-small sm:body-lg">Favoritos</span>
+                </a>
+            @else
+                <!-- Fallback: coming soon si no tiene ningún feature -->
+                <a href="{{ route('tenant.coming-soon', $store->slug) }}" 
+                   class="flex flex-col gap-1 justify-center items-center py-3 px-2 min-w-[70px] {{ request()->routeIs('tenant.coming-soon') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
+                    <i data-lucide="calendar-heart" class="w-32px h-32px sm:w-40px sm:h-40px"></i>
+                    <span class="body-small sm:body-lg">Reservas</span>
+                </a>
+            @endif
         </div>
     </nav>
 

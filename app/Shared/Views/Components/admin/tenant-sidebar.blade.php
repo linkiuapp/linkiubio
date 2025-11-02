@@ -362,6 +362,66 @@
                     </a>
                 </li>
 
+            <!-- Reservas y Servicios (según categoría) -->
+            @if(featureEnabled($store, 'reservas_mesas') || featureEnabled($store, 'consumo_local') || featureEnabled($store, 'reservas_hotel') || featureEnabled($store, 'consumo_hotel') || featureEnabled($store, 'notificaciones_whatsapp'))
+                <p class="title-group-sidebar w-full flex justify-between items-center px-2 py-1 rounded transition-colors">Reservas y Servicios</p>
+
+                {{-- Notificaciones WhatsApp --}}
+                @if(featureEnabled($store, 'notificaciones_whatsapp'))
+                <li>
+                    <a href="{{ route('tenant.admin.whatsapp-notifications.index', ['store' => $store->slug]) }}" 
+                       class="item-sidebar {{ request()->routeIs('tenant.admin.whatsapp-notifications.*') ? 'item-sidebar-active' : '' }}">
+                        <x-lucide-message-circle class="w-4 h-4 mr-2" />
+                        Notificaciones WhatsApp
+                    </a>
+                </li>
+                @endif
+
+                {{-- Reservas de Mesas (Restaurantes) --}}
+                @if(featureEnabled($store, 'reservas_mesas'))
+                <li>
+                    <a href="{{ route('tenant.admin.reservations.index', ['store' => $store->slug]) }}" 
+                       class="item-sidebar {{ request()->routeIs('tenant.admin.reservations.*') ? 'item-sidebar-active' : '' }}">
+                        <x-lucide-utensils class="w-4 h-4 mr-2" />
+                        Reservas de Mesas
+                    </a>
+                </li>
+                @endif
+
+                {{-- Consumo en Local (Restaurantes) --}}
+                @if(featureEnabled($store, 'consumo_local'))
+                <li>
+                    <a href="#" class="item-sidebar opacity-50 cursor-not-allowed" title="Disponible cuando se implemente REQ-004">
+                        <x-lucide-scan-barcode class="w-4 h-4 mr-2" />
+                        Consumo en Local
+                        <span class="ml-auto text-xs bg-warning-100 text-warning-500 px-2 py-0.5 rounded">Próximamente</span>
+                    </a>
+                </li>
+                @endif
+
+                {{-- Reservas de Hotel (Hoteles) --}}
+                @if(featureEnabled($store, 'reservas_hotel'))
+                <li>
+                    <a href="#" class="item-sidebar opacity-50 cursor-not-allowed" title="Disponible cuando se implemente REQ-003">
+                        <x-lucide-bed class="w-4 h-4 mr-2" />
+                        Reservas de Hotel
+                        <span class="ml-auto text-xs bg-warning-100 text-warning-500 px-2 py-0.5 rounded">Próximamente</span>
+                    </a>
+                </li>
+                @endif
+
+                {{-- Servicio a Habitación (Hoteles) --}}
+                @if(featureEnabled($store, 'consumo_hotel'))
+                <li>
+                    <a href="#" class="item-sidebar opacity-50 cursor-not-allowed" title="Disponible cuando se implemente REQ-004">
+                        <x-lucide-concierge-bell class="w-4 h-4 mr-2" />
+                        Servicio a Habitación
+                        <span class="ml-auto text-xs bg-warning-100 text-warning-500 px-2 py-0.5 rounded">Próximamente</span>
+                    </a>
+                </li>
+                @endif
+            @endif
+
             <!-- Marketing-->
                 <p class="title-group-sidebar w-full flex justify-between items-center px-2 py-1 rounded transition-colors">Marketing</p>
                 

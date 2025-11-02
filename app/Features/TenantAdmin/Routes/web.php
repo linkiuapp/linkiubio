@@ -20,6 +20,7 @@ use App\Features\TenantAdmin\Controllers\BillingController;
 use App\Features\TenantAdmin\Controllers\CouponController;
 use App\Features\TenantAdmin\Controllers\PreviewController;
 use App\Features\TenantAdmin\Controllers\MasterKeyController;
+use App\Features\TenantAdmin\Controllers\TableReservationController;
 
 
 /*
@@ -72,6 +73,12 @@ Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreAppro
         Route::post('/update-policies', [BusinessProfileController::class, 'updatePolicies'])->name('update-policies');
         Route::post('/update-about', [BusinessProfileController::class, 'updateAbout'])->name('update-about');
         Route::post('/update-whatsapp', [BusinessProfileController::class, 'updateWhatsApp'])->name('update-whatsapp');
+    });
+
+    // WhatsApp Notifications Routes (vista independiente)
+    Route::prefix('whatsapp-notifications')->name('whatsapp-notifications.')->group(function () {
+        Route::get('/', [BusinessProfileController::class, 'whatsappIndex'])->name('index');
+        Route::put('/update', [BusinessProfileController::class, 'updateWhatsApp'])->name('update');
     });
 
     // Store Design Routes
@@ -236,6 +243,25 @@ Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreAppro
     Route::post('/{ticket}/add-response', [TicketController::class, 'addResponse'])->name('add-response');
     Route::post('/{ticket}/update-status', [TicketController::class, 'updateStatus'])->name('update-status');
     Route::post('/{ticket}/reopen', [TicketController::class, 'reopen'])->name('reopen');
+    });
+
+    // Table Reservations Routes (protegidas por feature:reservas_mesas)
+    Route::middleware(['feature:reservas_mesas'])->prefix('reservations')->name('reservations.')->group(function () {
+        Route::get('/', [TableReservationController::class, 'index'])->name('index');
+        Route::get('/create', [TableReservationController::class, 'create'])->name('create');
+        Route::post('/', [TableReservationController::class, 'store'])->name('store');
+        Route::get('/settings', [TableReservationController::class, 'settings'])->name('settings');
+        Route::put('/settings', [TableReservationController::class, 'updateSettings'])->name('update-settings');
+        Route::get('/{reservation}', [TableReservationController::class, 'show'])->name('show');
+        Route::post('/{reservation}/confirm', [TableReservationController::class, 'confirm'])->name('confirm');
+        Route::post('/{reservation}/cancel', [TableReservationController::class, 'cancel'])->name('cancel');
+        Route::post('/{reservation}/complete', [TableReservationController::class, 'complete'])->name('complete');
+        
+        // Rutas para gestión de mesas
+        Route::post('/settings/tables', [TableReservationController::class, 'storeTable'])->name('tables.store');
+        Route::put('/settings/tables/{table}', [TableReservationController::class, 'updateTable'])->name('tables.update');
+        Route::delete('/settings/tables/{table}', [TableReservationController::class, 'destroyTable'])->name('tables.destroy');
+        Route::patch('/settings/tables/{table}/toggle', [TableReservationController::class, 'toggleTable'])->name('tables.toggle');
     });
 
     // Announcements Routes

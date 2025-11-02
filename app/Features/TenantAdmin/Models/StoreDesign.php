@@ -57,14 +57,36 @@ class StoreDesign extends Model
             return null;
         }
         
-        // Si ya es una URL completa (datos antiguos), devolverla tal cual
+        // Si ya es una URL completa (datos antiguos), convertir http a https si es necesario
         if (str_starts_with($path, 'http://') || str_starts_with($path, 'https://')) {
+            // Si la página está en HTTPS, forzar HTTPS en la URL de la imagen
+            if (request()->secure() && str_starts_with($path, 'http://')) {
+                return str_replace('http://', 'https://', $path);
+            }
             return $path;
         }
         
         // Si es un path relativo, convertir a URL con Storage::url()
         try {
-            return Storage::disk('public')->url($path);
+            $url = Storage::disk('public')->url($path);
+            
+            // Asegurar que si la página es HTTPS, la URL también lo sea
+            // También verificar si es una URL localhost/IP y convertirlo
+            if (request()->secure()) {
+                if (str_starts_with($url, 'http://')) {
+                    // Si es una URL localhost o IP en local, mantenerla como está
+                    // pero en producción, convertir a HTTPS
+                    if (str_contains($url, '127.0.0.1') || str_contains($url, 'localhost')) {
+                        // En local, mantener HTTP para evitar problemas de certificado
+                        // pero esto causará el warning de mixed content (es esperado en desarrollo)
+                    } else {
+                        // En producción, forzar HTTPS
+                        $url = str_replace('http://', 'https://', $url);
+                    }
+                }
+            }
+            
+            return $url;
         } catch (\Exception $e) {
             \Log::error('Error generando URL de logo de tienda', [
                 'store_id' => $this->store_id,

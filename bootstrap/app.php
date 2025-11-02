@@ -17,6 +17,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'super.admin' => \App\Shared\Middleware\SuperAdminMiddleware::class,
             'store.admin' => \App\Shared\Middleware\StoreAdminMiddleware::class,
             'tenant.identify' => \App\Shared\Middleware\TenantIdentificationMiddleware::class,
+            'feature' => \App\Shared\Http\Middleware\EnsureFeatureEnabled::class,
         ]);
         
         // Configurar redirects de autenticación según el contexto

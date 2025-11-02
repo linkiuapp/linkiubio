@@ -1,0 +1,192 @@
+# Plantillas WhatsApp para Sistema de Reservaciones
+
+Este documento contiene las 5 plantillas de WhatsApp que deben ser registradas en SendPulse para el sistema de reservaciones de mesas.
+
+## Formato de Plantillas
+
+Las plantillas de WhatsApp deben seguir el formato oficial de WhatsApp Business API. Cada variable dinámica se representa como `{{1}}`, `{{2}}`, etc.
+
+---
+
+## 1. Reserva Solicitada (Cliente)
+
+**Nombre de la plantilla:** `reservation_requested_es`  
+**Idioma:** Español (es)  
+**Categoría:** UTILITY  
+**Variables:** 4
+
+**Contenido:**
+```
+¡Hola! 👋
+
+Hemos recibido tu solicitud de reserva.
+
+📋 Código: {{1}}
+🏪 Tienda: {{2}}
+📅 Fecha: {{3}}
+🕐 Hora: {{4}}
+
+Te contactaremos pronto para confirmar tu reserva.
+
+¡Gracias por elegirnos!
+```
+
+**Parámetros en código:**
+- `{{1}}` = Código de referencia de la reserva (ej: RES-2024-001234)
+- `{{2}}` = Nombre de la tienda
+- `{{3}}` = Fecha (formato: DD/MM/YYYY)
+- `{{4}}` = Hora (formato: HH:MM)
+
+---
+
+## 2. Reserva Confirmada (Cliente)
+
+**Nombre de la plantilla:** `reservation_confirmed_es`  
+**Idioma:** Español (es)  
+**Categoría:** UTILITY  
+**Variables:** 5
+
+**Contenido:**
+```
+¡Reserva Confirmada! ✅
+
+Tu reserva ha sido confirmada exitosamente.
+
+📋 Código: {{1}}
+🏪 Tienda: {{2}}
+📅 Fecha: {{3}}
+🕐 Hora: {{4}}
+🪑 Mesa: {{5}}
+
+¡Te esperamos!
+```
+
+**Parámetros en código:**
+- `{{1}}` = Código de referencia
+- `{{2}}` = Nombre de la tienda
+- `{{3}}` = Fecha
+- `{{4}}` = Hora
+- `{{5}}` = Información de la mesa (ej: "Mesa 5" o "Mesa por asignar")
+
+---
+
+## 3. Recordatorio de Reserva (Cliente)
+
+**Nombre de la plantilla:** `reservation_reminder_client_es`  
+**Idioma:** Español (es)  
+**Categoría:** UTILITY  
+**Variables:** 4
+
+**Contenido:**
+```
+⏰ Recordatorio de Reserva
+
+Solo queríamos recordarte tu reserva de mañana:
+
+📋 Código: {{1}}
+🏪 Tienda: {{2}}
+📅 Fecha: {{3}}
+🕐 Hora: {{4}}
+
+¡Te esperamos!
+```
+
+**Parámetros en código:**
+- `{{1}}` = Código de referencia
+- `{{2}}` = Nombre de la tienda
+- `{{3}}` = Fecha
+- `{{4}}` = Hora
+
+---
+
+## 4. Reserva Cancelada (Cliente)
+
+**Nombre de la plantilla:** `reservation_cancelled_es`  
+**Idioma:** Español (es)  
+**Categoría:** UTILITY  
+**Variables:** 3
+
+**Contenido:**
+```
+Lamentamos informarte que tu reserva ha sido cancelada.
+
+📋 Código: {{1}}
+🏪 Tienda: {{2}}
+
+Si tienes alguna pregunta, contáctanos por WhatsApp: {{3}}
+
+Gracias por tu comprensión.
+```
+
+**Parámetros en código:**
+- `{{1}}` = Código de referencia
+- `{{2}}` = Nombre de la tienda
+- `{{3}}` = Número de WhatsApp de la tienda (formato: 3001234567)
+
+---
+
+## 5. Nueva Reserva (Admin)
+
+**Nombre de la plantilla:** `admin_new_reservation_es`  
+**Idioma:** Español (es)  
+**Categoría:** UTILITY  
+**Variables:** 5
+
+**Contenido:**
+```
+🔔 Nueva Reserva Recibida
+
+Se ha solicitado una nueva reserva:
+
+📋 Código: {{1}}
+👤 Cliente: {{2}}
+📅 Fecha: {{3}}
+🕐 Hora: {{4}}
+👥 Personas: {{5}}
+
+Revisa el panel de administración para confirmarla.
+```
+
+**Parámetros en código:**
+- `{{1}}` = Código de referencia
+- `{{2}}` = Nombre del cliente
+- `{{3}}` = Fecha
+- `{{4}}` = Hora
+- `{{5}}` = Número de personas (ej: "2 personas" o "1 persona")
+
+---
+
+## Instrucciones para Registrar en SendPulse
+
+1. **Iniciar sesión** en SendPulse: https://sendpulse.com/
+2. **Ir a WhatsApp** → **Plantillas**
+3. **Crear nueva plantilla** para cada una de las 5 plantillas anteriores
+4. **Configurar:**
+   - Nombre: El nombre exacto indicado arriba
+   - Idioma: Español (es)
+   - Categoría: UTILITY (para notificaciones)
+   - Contenido: Copiar y pegar el texto de cada plantilla
+   - Variables: Agregar las variables `{{1}}`, `{{2}}`, etc. en el orden indicado
+5. **Enviar para aprobación** (WhatsApp revisará y aprobará las plantillas)
+
+---
+
+## Notas Importantes
+
+- ⚠️ Las plantillas deben ser aprobadas por WhatsApp antes de poder usarse (puede tardar 24-48 horas)
+- ✅ Todas las plantillas usan categoría UTILITY (permitida para notificaciones transaccionales)
+- 📝 Los nombres de las plantillas deben ser exactamente como se indican (case-sensitive)
+- 🔢 El orden de las variables debe coincidir con el orden en el código
+
+---
+
+## Integración en el Código
+
+Una vez aprobadas las plantillas en SendPulse, el código las utilizará automáticamente a través del servicio `WhatsAppNotificationService` en los siguientes momentos:
+
+1. **Reserva Solicitada:** Cuando el cliente crea una reserva desde el frontend
+2. **Reserva Confirmada:** Cuando el admin confirma una reserva
+3. **Recordatorio:** 24 horas antes de la reserva (vía Job programado)
+4. **Reserva Cancelada:** Cuando el admin o sistema cancela una reserva
+5. **Nueva Reserva (Admin):** Cuando se crea una nueva reserva
+

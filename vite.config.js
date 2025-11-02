@@ -26,9 +26,23 @@ export default defineConfig({
         },
         rollupOptions: {
             output: {
-                manualChunks: undefined,
+                manualChunks: (id) => {
+                    // Separar Litepicker en un chunk propio (lazy loading)
+                    if (id.includes('litepicker')) {
+                        return 'litepicker';
+                    }
+                    // Separar Lucide icons en un chunk propio
+                    if (id.includes('lucide')) {
+                        return 'lucide';
+                    }
+                    // Separar Alpine.js en un chunk propio
+                    if (id.includes('alpinejs') || id.includes('alpine')) {
+                        return 'alpine';
+                    }
+                },
             },
         },
-
+        // Aumentar el límite de advertencia a 600 KB (el bundle principal puede ser grande con todas las dependencias)
+        chunkSizeWarningLimit: 600,
     },
 });

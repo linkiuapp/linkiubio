@@ -63,3 +63,9 @@ Schedule::command('tickets:auto-close-inactive --days=7')
     ->dailyAt('00:00')
     ->name('auto-close-inactive-tickets')
     ->description('Auto-close resolved tickets after 7 days of inactivity');
+
+// 📅 Programar recordatorios de reservaciones (cada 2 horas)
+Schedule::command('reservations:send-reminders')
+    ->everyTwoHours()
+    ->name('reservation-reminders')
+    ->description('Send WhatsApp reminders for confirmed reservations based on store settings');

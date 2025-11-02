@@ -5,6 +5,9 @@
 @import './tables.css';
 @import './sidebar.css';
 @import './navbar tenant admin.css';
+@import 'litepicker/dist/css/litepicker.css';
+@import './litepicker-custom.css';
+@import './timepicker-custom.css';
 
 
 /* Luego, tus directivas de Tailwind CSS */

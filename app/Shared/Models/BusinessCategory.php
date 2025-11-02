@@ -73,6 +73,19 @@ class BusinessCategory extends Model
     }
 
     /**
+     * Relación: Categorías tienen múltiples features asignados
+     */
+    public function features()
+    {
+        return $this->belongsToMany(
+            BusinessFeature::class,
+            'business_category_feature',
+            'business_category_id',
+            'business_feature_id'
+        )->withTimestamps();
+    }
+
+    /**
      * Relación con el usuario que creó la categoría
      */
     public function creator(): BelongsTo

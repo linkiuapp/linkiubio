@@ -348,5 +348,125 @@ class WhatsAppNotificationService
     {
         return !empty($this->userId) && !empty($this->secret);
     }
+
+    /**
+     * ========================================
+     * NOTIFICACIONES DE RESERVACIONES
+     * ========================================
+     */
+
+    /**
+     * Notificación: Reserva Solicitada (Cliente)
+     * Plantilla: reservation_requested_es
+     * Variables: {{1}} = código reserva, {{2}} = tienda, {{3}} = fecha, {{4}} = hora
+     */
+    public function notifyReservationRequested($reservation)
+    {
+        $phone = $this->formatPhone($reservation->customer_phone);
+        $store = $reservation->store;
+        
+        $date = $reservation->reservation_date->format('d/m/Y');
+        $time = $reservation->reservation_time;
+        
+        return $this->sendTemplateMessage($phone, 'reservation_requested_es', [
+            ['type' => 'text', 'text' => $reservation->reference_code],
+            ['type' => 'text', 'text' => $store->name],
+            ['type' => 'text', 'text' => $date],
+            ['type' => 'text', 'text' => $time]
+        ]);
+    }
+
+    /**
+     * Notificación: Reserva Confirmada (Cliente)
+     * Plantilla: reservation_confirmed_es
+     * Variables: {{1}} = código reserva, {{2}} = tienda, {{3}} = fecha, {{4}} = hora, {{5}} = mesa (opcional)
+     */
+    public function notifyReservationConfirmed($reservation)
+    {
+        $phone = $this->formatPhone($reservation->customer_phone);
+        $store = $reservation->store;
+        
+        $date = $reservation->reservation_date->format('d/m/Y');
+        $time = $reservation->reservation_time;
+        $tableInfo = $reservation->table 
+            ? "Mesa {$reservation->table->table_number}" 
+            : 'Mesa por asignar';
+        
+        return $this->sendTemplateMessage($phone, 'reservation_confirmed_es', [
+            ['type' => 'text', 'text' => $reservation->reference_code],
+            ['type' => 'text', 'text' => $store->name],
+            ['type' => 'text', 'text' => $date],
+            ['type' => 'text', 'text' => $time],
+            ['type' => 'text', 'text' => $tableInfo]
+        ]);
+    }
+
+    /**
+     * Notificación: Recordatorio de Reserva (Cliente)
+     * Plantilla: reservation_reminder_client_es
+     * Variables: {{1}} = código reserva, {{2}} = tienda, {{3}} = fecha, {{4}} = hora
+     */
+    public function notifyReservationReminder($reservation)
+    {
+        $phone = $this->formatPhone($reservation->customer_phone);
+        $store = $reservation->store;
+        
+        $date = $reservation->reservation_date->format('d/m/Y');
+        $time = $reservation->reservation_time;
+        
+        return $this->sendTemplateMessage($phone, 'reservation_reminder_client_es', [
+            ['type' => 'text', 'text' => $reservation->reference_code],
+            ['type' => 'text', 'text' => $store->name],
+            ['type' => 'text', 'text' => $date],
+            ['type' => 'text', 'text' => $time]
+        ]);
+    }
+
+    /**
+     * Notificación: Reserva Cancelada (Cliente)
+     * Plantilla: reservation_cancelled_es
+     * Variables: {{1}} = código reserva, {{2}} = tienda, {{3}} = número WhatsApp tienda
+     */
+    public function notifyReservationCancelled($reservation)
+    {
+        $phone = $this->formatPhone($reservation->customer_phone);
+        $store = $reservation->store;
+        
+        // Obtener número de WhatsApp de la tienda (owner_phone o phone)
+        $storePhone = $store->owner_phone ?? $store->phone ?? 'N/A';
+        // Formatear sin código de país para mostrar en el mensaje
+        $storePhoneDisplay = preg_replace('/[^0-9]/', '', $storePhone);
+        if (substr($storePhoneDisplay, 0, 2) === '57' && strlen($storePhoneDisplay) === 12) {
+            $storePhoneDisplay = substr($storePhoneDisplay, 2); // Remover código de país
+        }
+        
+        return $this->sendTemplateMessage($phone, 'reservation_cancelled_es', [
+            ['type' => 'text', 'text' => $reservation->reference_code],
+            ['type' => 'text', 'text' => $store->name],
+            ['type' => 'text', 'text' => $storePhoneDisplay]
+        ]);
+    }
+
+    /**
+     * Notificación: Nueva Reserva (Admin)
+     * Plantilla: admin_new_reservation_es
+     * Variables: {{1}} = código reserva, {{2}} = cliente, {{3}} = fecha, {{4}} = hora, {{5}} = personas
+     */
+    public function notifyAdminNewReservation($reservation, $store)
+    {
+        $adminPhone = $this->formatPhone($store->owner_phone ?? $this->phone);
+        
+        $date = $reservation->reservation_date->format('d/m/Y');
+        $time = $reservation->reservation_time;
+        $partySize = $reservation->party_size . ' ' . ($reservation->party_size == 1 ? 'persona' : 'personas');
+        
+        return $this->sendTemplateMessage($adminPhone, 'admin_new_reservation_es', [
+            ['type' => 'text', 'text' => $reservation->reference_code],
+            ['type' => 'text', 'text' => $reservation->customer_name],
+            ['type' => 'text', 'text' => $date],
+            ['type' => 'text', 'text' => $time],
+            ['type' => 'text', 'text' => $partySize]
+        ]);
+    }
 }
 

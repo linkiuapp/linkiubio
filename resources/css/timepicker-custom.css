@@ -1,0 +1,25 @@
+/* Estilos adicionales para el timepicker personalizado */
+
+.custom-timepicker-container {
+    font-family: 'Inter', sans-serif;
+}
+
+.custom-timepicker-container select {
+    outline: none;
+    transition: border-color 0.2s;
+}
+
+.custom-timepicker-container select:hover {
+    border-color: #da27a7;
+}
+
+.custom-timepicker-container select:focus {
+    border-color: #da27a7;
+    ring: 2px;
+    ring-color: #da27a7;
+}
+
+.custom-timepicker-container button:hover {
+    background-color: #c41f9a !important;
+}
+
