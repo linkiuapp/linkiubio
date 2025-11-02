@@ -12,6 +12,7 @@ class BusinessFeatureSeeder extends Seeder
      * Run the database seeds.
      * 
      * Inicializa todos los features del sistema desde el enum FeatureKey.
+     * Este seeder es seguro para producción ya que usa updateOrCreate para evitar duplicados.
      */
     public function run(): void
     {
@@ -32,17 +33,27 @@ class BusinessFeatureSeeder extends Seeder
         }
         
         // Insertar o actualizar features
+        $updated = 0;
+        $created = 0;
+        
         foreach ($features as $feature) {
-            BusinessFeature::updateOrCreate(
-                ['key' => $feature['key']],
-                $feature
-            );
+            $existing = BusinessFeature::where('key', $feature['key'])->first();
             
-            $this->command->info("  ✓ {$feature['name']} ({$feature['key']})");
+            if ($existing) {
+                $existing->update($feature);
+                $updated++;
+                $this->command->info("  ↻ Actualizado: {$feature['name']} ({$feature['key']})");
+            } else {
+                BusinessFeature::create($feature);
+                $created++;
+                $this->command->info("  ✓ Creado: {$feature['name']} ({$feature['key']})");
+            }
         }
         
         $this->command->info('✅ Features inicializados exitosamente');
-        $this->command->info("📊 Total: " . count($features) . " features");
+        $this->command->info("📊 Total procesados: " . count($features) . " features");
+        $this->command->info("   - Creados: {$created}");
+        $this->command->info("   - Actualizados: {$updated}");
     }
     
     /**
