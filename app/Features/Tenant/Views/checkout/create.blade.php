@@ -273,8 +273,6 @@
 
 @push('scripts')
 <script>
-console.log('🟢 CHECKOUT SIMPLE - INICIANDO');
-
 // Variables globales MUY simples
 let currentStep = 1;
 
@@ -284,8 +282,6 @@ let paymentMethods = [];
 
 // DOM ready
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 DOM LISTO');
-    
     initCheckout();
     loadOrderSummary(); // Esta es la función de la línea 1425+
     loadShippingMethods();
@@ -300,8 +296,6 @@ let cartItems = [];
 
 // Inicializar todo
 function initCheckout() {
-    console.log('⚡ Inicializando...');
-    
     // Mostrar solo paso 1
     showStep(1);
     
@@ -311,8 +305,6 @@ function initCheckout() {
 
 // Configurar eventos básicos
 function setupEvents() {
-    console.log('🔧 Configurando eventos...');
-    
     // Paso 1 - validación nombre/teléfono
     const nameInput = document.getElementById('customer_name');
     const phoneInput = document.getElementById('customer_phone');
@@ -322,22 +314,18 @@ function setupEvents() {
     
     // Botones navegación
     document.getElementById('btn-continue-step1').addEventListener('click', () => {
-        console.log('🔄 Click continuar paso 1');
         showStep(2);
     });
     
     document.getElementById('btn-back-step2').addEventListener('click', () => {
-        console.log('🔄 Click volver paso 2');
         showStep(1);
     });
     
     document.getElementById('btn-continue-step2').addEventListener('click', () => {
-        console.log('🔄 Click continuar paso 2');
         showStep(3);
     });
     
     document.getElementById('btn-back-step3').addEventListener('click', () => {
-        console.log('🔄 Click volver paso 3');
         showStep(2);
     });
     
@@ -373,8 +361,6 @@ function setupEvents() {
 
 // Mostrar paso específico
 function showStep(step) {
-    console.log('📍 Mostrando paso:', step);
-    
     // Ocultar todos
     document.getElementById('card-step1').classList.add('hidden');
     document.getElementById('card-step2').classList.add('hidden');
@@ -391,22 +377,12 @@ function checkStep1() {
     const name = document.getElementById('customer_name').value.trim();
     const phone = document.getElementById('customer_phone').value.trim();
     
-    console.log('📝 Checkeando:', { name, phone });
-    
     const nameOk = name.length >= 2;
     const phoneOk = /^3[0-9]{9}$/.test(phone);
     const valid = nameOk && phoneOk;
     
-    console.log('✅ Validación:', { nameOk, phoneOk, valid });
-    
     const btn = document.getElementById('btn-continue-step1');
     btn.disabled = !valid;
-    
-    if (valid) {
-        console.log('🎉 Paso 1 VÁLIDO - botón habilitado');
-    } else {
-        console.log('❌ Paso 1 INVÁLIDO - botón deshabilitado');
-    }
 }
 
 // Habilitar botón paso 2
@@ -416,13 +392,11 @@ function enableStep2Button() {
     
     if (!deliveryType) {
         btn.disabled = true;
-        console.log('❌ Paso 2 deshabilitado - sin delivery type');
         return;
     }
     
     if (deliveryType.value === 'pickup') {
         btn.disabled = false;
-        console.log('✅ Paso 2 habilitado - pickup');
         return;
     }
     
@@ -453,13 +427,6 @@ function enableStep2Button() {
     }
     
     btn.disabled = !isValid;
-    
-    if (isValid) {
-        console.log('✅ Paso 2 habilitado - domicilio válido');
-        // El cálculo ya se hizo arriba según el tipo de envío
-    } else {
-        console.log('❌ Paso 2 deshabilitado - domicilio incompleto');
-    }
 }
 
 // Manejar cambio de método de pago
@@ -481,8 +448,6 @@ function handlePaymentMethodChange(paymentMethod, methodId) {
             transferFields.classList.remove('hidden');
         }
     }
-    
-    console.log('💳 Método de pago cambiado:', { paymentMethod, methodId });
 }
 
 // Manejar cambio de monto en efectivo
@@ -501,7 +466,6 @@ function handleCashAmountChange(e) {
     }
     
     enableStep3Button();
-    console.log('💰 Cambio calculado para:', { cashAmount, currentTotal });
 }
 
 // Habilitar botón paso 3
@@ -511,7 +475,6 @@ function enableStep3Button() {
     
     if (!paymentMethod) {
         btn.disabled = true;
-        console.log('❌ Finalizar pedido deshabilitado - sin método');
         return;
     }
     
@@ -521,16 +484,9 @@ function enableStep3Button() {
         const isValid = cashAmount >= currentTotal && cashAmount > 0;
         
         btn.disabled = !isValid;
-        
-        if (isValid) {
-            console.log('✅ Finalizar pedido habilitado - efectivo válido');
-        } else {
-            console.log('❌ Finalizar pedido deshabilitado - efectivo insuficiente');
-        }
     } else {
         // Transferencia siempre es válida
         btn.disabled = false;
-        console.log('✅ Finalizar pedido habilitado - transferencia');
     }
     
     // Actualizar texto del botón con el total
@@ -565,10 +521,7 @@ function copyToClipboard(elementId) {
             button.textContent = originalText;
             button.classList.remove('bg-brandSuccess-300', 'text-brandWhite-100');
         }, 2000);
-        
-        console.log('📋 Copiado al portapapeles:', text);
     }).catch(err => {
-        console.error('Error copiando:', err);
         alert('No se pudo copiar. Copia manualmente: ' + text);
     });
 }
@@ -577,32 +530,16 @@ function copyToClipboard(elementId) {
 
 // Mostrar productos en el resumen
 function displayOrderProducts(items) {
-    console.log('🛒 Datos del carrito recibidos:', items);
-    
     const container = document.getElementById('order-products');
     
     let html = '';
     let totalQuantity = 0;
     
     items.forEach((item, index) => {
-        console.log(`📦 Producto ${index + 1}:`, {
-            name: item.product_name || item.product?.name,
-            rawPrice: item.product_price || item.price,
-            rawQuantity: item.quantity,
-            variant: item.variant_details
-        });
-        
         // Asegurar que los precios sean números válidos
         const basePrice = parseFloat(item.product_price || item.price) || 0;
         const variantModifier = parseFloat(item.variant_details?.precio_modificador) || 0;
         const quantity = parseInt(item.quantity) || 0;
-        
-        console.log(`💰 Producto ${index + 1} calculado:`, {
-            basePrice,
-            variantModifier,
-            quantity,
-            willAdd: quantity
-        });
         
         const unitPrice = basePrice + variantModifier;
         const totalPrice = unitPrice * quantity;
@@ -628,17 +565,9 @@ function displayOrderProducts(items) {
     container.innerHTML = html;
     
     // Actualizar desglose de productos
-    console.log('📊 TOTAL FINAL calculado:', {
-        totalQuantity: totalQuantity,
-        uniqueProducts: items.length,
-        typeof_totalQuantity: typeof totalQuantity
-    });
-    
     document.getElementById('total-quantity').textContent = totalQuantity;
     document.getElementById('unique-products').textContent = items.length;
     document.getElementById('product-breakdown').classList.remove('hidden');
-    
-    console.log('✅ Productos cargados y mostrados en DOM');
 }
 
 // Actualizar totales
@@ -666,8 +595,6 @@ function updateOrderTotals(subtotal, shipping, discount) {
     
     // Actualizar texto del botón
     updateSubmitButtonText();
-    
-    console.log('💰 Totales actualizados:', { subtotal, shipping, discount, total });
 }
 
 // FUNCIÓN PROBLEMÁTICA ELIMINADA COMPLETAMENTE - Solo usar la de línea 1583+
@@ -695,8 +622,6 @@ function getCurrentShipping() {
 
 // Cargar métodos de envío disponibles
 async function loadShippingMethods() {
-    console.log('🚚 Cargando métodos de envío...');
-    
     try {
         const response = await fetch('{{ route("tenant.checkout.shipping-methods", $store->slug) }}');
         const data = await response.json();
@@ -704,12 +629,9 @@ async function loadShippingMethods() {
         if (data.success) {
             shippingMethods = data.methods;
             renderShippingMethods();
-            console.log('✅ Métodos de envío cargados:', shippingMethods.length);
-        } else {
-            console.error('Error cargando métodos:', data.message);
         }
     } catch (error) {
-        console.error('Error en loadShippingMethods:', error);
+        // Error silencioso - métodos de envío no disponibles
     }
 }
 
@@ -786,8 +708,6 @@ function renderShippingMethods() {
     // Re-configurar event listeners
     document.querySelectorAll('input[name="delivery_type"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
-            console.log('📦 Delivery type:', e.target.value, 'Shipping type:', e.target.dataset.shippingType);
-            
             const addressFieldsLocal = document.getElementById('address-fields-local');
             const addressFieldsNational = document.getElementById('address-fields-national');
             
@@ -819,28 +739,21 @@ function renderShippingMethods() {
 
 // Cargar métodos de envío disponibles
 async function loadShippingMethods() {
-    console.log('🚚 Cargando métodos de envío...');
-    
     try {
         // Usar los métodos pasados desde el controlador por ahora
         const shippingData = @json($shippingMethods ?? []);
-        console.log('📦 Métodos de envío desde servidor:', shippingData);
         
         shippingMethods = shippingData;
         renderShippingMethods();
-        console.log('✅ Métodos de envío cargados:', shippingMethods.length);
     } catch (error) {
-        console.error('❌ Error en loadShippingMethods:', error);
+        // Error silencioso - métodos de envío no disponibles
     }
 }
 
 // Renderizar métodos de envío en el HTML
 function renderShippingMethods() {
-    console.log('🎨 Renderizando métodos de envío:', shippingMethods);
-    
     const container = document.querySelector('#shipping-methods-container');
     if (!container) {
-        console.error('❌ Container #shipping-methods-container no encontrado');
         return;
     }
     
@@ -852,7 +765,6 @@ function renderShippingMethods() {
     let hasNational = false;
     
     shippingMethods.forEach(method => {
-        console.log('🔍 Procesando método:', method);
         
         if (method.type === 'pickup') {
             hasPickup = true;
@@ -931,13 +843,9 @@ function renderShippingMethods() {
     
     container.innerHTML = html;
     
-    console.log('📊 Métodos renderizados - Pickup:', hasPickup, 'Local:', hasLocal, 'Nacional:', hasNational);
-    
     // Re-configurar event listeners
     document.querySelectorAll('input[name="delivery_type"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
-            console.log('📦 Delivery type:', e.target.value, 'Shipping type:', e.target.dataset.shippingType);
-            
             const addressFieldsLocal = document.getElementById('address-fields-local');
             const addressFieldsNational = document.getElementById('address-fields-national');
             
@@ -969,10 +877,7 @@ function renderShippingMethods() {
 
 // Cargar métodos de pago disponibles
 async function loadPaymentMethods() {
-    console.log('💳 Cargando métodos de pago...');
-    
     const url = '{{ route("tenant.checkout.payment-methods", $store->slug) }}';
-    console.log('🌐 URL de métodos de pago:', url);
     
     try {
         const response = await fetch(url);
@@ -981,12 +886,9 @@ async function loadPaymentMethods() {
         if (data.success) {
             paymentMethods = data.methods;
             renderPaymentMethods();
-            console.log('✅ Métodos de pago cargados:', paymentMethods.length);
-        } else {
-            console.error('Error cargando métodos:', data.message);
         }
     } catch (error) {
-        console.error('Error en loadPaymentMethods:', error);
+        // Error silencioso - métodos de pago no disponibles
     }
 }
 
@@ -1149,7 +1051,6 @@ function renderPaymentMethods() {
     // Re-configurar event listeners
     document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
-            console.log('💳 Payment method:', e.target.value);
             handlePaymentMethodChange(e.target.value, e.target.dataset.methodId);
             enableStep3Button();
         });
@@ -1164,8 +1065,6 @@ function renderPaymentMethods() {
 
 // Enviar pedido
 async function submitOrder() {
-    console.log('🚀 Enviando pedido...');
-    
     const btn = document.getElementById('btn-submit-order');
     const originalText = btn.innerHTML;
     
@@ -1224,14 +1123,9 @@ async function submitOrder() {
             
             // Si hay comprobante de pago
             const paymentProof = document.getElementById('payment_proof');
-            console.log('📄 Payment proof input:', paymentProof);
-            console.log('📄 Payment proof files:', paymentProof ? paymentProof.files : 'No input found');
             
             if (paymentProof && paymentProof.files.length > 0) {
-                console.log('✅ Agregando comprobante:', paymentProof.files[0].name, paymentProof.files[0].size);
                 formData.append('payment_proof', paymentProof.files[0]);
-            } else {
-                console.log('⚠️ No se encontró comprobante de pago');
             }
         }
         
@@ -1241,17 +1135,8 @@ async function submitOrder() {
             formData.append('coupon_code', couponCode.value);
         }
         
-        console.log('📝 Datos a enviar recopilados');
-        
-        // Debug: Mostrar datos que se van a enviar
-        console.log('🚀 FormData contents:');
-        for (let [key, value] of formData.entries()) {
-            console.log(`  ${key}:`, value);
-        }
-        
         // Enviar al servidor
         const checkoutUrl = '{{ route("tenant.checkout.store", $store->slug) }}';
-        console.log('🌐 URL de checkout:', checkoutUrl);
         
         const response = await fetch(checkoutUrl, {
             method: 'POST',
@@ -1263,33 +1148,22 @@ async function submitOrder() {
             }
         });
         
-        console.log('📡 Response status:', response.status);
-        console.log('📡 Response headers:', response.headers);
-        
         const responseText = await response.text();
-        console.log('📡 Raw response:', responseText);
         
         let data;
         try {
             data = JSON.parse(responseText);
-            console.log('📡 Parsed JSON:', data);
         } catch (e) {
-            console.error('❌ Error parsing JSON:', e);
-            console.error('❌ Response was not JSON:', responseText);
             alert('Error: El servidor no devolvió una respuesta JSON válida');
             return;
         }
         
         if (data.success) {
-            console.log('✅ Pedido creado exitosamente:', data);
             // Redirigir a página de éxito con el ID del pedido
             window.location.href = `{{ route("tenant.checkout.success", $store->slug) }}?order=${data.order.id}`;
         } else {
-            console.error('❌ Error del servidor:', data);
-            
             // Manejar errores de validación específicos
             if (data.errors) {
-                console.error('❌ Errores de validación:', data.errors);
                 let errorMessage = 'Errores de validación:\n';
                 for (const field in data.errors) {
                     errorMessage += `• ${field}: ${data.errors[field].join(', ')}\n`;
@@ -1301,7 +1175,6 @@ async function submitOrder() {
         }
         
     } catch (error) {
-        console.error('❌ Error enviando pedido:', error);
         alert('Error de conexión. Por favor intenta nuevamente.');
     } finally {
         // Restaurar botón
@@ -1315,7 +1188,6 @@ function formatPrice(price) {
     // Validar que el precio sea un número válido
     const numPrice = parseFloat(price);
     if (isNaN(numPrice) || !isFinite(numPrice)) {
-        console.warn('⚠️ Precio inválido:', price);
         return '0';
     }
     
@@ -1327,8 +1199,6 @@ function formatPrice(price) {
 
 // Actualizar la visualización del resumen del pedido
 function updateOrderSummaryDisplay() {
-    console.log('🎨 Actualizando resumen de pedido...');
-    
     // Sección de productos eliminada - no actualizar cart-items-list
     // const cartItemsList = document.getElementById('cart-items-list');
     // const cartItemsCount = document.getElementById('cart-items-count');
@@ -1336,7 +1206,6 @@ function updateOrderSummaryDisplay() {
     if (cartItems.length === 0) {
         // cartItemsList.innerHTML = '<p class="text-center text-black-300 py-4 text-sm">No hay productos en el carrito</p>';
         // cartItemsCount.textContent = '0 productos';
-        console.log('⚠️ No hay productos en el carrito');
     } else {
         let itemsHtml = '';
         let totalQuantity = 0;
@@ -1348,7 +1217,6 @@ function updateOrderSummaryDisplay() {
         
         // cartItemsList.innerHTML = itemsHtml; // ELIMINADO
         // cartItemsCount.textContent = `${totalQuantity} productos`; // ELIMINADO
-        console.log(`✅ ${totalQuantity} productos procesados para resumen`);
     }
     
     // Actualizar subtotal
@@ -1361,30 +1229,22 @@ function updateOrderSummaryDisplay() {
     
     // Actualizar total
     updateTotalDisplay();
-    
-    console.log('✅ Resumen actualizado');
 }
 
 // Cargar resumen del pedido desde el carrito
 async function loadOrderSummary() {
-    console.log('📦 Cargando resumen del pedido...');
-    
     try {
         const response = await fetch('{{ route("tenant.cart.get", $store->slug) }}');
-        console.log('📡 Cart fetch response status:', response.status);
         
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         
         const data = await response.json();
-        console.log('📦 Cart data received:', data);
         
         if (data.success) {
             cartItems = data.items || [];
             cartSubtotal = data.subtotal || 0;
-            
-            console.log('✅ Carrito cargado:', { items: cartItems.length, subtotal: cartSubtotal });
             
             // Mostrar productos usando la función correcta
             if (cartItems.length > 0) {
@@ -1399,20 +1259,16 @@ async function loadOrderSummary() {
                 // Actualizar variable global
                 discountAmount = couponDiscount;
                 
-                console.log('💰 Descuento de cupón:', couponDiscount);
-                
                 updateOrderTotals(cartSubtotal, shippingCost, couponDiscount);
             } else {
                 // Redirigir si no hay productos
                 window.location.href = '{{ route("tenant.cart.index", $store->slug) }}';
             }
         } else {
-            console.error('❌ Error cargando carrito:', data.message);
             // Redirigir si no hay productos
             window.location.href = '{{ route("tenant.cart.index", $store->slug) }}';
         }
     } catch (error) {
-        console.error('❌ Error de conexión cargando carrito:', error);
         cartItems = [];
         cartSubtotal = 0;
         updateOrderSummaryDisplay();
@@ -1522,8 +1378,6 @@ function updateTotalDisplay() {
     const total = subtotal + shipping - discount;
     
     document.getElementById('summary-total').textContent = '$' + formatPrice(Math.max(0, total));
-    
-    console.log('💰 Total actualizado:', { subtotal, shipping, discount, total });
 }
 
 // Calcular costo de envío
@@ -1533,22 +1387,9 @@ async function calculateShippingCost(department, city) {
     // Para envío local, puede que city venga en department y city sea vacío
     const finalCity = city || department || '';
     
-    console.log('🚚 Calculando costo de envío...', { 
-        originalDepartment: department, 
-        originalCity: city,
-        finalCity: finalCity,
-        subtotal: currentSubtotal,
-        cartItems: cartItems.length 
-    });
-    
     if (!finalCity) {
-        console.log('❌ Ciudad requerida para calcular envío');
         updateShippingCost(0);
         return;
-    }
-    
-    if (currentSubtotal <= 0) {
-        console.log('⚠️ Subtotal del carrito es 0 o inválido:', currentSubtotal);
     }
     
     // Mostrar estado calculando
@@ -1571,14 +1412,11 @@ async function calculateShippingCost(department, city) {
         const data = await response.json();
         
         if (data.success) {
-            console.log('✅ Costo de envío calculado:', data);
             updateShippingCost(data.cost);
         } else {
-            console.error('❌ Error calculando envío:', data.message);
             updateShippingCost(0);
         }
     } catch (error) {
-        console.error('❌ Error de conexión calculando envío:', error);
         updateShippingCost(0);
     }
 }
@@ -1619,8 +1457,6 @@ async function applyCoupon() {
         const data = await response.json();
         
         if (data.success) {
-            console.log('✅ Cupón aplicado:', data);
-            
             // Guardar descuento en dataset
             const summaryElement = document.getElementById('order-summary');
             if (summaryElement) {
@@ -1645,7 +1481,6 @@ async function applyCoupon() {
             showCouponError(data.message || 'Cupón no válido');
         }
     } catch (error) {
-        console.error('❌ Error aplicando cupón:', error);
         showCouponError('Error de conexión. Intenta nuevamente.');
     } finally {
         if (!couponCodeInput.disabled) {
