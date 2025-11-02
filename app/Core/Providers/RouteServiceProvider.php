@@ -27,6 +27,21 @@ class RouteServiceProvider extends ServiceProvider
             }
             return $value;
         });
+        
+        // Configurar route model binding para RoomType
+        Route::bind('roomType', function ($value, $route) {
+            // Solo resolver si es numérico (ID)
+            if (!is_numeric($value)) {
+                abort(404, 'Tipo de habitación no encontrado');
+            }
+            
+            $roomType = \App\Shared\Models\RoomType::find($value);
+            if (!$roomType) {
+                abort(404, 'Tipo de habitación no encontrado');
+            }
+            
+            return $roomType;
+        });
 
         $this->routes(function () {
             // 1. Rutas de API (primera prioridad)

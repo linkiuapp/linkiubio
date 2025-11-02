@@ -21,6 +21,9 @@ use App\Features\TenantAdmin\Controllers\CouponController;
 use App\Features\TenantAdmin\Controllers\PreviewController;
 use App\Features\TenantAdmin\Controllers\MasterKeyController;
 use App\Features\TenantAdmin\Controllers\TableReservationController;
+use App\Features\TenantAdmin\Controllers\RoomTypeController;
+use App\Features\TenantAdmin\Controllers\RoomController;
+use App\Features\TenantAdmin\Controllers\HotelReservationController;
 
 
 /*
@@ -262,6 +265,53 @@ Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreAppro
         Route::put('/settings/tables/{table}', [TableReservationController::class, 'updateTable'])->name('tables.update');
         Route::delete('/settings/tables/{table}', [TableReservationController::class, 'destroyTable'])->name('tables.destroy');
         Route::patch('/settings/tables/{table}/toggle', [TableReservationController::class, 'toggleTable'])->name('tables.toggle');
+    });
+
+    // Hotel Reservations Routes (protegidas por feature:reservas_hotel)
+    Route::middleware(['feature:reservas_hotel'])->prefix('hotel')->name('hotel.')->group(function () {
+        // Tipos de habitación
+        Route::prefix('room-types')->name('room-types.')->group(function () {
+            Route::get('/', [RoomTypeController::class, 'index'])->name('index');
+            Route::get('/create', [RoomTypeController::class, 'create'])->name('create');
+            Route::post('/', [RoomTypeController::class, 'store'])->name('store');
+            Route::get('/{roomType}', [RoomTypeController::class, 'show'])->name('show');
+            Route::get('/{roomType}/edit', [RoomTypeController::class, 'edit'])->name('edit');
+            Route::put('/{roomType}', [RoomTypeController::class, 'update'])->name('update');
+            Route::delete('/{roomType}', [RoomTypeController::class, 'destroy'])->name('destroy');
+            Route::post('/{roomType}/toggle-status', [RoomTypeController::class, 'toggleStatus'])->name('toggle-status');
+        });
+        
+        // Habitaciones (inventario)
+        Route::prefix('rooms')->name('rooms.')->group(function () {
+            Route::get('/', [RoomController::class, 'index'])->name('index');
+            Route::post('/', [RoomController::class, 'store'])->name('store');
+            Route::get('/{room}', [RoomController::class, 'show'])->name('show');
+            Route::put('/{room}', [RoomController::class, 'update'])->name('update');
+            Route::delete('/{room}', [RoomController::class, 'destroy'])->name('destroy');
+            Route::post('/{room}/update-status', [RoomController::class, 'updateStatus'])->name('update-status');
+        });
+        
+        // Reservas de hotel
+        Route::prefix('reservations')->name('reservations.')->group(function () {
+            Route::get('/', [HotelReservationController::class, 'index'])->name('index');
+            Route::get('/create', [HotelReservationController::class, 'create'])->name('create');
+            Route::post('/', [HotelReservationController::class, 'store'])->name('store');
+            Route::get('/{hotelReservation}/download-payment-proof', [HotelReservationController::class, 'downloadPaymentProof'])->name('download-payment-proof');
+            Route::get('/{hotelReservation}', [HotelReservationController::class, 'show'])->name('show');
+            Route::post('/{hotelReservation}/confirm', [HotelReservationController::class, 'confirm'])->name('confirm');
+            Route::post('/{hotelReservation}/check-in', [HotelReservationController::class, 'checkIn'])->name('check-in');
+            Route::post('/{hotelReservation}/check-out', [HotelReservationController::class, 'checkOut'])->name('check-out');
+            Route::post('/{hotelReservation}/cancel', [HotelReservationController::class, 'cancel'])->name('cancel');
+            Route::post('/{hotelReservation}/mark-deposit-paid', [HotelReservationController::class, 'markDepositAsPaid'])->name('mark-deposit-paid');
+            
+            // API
+            Route::get('/api/available-rooms', [HotelReservationController::class, 'getAvailableRooms'])->name('api.available-rooms');
+            Route::post('/api/calculate-pricing', [HotelReservationController::class, 'calculatePricing'])->name('api.calculate-pricing');
+        });
+        
+        // Configuración de Hotel
+        Route::get('/settings', [HotelReservationController::class, 'settings'])->name('settings');
+        Route::put('/settings', [HotelReservationController::class, 'updateSettings'])->name('update-settings');
     });
 
     // Announcements Routes

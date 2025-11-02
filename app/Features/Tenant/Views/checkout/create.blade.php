@@ -19,13 +19,14 @@
         <div class="mx-auto">
 
             <!-- CARD 1: DATOS PERSONALES -->
-            <div id="card-step1" class="bg-brandWhite-50 rounded-lg p-4 border border-brandWhite-300">
+            <div id="card-step1" class="bg-brandWhite-50 rounded-lg p-4 border border-brandWhite-300 mb-4">
                 <div class="flex items-center mb-4">
                     <div class="w-8 h-8 bg-brandPrimary-50 text-brandPrimary-300 rounded-full flex items-center justify-center caption-strong mr-3">1</div>
                     <h3 class="caption-strong text-brandNeutral-400">Datos Personales</h3>
                 </div>
                 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
                         <label for="customer_name" class="block caption text-brandNeutral-400 mb-2">Nombre Completo *</label>
                         <input 
@@ -49,35 +50,39 @@
                         >
                         <div id="phone_error" class="hidden mt-1 caption text-brandError-400"></div>
                     </div>
+                    </div>
+                    
+                    <div class="flex justify-end">
+                        <button 
+                            type="button" 
+                            id="btn-continue-step1" 
+                            class="bg-brandPrimary-300 hover:bg-brandPrimary-200 text-brandWhite-100 py-3 px-6 rounded-full caption transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled
+                        >
+                            Continuar al Paso 2
+                        </button>
+                    </div>
                 </div>
-                
-                <button 
-                    type="button" 
-                    id="btn-continue-step1" 
-                    class="w-full bg-brandPrimary-300 hover:bg-brandPrimary-200 text-brandWhite-100 py-3 rounded-full caption transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-center"
-                    disabled
-                >
-                    Continuar al Paso 2
-                </button>
             </div>
 
             <!-- CARD 2: MÉTODO DE ENVÍO -->
-            <div id="card-step2" class="bg-brandWhite-50 rounded-lg p-4 border border-brandWhite-300 hidden">
+            <div id="card-step2" class="bg-brandWhite-50 rounded-lg p-4 border border-brandWhite-300 mb-4 hidden">
                 <div class="flex items-center mb-4">
                     <div class="w-8 h-8 bg-brandPrimary-50 text-brandPrimary-300 rounded-full flex items-center justify-center caption-strong mr-3">2</div>
                     <h3 class="caption-strong text-brandNeutral-400">Método de Envío</h3>
                 </div>
                 
-                <div id="shipping-methods-container" class="space-y-3 mb-6">
-                    <!-- Los métodos de envío se cargan dinámicamente aquí -->
-                    <div class="text-center py-4">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brandPrimary-300 mx-auto"></div>
-                        <p class="caption text-brandNeutral-400 mt-2">Cargando métodos de envío...</p>
+                <div class="space-y-4">
+                    <div id="shipping-methods-container" class="space-y-3">
+                        <!-- Los métodos de envío se cargan dinámicamente aquí -->
+                        <div class="text-center py-4">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brandPrimary-300 mx-auto"></div>
+                            <p class="caption text-brandNeutral-400 mt-2">Cargando métodos de envío...</p>
+                        </div>
                     </div>
-                </div>
-                
-                <!-- Address Fields for Local Shipping (only address) -->
-                <div id="address-fields-local" class="hidden space-y-4 mb-6">
+                    
+                    <!-- Address Fields for Local Shipping (only address) -->
+                    <div id="address-fields-local" class="hidden space-y-4">
                     <div>
                         <label for="customer_address" class="block caption text-brandNeutral-400 mb-2">Dirección Completa *</label>
                         <textarea 
@@ -88,10 +93,10 @@
                             placeholder="Calle, carrera, número, apartamento, referencias..."
                         ></textarea>
                     </div>
-                </div>
+                    </div>
 
-                <!-- Address Fields for National Shipping (department + city + address) -->
-                <div id="address-fields-national" class="hidden space-y-4 mb-6">
+                    <!-- Address Fields for National Shipping (department + city + address) -->
+                    <div id="address-fields-national" class="hidden space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label for="department" class="block caption text-brandNeutral-400 mb-2">Departamento *</label>
@@ -129,58 +134,61 @@
                             placeholder="Calle, carrera, número, apartamento, referencias..."
                         ></textarea>
                     </div>
-                </div>
-                
-                <div class="flex gap-3">
-                    <button 
-                        type="button" 
-                        id="btn-back-step2" 
-                        class="px-4 py-2 bg-brandWhite-50 hover:bg-brandWhite-100 text-brandNeutral-400 rounded-full caption transition-colors border border-brandWhite-300 text-center"
-                    >
-                        Volver
-                    </button>
-                    <button 
-                        type="button" 
-                        id="btn-continue-step2" 
-                        class="flex-1 bg-brandPrimary-300 hover:bg-brandPrimary-200 text-brandWhite-100 py-3 rounded-full caption transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-center"
-                        disabled
-                    >
-                        Continuar al Paso 3
-                    </button>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button 
+                            type="button" 
+                            id="btn-back-step2" 
+                            class="px-4 py-2 bg-brandWhite-50 hover:bg-brandWhite-100 text-brandNeutral-400 rounded-full caption transition-colors border border-brandWhite-300 text-center"
+                        >
+                            Volver
+                        </button>
+                        <button 
+                            type="button" 
+                            id="btn-continue-step2" 
+                            class="flex-1 bg-brandPrimary-300 hover:bg-brandPrimary-200 text-brandWhite-100 py-3 rounded-full caption transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled
+                        >
+                            Continuar al Paso 3
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- CARD 3: MÉTODO DE PAGO -->
-            <div id="card-step3" class="bg-accent-50 rounded-xl p-4 hidden">
+            <div id="card-step3" class="bg-brandWhite-50 rounded-lg p-4 border border-brandWhite-300 mb-4 hidden">
                 <div class="flex items-center mb-4">
                     <div class="w-8 h-8 bg-brandPrimary-50 text-brandPrimary-300 rounded-full flex items-center justify-center caption-strong mr-3">3</div>
                     <h3 class="caption-strong text-brandNeutral-400">Método de Pago</h3>
                 </div>
                 
-                <div class="space-y-4 mb-6">
-                    <!-- Los métodos de pago se cargan dinámicamente aquí -->
-                    <div class="text-center py-4">
-                        <div class="animate-spin rounded-full h-8 w-8 mx-auto"></div>
-                        <p class="caption text-brandNeutral-400 mt-2">Cargando métodos de pago...</p>
+                <div class="space-y-4">
+                    <div id="payment-methods-container" class="space-y-3">
+                        <!-- Los métodos de pago se cargan dinámicamente aquí -->
+                        <div class="text-center py-4">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brandPrimary-300 mx-auto"></div>
+                            <p class="caption text-brandNeutral-400 mt-2">Cargando métodos de pago...</p>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="flex gap-3">
-                    <button 
-                        type="button" 
-                        id="btn-back-step3" 
-                        class="px-4 py-2 bg-brandWhite-50 hover:bg-brandWhite-100 text-brandNeutral-400 rounded-full caption transition-colors border border-brandWhite-300 text-center"
-                    >
-                        Volver
-                    </button>
-                    <button 
-                        type="button" 
-                        id="btn-submit-order" 
-                        class="flex-1 bg-brandPrimary-300 hover:bg-brandPrimary-200 text-brandWhite-100 py-3 rounded-full caption transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-center"
-                        disabled
-                    >
-                        Finalizar compra
-                    </button>
+                    
+                    <div class="flex gap-3">
+                        <button 
+                            type="button" 
+                            id="btn-back-step3" 
+                            class="px-4 py-2 bg-brandWhite-50 hover:bg-brandWhite-100 text-brandNeutral-400 rounded-full caption transition-colors border border-brandWhite-300 text-center"
+                        >
+                            Volver
+                        </button>
+                        <button 
+                            type="button" 
+                            id="btn-submit-order" 
+                            class="flex-1 bg-brandPrimary-300 hover:bg-brandPrimary-200 text-brandWhite-100 py-3 rounded-full caption transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled
+                        >
+                            Finalizar compra
+                        </button>
+                    </div>
                 </div>
             </div>
             
@@ -367,7 +375,18 @@ function showStep(step) {
     document.getElementById('card-step3').classList.add('hidden');
     
     // Mostrar actual
-    document.getElementById(`card-step${step}`).classList.remove('hidden');
+    const currentCard = document.getElementById(`card-step${step}`);
+    if (currentCard) {
+        currentCard.classList.remove('hidden');
+        
+        // Si se muestra el paso 3, intentar habilitar el botón si ya hay métodos de pago cargados
+        if (step === 3) {
+            // Pequeño delay para asegurar que el DOM esté actualizado
+            setTimeout(() => {
+                enableStep3Button();
+            }, 100);
+        }
+    }
     
     currentStep = step;
 }
@@ -457,6 +476,11 @@ function handleCashAmountChange(e) {
     const changeAmount = document.getElementById('change-amount');
     const currentTotal = getCurrentSubtotal() + getCurrentShipping() - getCurrentDiscount();
     
+    // Validar que los elementos existan
+    if (!changeDisplay || !changeAmount) {
+        return;
+    }
+    
     if (cashAmount >= currentTotal && cashAmount > 0) {
         const change = cashAmount - currentTotal;
         changeAmount.textContent = `$${formatPrice(change)}`;
@@ -472,6 +496,10 @@ function handleCashAmountChange(e) {
 function enableStep3Button() {
     const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
     const btn = document.getElementById('btn-submit-order');
+    
+    if (!btn) {
+        return; // El botón aún no existe en el DOM
+    }
     
     if (!paymentMethod) {
         btn.disabled = true;
@@ -496,12 +524,16 @@ function enableStep3Button() {
 // Actualizar texto del botón de finalizar con el total
 function updateSubmitButtonText() {
     const btn = document.getElementById('btn-submit-order');
+    if (!btn) {
+        return; // El botón aún no existe en el DOM
+    }
+    
     const currentTotal = getCurrentSubtotal() + getCurrentShipping() - getCurrentDiscount();
     
     if (currentTotal > 0) {
         btn.innerHTML = `Valor a pagar $${formatPrice(currentTotal)}`;
     } else {
-        btn.innerHTML = 'Finalizar Pedido';
+        btn.innerHTML = 'Finalizar compra';
     }
 }
 
@@ -894,7 +926,12 @@ async function loadPaymentMethods() {
 
 // Renderizar métodos de pago en el HTML
 function renderPaymentMethods() {
-    const container = document.querySelector('#card-step3 .space-y-4');
+    const container = document.getElementById('payment-methods-container');
+    
+    if (!container) {
+        console.warn('Contenedor de métodos de pago no encontrado');
+        return;
+    }
     
     let html = '';
     
@@ -1023,22 +1060,25 @@ function renderPaymentMethods() {
                         
                         <div class="bg-brandPrimary-50 border border-brandWhite-300 rounded-lg p-3 mt-2">
                             <label for="payment_proof" class="block caption text-brandNeutral-400 mb-2">
-                                Comprobante ${method.require_proof ? '*' : '(Opcional)'}
+                                Comprobante de Pago ${method.require_proof ? '*' : '(Opcional)'}
                             </label>
-                            <input 
-                                type="file" 
-                                id="payment_proof" 
-                                name="payment_proof" 
-                                accept=".jpg,.jpeg,.png,.pdf"
-                                ${method.require_proof ? 'required' : ''}
-                                class="w-full px-3 py-2 border border-brandWhite-300 rounded-lg focus:ring-1 focus:ring-brandPrimary-300 focus:border-transparent transition-colors caption"
-                            >
-                            <p class="caption text-brandNeutral-400 mt-1">
-                                ${method.require_proof ? 
-                                    'JPG, PNG o PDF - OBLIGATORIO' : 
-                                    'JPG, PNG o PDF - OPCIONAL'
-                                }
-                            </p>
+                            <div class="border-2 border-dashed border-brandWhite-300 rounded-lg p-6 text-center hover:border-brandPrimary-300 transition-colors">
+                                <input 
+                                    type="file" 
+                                    id="payment_proof" 
+                                    name="payment_proof" 
+                                    accept=".jpg,.jpeg,.png,.pdf"
+                                    ${method.require_proof ? 'required' : ''}
+                                    class="hidden"
+                                >
+                                <label for="payment_proof" class="cursor-pointer">
+                                    <div class="text-4xl mb-2">📎</div>
+                                    <p class="caption text-brandNeutral-400 font-medium mb-1">Subir comprobante</p>
+                                    <p class="caption text-brandNeutral-300">JPG, PNG o PDF (máx. 5MB)</p>
+                                </label>
+                            </div>
+                            <div id="payment_proof_preview" class="hidden mt-3"></div>
+                            <div id="payment_proof_error" class="hidden mt-1 caption text-brandError-400"></div>
                         </div>
                     </div>
                 </div>
@@ -1060,6 +1100,60 @@ function renderPaymentMethods() {
     const cashAmountInput = document.getElementById('cash_amount');
     if (cashAmountInput) {
         cashAmountInput.addEventListener('input', handleCashAmountChange);
+    }
+    
+    // Re-configurar payment proof upload listener
+    const paymentProofInput = document.getElementById('payment_proof');
+    if (paymentProofInput) {
+        paymentProofInput.addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                handlePaymentProofUpload(e.target.files[0]);
+            }
+        });
+    }
+}
+
+// Manejar subida de comprobante de pago
+function handlePaymentProofUpload(file) {
+    const preview = document.getElementById('payment_proof_preview');
+    const errorElement = document.getElementById('payment_proof_error');
+    
+    if (!file) {
+        if (preview) preview.classList.add('hidden');
+        return;
+    }
+    
+    const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    
+    if (!allowedTypes.includes(file.type)) {
+        if (errorElement) {
+            errorElement.textContent = 'Solo se permiten archivos JPG, PNG o PDF';
+            errorElement.classList.remove('hidden');
+        }
+        return;
+    }
+    
+    if (file.size > maxSize) {
+        if (errorElement) {
+            errorElement.textContent = 'El archivo no puede ser mayor a 5MB';
+            errorElement.classList.remove('hidden');
+        }
+        return;
+    }
+    
+    if (errorElement) errorElement.classList.add('hidden');
+    if (preview) {
+        preview.innerHTML = `
+            <div class="flex items-center gap-3 p-3 bg-brandSuccess-50 border border-brandSuccess-200 rounded-lg">
+                <span class="text-2xl">📎</span>
+                <div class="flex-1">
+                    <p class="caption-strong text-brandNeutral-400">${file.name}</p>
+                    <p class="caption text-brandNeutral-300">${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                </div>
+            </div>
+        `;
+        preview.classList.remove('hidden');
     }
 }
 
@@ -1199,33 +1293,31 @@ function formatPrice(price) {
 
 // Actualizar la visualización del resumen del pedido
 function updateOrderSummaryDisplay() {
-    // Sección de productos eliminada - no actualizar cart-items-list
-    // const cartItemsList = document.getElementById('cart-items-list');
-    // const cartItemsCount = document.getElementById('cart-items-count');
+    // Validar que existan los elementos antes de actualizarlos
+    const summarySubtotal = document.getElementById('summary-subtotal');
+    const totalQuantityEl = document.getElementById('total-quantity');
+    const uniqueProductsEl = document.getElementById('unique-products');
+    const productBreakdown = document.getElementById('product-breakdown');
     
-    if (cartItems.length === 0) {
-        // cartItemsList.innerHTML = '<p class="text-center text-black-300 py-4 text-sm">No hay productos en el carrito</p>';
-        // cartItemsCount.textContent = '0 productos';
-    } else {
-        let itemsHtml = '';
-        let totalQuantity = 0;
-        
-        cartItems.forEach(item => {
-            totalQuantity += item.quantity;
-            // HTML eliminado - ya no se usa la sección de productos duplicada
-        });
-        
-        // cartItemsList.innerHTML = itemsHtml; // ELIMINADO
-        // cartItemsCount.textContent = `${totalQuantity} productos`; // ELIMINADO
+    if (summarySubtotal) {
+        summarySubtotal.textContent = '$' + formatPrice(cartSubtotal);
     }
     
-    // Actualizar subtotal
-    document.getElementById('summary-subtotal').textContent = '$' + formatPrice(cartSubtotal);
-    
-    // Actualizar desglose
-    document.getElementById('total-quantity').textContent = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-    document.getElementById('unique-products').textContent = cartItems.length;
-    document.getElementById('product-breakdown').classList.remove('hidden');
+    if (cartItems.length > 0) {
+        if (totalQuantityEl) {
+            totalQuantityEl.textContent = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+        }
+        if (uniqueProductsEl) {
+            uniqueProductsEl.textContent = cartItems.length;
+        }
+        if (productBreakdown) {
+            productBreakdown.classList.remove('hidden');
+        }
+    } else {
+        if (productBreakdown) {
+            productBreakdown.classList.add('hidden');
+        }
+    }
     
     // Actualizar total
     updateTotalDisplay();
@@ -1275,29 +1367,6 @@ async function loadOrderSummary() {
     }
 }
 
-// Actualizar display del resumen
-function updateOrderSummaryDisplay() {
-    // Actualizar subtotal productos
-    document.getElementById('summary-subtotal').textContent = `$${formatPrice(cartSubtotal)}`;
-    
-    // Actualizar desglose de productos
-    const productBreakdown = document.getElementById('product-breakdown');
-    const totalQuantity = document.getElementById('total-quantity');
-    const uniqueProducts = document.getElementById('unique-products');
-    
-    if (cartItems.length > 0) {
-        const totalQty = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-        totalQuantity.textContent = totalQty;
-        uniqueProducts.textContent = cartItems.length;
-        productBreakdown.classList.remove('hidden');
-    } else {
-        productBreakdown.classList.add('hidden');
-    }
-    
-    // Actualizar total final
-    updateTotalDisplay();
-}
-
 // Obtener subtotal actual
 function getCurrentSubtotal() {
     return cartSubtotal;
@@ -1316,7 +1385,11 @@ function getCurrentDiscount() {
 // Actualizar display del total final
 function updateTotalDisplay() {
     const total = getCurrentSubtotal() + getCurrentShipping() - getCurrentDiscount();
-    document.getElementById('summary-total').textContent = `$${formatPrice(total)}`;
+    const summaryTotal = document.getElementById('summary-total');
+    
+    if (summaryTotal) {
+        summaryTotal.textContent = `$${formatPrice(total)}`;
+    }
     
     // Actualizar botón de envío
     updateSubmitButtonText();

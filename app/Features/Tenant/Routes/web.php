@@ -5,6 +5,7 @@ use App\Features\Tenant\Controllers\StorefrontController;
 use App\Features\Tenant\Controllers\OrderController;
 use App\Features\Tenant\Controllers\PageController;
 use App\Features\Tenant\Controllers\ReservationController;
+use App\Features\Tenant\Controllers\HotelReservationController;
 
 /*
 |--------------------------------------------------------------------------
@@ -100,6 +101,19 @@ Route::middleware(['feature:reservas_mesas'])->prefix('reservaciones')->name('re
     Route::prefix('api')->name('api.')->group(function () {
         Route::post('/available-slots', [ReservationController::class, 'getAvailableSlots'])->name('available-slots');
         Route::post('/check-availability', [ReservationController::class, 'checkAvailability'])->name('check-availability');
+    });
+});
+
+// Reservaciones de Hotel (protegidas por feature:reservas_hotel)
+Route::middleware(['feature:reservas_hotel'])->prefix('reservas-hotel')->name('hotel-reservations.')->group(function () {
+    Route::get('/', [HotelReservationController::class, 'index'])->name('index');
+    Route::post('/', [HotelReservationController::class, 'store'])->name('store');
+    Route::get('/exito', [HotelReservationController::class, 'success'])->name('success');
+    
+    // API Routes
+    Route::prefix('api')->name('api.')->group(function () {
+        Route::post('/available-room-types', [HotelReservationController::class, 'getAvailableRoomTypes'])->name('available-room-types');
+        Route::post('/calculate-pricing', [HotelReservationController::class, 'calculatePricing'])->name('calculate-pricing');
     });
 });
 

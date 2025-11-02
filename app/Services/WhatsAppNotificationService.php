@@ -254,11 +254,12 @@ class WhatsAppNotificationService
         $phone = $this->formatPhone($order->customer_phone);
         $store = $order->store;
         
-        // Usar plantilla: order_placed_notification_es
-        // Variables: {{1}} = pedido, {{2}} = tienda
-        return $this->sendTemplateMessage($phone, 'order_placed_notification_es', [
+        // Usar plantilla: order_placed_notification_es_v2
+        // Variables: {{1}} = pedido, {{2}} = tienda, {{3}} = número WhatsApp negocio
+        return $this->sendTemplateMessage($phone, 'order_placed_notification_es_v2', [
             ['type' => 'text', 'text' => $order->order_number],
-            ['type' => 'text', 'text' => $store->name]
+            ['type' => 'text', 'text' => $store->name],
+            ['type' => 'text', 'text' => $this->formatStorePhoneForDisplay($store)]
         ]);
     }
 
@@ -268,6 +269,7 @@ class WhatsAppNotificationService
     public function notifyOrderStatusChanged($order, $oldStatus, $newStatus)
     {
         $phone = $this->formatPhone($order->customer_phone);
+        $store = $order->store;
         
         $statusLabels = [
             'pending' => 'Pendiente',
@@ -280,11 +282,12 @@ class WhatsAppNotificationService
 
         $statusLabel = $statusLabels[$newStatus] ?? $newStatus;
         
-        // Usar plantilla: order_status_es
-        // Variables: {{1}} = pedido, {{2}} = nuevo estado
-        return $this->sendTemplateMessage($phone, 'order_status_es', [
+        // Usar plantilla: order_status_es_v2
+        // Variables: {{1}} = pedido, {{2}} = nuevo estado, {{3}} = número WhatsApp negocio
+        return $this->sendTemplateMessage($phone, 'order_status_es_v2', [
             ['type' => 'text', 'text' => $order->order_number],
-            ['type' => 'text', 'text' => $statusLabel]
+            ['type' => 'text', 'text' => $statusLabel],
+            ['type' => 'text', 'text' => $this->formatStorePhoneForDisplay($store)]
         ]);
     }
 
@@ -296,9 +299,9 @@ class WhatsAppNotificationService
         // Usar el número del admin/store owner
         $adminPhone = $this->formatPhone($store->owner_phone ?? $this->phone);
         
-        // Usar plantilla: admin_new_order_notification_es
+        // Usar plantilla: order_registration_notification_es
         // Variables: {{1}} = pedido, {{2}} = cliente, {{3}} = total
-        return $this->sendTemplateMessage($adminPhone, 'admin_new_order_notification_es', [
+        return $this->sendTemplateMessage($adminPhone, 'order_registration_notification_es', [
             ['type' => 'text', 'text' => $order->order_number],
             ['type' => 'text', 'text' => $order->customer_name],
             ['type' => 'text', 'text' => $order->formatted_total]
@@ -312,16 +315,16 @@ class WhatsAppNotificationService
     {
         $adminPhone = $this->formatPhone($store->owner_phone ?? $this->phone);
         
-        // Usar plantilla: admin_payment_proof_uploaded_es
+        // Usar plantilla: payment_proof_received_notification_es
         // Variables: {{1}} = pedido, {{2}} = cliente
-        return $this->sendTemplateMessage($adminPhone, 'admin_payment_proof_uploaded_es', [
+        return $this->sendTemplateMessage($adminPhone, 'payment_proof_received_notification_es', [
             ['type' => 'text', 'text' => $order->order_number],
             ['type' => 'text', 'text' => $order->customer_name]
         ]);
     }
 
     /**
-     * Formatear número de teléfono
+     * Formatear número de teléfono para envío (con código de país)
      */
     protected function formatPhone($phone)
     {
@@ -342,6 +345,23 @@ class WhatsAppNotificationService
     }
 
     /**
+     * Formatear número de teléfono de la tienda para mostrar (sin código de país)
+     * Usado en las plantillas de WhatsApp
+     */
+    protected function formatStorePhoneForDisplay($store)
+    {
+        $storePhone = $store->owner_phone ?? $store->phone ?? 'N/A';
+        $storePhoneDisplay = preg_replace('/[^0-9]/', '', $storePhone);
+        
+        // Remover código de país si está presente
+        if (substr($storePhoneDisplay, 0, 2) === '57' && strlen($storePhoneDisplay) === 12) {
+            $storePhoneDisplay = substr($storePhoneDisplay, 2);
+        }
+        
+        return $storePhoneDisplay;
+    }
+
+    /**
      * Verificar si las notificaciones están habilitadas
      */
     public function isEnabled()
@@ -357,8 +377,8 @@ class WhatsAppNotificationService
 
     /**
      * Notificación: Reserva Solicitada (Cliente)
-     * Plantilla: reservation_requested_es
-     * Variables: {{1}} = código reserva, {{2}} = tienda, {{3}} = fecha, {{4}} = hora
+     * Plantilla: reservation_requested_es_v3
+     * Variables: {{1}} = código reserva, {{2}} = tienda, {{3}} = fecha, {{4}} = hora, {{5}} = número WhatsApp negocio
      */
     public function notifyReservationRequested($reservation)
     {
@@ -368,18 +388,19 @@ class WhatsAppNotificationService
         $date = $reservation->reservation_date->format('d/m/Y');
         $time = $reservation->reservation_time;
         
-        return $this->sendTemplateMessage($phone, 'reservation_requested_es', [
+        return $this->sendTemplateMessage($phone, 'reservation_requested_es_v3', [
             ['type' => 'text', 'text' => $reservation->reference_code],
             ['type' => 'text', 'text' => $store->name],
             ['type' => 'text', 'text' => $date],
-            ['type' => 'text', 'text' => $time]
+            ['type' => 'text', 'text' => $time],
+            ['type' => 'text', 'text' => $this->formatStorePhoneForDisplay($store)]
         ]);
     }
 
     /**
      * Notificación: Reserva Confirmada (Cliente)
-     * Plantilla: reservation_confirmed_es
-     * Variables: {{1}} = código reserva, {{2}} = tienda, {{3}} = fecha, {{4}} = hora, {{5}} = mesa (opcional)
+     * Plantilla: reservation_confirmed_es_v3
+     * Variables: {{1}} = código reserva, {{2}} = tienda, {{3}} = fecha, {{4}} = hora, {{5}} = mesa, {{6}} = número WhatsApp negocio
      */
     public function notifyReservationConfirmed($reservation)
     {
@@ -392,19 +413,20 @@ class WhatsAppNotificationService
             ? "Mesa {$reservation->table->table_number}" 
             : 'Mesa por asignar';
         
-        return $this->sendTemplateMessage($phone, 'reservation_confirmed_es', [
+        return $this->sendTemplateMessage($phone, 'reservation_confirmed_es_v3', [
             ['type' => 'text', 'text' => $reservation->reference_code],
             ['type' => 'text', 'text' => $store->name],
             ['type' => 'text', 'text' => $date],
             ['type' => 'text', 'text' => $time],
-            ['type' => 'text', 'text' => $tableInfo]
+            ['type' => 'text', 'text' => $tableInfo],
+            ['type' => 'text', 'text' => $this->formatStorePhoneForDisplay($store)]
         ]);
     }
 
     /**
      * Notificación: Recordatorio de Reserva (Cliente)
-     * Plantilla: reservation_reminder_client_es
-     * Variables: {{1}} = código reserva, {{2}} = tienda, {{3}} = fecha, {{4}} = hora
+     * Plantilla: reservation_reminder_client_es_v3
+     * Variables: {{1}} = código reserva, {{2}} = tienda, {{3}} = fecha, {{4}} = hora, {{5}} = número WhatsApp negocio
      */
     public function notifyReservationReminder($reservation)
     {
@@ -414,43 +436,37 @@ class WhatsAppNotificationService
         $date = $reservation->reservation_date->format('d/m/Y');
         $time = $reservation->reservation_time;
         
-        return $this->sendTemplateMessage($phone, 'reservation_reminder_client_es', [
+        return $this->sendTemplateMessage($phone, 'reservation_reminder_client_es_v3', [
             ['type' => 'text', 'text' => $reservation->reference_code],
             ['type' => 'text', 'text' => $store->name],
             ['type' => 'text', 'text' => $date],
-            ['type' => 'text', 'text' => $time]
+            ['type' => 'text', 'text' => $time],
+            ['type' => 'text', 'text' => $this->formatStorePhoneForDisplay($store)]
         ]);
     }
 
     /**
      * Notificación: Reserva Cancelada (Cliente)
-     * Plantilla: reservation_cancelled_es
-     * Variables: {{1}} = código reserva, {{2}} = tienda, {{3}} = número WhatsApp tienda
+     * Plantilla: reservation_client_es
+     * Variables: {{1}} = referencia, {{2}} = tienda, {{3}} = estado, {{4}} = número WhatsApp tienda
      */
     public function notifyReservationCancelled($reservation)
     {
         $phone = $this->formatPhone($reservation->customer_phone);
         $store = $reservation->store;
         
-        // Obtener número de WhatsApp de la tienda (owner_phone o phone)
-        $storePhone = $store->owner_phone ?? $store->phone ?? 'N/A';
-        // Formatear sin código de país para mostrar en el mensaje
-        $storePhoneDisplay = preg_replace('/[^0-9]/', '', $storePhone);
-        if (substr($storePhoneDisplay, 0, 2) === '57' && strlen($storePhoneDisplay) === 12) {
-            $storePhoneDisplay = substr($storePhoneDisplay, 2); // Remover código de país
-        }
-        
-        return $this->sendTemplateMessage($phone, 'reservation_cancelled_es', [
+        return $this->sendTemplateMessage($phone, 'reservation_client_es', [
             ['type' => 'text', 'text' => $reservation->reference_code],
             ['type' => 'text', 'text' => $store->name],
-            ['type' => 'text', 'text' => $storePhoneDisplay]
+            ['type' => 'text', 'text' => 'Cancelada'],
+            ['type' => 'text', 'text' => $this->formatStorePhoneForDisplay($store)]
         ]);
     }
 
     /**
      * Notificación: Nueva Reserva (Admin)
-     * Plantilla: admin_new_reservation_es
-     * Variables: {{1}} = código reserva, {{2}} = cliente, {{3}} = fecha, {{4}} = hora, {{5}} = personas
+     * Plantilla: reservation_admin_es
+     * Variables: {{1}} = referencia, {{2}} = cliente, {{3}} = fecha, {{4}} = hora, {{5}} = personas
      */
     public function notifyAdminNewReservation($reservation, $store)
     {
@@ -460,12 +476,182 @@ class WhatsAppNotificationService
         $time = $reservation->reservation_time;
         $partySize = $reservation->party_size . ' ' . ($reservation->party_size == 1 ? 'persona' : 'personas');
         
-        return $this->sendTemplateMessage($adminPhone, 'admin_new_reservation_es', [
+        return $this->sendTemplateMessage($adminPhone, 'reservation_admin_es', [
             ['type' => 'text', 'text' => $reservation->reference_code],
             ['type' => 'text', 'text' => $reservation->customer_name],
             ['type' => 'text', 'text' => $date],
             ['type' => 'text', 'text' => $time],
             ['type' => 'text', 'text' => $partySize]
+        ]);
+    }
+
+    /**
+     * ========================================
+     * NOTIFICACIONES DE RESERVAS DE HOTEL
+     * ========================================
+     */
+
+    /**
+     * Notificación: Reserva de Hotel Solicitada (Cliente)
+     * Plantilla: hotel_reservation_requested_es_v2
+     * Variables: {{1}} = código reserva, {{2}} = hotel, {{3}} = tipo habitación, {{4}} = check-in, {{5}} = check-out, {{6}} = noches, {{7}} = número WhatsApp negocio
+     */
+    public function notifyHotelReservationRequested($hotelReservation)
+    {
+        $phone = $this->formatPhone($hotelReservation->guest_phone);
+        $store = $hotelReservation->store;
+        
+        $checkIn = $hotelReservation->check_in_date->format('d/m/Y');
+        $checkOut = $hotelReservation->check_out_date->format('d/m/Y');
+        $nights = $hotelReservation->num_nights . ' ' . ($hotelReservation->num_nights == 1 ? 'noche' : 'noches');
+        
+        return $this->sendTemplateMessage($phone, 'hotel_reservation_requested_es_v2', [
+            ['type' => 'text', 'text' => $hotelReservation->reservation_code],
+            ['type' => 'text', 'text' => $store->name],
+            ['type' => 'text', 'text' => $hotelReservation->roomType->name],
+            ['type' => 'text', 'text' => $checkIn],
+            ['type' => 'text', 'text' => $checkOut],
+            ['type' => 'text', 'text' => $nights],
+            ['type' => 'text', 'text' => $this->formatStorePhoneForDisplay($store)]
+        ]);
+    }
+
+    /**
+     * Notificación: Reserva de Hotel Confirmada (Cliente)
+     * Plantilla: hotel_reservation_confirmed_es_v2
+     * Variables: {{1}} = código reserva, {{2}} = hotel, {{3}} = habitación #, {{4}} = tipo, {{5}} = check-in, {{6}} = check-out, {{7}} = número WhatsApp negocio
+     */
+    public function notifyHotelReservationConfirmed($hotelReservation)
+    {
+        $phone = $this->formatPhone($hotelReservation->guest_phone);
+        $store = $hotelReservation->store;
+        
+        $checkIn = $hotelReservation->check_in_date->format('d/m/Y');
+        $checkOut = $hotelReservation->check_out_date->format('d/m/Y');
+        $roomInfo = $hotelReservation->room 
+            ? "Habitación #{$hotelReservation->room->room_number}" 
+            : 'Habitación por asignar';
+        
+        return $this->sendTemplateMessage($phone, 'hotel_reservation_confirmed_es_v2', [
+            ['type' => 'text', 'text' => $hotelReservation->reservation_code],
+            ['type' => 'text', 'text' => $store->name],
+            ['type' => 'text', 'text' => $roomInfo],
+            ['type' => 'text', 'text' => $hotelReservation->roomType->name],
+            ['type' => 'text', 'text' => $checkIn],
+            ['type' => 'text', 'text' => $checkOut],
+            ['type' => 'text', 'text' => $this->formatStorePhoneForDisplay($store)]
+        ]);
+    }
+
+    /**
+     * Notificación: Recordatorio Check-in (Cliente)
+     * Plantilla: hotel_checkin_reminder_es_v2
+     * Variables: {{1}} = código reserva, {{2}} = hotel, {{3}} = habitación #, {{4}} = fecha check-in, {{5}} = hora check-in, {{6}} = número WhatsApp negocio
+     */
+    public function notifyHotelCheckinReminder($hotelReservation)
+    {
+        $phone = $this->formatPhone($hotelReservation->guest_phone);
+        $store = $hotelReservation->store;
+        
+        $checkInDate = $hotelReservation->check_in_date->format('d/m/Y');
+        $roomInfo = $hotelReservation->room 
+            ? "Habitación #{$hotelReservation->room->room_number}" 
+            : 'Habitación por asignar';
+        
+        // Obtener hora de check-in de settings
+        $settings = \App\Shared\Models\HotelSetting::where('store_id', $store->id)->first();
+        $checkInTime = $settings 
+            ? \Carbon\Carbon::parse($settings->check_in_time)->format('g:i A')
+            : '3:00 PM';
+        
+        return $this->sendTemplateMessage($phone, 'hotel_checkin_reminder_es_v2', [
+            ['type' => 'text', 'text' => $hotelReservation->reservation_code],
+            ['type' => 'text', 'text' => $store->name],
+            ['type' => 'text', 'text' => $roomInfo],
+            ['type' => 'text', 'text' => $checkInDate],
+            ['type' => 'text', 'text' => $checkInTime],
+            ['type' => 'text', 'text' => $this->formatStorePhoneForDisplay($store)]
+        ]);
+    }
+
+    /**
+     * Notificación: Reserva de Hotel Cancelada (Cliente)
+     * Plantilla: hotel_reservation_client_es
+     * Variables: {{1}} = referencia, {{2}} = hotel, {{3}} = estado, {{4}} = número WhatsApp hotel
+     */
+    public function notifyHotelReservationCancelled($hotelReservation)
+    {
+        $phone = $this->formatPhone($hotelReservation->guest_phone);
+        $store = $hotelReservation->store;
+        
+        return $this->sendTemplateMessage($phone, 'hotel_reservation_client_es', [
+            ['type' => 'text', 'text' => $hotelReservation->reservation_code],
+            ['type' => 'text', 'text' => $store->name],
+            ['type' => 'text', 'text' => 'Cancelada'],
+            ['type' => 'text', 'text' => $this->formatStorePhoneForDisplay($store)]
+        ]);
+    }
+
+    /**
+     * Notificación: Check-in Completado (Cliente)
+     * Plantilla: hotel_reservation_client_es
+     * Variables: {{1}} = referencia, {{2}} = hotel, {{3}} = estado, {{4}} = número WhatsApp hotel
+     */
+    public function notifyHotelCheckInCompleted($hotelReservation)
+    {
+        $phone = $this->formatPhone($hotelReservation->guest_phone);
+        $store = $hotelReservation->store;
+        
+        $roomInfo = $hotelReservation->room 
+            ? "Habitación #{$hotelReservation->room->room_number}" 
+            : 'Habitación asignada';
+        
+        return $this->sendTemplateMessage($phone, 'hotel_reservation_client_es', [
+            ['type' => 'text', 'text' => $hotelReservation->reservation_code],
+            ['type' => 'text', 'text' => $store->name],
+            ['type' => 'text', 'text' => "Check-in completado - {$roomInfo}"],
+            ['type' => 'text', 'text' => $this->formatStorePhoneForDisplay($store)]
+        ]);
+    }
+
+    /**
+     * Notificación: Check-out Completado (Cliente)
+     * Plantilla: hotel_reservation_client_es
+     * Variables: {{1}} = referencia, {{2}} = hotel, {{3}} = estado, {{4}} = número WhatsApp hotel
+     */
+    public function notifyHotelCheckOutCompleted($hotelReservation)
+    {
+        $phone = $this->formatPhone($hotelReservation->guest_phone);
+        $store = $hotelReservation->store;
+        
+        return $this->sendTemplateMessage($phone, 'hotel_reservation_client_es', [
+            ['type' => 'text', 'text' => $hotelReservation->reservation_code],
+            ['type' => 'text', 'text' => $store->name],
+            ['type' => 'text', 'text' => 'Check-out completado - Gracias por tu visita'],
+            ['type' => 'text', 'text' => $this->formatStorePhoneForDisplay($store)]
+        ]);
+    }
+
+    /**
+     * Notificación: Nueva Reserva de Hotel (Admin)
+     * Plantilla: hotel_reservation_registration_notification_es
+     * Variables: {{1}} = código reserva, {{2}} = huésped, {{3}} = tipo habitación, {{4}} = check-in, {{5}} = check-out, {{6}} = total
+     */
+    public function notifyAdminNewHotelReservation($hotelReservation, $store)
+    {
+        $adminPhone = $this->formatPhone($store->owner_phone ?? $this->phone);
+        
+        $checkIn = $hotelReservation->check_in_date->format('d/m/Y');
+        $checkOut = $hotelReservation->check_out_date->format('d/m/Y');
+        $total = '$' . number_format($hotelReservation->total, 0, ',', '.');
+        
+        return $this->sendTemplateMessage($adminPhone, 'hotel_reservation_registration_notification_es', [
+            ['type' => 'text', 'text' => $hotelReservation->reservation_code],
+            ['type' => 'text', 'text' => $hotelReservation->guest_name],
+            ['type' => 'text', 'text' => $hotelReservation->roomType->name],
+            ['type' => 'text', 'text' => $checkIn],
+            ['type' => 'text', 'text' => $checkOut],
+            ['type' => 'text', 'text' => $total]
         ]);
     }
 }

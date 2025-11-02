@@ -388,8 +388,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                     button.className += ' border-brandNeutral-200 text-brandNeutral-200 bg-brandWhite-100 cursor-not-allowed opacity-50';
                     button.disabled = true;
                 } else {
-                    // Horario disponible: siempre mismo contraste en default, hover y active
-                    button.className += ' border-brandSuccess-300 text-brandSuccess-400 bg-brandSuccess-50 hover:bg-brandSuccess-50 hover:text-brandSuccess-400 cursor-pointer';
+                    // Horario disponible: default, hover y active
+                    button.className += ' border-brandSuccess-400 text-brandSuccess-400 bg-brandSuccess-50 hover:bg-brandPrimary-300 hover:text-brandWhite-50 cursor-pointer';
                 }
                 
                 button.textContent = slot.time;
@@ -400,15 +400,15 @@ document.addEventListener('DOMContentLoaded', async function() {
                     button.addEventListener('click', function() {
                         // Remover estado active de todos los botones
                         document.querySelectorAll('#time-slots-grid button').forEach(btn => {
-                            btn.classList.remove('bg-brandPrimary-300', 'text-brandWhite-100', 'border-brandPrimary-300');
+                            btn.classList.remove('bg-brandPrimary-300', 'text-brandWhite-50', 'border-brandPrimary-300');
                             // Restaurar estilo por defecto si está disponible
                             if (!btn.disabled) {
-                                btn.classList.add('bg-brandSuccess-50', 'text-brandSuccess-400');
+                                btn.classList.add('bg-brandSuccess-50', 'border-brandSuccess-400', 'text-brandSuccess-400');
                             }
                         });
                         // Agregar estado active al botón seleccionado
-                        this.classList.remove('bg-brandSuccess-50');
-                        this.classList.add('bg-brandPrimary-300', 'text-brandWhite-100', 'border-brandPrimary-300');
+                        this.classList.remove('bg-brandSuccess-50', 'border-brandSuccess-400', 'text-brandSuccess-400');
+                        this.classList.add('bg-brandPrimary-300', 'text-brandWhite-50', 'border-brandPrimary-300');
                         selectedTime.value = this.dataset.time;
                         validateForm();
                     });

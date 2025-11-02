@@ -402,10 +402,10 @@
                 {{-- Reservas de Hotel (Hoteles) --}}
                 @if(featureEnabled($store, 'reservas_hotel'))
                 <li>
-                    <a href="#" class="item-sidebar opacity-50 cursor-not-allowed" title="Disponible cuando se implemente REQ-003">
+                    <a href="{{ route('tenant.admin.hotel.reservations.index', ['store' => $store->slug]) }}" 
+                       class="item-sidebar {{ request()->routeIs('tenant.admin.hotel.reservations.*') ? 'item-sidebar-active' : '' }}">
                         <x-lucide-bed class="w-4 h-4 mr-2" />
                         Reservas de Hotel
-                        <span class="ml-auto text-xs bg-warning-100 text-warning-500 px-2 py-0.5 rounded">Próximamente</span>
                     </a>
                 </li>
                 @endif
