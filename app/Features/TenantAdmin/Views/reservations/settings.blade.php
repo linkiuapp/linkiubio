@@ -202,9 +202,9 @@
          x-transition:leave-start="opacity-100"
          x-transition:leave-end="opacity-0"
          style="display: none;"
-         class="fixed inset-0 z-50 flex items-center justify-center bg-black-500 bg-opacity-50">
-        <div @click.away="showTableModal = false" class="absolute inset-0"></div>
-        <div class="bg-accent-50 rounded-lg p-6 max-w-md w-full mx-4 relative z-10">
+         class="fixed inset-0 z-50 flex items-center justify-center bg-black-500 bg-opacity-50"
+         @click.self="showTableModal = false">
+        <div class="bg-accent-50 rounded-lg p-6 max-w-md w-full mx-4 relative z-10" @click.stop>
             <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-semibold text-black-500" x-text="tableModalTitle"></h3>
                 <button @click="showTableModal = false" class="text-black-300 hover:text-black-400">
@@ -212,13 +212,14 @@
                 </button>
             </div>
             
-            <form @submit.prevent="saveTable()" class="space-y-4">
+            <form @submit.prevent="saveTable()" class="space-y-4" @click.stop>
                 <div>
                     <label class="block text-sm font-semibold text-black-400 mb-2">
                         Número de Mesa
                     </label>
                     <input type="text" 
                            x-model="tableForm.table_number"
+                           @click.stop
                            class="w-full px-4 py-2 border border-accent-200 rounded-lg focus:border-primary-200 focus:ring-1 focus:ring-primary-200 focus:outline-none"
                            required>
                 </div>
@@ -229,6 +230,7 @@
                     </label>
                     <input type="number" 
                            x-model.number="tableForm.capacity"
+                           @click.stop
                            min="1" 
                            max="50"
                            class="w-full px-4 py-2 border border-accent-200 rounded-lg focus:border-primary-200 focus:ring-1 focus:ring-primary-200 focus:outline-none"
