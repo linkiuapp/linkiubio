@@ -332,10 +332,8 @@ Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreAppro
             Route::post('/{id}/liberate', [TableController::class, 'liberate'])->name('liberate');
         });
         
-        // Configuración
-        Route::prefix('settings')->name('settings.')->group(function () {
-            Route::put('/', [TableController::class, 'updateSettings'])->name('update');
-        });
+        // Configuración de Dine-In (unificada)
+        Route::put('/settings', [DineInSettingController::class, 'update'])->name('settings');
     });
 
     // Announcements Routes
