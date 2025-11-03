@@ -81,15 +81,68 @@ class ImageOptimizationService
             $maxWidth = $options['max_width'] ?? self::MAX_WIDTH;
             $quality = $options['quality'] ?? self::WEBP_QUALITY;
 
-            // Redimensionar si es necesario (mantener proporción)
+            // Redimensionar si es necesario
+            // Para productos: usar crop desde el centro si se especifica max_height
             $width = $image->width();
             $height = $image->height();
+            $maxHeight = $options['max_height'] ?? null;
 
-            if ($width > $maxWidth) {
-                $image->scale(width: $maxWidth);
+            if ($width > $maxWidth || ($maxHeight !== null && $height > $maxHeight)) {
+                // Si se especifica altura máxima, hacer crop desde el centro
+                if ($maxHeight !== null) {
+                    // Calcular ratio objetivo
+                    $targetRatio = $maxWidth / $maxHeight;
+                    $currentRatio = $width / $height;
+                    
+                    if ($currentRatio > $targetRatio) {
+                        // Imagen más ancha que el ratio objetivo: crop horizontal desde el centro
+                        $newHeight = $height;
+                        $newWidth = $height * $targetRatio;
+                        
+                        // Si el nuevo ancho es mayor que el máximo, ajustar
+                        if ($newWidth > $maxWidth) {
+                            $newWidth = $maxWidth;
+                            $newHeight = $maxWidth / $targetRatio;
+                        }
+                        
+                        $cropX = ($width - $newWidth) / 2; // Centrar horizontalmente
+                        $cropY = ($height - $newHeight) / 2; // Centrar verticalmente
+                    } else {
+                        // Imagen más alta que el ratio objetivo: crop vertical desde el centro
+                        $newWidth = $width;
+                        $newHeight = $width / $targetRatio;
+                        
+                        // Si la nueva altura es mayor que el máximo, ajustar
+                        if ($newHeight > $maxHeight) {
+                            $newHeight = $maxHeight;
+                            $newWidth = $maxHeight * $targetRatio;
+                        }
+                        
+                        $cropX = ($width - $newWidth) / 2; // Centrar horizontalmente
+                        $cropY = ($height - $newHeight) / 2; // Centrar verticalmente
+                    }
+                    
+                    // Crop desde el centro
+                    $image->crop(
+                        width: (int)$newWidth,
+                        height: (int)$newHeight,
+                        x: (int)$cropX,
+                        y: (int)$cropY
+                    );
+                    
+                    // Escalar a tamaño final si aún es necesario
+                    if ($image->width() > $maxWidth || ($maxHeight !== null && $image->height() > $maxHeight)) {
+                        $image->scale(width: $maxWidth, height: $maxHeight);
+                    }
+                } else {
+                    // Solo redimensionar manteniendo proporción (sin crop)
+                    $image->scale(width: $maxWidth);
+                }
+                
                 Log::info('Imagen redimensionada', [
                     'original' => "{$width}x{$height}",
-                    'nuevo' => "{$image->width()}x{$image->height()}"
+                    'nuevo' => "{$image->width()}x{$image->height()}",
+                    'crop_desde_centro' => $maxHeight !== null
                 ]);
             }
 
