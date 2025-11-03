@@ -325,7 +325,7 @@ class OrderController extends Controller
                 'store_id' => $store->id,
                 'order_number' => Order::generateOrderNumber($store->id),
                 'customer_name' => $validated['customer_name'],
-                'customer_phone' => $validated['customer_phone'] ?? null,
+                'customer_phone' => $isDineIn ? ($validated['customer_phone'] ?? 'N/A') : $validated['customer_phone'],
                 'delivery_type' => $isDineIn ? 'pickup' : ($validated['delivery_type'] ?? 'pickup'),
                 'order_type' => $orderType,
                 'payment_method' => $validated['payment_method'],
