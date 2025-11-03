@@ -80,16 +80,27 @@ class ImageOptimizationService
             // Obtener opciones
             $maxWidth = $options['max_width'] ?? self::MAX_WIDTH;
             $quality = $options['quality'] ?? self::WEBP_QUALITY;
+            $maxHeight = $options['max_height'] ?? null;
 
-            // Redimensionar si es necesario (mantener proporción)
+            // Redimensionar si es necesario
+            // Para productos: usar crop desde el centro si se especifica max_height
             $width = $image->width();
             $height = $image->height();
 
-            if ($width > $maxWidth) {
-                $image->scale(width: $maxWidth);
+            if ($width > $maxWidth || ($maxHeight !== null && $height > $maxHeight)) {
+                // Si se especifica altura máxima, hacer crop desde el centro usando cover()
+                if ($maxHeight !== null) {
+                    // cover() hace crop desde el centro automáticamente
+                    $image = $image->cover($maxWidth, $maxHeight);
+                } else {
+                    // Solo redimensionar manteniendo proporción (sin crop)
+                    $image->scale($maxWidth);
+                }
+                
                 Log::info('Imagen redimensionada', [
                     'original' => "{$width}x{$height}",
-                    'nuevo' => "{$image->width()}x{$image->height()}"
+                    'nuevo' => "{$image->width()}x{$image->height()}",
+                    'crop_desde_centro' => $maxHeight !== null
                 ]);
             }
 
