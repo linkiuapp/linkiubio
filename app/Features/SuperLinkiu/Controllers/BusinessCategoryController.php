@@ -15,8 +15,14 @@ class BusinessCategoryController extends Controller
     public function index()
     {
         $categories = BusinessCategory::ordered()
+            ->with('features')
             ->withCount('stores')
             ->paginate(20);
+
+        // Transformar features para el modal
+        foreach ($categories as $category) {
+            $category->feature_ids = $category->features->pluck('id')->toArray();
+        }
 
         $stats = [
             'total' => BusinessCategory::count(),
@@ -25,7 +31,10 @@ class BusinessCategoryController extends Controller
             'manual_review' => BusinessCategory::manualReview()->count()
         ];
 
-        return view('superlinkiu::business-categories.index', compact('categories', 'stats'));
+        // Cargar todos los features disponibles
+        $features = \App\Shared\Models\BusinessFeature::ordered()->get();
+
+        return view('superlinkiu::business-categories.index', compact('categories', 'stats', 'features'));
     }
 
     /**
@@ -39,7 +48,9 @@ class BusinessCategoryController extends Controller
             'description' => 'nullable|string|max:500',
             'requires_manual_approval' => 'required|boolean',
             'is_active' => 'boolean',
-            'order' => 'nullable|integer|min:0'
+            'order' => 'nullable|integer|min:0',
+            'features' => 'nullable|array',
+            'features.*' => 'exists:business_features,id'
         ]);
 
         $validated['created_by'] = auth()->id();
@@ -49,7 +60,12 @@ class BusinessCategoryController extends Controller
             $validated['order'] = BusinessCategory::max('order') + 1;
         }
 
-        BusinessCategory::create($validated);
+        $category = BusinessCategory::create($validated);
+
+        // Sincronizar features seleccionados
+        if (isset($validated['features'])) {
+            $category->features()->sync($validated['features']);
+        }
 
         return redirect()
             ->route('superlinkiu.business-categories.index')
@@ -67,12 +83,23 @@ class BusinessCategoryController extends Controller
             'description' => 'nullable|string|max:500',
             'requires_manual_approval' => 'required|boolean',
             'is_active' => 'boolean',
-            'order' => 'nullable|integer|min:0'
+            'order' => 'nullable|integer|min:0',
+            'features' => 'nullable|array',
+            'features.*' => 'exists:business_features,id'
         ]);
 
         $validated['slug'] = Str::slug($validated['name']);
 
         $businessCategory->update($validated);
+
+        // Sincronizar features seleccionados
+        if (isset($validated['features'])) {
+            $businessCategory->features()->sync($validated['features']);
+            
+            // Invalidar caché de todas las tiendas de esta categoría
+            $resolver = app(\App\Shared\Services\FeatureResolver::class);
+            $resolver->invalidateCategoryCache($businessCategory->id);
+        }
 
         return redirect()
             ->route('superlinkiu.business-categories.index')

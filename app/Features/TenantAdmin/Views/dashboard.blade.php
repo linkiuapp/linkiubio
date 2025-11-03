@@ -2,9 +2,7 @@
     @section('title', 'Dashboard')
     @section('subtitle', 'Panel de administración de tu tienda')
 
-    
     @section('content')
-
         {{-- Banner de Estado de Aprobación --}}
         @if($store->approval_status === 'pending_approval')
         <div class="mb-6 bg-gradient-to-r from-warning-100 to-warning-50 border-l-4 border-warning-300 rounded-lg p-6 shadow-sm">
@@ -17,237 +15,162 @@
                     </div>
                 </div>
                 <div class="flex-1">
-                    <h3 class="text-lg font-bold text-warning-500 mb-2">
-                        ⏰ Tu tienda está en revisión
-                    </h3>
+                    <h3 class="text-lg font-bold text-warning-500 mb-2">⏰ Tu tienda está en revisión</h3>
                     <p class="text-sm text-black-400 mb-3">
                         Estamos revisando tu solicitud. Este proceso usualmente toma <strong>24-48 horas</strong>.
                         Te notificaremos por email cuando tu tienda esté aprobada y lista para publicar.
                     </p>
-                    <div class="bg-white rounded-lg p-4 mb-3">
-                        <h4 class="text-sm font-semibold text-black-400 mb-2">Mientras tanto, puedes:</h4>
-                        <ul class="space-y-1 text-sm text-black-300">
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-success-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                Configurar los detalles de tu tienda
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-success-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                Agregar productos y categorías
-                            </li>
-                            <li class="flex items-center gap-2">
-                                <svg class="w-4 h-4 text-success-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
-                                </svg>
-                                Personalizar el diseño de tu tienda
-                            </li>
-                        </ul>
-                    </div>
-                    <div class="flex items-center gap-2 text-xs text-warning-500">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <span>⚠️ No compartas el link público de tu tienda hasta que sea aprobada</span>
-                    </div>
                 </div>
             </div>
         </div>
         @endif
 
-        <div class="grid grid-cols-10 grid-rows-6 gap-3">
-
-            <!-- Widget de estado de la tienda -->
-            @if($recentOrders->count() > 0)
-                <div class="col-span-6 row-span-5 bg-accent-50 rounded-lg p-0 overflow-hidden shadow-sm">
-                    <div class="p-6">
-                        <!-- Título -->
-                        <div class="flex items-center justify-between">
-                            <h2 class="text-body-large text-black-500 mb-0 font-medium">
-                                Pedidos Recientes
-                            </h2>
-                            <a href="{{ route('tenant.admin.orders.index', ['store' => $store->slug]) }}" 
-                               class="flex items-center text-secondary-300 text-body-small font-medium transition-colors border border-secondary-300 rounded-lg px-2 py-2">
-                                Ver todos
-                                <x-lucide-arrow-up-right class="w-4 h-4 ml-2" />
-                            </a>
-                        </div>
-                        <!-- Contenido -->
-                        <div class="pt-6">
-                            <div class="space-y-4" x-data="recentOrdersWidget">
-                                @foreach($recentOrders as $order)
-                                    <div class="flex items-center gap-4 p-4 border border-accent-100 rounded-lg hover:bg-accent-100 transition-colors">
-                                        <!-- Imagen del primer producto -->
-                                        <div class="flex-shrink-0">
-                                            @if($order->items->first() && $order->items->first()->product && $order->items->first()->product->mainImage)
-                                                <img src="{{ $order->items->first()->product->mainImage->image_url }}" 
-                                                     alt="{{ $order->items->first()->product_name }}"
-                                                     class="w-12 h-12 object-cover rounded-lg border border-accent-200">
-                                            @else
-                                                <div class="w-12 h-12 bg-accent-200 rounded-lg flex items-center justify-center">
-                                                    <x-solar-bag-3-outline class="w-6 h-6 text-black-300" />
-                                                </div>
-                                            @endif
-                                        </div>
-                                        <!-- Info del pedido -->
-                                        <div class="flex-1 min-w-0">
-                                            <div class="flex items-center gap-2 mb-1">
-                                                <a href="{{ route('tenant.admin.orders.show', ['store' => $store->slug, 'order' => $order->id]) }}" 
-                                                   class="text-body-small font-bold text-black-300 hover:text-info-300 transition-colors hover:underline">
-                                                    #{{ $order->order_number }}
-                                                </a>
-                                                <span class="text-small px-2 py-1 rounded-full {{ $order->status_color_class }}">
-                                                    {{ $order->status_label }}
-                                                </span>
-                                            </div>
-                                            <p class="text-small font-regular text-black-300 truncate">
-                                                {{ $order->customer_name }} • {{ $order->items_count }} producto(s)
-                                            </p>
-                                            <p class="text-small font-regular text-black-300">
-                                                {{ $order->created_at->format('d/m/Y H:i') }}
-                                            </p>
-                                        </div>
-                                        <div class="flex-shrink-0">
-                                            <!-- Total -->
-                                            <div class="text-right">
-                                                <div class="text-body-large font-bold text-black-300">
-                                                    ${{ number_format($order->total, 0, ',', '.') }}
-                                                </div>
-                                            </div>
-                                            <!-- Select de estado -->
-                                            <div class="flex-shrink-0">
-                                                <select 
-                                                    class="text-caption px-2 py-2 border border-accent-200 rounded focus:ring-1 focus:ring-primary-200 focus:border-primary-300 transition-colors"
-                                                    @change="updateOrderStatus({{ $order->id }}, $event.target.value, $event.target)"
-                                                    :disabled="updating"
-                                                >
-                                                    @foreach(\App\Shared\Models\Order::STATUSES as $status => $label)
-                                                        <option 
-                                                            value="{{ $status }}" 
-                                                            :selected="order.status === '{{ $status }}'"
-                                                            class="text-caption"
-                                                        >
-                                                            {{ $label }}
-                                                        </option>
-                                                    @endforeach
-                                                </select>
-                                            </div>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
+        <div class="grid grid-cols-6 grid-rows-7 gap-4">
+            {{-- 1. Card Total --}}
+            <div class="bg-gradient-to-r from-accent-200 to-accent-50 rounded-lg p-4 shadow-sm">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-lg bg-accent-300 flex items-center justify-center flex-shrink-0">
+                        <x-lucide-shopping-cart class="w-5 h-5 text-accent-50" />
                     </div>
+                    <h2 class="text-body-small text-black-400 mb-0 font-medium">Total</h2>
                 </div>
-            @endif
-
-            <!-- Widget botones de acciones -->
-            <!-- Crear Producto -->
-            <div class="col-start-7 bg-primary-300 rounded-lg p-0 shadow-sm flex items-center justify-center py-4 hover:bg-primary-400">
-                <a href="{{ route('tenant.admin.products.create', ['store' => $store->slug]) }}" class="flex flex-col items-center justify-center text-accent-50 text-body-small font-medium transition-colors">
-                    <x-lucide-circle-plus class="w-8 h-8 mb-2" />
-                    <span>Agregar Producto</span>
-                </a>
-            </div>
-            <!-- Crear Pedido -->
-            <div class="col-start-8 bg-info-300 rounded-lg p-0 shadow-sm flex items-center justify-center py-4 hover:bg-info-400">
-                <a href="{{ route('tenant.admin.orders.create', ['store' => $store->slug]) }}" class="flex flex-col items-center justify-center text-accent-50 text-body-small font-medium transition-colors">
-                    <x-lucide-circle-plus class="w-8 h-8 mb-2" />
-                    <span>Crear Pedido</span>
-                </a>
-            </div>
-            <!-- Crear Cupón -->
-            <div class="col-start-9 bg-secondary-300 rounded-lg p-0 shadow-sm flex items-center justify-center py-4 hover:bg-secondary-200">
-                <a href="{{ route('tenant.admin.coupons.create', ['store' => $store->slug]) }}" class="flex flex-col items-center justify-center text-accent-50 text-body-small font-medium transition-colors">
-                    <x-lucide-circle-plus class="w-8 h-8 mb-2" />
-                    <span>Crear Cupón</span>
-                </a>
-            </div>
-            <!-- Crear Slider -->
-            <div class="col-start-10 bg-warning-300 rounded-lg p-0 shadow-sm flex items-center justify-center py-4 hover:bg-warning-200">
-                <a href="{{ route('tenant.admin.sliders.create', ['store' => $store->slug]) }}" class="flex flex-col items-center justify-center text-black-300 text-body-small font-medium transition-colors">
-                    <x-lucide-circle-plus class="w-8 h-8 mb-2" />
-                    <span>Crear Slider</span>
-                </a>
+                <h3 class="text-h3 text-black-300 mb-0 font-extrabold">{{ $stats['total'] }}</h3>
             </div>
 
-            <!-- Widget contadores de estadísticas -->
-            <!-- Total de pedidos -->
-            <div class="col-span-2 col-start-7 row-start-2 bg-gradient-to-r from-accent-200 to-accent-50 rounded-lg p-0 overflow-hidden shadow-sm">
-                <div class="flex items-center justify-between px-8 py-6 gap-8">
-                    <h2 class="text-body-large text-secondary-100 mb-0 font-medium">
-                        Total de pedidos
-                    </h2>
-                    <h3 class="text-h3 text-black-300 mb-0 font-extrabold">
-                        {{ $stats['total'] }}
-                    </h3>
+            {{-- 2. Card Pendientes --}}
+            <div class="bg-gradient-to-r from-warning-100 to-accent-50 rounded-lg p-4 shadow-sm">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-lg bg-warning-200 flex items-center justify-center flex-shrink-0">
+                        <x-lucide-clock class="w-5 h-5 text-warning-300" />
+                    </div>
+                    <h2 class="text-body-small text-black-400 mb-0 font-medium">Pendientes</h2>
                 </div>
-            </div>
-            <!-- Pedidos confirmados -->
-            <div class="col-span-2 col-start-9 row-start-2 bg-gradient-to-r from-primary-75/50 to-accent-50 rounded-lg p-0 overflow-hidden shadow-sm">
-                <div class="flex items-center justify-between px-8 py-6 gap-8">
-                    <h2 class="text-body-large text-secondary-100 mb-0 font-medium">
-                        Pedidos confirmados
-                    </h2>
-                    <h3 class="text-h3 text-black-300 mb-0 font-extrabold">
-                        {{ $stats['confirmed'] }}
-                    </h3>
-                </div>
-            </div>
-            <!-- Pedidos pendientes -->
-            <div class="col-span-2 col-start-7 row-start-3 bg-gradient-to-r from-error-75/30 to-accent-50 rounded-lg p-0 overflow-hidden shadow-sm">
-                <div class="flex items-center justify-between px-8 py-6 gap-8">
-                    <h2 class="text-body-large text-secondary-100 mb-0 font-medium">
-                        Pedidos pendientes
-                    </h2>
-                    <h3 class="text-h3 text-black-300 mb-0 font-extrabold">
-                        {{ $stats['pending'] }}
-                    </h3>
-                </div>
-            </div>
-            <!-- Pedidos en preparación -->
-            <div class="col-span-2 col-start-9 row-start-3 bg-gradient-to-r from-warning-75/30 to-accent-50 rounded-lg p-0 overflow-hidden shadow-sm">
-                <div class="flex items-center justify-between px-8 py-6 gap-8">
-                    <h2 class="text-body-large text-secondary-100 mb-0 font-medium">
-                        Pedidos en preparación
-                    </h2>
-                    <h3 class="text-h3 text-black-300 mb-0 font-extrabold">
-                        {{ $stats['preparing'] }}
-                    </h3>
-                </div>
-            </div>
-            <!-- Pedidos en Enviados -->
-            <div class="col-span-2 col-start-7 row-start-4 bg-gradient-to-r from-info-75/30 to-accent-50 rounded-lg p-0 overflow-hidden shadow-sm">
-                <div class="flex items-center justify-between px-8 py-6 gap-8">
-                    <h2 class="text-body-large text-secondary-100 mb-0 font-medium">
-                        Pedidos en Enviados
-                    </h2>
-                    <h3 class="text-h3 text-black-300 mb-0 font-extrabold">
-                        {{ $stats['shipped'] }}
-                    </h3>
-                </div>
-            </div>
-            <!-- Pedidos entregados -->
-            <div class="col-span-2 col-start-9 row-start-4 bg-gradient-to-r from-success-75/30 to-accent-50 rounded-lg p-0 overflow-hidden shadow-sm">
-                <div class="flex items-center justify-between px-8 py-6 gap-8">
-                    <h2 class="text-body-large text-secondary-100 mb-0 font-medium">
-                        Pedidos entregados
-                    </h2>
-                    <h3 class="text-h3 text-black-300 mb-0 font-extrabold">
-                        {{ $stats['delivered'] }}
-                    </h3>
-                </div>
+                <h3 class="text-h3 text-black-300 mb-0 font-extrabold">{{ $stats['pending'] }}</h3>
             </div>
 
-            <!-- Widget anuncios -->
-            <div class="col-span-4 row-span-2 col-start-7 row-start-5">
-                <div class="mb-8" x-data="announcementBanners" x-init="loadBanners()" x-show="banners.length > 0">
-                    <div class="relative overflow-hidden rounded-xl shadow-sm mx-auto w-full">
-                        <!-- Contenedor del carrusel -->
-                        <div class="relative w-full h-[200px]">
+            {{-- 3. Card Confirmados --}}
+            <div class="bg-gradient-to-r from-info-100 to-accent-50 rounded-lg p-4 shadow-sm">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-lg bg-info-200 flex items-center justify-center flex-shrink-0">
+                        <x-lucide-check-circle class="w-5 h-5 text-info-300" />
+                    </div>
+                    <h2 class="text-body-small text-black-400 mb-0 font-medium">Confirmados</h2>
+                </div>
+                <h3 class="text-h3 text-black-300 mb-0 font-extrabold">{{ $stats['confirmed'] }}</h3>
+            </div>
+
+            {{-- 4. Card Preparando --}}
+            <div class="bg-gradient-to-r from-secondary-100 to-accent-50 rounded-lg p-4 shadow-sm">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-lg bg-secondary-200 flex items-center justify-center flex-shrink-0">
+                        <x-lucide-utensils-crossed class="w-5 h-5 text-secondary-300" />
+                    </div>
+                    <h2 class="text-body-small text-black-400 mb-0 font-medium">Preparando</h2>
+                </div>
+                <h3 class="text-h3 text-black-300 mb-0 font-extrabold">{{ $stats['preparing'] }}</h3>
+            </div>
+
+            {{-- 5. Card Enviado --}}
+            <div class="bg-gradient-to-r from-primary-100 to-accent-50 rounded-lg p-4 shadow-sm">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-lg bg-primary-200 flex items-center justify-center flex-shrink-0">
+                        <x-lucide-truck class="w-5 h-5 text-primary-300" />
+                    </div>
+                    <h2 class="text-body-small text-black-400 mb-0 font-medium">Enviados</h2>
+                </div>
+                <h3 class="text-h3 text-black-300 mb-0 font-extrabold">{{ $stats['shipped'] }}</h3>
+            </div>
+
+            {{-- 6. Card Entregado --}}
+            <div class="bg-gradient-to-r from-success-100 to-accent-50 rounded-lg p-4 shadow-sm">
+                <div class="flex items-center gap-3 mb-3">
+                    <div class="w-10 h-10 rounded-lg bg-success-200 flex items-center justify-center flex-shrink-0">
+                        <x-lucide-check-circle-2 class="w-5 h-5 text-success-300" />
+                    </div>
+                    <h2 class="text-body-small text-black-400 mb-0 font-medium">Entregados</h2>
+                </div>
+                <h3 class="text-h3 text-black-300 mb-0 font-extrabold">{{ $stats['delivered'] }}</h3>
+            </div>
+
+            {{-- 7. Crear Slider --}}
+            <div class="col-start-1 row-start-2">
+                <a href="{{ route('tenant.admin.sliders.create', ['store' => $store->slug]) }}" 
+                   class="flex flex-col items-center justify-center h-full bg-warning-300 rounded-lg p-4 shadow-sm hover:bg-warning-200 transition-colors group">
+                    <div class="w-12 h-12 rounded-lg bg-warning-200 flex items-center justify-center mb-2 group-hover:bg-warning-100 transition-colors">
+                        <x-lucide-circle-plus class="w-6 h-6 text-warning-300 group-hover:text-warning-400" />
+                    </div>
+                    <span class="text-body-small font-medium text-black-300 text-center">Crear Slider</span>
+                </a>
+            </div>
+
+            {{-- 8. Agregar Producto --}}
+            <div class="col-start-6 row-start-2">
+                <a href="{{ route('tenant.admin.products.create', ['store' => $store->slug]) }}" 
+                   class="flex flex-col items-center justify-center h-full bg-primary-300 rounded-lg p-4 shadow-sm hover:bg-primary-400 transition-colors group">
+                    <div class="w-12 h-12 rounded-lg bg-primary-200 flex items-center justify-center mb-2 group-hover:bg-primary-100 transition-colors">
+                        <x-lucide-circle-plus class="w-6 h-6 text-primary-300 group-hover:text-primary-400" />
+                    </div>
+                    <span class="text-body-small font-medium text-accent-50 text-center">Agregar Producto</span>
+                </a>
+            </div>
+
+            {{-- 9. Crear Pedido --}}
+            <div class="col-start-1 row-start-3">
+                <a href="{{ route('tenant.admin.orders.create', ['store' => $store->slug]) }}" 
+                   class="flex flex-col items-center justify-center h-full bg-info-300 rounded-lg p-4 shadow-sm hover:bg-info-400 transition-colors group">
+                    <div class="w-12 h-12 rounded-lg bg-info-200 flex items-center justify-center mb-2 group-hover:bg-info-100 transition-colors">
+                        <x-lucide-circle-plus class="w-6 h-6 text-info-300 group-hover:text-info-400" />
+                    </div>
+                    <span class="text-body-small font-medium text-accent-50 text-center">Crear Pedido</span>
+                </a>
+            </div>
+
+            {{-- 10. Crear Cupón --}}
+            <div class="col-start-2 row-start-3">
+                <a href="{{ route('tenant.admin.coupons.create', ['store' => $store->slug]) }}" 
+                   class="flex flex-col items-center justify-center h-full bg-secondary-300 rounded-lg p-4 shadow-sm hover:bg-secondary-200 transition-colors group">
+                    <div class="w-12 h-12 rounded-lg bg-secondary-200 flex items-center justify-center mb-2 group-hover:bg-secondary-100 transition-colors">
+                        <x-lucide-circle-plus class="w-6 h-6 text-secondary-300 group-hover:text-secondary-400" />
+                    </div>
+                    <span class="text-body-small font-medium text-accent-50 text-center">Crear Cupón</span>
+                </a>
+            </div>
+
+            {{-- 11. Crear Reserva Restaurante --}}
+            <div class="col-start-3 row-start-2">
+                @php
+                    $hasTableReservations = featureEnabled($store, 'reservas_mesas');
+                @endphp
+                <a href="{{ $hasTableReservations ? route('tenant.admin.reservations.create', ['store' => $store->slug]) : '#' }}" 
+                   class="flex flex-col items-center justify-center h-full bg-warning-300 rounded-lg p-4 shadow-sm transition-colors group {{ $hasTableReservations ? 'hover:bg-warning-200 cursor-pointer' : 'opacity-50 cursor-not-allowed' }}"
+                   @if(!$hasTableReservations) onclick="event.preventDefault(); Swal.fire({ icon: 'info', title: 'Feature no disponible', text: 'Las reservas de mesa no están habilitadas en tu plan.' });" @endif>
+                    <div class="w-12 h-12 rounded-lg bg-warning-200 flex items-center justify-center mb-2 group-hover:bg-warning-100 transition-colors">
+                        <x-lucide-circle-plus class="w-6 h-6 text-warning-300 group-hover:text-warning-400" />
+                    </div>
+                    <span class="text-body-small font-medium text-black-300 text-center">Crear Reserva Restaurante</span>
+                </a>
+            </div>
+
+            {{-- 12. Crear Reserva Hotel --}}
+            <div class="col-start-3 row-start-3">
+                @php
+                    $hasHotelReservations = featureEnabled($store, 'reservas_hotel');
+                @endphp
+                <a href="{{ $hasHotelReservations ? route('tenant.admin.hotel.reservations.create', ['store' => $store->slug]) : '#' }}" 
+                   class="flex flex-col items-center justify-center h-full bg-info-200 rounded-lg p-4 shadow-sm transition-colors group {{ $hasHotelReservations ? 'hover:bg-info-100 cursor-pointer' : 'opacity-50 cursor-not-allowed' }}"
+                   @if(!$hasHotelReservations) onclick="event.preventDefault(); Swal.fire({ icon: 'info', title: 'Feature no disponible', text: 'Las reservas de hotel no están habilitadas en tu plan.' });" @endif>
+                    <div class="w-12 h-12 rounded-lg bg-info-100 flex items-center justify-center mb-2 group-hover:bg-info-50 transition-colors">
+                        <x-lucide-circle-plus class="w-6 h-6 text-info-200 group-hover:text-info-300" />
+                    </div>
+                    <span class="text-body-small font-medium text-black-300 text-center">Crear Reserva Hotel</span>
+                </a>
+            </div>
+
+            {{-- 13. Anuncios --}}
+            <div class="col-span-3 row-span-2 col-start-4 row-start-2">
+                <div x-data="announcementBanners" x-init="loadBanners()" x-show="banners.length > 0">
+                    <div class="relative overflow-hidden rounded-xl shadow-sm w-full h-full">
+                        <div class="relative w-full h-full">
                             <template x-for="(banner, index) in banners" :key="banner.id">
                                 <div x-show="currentSlide === index"
                                     x-transition:enter="transition ease-out duration-300"
@@ -257,31 +180,26 @@
                                     x-transition:leave-start="opacity-100 transform translate-x-0"
                                     x-transition:leave-end="opacity-0 transform -translate-x-full"
                                     class="absolute inset-0 w-full h-full">
-                                    <!-- Banner clickeable - Solo imagen -->
                                     <a :href="banner.banner_link || banner.show_url" 
                                        class="block w-full h-full"
                                        :target="banner.banner_link ? '_blank' : '_self'">
                                         <img :src="banner.banner_image_url" 
                                              :alt="banner.title"
-                                             class="w-full h-full object-none rounded-xl">
+                                             class="w-full h-full object-cover rounded-xl">
                                     </a>
                                 </div>
                             </template>
                         </div>
-                        <!-- Controles del carrusel -->
                         <div x-show="banners.length > 1" class="absolute inset-0 flex items-center justify-between pointer-events-none">
-                            <!-- Botón anterior -->
                             <button @click="previousSlide()" 
                                     class="ml-4 w-8 h-8 bg-black bg-opacity-40 hover:bg-opacity-60 rounded-full flex items-center justify-center text-accent-50 transition-all duration-200 pointer-events-auto">
                                 <x-solar-arrow-left-outline class="w-4 h-4" />
                             </button>
-                            <!-- Botón siguiente -->
                             <button @click="nextSlide()" 
                                     class="mr-4 w-8 h-8 bg-black bg-opacity-40 hover:bg-opacity-60 rounded-full flex items-center justify-center text-accent-50 transition-all duration-200 pointer-events-auto">
                                 <x-solar-arrow-right-outline class="w-4 h-4" />
                             </button>
                         </div>
-                        <!-- Indicadores -->
                         <div x-show="banners.length > 1" class="absolute bottom-2 left-1/2 transform -translate-x-1/2 flex gap-2">
                             <template x-for="(banner, index) in banners" :key="'dot-' + banner.id">
                                 <button @click="goToSlide(index)"
@@ -293,61 +211,186 @@
                     </div>
                 </div>
             </div>
+
+            {{-- 14. Pedidos Delivery (lista completa) --}}
+            <div class="col-span-2 row-span-4 row-start-4 bg-accent-50 rounded-lg p-4 shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-body-large text-black-500 mb-0 font-medium flex items-center gap-2">
+                        <x-lucide-truck class="w-5 h-5 text-primary-300" />
+                        Delivery
+                    </h3>
+                    <a href="{{ route('tenant.admin.orders.index', ['store' => $store->slug, 'type' => 'delivery']) }}" 
+                       class="text-body-small text-secondary-300 hover:text-secondary-400">
+                        Ver todos
+                    </a>
+                </div>
+                <div class="space-y-2 max-h-[500px] overflow-y-auto" x-data="ordersListWidget({{ json_encode($deliveryOrders) }})">
+                    <template x-for="order in orders" :key="order.id">
+                        <a :href="`{{ url('/' . $store->slug . '/admin/orders') }}/${order.id}`" 
+                           class="block p-3 border border-accent-100 rounded-lg hover:bg-accent-100 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div class="flex-shrink-0">
+                                    <div class="w-10 h-10 rounded-lg bg-secondary-100 flex items-center justify-center">
+                                        <x-lucide-truck class="w-5 h-5 text-secondary-300" />
+                                    </div>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <p class="text-body-small font-bold text-black-300">#<span x-text="order.order_number"></span></p>
+                                        <span class="text-small px-2 py-0.5 rounded-full" 
+                                              :class="getStatusColorClass(order.status)"
+                                              x-text="getStatusLabel(order.status)"></span>
+                                    </div>
+                                    <p class="text-caption text-black-300 truncate" x-text="order.customer_name"></p>
+                                    <p class="text-caption text-black-300" x-text="formatDate(order.created_at)"></p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-body-small font-bold text-black-300">$<span x-text="formatCurrency(order.total)"></span></p>
+                                </div>
+                            </div>
+                        </a>
+                    </template>
+                    <div x-show="orders.length === 0" class="text-center py-8">
+                        <p class="text-body-small text-black-300">No hay pedidos</p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- 15. Pedidos a la Habitación --}}
+            <div class="col-span-2 row-span-4 col-start-3 row-start-4 bg-accent-50 rounded-lg p-4 shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-body-large text-black-500 mb-0 font-medium flex items-center gap-2">
+                        <x-lucide-bed class="w-5 h-5 text-info-300" />
+                        Habitación
+                    </h3>
+                    <a href="{{ route('tenant.admin.orders.index', ['store' => $store->slug, 'type' => 'room_service']) }}" 
+                       class="text-body-small text-secondary-300 hover:text-secondary-400">
+                        Ver todos
+                    </a>
+                </div>
+                <div class="space-y-2 max-h-[500px] overflow-y-auto" x-data="ordersListWidget({{ json_encode($roomServiceOrders) }})">
+                    <template x-for="order in orders" :key="order.id">
+                        <a :href="`{{ url('/' . $store->slug . '/admin/orders') }}/${order.id}`" 
+                           class="block p-3 border border-accent-100 rounded-lg hover:bg-accent-100 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div class="flex-shrink-0">
+                                    <div class="w-10 h-10 rounded-lg bg-info-100 flex items-center justify-center">
+                                        <x-lucide-bed class="w-5 h-5 text-info-300" />
+                                    </div>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <p class="text-body-small font-bold text-black-300">#<span x-text="order.order_number"></span></p>
+                                        <span class="text-small px-2 py-0.5 rounded-full" 
+                                              :class="getStatusColorClass(order.status)"
+                                              x-text="getStatusLabel(order.status)"></span>
+                                    </div>
+                                    <p class="text-caption text-black-300 truncate" x-text="order.customer_name"></p>
+                                    <template x-if="order.room_number">
+                                        <p class="text-caption text-black-300">Habitación #<span x-text="order.room_number"></span></p>
+                                    </template>
+                                    <p class="text-caption text-black-300" x-text="formatDate(order.created_at)"></p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-body-small font-bold text-black-300">$<span x-text="formatCurrency(order.total)"></span></p>
+                                </div>
+                            </div>
+                        </a>
+                    </template>
+                    <div x-show="orders.length === 0" class="text-center py-8">
+                        <p class="text-body-small text-black-300">No hay pedidos</p>
+                    </div>
+                </div>
+            </div>
+
+            {{-- 16. Pedidos Consumo en Local --}}
+            <div class="col-span-2 row-span-4 col-start-5 row-start-4 bg-accent-50 rounded-lg p-4 shadow-sm">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-body-large text-black-500 mb-0 font-medium flex items-center gap-2">
+                        <x-lucide-utensils-crossed class="w-5 h-5 text-primary-300" />
+                        Consumo Local
+                    </h3>
+                    <a href="{{ route('tenant.admin.orders.index', ['store' => $store->slug, 'type' => 'dine_in']) }}" 
+                       class="text-body-small text-secondary-300 hover:text-secondary-400">
+                        Ver todos
+                    </a>
+                </div>
+                <div class="space-y-2 max-h-[500px] overflow-y-auto" x-data="ordersListWidget({{ json_encode($dineInOrders) }})">
+                    <template x-for="order in orders" :key="order.id">
+                        <a :href="`{{ url('/' . $store->slug . '/admin/orders') }}/${order.id}`" 
+                           class="block p-3 border border-accent-100 rounded-lg hover:bg-accent-100 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <div class="flex-shrink-0">
+                                    <div class="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center">
+                                        <x-lucide-utensils-crossed class="w-5 h-5 text-primary-300" />
+                                    </div>
+                                </div>
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex items-center gap-2 mb-1">
+                                        <p class="text-body-small font-bold text-black-300">#<span x-text="order.order_number"></span></p>
+                                        <span class="text-small px-2 py-0.5 rounded-full" 
+                                              :class="getStatusColorClass(order.status)"
+                                              x-text="getStatusLabel(order.status)"></span>
+                                    </div>
+                                    <p class="text-caption text-black-300 truncate" x-text="order.customer_name"></p>
+                                    <template x-if="order.table_number">
+                                        <p class="text-caption text-black-300">Mesa #<span x-text="order.table_number"></span></p>
+                                    </template>
+                                    <p class="text-caption text-black-300" x-text="formatDate(order.created_at)"></p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-body-small font-bold text-black-300">$<span x-text="formatCurrency(order.total)"></span></p>
+                                </div>
+                            </div>
+                        </a>
+                    </template>
+                    <div x-show="orders.length === 0" class="text-center py-8">
+                        <p class="text-body-small text-black-300">No hay pedidos</p>
+                    </div>
+                </div>
+            </div>
         </div>
     @endsection
 
     @push('scripts')
     <script>
     document.addEventListener('alpine:init', () => {
-        Alpine.data('recentOrdersWidget', () => ({
-            updating: false,
+        const getStatusLabel = (status) => {
+            const statuses = @json(\App\Shared\Models\Order::STATUSES);
+            return statuses[status] || status;
+        };
+
+        const getStatusColorClass = (status) => {
+            const colorMap = {
+                'pending': 'bg-warning-100 text-warning-400',
+                'confirmed': 'bg-info-100 text-info-400',
+                'preparing': 'bg-secondary-100 text-secondary-400',
+                'shipped': 'bg-primary-100 text-primary-400',
+                'delivered': 'bg-success-100 text-success-400',
+                'cancelled': 'bg-error-100 text-error-400'
+            };
+            return colorMap[status] || 'bg-accent-200 text-black-300';
+        };
+
+        Alpine.data('ordersListWidget', (orders) => ({
+            orders: orders,
             
-            async updateOrderStatus(orderId, newStatus, selectElement) {
-                if (this.updating) return;
-                
-                this.updating = true;
-                const originalValue = selectElement.getAttribute('data-original') || selectElement.value;
-                
-                try {
-                    const response = await fetch(`{{ url('/' . $store->slug . '/admin/orders') }}/${orderId}/update-status`, {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            status: newStatus
-                        })
-                    });
-
-                    const data = await response.json();
-
-                    if (data.success) {
-                        // Actualizar la badge de estado
-                        const orderRow = selectElement.closest('.flex');
-                        const statusBadge = orderRow.querySelector('.rounded-full');
-                        statusBadge.textContent = data.status_label;
-                        statusBadge.className = `text-xs px-2 py-1 rounded-full ${data.status_color_class}`;
-                        
-                        selectElement.setAttribute('data-original', newStatus);
-                        
-                        // Mostrar notificación de éxito
-                        this.showToast('Estado actualizado correctamente', 'success');
-                    } else {
-                        selectElement.value = originalValue;
-                        this.showToast(data.message || 'Error al actualizar el estado', 'error');
-                    }
-                } catch (error) {
-                    selectElement.value = originalValue;
-                    this.showToast('Error al actualizar el estado', 'error');
-                } finally {
-                    this.updating = false;
-                }
+            getStatusLabel,
+            getStatusColorClass,
+            
+            formatCurrency(value) {
+                return new Intl.NumberFormat('es-CO').format(Math.round(value || 0));
             },
             
-            showToast(message, type = 'info') {
-                alert(`${type.toUpperCase()}: ${message}`);
+            formatDate(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleDateString('es-CO', {
+                    day: '2-digit',
+                    month: '2-digit',
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
             }
         }));
     });
@@ -357,7 +400,7 @@
             banners: [],
             currentSlide: 0,
             autoplayInterval: null,
-            autoplayDelay: 4000, // 4 segundos
+            autoplayDelay: 4000,
             
             async loadBanners() {
                 try {
@@ -411,4 +454,4 @@
     });
     </script>
     @endpush
-</x-tenant-admin-layout> 
+</x-tenant-admin-layout>

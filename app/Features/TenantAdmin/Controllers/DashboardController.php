@@ -28,12 +28,17 @@ class DashboardController extends Controller
         // Eager loading del plan
         $store->load('plan');
         
-        // Obtener pedidos recientes (últimos 5) - Sin caché porque son datos en tiempo real
+        // Obtener pedidos recientes - Sin caché porque son datos en tiempo real
+        // Se filtrarán por tipo en el frontend con Alpine.js
+        // Orden: más reciente primero (desc)
         $recentOrders = Order::where('store_id', $store->id)
             ->with(['items.product.mainImage'])
             ->orderBy('created_at', 'desc')
-            ->limit(5)
-            ->get();
+            ->limit(20)
+            ->get()
+            ->map(function ($order) {
+                return $this->mapOrder($order);
+            });
         
         // Estadísticas con caché de 5 minutos
         $stats = \Cache::remember("tenant_dashboard_stats_{$store->id}", 300, function () use ($store) {
@@ -44,8 +49,32 @@ class DashboardController extends Controller
                 ->pluck('count', 'status')
                 ->toArray();
             
+            // Obtener conteos por tipo de orden
+            $orderTypeCounts = Order::select('order_type', \DB::raw('count(*) as count'))
+                ->where('store_id', $store->id)
+                ->groupBy('order_type')
+                ->pluck('count', 'order_type')
+                ->toArray();
+            
             $totalOrders = array_sum($statusCounts);
             $deliveredOrders = $statusCounts['delivered'] ?? 0;
+            
+            // Contar delivery (delivery + pickup)
+            $deliveryCount = ($orderTypeCounts['delivery'] ?? 0) + ($orderTypeCounts['pickup'] ?? 0);
+            $dineInCount = $orderTypeCounts['dine_in'] ?? 0;
+            $roomServiceCount = $orderTypeCounts['room_service'] ?? 0;
+            
+            // Mesas activas (dine_in con status != delivered/cancelled)
+            $activeDineIn = Order::byStore($store->id)
+                ->dineIn()
+                ->whereNotIn('status', ['delivered', 'cancelled'])
+                ->count();
+            
+            // Habitaciones activas (room_service con status != delivered/cancelled)
+            $activeRoomService = Order::byStore($store->id)
+                ->roomService()
+                ->whereNotIn('status', ['delivered', 'cancelled'])
+                ->count();
             
             return [
                 'total' => $totalOrders,
@@ -70,6 +99,14 @@ class DashboardController extends Controller
                     ->whereDate('created_at', today())
                     ->whereIn('status', ['delivered'])
                     ->sum('total'),
+                // Stats por tipo de orden (para tabs)
+                'total_count' => $totalOrders,
+                'delivery_count' => $deliveryCount,
+                'dine_in_count' => $dineInCount,
+                'room_service_count' => $roomServiceCount,
+                // Stats activas
+                'active_dine_in' => $activeDineIn,
+                'active_room_service' => $activeRoomService,
             ];
         });
         
@@ -81,6 +118,65 @@ class DashboardController extends Controller
         $stats['admin_name'] = $user->name;
         $stats['admin_email'] = $user->email;
 
-        return view('tenant-admin::dashboard', compact('store', 'stats', 'recentOrders'));
+        // Obtener pedidos por tipo para las secciones
+        $deliveryOrders = Order::where('store_id', $store->id)
+            ->whereIn('order_type', ['delivery', 'pickup'])
+            ->with(['items.product.mainImage'])
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function ($order) {
+                return $this->mapOrder($order);
+            });
+        
+        $roomServiceOrders = Order::where('store_id', $store->id)
+            ->where('order_type', 'room_service')
+            ->with(['items.product.mainImage'])
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function ($order) {
+                return $this->mapOrder($order);
+            });
+        
+        $dineInOrders = Order::where('store_id', $store->id)
+            ->where('order_type', 'dine_in')
+            ->with(['items.product.mainImage'])
+            ->orderBy('created_at', 'desc')
+            ->limit(10)
+            ->get()
+            ->map(function ($order) {
+                return $this->mapOrder($order);
+            });
+
+        return view('tenant-admin::dashboard', compact('store', 'stats', 'recentOrders', 'deliveryOrders', 'roomServiceOrders', 'dineInOrders'));
+    }
+    
+    /**
+     * Mapear orden a formato para frontend
+     */
+    private function mapOrder($order)
+    {
+        return [
+            'id' => $order->id,
+            'order_number' => $order->order_number,
+            'customer_name' => $order->customer_name,
+            'status' => $order->status,
+            'order_type' => $order->order_type,
+            'table_number' => $order->table_number,
+            'room_number' => $order->room_number,
+            'total' => $order->total,
+            'created_at' => $order->created_at->toISOString(),
+            'items' => $order->items->map(function ($item) {
+                return [
+                    'product_name' => $item->product_name,
+                    'product' => $item->product ? [
+                        'main_image' => $item->product->mainImage ? [
+                            'image_url' => $item->product->mainImage->image_url
+                        ] : null
+                    ] : null
+                ];
+            })
+        ];
     }
 } 

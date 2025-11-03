@@ -3,9 +3,10 @@
 @section('content')
 <div class="px-4 py-6 space-y-6">
     <!-- Header del carrito -->
-    <div class="text-center">
-        <h1 class="text-2xl font-bold text-black-500 mb-2">Mi Carrito</h1>
-        <p class="text-black-300">Revisa tus productos antes de continuar</p>
+    <div class="flex flex-col items-center justify-center">
+        <img src="https://cdn.jsdelivr.net/gh/linkiuapp/medialink@main/Assets_Fronted/img_linkiu_v1_cart.svg" alt="img_linkiu_v1_cart" class="h-32 w-auto" loading="lazy">
+        <h1 class="h3 text-brandNeutral-400 mt-4">Mi Carrito</h1>
+        <p class="caption text-brandNeutral-400">Revisa tus productos antes de continuar</p>
     </div>
 
     <!-- Contenedor del carrito -->
@@ -18,12 +19,12 @@
 
         <!-- Empty state -->
         <div id="cart-empty" class="text-center py-12 hidden">
-            <x-solar-bag-2-outline class="w-16 h-16 mx-auto mb-4 text-black-200" />
-            <h3 class="text-lg font-semibold text-black-400 mb-2">Tu carrito está vacío</h3>
-            <p class="text-black-300 mb-6">¡Agrega algunos productos deliciosos!</p>
+            <h3 class="h4 text-brandNeutral-400 mt-4">Tu carrito está vacío</h3>
+            <p class="caption text-brandNeutral-400 mb-6">¡Agrega algunos productos deliciosos!</p>
             <a href="{{ route('tenant.home', $store->slug) }}" 
-               class="bg-primary-300 hover:bg-primary-200 text-accent-50 px-6 py-3 rounded-lg font-medium transition-colors">
-                Ver productos
+               class="inline-flex items-center gap-2 bg-brandPrimary-300 hover:bg-brandPrimary-200 text-brandWhite-100 px-6 py-3 rounded-full caption transition-colors text-center">
+                Continuar comprando
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
             </a>
         </div>
 
@@ -33,16 +34,16 @@
         </div>
 
         <!-- Cart summary -->
-        <div id="cart-summary" class="bg-accent-50 rounded-lg p-4 border border-accent-200 hidden">
+        <div id="cart-summary" class="bg-brandWhite-50 rounded-lg p-4 border border-brandWhite-300 hidden">
             <div class="space-y-3">
                 <div class="flex justify-between items-center">
-                    <span class="text-black-400">Subtotal:</span>
-                    <span id="cart-subtotal" class="font-semibold text-black-500">$0</span>
+                    <span class="caption text-brandNeutral-400">Subtotal:</span>
+                    <span id="cart-subtotal" class="body-lg-bold text-brandNeutral-400">$0</span>
                 </div>
-                <div class="border-t border-accent-200 pt-3">
+                <div class="border-t border-brandWhite-300 pt-3">
                     <div class="flex justify-between items-center">
-                        <span class="text-lg font-bold text-black-500">Total:</span>
-                        <span id="cart-total" class="text-lg font-bold text-primary-300">$0</span>
+                        <span class="caption text-brandNeutral-400">Total:</span>
+                        <span id="cart-total" class="body-lg-bold text-brandNeutral-400">$0</span>
                     </div>
                 </div>
             </div>
@@ -52,12 +53,12 @@
         <div id="cart-actions" class="space-y-3 hidden">
             <a href="{{ route('tenant.checkout.create', $store->slug) }}" 
                id="checkout-btn" 
-               class="block w-full bg-success-300 hover:bg-success-200 text-accent-50 py-3 rounded-lg font-semibold transition-colors text-center">
-                Proceder al Checkout
+               class="block w-full bg-brandPrimary-300 hover:bg-brandPrimary-200 text-brandWhite-100 py-3 rounded-lg caption transition-colors text-center">
+                Finalizar compra
             </a>
             <button id="clear-cart-btn" 
-                    class="w-full bg-error-300 hover:bg-error-200 text-accent-50 py-2 rounded-lg font-medium transition-colors">
-                Vaciar Carrito
+                    class="w-full bg-brandError-100 hover:bg-brandError-300 text-brandError-400 py-2 rounded-lg caption transition-colors text-center">
+                Vaciar carrito
             </button>
         </div>
     </div>
@@ -65,37 +66,35 @@
 
 <!-- Template para items del carrito -->
 <template id="cart-item-template">
-    <div class="cart-item bg-accent-50 rounded-lg p-4 border border-accent-200">
+    <div class="cart-item bg-brandWhite-50 rounded-lg p-4 border border-brandWhite-300">
         <div class="flex items-center gap-3">
             <!-- Imagen del producto -->
-            <div class="w-16 h-16 bg-accent-100 rounded-lg overflow-hidden flex-shrink-0">
-                <img class="item-image w-full h-full object-cover" src="" alt="">
+            <div class="w-8 h-8 bg-brandPrimary-50 rounded-lg overflow-hidden flex-shrink-0">
+                <img class="item-image w-8 h-8 object-cover" src="" alt="">
             </div>
             
             <!-- Información del producto -->
             <div class="flex-1 min-w-0">
-                <h3 class="item-name font-semibold text-black-500 truncate"></h3>
-                <p class="item-variants text-sm text-black-300"></p>
-                <p class="item-price text-primary-300 font-bold"></p>
+                <h3 class="item-name caption-strong text-brandNeutral-400 truncate"></h3>
+                <p class="item-variants caption text-brandNeutral-400"></p>
+                <p class="item-price caption-strong text-brandNeutral-400"></p>
             </div>
             
             <!-- Controles de cantidad -->
             <div class="flex items-center gap-2 flex-shrink-0">
-                <button class="quantity-decrease bg-accent-200 hover:bg-accent-300 w-8 h-8 rounded-full flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                    <x-solar-square-alt-arrow-left-outline class="w-4 h-4 text-black-400" />
-                    <div class="loading-spinner hidden w-4 h-4 border-2 border-black-200 border-t-black-400 rounded-full animate-spin"></div>
+                <button class="quantity-decrease bg-brandPrimary-50 hover:bg-brandPrimary-100 w-8 h-8 rounded-full flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-minus-icon lucide-minus"><path d="M5 12h14"/></svg>                    <div class="loading-spinner hidden w-3 h-3 border-2 border-brandNeutral-400 border-t-brandNeutral-400 rounded-full animate-spin"></div>
                 </button>
-                <span class="item-quantity font-semibold text-black-500 min-w-[2rem] text-center"></span>
-                <button class="quantity-increase bg-accent-200 hover:bg-accent-300 w-8 h-8 rounded-full flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                    <x-solar-square-alt-arrow-right-outline class="w-4 h-4 text-black-400" />
-                    <div class="loading-spinner hidden w-4 h-4 border-2 border-black-200 border-t-black-400 rounded-full animate-spin"></div>
+                <span class="item-quantity body-lg-bold text-brandNeutral-400 min-w-[2rem] text-center"></span>
+                <button class="quantity-increase bg-brandPrimary-50 hover:bg-brandPrimary-100 w-8 h-8 rounded-full flex items-center justify-center transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-plus-icon lucide-plus"><path d="M5 12h14"/><path d="M12 5v14"/></svg>                    <div class="loading-spinner hidden w-4 h-4 border-2 border-brandNeutral-400 border-t-brandNeutral-400 rounded-full animate-spin"></div>
                 </button>
             </div>
             
             <!-- Botón eliminar -->
-            <button class="remove-item text-error-300 hover:text-error-200 p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
-                <x-solar-trash-bin-trash-outline class="w-5 h-5" />
-                <div class="loading-spinner hidden w-4 h-4 border-2 border-error-200 border-t-error-300 rounded-full animate-spin"></div>
+            <button class="remove-item text-brandError-300 hover:text-brandError-200 p-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-trash2-icon lucide-trash-2"><path d="M10 11v6"/><path d="M14 11v6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/><path d="M3 6h18"/><path d="M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                <div class="loading-spinner hidden w-3 h-3 border-2 border-brandNeutral-400 border-t-brandNeutral-400 rounded-full animate-spin"></div>
             </button>
         </div>
     </div>
@@ -314,11 +313,11 @@ document.addEventListener('DOMContentLoaded', function() {
     document.getElementById('clear-cart-btn').addEventListener('click', async function() {
         Swal.fire({
             title: '¿Vaciar carrito?',
-            text: 'Se eliminarán todos los productos del carrito',
+            text: 'Todos los productos serán eliminados del carrito',
             icon: 'warning',
             showCancelButton: true,
-            confirmButtonColor: '#ed2e45',
-            cancelButtonColor: '#6b7280',
+            confirmButtonColor: '#22c55e',
+            cancelButtonColor: '#ed2e45',
             confirmButtonText: 'Sí, vaciar',
             cancelButtonText: 'Cancelar'
         }).then(async (result) => {
@@ -339,9 +338,9 @@ document.addEventListener('DOMContentLoaded', function() {
                         // Mostrar SweetAlert de éxito
                         Swal.fire({
                             icon: 'success',
-                            title: 'Carrito vaciado',
-                            text: 'Se han eliminado todos los productos del carrito',
-                            confirmButtonColor: '#00c76f',
+                            title: '¡Carrito vaciado!',
+                            text: 'Todos los productos fueron eliminados',
+                            confirmButtonColor: '#22c55e',
                             confirmButtonText: 'OK',
                             timer: 2000,
                             timerProgressBar: true
@@ -449,16 +448,16 @@ document.addEventListener('DOMContentLoaded', function() {
 
         // Mostrar notificación de error mejorada
         const notification = document.createElement('div');
-        notification.className = 'cart-page-error fixed top-4 right-4 bg-error-300 text-accent-50 px-4 py-3 rounded-lg shadow-lg z-50 max-w-sm transform transition-all duration-300 translate-x-full';
+        notification.className = 'cart-page-error fixed top-4 right-4 bg-brandError-300 text-brandWhite-100 px-4 py-3 rounded-lg shadow-lg z-50 max-w-sm transform transition-all duration-300 translate-x-full';
         notification.innerHTML = `
             <div class="flex items-start gap-2">
                 <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.664-.833-2.464 0L4.268 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
                 </svg>
                 <div class="flex-1">
-                    <span class="text-sm font-medium">${message}</span>
+                    <span class="caption font-medium">${message}</span>
                 </div>
-                <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-accent-50 hover:text-accent-200">
+                <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-brandWhite-100 hover:text-brandWhite-200">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                     </svg>

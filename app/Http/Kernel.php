@@ -71,6 +71,7 @@ class Kernel extends HttpKernel
         'store.approval' => \App\Shared\Middleware\CheckStoreApprovalStatus::class,
         'tenant.identify' => \App\Shared\Middleware\TenantIdentificationMiddleware::class,
         'email.config.rate.limit' => \App\Shared\Middleware\EmailConfigurationRateLimitMiddleware::class,
+        'feature' => \App\Shared\Http\Middleware\EnsureFeatureEnabled::class,
         'debug.auth' => \App\Http\Middleware\DebugAuthMiddleware::class,
     ];
 } 

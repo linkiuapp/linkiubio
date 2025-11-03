@@ -1,0 +1,127 @@
+/* Estilos personalizados para Litepicker - Compacto y Moderno */
+
+:root {
+    --litepicker-container-months-color-bg: #ffffff;
+    --litepicker-container-months-color-box-shadow: rgba(0, 0, 0, 0.1);
+    --litepicker-month-header-color: #000000;
+    --litepicker-month-header-color-divider: #e5e7eb;
+    --litepicker-month-weekday-color: #6b7280;
+    --litepicker-month-week-numbers-color: #9ca3af;
+    --litepicker-day-width: 40px;
+    --litepicker-day-height: 40px;
+    --litepicker-month-padding: 12px;
+}
+
+.litepicker {
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.litepicker .container__months {
+    padding: 12px;
+}
+
+.litepicker .container__months .month-item-header {
+    padding: 8px 12px;
+    margin-bottom: 8px;
+}
+
+.litepicker .container__months .month-item-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1f2937;
+}
+
+.litepicker .container__months .button-previous-month,
+.litepicker .container__months .button-next-month {
+    width: 32px;
+    height: 32px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.litepicker .container__months .button-previous-month:hover,
+.litepicker .container__months .button-next-month:hover {
+    background-color: #f3f4f6;
+}
+
+.litepicker .container__months .month-item-weekdays-row {
+    padding: 4px 0;
+    margin-bottom: 4px;
+}
+
+.litepicker .container__months .month-item-weekdays-row > div {
+    font-size: 12px;
+    font-weight: 600;
+    color: #6b7280;
+    padding: 4px;
+}
+
+.litepicker .container__months .month-item-wrapper {
+    padding: 4px;
+}
+
+.litepicker .container__months .month-item-days-row {
+    margin: 2px 0;
+}
+
+.litepicker .container__months .month-item-day-item {
+    width: 36px;
+    height: 36px;
+    font-size: 14px;
+    border-radius: 6px;
+    margin: 2px;
+    transition: all 0.15s;
+}
+
+.litepicker .container__months .month-item-day-item:hover {
+    background-color: #f3f4f6;
+    transform: scale(1.05);
+}
+
+.litepicker .container__months .month-item-day-item.is-today {
+    background-color: #eff6ff;
+    color: #2563eb;
+    font-weight: 600;
+}
+
+.litepicker .container__months .month-item-day-item.is-selected {
+    background-color: #da27a7;
+    color: #ffffff;
+    font-weight: 600;
+}
+
+.litepicker .container__months .month-item-day-item.is-selected:hover {
+    background-color: #c41f9a;
+}
+
+.litepicker .container__months .month-item-day-item.is-in-range {
+    background-color: #fce7f3;
+    color: #da27a7;
+}
+
+.litepicker .container__months .month-item-day-item.is-disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.litepicker .container__months .month-item-day-item.is-prev-month-day,
+.litepicker .container__months .month-item-day-item.is-next-month-day {
+    opacity: 0.4;
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+    .litepicker .container__months {
+        padding: 8px;
+    }
+
+    .litepicker .container__months .month-item-day-item {
+        width: 32px;
+        height: 32px;
+        font-size: 13px;
+    }
+}
+

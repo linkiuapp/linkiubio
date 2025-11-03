@@ -11,97 +11,141 @@
     <div class="max-w-6xl mx-auto">
         <!-- Header -->
         <div class="text-center mb-8">
-            <h1 class="text-h5 font-bold text-black-500 mb-2">Finalizar compra</h1>
-            <p class="text-body-regular text-black-500">Completa tu información para procesar tu pedido</p>
+            <h1 class="h1 text-brandNeutral-400 mb-2">Finalizar compra</h1>
+            <p class="caption text-brandNeutral-400">Completa tu información para procesar tu pedido</p>
         </div>
 
         <!-- Main Checkout Layout - Single Column -->
-        <div class="max-w-2xl mx-auto">
-            <!-- Checkout Form -->
-            <div class="bg-accent-50 rounded-xl p-2 border border-accent-200">
-                <div class="space-y-6">
-            
+        <div class="mx-auto">
+
             <!-- CARD 1: DATOS PERSONALES -->
-            <div id="card-step1" class="bg-accent-50 rounded-xl p-4">
+            <div id="card-step1" class="bg-brandWhite-50 rounded-lg p-4 border border-brandWhite-300 mb-4">
                 <div class="flex items-center mb-4">
-                    <div class="w-8 h-8 bg-primary-300 text-accent-50 rounded-full flex items-center justify-center text-sm font-bold mr-3">1</div>
-                    <h3 class="text-body-large font-semibold text-black-500">Datos Personales</h3>
+                    <div class="w-8 h-8 bg-brandPrimary-50 text-brandPrimary-300 rounded-full flex items-center justify-center caption-strong mr-3">1</div>
+                    <h3 class="caption-strong text-brandNeutral-400">Datos Personales</h3>
                 </div>
                 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                <div class="space-y-4">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label for="customer_name" class="block text-caption font-medium text-black-500 mb-2">Nombre Completo *</label>
+                        <label for="customer_name" class="block caption text-brandNeutral-400 mb-2">Nombre Completo *</label>
                         <input 
                             type="text" 
                             id="customer_name" 
                             name="customer_name" 
-                            class="w-full px-4 py-3 border border-accent-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-colors"
+                            class="w-full px-4 py-3 border border-brandWhite-300 rounded-lg caption"
                             placeholder="Nombre completo"
                         >
-                        <div id="name_error" class="hidden mt-1 text-sm text-error-300"></div>
+                        <div id="name_error" class="hidden mt-1 caption text-brandError-400"></div>
                     </div>
                     
                     <div>
-                        <label for="customer_phone" class="block text-caption font-medium text-black-500 mb-2">Número de Celular *</label>
+                        <label for="customer_phone" class="block caption text-brandNeutral-400 mb-2">Número de Celular *</label>
                         <input 
                             type="tel" 
                             id="customer_phone" 
                             name="customer_phone" 
-                            class="w-full px-4 py-3 border border-accent-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-colors"
+                            class="w-full px-4 py-3 border border-brandWhite-300 rounded-lg caption"
                             placeholder="3001234567"
                         >
-                        <div id="phone_error" class="hidden mt-1 text-sm text-error-300"></div>
+                        <div id="phone_error" class="hidden mt-1 caption text-brandError-400"></div>
+                    </div>
+                    </div>
+                    
+                    <div class="flex justify-end">
+                        <button 
+                            type="button" 
+                            id="btn-continue-step1" 
+                            class="bg-brandPrimary-300 hover:bg-brandPrimary-200 text-brandWhite-100 py-3 px-6 rounded-full caption transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled
+                        >
+                            Continuar al Paso 2
+                        </button>
                     </div>
                 </div>
-                
-                <button 
-                    type="button" 
-                    id="btn-continue-step1" 
-                    class="w-full bg-primary-300 hover:bg-primary-200 text-accent-50 py-2 px-4 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-body-regular"
-                    disabled
-                >
-                    Continuar al Paso 2
-                </button>
             </div>
 
             <!-- CARD 2: MÉTODO DE ENVÍO -->
-            <div id="card-step2" class="bg-accent-50 rounded-xl p-4 hidden">
+            <div id="card-step2" class="bg-brandWhite-50 rounded-lg p-4 border border-brandWhite-300 mb-4 hidden">
                 <div class="flex items-center mb-4">
-                    <div class="w-8 h-8 bg-primary-300 text-accent-50 rounded-full flex items-center justify-center text-sm font-bold mr-3">2</div>
-                    <h3 class="text-body-large font-semibold text-black-500">Método de Envío</h3>
+                    <div class="w-8 h-8 bg-brandPrimary-50 text-brandPrimary-300 rounded-full flex items-center justify-center caption-strong mr-3">2</div>
+                    <h3 class="caption-strong text-brandNeutral-400">Método de Envío</h3>
                 </div>
                 
-                <div id="shipping-methods-container" class="space-y-3 mb-6">
-                    <!-- Los métodos de envío se cargan dinámicamente aquí -->
-                    <div class="text-center py-4">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-300 mx-auto"></div>
-                        <p class="text-sm text-black-300 mt-2">Cargando métodos de envío...</p>
+                <div class="space-y-4">
+                    <div id="shipping-methods-container" class="space-y-3">
+                        <!-- Los métodos de envío se cargan dinámicamente aquí -->
+                        <div class="text-center py-4">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brandPrimary-300 mx-auto"></div>
+                            <p class="caption text-brandNeutral-400 mt-2">Cargando métodos de envío...</p>
+                        </div>
                     </div>
-                </div>
-                
-                <!-- Address Fields for Local Shipping (only address) -->
-                <div id="address-fields-local" class="hidden space-y-4 mb-6">
+                    
+                    <!-- Selector de Mesa (para Consumo en Local) -->
+                    <div id="table-selector-container" class="hidden space-y-4 mb-4">
+                        <div>
+                            <label for="selected_table_number" class="block caption text-brandNeutral-400 mb-2">
+                                Selecciona tu Mesa *
+                            </label>
+                            <select 
+                                id="selected_table_number" 
+                                name="selected_table_number"
+                                class="w-full px-4 py-3 border border-brandWhite-300 rounded-lg caption focus:border-brandPrimary-300 focus:ring-1 focus:ring-brandPrimary-300"
+                                required
+                            >
+                                <option value="">-- Selecciona una mesa --</option>
+                                <!-- Se cargarán dinámicamente -->
+                            </select>
+                            <p class="caption text-brandNeutral-300 mt-1">
+                                Elige la mesa donde deseas consumir
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Selector de Habitación (para Servicio a Habitación) -->
+                    <div id="room-selector-container" class="hidden space-y-4 mb-4">
+                        <div>
+                            <label for="selected_room_number" class="block caption text-brandNeutral-400 mb-2">
+                                Selecciona tu Habitación *
+                            </label>
+                            <select 
+                                id="selected_room_number" 
+                                name="selected_room_number"
+                                class="w-full px-4 py-3 border border-brandWhite-300 rounded-lg caption focus:border-brandPrimary-300 focus:ring-1 focus:ring-brandPrimary-300"
+                                required
+                            >
+                                <option value="">-- Selecciona una habitación --</option>
+                                <!-- Se cargarán dinámicamente -->
+                            </select>
+                            <p class="caption text-brandNeutral-300 mt-1">
+                                Elige la habitación a la que deseas que se envíe el servicio
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Address Fields for Local Shipping (only address) -->
+                    <div id="address-fields-local" class="hidden space-y-4">
                     <div>
-                        <label for="customer_address" class="block text-sm font-medium text-black-500 mb-2">Dirección Completa *</label>
+                        <label for="customer_address" class="block caption text-brandNeutral-400 mb-2">Dirección Completa *</label>
                         <textarea 
                             id="customer_address" 
                             name="customer_address" 
                             rows="2"
-                            class="w-full px-4 py-3 border border-accent-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-colors resize-none text-caption"
+                            class="w-full px-4 py-3 border border-brandWhite-300 rounded-lg caption resize-none"
                             placeholder="Calle, carrera, número, apartamento, referencias..."
                         ></textarea>
                     </div>
-                </div>
+                    </div>
 
-                <!-- Address Fields for National Shipping (department + city + address) -->
-                <div id="address-fields-national" class="hidden space-y-4 mb-6">
+                    <!-- Address Fields for National Shipping (department + city + address) -->
+                    <div id="address-fields-national" class="hidden space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label for="department" class="block text-sm font-medium text-black-500 mb-2">Departamento *</label>
+                            <label for="department" class="block caption text-brandNeutral-400 mb-2">Departamento *</label>
                             <select 
                                 id="department" 
                                 name="department" 
-                                class="w-full px-4 py-3 border border-accent-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-colors text-caption"
+                                class="w-full px-4 py-3 border border-brandWhite-300 rounded-lg caption"
                             >
                                 <option value="">Selecciona tu departamento</option>
                                 @foreach(['Amazonas', 'Antioquia', 'Arauca', 'Atlántico', 'Bolívar', 'Boyacá', 'Caldas', 'Caquetá', 'Casanare', 'Cauca', 'Cesar', 'Chocó', 'Córdoba', 'Cundinamarca', 'Guainía', 'Guaviare', 'Huila', 'La Guajira', 'Magdalena', 'Meta', 'Nariño', 'Norte de Santander', 'Putumayo', 'Quindío', 'Risaralda', 'San Andrés y Providencia', 'Santander', 'Sucre', 'Tolima', 'Valle del Cauca', 'Vaupés', 'Vichada'] as $dept)
@@ -111,99 +155,102 @@
                         </div>
                         
                         <div>
-                            <label for="city" class="block text-caption font-medium text-black-500 mb-2">Ciudad *</label>
+                            <label for="city" class="block caption text-brandNeutral-400 mb-2">Ciudad *</label>
                             <input 
                                 type="text" 
                                 id="city" 
                                 name="city" 
-                                class="w-full px-4 py-3 border border-accent-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-colors text-caption"
+                                class="w-full px-4 py-3 border border-brandWhite-300 rounded-lg caption"
                                 placeholder="Escribe tu ciudad"
                             >
                         </div>
                     </div>
                     
                     <div>
-                        <label for="customer_address_national" class="block text-caption font-medium text-black-500 mb-2">Dirección Completa *</label>
+                        <label for="customer_address_national" class="block caption text-brandNeutral-400 mb-2">Dirección Completa *</label>
                         <textarea 
                             id="customer_address_national" 
                             name="customer_address" 
                             rows="2"
-                            class="w-full px-4 py-3 border border-accent-200 rounded-lg focus:ring-2 focus:ring-primary-300 focus:border-transparent transition-colors resize-none text-caption"
+                            class="w-full px-4 py-3 border border-brandWhite-300 rounded-lg resize-none caption"
                             placeholder="Calle, carrera, número, apartamento, referencias..."
                         ></textarea>
                     </div>
-                </div>
-                
-                <div class="flex gap-3">
-                    <button 
-                        type="button" 
-                        id="btn-back-step2" 
-                        class="px-4 py-2 bg-accent-100 hover:bg-accent-200 text-black-400 rounded-lg font-medium transition-colors border border-accent-200 text-body-regular"
-                    >
-                        Volver
-                    </button>
-                    <button 
-                        type="button" 
-                        id="btn-continue-step2" 
-                        class="flex-1 bg-primary-300 hover:bg-primary-200 text-accent-50 py-2 px-4 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-body-regular"
-                        disabled
-                    >
-                        Continuar al Paso 3
-                    </button>
+                    </div>
+                    
+                    <div class="flex gap-3">
+                        <button 
+                            type="button" 
+                            id="btn-back-step2" 
+                            class="px-4 py-2 bg-brandWhite-50 hover:bg-brandWhite-100 text-brandNeutral-400 rounded-full caption transition-colors border border-brandWhite-300 text-center"
+                        >
+                            Volver
+                        </button>
+                        <button 
+                            type="button" 
+                            id="btn-continue-step2" 
+                            class="flex-1 bg-brandPrimary-300 hover:bg-brandPrimary-200 text-brandWhite-100 py-3 rounded-full caption transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled
+                        >
+                            Continuar al Paso 3
+                        </button>
+                    </div>
                 </div>
             </div>
 
             <!-- CARD 3: MÉTODO DE PAGO -->
-            <div id="card-step3" class="bg-accent-50 rounded-xl p-4 hidden">
+            <div id="card-step3" class="bg-brandWhite-50 rounded-lg p-4 border border-brandWhite-300 mb-4 hidden">
                 <div class="flex items-center mb-4">
-                    <div class="w-8 h-8 bg-primary-300 text-accent-50 rounded-full flex items-center justify-center text-small font-bold mr-3">3</div>
-                    <h3 class="text-body-large font-semibold text-black-500">Método de Pago</h3>
+                    <div class="w-8 h-8 bg-brandPrimary-50 text-brandPrimary-300 rounded-full flex items-center justify-center caption-strong mr-3">3</div>
+                    <h3 class="caption-strong text-brandNeutral-400">Método de Pago</h3>
                 </div>
                 
-                <div class="space-y-4 mb-6">
-                    <!-- Los métodos de pago se cargan dinámicamente aquí -->
-                    <div class="text-center py-4">
-                        <div class="animate-spin rounded-full h-8 w-8 mx-auto"></div>
-                        <p class="text-sm text-black-300 mt-2">Cargando métodos de pago...</p>
+                <div class="space-y-4">
+                    <div id="payment-methods-container" class="space-y-3">
+                        <!-- Los métodos de pago se cargan dinámicamente aquí -->
+                        <div class="text-center py-4">
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brandPrimary-300 mx-auto"></div>
+                            <p class="caption text-brandNeutral-400 mt-2">Cargando métodos de pago...</p>
+                        </div>
                     </div>
-                </div>
-                
-                <div class="flex gap-3">
-                    <button 
-                        type="button" 
-                        id="btn-back-step3" 
-                        class="px-4 py-2 bg-accent-100 hover:bg-accent-200 text-black-400 rounded-lg font-medium transition-colors border border-accent-200 text-sm"
-                    >
-                        Volver
-                    </button>
-                    <button 
-                        type="button" 
-                        id="btn-submit-order" 
-                        class="flex-1 bg-success-300 hover:bg-success-200 text-accent-50 py-2 px-4 rounded-lg font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-sm"
-                        disabled
-                    >
-                        Finalizar Pedido
-                    </button>
+                    
+                    <div class="flex gap-3">
+                        <button 
+                            type="button" 
+                            id="btn-back-step3" 
+                            class="px-4 py-2 bg-brandWhite-50 hover:bg-brandWhite-100 text-brandNeutral-400 rounded-full caption transition-colors border border-brandWhite-300 text-center"
+                        >
+                            Volver
+                        </button>
+                        <button 
+                            type="button" 
+                            id="btn-submit-order" 
+                            class="flex-1 bg-brandPrimary-300 hover:bg-brandPrimary-200 text-brandWhite-100 py-3 rounded-full caption transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            disabled
+                        >
+                            Finalizar compra
+                        </button>
+                    </div>
                 </div>
             </div>
             
             <!-- Resumen integrado al final -->
             <div class="border-t border-accent-200 pt-6 mt-6 px-4">
-                <h3 class="text-body-large font-semibold text-black-500 mb-4">Resumen del Pedido</h3>
+                <h3 class="caption-strong text-brandNeutral-400 mb-4">Resumen del Pedido</h3>
                 
                 <!-- Products List -->
                 <div id="order-products" class="space-y-3 mb-4">
                     <div class="text-center py-4">
                         <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-300 mx-auto"></div>
-                        <p class="text-sm text-black-300 mt-2">Cargando productos...</p>
+                        <p class="caption text-brandNeutral-400 mt-2">Cargando productos...</p>
                     </div>
                 </div>
                 
                 <!-- Coupon Section -->
                 <div class="border-t border-accent-200 pt-4 mb-4">
                     <div class="flex items-center gap-2 mb-3">
-                        <span class="text-lg">🎟️</span>
-                        <h4 class="text-caption font-medium text-black-500">Cupón de Descuento</h4>
+                        <i data-lucide="ticket" class="w-5 h-5 text-brandPrimary-300"></i>
+                        <h4 class="caption text-brandNeutral-400">Cupón de Descuento</h4>
                     </div>
                     
                     <div class="flex gap-2">
@@ -211,60 +258,60 @@
                             type="text" 
                             id="coupon_code" 
                             name="coupon_code" 
-                            class="flex-1 px-3 py-2 border border-accent-200 rounded-lg focus:ring-1 focus:ring-primary-300 focus:border-transparent transition-colors text-sm"
+                            class="flex-1 px-3 py-2 border border-brandWhite-300 rounded-lg caption"
                             placeholder="Código de cupón"
                             maxlength="50"
                         >
                         <button 
                             type="button" 
                             id="apply-coupon-btn" 
-                            class="px-4 py-2 bg-primary-300 hover:bg-primary-200 text-accent-50 rounded-lg text-sm font-medium transition-colors"
+                            class="px-4 py-2 bg-brandPrimary-300 hover:bg-brandPrimary-200 text-brandWhite-100 rounded-full caption transition-colors text-center"
                         >
                             Aplicar
                         </button>
                     </div>
                     
-                    <div id="coupon_error" class="hidden mt-1 text-xs text-error-300"></div>
+                    <div id="coupon_error" class="hidden mt-1 caption text-brandError-400"></div>
                 </div>
                 
                 <!-- Sección de productos eliminada - ya está en "Resumen del Pedido" -->
 
                 <!-- Totals -->
-                <div class="border-t border-accent-200 pt-4 space-y-3 mb-4">
+                <div class="border-t border-brandWhite-300 pt-4 space-y-3 mb-4">
                     <!-- Subtotal productos -->
                     <div class="flex justify-between items-center">
-                        <span class="text-caption text-black-400">Subtotal productos:</span>
-                        <span class="text-caption font-medium text-black-500" id="summary-subtotal">$0</span>
+                        <span class="caption text-brandNeutral-400">Subtotal productos:</span>
+                        <span class="caption text-brandNeutral-400" id="summary-subtotal">$0</span>
                     </div>
                     
                     <!-- Envío -->
                     <div class="flex justify-between items-center">
-                        <span class="text-caption text-black-400">Costo de envío:</span>
-                        <span class="text-caption font-medium text-black-500" id="summary-shipping">Calculando...</span>
+                        <span class="caption text-brandNeutral-400">Costo de envío:</span>
+                        <span class="caption text-brandNeutral-400" id="summary-shipping">Calculando...</span>
                     </div>
                     
                     <!-- Descuento cupón (oculto por defecto) -->
                     <div id="coupon-discount-row" class="hidden flex justify-between items-center">
-                        <span class="text-sm text-success-400">Descuento cupón:</span>
-                        <span class="text-sm font-medium text-success-400" id="summary-discount">-$0</span>
+                        <span class="caption text-brandNeutral-400">Descuento cupón:</span>
+                        <span class="caption text-brandNeutral-400" id="summary-discount">-$0</span>
                     </div>
                     
                     <!-- Línea separadora -->
-                    <div class="border-t border-accent-200 pt-3">
+                    <div class="border-t border-brandWhite-300 pt-3">
                         <div class="flex justify-between items-center">
-                            <span class="text-body-large font-semibold text-black-500">Total a pagar:</span>
-                            <span class="text-lg font-bold text-primary-300" id="summary-total">$0</span>
+                            <span class="caption-strong text-brandNeutral-400">Total a pagar:</span>
+                            <span class="caption-strong text-brandNeutral-400" id="summary-total">$0</span>
                         </div>
                     </div>
                     
                     <!-- Desglose productos -->
-                    <div id="product-breakdown" class="hidden border-t border-accent-200 pt-3">
-                        <div class="text-xs text-black-300 mb-2">
-                            <span class="font-medium">Cantidad total de productos:</span>
+                    <div id="product-breakdown" class="hidden border-t border-brandWhite-300 pt-3">
+                        <div class="caption text-brandNeutral-400 mb-2">
+                            <span class="caption-strong">Cantidad total de productos:</span>
                             <span id="total-quantity">0</span>
                         </div>
-                        <div class="text-xs text-black-300">
-                            <span class="font-medium">Productos únicos:</span>
+                        <div class="caption text-brandNeutral-400">
+                            <span class="caption-strong">Productos únicos:</span>
                             <span id="unique-products">0</span>
                         </div>
                     </div>
@@ -276,8 +323,6 @@
 
 @push('scripts')
 <script>
-console.log('🟢 CHECKOUT SIMPLE - INICIANDO');
-
 // Variables globales MUY simples
 let currentStep = 1;
 
@@ -287,8 +332,6 @@ let paymentMethods = [];
 
 // DOM ready
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('🚀 DOM LISTO');
-    
     initCheckout();
     loadOrderSummary(); // Esta es la función de la línea 1425+
     loadShippingMethods();
@@ -303,8 +346,6 @@ let cartItems = [];
 
 // Inicializar todo
 function initCheckout() {
-    console.log('⚡ Inicializando...');
-    
     // Mostrar solo paso 1
     showStep(1);
     
@@ -314,8 +355,6 @@ function initCheckout() {
 
 // Configurar eventos básicos
 function setupEvents() {
-    console.log('🔧 Configurando eventos...');
-    
     // Paso 1 - validación nombre/teléfono
     const nameInput = document.getElementById('customer_name');
     const phoneInput = document.getElementById('customer_phone');
@@ -325,22 +364,18 @@ function setupEvents() {
     
     // Botones navegación
     document.getElementById('btn-continue-step1').addEventListener('click', () => {
-        console.log('🔄 Click continuar paso 1');
         showStep(2);
     });
     
     document.getElementById('btn-back-step2').addEventListener('click', () => {
-        console.log('🔄 Click volver paso 2');
         showStep(1);
     });
     
     document.getElementById('btn-continue-step2').addEventListener('click', () => {
-        console.log('🔄 Click continuar paso 2');
         showStep(3);
     });
     
     document.getElementById('btn-back-step3').addEventListener('click', () => {
-        console.log('🔄 Click volver paso 3');
         showStep(2);
     });
     
@@ -376,15 +411,24 @@ function setupEvents() {
 
 // Mostrar paso específico
 function showStep(step) {
-    console.log('📍 Mostrando paso:', step);
-    
     // Ocultar todos
     document.getElementById('card-step1').classList.add('hidden');
     document.getElementById('card-step2').classList.add('hidden');
     document.getElementById('card-step3').classList.add('hidden');
     
     // Mostrar actual
-    document.getElementById(`card-step${step}`).classList.remove('hidden');
+    const currentCard = document.getElementById(`card-step${step}`);
+    if (currentCard) {
+        currentCard.classList.remove('hidden');
+        
+        // Si se muestra el paso 3, intentar habilitar el botón si ya hay métodos de pago cargados
+        if (step === 3) {
+            // Pequeño delay para asegurar que el DOM esté actualizado
+            setTimeout(() => {
+                enableStep3Button();
+            }, 100);
+        }
+    }
     
     currentStep = step;
 }
@@ -394,22 +438,12 @@ function checkStep1() {
     const name = document.getElementById('customer_name').value.trim();
     const phone = document.getElementById('customer_phone').value.trim();
     
-    console.log('📝 Checkeando:', { name, phone });
-    
     const nameOk = name.length >= 2;
     const phoneOk = /^3[0-9]{9}$/.test(phone);
     const valid = nameOk && phoneOk;
     
-    console.log('✅ Validación:', { nameOk, phoneOk, valid });
-    
     const btn = document.getElementById('btn-continue-step1');
     btn.disabled = !valid;
-    
-    if (valid) {
-        console.log('🎉 Paso 1 VÁLIDO - botón habilitado');
-    } else {
-        console.log('❌ Paso 1 INVÁLIDO - botón deshabilitado');
-    }
 }
 
 // Habilitar botón paso 2
@@ -419,13 +453,35 @@ function enableStep2Button() {
     
     if (!deliveryType) {
         btn.disabled = true;
-        console.log('❌ Paso 2 deshabilitado - sin delivery type');
+        return;
+    }
+    
+    // Verificar si es dine_in o room_service (requieren mesa/habitación, no dirección)
+    const orderType = deliveryType.dataset.orderType;
+    if (orderType === 'dine_in') {
+        // Para dine_in: validar que se haya seleccionado una mesa
+        const tableSelect = document.getElementById('selected_table_number');
+        if (tableSelect && tableSelect.value) {
+            btn.disabled = false;
+        } else {
+            btn.disabled = true;
+        }
+        return;
+    }
+    
+    if (orderType === 'room_service') {
+        // Para room_service: validar que se haya seleccionado una habitación
+        const roomSelect = document.getElementById('selected_room_number');
+        if (roomSelect && roomSelect.value) {
+            btn.disabled = false;
+        } else {
+            btn.disabled = true;
+        }
         return;
     }
     
     if (deliveryType.value === 'pickup') {
         btn.disabled = false;
-        console.log('✅ Paso 2 habilitado - pickup');
         return;
     }
     
@@ -456,13 +512,6 @@ function enableStep2Button() {
     }
     
     btn.disabled = !isValid;
-    
-    if (isValid) {
-        console.log('✅ Paso 2 habilitado - domicilio válido');
-        // El cálculo ya se hizo arriba según el tipo de envío
-    } else {
-        console.log('❌ Paso 2 deshabilitado - domicilio incompleto');
-    }
 }
 
 // Manejar cambio de método de pago
@@ -484,8 +533,6 @@ function handlePaymentMethodChange(paymentMethod, methodId) {
             transferFields.classList.remove('hidden');
         }
     }
-    
-    console.log('💳 Método de pago cambiado:', { paymentMethod, methodId });
 }
 
 // Manejar cambio de monto en efectivo
@@ -494,6 +541,11 @@ function handleCashAmountChange(e) {
     const changeDisplay = document.getElementById('change-display');
     const changeAmount = document.getElementById('change-amount');
     const currentTotal = getCurrentSubtotal() + getCurrentShipping() - getCurrentDiscount();
+    
+    // Validar que los elementos existan
+    if (!changeDisplay || !changeAmount) {
+        return;
+    }
     
     if (cashAmount >= currentTotal && cashAmount > 0) {
         const change = cashAmount - currentTotal;
@@ -504,7 +556,6 @@ function handleCashAmountChange(e) {
     }
     
     enableStep3Button();
-    console.log('💰 Cambio calculado para:', { cashAmount, currentTotal });
 }
 
 // Habilitar botón paso 3
@@ -512,9 +563,12 @@ function enableStep3Button() {
     const paymentMethod = document.querySelector('input[name="payment_method"]:checked');
     const btn = document.getElementById('btn-submit-order');
     
+    if (!btn) {
+        return; // El botón aún no existe en el DOM
+    }
+    
     if (!paymentMethod) {
         btn.disabled = true;
-        console.log('❌ Finalizar pedido deshabilitado - sin método');
         return;
     }
     
@@ -524,16 +578,9 @@ function enableStep3Button() {
         const isValid = cashAmount >= currentTotal && cashAmount > 0;
         
         btn.disabled = !isValid;
-        
-        if (isValid) {
-            console.log('✅ Finalizar pedido habilitado - efectivo válido');
-        } else {
-            console.log('❌ Finalizar pedido deshabilitado - efectivo insuficiente');
-        }
     } else {
         // Transferencia siempre es válida
         btn.disabled = false;
-        console.log('✅ Finalizar pedido habilitado - transferencia');
     }
     
     // Actualizar texto del botón con el total
@@ -543,12 +590,16 @@ function enableStep3Button() {
 // Actualizar texto del botón de finalizar con el total
 function updateSubmitButtonText() {
     const btn = document.getElementById('btn-submit-order');
+    if (!btn) {
+        return; // El botón aún no existe en el DOM
+    }
+    
     const currentTotal = getCurrentSubtotal() + getCurrentShipping() - getCurrentDiscount();
     
     if (currentTotal > 0) {
         btn.innerHTML = `Valor a pagar $${formatPrice(currentTotal)}`;
     } else {
-        btn.innerHTML = 'Finalizar Pedido';
+        btn.innerHTML = 'Finalizar compra';
     }
 }
 
@@ -562,16 +613,13 @@ function copyToClipboard(elementId) {
         const button = element.nextElementSibling;
         const originalText = button.textContent;
         button.textContent = '¡Copiado!';
-        button.classList.add('bg-success-200', 'text-success-400');
+        button.classList.add('bg-brandSuccess-300', 'text-brandWhite-100');
         
         setTimeout(() => {
             button.textContent = originalText;
-            button.classList.remove('bg-success-200', 'text-success-400');
+            button.classList.remove('bg-brandSuccess-300', 'text-brandWhite-100');
         }, 2000);
-        
-        console.log('📋 Copiado al portapapeles:', text);
     }).catch(err => {
-        console.error('Error copiando:', err);
         alert('No se pudo copiar. Copia manualmente: ' + text);
     });
 }
@@ -580,48 +628,32 @@ function copyToClipboard(elementId) {
 
 // Mostrar productos en el resumen
 function displayOrderProducts(items) {
-    console.log('🛒 Datos del carrito recibidos:', items);
-    
     const container = document.getElementById('order-products');
     
     let html = '';
     let totalQuantity = 0;
     
     items.forEach((item, index) => {
-        console.log(`📦 Producto ${index + 1}:`, {
-            name: item.product_name || item.product?.name,
-            rawPrice: item.product_price || item.price,
-            rawQuantity: item.quantity,
-            variant: item.variant_details
-        });
-        
         // Asegurar que los precios sean números válidos
         const basePrice = parseFloat(item.product_price || item.price) || 0;
         const variantModifier = parseFloat(item.variant_details?.precio_modificador) || 0;
         const quantity = parseInt(item.quantity) || 0;
-        
-        console.log(`💰 Producto ${index + 1} calculado:`, {
-            basePrice,
-            variantModifier,
-            quantity,
-            willAdd: quantity
-        });
         
         const unitPrice = basePrice + variantModifier;
         const totalPrice = unitPrice * quantity;
         totalQuantity += quantity;
         
         html += `
-            <div class="flex items-center gap-3 py-2 border-b border-accent-200 last:border-b-0">
+            <div class="flex items-center gap-3 py-2 border-b border-brandWhite-300 last:border-b-0">
                 <img src="${item.image_url || (item.product && item.product.main_image_url) || '{{ asset("assets/images/placeholder-product.svg") }}'}" 
                      alt="${item.product_name || item.product?.name || 'Producto'}" 
                      class="w-12 h-12 object-cover rounded-lg">
                 <div class="flex-1 min-w-0">
-                    <h4 class="text-sm font-medium text-black-500 truncate">${item.product_name || item.product?.name || 'Producto'}</h4>
-                    ${item.variant_display ? `<p class="text-xs text-black-300">${item.variant_display}</p>` : ''}
+                    <h4 class="caption text-brandNeutral-400 truncate">${item.product_name || item.product?.name || 'Producto'}</h4>
+                    ${item.variant_display ? `<p class="caption text-brandNeutral-400">${item.variant_display}</p>` : ''}
                     <div class="flex items-center justify-between mt-1">
-                        <span class="text-xs text-black-400">Cantidad: ${item.quantity}</span>
-                        <span class="text-sm font-semibold text-black-500">$${formatPrice(totalPrice)}</span>
+                        <span class="caption text-brandNeutral-400">Cantidad: ${item.quantity}</span>
+                        <span class="caption-strong text-brandNeutral-400">$${formatPrice(totalPrice)}</span>
                     </div>
                 </div>
             </div>
@@ -631,17 +663,9 @@ function displayOrderProducts(items) {
     container.innerHTML = html;
     
     // Actualizar desglose de productos
-    console.log('📊 TOTAL FINAL calculado:', {
-        totalQuantity: totalQuantity,
-        uniqueProducts: items.length,
-        typeof_totalQuantity: typeof totalQuantity
-    });
-    
     document.getElementById('total-quantity').textContent = totalQuantity;
     document.getElementById('unique-products').textContent = items.length;
     document.getElementById('product-breakdown').classList.remove('hidden');
-    
-    console.log('✅ Productos cargados y mostrados en DOM');
 }
 
 // Actualizar totales
@@ -669,8 +693,6 @@ function updateOrderTotals(subtotal, shipping, discount) {
     
     // Actualizar texto del botón
     updateSubmitButtonText();
-    
-    console.log('💰 Totales actualizados:', { subtotal, shipping, discount, total });
 }
 
 // FUNCIÓN PROBLEMÁTICA ELIMINADA COMPLETAMENTE - Solo usar la de línea 1583+
@@ -698,8 +720,6 @@ function getCurrentShipping() {
 
 // Cargar métodos de envío disponibles
 async function loadShippingMethods() {
-    console.log('🚚 Cargando métodos de envío...');
-    
     try {
         const response = await fetch('{{ route("tenant.checkout.shipping-methods", $store->slug) }}');
         const data = await response.json();
@@ -707,12 +727,9 @@ async function loadShippingMethods() {
         if (data.success) {
             shippingMethods = data.methods;
             renderShippingMethods();
-            console.log('✅ Métodos de envío cargados:', shippingMethods.length);
-        } else {
-            console.error('Error cargando métodos:', data.message);
         }
     } catch (error) {
-        console.error('Error en loadShippingMethods:', error);
+        // Error silencioso - métodos de envío no disponibles
     }
 }
 
@@ -725,26 +742,26 @@ function renderShippingMethods() {
     shippingMethods.forEach(method => {
         if (method.type === 'pickup') {
             html += `
-                <div class="border border-accent-200 rounded-lg p-4 hover:border-primary-300 transition-colors">
+                <div class="border border-brandWhite-300 rounded-lg p-4 hover:border-brandPrimary-300 transition-colors">
                     <label class="flex items-center cursor-pointer">
                         <input 
                             type="radio" 
                             name="delivery_type" 
                             value="pickup"
                             data-method-id="${method.id}"
-                            class="mr-3 text-primary-300 focus:ring-primary-300 w-4 h-4"
+                            class="mr-3 text-brandPrimary-300 focus:ring-brandPrimary-300 w-4 h-4"
                         >
-                        <div class="flex items-center justify-center w-12 h-12 bg-primary-50 rounded-lg mr-3">
-                            <span class="text-2xl">${method.icon}</span>
+                        <div class="flex items-center justify-center w-12 h-12 bg-brandPrimary-50 rounded-lg mr-3">
+                            <span class="caption-strong text-brandNeutral-400">${method.icon}</span>
                         </div>
                         <div class="flex-1">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <h4 class="font-semibold text-black-500">${method.name}</h4>
-                                    <p class="text-sm text-black-300">${method.instructions || 'Recoge tu pedido en nuestra tienda física'}</p>
-                                    ${method.pickup_address ? `<p class="text-xs text-black-400 mt-1">📍 ${method.pickup_address}</p>` : ''}
+                                    <h4 class="caption-strong text-brandNeutral-400">${method.name}</h4>
+                                    <p class="caption text-brandNeutral-400">${method.instructions || 'Recoge tu pedido en nuestra tienda física'}</p>
+                                    ${method.pickup_address ? `<p class="caption text-brandNeutral-400 mt-1">📍 ${method.pickup_address}</p>` : ''}
                                 </div>
-                                <span class="bg-success-100 text-success-400 text-xs px-3 py-1 rounded-full font-medium">GRATIS</span>
+                                <span class="bg-brandSuccess-100 text-brandSuccess-400 caption px-3 py-1 rounded-full caption-strong">GRATIS</span>
                             </div>
                         </div>
                     </label>
@@ -756,26 +773,26 @@ function renderShippingMethods() {
                 'Zonas disponibles';
                 
             html += `
-                <div class="border border-accent-200 rounded-lg p-4 hover:border-primary-300 transition-colors">
+                <div class="border border-brandWhite-300 rounded-lg p-4 hover:border-brandPrimary-300 transition-colors">
                     <label class="flex items-center cursor-pointer">
                         <input 
                             type="radio" 
                             name="delivery_type" 
                             value="domicilio"
                             data-method-id="${method.id}"
-                            class="mr-3 text-primary-300 focus:ring-primary-300 w-4 h-4"
+                            class="mr-3 text-brandPrimary-300 focus:ring-brandPrimary-300 w-4 h-4"
                         >
-                        <div class="flex items-center justify-center w-12 h-12 bg-primary-50 rounded-lg mr-3">
-                            <span class="text-2xl">${method.icon}</span>
+                        <div class="flex items-center justify-center w-12 h-12 bg-brandPrimary-50 rounded-lg mr-3">
+                            <span class="caption-strong text-brandNeutral-400">${method.icon}</span>
                         </div>
                         <div class="flex-1">
                             <div class="flex items-center justify-between">
                                 <div>
-                                    <h4 class="font-semibold text-black-500">${method.name}</h4>
-                                    <p class="text-sm text-black-300">${method.instructions || 'Entregamos en tu dirección'}</p>
-                                    <p class="text-xs text-black-400 mt-1">${zoneInfo}</p>
+                                    <h4 class="caption-strong text-brandNeutral-400">${method.name}</h4>
+                                    <p class="caption text-brandNeutral-400">${method.instructions || 'Entregamos en tu dirección'}</p>
+                                    <p class="caption text-brandNeutral-400 mt-1">${zoneInfo}</p>
                                 </div>
-                                <div id="shipping-cost-display" class="hidden text-sm font-medium text-primary-300"></div>
+                                <div id="shipping-cost-display" class="hidden caption text-brandNeutral-400"></div>
                             </div>
                         </div>
                     </label>
@@ -789,8 +806,6 @@ function renderShippingMethods() {
     // Re-configurar event listeners
     document.querySelectorAll('input[name="delivery_type"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
-            console.log('📦 Delivery type:', e.target.value, 'Shipping type:', e.target.dataset.shippingType);
-            
             const addressFieldsLocal = document.getElementById('address-fields-local');
             const addressFieldsNational = document.getElementById('address-fields-national');
             
@@ -822,28 +837,21 @@ function renderShippingMethods() {
 
 // Cargar métodos de envío disponibles
 async function loadShippingMethods() {
-    console.log('🚚 Cargando métodos de envío...');
-    
     try {
         // Usar los métodos pasados desde el controlador por ahora
         const shippingData = @json($shippingMethods ?? []);
-        console.log('📦 Métodos de envío desde servidor:', shippingData);
         
         shippingMethods = shippingData;
         renderShippingMethods();
-        console.log('✅ Métodos de envío cargados:', shippingMethods.length);
     } catch (error) {
-        console.error('❌ Error en loadShippingMethods:', error);
+        // Error silencioso - métodos de envío no disponibles
     }
 }
 
 // Renderizar métodos de envío en el HTML
 function renderShippingMethods() {
-    console.log('🎨 Renderizando métodos de envío:', shippingMethods);
-    
     const container = document.querySelector('#shipping-methods-container');
     if (!container) {
-        console.error('❌ Container #shipping-methods-container no encontrado');
         return;
     }
     
@@ -855,26 +863,25 @@ function renderShippingMethods() {
     let hasNational = false;
     
     shippingMethods.forEach(method => {
-        console.log('🔍 Procesando método:', method);
         
         if (method.type === 'pickup') {
             hasPickup = true;
             html += `
-                <label class="flex items-center p-4 border border-accent-200 rounded-lg cursor-pointer hover:bg-accent-50 transition-colors">
+                <label class="flex items-center p-4 border border-brandWhite-300 rounded-lg cursor-pointer hover:bg-brandWhite-50 transition-colors">
                     <input 
                         type="radio" 
                         name="delivery_type" 
                         value="pickup"
                         data-shipping-type="pickup"
-                        class="mr-3 w-4 h-4 text-primary-500 border-accent-300 focus:ring-primary-300"
+                        class="mr-3 w-4 h-4 text-brandPrimary-500 border-brandWhite-300 focus:ring-brandPrimary-300"
                     >
                     <div class="flex-1">
                         <div class="flex flex-col gap-1">
-                            <span class="text-body-small font-medium text-black-600">${method.icon || '🏪'} ${method.name || 'Recogida en Tienda'}</span>
-                            <span class="text-caption text-primary-500 font-bold">${method.formatted_cost || 'GRATIS'}</span>
+                            <span class="caption text-brandNeutral-400">${method.icon || '🏪'} ${method.name || 'Recogida en Tienda'}</span>
+                            <span class="caption-strong text-brandNeutral-400">${method.formatted_cost || 'GRATIS'}</span>
                         </div>
-                        <p class="text-small text-black-400 mt-1">${method.instructions || 'Recoge tu pedido en nuestra tienda'}</p>
-                        <p class="text-small text-black-300 mt-1">⏱️ Listo en: ${method.preparation_label || method.preparation_time || '1 hora'}</p>
+                        <p class="caption text-brandNeutral-400 mt-1">${method.instructions || 'Recoge tu pedido en nuestra tienda'}</p>
+                        <p class="caption text-brandNeutral-400 mt-1">⏱️ Listo en: ${method.preparation_label || method.preparation_time || '1 hora'}</p>
                     </div>
                 </label>
             `;
@@ -883,22 +890,22 @@ function renderShippingMethods() {
         if (method.id === 'local' && method.type === 'domicilio') {
             hasLocal = true;
             html += `
-                <label class="flex items-center p-4 border border-accent-200 rounded-lg cursor-pointer hover:bg-accent-50 transition-colors">
+                <label class="flex items-center p-4 border border-brandWhite-300 rounded-lg cursor-pointer hover:bg-brandWhite-50 transition-colors">
                     <input 
                         type="radio" 
                         name="delivery_type" 
                         value="domicilio"
                         data-shipping-type="local"
                         data-cost="${method.cost}"
-                        class="mr-3 w-4 h-4 text-primary-500 border-accent-300 focus:ring-primary-300"
+                        class="mr-3 w-4 h-4 text-brandPrimary-500 border-brandWhite-300 focus:ring-brandPrimary-300"
                     >
                     <div class="flex-1">
                         <div class="flex flex-col gap-1">
-                            <span class="text-body-small font-medium text-black-600">${method.icon || '🚚'} ${method.name || 'Envío Local'}</span>
-                            <span class="text-caption text-primary-500 font-bold">${method.formatted_cost}</span>
+                            <span class="caption text-brandNeutral-400">${method.icon || '🚚'} ${method.name || 'Envío Local'}</span>
+                            <span class="caption-strong text-brandNeutral-400">${method.formatted_cost}</span>
                         </div>
-                        <p class="text-small text-black-400 mt-1">${method.instructions || 'Entrega en tu ciudad'}</p>
-                        <p class="text-small text-black-300 mt-1">⏱️ Tiempo: ${method.preparation_label || method.preparation_time || '2-4 horas'}</p>
+                        <p class="caption text-brandNeutral-400 mt-1">${method.instructions || 'Entrega en tu ciudad'}</p>
+                        <p class="caption text-brandNeutral-400 mt-1">⏱️ Tiempo: ${method.preparation_label || method.preparation_time || '2-4 horas'}</p>
                     </div>
                 </label>
             `;
@@ -907,21 +914,69 @@ function renderShippingMethods() {
         if (method.id === 'national' && method.type === 'domicilio') {
             hasNational = true;
             html += `
-                <label class="flex items-center p-4 border border-accent-200 rounded-lg cursor-pointer hover:bg-accent-50 transition-colors">
+                <label class="flex items-center p-4 border border-brandWhite-300 rounded-lg cursor-pointer hover:bg-brandWhite-50 transition-colors">
                     <input 
                         type="radio" 
                         name="delivery_type" 
                         value="domicilio"
                         data-shipping-type="nacional"
-                        class="mr-3 w-4 h-4 text-primary-500 border-accent-300 focus:ring-primary-300"
+                        class="mr-3 w-4 h-4 text-brandPrimary-500 border-brandWhite-300 focus:ring-brandPrimary-300"
                     >
                     <div class="flex-1">
                         <div class="flex flex-col gap-1">
-                            <span class="text-body-small font-medium text-black-600">${method.icon || '🌍'} ${method.name || 'Envío Nacional'}</span>
-                            <span class="text-caption text-primary-500 font-bold">${method.formatted_cost || 'Según destino'}</span>
+                            <span class="caption text-brandNeutral-400">${method.icon || '🌍'} ${method.name || 'Envío Nacional'}</span>
+                            <span class="caption-strong text-brandNeutral-400">${method.formatted_cost || 'Según destino'}</span>
                         </div>
-                        <p class="text-small text-black-400 mt-1">${method.instructions || 'Envío a todo el país'}</p>
-                        <p class="text-small text-black-300 mt-1">⏱️ Tiempo: ${method.preparation_label || '3-7 días hábiles'}</p>
+                        <p class="caption text-brandNeutral-400 mt-1">${method.instructions || 'Envío a todo el país'}</p>
+                        <p class="caption text-brandNeutral-400 mt-1">⏱️ Tiempo: ${method.preparation_label || '3-7 días hábiles'}</p>
+                    </div>
+                </label>
+            `;
+        }
+        
+        // Consumo en Local
+        if (method.type === 'dine_in' || method.id === 'dine_in') {
+            html += `
+                <label class="flex items-center p-4 border border-brandWhite-300 rounded-lg cursor-pointer hover:bg-brandWhite-50 transition-colors">
+                    <input 
+                        type="radio" 
+                        name="delivery_type" 
+                        value="pickup"
+                        data-shipping-type="pickup"
+                        data-order-type="dine_in"
+                        class="mr-3 w-4 h-4 text-brandPrimary-500 border-brandWhite-300 focus:ring-brandPrimary-300"
+                    >
+                    <div class="flex-1">
+                        <div class="flex flex-col gap-1">
+                            <span class="caption text-brandNeutral-400">${method.icon || '🍽️'} ${method.name || 'Consumo en Local'}</span>
+                            <span class="caption-strong text-brandNeutral-400">${method.formatted_cost || 'GRATIS'}</span>
+                        </div>
+                        <p class="caption text-brandNeutral-400 mt-1">${method.instructions || 'Consume en el local (mesa)'}</p>
+                        <p class="caption text-brandNeutral-400 mt-1">⏱️ Tiempo: ${method.preparation_label || 'Inmediato'}</p>
+                    </div>
+                </label>
+            `;
+        }
+        
+        // Servicio a Habitación
+        if (method.type === 'room_service' || method.id === 'room_service') {
+            html += `
+                <label class="flex items-center p-4 border border-brandWhite-300 rounded-lg cursor-pointer hover:bg-brandWhite-50 transition-colors">
+                    <input 
+                        type="radio" 
+                        name="delivery_type" 
+                        value="pickup"
+                        data-shipping-type="pickup"
+                        data-order-type="room_service"
+                        class="mr-3 w-4 h-4 text-brandPrimary-500 border-brandWhite-300 focus:ring-brandPrimary-300"
+                    >
+                    <div class="flex-1">
+                        <div class="flex flex-col gap-1">
+                            <span class="caption text-brandNeutral-400">${method.icon || '🏨'} ${method.name || 'Servicio a Habitación'}</span>
+                            <span class="caption-strong text-brandNeutral-400">${method.formatted_cost || 'GRATIS'}</span>
+                        </div>
+                        <p class="caption text-brandNeutral-400 mt-1">${method.instructions || 'Servicio directo a tu habitación'}</p>
+                        <p class="caption text-brandNeutral-400 mt-1">⏱️ Tiempo: ${method.preparation_label || '30 minutos'}</p>
                     </div>
                 </label>
             `;
@@ -929,26 +984,42 @@ function renderShippingMethods() {
     });
     
     if (!html) {
-        html = '<p class="text-center text-black-400 py-8">No hay métodos de envío disponibles</p>';
+        html = '<p class="caption text-brandNeutral-400 py-8">No hay métodos de envío disponibles</p>';
     }
     
     container.innerHTML = html;
     
-    console.log('📊 Métodos renderizados - Pickup:', hasPickup, 'Local:', hasLocal, 'Nacional:', hasNational);
-    
     // Re-configurar event listeners
     document.querySelectorAll('input[name="delivery_type"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
-            console.log('📦 Delivery type:', e.target.value, 'Shipping type:', e.target.dataset.shippingType);
-            
             const addressFieldsLocal = document.getElementById('address-fields-local');
             const addressFieldsNational = document.getElementById('address-fields-national');
+            const tableContainer = document.getElementById('table-selector-container');
+            const roomContainer = document.getElementById('room-selector-container');
             
-            // Ocultar ambos campos primero
+            // Ocultar todos los campos primero
             addressFieldsLocal.classList.add('hidden');
             addressFieldsNational.classList.add('hidden');
+            if (tableContainer) tableContainer.classList.add('hidden');
+            if (roomContainer) roomContainer.classList.add('hidden');
             
-            if (e.target.value === 'domicilio') {
+            // Si es dine_in o room_service, mostrar selector correspondiente
+            const orderType = e.target.dataset.orderType;
+            if (orderType === 'dine_in') {
+                // Mostrar selector de mesas
+                if (tableContainer) {
+                    tableContainer.classList.remove('hidden');
+                    loadAvailableTables(); // Cargar mesas disponibles
+                }
+                enableStep2Button(); // Validará cuando se seleccione una mesa
+            } else if (orderType === 'room_service') {
+                // Mostrar selector de habitaciones
+                if (roomContainer) {
+                    roomContainer.classList.remove('hidden');
+                    loadAvailableRooms(); // Cargar habitaciones disponibles
+                }
+                enableStep2Button(); // Validará cuando se seleccione una habitación
+            } else if (e.target.value === 'domicilio') {
                 const shippingType = e.target.dataset.shippingType;
                 
                 if (shippingType === 'local') {
@@ -964,18 +1035,18 @@ function renderShippingMethods() {
                     // Limpiar campo local
                     document.getElementById('customer_address').value = '';
                 }
+                enableStep2Button();
+            } else if (e.target.value === 'pickup') {
+                // Para pickup, no se necesitan campos de dirección
+                enableStep2Button();
             }
-            enableStep2Button();
         });
     });
 }
 
 // Cargar métodos de pago disponibles
 async function loadPaymentMethods() {
-    console.log('💳 Cargando métodos de pago...');
-    
     const url = '{{ route("tenant.checkout.payment-methods", $store->slug) }}';
-    console.log('🌐 URL de métodos de pago:', url);
     
     try {
         const response = await fetch(url);
@@ -984,60 +1055,150 @@ async function loadPaymentMethods() {
         if (data.success) {
             paymentMethods = data.methods;
             renderPaymentMethods();
-            console.log('✅ Métodos de pago cargados:', paymentMethods.length);
-        } else {
-            console.error('Error cargando métodos:', data.message);
         }
     } catch (error) {
-        console.error('Error en loadPaymentMethods:', error);
+        // Error silencioso - métodos de pago no disponibles
+    }
+}
+
+// Cargar mesas disponibles para consumo en local
+async function loadAvailableTables() {
+    const url = '{{ route("tenant.checkout.available-tables", $store->slug) }}';
+    const select = document.getElementById('selected_table_number');
+    
+    if (!select) return;
+    
+    try {
+        // Mostrar loading
+        select.innerHTML = '<option value="">Cargando mesas...</option>';
+        select.disabled = true;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.success && data.tables) {
+            select.innerHTML = '<option value="">-- Selecciona una mesa --</option>';
+            
+            data.tables.forEach(table => {
+                const option = document.createElement('option');
+                option.value = table.table_number;
+                option.textContent = `Mesa ${table.table_number} - Capacidad: ${table.capacity} personas (${table.status_label})`;
+                select.appendChild(option);
+            });
+            
+            if (data.tables.length === 0) {
+                select.innerHTML = '<option value="">No hay mesas disponibles</option>';
+            }
+            
+            select.disabled = false;
+            
+            // Agregar listener para validar cuando se seleccione
+            select.addEventListener('change', enableStep2Button);
+        } else {
+            select.innerHTML = '<option value="">Error al cargar mesas</option>';
+            select.disabled = false;
+        }
+    } catch (error) {
+        console.error('Error cargando mesas:', error);
+        select.innerHTML = '<option value="">Error al cargar mesas</option>';
+        select.disabled = false;
+    }
+}
+
+// Cargar habitaciones disponibles para servicio a habitación
+async function loadAvailableRooms() {
+    const url = '{{ route("tenant.checkout.available-rooms", $store->slug) }}';
+    const select = document.getElementById('selected_room_number');
+    
+    if (!select) return;
+    
+    try {
+        // Mostrar loading
+        select.innerHTML = '<option value="">Cargando habitaciones...</option>';
+        select.disabled = true;
+        
+        const response = await fetch(url);
+        const data = await response.json();
+        
+        if (data.success && data.rooms) {
+            select.innerHTML = '<option value="">-- Selecciona una habitación --</option>';
+            
+            data.rooms.forEach(room => {
+                const option = document.createElement('option');
+                option.value = room.room_number;
+                option.textContent = `Habitación ${room.room_number} - ${room.room_type_name} - Capacidad: ${room.capacity} personas (${room.status_label})`;
+                select.appendChild(option);
+            });
+            
+            if (data.rooms.length === 0) {
+                select.innerHTML = '<option value="">No hay habitaciones disponibles</option>';
+            }
+            
+            select.disabled = false;
+            
+            // Agregar listener para validar cuando se seleccione
+            select.addEventListener('change', enableStep2Button);
+        } else {
+            select.innerHTML = '<option value="">Error al cargar habitaciones</option>';
+            select.disabled = false;
+        }
+    } catch (error) {
+        console.error('Error cargando habitaciones:', error);
+        select.innerHTML = '<option value="">Error al cargar habitaciones</option>';
+        select.disabled = false;
     }
 }
 
 // Renderizar métodos de pago en el HTML
 function renderPaymentMethods() {
-    const container = document.querySelector('#card-step3 .space-y-4');
+    const container = document.getElementById('payment-methods-container');
+    
+    if (!container) {
+        console.warn('Contenedor de métodos de pago no encontrado');
+        return;
+    }
     
     let html = '';
     
     paymentMethods.forEach(method => {
         if (method.type === 'cash') {
             html += `
-                <div class="border border-accent-200 rounded-lg transition-colors">
+                <div class="border border-brandWhite-300 rounded-lg transition-colors">
                     <label class="flex items-center cursor-pointer gap-3 p-4">
                         <input 
                             type="radio" 
                             name="payment_method" 
                             value="efectivo"
                             data-method-id="${method.id}"
-                            class="mr-3 text-info-300 focus:ring-info-300 w-4 h-4"
+                            class="mr-3 text-brandPrimary-300 focus:ring-brandPrimary-300 w-4 h-4"
                         >
-                        <div class="flex items-center justify-center w-12 h-12 bg-accent-100 rounded-lg">
-                            <span class="text-xl">${method.icon}</span>
+                        <div class="flex items-center justify-center w-12 h-12 bg-brandWhite-50 rounded-lg p-2">
+                            <span class="h1 text-brandPrimary-300">${method.icon}</span>
                         </div>
                         <div class="flex-1">
-                            <h4 class="text-body-small font-semibold text-black-500">${method.name}</h4>
-                            <p class="text-small text-black-500">${method.instructions || 'Paga en efectivo al recibir tu pedido'}</p>
+                            <h4 class="body-small-medium text-brandNeutral-400">${method.name}</h4>
+                            <p class="caption text-brandNeutral-400">${method.instructions || 'Paga en efectivo al recibir tu pedido'}</p>
                         </div>
                     </label>
                     
                     <!-- Efectivo Fields -->
                     <div id="cash-fields-${method.id}" class="hidden mt-4">
-                        <div class="bg-accent-100 border border-accent-200 rounded-lg p-4">
-                            <label for="cash_amount" class="block text-caption font-medium text-black-500 mb-2">
+                        <div class="bg-brandWhite-50 border border-brandWhite-300 rounded-lg p-4">
+                            <label for="cash_amount" class="block caption text-brandNeutral-400 mb-2">
                                 ¿Con cuánto vas a pagar? *
                             </label>
                             <input 
                                 type="number" 
                                 id="cash_amount" 
                                 name="cash_amount" 
-                                class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:ring-1 focus:ring-primary-300 focus:border-transparent transition-colors text-sm"
+                                class="w-full px-3 py-2 border border-brandWhite-300 rounded-lg focus:ring-1 focus:ring-brandWhite-300 focus:border-transparent transition-colors caption"
                                 placeholder="Ejemplo: 50000"
                                 min="0"
                             >
-                            <div id="change-display" class="hidden mt-3 p-3 bg-info-50 border border-info-200 rounded-lg">
-                                <p class="text-sm text-info-400">
-                                    <span class="font-medium">Tu cambio será:</span> 
-                                    <span id="change-amount" class="font-semibold"></span>
+                            <div id="change-display" class="hidden mt-3 p-3 bg-brandSuccess-50 rounded-lg">
+                                <p class="caption text-brandSuccess-400">
+                                    <span class="caption-strong">Tu cambio será:</span> 
+                                    <span id="change-amount" class="caption-strong"></span>
                                 </p>
                             </div>
                         </div>
@@ -1048,48 +1209,48 @@ function renderPaymentMethods() {
             const accounts = method.bank_accounts || [];
             
             html += `
-                <div class="border border-accent-200 rounded-lg p-2 transition-colors">
+                <div class="border border-brandWhite-300 rounded-lg p-2 transition-colors">
                     <label class="flex items-center cursor-pointer">
                         <input 
                             type="radio" 
                             name="payment_method" 
                             value="transferencia"
                             data-method-id="${method.id}"
-                            class="mr-3 text-info-300 focus:ring-info-300 w-4 h-4"
+                            class="mr-3 text-brandPrimary-300 focus:ring-brandPrimary-300 w-4 h-4"
                         >
-                        <div class="flex items-center justify-center w-12 h-12 bg-accent-100 rounded-lg mr-3">
-                            <span class="text-xl">${method.icon}</span>
+                        <div class="flex items-center justify-center w-12 h-12 bg-brandPrimary-50 rounded-lg mr-3">
+                            <span class="h1 text-brandNeutral-400">${method.icon}</span>
                         </div>
                         <div class="flex-1">
-                            <h4 class="text-body-small font-semibold text-black-500">${method.name}</h4>
-                            <p class="text-small text-black-500">${method.instructions || 'Transfiere a nuestras cuentas bancarias'}</p>
+                            <h4 class="caption text-brandNeutral-400">${method.name}</h4>
+                            <p class="caption text-brandNeutral-400">${method.instructions || 'Transfiere a nuestras cuentas bancarias'}</p>
                         </div>
                     </label>
                     
                     <!-- Transferencia Fields -->
                     <div id="transfer-fields-${method.id}" class="hidden mt-4">
                         ${accounts.map(account => `
-                            <div class="bg-gradient-to-r from-info-50 to-primary-50 border border-info-200 rounded-lg p-2 sm:p-4 shadow-sm mb-3">
-                                <h4 class="font-bold text-info-300 mb-3 flex items-center text-body-small">
-                                    <x-solar-card-transfer-outline class="w-5 h-5 inline-block mr-2" />
+                            <div class="bg-gradient-to-r from-brandPrimary-100 to-brandSecondary-100 border border-brandWhite-300 rounded-lg p-4 sm:p-4 shadow-sm mb-3">
+                                <h4 class="gap-2 body-small-medium text-brandNeutral-400 mb-3 flex items-center caption">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-landmark-icon lucide-landmark"><path d="M10 18v-7"/><path d="M11.12 2.198a2 2 0 0 1 1.76.006l7.866 3.847c.476.233.31.949-.22.949H3.474c-.53 0-.695-.716-.22-.949z"/><path d="M14 18v-7"/><path d="M18 18v-7"/><path d="M3 22h18"/><path d="M6 18v-7"/></svg>
                                     ${account.bank_name}
                                 </h4>
                                 <div class="space-y-2">
                                     <!-- Tipo de Cuenta -->
-                                    <div class="bg-accent-50 rounded-lg p-2 border border-accent-200">
+                                    <div class="bg-brandWhite-50 rounded-lg p-2 border border-brandWhite-300">
                                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
-                                            <span class="text-small text-black-500 font-medium">Tipo:</span>
-                                            <span class="text-caption sm:text-body-small font-bold text-black-500 px-2 py-0.5 rounded-full inline-block">${account.account_type || 'Cuenta Corriente'}</span>
+                                            <span class="caption text-brandNeutral-400 font-medium">Tipo:</span>
+                                            <span class="caption sm:caption font-bold text-brandNeutral-400 px-2 py-0.5 rounded-full inline-block">${account.account_type || 'Cuenta Corriente'}</span>
                                         </div>
                                     </div>
                                     
                                     <!-- Número de Cuenta -->
-                                    <div class="bg-accent-50 rounded-lg p-2 border border-accent-200">
+                                        <div class="bg-brandWhite-50 rounded-lg p-2 border border-brandWhite-300">
                                         <div class="space-y-2">
-                                            <span class="text-small text-black-500 font-medium block">Número de Cuenta:</span>
+                                            <span class="caption text-brandNeutral-400 font-medium block">Número de Cuenta:</span>
                                             <div class="flex sm:flex-row items-start sm:items-center justify-between gap-2">
-                                                <span class="text-caption sm:text-body-small font-bold text-black-500 bg-accent-100 px-3 py-2 rounded-full tracking-wider break-all" id="account-${account.id}">${account.account_number}</span>
-                                                <button type="button" onclick="copyToClipboard('account-${account.id}')" class="text-caption bg-accent-200 hover:bg-success-300 hover:text-black-500 text-black-500 px-3 py-2 rounded-full font-semibold transition-colors whitespace-nowrap">
+                                                <span class="caption sm:caption font-bold text-brandNeutral-400 bg-brandPrimary-50 px-3 py-2 rounded-full tracking-wider break-all" id="account-${account.id}">${account.account_number}</span>
+                                                <button type="button" onclick="copyToClipboard('account-${account.id}')" class="caption bg-brandPrimary-300 hover:bg-brandSuccess-300 hover:text-brandWhite-50 text-brandWhite-50 px-3 py-2 rounded-full font-semibold transition-colors whitespace-nowrap">
                                                     Copiar
                                                 </button>
                                             </div>
@@ -1097,21 +1258,21 @@ function renderPaymentMethods() {
                                     </div>
                                     
                                     <!-- Titular -->
-                                    <div class="bg-accent-50 rounded-lg p-2 border border-accent-200">
+                                    <div class="bg-brandWhite-50 rounded-lg p-2 border border-brandWhite-300">
                                         <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-1">
-                                            <span class="text-small text-black-500 font-medium">Titular:</span>
-                                            <span class="text-caption sm:text-body-small font-bold text-black-500">${account.account_holder}</span>
+                                            <span class="caption text-brandNeutral-400 font-medium">Titular:</span>
+                                            <span class="caption sm:caption font-bold text-brandNeutral-400">${account.account_holder}</span>
                                         </div>
                                     </div>
                                     
                                     ${account.document_number ? `
                                         <!-- Documento -->
-                                        <div class="bg-accent-50 rounded-lg p-2 border border-accent-200">
+                                            <div class="bg-brandWhite-50 rounded-lg p-2 border border-brandWhite-300">
                                             <div class="space-y-2">
-                                                <span class="text-small text-black-500 font-medium block">Documento:</span>
+                                                <span class="caption text-brandNeutral-400 font-medium block">Documento:</span>
                                                 <div class="flex sm:flex-row items-start sm:items-center justify-between gap-2">
-                                                    <span class="text-caption sm:text-body-small font-bold text-black-500 bg-accent-100 px-3 py-2 rounded-full break-all" id="document-${account.id}">${account.document_number}</span>
-                                                    <button type="button" onclick="copyToClipboard('document-${account.id}')" class="text-caption bg-accent-200 hover:bg-success-300 hover:text-black-500 text-black-500 px-3 py-2 rounded-full font-semibold transition-colors whitespace-nowrap">
+                                                    <span class="caption sm:caption font-bold text-brandNeutral-400 bg-brandPrimary-50 px-3 py-2 rounded-full break-all" id="document-${account.id}">${account.document_number}</span>
+                                                    <button type="button" onclick="copyToClipboard('document-${account.id}')" class="caption bg-brandPrimary-300 hover:bg-brandSuccess-300 hover:text-brandWhite-50 text-brandWhite-50 px-3 py-2 rounded-full font-semibold transition-colors whitespace-nowrap">
                                                         Copiar
                                                     </button>
                                                 </div>
@@ -1122,24 +1283,27 @@ function renderPaymentMethods() {
                             </div>
                         `).join('')}
                         
-                        <div class="bg-accent-100 border border-accent-200 rounded-lg p-3 mt-2">
-                            <label for="payment_proof" class="block text-small font-medium text-black-500 mb-2">
-                                Comprobante ${method.require_proof ? '*' : '(Opcional)'}
+                        <div class="bg-brandPrimary-50 border border-brandWhite-300 rounded-lg p-3 mt-2">
+                            <label for="payment_proof" class="block caption text-brandNeutral-400 mb-2">
+                                Comprobante de Pago ${method.require_proof ? '*' : '(Opcional)'}
                             </label>
-                            <input 
-                                type="file" 
-                                id="payment_proof" 
-                                name="payment_proof" 
-                                accept=".jpg,.jpeg,.png,.pdf"
-                                ${method.require_proof ? 'required' : ''}
-                                class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:ring-1 focus:ring-primary-300 focus:border-transparent transition-colors text-small"
-                            >
-                            <p class="text-small text-black-300 mt-1">
-                                ${method.require_proof ? 
-                                    'JPG, PNG o PDF - OBLIGATORIO' : 
-                                    'JPG, PNG o PDF - OPCIONAL'
-                                }
-                            </p>
+                            <div class="border-2 border-dashed border-brandWhite-300 rounded-lg p-6 text-center hover:border-brandPrimary-300 transition-colors">
+                                <input 
+                                    type="file" 
+                                    id="payment_proof" 
+                                    name="payment_proof" 
+                                    accept=".jpg,.jpeg,.png,.pdf"
+                                    ${method.require_proof ? 'required' : ''}
+                                    class="hidden"
+                                >
+                                <label for="payment_proof" class="cursor-pointer">
+                                    <div class="text-4xl mb-2">📎</div>
+                                    <p class="caption text-brandNeutral-400 font-medium mb-1">Subir comprobante</p>
+                                    <p class="caption text-brandNeutral-300">JPG, PNG o PDF (máx. 5MB)</p>
+                                </label>
+                            </div>
+                            <div id="payment_proof_preview" class="hidden mt-3"></div>
+                            <div id="payment_proof_error" class="hidden mt-1 caption text-brandError-400"></div>
                         </div>
                     </div>
                 </div>
@@ -1152,7 +1316,6 @@ function renderPaymentMethods() {
     // Re-configurar event listeners
     document.querySelectorAll('input[name="payment_method"]').forEach(radio => {
         radio.addEventListener('change', (e) => {
-            console.log('💳 Payment method:', e.target.value);
             handlePaymentMethodChange(e.target.value, e.target.dataset.methodId);
             enableStep3Button();
         });
@@ -1163,12 +1326,64 @@ function renderPaymentMethods() {
     if (cashAmountInput) {
         cashAmountInput.addEventListener('input', handleCashAmountChange);
     }
+    
+    // Re-configurar payment proof upload listener
+    const paymentProofInput = document.getElementById('payment_proof');
+    if (paymentProofInput) {
+        paymentProofInput.addEventListener('change', function(e) {
+            if (e.target.files && e.target.files[0]) {
+                handlePaymentProofUpload(e.target.files[0]);
+            }
+        });
+    }
+}
+
+// Manejar subida de comprobante de pago
+function handlePaymentProofUpload(file) {
+    const preview = document.getElementById('payment_proof_preview');
+    const errorElement = document.getElementById('payment_proof_error');
+    
+    if (!file) {
+        if (preview) preview.classList.add('hidden');
+        return;
+    }
+    
+    const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+    const maxSize = 5 * 1024 * 1024; // 5MB
+    
+    if (!allowedTypes.includes(file.type)) {
+        if (errorElement) {
+            errorElement.textContent = 'Solo se permiten archivos JPG, PNG o PDF';
+            errorElement.classList.remove('hidden');
+        }
+        return;
+    }
+    
+    if (file.size > maxSize) {
+        if (errorElement) {
+            errorElement.textContent = 'El archivo no puede ser mayor a 5MB';
+            errorElement.classList.remove('hidden');
+        }
+        return;
+    }
+    
+    if (errorElement) errorElement.classList.add('hidden');
+    if (preview) {
+        preview.innerHTML = `
+            <div class="flex items-center gap-3 p-3 bg-brandSuccess-50 border border-brandSuccess-200 rounded-lg">
+                <span class="text-2xl">📎</span>
+                <div class="flex-1">
+                    <p class="caption-strong text-brandNeutral-400">${file.name}</p>
+                    <p class="caption text-brandNeutral-300">${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                </div>
+            </div>
+        `;
+        preview.classList.remove('hidden');
+    }
 }
 
 // Enviar pedido
 async function submitOrder() {
-    console.log('🚀 Enviando pedido...');
-    
     const btn = document.getElementById('btn-submit-order');
     const originalText = btn.innerHTML;
     
@@ -1188,6 +1403,24 @@ async function submitOrder() {
         const deliveryType = document.querySelector('input[name="delivery_type"]:checked');
         if (deliveryType) {
             formData.append('delivery_type', deliveryType.value);
+            
+            // Verificar si es dine_in o room_service (desde data-order-type)
+            const orderType = deliveryType.dataset.orderType;
+            if (orderType === 'dine_in') {
+                // Agregar order_type y table_number
+                formData.append('order_type', orderType);
+                const tableNumber = document.getElementById('selected_table_number')?.value;
+                if (tableNumber) {
+                    formData.append('table_number', tableNumber);
+                }
+            } else if (orderType === 'room_service') {
+                // Agregar order_type y room_number (usando table_number en el backend)
+                formData.append('order_type', orderType);
+                const roomNumber = document.getElementById('selected_room_number')?.value;
+                if (roomNumber) {
+                    formData.append('table_number', roomNumber); // El backend espera table_number para room_service también
+                }
+            }
             
             if (deliveryType.value === 'domicilio') {
                 const shippingType = deliveryType.dataset.shippingType;
@@ -1227,14 +1460,9 @@ async function submitOrder() {
             
             // Si hay comprobante de pago
             const paymentProof = document.getElementById('payment_proof');
-            console.log('📄 Payment proof input:', paymentProof);
-            console.log('📄 Payment proof files:', paymentProof ? paymentProof.files : 'No input found');
             
             if (paymentProof && paymentProof.files.length > 0) {
-                console.log('✅ Agregando comprobante:', paymentProof.files[0].name, paymentProof.files[0].size);
                 formData.append('payment_proof', paymentProof.files[0]);
-            } else {
-                console.log('⚠️ No se encontró comprobante de pago');
             }
         }
         
@@ -1244,17 +1472,8 @@ async function submitOrder() {
             formData.append('coupon_code', couponCode.value);
         }
         
-        console.log('📝 Datos a enviar recopilados');
-        
-        // Debug: Mostrar datos que se van a enviar
-        console.log('🚀 FormData contents:');
-        for (let [key, value] of formData.entries()) {
-            console.log(`  ${key}:`, value);
-        }
-        
         // Enviar al servidor
         const checkoutUrl = '{{ route("tenant.checkout.store", $store->slug) }}';
-        console.log('🌐 URL de checkout:', checkoutUrl);
         
         const response = await fetch(checkoutUrl, {
             method: 'POST',
@@ -1266,33 +1485,22 @@ async function submitOrder() {
             }
         });
         
-        console.log('📡 Response status:', response.status);
-        console.log('📡 Response headers:', response.headers);
-        
         const responseText = await response.text();
-        console.log('📡 Raw response:', responseText);
         
         let data;
         try {
             data = JSON.parse(responseText);
-            console.log('📡 Parsed JSON:', data);
         } catch (e) {
-            console.error('❌ Error parsing JSON:', e);
-            console.error('❌ Response was not JSON:', responseText);
             alert('Error: El servidor no devolvió una respuesta JSON válida');
             return;
         }
         
         if (data.success) {
-            console.log('✅ Pedido creado exitosamente:', data);
             // Redirigir a página de éxito con el ID del pedido
             window.location.href = `{{ route("tenant.checkout.success", $store->slug) }}?order=${data.order.id}`;
         } else {
-            console.error('❌ Error del servidor:', data);
-            
             // Manejar errores de validación específicos
             if (data.errors) {
-                console.error('❌ Errores de validación:', data.errors);
                 let errorMessage = 'Errores de validación:\n';
                 for (const field in data.errors) {
                     errorMessage += `• ${field}: ${data.errors[field].join(', ')}\n`;
@@ -1304,7 +1512,6 @@ async function submitOrder() {
         }
         
     } catch (error) {
-        console.error('❌ Error enviando pedido:', error);
         alert('Error de conexión. Por favor intenta nuevamente.');
     } finally {
         // Restaurar botón
@@ -1318,7 +1525,6 @@ function formatPrice(price) {
     // Validar que el precio sea un número válido
     const numPrice = parseFloat(price);
     if (isNaN(numPrice) || !isFinite(numPrice)) {
-        console.warn('⚠️ Precio inválido:', price);
         return '0';
     }
     
@@ -1330,64 +1536,50 @@ function formatPrice(price) {
 
 // Actualizar la visualización del resumen del pedido
 function updateOrderSummaryDisplay() {
-    console.log('🎨 Actualizando resumen de pedido...');
+    // Validar que existan los elementos antes de actualizarlos
+    const summarySubtotal = document.getElementById('summary-subtotal');
+    const totalQuantityEl = document.getElementById('total-quantity');
+    const uniqueProductsEl = document.getElementById('unique-products');
+    const productBreakdown = document.getElementById('product-breakdown');
     
-    // Sección de productos eliminada - no actualizar cart-items-list
-    // const cartItemsList = document.getElementById('cart-items-list');
-    // const cartItemsCount = document.getElementById('cart-items-count');
-    
-    if (cartItems.length === 0) {
-        // cartItemsList.innerHTML = '<p class="text-center text-black-300 py-4 text-sm">No hay productos en el carrito</p>';
-        // cartItemsCount.textContent = '0 productos';
-        console.log('⚠️ No hay productos en el carrito');
-    } else {
-        let itemsHtml = '';
-        let totalQuantity = 0;
-        
-        cartItems.forEach(item => {
-            totalQuantity += item.quantity;
-            // HTML eliminado - ya no se usa la sección de productos duplicada
-        });
-        
-        // cartItemsList.innerHTML = itemsHtml; // ELIMINADO
-        // cartItemsCount.textContent = `${totalQuantity} productos`; // ELIMINADO
-        console.log(`✅ ${totalQuantity} productos procesados para resumen`);
+    if (summarySubtotal) {
+        summarySubtotal.textContent = '$' + formatPrice(cartSubtotal);
     }
     
-    // Actualizar subtotal
-    document.getElementById('summary-subtotal').textContent = '$' + formatPrice(cartSubtotal);
-    
-    // Actualizar desglose
-    document.getElementById('total-quantity').textContent = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-    document.getElementById('unique-products').textContent = cartItems.length;
-    document.getElementById('product-breakdown').classList.remove('hidden');
+    if (cartItems.length > 0) {
+        if (totalQuantityEl) {
+            totalQuantityEl.textContent = cartItems.reduce((sum, item) => sum + item.quantity, 0);
+        }
+        if (uniqueProductsEl) {
+            uniqueProductsEl.textContent = cartItems.length;
+        }
+        if (productBreakdown) {
+            productBreakdown.classList.remove('hidden');
+        }
+    } else {
+        if (productBreakdown) {
+            productBreakdown.classList.add('hidden');
+        }
+    }
     
     // Actualizar total
     updateTotalDisplay();
-    
-    console.log('✅ Resumen actualizado');
 }
 
 // Cargar resumen del pedido desde el carrito
 async function loadOrderSummary() {
-    console.log('📦 Cargando resumen del pedido...');
-    
     try {
         const response = await fetch('{{ route("tenant.cart.get", $store->slug) }}');
-        console.log('📡 Cart fetch response status:', response.status);
         
         if (!response.ok) {
             throw new Error(`HTTP ${response.status}: ${response.statusText}`);
         }
         
         const data = await response.json();
-        console.log('📦 Cart data received:', data);
         
         if (data.success) {
             cartItems = data.items || [];
             cartSubtotal = data.subtotal || 0;
-            
-            console.log('✅ Carrito cargado:', { items: cartItems.length, subtotal: cartSubtotal });
             
             // Mostrar productos usando la función correcta
             if (cartItems.length > 0) {
@@ -1402,47 +1594,20 @@ async function loadOrderSummary() {
                 // Actualizar variable global
                 discountAmount = couponDiscount;
                 
-                console.log('💰 Descuento de cupón:', couponDiscount);
-                
                 updateOrderTotals(cartSubtotal, shippingCost, couponDiscount);
             } else {
                 // Redirigir si no hay productos
                 window.location.href = '{{ route("tenant.cart.index", $store->slug) }}';
             }
         } else {
-            console.error('❌ Error cargando carrito:', data.message);
             // Redirigir si no hay productos
             window.location.href = '{{ route("tenant.cart.index", $store->slug) }}';
         }
     } catch (error) {
-        console.error('❌ Error de conexión cargando carrito:', error);
         cartItems = [];
         cartSubtotal = 0;
         updateOrderSummaryDisplay();
     }
-}
-
-// Actualizar display del resumen
-function updateOrderSummaryDisplay() {
-    // Actualizar subtotal productos
-    document.getElementById('summary-subtotal').textContent = `$${formatPrice(cartSubtotal)}`;
-    
-    // Actualizar desglose de productos
-    const productBreakdown = document.getElementById('product-breakdown');
-    const totalQuantity = document.getElementById('total-quantity');
-    const uniqueProducts = document.getElementById('unique-products');
-    
-    if (cartItems.length > 0) {
-        const totalQty = cartItems.reduce((sum, item) => sum + item.quantity, 0);
-        totalQuantity.textContent = totalQty;
-        uniqueProducts.textContent = cartItems.length;
-        productBreakdown.classList.remove('hidden');
-    } else {
-        productBreakdown.classList.add('hidden');
-    }
-    
-    // Actualizar total final
-    updateTotalDisplay();
 }
 
 // Obtener subtotal actual
@@ -1463,7 +1628,11 @@ function getCurrentDiscount() {
 // Actualizar display del total final
 function updateTotalDisplay() {
     const total = getCurrentSubtotal() + getCurrentShipping() - getCurrentDiscount();
-    document.getElementById('summary-total').textContent = `$${formatPrice(total)}`;
+    const summaryTotal = document.getElementById('summary-total');
+    
+    if (summaryTotal) {
+        summaryTotal.textContent = `$${formatPrice(total)}`;
+    }
     
     // Actualizar botón de envío
     updateSubmitButtonText();
@@ -1525,8 +1694,6 @@ function updateTotalDisplay() {
     const total = subtotal + shipping - discount;
     
     document.getElementById('summary-total').textContent = '$' + formatPrice(Math.max(0, total));
-    
-    console.log('💰 Total actualizado:', { subtotal, shipping, discount, total });
 }
 
 // Calcular costo de envío
@@ -1536,22 +1703,9 @@ async function calculateShippingCost(department, city) {
     // Para envío local, puede que city venga en department y city sea vacío
     const finalCity = city || department || '';
     
-    console.log('🚚 Calculando costo de envío...', { 
-        originalDepartment: department, 
-        originalCity: city,
-        finalCity: finalCity,
-        subtotal: currentSubtotal,
-        cartItems: cartItems.length 
-    });
-    
     if (!finalCity) {
-        console.log('❌ Ciudad requerida para calcular envío');
         updateShippingCost(0);
         return;
-    }
-    
-    if (currentSubtotal <= 0) {
-        console.log('⚠️ Subtotal del carrito es 0 o inválido:', currentSubtotal);
     }
     
     // Mostrar estado calculando
@@ -1574,14 +1728,11 @@ async function calculateShippingCost(department, city) {
         const data = await response.json();
         
         if (data.success) {
-            console.log('✅ Costo de envío calculado:', data);
             updateShippingCost(data.cost);
         } else {
-            console.error('❌ Error calculando envío:', data.message);
             updateShippingCost(0);
         }
     } catch (error) {
-        console.error('❌ Error de conexión calculando envío:', error);
         updateShippingCost(0);
     }
 }
@@ -1622,8 +1773,6 @@ async function applyCoupon() {
         const data = await response.json();
         
         if (data.success) {
-            console.log('✅ Cupón aplicado:', data);
-            
             // Guardar descuento en dataset
             const summaryElement = document.getElementById('order-summary');
             if (summaryElement) {
@@ -1648,7 +1797,6 @@ async function applyCoupon() {
             showCouponError(data.message || 'Cupón no válido');
         }
     } catch (error) {
-        console.error('❌ Error aplicando cupón:', error);
         showCouponError('Error de conexión. Intenta nuevamente.');
     } finally {
         if (!couponCodeInput.disabled) {

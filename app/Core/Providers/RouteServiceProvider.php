@@ -14,6 +14,34 @@ class RouteServiceProvider extends ServiceProvider
     {
         // Definir el patrón para el parámetro store
         Route::pattern('store', '[a-z0-9-]+');
+        
+        // Configurar route model binding para Reservation
+        // Solo resolver si es un valor numérico (ID), de lo contrario dejar pasar el string
+        Route::bind('reservation', function ($value) {
+            if (is_numeric($value)) {
+                $reservation = \App\Shared\Models\Reservation::find($value);
+                if (!$reservation) {
+                    abort(404, 'Reservación no encontrada');
+                }
+                return $reservation;
+            }
+            return $value;
+        });
+        
+        // Configurar route model binding para RoomType
+        Route::bind('roomType', function ($value, $route) {
+            // Solo resolver si es numérico (ID)
+            if (!is_numeric($value)) {
+                abort(404, 'Tipo de habitación no encontrado');
+            }
+            
+            $roomType = \App\Shared\Models\RoomType::find($value);
+            if (!$roomType) {
+                abort(404, 'Tipo de habitación no encontrado');
+            }
+            
+            return $roomType;
+        });
 
         $this->routes(function () {
             // 1. Rutas de API (primera prioridad)

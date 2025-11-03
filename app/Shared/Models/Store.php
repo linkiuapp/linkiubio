@@ -608,4 +608,28 @@ class Store extends Model
     {
         return $this->hasMany(StoreReport::class);
     }
+
+    /**
+     * Relación con mesas (tables)
+     */
+    public function tables()
+    {
+        return $this->hasMany(Table::class);
+    }
+
+    /**
+     * Relación con reservaciones
+     */
+    public function reservations()
+    {
+        return $this->hasMany(Reservation::class);
+    }
+
+    /**
+     * Relación con configuración de reservaciones
+     */
+    public function reservationSettings()
+    {
+        return $this->hasOne(ReservationSetting::class);
+    }
 } 

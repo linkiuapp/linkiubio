@@ -146,7 +146,8 @@
                         </a>
                     </li>
                     
-                    <!-- Gestión de envíos -->
+                    {{-- Gestión de envíos - Solo si el feature está habilitado --}}
+                    @if(featureEnabled($store, 'shipping'))
                     <li>
                         <a href="{{ route('tenant.admin.simple-shipping.index', ['store' => $store->slug]) }}" 
                            class="item-sidebar {{ request()->routeIs('tenant.admin.simple-shipping.*') ? 'item-sidebar-active' : '' }} {{ $onboardingSteps['shipping'] ? 'opacity-95' : '' }}">
@@ -158,6 +159,7 @@
                             <span class="{{ $onboardingSteps['shipping'] ? 'line-through' : '' }}">Gestión de Envíos</span>
                         </a>
                     </li>
+                    @endif
                     
                     <!-- Categorías -->
                     <li>
@@ -306,7 +308,8 @@
                     </a>
                 </li>
 
-                <!-- Configuración de Envíos (NUEVO SISTEMA) -->
+                {{-- Configuración de Envíos - Solo si el feature está habilitado --}}
+                @if(featureEnabled($store, 'shipping'))
                 <li>
                     <a href="{{ route('tenant.admin.simple-shipping.index', ['store' => $store->slug]) }}" 
                         class="item-sidebar {{ request()->routeIs('tenant.admin.simple-shipping.*') ? 'item-sidebar-active' : '' }}">
@@ -334,6 +337,7 @@
                         </span>
                     </a>
                 </li>
+                @endif
 
                 <!-- Métodos de Pago -->
                 <li>
@@ -361,6 +365,66 @@
                         </span>
                     </a>
                 </li>
+
+            <!-- Reservas y Servicios (según categoría) -->
+            @if(featureEnabled($store, 'reservas_mesas') || featureEnabled($store, 'consumo_local') || featureEnabled($store, 'reservas_hotel') || featureEnabled($store, 'consumo_hotel') || featureEnabled($store, 'notificaciones_whatsapp'))
+                <p class="title-group-sidebar w-full flex justify-between items-center px-2 py-1 rounded transition-colors">Reservas y Servicios</p>
+
+                {{-- Notificaciones WhatsApp --}}
+                @if(featureEnabled($store, 'notificaciones_whatsapp'))
+                <li>
+                    <a href="{{ route('tenant.admin.whatsapp-notifications.index', ['store' => $store->slug]) }}" 
+                       class="item-sidebar {{ request()->routeIs('tenant.admin.whatsapp-notifications.*') ? 'item-sidebar-active' : '' }}">
+                        <x-lucide-message-circle class="w-4 h-4 mr-2" />
+                        Notificaciones WhatsApp
+                    </a>
+                </li>
+                @endif
+
+                {{-- Reservas de Mesas (Restaurantes) --}}
+                @if(featureEnabled($store, 'reservas_mesas'))
+                <li>
+                    <a href="{{ route('tenant.admin.reservations.index', ['store' => $store->slug]) }}" 
+                       class="item-sidebar {{ request()->routeIs('tenant.admin.reservations.*') ? 'item-sidebar-active' : '' }}">
+                        <x-lucide-utensils class="w-4 h-4 mr-2" />
+                        Reservas de Mesas
+                    </a>
+                </li>
+                @endif
+
+                {{-- Consumo en Local (Restaurantes) --}}
+                @if(featureEnabled($store, 'consumo_local'))
+                <li>
+                    <a href="{{ route('tenant.admin.dine-in.tables.index', ['store' => $store->slug, 'type' => 'mesa']) }}" 
+                       class="item-sidebar {{ request()->routeIs('tenant.admin.dine-in.*') && request()->get('type') === 'mesa' ? 'item-sidebar-active' : '' }}">
+                        <x-lucide-scan-barcode class="w-4 h-4 mr-2" />
+                        Consumo en Local
+                    </a>
+                </li>
+                @endif
+
+                {{-- Reservas de Hotel (Hoteles) --}}
+                @if(featureEnabled($store, 'reservas_hotel'))
+                <li>
+                    <a href="{{ route('tenant.admin.hotel.reservations.index', ['store' => $store->slug]) }}" 
+                       class="item-sidebar {{ request()->routeIs('tenant.admin.hotel.reservations.*') ? 'item-sidebar-active' : '' }}">
+                        <x-lucide-bed class="w-4 h-4 mr-2" />
+                        Reservas de Hotel
+                    </a>
+                </li>
+                @endif
+
+                {{-- Servicio a Habitación (Hoteles) - Requiere consumo_hotel Y reservas_hotel --}}
+                @if(featureEnabled($store, 'consumo_hotel') && featureEnabled($store, 'reservas_hotel'))
+                <li>
+                    <a href="{{ route('tenant.admin.dine-in.tables.index', ['store' => $store->slug, 'type' => 'habitacion']) }}" 
+                       class="item-sidebar {{ request()->routeIs('tenant.admin.dine-in.*') && request()->get('type') === 'habitacion' ? 'item-sidebar-active' : '' }}">
+                        <x-lucide-concierge-bell class="w-4 h-4 mr-2" />
+                        Servicio a Habitación
+                    </a>
+                </li>
+                @endif
+            @endif
 
             <!-- Marketing-->
                 <p class="title-group-sidebar w-full flex justify-between items-center px-2 py-1 rounded transition-colors">Marketing</p>

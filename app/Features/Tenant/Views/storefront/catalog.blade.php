@@ -2,6 +2,38 @@
 
 @section('content')
 <div class="p-4 space-y-6">
+    <!-- Banner de Mesa/Habitación Activa -->
+    @php
+        $dineInTableId = session('dine_in_table_id');
+        $dineInTableNumber = session('dine_in_table_number');
+        $dineInType = session('dine_in_type');
+    @endphp
+    
+    @if($dineInTableId && $dineInTableNumber)
+        <div class="bg-brandPrimary-50 border border-brandPrimary-300 rounded-lg p-4 mb-4">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 justify-center">
+                <div class="flex items-center gap-3 flex-1 min-w-0 justify-center">
+                    @if($dineInType === 'mesa')
+                        <i data-lucide="utensils" class="w-6 h-6 text-brandPrimary-300 flex-shrink-0"></i>
+                    @else
+                        <i data-lucide="bed" class="w-6 h-6 text-brandPrimary-300 flex-shrink-0"></i>
+                    @endif
+                    <div class="min-w-0 flex-1">
+                        <p class="caption-strong text-brandPrimary-400">
+                            Ordenando para {{ $dineInType === 'mesa' ? 'Mesa' : 'Habitación' }} #{{ $dineInTableNumber }}
+                        </p>
+                        <p class="caption text-brandNeutral-400">Tu pedido será entregado en tu {{ $dineInType === 'mesa' ? 'mesa' : 'habitación' }}</p>
+                    </div>
+                </div>
+                <a 
+                    href="{{ route('tenant.dine-in.checkout', $store->slug) }}" 
+                    class="flex items-center justify-center bg-brandPrimary-300 hover:bg-brandPrimary-200 text-brandWhite-100 px-4 py-2 rounded-full caption-strong transition-colors whitespace-nowrap flex-shrink-0 w-full sm:w-auto text-center">
+                    Ver Pedido
+                </a>
+            </div>
+        </div>
+    @endif
+
     <!-- Header -->
     <div class="space-y-3">
         <nav class="flex caption text-brandInfo-300">
@@ -88,7 +120,7 @@
 
     <!-- Resultados -->
     @if(request('search'))
-        <div class="bg-brandInfo-50 border border-brandInfo-200 rounded-lg p-3">
+        <div class="bg-brandInfo-50 rounded-lg p-3">
             <p class="caption text-brandInfo-300">
                 Resultados para "<span class="caption-strong text-brandInfo-400">{{ request('search') }}</span>" - {{ $products->total() }} productos
             </p>

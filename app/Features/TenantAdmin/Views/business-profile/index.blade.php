@@ -49,13 +49,6 @@
                         <span class="hidden sm:inline">Acerca de Nosotros</span>
                         <span class="sm:hidden">Acerca de</span>
                     </button>
-                    <button @click="activeTab = 'whatsapp'" 
-                            :class="activeTab === 'whatsapp' ? 'bg-primary-200 text-white' : 'bg-white text-black-400 hover:bg-primary-50'"
-                            class="px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2">
-                        <x-solar-chat-round-call-outline class="w-4 h-4" />
-                        <span class="hidden sm:inline">WhatsApp</span>
-                        <span class="sm:hidden">WhatsApp</span>
-                    </button>
                 </nav>
             </div>
         </div>
@@ -350,8 +343,9 @@
                 </form>
             </div>
 
-            <!-- TAB 5: NOTIFICACIONES WHATSAPP -->
-            <div x-show="activeTab === 'whatsapp'" x-transition class="p-4 lg:p-6">
+            <!-- TAB WHATSAPP MOVIDO A: Reservas y Servicios → Notificaciones WhatsApp -->
+            <!-- (Ya no está aquí, ahora es un item independiente del menú) -->
+            <div x-show="false" style="display:none;">
                 <form action="{{ route('tenant.admin.business-profile.update-whatsapp', ['store' => $store->slug]) }}" method="POST">
                     @csrf
                     <div class="space-y-6">

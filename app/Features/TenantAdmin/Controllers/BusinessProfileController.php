@@ -27,6 +27,17 @@ class BusinessProfileController extends Controller
         return view('tenant-admin::business-profile.index', compact('store', 'policies'));
     }
 
+    public function whatsappIndex()
+    {
+        $store = view()->shared('currentStore');
+        
+        if (!$store) {
+            return redirect()->route('tenant.admin.dashboard', ['store' => $store->slug]);
+        }
+        
+        return view('tenant-admin::whatsapp-notifications.index', compact('store'));
+    }
+
 
     public function updateSeo(Request $request, Store $store)
     {

@@ -4,6 +4,9 @@ use Illuminate\Support\Facades\Route;
 use App\Features\Tenant\Controllers\StorefrontController;
 use App\Features\Tenant\Controllers\OrderController;
 use App\Features\Tenant\Controllers\PageController;
+use App\Features\Tenant\Controllers\ReservationController;
+use App\Features\Tenant\Controllers\HotelReservationController;
+use App\Features\Tenant\Controllers\DineInController;
 
 /*
 |--------------------------------------------------------------------------
@@ -87,6 +90,60 @@ Route::get('/proximamente', function() {
     $store = request()->route('store');
     return view('tenant::storefront.coming-soon', compact('store'));
 })->name('coming-soon');
+
+// Prepágina de selección de tipo de reserva (si ambos están activos)
+Route::middleware(['feature:reservas_mesas,reservas_hotel'])->get('/reservaciones/tipo', [ReservationController::class, 'selectType'])->name('reservations.select-type');
+
+// Reservaciones de Mesa (protegidas por feature:reservas_mesas)
+Route::middleware(['feature:reservas_mesas'])->prefix('reservaciones')->name('reservations.')->group(function () {
+    Route::get('/', [ReservationController::class, 'index'])->name('index');
+    Route::post('/', [ReservationController::class, 'store'])->name('store');
+    // Ruta success sin parámetros en la URL (igual que checkout) - usa query parameter
+    Route::get('/exito', [ReservationController::class, 'success'])->name('success');
+    
+    // API Routes para validación en tiempo real
+    Route::prefix('api')->name('api.')->group(function () {
+        Route::post('/available-slots', [ReservationController::class, 'getAvailableSlots'])->name('available-slots');
+        Route::post('/check-availability', [ReservationController::class, 'checkAvailability'])->name('check-availability');
+    });
+});
+
+// Reservaciones de Hotel (protegidas por feature:reservas_hotel)
+Route::middleware(['feature:reservas_hotel'])->prefix('reservas-hotel')->name('hotel-reservations.')->group(function () {
+    Route::get('/', [HotelReservationController::class, 'index'])->name('index');
+    Route::post('/', [HotelReservationController::class, 'store'])->name('store');
+    Route::get('/exito', [HotelReservationController::class, 'success'])->name('success');
+    
+    // API Routes
+    Route::prefix('api')->name('api.')->group(function () {
+        Route::post('/available-room-types', [HotelReservationController::class, 'getAvailableRoomTypes'])->name('available-room-types');
+        Route::post('/calculate-pricing', [HotelReservationController::class, 'calculatePricing'])->name('calculate-pricing');
+    });
+});
+
+// Dine-In / Room Service (protegidas por feature:consumo_local o consumo_hotel)
+// IMPORTANTE: {number} debe ser un parámetro literal, no model binding
+Route::prefix('mesa')->name('dine-in.')->group(function () {
+    Route::get('/{number}', [DineInController::class, 'detectTable'])
+        ->where('number', '[0-9]+') // Solo números
+        ->name('table');
+});
+
+Route::prefix('habitacion')->name('dine-in.')->group(function () {
+    Route::get('/{number}', [DineInController::class, 'detectTable'])
+        ->where('number', '[0-9]+') // Solo números
+        ->name('room');
+});
+
+Route::prefix('dine-in')->name('dine-in.')->group(function () {
+    Route::get('/checkout', [DineInController::class, 'checkout'])->name('checkout');
+});
+
+// API Routes para checkout (mesas y habitaciones disponibles)
+Route::prefix('checkout')->name('checkout.')->group(function () {
+    Route::get('/available-tables', [OrderController::class, 'getAvailableTables'])->name('available-tables');
+    Route::get('/available-rooms', [OrderController::class, 'getAvailableRooms'])->name('available-rooms');
+});
 
 // Rutas de páginas informativas
 Route::get('/politicas-legales', [PageController::class, 'legalPolicies'])->name('legal-policies');

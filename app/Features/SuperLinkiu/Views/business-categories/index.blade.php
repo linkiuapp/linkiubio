@@ -88,9 +88,9 @@
                                 {{ $category->stores_count ?? 0 }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                                <button @click="openEditModal({{ json_encode($category) }})" class="text-primary-200 hover:text-primary-300 mr-3">
-                                    Editar
-                                </button>
+                <button @click="openEditModal(@js(['id' => $category->id, 'name' => $category->name, 'icon' => $category->icon, 'description' => $category->description, 'requires_manual_approval' => $category->requires_manual_approval, 'is_active' => $category->is_active, 'features' => $category->feature_ids]))" class="text-primary-200 hover:text-primary-300 mr-3">
+                    Editar
+                </button>
                                 <form action="{{ route('superlinkiu.business-categories.destroy', $category) }}" method="POST" class="inline" onsubmit="return confirm('¿Estás seguro de eliminar esta categoría?');">
                                     @csrf
                                     @method('DELETE')
@@ -201,6 +201,40 @@
                                     <span class="text-sm font-medium text-gray-700">Categoría activa</span>
                                 </label>
                             </div>
+
+                            {{-- Features Asignados --}}
+                            <div class="border-t border-gray-200 pt-4">
+                                <label class="block text-sm font-medium text-gray-700 mb-3">Features Habilitados</label>
+                                
+                                <div class="max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                    <div class="space-y-2">
+                                        <template x-for="feature in availableFeatures" :key="feature.id">
+                                            <label class="flex items-start p-2 hover:bg-white rounded cursor-pointer transition-colors" :class="{'bg-success-50 border border-success-200': feature.is_default}">
+                                                <input type="checkbox" 
+                                                       name="features[]" 
+                                                       :value="feature.id"
+                                                       x-model="form.features"
+                                                       :disabled="feature.is_default"
+                                                       :checked="feature.is_default"
+                                                       class="mt-1 mr-3 text-primary-300 focus:ring-primary-200">
+                                                <div class="flex-1">
+                                                    <span class="text-sm font-medium text-gray-900" x-text="feature.name"></span>
+                                                    <p class="text-xs text-gray-500" x-text="feature.description || feature.key"></p>
+                                                    <span x-show="feature.is_default" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-success-100 text-success-700 mt-1">
+                                                        ✓ Siempre habilitado
+                                                    </span>
+                                                </div>
+                                            </label>
+                                        </template>
+                                        <template x-if="availableFeatures.length === 0">
+                                            <p class="text-sm text-gray-500 text-center py-4">No hay features disponibles</p>
+                                        </template>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-gray-500 mt-2">
+                                    Features base están siempre habilitados. Selecciona adicionales según tipo de negocio.
+                                </p>
+                            </div>
                         </div>
                     </div>
 
@@ -225,23 +259,32 @@ document.addEventListener('alpine:init', () => {
         isEditing: false,
         editingId: null,
         categoryStates: @json($categories->pluck('is_active', 'id')->toArray()),
+        availableFeatures: @json($features ?? []),
         form: {
             name: '',
             icon: '',
             description: '',
             requires_manual_approval: '1',
-            is_active: true
+            is_active: true,
+            features: []
         },
 
         openCreateModal() {
             this.isEditing = false;
             this.editingId = null;
+            
+            // Preseleccionar features base (is_default = true)
+            const defaultFeatureIds = this.availableFeatures
+                .filter(f => f.is_default)
+                .map(f => f.id);
+            
             this.form = {
                 name: '',
                 icon: '',
                 description: '',
                 requires_manual_approval: '1',
-                is_active: true
+                is_active: true,
+                features: defaultFeatureIds
             };
             this.showModal = true;
         },
@@ -254,7 +297,8 @@ document.addEventListener('alpine:init', () => {
                 icon: category.icon || '',
                 description: category.description || '',
                 requires_manual_approval: category.requires_manual_approval ? '1' : '0',
-                is_active: category.is_active
+                is_active: category.is_active,
+                features: category.features || []
             };
             this.showModal = true;
         },
