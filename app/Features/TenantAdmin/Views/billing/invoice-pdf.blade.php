@@ -286,26 +286,38 @@
                     <td class="company-details">
                         @if($billingSettings->logo_url)
                             @php
-                                $logoUrl = $billingSettings->logo_url;
+                                $conversionService = app(\App\Shared\Services\ImageConversionService::class);
                                 
-                                // Para PDF, usar ruta absoluta del sistema
-                                if (strpos($logoUrl, '/storage/') === 0) {
-                                    $logoPath = public_path(ltrim($logoUrl, '/'));
-                                    if (file_exists($logoPath)) {
-                                        $logoUrl = $logoPath;
+                                // Obtener path relativo del logo
+                                $logoRelativePath = str_replace('/storage/', '', parse_url($billingSettings->logo_url, PHP_URL_PATH));
+                                $logoRelativePath = ltrim($logoRelativePath, '/');
+                                
+                                // Convertir WebP a JPG si es necesario (para compatibilidad con PDFs)
+                                $logoPath = $conversionService->getCompatibleImagePath($logoRelativePath);
+                                
+                                // Si no se pudo convertir, usar ruta original
+                                if (!$logoPath) {
+                                    $logoUrl = $billingSettings->logo_url;
+                                    if (strpos($logoUrl, '/storage/') === 0) {
+                                        $logoPath = public_path(ltrim($logoUrl, '/'));
+                                        if (file_exists($logoPath)) {
+                                            $logoUrl = $logoPath;
+                                        } else {
+                                            $logoUrl = asset($logoUrl);
+                                        }
                                     } else {
                                         $logoUrl = asset($logoUrl);
                                     }
-                                } else {
-                                    $logoUrl = asset($logoUrl);
-                                }
-                                
-                                // Verificar en storage
-                                if (!file_exists($logoUrl)) {
-                                    $storagePath = storage_path('app/public/' . ltrim($billingSettings->logo_url, '/storage/'));
-                                    if (file_exists($storagePath)) {
-                                        $logoUrl = $storagePath;
+                                    
+                                    // Verificar en storage
+                                    if (!file_exists($logoUrl)) {
+                                        $storagePath = storage_path('app/public/' . ltrim($billingSettings->logo_url, '/storage/'));
+                                        if (file_exists($storagePath)) {
+                                            $logoUrl = $storagePath;
+                                        }
                                     }
+                                } else {
+                                    $logoUrl = $logoPath;
                                 }
                             @endphp
                             <img src="{{ $logoUrl }}" alt="Logo" class="company-logo">
