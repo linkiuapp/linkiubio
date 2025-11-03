@@ -19,7 +19,7 @@ class OptimizeExistingImagesCommand extends Command
      */
     protected $signature = 'images:optimize-existing 
                             {--context=all : Tipo de imágenes a optimizar (products, sliders, icons, all)}
-                            {--limit=50 : Número máximo de imágenes por lote}
+                            {--limit=10 : Número máximo de imágenes por lote (default: 10 para evitar timeout)}
                             {--batch=1 : Número de lote a procesar}
                             {--dry-run : Solo mostrar qué se procesaría sin hacer cambios}';
 
@@ -189,7 +189,9 @@ class OptimizeExistingImagesCommand extends Command
         $this->info("Total procesado: " . ($dryRun ? $totalProcessed : $totalQueued));
         
         if (!$dryRun && $totalQueued > 0) {
-            $this->info("\n💡 Ejecuta 'php artisan queue:work --queue=images' para procesar las imágenes");
+            $this->info("\n💡 Ejecuta uno de estos comandos para procesar las imágenes:");
+            $this->line("   Opción 1 (recomendado para Laravel Cloud): php artisan images:process-queue --limit=10");
+            $this->line("   Opción 2 (si tienes acceso SSH): php artisan queue:work --queue=images --stop-when-empty");
         }
 
         return Command::SUCCESS;

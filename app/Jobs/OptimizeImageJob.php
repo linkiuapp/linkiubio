@@ -21,9 +21,9 @@ class OptimizeImageJob implements ShouldQueue
     public $tries = 3;
 
     /**
-     * Timeout del job (60 segundos)
+     * Timeout del job (10 minutos - Laravel Cloud tiene límite de 15 min)
      */
-    public $timeout = 60;
+    public $timeout = 600;
 
     /**
      * Create a new job instance.
