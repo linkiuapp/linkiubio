@@ -88,45 +88,13 @@ class ImageOptimizationService
             $maxHeight = $options['max_height'] ?? null;
 
             if ($width > $maxWidth || ($maxHeight !== null && $height > $maxHeight)) {
-                // Si se especifica altura máxima, hacer crop desde el centro
+                // Si se especifica altura máxima, hacer crop desde el centro usando cover()
                 if ($maxHeight !== null) {
-                    // Calcular ratio objetivo
-                    $targetRatio = $maxWidth / $maxHeight;
-                    $currentRatio = $width / $height;
-                    
-                    if ($currentRatio > $targetRatio) {
-                        // Imagen más ancha que el ratio objetivo: crop horizontal desde el centro
-                        $newHeight = $height;
-                        $newWidth = $height * $targetRatio;
-                        
-                        // Si el nuevo ancho es mayor que el máximo, ajustar
-                        if ($newWidth > $maxWidth) {
-                            $newWidth = $maxWidth;
-                            $newHeight = $maxWidth / $targetRatio;
-                        }
-                        
-                        $cropX = ($width - $newWidth) / 2; // Centrar horizontalmente
-                        $cropY = ($height - $newHeight) / 2; // Centrar verticalmente
-                    } else {
-                        // Imagen más alta que el ratio objetivo: crop vertical desde el centro
-                        $newWidth = $width;
-                        $newHeight = $width / $targetRatio;
-                        
-                        // Si la nueva altura es mayor que el máximo, ajustar
-                        if ($newHeight > $maxHeight) {
-                            $newHeight = $maxHeight;
-                            $newWidth = $maxHeight * $targetRatio;
-                        }
-                        
-                        $cropX = ($width - $newWidth) / 2; // Centrar horizontalmente
-                        $cropY = ($height - $newHeight) / 2; // Centrar verticalmente
-                    }
-                    
-                    // Crop desde el centro usando cover() - método correcto de Intervention Image v3
+                    // cover() hace crop desde el centro automáticamente
                     $image = $image->cover($maxWidth, $maxHeight);
                 } else {
                     // Solo redimensionar manteniendo proporción (sin crop)
-                    $image->scale(width: $maxWidth);
+                    $image->scale($maxWidth);
                 }
                 
                 Log::info('Imagen redimensionada', [
