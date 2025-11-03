@@ -122,18 +122,8 @@ class ImageOptimizationService
                         $cropY = ($height - $newHeight) / 2; // Centrar verticalmente
                     }
                     
-                    // Crop desde el centro
-                    $image->crop(
-                        width: (int)$newWidth,
-                        height: (int)$newHeight,
-                        x: (int)$cropX,
-                        y: (int)$cropY
-                    );
-                    
-                    // Escalar a tamaño final si aún es necesario
-                    if ($image->width() > $maxWidth || ($maxHeight !== null && $image->height() > $maxHeight)) {
-                        $image->scale(width: $maxWidth, height: $maxHeight);
-                    }
+                    // Crop desde el centro usando cover() - método correcto de Intervention Image v3
+                    $image = $image->cover($maxWidth, $maxHeight);
                 } else {
                     // Solo redimensionar manteniendo proporción (sin crop)
                     $image->scale(width: $maxWidth);
