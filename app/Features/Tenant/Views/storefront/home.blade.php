@@ -9,31 +9,33 @@
         <div class="slider-container relative" x-data="sliderComponent({{ $sliders->toJson() }}, {{ $sliders->first()->transition_duration ?? 5 }})">
             <!-- Slider principal -->
             <div class="overflow-hidden rounded-lg">
-                <div class="flex gap-4 transition-transform duration-500 ease-in-out" 
+                <div class="flex gap-2 sm:gap-4 transition-transform duration-500 ease-in-out" 
                      :style="getTransform()">
                     
                     @foreach($sliders as $index => $slider)
-                        <div class="flex-shrink-0 relative flex justify-center">
+                        <div class="flex-shrink-0 relative flex justify-center w-full sm:w-auto">
                             @if($slider->url && $slider->url_type !== 'none')
                                 @if($slider->url_type === 'external')
                                     <a href="{{ $slider->url }}" 
                                        target="_blank" 
                                        rel="noopener noreferrer"
-                                       class="block relative group">
+                                       class="block relative group w-full">
                                 @else
                                     <a href="{{ $slider->url_type === 'internal' ? url($store->slug . '/' . ltrim($slider->url, '/')) : '#' }}" 
-                                       class="block relative group">
+                                       class="block relative group w-full">
                                 @endif
                             @else
-                                <div class="block relative group">
+                                <div class="block relative group w-full">
                             @endif
                             
-                            <!-- Imagen del slider -->
-                            <div class="w-[420px] h-[200px] bg-accent-100 rounded-lg overflow-hidden relative">
+                            <!-- Imagen del slider - Responsive -->
+                            <div class="w-full sm:w-[420px] h-[180px] sm:h-[200px] bg-accent-100 rounded-lg overflow-hidden relative">
                                 @if($slider->image_url)
                                     <img src="{{ $slider->image_url }}" 
                                          alt="{{ $slider->name }}" 
-                                         class="w-[420px] h-[200px] object-cover object-center transition-transform duration-300 group-hover:scale-105">
+                                         loading="lazy"
+                                         class="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+                                         style="image-rendering: auto; -webkit-backface-visibility: hidden; backface-visibility: hidden;">
                                 @endif
                                 
                                 <!-- Overlay suave (solo si tiene enlace) -->
@@ -75,12 +77,14 @@
                                     <div class="block relative group">
                                 @endif
                                 
-                                <!-- Imagen del slider -->
-                                <div class="w-[420px] h-[200px] bg-accent-100 rounded-lg overflow-hidden relative">
+                                <!-- Imagen del slider - Responsive -->
+                                <div class="w-full sm:w-[420px] h-[180px] sm:h-[200px] bg-accent-100 rounded-lg overflow-hidden relative">
                                     @if($slider->image_url)
                                         <img src="{{ $slider->image_url }}" 
                                              alt="{{ $slider->name }}" 
-                                             class="w-[420px] h-[200px] object-cover object-center transition-transform duration-300 group-hover:scale-105">
+                                             loading="lazy"
+                                             class="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+                                             style="image-rendering: auto; -webkit-backface-visibility: hidden; backface-visibility: hidden;">
                                     @endif
                                     
                                     <!-- Overlay suave (solo si tiene enlace) -->
@@ -347,6 +351,10 @@ function sliderComponent(sliders, duration = 5) {
                 // Si cambió de móvil a desktop o viceversa, resetear a slide 0
                 if (wasMobile !== this.isMobile) {
                     this.currentSlide = 0;
+                    // Forzar recálculo del transform
+                    this.$nextTick(() => {
+                        // Trigger re-render
+                    });
                 }
             });
         },
@@ -356,9 +364,15 @@ function sliderComponent(sliders, duration = 5) {
         },
         
         getTransform() {
-            // Con tamaño fijo de 420px + gap de 16px (gap-4)
-            const slideWidth = 420; // w-[420px]
-            const gap = 16; // gap-4 = 16px
+            // Calcular ancho dinámicamente según viewport
+            const container = document.querySelector('.slider-container');
+            if (!container) return 'transform: translateX(0px)';
+            
+            const isMobile = window.innerWidth < 640; // sm breakpoint
+            const slideWidth = isMobile 
+                ? window.innerWidth - 32 // w-full menos padding (px-4 = 16px cada lado)
+                : 420; // w-[420px] en desktop
+            const gap = isMobile ? 8 : 16; // gap-2 en móvil (8px), gap-4 en desktop (16px)
             const totalWidth = slideWidth + gap;
             
             return `transform: translateX(-${this.currentSlide * totalWidth}px)`;

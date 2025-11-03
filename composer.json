@@ -12,6 +12,8 @@
         "php": "^8.2",
         "barryvdh/laravel-dompdf": "^3.1",
         "codeat3/blade-solar-icons": "^1.2",
+        "intervention/image": "^3.11",
+        "intervention/image-laravel": "^1.5",
         "laravel/framework": "^12.0",
         "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.10",
@@ -22,7 +24,8 @@
         "sendgrid/sendgrid": "^8.1",
         "sendpulse/rest-api": "*",
         "sentry/sentry-laravel": "^4.18",
-        "simplesoftwareio/simple-qrcode": "^4.2"
+        "simplesoftwareio/simple-qrcode": "^4.2",
+        "spatie/laravel-image-optimizer": "^1.8"
     },
     "require-dev": {
         "fakerphp/faker": "^1.23",

@@ -11,14 +11,14 @@
     
     @if($dineInTableId && $dineInTableNumber)
         <div class="bg-brandPrimary-50 border border-brandPrimary-300 rounded-lg p-4 mb-4">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center gap-3">
+            <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 justify-center">
+                <div class="flex items-center gap-3 flex-1 min-w-0 justify-center">
                     @if($dineInType === 'mesa')
-                        <i data-lucide="utensils" class="w-6 h-6 text-brandPrimary-300"></i>
+                        <i data-lucide="utensils" class="w-6 h-6 text-brandPrimary-300 flex-shrink-0"></i>
                     @else
-                        <i data-lucide="bed" class="w-6 h-6 text-brandPrimary-300"></i>
+                        <i data-lucide="bed" class="w-6 h-6 text-brandPrimary-300 flex-shrink-0"></i>
                     @endif
-                    <div>
+                    <div class="min-w-0 flex-1">
                         <p class="caption-strong text-brandPrimary-400">
                             Ordenando para {{ $dineInType === 'mesa' ? 'Mesa' : 'Habitación' }} #{{ $dineInTableNumber }}
                         </p>
@@ -27,8 +27,7 @@
                 </div>
                 <a 
                     href="{{ route('tenant.dine-in.checkout', $store->slug) }}" 
-                    class="bg-brandPrimary-300 hover:bg-brandPrimary-200 text-brandWhite-100 px-4 py-2 rounded-full caption transition-colors"
-                >
+                    class="flex items-center justify-center bg-brandPrimary-300 hover:bg-brandPrimary-200 text-brandWhite-100 px-4 py-2 rounded-full caption-strong transition-colors whitespace-nowrap flex-shrink-0 w-full sm:w-auto text-center">
                     Ver Pedido
                 </a>
             </div>
