@@ -30,9 +30,10 @@ class OptimizeImageJob implements ShouldQueue
      */
     public function __construct(
         public string $imagePath,
-        public string $context = 'general', // 'product', 'slider', 'logo', 'category'
+        public string $context = 'general', // 'product', 'slider', 'logo', 'category', 'icon'
         public ?int $maxWidth = null,
-        public ?string $modelType = null, // 'ProductImage', 'Slider', etc.
+        public ?int $maxHeight = null, // Altura máxima para crop desde centro
+        public ?string $modelType = null, // 'ProductImage', 'Slider', 'CategoryIcon', etc.
         public ?int $modelId = null // ID del modelo a actualizar
     ) {}
 
@@ -74,6 +75,9 @@ class OptimizeImageJob implements ShouldQueue
             $options = [];
             if ($this->maxWidth !== null) {
                 $options['max_width'] = $this->maxWidth;
+            }
+            if ($this->maxHeight !== null) {
+                $options['max_height'] = $this->maxHeight;
             }
 
             // Optimizar imagen
@@ -222,6 +226,17 @@ class OptimizeImageJob implements ShouldQueue
                     if ($model && $model->image_path === $oldPath) {
                         $model->update(['image_path' => $newPath]);
                         Log::info('Slider actualizado con nuevo path', [
+                            'id' => $this->modelId,
+                            'new_path' => $newPath
+                        ]);
+                    }
+                    break;
+                
+                case 'CategoryIcon':
+                    $model = \App\Shared\Models\CategoryIcon::find($this->modelId);
+                    if ($model && $model->image_path === $oldPath) {
+                        $model->update(['image_path' => $newPath]);
+                        Log::info('CategoryIcon actualizado con nuevo path', [
                             'id' => $this->modelId,
                             'new_path' => $newPath
                         ]);

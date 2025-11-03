@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Shared\Services\ImageOptimizationService;
+use App\Shared\Models\CategoryIcon;
 use App\Features\TenantAdmin\Models\ProductImage;
 use App\Features\TenantAdmin\Models\Slider;
 use App\Jobs\OptimizeImageJob;
@@ -17,7 +18,7 @@ class OptimizeExistingImagesCommand extends Command
      * @var string
      */
     protected $signature = 'images:optimize-existing 
-                            {--context=all : Tipo de imágenes a optimizar (products, sliders, all)}
+                            {--context=all : Tipo de imágenes a optimizar (products, sliders, icons, all)}
                             {--limit=50 : Número máximo de imágenes por lote}
                             {--batch=1 : Número de lote a procesar}
                             {--dry-run : Solo mostrar qué se procesaría sin hacer cambios}';
@@ -129,6 +130,59 @@ class OptimizeExistingImagesCommand extends Command
             }
 
             $this->info("  ✅ Sliders: {$totalProcessed} encontrados" . ($dryRun ? '' : ", {$totalQueued} encolados"));
+        }
+
+        // Optimizar iconos de categoría
+        if ($context === 'all' || $context === 'icons') {
+            $this->info("\n🎨 Procesando iconos de categoría...");
+            
+            $processedIcons = 0;
+            $queuedIcons = 0;
+            
+            $offset = ($batch - 1) * $limit;
+            $icons = CategoryIcon::whereNotNull('image_path')
+                ->offset($offset)
+                ->limit($limit)
+                ->get();
+
+            foreach ($icons as $icon) {
+                $extension = strtolower(pathinfo($icon->image_path, PATHINFO_EXTENSION));
+                
+                // Saltar SVG y WebP ya optimizados
+                if ($extension === 'svg' || $extension === 'webp') {
+                    continue;
+                }
+
+                if (!Storage::disk('public')->exists($icon->image_path)) {
+                    $this->warn("  ⚠️  Archivo no encontrado: {$icon->image_path}");
+                    continue;
+                }
+
+                if ($dryRun) {
+                    $this->line("  📄 Se optimizaría: {$icon->image_path}");
+                    $processedIcons++;
+                } else {
+                    OptimizeImageJob::dispatch(
+                        $icon->image_path,
+                        'icon',
+                        256, // maxWidth
+                        256, // maxHeight (para crop desde centro)
+                        'CategoryIcon',
+                        $icon->id
+                    )->onQueue('images');
+                    
+                    $queuedIcons++;
+                }
+            }
+
+            $this->info("  ✅ Iconos: {$processedIcons} encontrados" . ($dryRun ? '' : ", {$queuedIcons} encolados"));
+            
+            if (!$dryRun) {
+                $totalQueued += $queuedIcons;
+            }
+            if ($dryRun) {
+                $totalProcessed += $processedIcons;
+            }
         }
 
         $this->info("\n✅ Proceso completado!");

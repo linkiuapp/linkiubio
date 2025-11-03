@@ -51,8 +51,10 @@ class ProductImageService
             $relativePath = $directory . '/' . $filename;
 
             // Optimizar imagen: redimensionar, convertir a WebP
+            // Para productos: usar crop desde el centro si es necesario
             $optimizedContent = $optimizationService->optimize($image, null, [
                 'max_width' => 2000, // Máximo 2000px de ancho
+                'max_height' => 2000, // Máximo 2000px de alto (para crop desde centro si es necesario)
                 'quality' => 85
             ]);
 

@@ -86,6 +86,7 @@ class ImageOptimizationService
             // Para productos: usar crop desde el centro si se especifica max_height
             $width = $image->width();
             $height = $image->height();
+            $maxHeight = $options['max_height'] ?? null;
 
             if ($width > $maxWidth || ($maxHeight !== null && $height > $maxHeight)) {
                 // Si se especifica altura máxima, hacer crop desde el centro usando cover()

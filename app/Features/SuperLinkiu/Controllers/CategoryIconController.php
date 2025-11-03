@@ -4,6 +4,7 @@ namespace App\Features\SuperLinkiu\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Shared\Models\CategoryIcon;
+use App\Shared\Services\ImageOptimizationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -93,14 +94,45 @@ class CategoryIconController extends Controller
             // Inicializar variable de imagen
             $imagePath = null;
 
-            // Manejar subida del archivo
+            // Manejar subida del archivo con optimización
             if ($request->hasFile('icon_file')) {
                 $file = $request->file('icon_file');
-                $filename = $name . '.' . $file->getClientOriginalExtension();
                 
-                // ✅ Guardar usando Storage::disk('public')->putFileAs()
-                // Compatible con S3 (Laravel Cloud) y filesystem local
-                $imagePath = Storage::disk('public')->putFileAs('category-icons', $file, $filename);
+                // Si es SVG, guardar sin optimizar (los SVG no se optimizan)
+                if (strtolower($file->getClientOriginalExtension()) === 'svg') {
+                    $filename = $name . '.svg';
+                    $imagePath = Storage::disk('public')->putFileAs('category-icons', $file, $filename);
+                } else {
+                    // Para PNG/JPG: optimizar y convertir a WebP
+                    $optimizationService = app(ImageOptimizationService::class);
+                    
+                    if (!$optimizationService->isValidImage($file)) {
+                        throw new \Exception('El archivo no es una imagen válida');
+                    }
+                    
+                    // Iconos se muestran pequeños (90x90px), optimizar a 256x256px (suficiente para calidad)
+                    $filename = $optimizationService->generateWebpFilename($file);
+                    $directory = 'category-icons';
+                    $relativePath = $directory . '/' . $filename;
+                    
+                    // Optimizar imagen: redimensionar a 256x256px máximo, convertir a WebP
+                    $optimizedContent = $optimizationService->optimize($file, null, [
+                        'max_width' => 256, // Iconos no necesitan ser muy grandes
+                        'max_height' => 256, // Mantener cuadrados desde el centro
+                        'quality' => 90 // Mayor calidad para iconos pequeños
+                    ]);
+                    
+                    if ($optimizedContent === false) {
+                        // Fallback: guardar original
+                        \Log::warning('Optimización de icono falló, guardando original');
+                        $filename = $name . '.' . $file->getClientOriginalExtension();
+                        $imagePath = Storage::disk('public')->putFileAs($directory, $file, $filename);
+                    } else {
+                        // Guardar imagen optimizada (WebP)
+                        Storage::disk('public')->put($relativePath, $optimizedContent);
+                        $imagePath = $relativePath;
+                    }
+                }
             } else {
                 throw new \Exception('No se recibió el archivo de imagen');
             }
@@ -185,22 +217,52 @@ class CategoryIconController extends Controller
                 'is_global' => $request->boolean('is_global', false),
             ];
 
-            // Manejar nuevo archivo si se sube
+            // Manejar nuevo archivo si se sube con optimización
             if ($request->hasFile('icon_file')) {
                 // ✅ Eliminar archivo anterior del storage
                 if ($categoryIcon->image_path) {
                     Storage::disk('public')->delete($categoryIcon->image_path);
                 }
 
-                // ✅ Guardar nuevo archivo usando Storage::disk('public')->putFileAs()
-                // Compatible con S3 (Laravel Cloud) y filesystem local
                 $file = $request->file('icon_file');
-                $filename = $request->name . '.' . $file->getClientOriginalExtension();
                 
-                // Guardar en storage/category-icons/
-                $savedPath = Storage::disk('public')->putFileAs('category-icons', $file, $filename);
-                
-                $data['image_path'] = $savedPath; // Guardar path relativo
+                // Si es SVG, guardar sin optimizar
+                if (strtolower($file->getClientOriginalExtension()) === 'svg') {
+                    $filename = $request->name . '.svg';
+                    $savedPath = Storage::disk('public')->putFileAs('category-icons', $file, $filename);
+                    $data['image_path'] = $savedPath;
+                } else {
+                    // Para PNG/JPG: optimizar y convertir a WebP
+                    $optimizationService = app(ImageOptimizationService::class);
+                    
+                    if (!$optimizationService->isValidImage($file)) {
+                        throw new \Exception('El archivo no es una imagen válida');
+                    }
+                    
+                    // Iconos se muestran pequeños (90x90px), optimizar a 256x256px
+                    $filename = $optimizationService->generateWebpFilename($file);
+                    $directory = 'category-icons';
+                    $relativePath = $directory . '/' . $filename;
+                    
+                    // Optimizar imagen
+                    $optimizedContent = $optimizationService->optimize($file, null, [
+                        'max_width' => 256,
+                        'max_height' => 256,
+                        'quality' => 90
+                    ]);
+                    
+                    if ($optimizedContent === false) {
+                        // Fallback: guardar original
+                        \Log::warning('Optimización de icono falló, guardando original');
+                        $filename = $request->name . '.' . $file->getClientOriginalExtension();
+                        $savedPath = Storage::disk('public')->putFileAs($directory, $file, $filename);
+                        $data['image_path'] = $savedPath;
+                    } else {
+                        // Guardar imagen optimizada (WebP)
+                        Storage::disk('public')->put($relativePath, $optimizedContent);
+                        $data['image_path'] = $relativePath;
+                    }
+                }
             }
 
             $categoryIcon->update($data);
