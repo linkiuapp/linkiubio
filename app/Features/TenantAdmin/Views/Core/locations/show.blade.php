@@ -5,7 +5,7 @@
 @section('content')
 <div class="max-w-6xl mx-auto space-y-5" x-data="locationShow()">
     {{-- Sistema de notificaciones flotantes --}}
-    @include('tenant-admin::core.locations.components.notifications')
+    @include('tenant-admin::Core/locations/components/notifications')
 
     {{-- Alertas de sesión --}}
     @if(session('location_updated'))
@@ -341,7 +341,7 @@
     </div>
 
     {{-- Modal de eliminación --}}
-    @include('tenant-admin::core.locations.components.delete-modal')
+    @include('tenant-admin::Core/locations/components/delete-modal')
 </div>
 
 @push('scripts')

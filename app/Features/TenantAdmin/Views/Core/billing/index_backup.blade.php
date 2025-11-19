@@ -537,16 +537,16 @@
         <!-- ================================================================= -->
 
         <!-- Modal Cambiar Plan -->
-        @include('tenant-admin::core.billing.modals.change-plan')
+        @include('tenant-admin::Core/billing.modals.change-plan')
 
         <!-- Modal Cambiar Ciclo -->
-        @include('tenant-admin::core.billing.modals.change-cycle')
+        @include('tenant-admin::Core/billing.modals.change-cycle')
 
         <!-- Modal Cancelar Suscripción -->
-        @include('tenant-admin::core.billing.modals.cancel-subscription')
+        @include('tenant-admin::Core/billing.modals.cancel-subscription')
 
         <!-- Modal Reactivar Suscripción -->
-        @include('tenant-admin::core.billing.modals.reactivate-subscription')
+        @include('tenant-admin::Core/billing.modals.reactivate-subscription')
 
     </div>
     @endsection

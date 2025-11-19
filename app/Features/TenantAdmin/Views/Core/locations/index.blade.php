@@ -159,7 +159,7 @@ Muestra todas las sedes con filtros, acciones y paginación siguiendo el patrón
             {{-- End SECTION: Toolbar --}}
 
             {{-- SECTION: Table Content --}}
-            @include('tenant-admin::core.locations.components.table-view', [
+            @include('tenant-admin::Core/locations/components/table-view', [
                 'locations' => $locations,
                 'store' => $store,
                 'remainingSlots' => $remainingSlots,
@@ -171,7 +171,7 @@ Muestra todas las sedes con filtros, acciones y paginación siguiendo el patrón
             {{-- SECTION: Pagination --}}
             @if($locations->hasPages())
                 <div class="px-6 py-4 border-t border-gray-200 bg-gray-50">
-                    {{ $locations->links('tenant-admin::core.locations.components.pagination') }}
+                    {{ $locations->links('tenant-admin::Core/locations/components/pagination') }}
                 </div>
             @endif
             {{-- End SECTION: Pagination --}}

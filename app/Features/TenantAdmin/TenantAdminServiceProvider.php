@@ -12,8 +12,7 @@ class TenantAdminServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Registrar vistas con namespace en register() para que esté disponible antes
-        $this->loadViewsFrom(__DIR__ . '/Views', 'tenant-admin');
+        //
     }
 
     /**
@@ -21,6 +20,9 @@ class TenantAdminServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Registrar vistas con namespace
+        $this->loadViewsFrom(__DIR__ . '/Views', 'tenant-admin');
+        
         // No cargamos rutas aquí porque se manejan dinámicamente
         // en el RouteServiceProvider principal
         

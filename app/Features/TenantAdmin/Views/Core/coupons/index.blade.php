@@ -221,7 +221,7 @@
 
             {{-- SECTION: Table Content --}}
             <div class="space-y-6">
-                @include('tenant-admin::core.coupons.components.table-view', [
+                @include('tenant-admin::Core/coupons/components/table-view', [
                     'coupons' => $coupons,
                     'store' => $store,
                     'statusBadgeMap' => $statusBadgeMap,

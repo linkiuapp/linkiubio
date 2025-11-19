@@ -208,7 +208,7 @@ Muestra todos los sliders con filtros, acciones y paginación
             {{-- End SECTION: Filters --}}
 
             {{-- SECTION: Table --}}
-            @include('tenant-admin::core.sliders.components.table-view', [
+            @include('tenant-admin::Core/sliders/components/table-view', [
                 'sliders' => $sliders,
                 'store' => $store,
                 'currentCount' => $currentCount,

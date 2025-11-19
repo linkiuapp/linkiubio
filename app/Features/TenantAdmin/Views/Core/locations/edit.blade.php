@@ -8,7 +8,7 @@
     x-data="locationForm"
 >
     {{-- COMPONENT: Notifications --}}
-    @include('tenant-admin::core.locations.components.notifications')
+    @include('tenant-admin::Core/locations/components/notifications')
 
     @if(session('error'))
         <x-alert-bordered
