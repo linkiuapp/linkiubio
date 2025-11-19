@@ -17,7 +17,7 @@ class ProfileController extends Controller
         $store = $request->route('store');
         $user = auth()->user();
         
-        return view('tenant-admin::core.profile.index', compact('store', 'user'));
+        return view('tenant-admin::Core/profile.index', compact('store', 'user'));
     }
     
     /**

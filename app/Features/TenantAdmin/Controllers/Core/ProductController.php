@@ -85,7 +85,7 @@ class ProductController extends Controller
 
         $products = $query->paginate(20);
         
-        return view('tenant-admin::core.products.index', compact('products', 'store', 'currentCount', 'maxProducts', 'categories'));
+        return view('tenant-admin::Core/products.index', compact('products', 'store', 'currentCount', 'maxProducts', 'categories'));
     }
 
     /**
@@ -112,7 +112,7 @@ class ProductController extends Controller
             ->with('activeOptions')
             ->get();
 
-        return view('tenant-admin::core.products.create', compact(
+        return view('tenant-admin::Core/products.create', compact(
             'store',
             'categories',
             'variables',
@@ -199,7 +199,7 @@ class ProductController extends Controller
             'variableAssignments.variable.activeOptions'
         ]);
         
-        return view('tenant-admin::core.products.show', compact('product', 'store'));
+        return view('tenant-admin::Core/products.show', compact('product', 'store'));
     }
 
     /**
@@ -219,7 +219,7 @@ class ProductController extends Controller
         $categories = Category::where('store_id', $store->id)->get();
         $variables = ProductVariable::where('store_id', $store->id)->with('activeOptions')->get();
 
-        return view('tenant-admin::core.products.edit', compact(
+        return view('tenant-admin::Core/products.edit', compact(
             'product',
             'store',
             'categories',

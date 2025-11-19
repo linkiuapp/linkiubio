@@ -24,7 +24,7 @@ class BusinessProfileController extends Controller
         // Usar first() para obtener el primer registro o null, luego el operador null coalescing
         $policies = $store->policies()->first() ?? new StorePolicy();
         
-        return view('tenant-admin::core.business-profile.index', compact('store', 'policies'));
+        return view('tenant-admin::Core/business-profile.index', compact('store', 'policies'));
     }
 
     public function whatsappIndex()
@@ -35,7 +35,7 @@ class BusinessProfileController extends Controller
             return redirect()->route('tenant.admin.dashboard', ['store' => $store->slug]);
         }
         
-        return view('tenant-admin::core.whatsapp-notifications.index', compact('store'));
+        return view('tenant-admin::Core/whatsapp-notifications.index', compact('store'));
     }
 
 

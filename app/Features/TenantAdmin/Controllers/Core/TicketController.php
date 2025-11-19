@@ -62,7 +62,7 @@ class TicketController extends Controller
             'resolved' => Ticket::where('store_id', $store->id)->resolved()->count(),
         ];
 
-        return view('tenant-admin::core.tickets.index', compact('tickets', 'categories', 'stats', 'store'));
+        return view('tenant-admin::Core/tickets.index', compact('tickets', 'categories', 'stats', 'store'));
     }
 
     public function show(Request $request, $storeSlug, Ticket $ticket): View
@@ -79,7 +79,7 @@ class TicketController extends Controller
         // Marcar como visto por store admin
         $ticket->markAsViewed();
 
-        return view('tenant-admin::core.tickets.show', compact('ticket', 'store'));
+        return view('tenant-admin::Core/tickets.show', compact('ticket', 'store'));
     }
 
     public function create(Request $request): View
@@ -87,7 +87,7 @@ class TicketController extends Controller
         $store = $request->route('store');
         $categories = TicketCategory::getActiveOptions();
 
-        return view('tenant-admin::core.tickets.create', compact('categories', 'store'));
+        return view('tenant-admin::Core/tickets.create', compact('categories', 'store'));
     }
 
     public function store(Request $request): RedirectResponse

@@ -37,7 +37,7 @@ class VariableController extends Controller
         // Contar total de variables
         $totalVariables = ProductVariable::where('store_id', $store->id)->count();
         
-        return view('tenant-admin::core.variables.index', compact(
+        return view('tenant-admin::Core/variables.index', compact(
             'store',
             'variables',
             'totalVariables',
@@ -63,7 +63,7 @@ class VariableController extends Controller
         
         $types = ProductVariable::TYPES;
         
-        return view('tenant-admin::core.variables.create', compact(
+        return view('tenant-admin::Core/variables.create', compact(
             'store',
             'types',
             'totalVariables',
@@ -188,7 +188,7 @@ class VariableController extends Controller
         // Cargar relaciones necesarias
         $variable->load(['options', 'assignments.product']);
         
-        return view('tenant-admin::core.variables.show', compact('store', 'variable'));
+        return view('tenant-admin::Core/variables.show', compact('store', 'variable'));
     }
 
     /**
@@ -213,7 +213,7 @@ class VariableController extends Controller
         $totalVariables = ProductVariable::where('store_id', $store->id)->count();
         $variableLimit = $this->getVariableLimit($store);
         
-        return view('tenant-admin::core.variables.edit', compact(
+        return view('tenant-admin::Core/variables.edit', compact(
             'store',
             'variable',
             'types',

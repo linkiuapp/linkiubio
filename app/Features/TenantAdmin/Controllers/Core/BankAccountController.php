@@ -101,7 +101,7 @@ class BankAccountController extends Controller
             session()->flash('warning', session('plan_limit_warning'));
         }
         
-        return view('tenant-admin::core.bank-accounts.index', compact(
+        return view('tenant-admin::Core/bank-accounts.index', compact(
             'bankAccounts',
             'paymentMethod',
             'store',
@@ -152,7 +152,7 @@ class BankAccountController extends Controller
             'daviplata' => 'Daviplata'
         ];
         
-        return view('tenant-admin::core.bank-accounts.create', compact(
+        return view('tenant-admin::Core/bank-accounts.create', compact(
             'paymentMethod',
             'store',
             'accountTypes'
@@ -277,7 +277,7 @@ class BankAccountController extends Controller
             'daviplata' => 'Daviplata'
         ];
         
-        return view('tenant-admin::core.bank-accounts.edit', compact(
+        return view('tenant-admin::Core/bank-accounts.edit', compact(
             'bankAccount',
             'paymentMethod',
             'store',

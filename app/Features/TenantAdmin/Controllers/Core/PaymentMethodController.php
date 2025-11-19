@@ -434,7 +434,7 @@ class PaymentMethodController extends Controller
         // Get default payment method
         $defaultMethod = $this->paymentMethodService->getDefaultMethod($store);
         
-        return view('tenant-admin::core.payment-methods.index', compact(
+        return view('tenant-admin::Core/payment-methods.index', compact(
             'paymentMethods',
             'store',
             'defaultMethod'
@@ -451,7 +451,7 @@ class PaymentMethodController extends Controller
         // Get current store from view shared data
         $store = view()->shared('currentStore');
         
-        return view('tenant-admin::core.payment-methods.create', compact('store'));
+        return view('tenant-admin::Core/payment-methods.create', compact('store'));
     }
     
     /**
@@ -556,7 +556,7 @@ class PaymentMethodController extends Controller
         // Check if this is the default payment method
         $isDefault = $this->paymentMethodService->getDefaultMethod($store)?->id === $paymentMethod->id;
         
-        return view('tenant-admin::core.payment-methods.show', compact(
+        return view('tenant-admin::Core/payment-methods.show', compact(
             'paymentMethod',
             'store',
             'isDefault'
@@ -588,7 +588,7 @@ class PaymentMethodController extends Controller
         $config = PaymentMethodConfig::getForStore($store->id);
         $cashChangeAvailable = $config->cash_change_available;
         
-        return view('tenant-admin::core.payment-methods.edit', compact(
+        return view('tenant-admin::Core/payment-methods.edit', compact(
             'paymentMethod',
             'store',
             'isDefault',

@@ -138,7 +138,7 @@ class DashboardController extends Controller
                 return $this->mapOrder($order);
             });
 
-        return view('tenant-admin::core.dashboard', compact('store', 'stats', 'allOrders'));
+        return view('tenant-admin::Core/dashboard', compact('store', 'stats', 'allOrders'));
     }
     
     /**

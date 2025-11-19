@@ -45,7 +45,7 @@ class ShippingMethodController extends Controller
         // Obtener método de domicilio para mostrar zonas
         $domicilioMethod = $methods->where('type', ShippingMethod::TYPE_DOMICILIO)->first();
         
-        return view('tenant-admin::core.shipping-methods.index', compact(
+        return view('tenant-admin::Core/shipping-methods.index', compact(
             'store',
             'methods',
             'config',
@@ -168,7 +168,7 @@ class ShippingMethodController extends Controller
             abort(404);
         }
         
-        return view('tenant-admin::core.shipping-methods.edit', compact('store', 'method'));
+        return view('tenant-admin::Core/shipping-methods.edit', compact('store', 'method'));
     }
     
     /**
@@ -226,7 +226,7 @@ class ShippingMethodController extends Controller
                 ->with('error', "Has alcanzado el límite de zonas para tu plan {$store->plan->name} ({$maxZones} zonas)");
         }
         
-        return view('tenant-admin::core.shipping-methods.zones.create', compact('store', 'method'));
+        return view('tenant-admin::Core/shipping-methods.zones.create', compact('store', 'method'));
     }
     
     /**
@@ -285,7 +285,7 @@ class ShippingMethodController extends Controller
         
         $methodModel = $zone->shippingMethod;
         
-        return view('tenant-admin::core.shipping-methods.zones.edit', compact('store', 'zone', 'methodModel'));
+        return view('tenant-admin::Core/shipping-methods.zones.edit', compact('store', 'zone', 'methodModel'));
     }
     
     /**

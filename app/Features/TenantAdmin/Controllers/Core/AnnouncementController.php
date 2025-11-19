@@ -84,7 +84,7 @@ class AnnouncementController extends Controller
                 ->count(),
         ];
 
-        return view('tenant-admin::core.announcements.index', compact('announcements', 'stats', 'store'));
+        return view('tenant-admin::Core/announcements.index', compact('announcements', 'stats', 'store'));
     }
 
     /**
@@ -108,7 +108,7 @@ class AnnouncementController extends Controller
             $announcement->markAsReadBy($store->id);
         }
 
-        return view('tenant-admin::core.announcements.show', compact('announcement', 'store'));
+        return view('tenant-admin::Core/announcements.show', compact('announcement', 'store'));
     }
 
     /**

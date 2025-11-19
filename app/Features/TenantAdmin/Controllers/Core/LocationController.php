@@ -64,7 +64,7 @@ class LocationController extends Controller
             $location->currentStatus = $this->locationService->calculateCurrentStatus($location);
         }
         
-        return view('tenant-admin::core.locations.index', compact(
+        return view('tenant-admin::Core/locations.index', compact(
             'locations',
             'store',
             'maxLocations',
@@ -90,7 +90,7 @@ class LocationController extends Controller
         // Get available social platforms
         $platforms = \App\Shared\Models\LocationSocialLink::getPlatforms();
         
-        return view('tenant-admin::core.locations.create', compact('store', 'platforms'));
+        return view('tenant-admin::Core/locations.create', compact('store', 'platforms'));
     }
     
     /**
@@ -219,7 +219,7 @@ class LocationController extends Controller
         // Get available social platforms
         $platforms = \App\Shared\Models\LocationSocialLink::getPlatforms();
         
-        return view('tenant-admin::core.locations.show', compact(
+        return view('tenant-admin::Core/locations.show', compact(
             'location',
             'store',
             'schedulesByDay',
@@ -253,7 +253,7 @@ class LocationController extends Controller
         // Get available social platforms
         $platforms = \App\Shared\Models\LocationSocialLink::getPlatforms();
         
-        return view('tenant-admin::core.locations.edit', compact(
+        return view('tenant-admin::Core/locations.edit', compact(
             'location',
             'store',
             'schedulesByDay',

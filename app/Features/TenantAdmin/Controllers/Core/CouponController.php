@@ -73,7 +73,7 @@ class CouponController extends Controller
             $coupon->status_info = $this->getCouponStatusInfo($coupon);
         }
         
-        return view('tenant-admin::core.coupons.index', compact(
+        return view('tenant-admin::Core/coupons.index', compact(
             'coupons',
             'store',
             'maxCoupons',
@@ -103,7 +103,7 @@ class CouponController extends Controller
         $categories = $store->categories()->active()->orderBy('name')->get();
         $products = $store->products()->active()->orderBy('name')->get();
         
-        return view('tenant-admin::core.coupons.create', compact('store', 'categories', 'products', 'maxCoupons', 'currentCount'));
+        return view('tenant-admin::Core/coupons.create', compact('store', 'categories', 'products', 'maxCoupons', 'currentCount'));
     }
     
     /**
@@ -241,7 +241,7 @@ class CouponController extends Controller
             ->limit(10)
             ->get();
         
-        return view('tenant-admin::core.coupons.show', compact('coupon', 'store', 'stats', 'recentUsage'));
+        return view('tenant-admin::Core/coupons.show', compact('coupon', 'store', 'stats', 'recentUsage'));
     }
     
     /**
@@ -263,7 +263,7 @@ class CouponController extends Controller
         $categories = $store->categories()->active()->orderBy('name')->get();
         $products = $store->products()->active()->orderBy('name')->get();
         
-        return view('tenant-admin::core.coupons.edit', compact('coupon', 'store', 'categories', 'products'));
+        return view('tenant-admin::Core/coupons.edit', compact('coupon', 'store', 'categories', 'products'));
     }
     
     /**

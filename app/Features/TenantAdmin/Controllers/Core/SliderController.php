@@ -59,7 +59,7 @@ class SliderController extends Controller
         $currentCount = $store->sliders()->count();
         $maxSliders = $store->plan->max_slider ?? 1;
 
-        return view('tenant-admin::core.sliders.index', compact(
+        return view('tenant-admin::Core/sliders.index', compact(
             'sliders',
             'store',
             'currentCount',
@@ -153,7 +153,7 @@ class SliderController extends Controller
                            ->with('error', 'Has alcanzado el límite de sliders de tu plan.');
         }
 
-        return view('tenant-admin::core.sliders.create', compact('store'));
+        return view('tenant-admin::Core/sliders.create', compact('store'));
     }
 
     /**
@@ -283,7 +283,7 @@ class SliderController extends Controller
                        ->where('store_id', $store->id)
                        ->firstOrFail();
 
-        return view('tenant-admin::core.sliders.show', compact('slider', 'store'));
+        return view('tenant-admin::Core/sliders.show', compact('slider', 'store'));
     }
 
     /**
@@ -301,7 +301,7 @@ class SliderController extends Controller
         $currentCount = $store->sliders()->count();
         $maxSliders = $store->plan->max_slider ?? 1;
 
-        return view('tenant-admin::core.sliders.edit', compact('slider', 'store', 'currentCount', 'maxSliders'));
+        return view('tenant-admin::Core/sliders.edit', compact('slider', 'store', 'currentCount', 'maxSliders'));
     }
 
     /**

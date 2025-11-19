@@ -54,7 +54,7 @@ class StoreDesignController extends Controller
             'favicon' => $design->favicon_url
         ];
 
-        return view('tenant-admin::core.store-design.index', [
+        return view('tenant-admin::Core/store-design.index', [
             'store' => $store,
             'design' => $design,
             'history' => $history,

@@ -151,7 +151,7 @@ class OrderController extends Controller
             'amount_to' => $request->get('amount_to'),
         ];
 
-        return view('tenant-admin::core.orders.index', compact('orders', 'stats', 'store', 'currentFilters'));
+        return view('tenant-admin::Core/orders.index', compact('orders', 'stats', 'store', 'currentFilters'));
     }
     
     /**
@@ -344,7 +344,7 @@ class OrderController extends Controller
             ];
         }
 
-        return view('tenant-admin::core.orders.create', compact('products', 'shippingZones', 'store', 'simpleShipping', 'simpleShippingData'));
+        return view('tenant-admin::Core/orders.create', compact('products', 'shippingZones', 'store', 'simpleShipping', 'simpleShippingData'));
     }
 
     /**
@@ -595,7 +595,7 @@ class OrderController extends Controller
         $simpleShipping = \App\Features\TenantAdmin\Models\SimpleShipping::getOrCreateForStore($store->id);
         $simpleShipping->load('activeZones');
 
-        return view('tenant-admin::core.orders.show', compact('order', 'store', 'simpleShipping'));
+        return view('tenant-admin::Core/orders.show', compact('order', 'store', 'simpleShipping'));
     }
 
     /**
@@ -638,7 +638,7 @@ class OrderController extends Controller
             'Valle del Cauca', 'Vaupés', 'Vichada'
         ];
 
-        return view('tenant-admin::core.orders.edit', compact('order', 'products', 'simpleShipping', 'departments', 'store'));
+        return view('tenant-admin::Core/orders.edit', compact('order', 'products', 'simpleShipping', 'departments', 'store'));
     }
 
     /**

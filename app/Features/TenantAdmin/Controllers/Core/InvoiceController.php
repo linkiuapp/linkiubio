@@ -24,7 +24,7 @@ class InvoiceController extends Controller
         
         $billingSettings = BillingSetting::getInstance();
         
-        return view('tenant-admin::core.billing.invoice-view', compact('invoice', 'billingSettings', 'store'));
+        return view('tenant-admin::Core/billing.invoice-view', compact('invoice', 'billingSettings', 'store'));
     }
     
     /**
@@ -42,7 +42,7 @@ class InvoiceController extends Controller
         $billingSettings = BillingSetting::getInstance();
         
         // Generar PDF
-        $pdf = Pdf::loadView('tenant-admin::core.billing.invoice-pdf', compact('invoice', 'billingSettings'));
+        $pdf = Pdf::loadView('tenant-admin::Core/billing.invoice-pdf', compact('invoice', 'billingSettings'));
         
         // Configurar tamaño y orientación
         $pdf->setPaper('A4', 'portrait');
@@ -67,6 +67,6 @@ class InvoiceController extends Controller
         
         $billingSettings = BillingSetting::getInstance();
         
-        return view('tenant-admin::core.billing.invoice-preview', compact('invoice', 'billingSettings', 'store'));
+        return view('tenant-admin::Core/billing.invoice-preview', compact('invoice', 'billingSettings', 'store'));
     }
 }

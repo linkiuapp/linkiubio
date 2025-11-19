@@ -35,7 +35,7 @@ class SimpleShippingController extends Controller
         $maxZones = $zoneLimits[$planSlug] ?? 2;
         $currentZoneCount = $shipping->zones()->count();
         
-        return view('tenant-admin::core.simple-shipping.index', compact(
+        return view('tenant-admin::Core/simple-shipping.index', compact(
             'store',
             'shipping',
             'maxZones',

@@ -36,7 +36,7 @@ class CategoryController extends Controller
         // Vista (tabla o cards)
         $viewType = $request->get('view', 'table');
         
-        return view('tenant-admin::core.categories.index', compact(
+        return view('tenant-admin::Core/categories.index', compact(
             'store',
             'categories',
             'totalCategories',
@@ -62,7 +62,7 @@ class CategoryController extends Controller
         // Cargar relaciones necesarias
         $category->load(['icon', 'parent', 'children.icon']);
         
-        return view('tenant-admin::core.categories.show', compact('store', 'category'));
+        return view('tenant-admin::Core/categories.show', compact('store', 'category'));
     }
 
     /**
@@ -103,7 +103,7 @@ class CategoryController extends Controller
             ->orderBy('name')
             ->get();
         
-        return view('tenant-admin::core.categories.create', compact(
+        return view('tenant-admin::Core/categories.create', compact(
             'store',
             'icons',
             'parentCategories',
@@ -235,7 +235,7 @@ class CategoryController extends Controller
         $categoryLimit = $this->getCategoryLimit($store);
         $totalCategories = Category::where('store_id', $store->id)->count();
         
-        return view('tenant-admin::core.categories.edit', compact(
+        return view('tenant-admin::Core/categories.edit', compact(
             'store',
             'category',
             'icons',

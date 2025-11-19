@@ -16,7 +16,7 @@ class MasterKeyController
     {
         $store = $request->route('store');
         
-        return view('tenant-admin::core.master-key.index', compact('store'));
+        return view('tenant-admin::Core/master-key.index', compact('store'));
     }
 
     /**

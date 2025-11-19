@@ -85,7 +85,7 @@ class BillingController extends Controller
             ->orderBy('requested_at', 'desc')
             ->get();
 
-        return view('tenant-admin::core.billing.index', compact(
+        return view('tenant-admin::Core/billing.index', compact(
             'store',
             'subscription',
             'availablePlans',
@@ -305,7 +305,7 @@ class BillingController extends Controller
             abort(404);
         }
 
-        $pdf = Pdf::loadView('tenant-admin::core.billing.invoice-pdf', compact('invoice', 'store'));
+        $pdf = Pdf::loadView('tenant-admin::Core/billing.invoice-pdf', compact('invoice', 'store'));
         
         return $pdf->download("Factura_{$invoice->invoice_number}.pdf");
     }

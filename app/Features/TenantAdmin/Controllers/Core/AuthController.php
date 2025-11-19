@@ -18,7 +18,7 @@ class AuthController extends Controller
         // El middleware ya identificó la tienda
         $store = view()->shared('currentStore');
         
-        return view('tenant-admin::core.auth.login', compact('store'));
+        return view('tenant-admin::Core/auth.login', compact('store'));
     }
 
     /**
