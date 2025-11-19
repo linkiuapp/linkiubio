@@ -35,80 +35,77 @@ class ComponentsServiceProvider extends ServiceProvider
         // Registrar componentes del Design System (disponible en todos los ambientes)
         // (Removida restricción de ambiente local)
         {
-            Blade::component('design-system::alerts.desktop-alert', 'design-system.alerts.desktop-alert');
-            Blade::component('design-system::alerts.mobile-alert', 'design-system.alerts.mobile-alert');
-            
             // Input components - Preline UI Based
-            Blade::component('design-system::inputs.InputPlaceholder', 'input-placeholder');
-            Blade::component('design-system::inputs.InputLabel', 'input-label');
-            Blade::component('design-system::inputs.InputBasic', 'input-basic');
-            Blade::component('design-system::inputs.InputHiddenLabel', 'input-hidden-label');
-            Blade::component('design-system::inputs.InputGray', 'input-gray');
-            Blade::component('design-system::inputs.InputFloatingLabel', 'input-floating-label');
-            Blade::component('design-system::inputs.InputSizes', 'input-sizes');
-            Blade::component('design-system::inputs.InputReadonly', 'input-readonly');
-            Blade::component('design-system::inputs.InputDisabled', 'input-disabled');
-            Blade::component('design-system::inputs.InputWithHelper', 'input-with-helper');
-            Blade::component('design-system::inputs.InputCornerHint', 'input-corner-hint');
-            Blade::component('design-system::inputs.InputValidation', 'input-validation');
+            Blade::component('design-system::Inputs.InputPlaceholder', 'input-placeholder');
+            Blade::component('design-system::Inputs.InputLabel', 'input-label');
+            Blade::component('design-system::Inputs.InputBasic', 'input-basic');
+            Blade::component('design-system::Inputs.InputHiddenLabel', 'input-hidden-label');
+            Blade::component('design-system::Inputs.InputGray', 'input-gray');
+            Blade::component('design-system::Inputs.InputFloatingLabel', 'input-floating-label');
+            Blade::component('design-system::Inputs.InputSizes', 'input-sizes');
+            Blade::component('design-system::Inputs.InputReadonly', 'input-readonly');
+            Blade::component('design-system::Inputs.InputDisabled', 'input-disabled');
+            Blade::component('design-system::Inputs.InputWithHelper', 'input-with-helper');
+            Blade::component('design-system::Inputs.InputCornerHint', 'input-corner-hint');
+            Blade::component('design-system::Inputs.InputValidation', 'input-validation');
             
             // Legacy input components (mantener compatibilidad)
-            Blade::component('design-system::inputs.InputWithLabel', 'input-with-label');
-            Blade::component('design-system::inputs.InputWithCornerHint', 'input-with-corner-hint');
+            Blade::component('design-system::Inputs.InputWithLabel', 'input-with-label');
+            Blade::component('design-system::Inputs.InputWithCornerHint', 'input-with-corner-hint');
             
             // Alert components - Preline UI Based
-            Blade::component('design-system::alerts.AlertSolid', 'alert-solid');
-            Blade::component('design-system::alerts.AlertSoft', 'alert-soft');
-            Blade::component('design-system::alerts.AlertBordered', 'alert-bordered');
-            Blade::component('design-system::alerts.AlertDismiss', 'alert-dismiss');
-            Blade::component('design-system::alerts.AlertDiscovery', 'alert-discovery');
-            Blade::component('design-system::alerts.AlertActions', 'alert-actions');
-            Blade::component('design-system::alerts.AlertWithList', 'alert-with-list');
+            Blade::component('design-system::Alerts.AlertSolid', 'alert-solid');
+            Blade::component('design-system::Alerts.AlertSoft', 'alert-soft');
+            Blade::component('design-system::Alerts.AlertBordered', 'alert-bordered');
+            Blade::component('design-system::Alerts.AlertDismiss', 'alert-dismiss');
+            Blade::component('design-system::Alerts.AlertDiscovery', 'alert-discovery');
+            Blade::component('design-system::Alerts.AlertActions', 'alert-actions');
+            Blade::component('design-system::Alerts.AlertWithList', 'alert-with-list');
             
             // Badge components - Preline UI Based
-            Blade::component('design-system::badges.BadgeSolid', 'badge-solid');
-            Blade::component('design-system::badges.BadgeSoft', 'badge-soft');
-            Blade::component('design-system::badges.BadgeMaxWidth', 'badge-max-width');
-            Blade::component('design-system::badges.BadgeIndicator', 'badge-indicator');
-            Blade::component('design-system::badges.BadgeIcon', 'badge-icon');
-            Blade::component('design-system::badges.BadgeRemovable', 'badge-removable');
-            Blade::component('design-system::badges.BadgeAvatar', 'badge-avatar');
-            Blade::component('design-system::badges.BadgePositioned', 'badge-positioned');
-            Blade::component('design-system::badges.BadgeButton', 'badge-button');
+            Blade::component('design-system::Badges.BadgeSolid', 'badge-solid');
+            Blade::component('design-system::Badges.BadgeSoft', 'badge-soft');
+            Blade::component('design-system::Badges.BadgeMaxWidth', 'badge-max-width');
+            Blade::component('design-system::Badges.BadgeIndicator', 'badge-indicator');
+            Blade::component('design-system::Badges.BadgeIcon', 'badge-icon');
+            Blade::component('design-system::Badges.BadgeRemovable', 'badge-removable');
+            Blade::component('design-system::Badges.BadgeAvatar', 'badge-avatar');
+            Blade::component('design-system::Badges.BadgePositioned', 'badge-positioned');
+            Blade::component('design-system::Badges.BadgeButton', 'badge-button');
             
             // Button components - Preline UI Based
-            Blade::component('design-system::buttons.ButtonBase', 'button-base');
-            Blade::component('design-system::buttons.ButtonIcon', 'button-icon');
-            Blade::component('design-system::buttons.ButtonIconOnly', 'button-icon-only');
-            Blade::component('design-system::buttons.ButtonLoading', 'button-loading');
-            Blade::component('design-system::buttons.ButtonBlock', 'button-block');
+            Blade::component('design-system::Buttons.ButtonBase', 'button-base');
+            Blade::component('design-system::Buttons.ButtonIcon', 'button-icon');
+            Blade::component('design-system::Buttons.ButtonIconOnly', 'button-icon-only');
+            Blade::component('design-system::Buttons.ButtonLoading', 'button-loading');
+            Blade::component('design-system::Buttons.ButtonBlock', 'button-block');
             
             // Card components - Preline UI Based
-            Blade::component('design-system::cards.CardBase', 'card-base');
-            Blade::component('design-system::cards.CardScrollable', 'card-scrollable');
-            Blade::component('design-system::cards.CardEmptyState', 'card-empty-state');
-            Blade::component('design-system::cards.CardCentered', 'card-centered');
-            Blade::component('design-system::cards.CardPanelActions', 'card-panel-actions');
-            Blade::component('design-system::cards.CardHorizontal', 'card-horizontal');
-            Blade::component('design-system::cards.CardImage', 'card-image');
-            Blade::component('design-system::cards.CardWithAlert', 'card-with-alert');
+            Blade::component('design-system::Cards.CardBase', 'card-base');
+            Blade::component('design-system::Cards.CardScrollable', 'card-scrollable');
+            Blade::component('design-system::Cards.CardEmptyState', 'card-empty-state');
+            Blade::component('design-system::Cards.CardCentered', 'card-centered');
+            Blade::component('design-system::Cards.CardPanelActions', 'card-panel-actions');
+            Blade::component('design-system::Cards.CardHorizontal', 'card-horizontal');
+            Blade::component('design-system::Cards.CardImage', 'card-image');
+            Blade::component('design-system::Cards.CardWithAlert', 'card-with-alert');
             
             // Old input components (mantener compatibilidad)
-            Blade::component('design-system::inputs.TextInput', 'ds.text-input');
-            Blade::component('design-system::inputs.FloatingLabelInput', 'ds.floating-input');
-            Blade::component('design-system::inputs.InputWithIcon', 'input-with-icon');
-            Blade::component('design-system::inputs.Textarea', 'ds.textarea');
+            Blade::component('design-system::Inputs.TextInput', 'ds.text-input');
+            Blade::component('design-system::Inputs.FloatingLabelInput', 'ds.floating-input');
+            Blade::component('design-system::Inputs.InputWithIcon', 'input-with-icon');
+            Blade::component('design-system::Inputs.Textarea', 'ds.textarea');
             
             // Datepicker components - Preline UI Based
-            Blade::component('design-system::datepickers.DatepickerSingle', 'datepicker-single');
-            Blade::component('design-system::datepickers.DatepickerRange', 'datepicker-range');
-            Blade::component('design-system::datepickers.DatepickerWithTime', 'datepicker-with-time');
+            Blade::component('design-system::Datepickers.DatepickerSingle', 'datepicker-single');
+            Blade::component('design-system::Datepickers.DatepickerRange', 'datepicker-range');
+            Blade::component('design-system::Datepickers.DatepickerWithTime', 'datepicker-with-time');
             
             // List components - Preline UI Based
-            Blade::component('design-system::lists.ListBasic', 'list-basic');
-            Blade::component('design-system::lists.ListWithMarker', 'list-with-marker');
-            Blade::component('design-system::lists.ListSeparator', 'list-separator');
-            Blade::component('design-system::lists.ListChecked', 'list-checked');
+            Blade::component('design-system::Lists.ListBasic', 'list-basic');
+            Blade::component('design-system::Lists.ListWithMarker', 'list-with-marker');
+            Blade::component('design-system::Lists.ListSeparator', 'list-separator');
+            Blade::component('design-system::Lists.ListChecked', 'list-checked');
             
             // List Group components - Preline UI Based
             Blade::component('design-system::ListGroups.ListGroupBasic', 'list-group-basic');
