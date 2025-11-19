@@ -13,36 +13,34 @@ export default defineConfig({
         }),
     ],
     build: {
+        outDir: 'public/build', // MOVIDO AQUÍ - Laravel espera los assets en public/build
         minify: 'terser',
         terserOptions: {
             compress: {
-                drop_console: true,    // Elimina console.log en producción
-                drop_debugger: true,   // Elimina debugger statements
+                drop_console: true,
+                drop_debugger: true,
                 pure_funcs: ['console.log', 'console.info', 'console.debug'],
             },
             format: {
-                comments: false,       // Elimina comentarios
-            }
+                comments: false,
+            },
+            // outDir NO va aquí
         },
         rollupOptions: {
             output: {
                 manualChunks: (id) => {
-                    // Separar Litepicker en un chunk propio (lazy loading)
                     if (id.includes('litepicker')) {
                         return 'litepicker';
                     }
-                    // Separar Lucide icons en un chunk propio
                     if (id.includes('lucide')) {
                         return 'lucide';
                     }
-                    // Separar Alpine.js en un chunk propio
                     if (id.includes('alpinejs') || id.includes('alpine')) {
                         return 'alpine';
                     }
                 },
             },
         },
-        // Aumentar el límite de advertencia a 600 KB (el bundle principal puede ser grande con todas las dependencias)
         chunkSizeWarningLimit: 600,
     },
 });
