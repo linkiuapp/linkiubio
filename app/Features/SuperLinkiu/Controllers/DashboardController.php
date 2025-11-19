@@ -132,6 +132,35 @@ class DashboardController extends Controller
 
         // Datos para gráfico de crecimiento mensual (últimos 6 meses)
         $monthlyGrowth = $this->getMonthlyGrowthData();
+        
+        // Preparar datos para Chart.js - Crecimiento Mensual
+        $growthChartData = [
+            'labels' => array_column($monthlyGrowth, 'month'),
+            'datasets' => [[
+                'label' => 'Tiendas Nuevas',
+                'data' => array_column($monthlyGrowth, 'count'),
+                'borderColor' => '#7432F8',
+                'backgroundColor' => 'rgba(116, 50, 248, 0.1)',
+                'borderWidth' => 3,
+                'fill' => true,
+                'tension' => 0.4,
+                'pointBackgroundColor' => '#7432F8',
+                'pointBorderColor' => '#fff',
+                'pointBorderWidth' => 2,
+                'pointRadius' => 6,
+                'pointHoverRadius' => 8
+            ]]
+        ];
+        
+        // Preparar datos para Chart.js - Distribución por Plan
+        $planChartData = [
+            'labels' => $storesByPlan->pluck('plan')->toArray(),
+            'datasets' => [[
+                'data' => $storesByPlan->pluck('total')->toArray(),
+                'backgroundColor' => $storesByPlan->pluck('color')->toArray(),
+                'borderWidth' => 0
+            ]]
+        ];
 
         // Últimas tiendas creadas
         $latestStores = Store::with('plan')
@@ -147,7 +176,9 @@ class DashboardController extends Controller
             'revenueGrowth',
             'alerts',
             'monthlyGrowth',
-            'latestStores'
+            'latestStores',
+            'growthChartData',
+            'planChartData'
         ));
     }
 

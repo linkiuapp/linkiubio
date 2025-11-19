@@ -30,15 +30,20 @@ class StoreOnboardingStep extends Model
      */
     public static function markAsCompleted(int $storeId, string $stepKey): void
     {
-        static::updateOrCreate(
-            [
-                'store_id' => $storeId,
-                'step_key' => $stepKey,
-            ],
-            [
-                'completed_at' => now(),
-            ]
-        );
+        $step = static::firstOrNew([
+            'store_id' => $storeId,
+            'step_key' => $stepKey,
+        ]);
+
+        $wasAlreadyCompleted = !empty($step->completed_at);
+
+        if ($wasAlreadyCompleted) {
+            // Ya estaba completado, no necesitamos modificar nada ni disparar confetti
+            return;
+        }
+
+        $step->completed_at = now();
+        $step->save();
         
         // Verificar si se completaron todos los pasos para celebrar 🎉
         if (static::allCompleted($storeId)) {

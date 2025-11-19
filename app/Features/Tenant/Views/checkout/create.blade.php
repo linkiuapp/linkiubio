@@ -148,21 +148,20 @@
                                 class="w-full px-4 py-3 border border-brandWhite-300 rounded-lg caption"
                             >
                                 <option value="">Selecciona tu departamento</option>
-                                @foreach(['Amazonas', 'Antioquia', 'Arauca', 'Atlántico', 'Bolívar', 'Boyacá', 'Caldas', 'Caquetá', 'Casanare', 'Cauca', 'Cesar', 'Chocó', 'Córdoba', 'Cundinamarca', 'Guainía', 'Guaviare', 'Huila', 'La Guajira', 'Magdalena', 'Meta', 'Nariño', 'Norte de Santander', 'Putumayo', 'Quindío', 'Risaralda', 'San Andrés y Providencia', 'Santander', 'Sucre', 'Tolima', 'Valle del Cauca', 'Vaupés', 'Vichada'] as $dept)
-                                    <option value="{{ $dept }}">{{ $dept }}</option>
-                                @endforeach
+                                <!-- Se cargarán dinámicamente desde las zonas configuradas -->
                             </select>
                         </div>
                         
                         <div>
                             <label for="city" class="block caption text-brandNeutral-400 mb-2">Ciudad *</label>
-                            <input 
-                                type="text" 
+                            <select 
                                 id="city" 
                                 name="city" 
                                 class="w-full px-4 py-3 border border-brandWhite-300 rounded-lg caption"
-                                placeholder="Escribe tu ciudad"
+                                disabled
                             >
+                                <option value="">Primero selecciona un departamento</option>
+                            </select>
                         </div>
                     </div>
                     
@@ -336,6 +335,7 @@ document.addEventListener('DOMContentLoaded', function() {
     loadOrderSummary(); // Esta es la función de la línea 1425+
     loadShippingMethods();
     loadPaymentMethods();
+    loadDepartmentsAndCities(); // Cargar departamentos/ciudades para envío nacional
 });
 
 // Variables globales para totales
@@ -380,8 +380,11 @@ function setupEvents() {
     });
     
     // Address fields validation (los delivery type listeners se configuran en renderShippingMethods)
-    document.getElementById('department').addEventListener('change', enableStep2Button);
-    document.getElementById('city').addEventListener('input', enableStep2Button);
+    document.getElementById('department').addEventListener('change', () => {
+        onDepartmentChange();
+        enableStep2Button();
+    });
+    document.getElementById('city').addEventListener('change', enableStep2Button); // Cambio de 'input' a 'change' porque ahora es select
     document.getElementById('customer_address').addEventListener('input', enableStep2Button);
     document.getElementById('customer_address_national').addEventListener('input', enableStep2Button);
     
@@ -1812,6 +1815,76 @@ function showCouponError(message) {
     if (couponError) {
         couponError.textContent = message;
         couponError.classList.remove('hidden');
+    }
+}
+
+// Cargar departamentos y ciudades para envío nacional
+let nationalShippingData = {
+    departments: [],
+    cities_by_department: {}
+};
+
+async function loadDepartmentsAndCities() {
+    try {
+        const response = await fetch('{{ route("tenant.checkout.shipping-departments", $store->slug) }}');
+        const data = await response.json();
+        
+        if (data.success) {
+            nationalShippingData = {
+                departments: data.departments || [],
+                cities_by_department: data.cities_by_department || {}
+            };
+            
+            // Poblar el select de departamentos
+            populateDepartments();
+        }
+    } catch (error) {
+        // Error silencioso - simplemente no habrá departamentos disponibles
+    }
+}
+
+function populateDepartments() {
+    const departmentSelect = document.getElementById('department');
+    if (!departmentSelect) return;
+    
+    // Limpiar opciones existentes (excepto la primera)
+    departmentSelect.innerHTML = '<option value="">Selecciona tu departamento</option>';
+    
+    // Agregar departamentos disponibles
+    nationalShippingData.departments.forEach(dept => {
+        const option = document.createElement('option');
+        option.value = dept;
+        option.textContent = dept;
+        departmentSelect.appendChild(option);
+    });
+}
+
+function onDepartmentChange() {
+    const departmentSelect = document.getElementById('department');
+    const citySelect = document.getElementById('city');
+    
+    if (!departmentSelect || !citySelect) return;
+    
+    const selectedDept = departmentSelect.value;
+    
+    // Limpiar y deshabilitar el select de ciudades
+    citySelect.innerHTML = '<option value="">Selecciona tu ciudad</option>';
+    citySelect.disabled = true;
+    citySelect.value = '';
+    
+    if (selectedDept && nationalShippingData.cities_by_department[selectedDept]) {
+        const cities = nationalShippingData.cities_by_department[selectedDept];
+        
+        // Agregar ciudades del departamento seleccionado
+        cities.forEach(city => {
+            const option = document.createElement('option');
+            option.value = city;
+            option.textContent = city;
+            citySelect.appendChild(option);
+        });
+        
+        // Habilitar el select
+        citySelect.disabled = false;
     }
 }
 </script>

@@ -753,6 +753,78 @@ class OrderController extends Controller
     }
 
     /**
+     * Get shipping departments and cities for national shipping
+     */
+    public function getShippingDepartments(Request $request): JsonResponse
+    {
+        $store = $request->route('store');
+        
+        try {
+            $shipping = SimpleShipping::where('store_id', $store->id)->first();
+            
+            if (!$shipping || !$shipping->national_enabled) {
+                return response()->json([
+                    'success' => true,
+                    'departments' => [],
+                    'cities_by_department' => []
+                ]);
+            }
+            
+            $departments = [];
+            $citiesByDepartment = [];
+            
+            // Obtener zonas activas con ciudades
+            $zones = $shipping->zones()->where('is_active', true)->get();
+            
+            foreach ($zones as $zone) {
+                foreach ($zone->cities as $city) {
+                    // Soportar ambos formatos (string y array con departamento)
+                    if (is_array($city) && isset($city['name']) && isset($city['department'])) {
+                        $cityName = $city['name'];
+                        $department = $city['department'];
+                        
+                        if (!in_array($department, $departments)) {
+                            $departments[] = $department;
+                        }
+                        
+                        if (!isset($citiesByDepartment[$department])) {
+                            $citiesByDepartment[$department] = [];
+                        }
+                        
+                        if (!in_array($cityName, $citiesByDepartment[$department])) {
+                            $citiesByDepartment[$department][] = $cityName;
+                        }
+                    }
+                    // Ignorar formato antiguo (solo string sin departamento)
+                }
+            }
+            
+            // Ordenar departamentos y ciudades alfabéticamente
+            sort($departments);
+            foreach ($citiesByDepartment as $dept => &$cities) {
+                sort($cities);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'departments' => $departments,
+                'cities_by_department' => $citiesByDepartment
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error obteniendo departamentos de envío:', [
+                'store_id' => $store->id,
+                'error' => $e->getMessage()
+            ]);
+            
+            return response()->json([
+                'success' => false,
+                'message' => 'Error cargando departamentos'
+            ], 500);
+        }
+    }
+
+    /**
      * Get payment methods for checkout
      */
     public function getPaymentMethods(Request $request): JsonResponse

@@ -54,6 +54,7 @@ Route::prefix('checkout')->name('checkout.')->group(function () {
     Route::post('/shipping-cost', [OrderController::class, 'getShippingCost'])->name('shipping-cost');
     Route::get('/shipping-methods', [OrderController::class, 'getShippingMethods'])->name('shipping-methods');
     Route::get('/payment-methods', [OrderController::class, 'getPaymentMethods'])->name('payment-methods');
+    Route::get('/shipping-departments', [OrderController::class, 'getShippingDepartments'])->name('shipping-departments');
     Route::get('/exito', [OrderController::class, 'success'])->name('success');
     Route::get('/error', [OrderController::class, 'error'])->name('error');
     

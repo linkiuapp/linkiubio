@@ -3,7 +3,7 @@
 namespace App\Features\TenantAdmin\Policies;
 
 use App\Features\TenantAdmin\Models\BankAccount;
-use App\Features\TenantAdmin\Services\BankAccountService;
+use App\Features\TenantAdmin\Services\Core\BankAccountService;
 use App\Shared\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 

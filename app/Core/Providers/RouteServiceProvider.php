@@ -52,7 +52,12 @@ class RouteServiceProvider extends ServiceProvider
             // 2. Rutas de SuperLinkiu (segunda prioridad - ANTES que las rutas generales)
             // Las rutas de SuperLinkiu ya están cargadas por el SuperLinkiuServiceProvider
             
-            // 3. Rutas del sistema web (tercera prioridad)
+            // 3. Rutas del Design System (solo en local)
+            if (app()->environment('local') && file_exists(base_path('app/Features/DesignSystem/Routes/web.php'))) {
+                require base_path('app/Features/DesignSystem/Routes/web.php');
+            }
+            
+            // 4. Rutas del sistema web (cuarta prioridad)
             Route::middleware('web')
                 ->group(base_path('routes/web.php'));
             

@@ -47,6 +47,7 @@ class SimpleShippingZone extends Model
 
     /**
      * Verificar si una ciudad está en esta zona
+     * Compatible con formato antiguo (string) y nuevo (array con department)
      */
     public function hasCity(string $city): bool
     {
@@ -57,8 +58,17 @@ class SimpleShippingZone extends Model
         $city = $this->normalizeCity($city);
         
         foreach ($this->cities as $zoneCity) {
-            if ($this->normalizeCity($zoneCity) === $city) {
-                return true;
+            // Formato antiguo: string
+            if (is_string($zoneCity)) {
+                if ($this->normalizeCity($zoneCity) === $city) {
+                    return true;
+                }
+            }
+            // Formato nuevo: array con 'name' y 'department'
+            elseif (is_array($zoneCity) && isset($zoneCity['name'])) {
+                if ($this->normalizeCity($zoneCity['name']) === $city) {
+                    return true;
+                }
             }
         }
 
@@ -75,6 +85,7 @@ class SimpleShippingZone extends Model
 
     /**
      * Obtener ciudades como string separado por comas
+     * Compatible con formato antiguo (string) y nuevo (array con department)
      */
     public function getCitiesStringAttribute(): string
     {
@@ -82,7 +93,19 @@ class SimpleShippingZone extends Model
             return '';
         }
 
-        return implode(', ', $this->cities);
+        $cityNames = array_map(function($city) {
+            // Formato antiguo: string
+            if (is_string($city)) {
+                return $city;
+            }
+            // Formato nuevo: array con 'name' y 'department'
+            if (is_array($city) && isset($city['name'])) {
+                return $city['name'];
+            }
+            return '';
+        }, $this->cities);
+
+        return implode(', ', array_filter($cityNames));
     }
 
     /**
@@ -100,5 +123,45 @@ class SimpleShippingZone extends Model
     {
         $times = SimpleShipping::DELIVERY_TIMES;
         return $times[$this->delivery_time] ?? $this->delivery_time;
+    }
+
+    /**
+     * Obtener departamentos únicos de las ciudades configuradas
+     */
+    public function getDepartmentsAttribute(): array
+    {
+        if (!$this->cities || !is_array($this->cities)) {
+            return [];
+        }
+
+        $departments = [];
+        foreach ($this->cities as $city) {
+            // Solo procesar formato nuevo con department
+            if (is_array($city) && isset($city['department'])) {
+                $departments[] = $city['department'];
+            }
+        }
+        
+        return array_values(array_unique($departments));
+    }
+
+    /**
+     * Obtener ciudades de un departamento específico
+     */
+    public function getCitiesByDepartment(string $department): array
+    {
+        if (!$this->cities || !is_array($this->cities)) {
+            return [];
+        }
+
+        $result = [];
+        foreach ($this->cities as $city) {
+            // Solo procesar formato nuevo con department
+            if (is_array($city) && isset($city['department']) && $city['department'] === $department && isset($city['name'])) {
+                $result[] = $city['name'];
+            }
+        }
+        
+        return $result;
     }
 }

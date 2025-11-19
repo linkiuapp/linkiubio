@@ -6,9 +6,9 @@ use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Broadcast;
 
 // Ruta de preview para SuperAdmin (debe estar antes de las rutas catch-all)
-Route::get('/admin-preview/{token}', [App\Features\TenantAdmin\Controllers\PreviewController::class, 'preview'])
+Route::get('/admin-preview/{token}', [App\Features\TenantAdmin\Controllers\Core\PreviewController::class, 'preview'])
     ->name('linkiu.admin-preview');
-Route::post('/admin-preview/exit', [App\Features\TenantAdmin\Controllers\PreviewController::class, 'exitPreview'])
+Route::post('/admin-preview/exit', [App\Features\TenantAdmin\Controllers\Core\PreviewController::class, 'exitPreview'])
     ->name('linkiu.admin-preview.exit');
 
 // Redirección de linkiu.bio a linkiu.com.co
@@ -193,6 +193,22 @@ Route::get('/storage/tickets/{store}/{ticket}/responses/{response}/{filename}', 
     'response' => '[0-9]+',
     'filename' => '[a-zA-Z0-9\-_\.]+',
 ]);
+
+// Ruta para servir SVG del DesignSystem desde app/Features/DesignSystem/images-ui
+Route::get('/images-ui/{filename}', function ($filename) {
+    $filePath = app_path('Features/DesignSystem/images-ui/' . $filename);
+    
+    if (!file_exists($filePath)) {
+        abort(404);
+    }
+    
+    $file = file_get_contents($filePath);
+    $mimeType = mime_content_type($filePath) ?: 'image/svg+xml';
+    
+    return response($file, 200)
+        ->header('Content-Type', $mimeType)
+        ->header('Cache-Control', 'public, max-age=31536000');
+})->where('filename', '[a-zA-Z0-9\-_\.]+');
 
 // Test temporal para SuperAdmin
 Route::get('/test-superlinkiu', function () {

@@ -1,27 +1,45 @@
-<footer class="footer main-footer items-center">
-    <div class="flex justify-between">
-        <p class="mb-0">© {{ date('Y') }} <strong>Linkiu.bio</strong>. Todos los derechos reservados | Desarrollado por <strong>Linkiu Devs ♥️</strong></p>
-        <div class="flex items-center gap-2">
-            <a href="#" target="_blank" class="text-caption font-regular text-black-300 flex items-center gap-2 hover:text-info-300 transition-colors">
+<div class="px-6 py-4">
+    <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
+        <p class="text-sm text-gray-600 mb-0">
+           <x-badge-indicator
+           class="caption-strong"
+           text="Versión Beta 1.0.1"
+           type="error"
+           />
+           - © {{ date('Y') }} <strong>Linkiu.bio</strong>. Todos los derechos reservados | Desarrollado por <strong>Linkiu Devs ♥️</strong>
+        </p>
+        <div class="flex flex-wrap items-center gap-3 text-xs">
+            <a href="#" target="_blank" class="text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1">
                 <span>Acerca de <strong>Linkiu</strong></span>
-                <x-lucide-arrow-up-right class="w-4 h-4" />
+                <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
             </a>
-            <a href="#" target="_blank" class="text-caption font-regular text-black-300 flex items-center gap-2 hover:text-info-300 transition-colors">
+            <a href="#" target="_blank" class="text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1">
                 <span>Términos y condiciones</span>
-                <x-lucide-arrow-up-right class="w-4 h-4" />
+                <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
             </a>
-            <a href="#" target="_blank" class="text-caption font-regular text-black-300 flex items-center gap-2 hover:text-info-300 transition-colors">
+            <a href="#" target="_blank" class="text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1">
                 <span>Política de privacidad</span>
-                <x-lucide-arrow-up-right class="w-4 h-4" />
+                <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
             </a>
-            <a href="#" target="_blank" class="text-caption font-regular text-black-300 flex items-center gap-2 hover:text-info-300 transition-colors">
+            <a href="#" target="_blank" class="text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1">
                 <span>Política de cookies</span>
-                <x-lucide-arrow-up-right class="w-4 h-4" />
+                <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
             </a>
-            <a href="#" target="_blank" class="text-caption font-regular text-black-300 flex items-center gap-2 hover:text-info-300 transition-colors">
-                <span>Políticas de envío y devoluciones</span>
-                <x-lucide-arrow-up-right class="w-4 h-4" />
+            <a href="#" target="_blank" class="text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1">
+                <span>Políticas de envío</span>
+                <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
             </a>
         </div>
     </div>
-</footer>
+</div>
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Inicializar iconos de Lucide en el footer
+    if (typeof window.createIcons !== 'undefined' && typeof window.lucideIcons !== 'undefined') {
+        window.createIcons({ icons: window.lucideIcons });
+    }
+});
+</script>
+@endpush

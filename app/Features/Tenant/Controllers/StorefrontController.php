@@ -425,20 +425,36 @@ class StorefrontController extends Controller
             ];
         }
 
-        // Verificar si está abierto ahora
+        // Verificar si está abierto ahora (con soporte para cruce de medianoche)
         $isOpen = false;
         
         // Turno 1
         if ($todaySchedule->open_time_1 && $todaySchedule->close_time_1) {
-            if ($currentTime >= $todaySchedule->open_time_1 && $currentTime <= $todaySchedule->close_time_1) {
-                $isOpen = true;
+            // ✅ Soporte para cruce de medianoche (ej: 17:00 - 02:00)
+            if ($todaySchedule->open_time_1 > $todaySchedule->close_time_1) {
+                // Cruce de medianoche: está abierto si current >= open OR current <= close
+                if ($currentTime >= $todaySchedule->open_time_1 || $currentTime <= $todaySchedule->close_time_1) {
+                    $isOpen = true;
+                }
+            } else {
+                // Horario normal: está abierto si current está entre open y close
+                if ($currentTime >= $todaySchedule->open_time_1 && $currentTime <= $todaySchedule->close_time_1) {
+                    $isOpen = true;
+                }
             }
         }
 
         // Turno 2 (si existe)
         if (!$isOpen && $todaySchedule->open_time_2 && $todaySchedule->close_time_2) {
-            if ($currentTime >= $todaySchedule->open_time_2 && $currentTime <= $todaySchedule->close_time_2) {
-                $isOpen = true;
+            // ✅ Soporte para cruce de medianoche en turno 2
+            if ($todaySchedule->open_time_2 > $todaySchedule->close_time_2) {
+                if ($currentTime >= $todaySchedule->open_time_2 || $currentTime <= $todaySchedule->close_time_2) {
+                    $isOpen = true;
+                }
+            } else {
+                if ($currentTime >= $todaySchedule->open_time_2 && $currentTime <= $todaySchedule->close_time_2) {
+                    $isOpen = true;
+                }
             }
         }
 
@@ -486,14 +502,25 @@ class StorefrontController extends Controller
             if ($i === 0) {
                 $currentTime = $now->format('H:i');
                 
-                // Verificar turno 2 si el turno 1 ya pasó
-                if ($schedule->open_time_2 && $schedule->open_time_2 > $currentTime) {
-                    return "hoy a las {$schedule->open_time_2}";
+                // ✅ Revisar turno 1 primero
+                if ($schedule->open_time_1 && $schedule->open_time_1 > $currentTime) {
+                    $openTime = substr($schedule->open_time_1, 0, 5); // HH:MM
+                    return "hoy a las {$openTime}";
                 }
+                
+                // ✅ Revisar turno 2 si existe
+                if ($schedule->open_time_2 && $schedule->open_time_2 > $currentTime) {
+                    $openTime = substr($schedule->open_time_2, 0, 5); // HH:MM
+                    return "hoy a las {$openTime}";
+                }
+                
+                // Si ya pasaron ambos turnos de hoy, continuar buscando
+                continue;
             } else {
                 // Días futuros
-                $dayName = $checkDate->locale('es')->dayName;
-                return "{$dayName} a las {$schedule->open_time_1}";
+                $dayName = ($i === 1) ? 'mañana' : $checkDate->locale('es')->dayName;
+                $openTime = substr($schedule->open_time_1, 0, 5); // HH:MM
+                return "{$dayName} a las {$openTime}";
             }
         }
 

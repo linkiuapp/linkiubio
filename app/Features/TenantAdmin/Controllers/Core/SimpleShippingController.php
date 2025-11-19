@@ -1,0 +1,606 @@
+<?php
+
+namespace App\Features\TenantAdmin\Controllers\Core;
+
+use App\Http\Controllers\Controller;
+use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
+use App\Features\TenantAdmin\Models\SimpleShipping;
+use App\Features\TenantAdmin\Models\SimpleShippingZone;
+use App\Shared\Models\Store;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
+
+class SimpleShippingController extends Controller
+{
+    /**
+     * Mostrar la configuración de envíos
+     */
+    public function index(Request $request)
+    {
+        $store = $request->route('store');
+        
+        // Obtener o crear configuración de envío
+        $shipping = SimpleShipping::getOrCreateForStore($store->id, $store->city);
+        $shipping->load('activeZones');
+        
+        // Límites según el plan (consistente con sidebar)
+        $zoneLimits = [
+            'explorer' => 2,
+            'master' => 3,
+            'legend' => 4
+        ];
+        
+        $planSlug = strtolower($store->plan->slug ?? 'explorer');
+        $maxZones = $zoneLimits[$planSlug] ?? 2;
+        $currentZoneCount = $shipping->zones()->count();
+        
+        return view('tenant-admin::core.simple-shipping.index', compact(
+            'store',
+            'shipping',
+            'maxZones',
+            'currentZoneCount'
+        ));
+    }
+
+    /**
+     * Actualizar configuración general
+     */
+    public function update(Request $request)
+    {
+        $store = $request->route('store');
+        
+        $validated = $request->validate([
+            // Recogida en tienda
+            'pickup_enabled' => 'boolean',
+            'pickup_instructions' => 'nullable|string|max:500',
+            'pickup_preparation_time' => ['nullable', 'string', Rule::in(array_keys(SimpleShipping::PREPARATION_TIMES))],
+            
+            // Envío local
+            'local_enabled' => 'boolean',
+            'local_cost' => 'nullable|numeric|min:0|max:999999',
+            'local_free_from' => 'nullable|numeric|min:0|max:999999',
+            'local_city' => 'nullable|string|max:100',
+            'local_instructions' => 'nullable|string|max:500',
+            'local_preparation_time' => ['nullable', 'string', Rule::in(array_keys(SimpleShipping::PREPARATION_TIMES))],
+            
+            // Envío nacional
+            'national_enabled' => 'boolean',
+            'national_free_from' => 'nullable|numeric|min:0|max:999999',
+            'national_instructions' => 'nullable|string|max:500',
+            
+            // Ciudades no listadas
+            'allow_unlisted_cities' => 'boolean',
+            'unlisted_cities_cost' => 'nullable|numeric|min:0|max:999999',
+            'unlisted_cities_message' => 'nullable|string|max:200',
+        ], [
+            'pickup_instructions.max' => 'Las instrucciones de recogida no pueden exceder 500 caracteres',
+            'local_cost.numeric' => 'El costo de envío local debe ser un número',
+            'local_cost.min' => 'El costo de envío local no puede ser negativo',
+            'local_cost.max' => 'El costo de envío local es demasiado alto',
+            'local_free_from.numeric' => 'El monto de envío gratis debe ser un número',
+            'local_free_from.min' => 'El monto de envío gratis no puede ser negativo',
+            'local_city.max' => 'El nombre de la ciudad no puede exceder 100 caracteres',
+            'local_instructions.max' => 'Las instrucciones no pueden exceder 500 caracteres',
+            'national_free_from.numeric' => 'El monto de envío gratis debe ser un número',
+            'national_free_from.min' => 'El monto no puede ser negativo',
+            'national_instructions.max' => 'Las instrucciones no pueden exceder 500 caracteres',
+            'unlisted_cities_cost.numeric' => 'El costo debe ser un número',
+            'unlisted_cities_cost.min' => 'El costo no puede ser negativo',
+            'unlisted_cities_message.max' => 'El mensaje no puede exceder 200 caracteres',
+        ]);
+
+        try {
+            $shipping = SimpleShipping::getOrCreateForStore($store->id, $store->city);
+            $shipping->update($validated);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Configuración de envíos actualizada correctamente',
+                'shipping' => $shipping->fresh()
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar la configuración: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Actualizar campo específico (auto-guardado de toggles)
+     */
+    public function updateField(Request $request): JsonResponse
+    {
+        $store = $request->route('store');
+        
+        $validated = $request->validate([
+            'field' => 'required|string|in:pickup_enabled,local_enabled,national_enabled',
+            'value' => 'required|boolean'
+        ]);
+
+        try {
+            $shipping = SimpleShipping::getOrCreateForStore($store->id, $store->city);
+            $shipping->{$validated['field']} = $validated['value'];
+            $shipping->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => $this->getFieldMessage($validated['field'], $validated['value']),
+                'shipping' => $shipping->fresh()
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Obtener mensaje descriptivo para campo actualizado
+     */
+    private function getFieldMessage(string $field, bool $enabled): string
+    {
+        $messages = [
+            'pickup_enabled' => $enabled ? 'Recogida en tienda activada' : 'Recogida en tienda desactivada',
+            'local_enabled' => $enabled ? 'Envío local activado' : 'Envío local desactivado',
+            'national_enabled' => $enabled ? 'Envío nacional activado' : 'Envío nacional desactivado',
+        ];
+        
+        return $messages[$field] ?? 'Configuración actualizada';
+    }
+
+    /**
+     * Crear nueva zona de envío
+     */
+    public function createZone(Request $request): JsonResponse
+    {
+        $store = $request->route('store');
+        
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'cost' => 'required|numeric|min:0|max:999999',
+            'delivery_time' => ['required', 'string', Rule::in(array_keys(SimpleShipping::DELIVERY_TIMES))],
+            'cities' => 'required|array|min:1|max:20',
+        ], [
+            'name.required' => 'El nombre de la zona es obligatorio',
+            'name.max' => 'El nombre no puede exceder 100 caracteres',
+            'cost.required' => 'El costo de envío es obligatorio',
+            'cost.numeric' => 'El costo debe ser un número',
+            'cost.min' => 'El costo no puede ser negativo',
+            'cost.max' => 'El costo es demasiado alto',
+            'delivery_time.required' => 'El tiempo de entrega es obligatorio',
+            'cities.required' => 'Debes agregar al menos una ciudad',
+            'cities.min' => 'Debes agregar al menos una ciudad',
+            'cities.max' => 'No puedes agregar más de 20 ciudades por zona',
+        ]);
+
+        try {
+            $shipping = SimpleShipping::getOrCreateForStore($store->id, $store->city);
+            
+            // Verificar límites del plan (consistente)
+            $zoneLimits = [
+                'explorer' => 2,
+                'master' => 3,
+                'legend' => 4
+            ];
+            
+            $planSlug = strtolower($store->plan->slug ?? 'explorer');
+            $maxZones = $zoneLimits[$planSlug] ?? 2;
+            $currentZoneCount = $shipping->zones()->count();
+            
+            if ($currentZoneCount >= $maxZones) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Has alcanzado el límite de {$maxZones} zonas para tu plan {$store->plan->name}"
+                ], 422);
+            }
+            
+            // Procesar y validar ciudades (compatible con ambos formatos)
+            $citiesRaw = $validated['cities'];
+            $cityNames = [];
+            $citiesProcessed = [];
+            
+            // Procesar y eliminar duplicados manteniendo el formato
+            foreach ($citiesRaw as $city) {
+                if (is_string($city)) {
+                    $cityName = trim($city);
+                    // Solo agregar si no existe ya (case-insensitive)
+                    if ($cityName && !in_array(strtolower($cityName), array_map('strtolower', $cityNames))) {
+                        $cityNames[] = $cityName;
+                        $citiesProcessed[] = $cityName;
+                    }
+                } elseif (is_array($city) && isset($city['name'])) {
+                    $cityName = trim($city['name']);
+                    // Solo agregar si no existe ya (case-insensitive)
+                    if ($cityName && !in_array(strtolower($cityName), array_map('strtolower', $cityNames))) {
+                        $cityNames[] = $cityName;
+                        $citiesProcessed[] = $city; // Mantener formato con departamento
+                    }
+                }
+            }
+            
+            // Verificar que no haya ciudades duplicadas en otras zonas
+            $existingCities = $this->getExistingCitiesInZones($shipping);
+            $duplicatedCities = array_intersect(array_map('strtolower', $cityNames), array_map('strtolower', $existingCities));
+            
+            if (!empty($duplicatedCities)) {
+                $citiesText = count($duplicatedCities) === 1 ? 'La ciudad' : 'Las ciudades';
+                $zonesText = count($duplicatedCities) === 1 ? 'otra zona' : 'otras zonas';
+                $cityList = implode(', ', array_map('ucfirst', $duplicatedCities));
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => "{$citiesText} {$cityList} ya se encuentra registrada en {$zonesText}. Por favor, eliminala de la otra zona o elige una ciudad diferente."
+                ], 422);
+            }
+
+            // Crear la zona con el array filtrado sin duplicados
+            $zone = $shipping->zones()->create([
+                'name' => $validated['name'],
+                'cost' => $validated['cost'],
+                'delivery_time' => $validated['delivery_time'],
+                'cities' => $citiesProcessed, // Guardamos el array filtrado sin duplicados
+                'sort_order' => $currentZoneCount,
+                'is_active' => true,
+            ]);
+            
+            // Marcar paso de onboarding como completado
+            \App\Shared\Models\StoreOnboardingStep::markAsCompleted($store->id, 'shipping');
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Zona de envío creada correctamente',
+                'zone' => $zone->fresh(),
+                'zones' => $shipping->zones()->orderBy('sort_order')->get()
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al crear la zona: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Actualizar zona de envío
+     */
+    public function updateZone(Request $request, $store, $zone_id): JsonResponse
+    {
+        // Buscar la zona manualmente
+        $zone = SimpleShippingZone::where('id', $zone_id)
+            ->whereHas('simpleShipping', function($query) use ($store) {
+                $query->where('store_id', $store->id);
+            })
+            ->first();
+
+        if (!$zone) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Zona no encontrada'
+            ], 404);
+        }
+        
+        $validated = $request->validate([
+            'name' => 'required|string|max:100',
+            'cost' => 'required|numeric|min:0|max:999999',
+            'delivery_time' => ['required', 'string', Rule::in(array_keys(SimpleShipping::DELIVERY_TIMES))],
+            'cities' => 'required',
+        ], [
+            'name.required' => 'El nombre de la zona es obligatorio',
+            'name.max' => 'El nombre no puede exceder 100 caracteres',
+            'cost.required' => 'El costo de envío es obligatorio',
+            'cost.numeric' => 'El costo debe ser un número',
+            'cost.min' => 'El costo no puede ser negativo',
+            'cost.max' => 'El costo es demasiado alto',
+            'delivery_time.required' => 'El tiempo de entrega es obligatorio',
+            'cities.required' => 'Debes agregar al menos una ciudad',
+        ]);
+        
+        // Manejar cities si viene como string JSON (desde FormData)
+        if (is_string($validated['cities'])) {
+            $validated['cities'] = json_decode($validated['cities'], true);
+        }
+        
+        // Validar cities después de decodificar
+        if (!is_array($validated['cities']) || empty($validated['cities']) || count($validated['cities']) > 20) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Ciudades debe ser un array de 1 a 20 elementos'
+            ], 422);
+        }
+
+        try {
+            // Procesar y validar ciudades (compatible con ambos formatos)
+            $citiesRaw = $validated['cities'];
+            $cityNames = [];
+            $citiesProcessed = [];
+            
+            // Procesar y eliminar duplicados manteniendo el formato
+            foreach ($citiesRaw as $city) {
+                if (is_string($city)) {
+                    $cityName = trim($city);
+                    // Solo agregar si no existe ya (case-insensitive)
+                    if ($cityName && !in_array(strtolower($cityName), array_map('strtolower', $cityNames))) {
+                        $cityNames[] = $cityName;
+                        $citiesProcessed[] = $cityName;
+                    }
+                } elseif (is_array($city) && isset($city['name'])) {
+                    $cityName = trim($city['name']);
+                    // Solo agregar si no existe ya (case-insensitive)
+                    if ($cityName && !in_array(strtolower($cityName), array_map('strtolower', $cityNames))) {
+                        $cityNames[] = $cityName;
+                        $citiesProcessed[] = $city; // Mantener formato con departamento
+                    }
+                }
+            }
+            
+            // Verificar ciudades duplicadas en otras zonas (excluyendo la zona actual)
+            $existingCities = $this->getExistingCitiesInZones($zone->simpleShipping, $zone->id);
+            $duplicatedCities = array_intersect(array_map('strtolower', $cityNames), array_map('strtolower', $existingCities));
+            
+            if (!empty($duplicatedCities)) {
+                $citiesText = count($duplicatedCities) === 1 ? 'La ciudad' : 'Las ciudades';
+                $zonesText = count($duplicatedCities) === 1 ? 'otra zona' : 'otras zonas';
+                $cityList = implode(', ', array_map('ucfirst', $duplicatedCities));
+                
+                return response()->json([
+                    'success' => false,
+                    'message' => "{$citiesText} {$cityList} ya se encuentra registrada en {$zonesText}. Por favor, eliminala de la otra zona o elige una ciudad diferente."
+                ], 422);
+            }
+
+            $zone->update([
+                'name' => $validated['name'],
+                'cost' => $validated['cost'],
+                'delivery_time' => $validated['delivery_time'],
+                'cities' => $citiesProcessed, // Guardamos el array filtrado sin duplicados
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Zona actualizada correctamente',
+                'zone' => $zone->fresh(),
+                'zones' => $zone->simpleShipping->zones()->orderBy('sort_order')->get()
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al actualizar la zona: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Eliminar zona de envío
+     */
+    public function deleteZone(Request $request, $store, $zone_id): JsonResponse
+    {
+        try {
+            // Validar que zone_id sea un número
+            if (!is_numeric($zone_id)) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'ID de zona inválido'
+                ], 400);
+            }
+
+            // Buscar la zona manualmente
+            $zone = SimpleShippingZone::where('id', $zone_id)
+                ->whereHas('simpleShipping', function($query) use ($store) {
+                    $query->where('store_id', $store->id);
+                })
+                ->first();
+
+            if (!$zone) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Zona no encontrada'
+                ], 404);
+            }
+
+            $zone->delete();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Zona eliminada correctamente'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al eliminar la zona: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Reordenar zonas
+     */
+    public function reorderZones(Request $request): JsonResponse
+    {
+        $store = $request->route('store');
+        
+        $validated = $request->validate([
+            'zones' => 'required|array',
+            'zones.*.id' => 'required|integer|exists:simple_shipping_zones,id',
+            'zones.*.sort_order' => 'required|integer|min:0',
+        ]);
+
+        try {
+            DB::transaction(function () use ($validated, $store) {
+                foreach ($validated['zones'] as $zoneData) {
+                    SimpleShippingZone::where('id', $zoneData['id'])
+                        ->whereHas('simpleShipping', function ($query) use ($store) {
+                            $query->where('store_id', $store->id);
+                        })
+                        ->update(['sort_order' => $zoneData['sort_order']]);
+                }
+            });
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Orden actualizado correctamente'
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al reordenar las zonas: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Calcular costo de envío
+     */
+    public function calculateCost(Request $request): JsonResponse
+    {
+        $store = $request->route('store');
+        
+        $validated = $request->validate([
+            'city' => 'required|string|max:100',
+            'subtotal' => 'required|numeric|min:0'
+        ]);
+
+        try {
+            $shipping = SimpleShipping::getOrCreateForStore($store->id, $store->city);
+            $shipping->load('activeZones');
+            $result = $shipping->calculateShippingCost($validated['city'], $validated['subtotal']);
+
+            return response()->json([
+                'success' => true,
+                'shipping' => $result
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al calcular el costo de envío: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Obtener opciones de envío disponibles
+     */
+    public function getOptions(Request $request): JsonResponse
+    {
+        $store = $request->route('store');
+        
+        try {
+            $shipping = SimpleShipping::getOrCreateForStore($store->id, $store->city);
+            $shipping->load('activeZones');
+            $options = $shipping->getAvailableOptions();
+
+            return response()->json([
+                'success' => true,
+                'options' => $options
+            ]);
+
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener las opciones de envío: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * API: Obtener departamentos y ciudades de todas las zonas activas
+     */
+    public function getDepartmentsAndCities(Request $request): JsonResponse
+    {
+        $store = $request->route('store');
+        
+        try {
+            $shipping = SimpleShipping::getOrCreateForStore($store->id, $store->city);
+            $zones = $shipping->zones()->active()->get();
+            
+            $departments = [];
+            $citiesByDepartment = [];
+            
+            foreach ($zones as $zone) {
+                if (!$zone->cities || !is_array($zone->cities)) {
+                    continue;
+                }
+                
+                foreach ($zone->cities as $city) {
+                    // Solo procesar formato nuevo con department
+                    if (is_array($city) && isset($city['name']) && isset($city['department'])) {
+                        $dept = $city['department'];
+                        $cityName = $city['name'];
+                        
+                        // Agregar departamento único
+                        if (!in_array($dept, $departments)) {
+                            $departments[] = $dept;
+                        }
+                        
+                        // Agregar ciudad al departamento
+                        if (!isset($citiesByDepartment[$dept])) {
+                            $citiesByDepartment[$dept] = [];
+                        }
+                        
+                        if (!in_array($cityName, $citiesByDepartment[$dept])) {
+                            $citiesByDepartment[$dept][] = $cityName;
+                        }
+                    }
+                }
+            }
+            
+            // Ordenar departamentos alfabéticamente
+            sort($departments);
+            
+            // Ordenar ciudades dentro de cada departamento
+            foreach ($citiesByDepartment as $dept => $cities) {
+                sort($citiesByDepartment[$dept]);
+            }
+            
+            return response()->json([
+                'success' => true,
+                'departments' => $departments,
+                'cities_by_department' => $citiesByDepartment
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al obtener departamentos: ' . $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Obtener ciudades existentes en todas las zonas (excepto la zona excluida)
+     */
+    private function getExistingCitiesInZones(SimpleShipping $shipping, ?int $excludeZoneId = null): array
+    {
+        $query = $shipping->zones()->active();
+        
+        if ($excludeZoneId) {
+            $query->where('id', '!=', $excludeZoneId);
+        }
+        
+        $zones = $query->get();
+        $cities = [];
+        
+        foreach ($zones as $zone) {
+            if ($zone->cities && is_array($zone->cities)) {
+                foreach ($zone->cities as $city) {
+                    // Extraer nombre de ciudad (compatible con ambos formatos)
+                    $cityName = is_string($city) ? $city : ($city['name'] ?? null);
+                    if ($cityName) {
+                        $cities[] = $cityName;
+                    }
+                }
+            }
+        }
+        
+        return $cities;
+    }
+}

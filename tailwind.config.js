@@ -8,7 +8,8 @@ module.exports = {
     // Feature-based Architecture - Incluir archivos Blade en Features y Shared
     './app/Features/**/*.blade.php',
     './app/Shared/**/*.blade.php',
-    
+    // Preline UI components
+    './node_modules/preline/dist/*.js',
   ],
   safelist: [
     // Clases de estado de cupones generadas dinámicamente desde PHP
@@ -24,6 +25,83 @@ module.exports = {
     'text-brandInfo-400',
     'bg-brandInfo-50',
     'border-brandInfo-400',
+    // Clases para alerts del Design System
+    'bg-brandWarning-100',
+    'bg-brandInfo-100',
+
+    
+    // Clases de animación para componentes
+    'animate-ping',
+    'animate-spin',
+    'group-hover:scale-105',
+    'group-focus:scale-105', 
+    'transition-transform',
+    'duration-500',
+    'ease-in-out',
+    'group',
+    
+    // Clases de spinner para botones loading
+    'border-current',
+    'border-t-transparent',
+    'w-3', 'h-3', 'w-4', 'h-4', 'w-5', 'h-5',
+    'border-2', 'border-4',
+    'inline-block',
+    'px-3',
+    'px-4',
+    'ps-4',
+    'ps-11',
+    'pe-3',
+    'p-3.5',
+    'p-4',
+    'sm:py-2',
+    'sm:py-3',
+    'sm:p-5',
+    'sm:text-sm',
+    'focus:border-blue-500',
+    'focus:border-red-500',
+    'focus:border-teal-500',
+    'focus:ring-blue-500',
+    'focus:ring-red-500',
+    'focus:ring-teal-500',
+    'focus:ring-neutral-600',
+    'disabled:opacity-50',
+    'disabled:pointer-events-none',
+    'peer-disabled:opacity-50',
+    'peer-disabled:pointer-events-none',
+    'placeholder:text-transparent',
+    'peer-focus:scale-90',
+    'peer-focus:translate-x-0.5',
+    'peer-focus:-translate-y-1.5',
+    'peer-focus:text-gray-500',
+    'peer-not-placeholder-shown:scale-90',
+    'peer-not-placeholder-shown:translate-x-0.5',
+    'peer-not-placeholder-shown:-translate-y-1.5',
+    'peer-not-placeholder-shown:text-gray-500',
+    'focus:pt-6',
+    'focus:pb-2',
+    'not-placeholder-shown:pt-6',
+    'not-placeholder-shown:pb-2',
+    'autofill:pt-6',
+    'autofill:pb-2',
+    'shrink-0',
+    'size-4',
+    
+    // Clases para floating labels
+    'placeholder-transparent',
+    'transition-all',
+    'peer-focus:scale-90',
+    'peer-focus:translate-x-0.5',
+    'peer-focus:-translate-y-1.5',
+    'peer-focus:text-gray-600',
+    'peer-placeholder-shown:scale-100',
+    'peer-placeholder-shown:translate-x-0',
+    'peer-placeholder-shown:translate-y-0',
+    'text-brandWarning-300',
+    'text-brandInfo-300',
+    'bg-brandSuccess-100',
+    'bg-brandError-100',
+    'text-brandSuccess-300',
+    'text-brandError-300',
   ],
   theme: {
     extend: {
@@ -256,7 +334,7 @@ module.exports = {
         },
 
         // Paleta Gray (Alias que combina white/black según reglas de diseño)
-        gray: {
+        grayer: {
           50: '#F0F0F0',   // Del sistema black
           100: '#EFF6FD',  // Del sistema white
           200: '#E8F2FC',  // Del sistema white
@@ -274,6 +352,23 @@ module.exports = {
       },
     },
   },
-  plugins: [],
+  plugins: [
+    require('@tailwindcss/forms')({
+      strategy: 'base', // Aplica estilos base a todos los inputs automáticamente
+    }),
+    // Plugin personalizado para soportar not-placeholder-shown (floating labels)
+    function({ addVariant }) {
+      addVariant('not-placeholder-shown', '&:not(:placeholder-shown)');
+    },
+    // Preline UI plugin (condicional para evitar errores de build)
+    ...(function() {
+      try {
+        return [require('preline/plugin')];
+      } catch (e) {
+        console.warn('Preline plugin not available:', e.message);
+        return [];
+      }
+    })()
+  ],
   darkMode: 'class', // Asumo que usas dark mode basado en tus clases `dark:bg-neutral-600`
 }

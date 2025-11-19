@@ -10,10 +10,24 @@
             <h1 class="text-body-large font-bold text-black-500">Categorías de Negocio</h1>
             <p class="text-body-regular text-black-300 mt-1">Gestiona las categorías de negocio y configura la aprobación automática</p>
         </div>
-        <button @click="openCreateModal()" class="btn-primary flex items-center gap-2">
-            <x-solar-add-circle-outline class="w-5 h-5 mr-2" />
-            Nueva Categoría
-        </button>
+        <div class="flex gap-3">
+            @php
+                $categoriesWithoutVertical = \App\Shared\Models\BusinessCategory::withoutVertical()->count();
+            @endphp
+            @if($categoriesWithoutVertical > 0)
+                <a href="{{ route('superlinkiu.business-categories.migrate-verticals') }}" class="btn-secondary flex items-center gap-2">
+                    <x-solar-refresh-outline class="w-5 h-5" />
+                    Migrar Verticales
+                    @if($categoriesWithoutVertical > 0)
+                        <span class="bg-warning-300 text-white text-xs px-2 py-0.5 rounded-full">{{ $categoriesWithoutVertical }}</span>
+                    @endif
+                </a>
+            @endif
+            <button @click="openCreateModal()" class="btn-primary flex items-center gap-2">
+                <x-solar-add-circle-outline class="w-5 h-5 mr-2" />
+                Nueva Categoría
+            </button>
+        </div>
     </div>
 
     {{-- Stats Cards --}}
@@ -43,6 +57,7 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vertical</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo de Aprobación</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tiendas</th>
@@ -61,6 +76,31 @@
                                         @endif
                                     </div>
                                 </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                @if($category->vertical)
+                                    @php
+                                        $verticalNames = [
+                                            'ecommerce' => 'Ecommerce',
+                                            'restaurant' => 'Restaurante',
+                                            'hotel' => 'Hotel',
+                                            'dropshipping' => 'Dropshipping'
+                                        ];
+                                        $verticalColors = [
+                                            'ecommerce' => 'bg-blue-100 text-blue-800',
+                                            'restaurant' => 'bg-orange-100 text-orange-800',
+                                            'hotel' => 'bg-purple-100 text-purple-800',
+                                            'dropshipping' => 'bg-green-100 text-green-800'
+                                        ];
+                                    @endphp
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $verticalColors[$category->vertical] ?? 'bg-gray-100 text-gray-800' }}">
+                                        {{ $verticalNames[$category->vertical] ?? $category->vertical }}
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
+                                        Sin asignar
+                                    </span>
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if($category->requires_manual_approval)
@@ -88,7 +128,7 @@
                                 {{ $category->stores_count ?? 0 }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button @click="openEditModal(@js(['id' => $category->id, 'name' => $category->name, 'icon' => $category->icon, 'description' => $category->description, 'requires_manual_approval' => $category->requires_manual_approval, 'is_active' => $category->is_active, 'features' => $category->feature_ids]))" class="text-primary-200 hover:text-primary-300 mr-3">
+                <button @click="openEditModal(@js(['id' => $category->id, 'name' => $category->name, 'icon' => $category->icon, 'description' => $category->description, 'vertical' => $category->vertical, 'requires_manual_approval' => $category->requires_manual_approval, 'is_active' => $category->is_active, 'features' => $category->feature_ids]))" class="text-primary-200 hover:text-primary-300 mr-3">
                     Editar
                 </button>
                                 <form action="{{ route('superlinkiu.business-categories.destroy', $category) }}" method="POST" class="inline" onsubmit="return confirm('¿Estás seguro de eliminar esta categoría?');">
@@ -102,7 +142,7 @@
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="5" class="px-6 py-12 text-center text-gray-500">
+                            <td colspan="6" class="px-6 py-12 text-center text-gray-500">
                                 <x-solar-document-outline class="w-16 h-16 text-gray-300 mx-auto mb-4" />
                                 <p class="text-lg">No hay categorías registradas</p>
                                 <button @click="openCreateModal()" class="mt-4 text-primary-200 hover:text-primary-300">
@@ -173,6 +213,22 @@
                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-200 focus:border-primary-200"></textarea>
                             </div>
 
+                            {{-- Vertical --}}
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Vertical *</label>
+                                <select name="vertical" x-model="form.vertical" @change="onVerticalChange()" required
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-200 focus:border-primary-200">
+                                    <option value="">Selecciona un vertical</option>
+                                    <option value="ecommerce">Ecommerce</option>
+                                    <option value="restaurant">Restaurante</option>
+                                    <option value="hotel">Hotel</option>
+                                    <option value="dropshipping">Dropshipping</option>
+                                </select>
+                                <p class="text-xs text-gray-500 mt-1">
+                                    Los features se asignarán automáticamente según el vertical seleccionado.
+                                </p>
+                            </div>
+
                             {{-- Tipo de Aprobación --}}
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Aprobación *</label>
@@ -202,8 +258,8 @@
                                 </label>
                             </div>
 
-                            {{-- Features Asignados --}}
-                            <div class="border-t border-gray-200 pt-4">
+                            {{-- Features Asignados (Solo mostrar si NO hay vertical seleccionado) --}}
+                            <div x-show="!form.vertical" class="border-t border-gray-200 pt-4">
                                 <label class="block text-sm font-medium text-gray-700 mb-3">Features Habilitados</label>
                                 
                                 <div class="max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
@@ -235,6 +291,22 @@
                                     Features base están siempre habilitados. Selecciona adicionales según tipo de negocio.
                                 </p>
                             </div>
+
+                            {{-- Información de Features Automáticos (Solo mostrar si hay vertical seleccionado) --}}
+                            <div x-show="form.vertical" class="border-t border-gray-200 pt-4">
+                                <div class="bg-info-50 border border-info-200 rounded-lg p-4">
+                                    <div class="flex items-start">
+                                        <x-solar-info-circle-outline class="w-5 h-5 text-info-300 mr-2 mt-0.5 flex-shrink-0" />
+                                        <div>
+                                            <p class="text-sm font-medium text-info-800 mb-1">Features asignados automáticamente</p>
+                                            <p class="text-xs text-info-700">
+                                                Los features se asignarán automáticamente según el vertical "<span x-text="getVerticalName(form.vertical)" class="font-semibold"></span>".
+                                                No es necesario seleccionarlos manualmente.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -260,10 +332,12 @@ document.addEventListener('alpine:init', () => {
         editingId: null,
         categoryStates: @json($categories->pluck('is_active', 'id')->toArray()),
         availableFeatures: @json($features ?? []),
+        verticals: @json(config('verticals')),
         form: {
             name: '',
             icon: '',
             description: '',
+            vertical: '',
             requires_manual_approval: '1',
             is_active: true,
             features: []
@@ -282,6 +356,7 @@ document.addEventListener('alpine:init', () => {
                 name: '',
                 icon: '',
                 description: '',
+                vertical: '',
                 requires_manual_approval: '1',
                 is_active: true,
                 features: defaultFeatureIds
@@ -296,6 +371,7 @@ document.addEventListener('alpine:init', () => {
                 name: category.name,
                 icon: category.icon || '',
                 description: category.description || '',
+                vertical: category.vertical || '',
                 requires_manual_approval: category.requires_manual_approval ? '1' : '0',
                 is_active: category.is_active,
                 features: category.features || []
@@ -305,6 +381,21 @@ document.addEventListener('alpine:init', () => {
 
         closeModal() {
             this.showModal = false;
+        },
+
+        onVerticalChange() {
+            // Cuando cambia el vertical, los features se asignarán automáticamente en el backend
+            // No necesitamos hacer nada aquí, solo mostrar el mensaje informativo
+        },
+
+        getVerticalName(vertical) {
+            const names = {
+                'ecommerce': 'Ecommerce',
+                'restaurant': 'Restaurante',
+                'hotel': 'Hotel',
+                'dropshipping': 'Dropshipping'
+            };
+            return names[vertical] || vertical;
         },
 
         async toggleStatus(categoryId, currentStatus) {

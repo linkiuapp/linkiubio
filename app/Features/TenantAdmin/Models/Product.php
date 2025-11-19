@@ -23,12 +23,14 @@ class Product extends Model
         'is_active',
         'allow_sharing',
         'store_id',
+        'option_quantities',
     ];
 
     protected $casts = [
         'price' => 'decimal:2',
         'is_active' => 'boolean',
         'allow_sharing' => 'boolean',
+        'option_quantities' => 'array',
     ];
 
     /**

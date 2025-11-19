@@ -14,6 +14,7 @@ class BusinessCategory extends Model
         'slug',
         'icon',
         'description',
+        'vertical',
         'is_active',
         'requires_manual_approval',
         'order',
@@ -123,6 +124,30 @@ class BusinessCategory extends Model
     public function scopeOrdered($query)
     {
         return $query->orderBy('order', 'asc')->orderBy('name', 'asc');
+    }
+
+    /**
+     * Scope: Filtrar por vertical
+     */
+    public function scopeByVertical($query, string $vertical)
+    {
+        return $query->where('vertical', $vertical);
+    }
+
+    /**
+     * Scope: Solo categorías con vertical asignado
+     */
+    public function scopeWithVertical($query)
+    {
+        return $query->whereNotNull('vertical');
+    }
+
+    /**
+     * Scope: Solo categorías sin vertical asignado
+     */
+    public function scopeWithoutVertical($query)
+    {
+        return $query->whereNull('vertical');
     }
 
     /**

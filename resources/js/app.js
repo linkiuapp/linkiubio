@@ -14,6 +14,12 @@ window.lucideIcons = icons;
 import './datepicker.js';
 // Importar timepicker personalizado
 import './timepicker.js';
+// Importar helpers de ApexCharts
+import './apexcharts-helpers.js';
+// Importar helpers de Clipboard
+import './clipboard-helpers.js';
+// Importar helpers de File Upload (Dropzone y lodash para Preline UI)
+import './file-upload-helpers.js';
 
 console.log('🟢 Imports loaded successfully');
 
@@ -314,6 +320,27 @@ window.handleLoginAsStore = async function(storeSlug) {
  * @param {function} callback - Función a ejecutar si la clave es correcta
  */
 window.requireMasterKey = async function(action, actionLabel, callback) {
+    // Primero intentar usar el modal del DesignSystem si está disponible
+    const modalId = 'master-key-modal';
+    // Intentar múltiples formas de encontrar el modal
+    let modal = window[`masterKeyModal_${modalId}`] || window.masterKeyModalInstance;
+    
+    // Si no está disponible, buscar en el DOM
+    if (!modal) {
+        const modalElement = document.querySelector('[x-data*="masterKeyModal"]');
+        if (modalElement && modalElement.__x && modalElement.__x.$data) {
+            modal = modalElement.__x.$data;
+            // Registrar para futuras llamadas
+            window[`masterKeyModal_${modalId}`] = modal;
+        }
+    }
+    
+    if (modal && typeof modal.show === 'function') {
+        modal.show(callback, actionLabel);
+        return;
+    }
+    
+    // Fallback: usar SweetAlert si el modal del DesignSystem no está disponible
     // Obtener el slug de la tienda desde la URL
     const storeSlug = window.location.pathname.split('/')[1];
     

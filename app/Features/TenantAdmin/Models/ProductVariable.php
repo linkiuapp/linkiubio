@@ -148,7 +148,7 @@ class ProductVariable extends Model
      */
     public function getProductsCountAttribute()
     {
-        return $this->assignments()->count();
+        return $this->assignments()->whereHas('product')->count();
     }
 
     /**

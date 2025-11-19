@@ -9,17 +9,16 @@
 @import './litepicker-custom.css';
 @import './timepicker-custom.css';
 
+/* Preline UI - Variants CSS (estilos opcionales para componentes) */
+@import '../../node_modules/preline/variants.css';
 
 /* Luego, tus directivas de Tailwind CSS */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 @tailwind tables;
+@tailwind forms;
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
-@source '../**/*.blade.php';
-@source '../**/*.js';
 
 @theme {
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
@@ -139,20 +138,19 @@
 
 /* Main content */
 .main-content {
-    margin-left: 300px;
-    margin-top: 80px;
-    padding: 1rem;
-    height: calc(100vh - 130px);
+    margin-top: 0;
+    padding: 0;
+    min-height: calc(100vh);
     overflow-y: auto;
 }
 
+.main-content-inner {
+    padding: 1.5rem;
+    padding-bottom: 5rem; /* Espacio para el footer fijo */
+    min-height: calc(100vh - 80px);
+}
 
-/* Footer Styles */
-.main-footer {
-    width: calc(100% - 300px);
-    /* Resta el ancho del sidebar */
-    position: fixed;
-    bottom: 0;
-    right: 0;
-    z-index: 30;
+/* Alpine.js x-cloak - Oculta elementos hasta que Alpine esté inicializado */
+[x-cloak] {
+    display: none !important;
 }

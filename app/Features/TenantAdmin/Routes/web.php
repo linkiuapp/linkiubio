@@ -1,31 +1,30 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Features\TenantAdmin\Controllers\PaymentMethodController;
-use App\Features\TenantAdmin\Controllers\BankAccountController;
-use App\Features\TenantAdmin\Controllers\AuthController;
-use App\Features\TenantAdmin\Controllers\DashboardController;
-use App\Features\TenantAdmin\Controllers\BusinessProfileController;
-use App\Features\TenantAdmin\Controllers\StoreDesignController;
-use App\Features\TenantAdmin\Controllers\CategoryController;
-use App\Features\TenantAdmin\Controllers\VariableController;
-use App\Features\TenantAdmin\Controllers\ProductController;
-use App\Features\TenantAdmin\Controllers\SliderController;
-use App\Features\TenantAdmin\Controllers\LocationController;
-use App\Features\TenantAdmin\Controllers\SimpleShippingController;
-use App\Features\TenantAdmin\Controllers\TicketController;
-use App\Features\TenantAdmin\Controllers\AnnouncementController;
-use App\Features\TenantAdmin\Controllers\OrderController;
-use App\Features\TenantAdmin\Controllers\BillingController;
-use App\Features\TenantAdmin\Controllers\CouponController;
-use App\Features\TenantAdmin\Controllers\PreviewController;
-use App\Features\TenantAdmin\Controllers\MasterKeyController;
-use App\Features\TenantAdmin\Controllers\TableReservationController;
-use App\Features\TenantAdmin\Controllers\RoomTypeController;
-use App\Features\TenantAdmin\Controllers\RoomController;
-use App\Features\TenantAdmin\Controllers\HotelReservationController;
-use App\Features\TenantAdmin\Controllers\TableController;
-use App\Features\TenantAdmin\Controllers\DineInSettingController;
+use App\Features\TenantAdmin\Controllers\Core\PaymentMethodController;
+use App\Features\TenantAdmin\Controllers\Core\BankAccountController;
+use App\Features\TenantAdmin\Controllers\Core\AuthController;
+use App\Features\TenantAdmin\Controllers\Core\DashboardController;
+use App\Features\TenantAdmin\Controllers\Core\BusinessProfileController;
+use App\Features\TenantAdmin\Controllers\Core\StoreDesignController;
+use App\Features\TenantAdmin\Controllers\Core\CategoryController;
+use App\Features\TenantAdmin\Controllers\Core\VariableController;
+use App\Features\TenantAdmin\Controllers\Core\ProductController;
+use App\Features\TenantAdmin\Controllers\Core\SliderController;
+use App\Features\TenantAdmin\Controllers\Core\LocationController;
+use App\Features\TenantAdmin\Controllers\Core\SimpleShippingController;
+use App\Features\TenantAdmin\Controllers\Core\TicketController;
+use App\Features\TenantAdmin\Controllers\Core\AnnouncementController;
+use App\Features\TenantAdmin\Controllers\Core\OrderController;
+use App\Features\TenantAdmin\Controllers\Core\BillingController;
+use App\Features\TenantAdmin\Controllers\Core\CouponController;
+use App\Features\TenantAdmin\Controllers\Core\MasterKeyController;
+use App\Features\TenantAdmin\Controllers\Verticals\Restaurant\TableReservationController;
+use App\Features\TenantAdmin\Controllers\Verticals\Hotel\RoomTypeController;
+use App\Features\TenantAdmin\Controllers\Verticals\Hotel\RoomController;
+use App\Features\TenantAdmin\Controllers\Verticals\Hotel\HotelReservationController;
+use App\Features\TenantAdmin\Controllers\Verticals\Restaurant\TableController;
+use App\Features\TenantAdmin\Controllers\Verticals\Restaurant\DineInSettingController;
 
 
 /*
@@ -54,8 +53,8 @@ Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreAppro
     
     // Profile Routes (Usuario/Seguridad)
     Route::prefix('profile')->name('profile.')->group(function () {
-        Route::get('/', [\App\Features\TenantAdmin\Controllers\ProfileController::class, 'index'])->name('index');
-        Route::post('/change-password', [\App\Features\TenantAdmin\Controllers\ProfileController::class, 'changePassword'])->name('change-password');
+        Route::get('/', [\App\Features\TenantAdmin\Controllers\Core\ProfileController::class, 'index'])->name('index');
+        Route::post('/change-password', [\App\Features\TenantAdmin\Controllers\Core\ProfileController::class, 'changePassword'])->name('change-password');
     });
     
     // Master Key Routes (Clave Maestra)
@@ -141,6 +140,7 @@ Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreAppro
         Route::get('/', [SliderController::class, 'index'])->name('index');
         Route::get('/create', [SliderController::class, 'create'])->name('create');
         Route::post('/', [SliderController::class, 'store'])->name('store');
+        Route::get('/internal-links/search', [SliderController::class, 'searchInternalLinks'])->name('internal-links');
         Route::get('/{slider}', [SliderController::class, 'show'])->name('show');
         Route::get('/{slider}/edit', [SliderController::class, 'edit'])->name('edit');
         Route::put('/{slider}', [SliderController::class, 'update'])->name('update');
@@ -210,6 +210,7 @@ Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreAppro
     Route::prefix('envios')->name('simple-shipping.')->group(function () {
         Route::get('/', [SimpleShippingController::class, 'index'])->name('index');
         Route::put('/update', [SimpleShippingController::class, 'update'])->name('update');
+        Route::patch('/update-field', [SimpleShippingController::class, 'updateField'])->name('update-field');
         
         // Zones management
         Route::post('/zones', [SimpleShippingController::class, 'createZone'])->name('zones.create');
@@ -220,6 +221,7 @@ Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreAppro
         // API endpoints
         Route::post('/calculate-cost', [SimpleShippingController::class, 'calculateCost'])->name('calculate-cost');
         Route::get('/options', [SimpleShippingController::class, 'getOptions'])->name('options');
+        Route::get('/zones/departments', [SimpleShippingController::class, 'getDepartmentsAndCities'])->name('zones.departments');
     });
 
     // Coupons Routes
@@ -356,6 +358,7 @@ Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreAppro
     Route::prefix('orders')->name('orders.')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('index');
         Route::get('/create', [OrderController::class, 'create'])->name('create');
+        Route::get('/shipping-departments', [OrderController::class, 'getShippingDepartments'])->name('shipping-departments');
         Route::post('/', [OrderController::class, 'store'])->name('store');
         Route::get('/{order}', [OrderController::class, 'show'])->name('show');
         Route::get('/{order}/edit', [OrderController::class, 'edit'])->name('edit');
@@ -390,9 +393,9 @@ Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreAppro
 
     // Invoice Routes
     Route::prefix('invoices')->name('invoices.')->group(function () {
-        Route::get('/{invoice}', [\App\Features\TenantAdmin\Controllers\InvoiceController::class, 'show'])->name('show');
-        Route::get('/{invoice}/download', [\App\Features\TenantAdmin\Controllers\InvoiceController::class, 'downloadPdf'])->name('download');
-        Route::get('/{invoice}/preview', [\App\Features\TenantAdmin\Controllers\InvoiceController::class, 'preview'])->name('preview');
+        Route::get('/{invoice}', [\App\Features\TenantAdmin\Controllers\Core\InvoiceController::class, 'show'])->name('show');
+        Route::get('/{invoice}/download', [\App\Features\TenantAdmin\Controllers\Core\InvoiceController::class, 'downloadPdf'])->name('download');
+        Route::get('/{invoice}/preview', [\App\Features\TenantAdmin\Controllers\Core\InvoiceController::class, 'preview'])->name('preview');
     });
 
     // Ruta para manejar bajada de plan

@@ -56,6 +56,12 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
         Route::post('business-categories/reorder', 
             [\App\Features\SuperLinkiu\Controllers\BusinessCategoryController::class, 'reorder'])
             ->name('business-categories.reorder');
+        Route::get('business-categories/migrate-verticals', 
+            [\App\Features\SuperLinkiu\Controllers\BusinessCategoryController::class, 'migrateVerticals'])
+            ->name('business-categories.migrate-verticals');
+        Route::post('business-categories/apply-verticals', 
+            [\App\Features\SuperLinkiu\Controllers\BusinessCategoryController::class, 'applyVerticals'])
+            ->name('business-categories.apply-verticals');
 
         // User Management
         Route::resource('user-management', \App\Features\SuperLinkiu\Controllers\UserManagementController::class)

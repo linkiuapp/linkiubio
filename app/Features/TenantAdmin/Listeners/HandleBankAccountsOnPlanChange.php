@@ -3,7 +3,7 @@
 namespace App\Features\TenantAdmin\Listeners;
 
 use App\Features\TenantAdmin\Events\StorePlanChanged;
-use App\Features\TenantAdmin\Services\BankAccountService;
+use App\Features\TenantAdmin\Services\Core\BankAccountService;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Facades\Log;

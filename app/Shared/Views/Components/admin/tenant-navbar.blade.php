@@ -1,202 +1,359 @@
-<div class="main-wrapper">
+{{--
+Navbar Tenant Admin - Barra de navegación superior adaptativa
+Se adapta automáticamente al estado del sidebar (abierto/minificado/cerrado)
+--}}
 
-    <nav class="navbar">
-        <div class="py-4 px-2">
-            <div class="flex items-center justify-between">
-                <div class="inline-block items-center justify-start">
-                    <span class="user-name-navbar">
-                       Hola, {{ auth()->user()->name }}! Bienvenido a {{ $store->name }}
-                    </span>
-                    <div class="breadcrumb">
-                        <ul class="flex items-center gap-[2px]">
-                            <li>
-                                <a href="{{ route('tenant.admin.dashboard', ['store' => $store->slug]) }}" class="flex items-center gap-2 hover:text-primary-600 dark:text-accent-50">
-                                    <x-lucide-layout-dashboard class="w-3 h-3" />
-                                    Dashboard
-                                </a>
-                            </li>
-                            <li class="text-black-300"> > </li>
-                            <li class="text-black-300">@yield('title')</li>
-                        </ul>
-                    </div>
-                </div>
+{{-- SECTION: Helper Function - Obtener icono de página actual --}}
+@php
+    if (!function_exists('getCurrentPageIcon')) {
+        function getCurrentPageIcon($store) {
+            $routeIconMap = [
+                'tenant.admin.dashboard' => 'layout-dashboard',
+                'tenant.admin.orders.*' => 'party-popper',
+                'tenant.admin.categories.*' => 'layout-list',
+                'tenant.admin.variables.*' => 'tag',
+                'tenant.admin.products.*' => 'package',
+                'tenant.admin.simple-shipping.*' => 'truck',
+                'tenant.admin.payment-methods.*' => 'dock',
+                'tenant.admin.locations.*' => 'store',
+                'tenant.admin.whatsapp-notifications.*' => 'message-circle',
+                'tenant.admin.reservations.*' => 'utensils',
+                'tenant.admin.dine-in.*' => 'scan-barcode',
+                'tenant.admin.hotel.reservations.*' => 'bed',
+                'tenant.admin.store-design.*' => 'palette',
+                'tenant.admin.coupons.*' => 'ticket-percent',
+                'tenant.admin.sliders.*' => 'images',
+                'tenant.admin.tickets.*' => 'server-crash',
+                'tenant.admin.announcements.*' => 'megaphone',
+                'tenant.admin.profile.*' => 'user-circle',
+                'tenant.admin.master-key.*' => 'lock-keyhole',
+                'tenant.admin.business-profile.*' => 'store',
+                'tenant.admin.billing.*' => 'credit-card',
+            ];
 
-                <div class="flex items-center justify-end gap-2">
-
-                <!-- Badge Verificado -->
-                     <div class="flex items-center gap-2">
-                        <div id="verification-badge" class="flex items-center gap-2 px-3 py-2 rounded-full {{ $store->verified ? 'bg-info-50 border border-info-300' : 'bg-secondary-50 border border-secondary-100' }}">
-                            <span id="verification-text" class="text-caption font-regular {{ $store->verified ? 'text-info-300' : 'text-secondary-100' }}">
-                                {{ $store->verified ? 'Verificado' : 'No Verificado' }}
-                            </span>
-                            @if($store->verified)
-                                <div id="verification-indicator">
-                                    <x-lucide-badge-check class="w-4 h-4 text-info-300" />
-                                </div>
-                            @else
-                                <div id="verification-indicator">
-                                    <x-lucide-shield-off class="w-4 h-4 text-secondary-100" />
-                                </div>
-                            @endif
-                        </div>
-                     </div>
-
-                    <!-- Badge Store Status -->
-                    <div class="flex items-center gap-2">
-                        @php
-                            // Determinar clases y textos según el estado
-                            $status = $store->status;
-                            switch ($status) {
-                                case 'active':
-                                default:
-                                    $badgeClasses = 'bg-success-50 border border-success-500';
-                                    $textClasses = 'text-success-500';
-                                    $label = 'Tienda Activa';
-                                    $iconComponent = 'shield-check';
-                                    $iconColor = 'text-success-500';
-                                    break;
-                                case 'inactive':
-                                    $badgeClasses = 'bg-secondary-50 border border-secondary-100';
-                                    $textClasses = 'text-secondary-100';
-                                    $label = 'Tienda Inactiva';
-                                    $iconComponent = 'shield-off';
-                                    $iconColor = 'text-secondary-100';
-                                    break;
-                                case 'suspended':
-                                    $badgeClasses = 'bg-warning-50 border border-warning-500';
-                                    $textClasses = 'text-warning-500';
-                                    $label = 'Tienda Suspendida';
-                                    $iconComponent = 'shield-off';
-                                    $iconColor = 'text-warning-500';
-                                    break;
-                            }
-                        @endphp
-                        <div class="flex items-center gap-2 px-3 py-2 rounded-full {{ $badgeClasses }}">
-                            <span class="text-caption font-regular {{ $textClasses }}">
-                                {{ $label }}
-                            </span>
-                            <div>
-                                @if($iconComponent === 'shield-check')
-                                    <x-lucide-shield-check class="w-4 h-4 {{ $iconColor }}" />
-                                @elseif($iconComponent === 'shield-off')
-                                    <x-lucide-shield-off class="w-4 h-4 {{ $iconColor }}" />
-                                @endif
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Ver tienda -->
-                    <div class="flex items-center gap-2">
-                        <a href="https://linkiu.bio/{{ $store->slug }}" target="_blank" 
-                            class="flex items-center gap-2 px-4 py-2 text-caption font-regular text-accent-300 bg-primary-300 rounded-full hover:bg-primary-500 transition-colors">
-                            Ver mi tienda
-                            <x-lucide-external-link class="w-4 h-4" />
-                        </a>
-                    </div>
-
-                    <!-- Notifications -->
-                    <div class="flex items-center gap-4">
-                        <!-- Pending Orders -->
-                        <a href="{{ route('tenant.admin.orders.index', $store->slug) }}" 
-                           class="pt-2 items-center text-black-300 hover:text-accent-300">
-                            <span class="sr-only">Pedidos pendientes</span>
-                            <div class="relative">
-                                <x-lucide-party-popper class="w-10 h-10 bg-secondary-50 hover:bg-secondary-300 p-2 rounded-lg transition-colors" />
-                                <div class="absolute inline-flex items-center justify-center w-5 h-5 text-small font-medium text-accent-300 bg-error-300 border-2 border-accent-50 rounded-full -top-2 -end-2 dark:border-gray-900">
-                                    {{ $store->pending_orders_count ?? 0 }}
-                                </div>
-                            </div>
-                        </a>
-
-                        <!-- Support Tickets -->
-                        <a href="{{ route('tenant.admin.tickets.index', $store->slug) }}" 
-                           class="pt-2 items-center text-black-300 hover:text-accent-300">
-                            <span class="sr-only">Tickets de soporte</span>
-                            <div class="relative">
-                                <x-lucide-message-square-more class="w-10 h-10 bg-secondary-50 hover:bg-secondary-300 p-2 rounded-lg transition-colors" />
-                                <div class="absolute inline-flex items-center justify-center w-5 h-5 text-small font-medium text-accent-300 bg-info-300 border-2 border-accent-50 rounded-full -top-2 -end-2 dark:border-gray-900">
-                                    {{ $store->open_tickets_count ?? 0 }}
-                                </div>
-                            </div>
-                        </a>
-
-                        <!-- Announcements -->
-                        <a href="{{ route('tenant.admin.announcements.index', $store->slug) }}" 
-                           class="pt-2 items-center text-black-300 hover:text-accent-300">
-                            <span class="sr-only">Anuncios sin leer</span>
-                            <div class="relative">
-                                <x-lucide-megaphone class="w-10 h-10 bg-secondary-50 hover:bg-secondary-300 p-2 rounded-lg transition-colors" />
-                                <div class="absolute inline-flex items-center justify-center w-5 h-5 text-small font-medium text-accent-300 bg-warning-300 border-2 border-accent-50 rounded-full -top-2 -end-2 dark:border-gray-900">
-                                    {{ $store->unread_announcements_count ?? 0 }}
-                                </div>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </nav>
-</div>
-
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Función para actualizar badge de verificación
-    function updateVerificationBadge(verified) {
-        const badge = document.getElementById('verification-badge');
-        const indicator = document.getElementById('verification-indicator'); 
-        const text = document.getElementById('verification-text');
-        
-        if (badge && indicator && text) {
-            // Remover todas las clases y aplicar las correctas
-            badge.removeAttribute('class');
-            indicator.removeAttribute('class');
-            text.removeAttribute('class');
-            
-            if (verified) {
-                badge.setAttribute('class', 'flex items-center gap-2 px-3 py-2 rounded-full bg-info-50 border border-info-300');
-                
-                /*indicator.setAttribute('class', 'w-4 h-4 bg-info-300');*/
-                
-                text.setAttribute('class', 'text-caption font-regular text-info-300');
-            } else {
-                badge.setAttribute('class', 'flex items-center gap-2 px-3 py-2 rounded-full bg-secondary-50 border border-secondary-100');
-                
-                /*indicator.setAttribute('class', 'w-4 h-4 bg-secondary-100');*/
-                
-                text.setAttribute('class', 'text-caption font-regular text-secondary-100');
+            foreach ($routeIconMap as $routePattern => $icon) {
+                if (request()->routeIs($routePattern)) {
+                    return $icon;
+                }
             }
-            
-            text.textContent = verified ? 'Verificado' : 'No Verificado';
+
+            return 'layout-dashboard';
         }
     }
-    
-    // Función para verificar estado cada 30 segundos
-    function checkVerificationStatus() {
-        const storeSlug = window.location.pathname.split('/')[1];
-        
-        fetch(`/api/store/${storeSlug}/status`, {
-            method: 'GET',
-            headers: {
-                'Accept': 'application/json',
-                'X-Requested-With': 'XMLHttpRequest'
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.verified !== undefined) {
-                updateVerificationBadge(data.verified);
-            }
-        })
-        .catch(() => {
-            // Silenciar errores de red
-        });
-    }
-    
-    // Verificar estado cada 30 segundos
-    setInterval(checkVerificationStatus, 30000);
-    
-    // Verificar inmediatamente al cargar
-    checkVerificationStatus();
-});
 
-</script> 
+    $currentPageIcon = getCurrentPageIcon($store);
+    $currentPageTitle = $__env->yieldContent('title') ?: 'Dashboard';
+@endphp
+{{-- End SECTION: Helper Function --}}
+
+{{-- SECTION: Navbar Container --}}
+<nav 
+    x-data="{
+        left: '0px',
+        width: '100%',
+        initInterval: null,
+        
+        updatePosition() {
+            const savedMinified = localStorage.getItem('sidebar_tenant-admin-sidebar_minified');
+            const isMinified = savedMinified === 'true';
+            const isDesktop = window.innerWidth >= 1024;
+            
+            if (typeof Alpine !== 'undefined' && Alpine.store) {
+                const store = Alpine.store('sidebar');
+                if (store) {
+                    if (!store.isDesktop) {
+                        this.left = '0px';
+                        this.width = '100%';
+                    } else if (store.isMinified) {
+                        this.left = '65px';
+                        this.width = 'calc(100% - 65px)';
+                    } else {
+                        this.left = '288px';
+                        this.width = 'calc(100% - 288px)';
+                    }
+                    return;
+                }
+            }
+            
+            if (!isDesktop) {
+                this.left = '0px';
+                this.width = '100%';
+            } else if (isMinified) {
+                this.left = '65px';
+                this.width = 'calc(100% - 65px)';
+            } else {
+                this.left = '288px';
+                this.width = 'calc(100% - 288px)';
+            }
+        },
+        
+        init() {
+            this.updatePosition();
+            
+            const trySync = () => {
+                if (typeof Alpine !== 'undefined' && Alpine.store && Alpine.store('sidebar')) {
+                    this.updatePosition();
+                    if (this.initInterval) {
+                        clearInterval(this.initInterval);
+                        this.initInterval = null;
+                    }
+                }
+            };
+            
+            let attempts = 0;
+            this.initInterval = setInterval(() => {
+                attempts++;
+                if (attempts > 40) {
+                    clearInterval(this.initInterval);
+                    this.initInterval = null;
+                }
+                trySync();
+            }, 50);
+            
+            window.addEventListener('sidebar-state-changed', () => {
+                this.updatePosition();
+            });
+            
+            document.addEventListener('alpine:initialized', () => {
+                this.$nextTick(() => {
+                    this.updatePosition();
+                });
+            });
+            
+            window.addEventListener('resize', () => {
+                this.updatePosition();
+            });
+        }
+    }"
+    class="fixed top-0 bg-white border-b border-gray-200 z-50 h-20 transition-all duration-300"
+    :style="`left: ${left}; width: ${width};`"
+>
+    <div class="h-full px-6 flex items-center justify-between">
+        {{-- SECTION: Left Side - Greeting and Breadcrumbs --}}
+        <div class="flex flex-col gap-1">
+            <span class="text-sm font-medium text-gray-700">
+                Hola, {{ auth()->user()->name }}! Bienvenido a {{ $store->name }}
+            </span>
+            
+            <nav class="flex items-center gap-2 text-sm text-gray-600" aria-label="Breadcrumb">
+                <a 
+                    href="{{ route('tenant.admin.dashboard', ['store' => $store->slug]) }}" 
+                    class="flex items-center gap-1.5 hover:text-blue-600 transition-colors"
+                >
+                    <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
+                    <span>Dashboard</span>
+                </a>
+                <span class="text-gray-400">/</span>
+                <span class="flex items-center gap-1.5 text-gray-800 font-medium">
+                    <i data-lucide="{{ $currentPageIcon }}" class="w-3.5 h-3.5"></i>
+                    <span>{{ $currentPageTitle }}</span>
+                </span>
+            </nav>
+        </div>
+        {{-- End SECTION: Left Side --}}
+
+        {{-- SECTION: Right Side - Badges, Button and Notifications --}}
+        <div class="flex items-center gap-3">
+            {{-- ITEM: Badge Verificado --}}
+            <div 
+                id="verification-badge-container"
+                x-data="{ verified: {{ $store->verified ? 'true' : 'false' }} }"
+                x-effect="
+                    const badge = document.getElementById('verification-badge');
+                    if (badge) {
+                        badge.setAttribute('data-verified', verified);
+                    }
+                "
+            >
+                <x-badge-icon 
+                    :type="$store->verified ? 'info' : 'secondary'"
+                    :icon="$store->verified ? 'badge-check' : 'shield-off'"
+                    :text="$store->verified ? 'Verificado' : 'No Verificado'"
+                    id="verification-badge"
+                />
+            </div>
+            {{-- End ITEM: Badge Verificado --}}
+
+            {{-- ITEM: Badge Estatus de Tienda --}}
+            @php
+                $statusType = match($store->status) {
+                    'active' => 'success',
+                    'suspended' => 'warning',
+                    default => 'secondary'
+                };
+                $statusIcon = match($store->status) {
+                    'active' => 'shield-check',
+                    default => 'shield-off'
+                };
+                $statusText = match($store->status) {
+                    'active' => 'Tienda Activa',
+                    'inactive' => 'Tienda Inactiva',
+                    'suspended' => 'Tienda Suspendida',
+                    default => 'Tienda Inactiva'
+                };
+            @endphp
+            <x-badge-icon 
+                :type="$statusType"
+                :icon="$statusIcon"
+                :text="$statusText"
+            />
+            {{-- End ITEM: Badge Estatus de Tienda --}}
+
+            {{-- ITEM: Botón Ver Tienda --}}
+            <a 
+                href="https://linkiu.bio/{{ $store->slug }}" 
+                target="_blank"
+                class="inline-flex items-center gap-2 py-2 px-4 text-sm font-medium text-white bg-blue-600 rounded-full hover:bg-blue-700 focus:outline-none focus:bg-blue-700 transition-colors"
+            >
+                <span>Ver mi tienda</span>
+                <i data-lucide="external-link" class="w-4 h-4"></i>
+            </a>
+            {{-- End ITEM: Botón Ver Tienda --}}
+
+            {{-- SECTION: Notificaciones --}}
+            <div class="flex items-center gap-3">
+                {{-- ITEM: Pedidos Pendientes --}}
+                @php
+                    $pendingOrders = $store->pending_orders_count ?? 0;
+                @endphp
+                <a 
+                    href="{{ route('tenant.admin.orders.index', $store->slug) }}" 
+                    class="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors"
+                    aria-label="Pedidos pendientes"
+                >
+                    <i data-lucide="party-popper" class="w-6 h-6"></i>
+                    @if($pendingOrders > 0)
+                        <x-badge-positioned 
+                            :count="$pendingOrders"
+                            type="notification"
+                            position="top-right"
+                            color="red"
+                            :animated="true"
+                        />
+                    @endif
+                </a>
+                {{-- End ITEM: Pedidos Pendientes --}}
+
+                {{-- ITEM: Tickets de Soporte --}}
+                @php
+                    $openTickets = $store->open_tickets_count ?? 0;
+                @endphp
+                <a 
+                    href="{{ route('tenant.admin.tickets.index', $store->slug) }}" 
+                    class="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors"
+                    aria-label="Tickets de soporte"
+                >
+                    <i data-lucide="message-square-more" class="w-6 h-6"></i>
+                    @if($openTickets > 0)
+                        <x-badge-positioned 
+                            :count="$openTickets"
+                            type="notification"
+                            position="top-right"
+                            color="blue"
+                            :animated="true"
+                        />
+                    @endif
+                </a>
+                {{-- End ITEM: Tickets de Soporte --}}
+
+                {{-- ITEM: Anuncios --}}
+                @php
+                    $unreadAnnouncements = $store->unread_announcements_count ?? 0;
+                @endphp
+                <a 
+                    href="{{ route('tenant.admin.announcements.index', $store->slug) }}" 
+                    class="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors"
+                    aria-label="Anuncios sin leer"
+                >
+                    <i data-lucide="megaphone" class="w-6 h-6"></i>
+                    @if($unreadAnnouncements > 0)
+                        <x-badge-positioned 
+                            :count="$unreadAnnouncements"
+                            type="notification"
+                            position="top-right"
+                            color="yellow"
+                            :animated="true"
+                        />
+                    @endif
+                </a>
+                {{-- End ITEM: Anuncios --}}
+            </div>
+            {{-- End SECTION: Notificaciones --}}
+        </div>
+        {{-- End SECTION: Right Side --}}
+    </div>
+</nav>
+{{-- End SECTION: Navbar Container --}}
+
+{{-- SECTION: Scripts --}}
+@push('scripts')
+<script>
+(function() {
+    'use strict';
+
+    document.addEventListener('DOMContentLoaded', function() {
+        if (typeof window.createIcons !== 'undefined' && typeof window.lucideIcons !== 'undefined') {
+            window.createIcons({ icons: window.lucideIcons });
+        }
+        
+        function updateVerificationBadge(verified) {
+            const container = document.getElementById('verification-badge-container');
+            if (!container || !container.__x) return;
+            
+            container.__x.$data.verified = verified;
+            
+            const badge = document.getElementById('verification-badge');
+            if (badge) {
+                const type = verified ? 'info' : 'secondary';
+                const icon = verified ? 'badge-check' : 'shield-off';
+                const text = verified ? 'Verificado' : 'No Verificado';
+                
+                badge.className = badge.className.replace(/bg-(teal|blue|gray)-100/g, '');
+                badge.className = badge.className.replace(/text-(teal|blue|gray)-(800|500)/g, '');
+                badge.className += verified 
+                    ? ' bg-blue-100 text-blue-800' 
+                    : ' bg-gray-50 text-gray-500';
+                
+                const iconEl = badge.querySelector('i[data-lucide]');
+                if (iconEl) {
+                    iconEl.setAttribute('data-lucide', icon);
+                    if (typeof window.createIcons !== 'undefined') {
+                        window.createIcons({ icons: window.lucideIcons });
+                    }
+                }
+                
+                const textEl = badge.querySelector('span:not([class*="size"])');
+                if (textEl && textEl.textContent) {
+                    textEl.textContent = text;
+                }
+            }
+        }
+        
+        function checkVerificationStatus() {
+            const storeSlug = window.location.pathname.split('/')[1];
+            
+            fetch(`/api/store/${storeSlug}/status`, {
+                method: 'GET',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.verified !== undefined) {
+                    updateVerificationBadge(data.verified);
+                }
+            })
+            .catch(() => {
+                // Error silencioso
+            });
+        }
+        
+        setInterval(checkVerificationStatus, 30000);
+        checkVerificationStatus();
+    });
+})();
+</script>
+@endpush
+{{-- End SECTION: Scripts --}}
