@@ -30,6 +30,20 @@ class DiagnoseViewNamespacesCommand extends Command
         
         // Verificar vista específica
         $this->info("\n🔍 Verificando vista: tenant-admin::core.auth.login");
+        
+        // Verificar ruta esperada
+        $expectedPath = base_path('app/Features/TenantAdmin/Views/Core/auth/login.blade.php');
+        $this->line("   📁 Ruta esperada: {$expectedPath}");
+        $this->line("   " . (file_exists($expectedPath) ? '✅' : '❌') . " Archivo existe: " . (file_exists($expectedPath) ? 'Sí' : 'No'));
+        
+        // Verificar namespace
+        if (isset($hints['tenant-admin'])) {
+            $namespacePath = $hints['tenant-admin'][0];
+            $fullPath = $namespacePath . '/Core/auth/login.blade.php';
+            $this->line("   📁 Ruta completa según namespace: {$fullPath}");
+            $this->line("   " . (file_exists($fullPath) ? '✅' : '❌') . " Archivo existe: " . (file_exists($fullPath) ? 'Sí' : 'No'));
+        }
+        
         try {
             $view = view('tenant-admin::core.auth.login');
             $this->info('   ✅ Vista encontrada correctamente');
@@ -37,6 +51,7 @@ class DiagnoseViewNamespacesCommand extends Command
         } catch (\Exception $e) {
             $this->error('   ❌ Vista NO encontrada');
             $this->line("   Error: {$e->getMessage()}");
+            $this->line("\n   💡 Solución: Ejecutar 'php artisan view:clear' y 'php artisan optimize:clear'");
         }
         
         // Verificar Service Providers
