@@ -110,7 +110,7 @@
             <div class="xl:col-span-4">
                 <x-card-base title="Vista previa" shadow="sm">
                     <div class="mx-auto mt-4 w-[480px]">
-                        <x-tenant-admin::Core/header-preview :store="$store" :design="$design" />
+                        <x-tenant-admin::Core.header-preview :store="$store" :design="$design" />
                     </div>
                 </x-card-base>
             </div>
