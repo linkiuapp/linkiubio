@@ -40,7 +40,6 @@
     <div class="max-w-5xl">
         <form action="{{ route('superlinkiu.category-icons.update', $categoryIcon->id) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
             @csrf
-            @method('PUT')
 
             <!-- Main Content Card -->
             <div class="bg-accent-50 rounded-xl shadow-sm border border-accent-100 overflow-hidden">
@@ -52,7 +51,7 @@
                 <!-- Card Content -->
                 <div class="p-6 space-y-8">
                     <!-- Current Icon and New Upload Section -->
-                    <div x-data="iconPreview('{{ $categoryIcon->image_url }}')" class="space-y-6">
+                    <div class="space-y-6">
                         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
                             <!-- Current Icon Display -->
                             <div class="space-y-4">
@@ -84,49 +83,45 @@
                                     Reemplazar Icono <span class="text-black-300">(Opcional)</span>
                                 </label>
                                 
-                                <div class="relative border-2 border-dashed border-accent-300 rounded-xl p-8 text-center hover:border-primary-200 hover:bg-primary-50 transition-all duration-200"
-                                     @dragover.prevent="isDragging = true"
-                                     @dragleave.prevent="isDragging = false"
-                                     @drop.prevent="handleDrop"
-                                     :class="{ 'border-primary-200 bg-primary-50': isDragging }">
+                                <div class="relative border-2 border-dashed border-accent-300 rounded-xl p-8 text-center hover:border-primary-200 hover:bg-primary-50 transition-all duration-200">
                                     
-                                    <template x-if="!preview">
-                                        <div class="space-y-4">
-                                            <div class="w-16 h-16 mx-auto bg-accent-200 rounded-xl flex items-center justify-center">
-                                                <x-solar-gallery-add-outline class="w-8 h-8 text-black-300" />
-                                            </div>
-                                            <div>
-                                                <label for="icon_file" class="cursor-pointer">
-                                                    <span class="text-primary-400 hover:text-primary-300 font-medium">Selecciona un nuevo archivo</span>
-                                                    <span class="text-black-300"> o arrastra y suelta aquí</span>
-                                                    <input id="icon_file" 
-                                                           name="icon_file" 
-                                                           type="file" 
-                                                           class="sr-only" 
-                                                           accept=".svg,.png,.jpg,.jpeg"
-                                                           @change="handleFileSelect">
-                                                </label>
-                                            </div>
-                                            <p class="text-sm text-black-300">
-                                                Formatos: SVG, PNG, JPG • Tamaño máximo: 2MB
-                                            </p>
+                                    <!-- Upload Area (always visible) -->
+                                    <div id="upload-area" class="space-y-4">
+                                        <div class="w-16 h-16 mx-auto bg-accent-200 rounded-xl flex items-center justify-center">
+                                            <x-solar-gallery-add-outline class="w-8 h-8 text-black-300" />
                                         </div>
-                                    </template>
+                                        <div>
+                                            <input id="icon_file" 
+                                                   name="icon_file" 
+                                                   type="file" 
+                                                   class="sr-only" 
+                                                   accept=".svg,.png,.jpg,.jpeg"
+                                                   onchange="handleFileSelect(this)">
+                                            <label for="icon_file" class="cursor-pointer">
+                                                <span class="text-primary-400 hover:text-primary-300 font-medium">Selecciona un nuevo archivo</span>
+                                                <span class="text-black-300"> o arrastra y suelta aquí</span>
+                                            </label>
+                                        </div>
+                                        <p class="text-sm text-black-300">
+                                            Formatos: SVG, PNG, JPG • Tamaño máximo: 2MB
+                                        </p>
+                                    </div>
                                     
-                                    <template x-if="preview">
+                                    <!-- Preview Area (hidden initially) -->
+                                    <div id="preview-area" class="space-y-4 hidden">
                                         <div class="relative">
                                             <div class="w-32 h-32 mx-auto bg-accent-100 rounded-xl p-4 flex items-center justify-center shadow-inner">
-                                                <img :src="preview" class="max-w-full max-h-full object-contain" alt="Preview">
+                                                <img id="preview-image" class="max-w-full max-h-full object-contain" alt="Preview">
                                             </div>
                                             <button type="button" 
-                                                    @click="clearPreview"
+                                                    onclick="clearPreview()"
                                                     class="absolute -top-2 -right-2 w-8 h-8 bg-error-400 text-accent-50 rounded-full hover:bg-error-300 transition-colors flex items-center justify-center">
                                                 <x-solar-close-circle-outline class="w-4 h-4" />
                                             </button>
-                                            <p class="mt-3 text-sm font-medium text-black-400" x-text="fileName"></p>
-                                            <p class="text-xs text-success-400">✓ Nuevo archivo seleccionado</p>
                                         </div>
-                                    </template>
+                                        <p id="file-name" class="text-sm font-medium text-black-400"></p>
+                                        <p class="text-xs text-success-400">✓ Nuevo archivo seleccionado</p>
+                                    </div>
                                 </div>
                                 
                                 @error('icon_file')
@@ -139,7 +134,7 @@
                         </div>
 
                         <!-- Preview of New Icon (only if file selected) -->
-                        <div x-show="preview" x-transition class="space-y-4">
+                        <div id="preview-sizes" class="space-y-4 hidden">
                             <label class="block text-sm font-semibold text-black-400">
                                 Vista Previa del Nuevo Icono
                             </label>
@@ -149,7 +144,7 @@
                                     <!-- Small -->
                                     <div class="text-center p-4 bg-accent-50 rounded-lg">
                                         <div class="w-8 h-8 bg-accent-200 rounded-lg p-1 flex items-center justify-center mx-auto mb-3">
-                                            <img :src="preview" class="w-full h-full object-contain" alt="Pequeño">
+                                            <img class="preview-small w-full h-full object-contain" alt="Pequeño">
                                         </div>
                                         <span class="text-sm font-medium text-black-400">Pequeño</span>
                                         <p class="text-xs text-black-300">32×32px</p>
@@ -158,7 +153,7 @@
                                     <!-- Medium -->
                                     <div class="text-center p-4 bg-accent-50 rounded-lg">
                                         <div class="w-12 h-12 bg-accent-200 rounded-lg p-2 flex items-center justify-center mx-auto mb-3">
-                                            <img :src="preview" class="w-full h-full object-contain" alt="Mediano">
+                                            <img class="preview-medium w-full h-full object-contain" alt="Mediano">
                                         </div>
                                         <span class="text-sm font-medium text-black-400">Mediano</span>
                                         <p class="text-xs text-black-300">48×48px</p>
@@ -167,7 +162,7 @@
                                     <!-- Large -->
                                     <div class="text-center p-4 bg-accent-50 rounded-lg">
                                         <div class="w-16 h-16 bg-accent-200 rounded-lg p-3 flex items-center justify-center mx-auto mb-3">
-                                            <img :src="preview" class="w-full h-full object-contain" alt="Grande">
+                                            <img class="preview-large w-full h-full object-contain" alt="Grande">
                                         </div>
                                         <span class="text-sm font-medium text-black-400">Grande</span>
                                         <p class="text-xs text-black-300">64×64px</p>
@@ -284,6 +279,78 @@
                             @enderror
                         </div>
                     </div>
+
+                    <!-- Categorías de Negocio -->
+                    <div class="space-y-3" x-data="{ isGlobal: {{ old('is_global', $categoryIcon->is_global) ? 'true' : 'false' }} }">
+                        <label class="block text-sm font-semibold text-black-400">
+                            Categorías de Negocio <span class="text-error-400">*</span>
+                        </label>
+
+                        <!-- Checkbox Global -->
+                        <div class="bg-primary-50 border border-primary-100 rounded-lg p-4 mb-4">
+                            <label class="flex items-start gap-3 cursor-pointer">
+                                <input type="hidden" name="is_global" value="0">
+                                <input type="checkbox" 
+                                       name="is_global" 
+                                       value="1"
+                                       x-model="isGlobal"
+                                       class="mt-0.5 rounded border-primary-200 text-primary-300 focus:ring-primary-200"
+                                       {{ old('is_global', $categoryIcon->is_global) ? 'checked' : '' }}>
+                                <div>
+                                    <span class="text-sm font-semibold text-primary-400 flex items-center gap-2">
+                                        <x-solar-star-bold class="w-4 h-4" />
+                                        Icono Global (aparece en todas las categorías)
+                                    </span>
+                                    <p class="text-xs text-primary-300 mt-1">
+                                        Usa esto para iconos universales como "Destacado", "Nuevo", "Oferta", etc.
+                                    </p>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Multiselect de Categorías -->
+                        <div x-show="!isGlobal" x-transition class="space-y-3">
+                            <div class="bg-accent-100 rounded-lg p-4 max-h-64 overflow-y-auto">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                    @foreach($businessCategories as $category)
+                                        <label class="flex items-start gap-3 p-3 bg-accent-50 rounded-lg hover:bg-accent-200 cursor-pointer transition-colors">
+                                            <input type="checkbox" 
+                                                   name="business_categories[]" 
+                                                   value="{{ $category->id }}"
+                                                   class="mt-0.5 rounded border-accent-300 text-primary-300 focus:ring-primary-200"
+                                                   {{ in_array($category->id, old('business_categories', $selectedCategories)) ? 'checked' : '' }}>
+                                            <div class="flex-1">
+                                                <span class="text-sm font-medium text-black-400">{{ $category->name }}</span>
+                                                @if($category->icon)
+                                                    <span class="text-xs text-black-300">{{ $category->icon }}</span>
+                                                @endif
+                                            </div>
+                                        </label>
+                                    @endforeach
+                                </div>
+                            </div>
+                            
+                            <div class="flex gap-2">
+                                <button type="button" 
+                                        onclick="document.querySelectorAll('input[name=\'business_categories[]\']').forEach(cb => cb.checked = true)"
+                                        class="text-xs px-3 py-1.5 bg-primary-100 text-primary-400 rounded-lg hover:bg-primary-200">
+                                    Seleccionar todas
+                                </button>
+                                <button type="button" 
+                                        onclick="document.querySelectorAll('input[name=\'business_categories[]\']').forEach(cb => cb.checked = false)"
+                                        class="text-xs px-3 py-1.5 bg-accent-200 text-black-400 rounded-lg hover:bg-accent-300">
+                                    Deseleccionar todas
+                                </button>
+                            </div>
+                        </div>
+
+                        @error('business_categories')
+                            <p class="text-sm text-error-400 flex items-center gap-2">
+                                <x-solar-info-circle-outline class="w-4 h-4" />
+                                {{ $message }}
+                            </p>
+                        @enderror
+                    </div>
                 </div>
             </div>
 
@@ -306,46 +373,51 @@
 
 @push('scripts')
 <script>
-    function iconPreview(currentImageUrl = null) {
-        return {
-            preview: null,
-            fileName: '',
-            isDragging: false,
-            currentImage: currentImageUrl,
-            
-            handleFileSelect(event) {
-                const file = event.target.files[0];
-                this.processFile(file);
-            },
-            
-            handleDrop(event) {
-                this.isDragging = false;
-                const file = event.dataTransfer.files[0];
-                if (file) {
-                    document.getElementById('icon_file').files = event.dataTransfer.files;
-                    this.processFile(file);
-                }
-            },
-            
-            processFile(file) {
-                if (file && file.type.startsWith('image/')) {
-                    this.fileName = file.name;
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        this.preview = e.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                } else if (file) {
-                    alert('Por favor selecciona un archivo de imagen válido (SVG, PNG, JPG)');
-                }
-            },
-            
-            clearPreview() {
-                this.preview = null;
-                this.fileName = '';
-                document.getElementById('icon_file').value = '';
-            }
+    function handleFileSelect(input) {
+        const file = input.files[0];
+        
+        if (file && file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Show preview area, hide upload area
+                document.getElementById('upload-area').classList.add('hidden');
+                document.getElementById('preview-area').classList.remove('hidden');
+                document.getElementById('preview-sizes').classList.remove('hidden');
+                
+                // Set preview images
+                const previewSrc = e.target.result;
+                document.getElementById('preview-image').src = previewSrc;
+                document.querySelector('.preview-small').src = previewSrc;
+                document.querySelector('.preview-medium').src = previewSrc;
+                document.querySelector('.preview-large').src = previewSrc;
+                
+                // Set filename
+                document.getElementById('file-name').textContent = file.name;
+            };
+            reader.readAsDataURL(file);
+        } else if (file) {
+            alert('Por favor selecciona un archivo de imagen válido (SVG, PNG, JPG)');
+            clearPreview();
         }
+    }
+    
+    function clearPreview() {
+        // Reset file input
+        document.getElementById('icon_file').value = '';
+        
+        // Show upload area, hide preview
+        document.getElementById('upload-area').classList.remove('hidden');
+        document.getElementById('preview-area').classList.add('hidden');
+        document.getElementById('preview-sizes').classList.add('hidden');
+        
+        // Clear preview images
+        document.getElementById('preview-image').src = '';
+        document.querySelector('.preview-small').src = '';
+        document.querySelector('.preview-medium').src = '';
+        document.querySelector('.preview-large').src = '';
+        
+        // Clear filename
+        document.getElementById('file-name').textContent = '';
     }
 </script>
 @endpush

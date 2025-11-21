@@ -189,6 +189,7 @@ class CategoryIconController extends Controller
 
     /**
      * Update the specified category icon
+     * Usa POST en lugar de PUT para permitir upload de archivos
      */
     public function update(Request $request, CategoryIcon $categoryIcon)
     {
@@ -198,28 +199,34 @@ class CategoryIconController extends Controller
             'icon_file' => ['nullable', 'file', 'mimes:svg,png,jpg,jpeg,webp', 'max:2048'],
             'is_active' => ['boolean'],
             'is_global' => ['boolean'],
+            'sort_order' => ['nullable', 'integer', 'min:0'],
             'business_categories' => ['nullable', 'array'],
             'business_categories.*' => ['exists:business_categories,id'],
         ]);
 
-        // Validar que tenga al menos una categoría O sea global
-        if (!$request->boolean('is_global') && empty($request->business_categories)) {
-            return back()
-                ->withErrors(['business_categories' => 'Debes seleccionar al menos una categoría de negocio o marcar el icono como global.'])
-                ->withInput();
-        }
-
         try {
+            // Procesar valores de checkboxes
+            $isGlobal = $request->has('is_global') ? $request->boolean('is_global') : false;
+            $isActive = $request->has('is_active') ? $request->boolean('is_active') : false;
+            
+            // Validar que tenga al menos una categoría O sea global
+            if (!$isGlobal && empty($request->business_categories)) {
+                return back()
+                    ->withErrors(['business_categories' => 'Debes seleccionar al menos una categoría de negocio o marcar el icono como global.'])
+                    ->withInput();
+            }
+
             $data = [
                 'name' => $request->name,
                 'display_name' => $request->display_name,
-                'is_active' => $request->boolean('is_active'),
-                'is_global' => $request->boolean('is_global', false),
+                'is_active' => $isActive,
+                'is_global' => $isGlobal,
+                'sort_order' => $request->input('sort_order', $categoryIcon->sort_order),
             ];
 
-            // Manejar nuevo archivo si se sube con optimización
+            // Manejar nuevo archivo si se sube
             if ($request->hasFile('icon_file')) {
-                // ✅ Eliminar archivo anterior del storage
+                // Eliminar archivo anterior
                 if ($categoryIcon->image_path) {
                     Storage::disk('public')->delete($categoryIcon->image_path);
                 }
@@ -268,14 +275,14 @@ class CategoryIconController extends Controller
             $categoryIcon->update($data);
 
             // Sincronizar categorías de negocio (si no es global)
-            if (!$request->boolean('is_global') && !empty($request->business_categories)) {
+            if (!$data['is_global'] && !empty($request->business_categories)) {
                 $syncData = [];
                 foreach ($request->business_categories as $index => $categoryId) {
                     $syncData[$categoryId] = ['sort_order' => $index];
                 }
                 $categoryIcon->businessCategories()->sync($syncData);
             } else {
-                // Si es global, eliminar todas las asociaciones
+                // Si es global o no hay categorías seleccionadas, eliminar todas las asociaciones
                 $categoryIcon->businessCategories()->detach();
             }
 

@@ -167,7 +167,7 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
                 ->name('store');
             Route::get('/{categoryIcon}/edit', [\App\Features\SuperLinkiu\Controllers\CategoryIconController::class, 'edit'])
                 ->name('edit');
-            Route::put('/{categoryIcon}', [\App\Features\SuperLinkiu\Controllers\CategoryIconController::class, 'update'])
+            Route::post('/{categoryIcon}', [\App\Features\SuperLinkiu\Controllers\CategoryIconController::class, 'update'])
                 ->name('update');
             Route::delete('/{categoryIcon}', [\App\Features\SuperLinkiu\Controllers\CategoryIconController::class, 'destroy'])
                 ->name('destroy');
