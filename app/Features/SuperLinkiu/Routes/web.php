@@ -49,6 +49,7 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
             
         // Business Categories
         Route::resource('business-categories', \App\Features\SuperLinkiu\Controllers\BusinessCategoryController::class)
+            ->except(['show'])
             ->names('business-categories');
         Route::post('business-categories/{businessCategory}/toggle-status', 
             [\App\Features\SuperLinkiu\Controllers\BusinessCategoryController::class, 'toggleStatus'])
