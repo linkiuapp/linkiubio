@@ -316,9 +316,11 @@
                                 <td colspan="8" class="px-6 py-12">
                                     <div class="flex flex-col items-center justify-center text-center">
                                         @php
+                                            use Illuminate\Support\Facades\Storage;
                                             $emptyStateSvg = 'base_ui_empty_productos.svg';
+                                            $svgPath = Storage::disk('public')->url('images-ui/' . $emptyStateSvg);
                                         @endphp
-                                        <img src="{{ asset('images-ui/' . $emptyStateSvg) }}" alt="Empty state" class="w-32 h-32 mb-4" />
+                                        <img src="{{ $svgPath }}" alt="Empty state" class="w-32 h-32 mb-4" />
                                         <h3 class="text-lg font-semibold text-gray-900 mb-2">No hay productos</h3>
                                         <p class="text-sm text-gray-600 mb-6">Comienza agregando tu primer producto</p>
                                         @if($currentCount < $maxProducts)
@@ -341,7 +343,7 @@
                         <tr id="dynamic-empty-state" style="display: none;">
                             <td colspan="8" class="px-6 py-12">
                                 <div class="flex flex-col items-center justify-center text-center">
-                                    <img src="{{ asset('images-ui/base_ui_empty_productos.svg') }}" alt="Empty state" class="w-32 h-32 mb-4" />
+                                    <img src="{{ Storage::disk('public')->url('images-ui/base_ui_empty_productos.svg') }}" alt="Empty state" class="w-32 h-32 mb-4" />
                                     <h3 class="text-lg font-semibold text-gray-900 mb-2">No hay productos</h3>
                                     <p class="text-sm text-gray-600 mb-6">Comienza agregando tu primer producto</p>
                                     @if($currentCount < $maxProducts)
