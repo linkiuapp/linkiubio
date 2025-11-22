@@ -149,7 +149,8 @@ class BankAccountController extends Controller
             'ahorros' => 'Cuenta de Ahorros',
             'corriente' => 'Cuenta Corriente',
             'nequi' => 'Nequi',
-            'daviplata' => 'Daviplata'
+            'daviplata' => 'Daviplata',
+            'bre-b' => 'Bre-b'
         ];
         
         return view('tenant-admin::Core/bank-accounts.create', compact(
@@ -193,11 +194,13 @@ class BankAccountController extends Controller
         // Validate request
         $validator = Validator::make($request->all(), [
             'bank_name' => 'required|string|max:100',
-            'account_type' => 'required|string|in:ahorros,corriente,nequi,daviplata',
-            'account_number' => 'required|string|min:10|max:20',
+            'account_type' => 'required|string|in:ahorros,corriente,nequi,daviplata,bre-b',
+            'account_number' => 'required|string|min:10|max:20|regex:/^[a-zA-Z0-9@]+$/',
             'account_holder' => 'required|string|max:100',
             'document_number' => 'nullable|string|max:20',
             'is_active' => 'nullable|boolean',
+        ], [
+            'account_number.regex' => 'El número de cuenta solo puede contener letras, números y el símbolo @ (para llaves Bre-b como @daviamapola)',
         ]);
         
         if ($validator->fails()) {
@@ -274,7 +277,8 @@ class BankAccountController extends Controller
             'ahorros' => 'Cuenta de Ahorros',
             'corriente' => 'Cuenta Corriente',
             'nequi' => 'Nequi',
-            'daviplata' => 'Daviplata'
+            'daviplata' => 'Daviplata',
+            'bre-b' => 'Bre-b'
         ];
         
         return view('tenant-admin::Core/bank-accounts.edit', compact(
@@ -327,11 +331,13 @@ class BankAccountController extends Controller
         // Validate request
         $validator = Validator::make($request->all(), [
             'bank_name' => 'required|string|max:100',
-            'account_type' => 'required|string|in:ahorros,corriente,nequi,daviplata',
-            'account_number' => 'required|string|min:10|max:20',
+            'account_type' => 'required|string|in:ahorros,corriente,nequi,daviplata,bre-b',
+            'account_number' => 'required|string|min:10|max:20|regex:/^[a-zA-Z0-9@]+$/',
             'account_holder' => 'required|string|max:100',
             'document_number' => 'nullable|string|max:20',
             'is_active' => 'nullable|boolean',
+        ], [
+            'account_number.regex' => 'El número de cuenta solo puede contener letras, números y el símbolo @ (para llaves Bre-b como @daviamapola)',
         ]);
         
         if ($validator->fails()) {

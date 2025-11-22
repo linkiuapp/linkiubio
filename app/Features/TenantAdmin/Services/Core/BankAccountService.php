@@ -131,7 +131,7 @@ class BankAccountService
         // Validate account number format (Requirement 2.6)
         if (!BankAccount::validateAccountNumber($data['account_number'])) {
             throw ValidationException::withMessages([
-                'account_number' => ['El número de cuenta debe contener solo dígitos y tener entre 10 y 20 caracteres.']
+                'account_number' => ['El número de cuenta debe contener solo letras, números y @ (para llaves Bre-b como @daviamapola), entre 10 y 20 caracteres.']
             ]);
         }
         
@@ -157,7 +157,7 @@ class BankAccountService
         if (isset($data['account_number']) && $data['account_number'] !== $bankAccount->account_number) {
             if (!BankAccount::validateAccountNumber($data['account_number'])) {
                 throw ValidationException::withMessages([
-                    'account_number' => ['El número de cuenta debe contener solo dígitos y tener entre 10 y 20 caracteres.']
+                    'account_number' => ['El número de cuenta debe contener solo letras, números y @ (para llaves Bre-b como @daviamapola), entre 10 y 20 caracteres.']
                 ]);
             }
         }

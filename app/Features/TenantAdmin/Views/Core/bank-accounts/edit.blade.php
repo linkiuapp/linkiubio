@@ -76,9 +76,9 @@
                             <input type="text" name="account_number" id="account_number" 
                                    class="w-full px-4 py-2 border border-accent-200 rounded-lg focus:border-primary-200 focus:ring-1 focus:ring-primary-200 focus:outline-none @error('account_number') border-error-200 @enderror"
                                    value="{{ old('account_number', $bankAccount->account_number) }}" required
-                                   pattern="[0-9]{10,20}" title="El número de cuenta debe contener solo dígitos y tener entre 10 y 20 caracteres"
-                                   oninput="this.value = this.value.replace(/[^0-9]/g, '')">
-                            <p class="text-caption text-black-300 mt-1">Solo números, entre 10 y 20 dígitos</p>
+                                   pattern="[a-zA-Z0-9@]{10,20}" title="El número de cuenta debe contener letras, números y @ (para llaves Bre-b como @daviamapola), entre 10 y 20 caracteres"
+                                   oninput="this.value = this.value.replace(/[^a-zA-Z0-9@]/g, '')">
+                            <p class="text-caption text-black-300 mt-1">Letras, números y @ (ej: @daviamapola), entre 10 y 20 caracteres</p>
                             @error('account_number')
                                 <p class="text-caption text-error-300 mt-1">{{ $message }}</p>
                             @enderror

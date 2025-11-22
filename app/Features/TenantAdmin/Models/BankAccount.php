@@ -109,12 +109,13 @@ class BankAccount extends Model
      */
     public static function validateAccountNumber(string $accountNumber): bool
     {
-        // Check if account number contains only digits
-        if (!ctype_digit($accountNumber)) {
+        // Check if account number contains only alphanumeric characters and @ (for Bre-b keys)
+        // Bre-b keys can be: @daviamapola, @3001234567, etc.
+        if (!preg_match('/^[a-zA-Z0-9@]+$/', $accountNumber)) {
             return false;
         }
         
-        // Check if account number length is between 10 and 20 digits
+        // Check if account number length is between 10 and 20 characters
         $length = strlen($accountNumber);
         return $length >= 10 && $length <= 20;
     }
