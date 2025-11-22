@@ -129,7 +129,9 @@ class SliderController extends Controller
                 ];
             });
 
-        $results = $categories->merge($products)->values();
+        // Usar concat() en lugar de merge() porque merge() intenta usar getKey() en arrays
+        // concat() simplemente añade los elementos sin intentar usar claves
+        $results = $categories->concat($products)->values();
 
         return response()->json([
             'results' => $results,
