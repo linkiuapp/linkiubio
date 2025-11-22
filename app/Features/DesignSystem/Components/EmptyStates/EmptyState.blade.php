@@ -7,15 +7,16 @@ Ejemplo: <x-empty-state svg="empty-categories.svg" title="No hay categorías" me
 --}}
 
 @props([
-    'svg' => 'empty-state.svg', // Nombre del archivo SVG en images-ui (debe estar en MinIO/storage en la ruta images-ui/)
+    'svg' => 'empty-state.svg', // Nombre del archivo SVG en images-ui (ubicado en app/Features/DesignSystem/images-ui/)
     'title' => 'No hay elementos',
     'message' => 'Comienza agregando tu primer elemento',
     'action' => null, // Slot para botón de acción
 ])
 
 @php
-    use Illuminate\Support\Facades\Storage;
-    $svgPath = Storage::disk('public')->url('images-ui/' . $svg);
+    // Los SVG están en app/Features/DesignSystem/images-ui/
+    // Se acceden a través de la ruta /images-ui/{filename} definida en routes/web.php
+    $svgPath = asset('images-ui/' . $svg);
 @endphp
 
 <div class="flex flex-col items-center justify-center py-8 px-6">

@@ -17,10 +17,10 @@ Ejemplo: <x-categories-table :categories="$categories" :store="$store" :emptySta
 ])
 
 @php
-    // Construir la ruta del SVG desde la carpeta images-ui del storage (S3/MinIO)
-    // Los SVG deben estar en storage/app/public/images-ui/ o en S3/MinIO en la ruta images-ui/
-    use Illuminate\Support\Facades\Storage;
-    $svgPath = Storage::disk('public')->url('images-ui/' . ltrim($emptyStateSvg, '/'));
+    // Construir la ruta del SVG desde la carpeta images-ui del DesignSystem
+    // Los SVG están en app/Features/DesignSystem/images-ui/
+    // Se acceden a través de la ruta /images-ui/{filename} definida en routes/web.php
+    $svgPath = asset('images-ui/' . ltrim($emptyStateSvg, '/'));
 @endphp
 
 <div class="bg-white rounded-lg shadow-sm overflow-hidden">
