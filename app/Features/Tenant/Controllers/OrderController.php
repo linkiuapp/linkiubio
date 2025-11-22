@@ -984,6 +984,25 @@ class OrderController extends Controller
                 $cartKey .= '_' . md5(json_encode($validated['variants']));
             }
             
+            // Calcular precio total incluyendo modificadores de variables
+            $basePrice = $product->price;
+            $priceModifier = 0;
+            
+            if (!empty($validated['variants'])) {
+                foreach ($validated['variants'] as $variableId => $options) {
+                    if (is_array($options)) {
+                        foreach ($options as $option) {
+                            // Si tiene price_modifier, sumarlo al modificador total
+                            if (isset($option['price_modifier'])) {
+                                $priceModifier += floatval($option['price_modifier']);
+                            }
+                        }
+                    }
+                }
+            }
+            
+            $totalPrice = $basePrice + $priceModifier;
+            
             // Si el producto ya existe, sumar cantidad
             if (isset($cart[$cartKey])) {
                 $cart[$cartKey]['quantity'] += $validated['quantity'];
@@ -992,7 +1011,7 @@ class OrderController extends Controller
                 $cart[$cartKey] = [
                 'product_id' => $validated['product_id'],
                     'product_name' => $product->name,
-                    'product_price' => $product->price,
+                    'product_price' => $totalPrice, // Precio total incluyendo modificadores
                 'quantity' => $validated['quantity'],
                     'variants' => $validated['variants'] ?? [],
                     'image_url' => $product->main_image_url ?? null,
@@ -1010,10 +1029,11 @@ class OrderController extends Controller
                 'cart_verification' => $request->session()->get('cart')
             ]);
             
-            // Calcular totales SIMPLES
+            // Calcular totales (ya incluye modificadores de precio en product_price)
         $cartCount = array_sum(array_column($cart, 'quantity'));
             $cartTotal = 0;
             foreach ($cart as $item) {
+                // product_price ya incluye modificadores de variables
                 $cartTotal += $item['product_price'] * $item['quantity'];
             }
 

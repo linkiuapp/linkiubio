@@ -246,17 +246,28 @@ class ProductController extends Controller
             'description' => 'nullable|string',
             'price' => 'required|numeric|min:0',
             'sku' => 'nullable|string|max:100',
+            'type' => 'required|in:simple,variable',
             'is_active' => 'boolean',
         ]);
 
-        // Actualizar producto
+        // Obtener el tipo del request antes de actualizar
+        $newType = $request->input('type', $product->type);
+        $oldType = $product->type;
+
+        // Actualizar producto incluyendo el tipo
         $product->update([
             'name' => $request->name,
             'description' => $request->description,
             'price' => $request->price,
             'sku' => $request->sku,
+            'type' => $newType,
             'is_active' => $request->boolean('is_active', true),
         ]);
+
+        // Si cambió de variable a simple, eliminar todas las asignaciones de variables
+        if ($oldType === 'variable' && $newType === 'simple') {
+            $product->variableAssignments()->delete();
+        }
 
         // Eliminar imágenes marcadas para eliminación
         if ($request->has('delete_images')) {
@@ -286,12 +297,14 @@ class ProductController extends Controller
         }
 
         // Actualizar variables si el producto es tipo 'variable'
-        if ($product->type === 'variable') {
+        if ($newType === 'variable') {
             if ($request->has('variables')) {
                 $this->syncProductVariables($product, $request->variables);
             } else {
-                // Si no hay variables en el request, eliminar todas las asignaciones
-                $product->variableAssignments()->delete();
+                // Si no hay variables en el request y es nuevo tipo variable, eliminar todas las asignaciones
+                if ($oldType !== 'variable') {
+                    $product->variableAssignments()->delete();
+                }
             }
         }
 

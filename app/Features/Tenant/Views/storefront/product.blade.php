@@ -196,12 +196,13 @@
 
                         @elseif($variable->type === 'text')
                             {{-- Texto libre --}}
-                            <input type="text" 
+                            <textarea 
                                    name="variable_{{ $variable->id }}"
                                    placeholder="Escribe aquí..."
-                                   class="w-full p-3 border border-brandPrimary-300 rounded-lg outline-none caption"
+                                   rows="3"
+                                   class="w-full p-3 border border-brandPrimary-300 rounded-lg outline-none caption resize-y"
                                    data-variable-id="{{ $variable->id }}"
-                                   {{ $isRequired ? 'required' : '' }}>
+                                   {{ $isRequired ? 'required' : '' }}></textarea>
 
                         @elseif($variable->type === 'numeric')
                             {{-- Numérico --}}
@@ -422,12 +423,12 @@
 
     function addVariableProductToCart() {
         // Validar que se hayan seleccionado todas las variables requeridas
-        const requiredVariables = document.querySelectorAll('#product-variables input[required]:not([type="radio"]):not([type="checkbox"])');
+        const requiredVariables = document.querySelectorAll('#product-variables textarea[required], #product-variables input[required]:not([type="radio"]):not([type="checkbox"])');
         let allValid = true;
         let missingFieldsMessage = '';
         
         requiredVariables.forEach(input => {
-            if (!input.value) {
+            if (!input.value || input.value.trim() === '') {
                 allValid = false;
                 input.classList.add('border-brandError-300');
             } else {
@@ -457,12 +458,27 @@
         const variableContainers = document.querySelectorAll('#product-variables [data-variable-required="true"]');
         variableContainers.forEach(container => {
             const variableId = container.dataset.variableId;
+            
+            // Verificar si es variable de selección (radio/checkbox)
             const hasSelection = selectedVariables[variableId] && selectedVariables[variableId].length > 0;
             
-            if (!hasSelection) {
+            // Verificar si es variable de texto o numérico
+            const textInput = container.querySelector(`textarea[data-variable-id="${variableId}"], input[type="number"][data-variable-id="${variableId}"]`);
+            const hasTextValue = textInput && textInput.value && textInput.value.trim() !== '';
+            
+            // Si es requerida, debe tener selección O valor de texto
+            if (!hasSelection && !hasTextValue) {
                 allValid = false;
                 const variableName = container.dataset.variableName || 'Variable';
                 missingFieldsMessage = `Debes escoger al menos una opción para: ${variableName}`;
+                
+                // Marcar campo de texto como error si existe
+                if (textInput) {
+                    textInput.classList.add('border-brandError-300');
+                }
+            } else if (textInput) {
+                // Limpiar error si tiene valor
+                textInput.classList.remove('border-brandError-300');
             }
         });
         
@@ -476,13 +492,13 @@
         const variants = selectedVariables;
         
         // Recopilar valores de text y numeric
-        const textInputs = document.querySelectorAll('#product-variables input[type="text"], #product-variables input[type="number"]');
+        const textInputs = document.querySelectorAll('#product-variables textarea[data-variable-id], #product-variables input[type="number"]');
         textInputs.forEach(input => {
             const variableId = input.dataset.variableId;
-            if (input.value) {
+            if (input.value && input.value.trim() !== '') {
                 variants[variableId] = [{
-                    value: input.value,
-                    type: input.type
+                    value: input.value.trim(),
+                    type: input.tagName.toLowerCase() === 'textarea' ? 'text' : input.type
                 }];
             }
         });
