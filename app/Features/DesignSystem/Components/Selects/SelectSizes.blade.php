@@ -47,7 +47,7 @@ Ejemplo: <x-select-sizes size="sm" name="select" :options="['Opción 1', 'Opció
                 @endforeach
             </optgroup>
         @else
-            <option value="{{ is_numeric($value) ? $label : $value }}" @if($selected == (is_numeric($value) ? $label : $value)) selected @endif>
+            <option value="{{ $value }}" @if($selected == $value) selected @endif>
                 {{ $label }}
             </option>
         @endif

@@ -141,7 +141,12 @@ class CategoryController extends Controller
             ],
             'description' => 'nullable|string|max:1000',
             'icon_id' => 'required|exists:category_icons,id',
-            'parent_id' => 'nullable|exists:categories,id',
+            'parent_id' => [
+                'nullable',
+                Rule::exists('categories', 'id')->where(function ($query) use ($store) {
+                    return $query->where('store_id', $store->id);
+                })
+            ],
             'is_active' => 'boolean',
             'sort_order' => 'integer|min:0'
         ], [
@@ -167,17 +172,6 @@ class CategoryController extends Controller
             while (Category::where('store_id', $store->id)->where('slug', $validated['slug'])->exists()) {
                 $validated['slug'] = $baseSlug . '-' . $counter;
                 $counter++;
-            }
-        }
-        
-        // Verificar que el parent_id pertenezca a la misma tienda
-        if (!empty($validated['parent_id'])) {
-            $parentExists = Category::where('id', $validated['parent_id'])
-                ->where('store_id', $store->id)
-                ->exists();
-                
-            if (!$parentExists) {
-                return response()->json(['error' => 'Categoría padre inválida'], 422);
             }
         }
         
@@ -269,7 +263,12 @@ class CategoryController extends Controller
             ],
             'description' => 'nullable|string|max:1000',
             'icon_id' => 'required|exists:category_icons,id',
-            'parent_id' => 'nullable|exists:categories,id',
+            'parent_id' => [
+                'nullable',
+                Rule::exists('categories', 'id')->where(function ($query) use ($store) {
+                    return $query->where('store_id', $store->id);
+                })
+            ],
             'is_active' => 'boolean',
             'sort_order' => 'integer|min:0'
         ], [

@@ -53,7 +53,7 @@ Ejemplo: <x-select-validation type="error" label="País" name="country" error-me
                         @endforeach
                     </optgroup>
                 @else
-                    <option value="{{ is_numeric($value) ? $labelOption : $value }}" @if($selected == (is_numeric($value) ? $labelOption : $value)) selected @endif>
+                    <option value="{{ $value }}" @if($selected == $value) selected @endif>
                         {{ $labelOption }}
                     </option>
                 @endif

@@ -38,7 +38,7 @@ Ejemplo: <x-select-basic name="select" :options="['Opción 1', 'Opción 2']" />
                 @endforeach
             </optgroup>
         @else
-            <option value="{{ is_numeric($value) ? $label : $value }}" @if($selected == (is_numeric($value) ? $label : $value)) selected @endif>
+            <option value="{{ $value }}" @if($selected == $value) selected @endif>
                 {{ $label }}
             </option>
         @endif
