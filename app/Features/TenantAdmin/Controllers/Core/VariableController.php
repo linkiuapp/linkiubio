@@ -4,6 +4,7 @@ namespace App\Features\TenantAdmin\Controllers\Core;
 
 use App\Http\Controllers\Controller;
 use App\Features\TenantAdmin\Models\ProductVariable;
+use App\Features\TenantAdmin\Models\ProductVariableAssignment;
 use App\Features\TenantAdmin\Models\VariableOption;
 use App\Shared\Models\Store;
 use Illuminate\Http\Request;
@@ -283,34 +284,95 @@ class VariableController extends Controller
             'max_value' => $validated['max_value'] ?? null,
         ]);
         
-        // Actualizar opciones
+        // Actualizar opciones de forma inteligente (mantener IDs existentes)
         if (!empty($validated['options'])) {
-            // Eliminar opciones existentes
-            $variable->options()->delete();
+            $existingOptions = $variable->options()->orderBy('sort_order')->get();
+            $newOptionsNames = collect($validated['options'])->pluck('name')->toArray();
+            $existingOptionsNames = $existingOptions->pluck('name')->toArray();
             
-            // Crear nuevas opciones
+            // Array para trackear qué opciones existentes ya fueron procesadas
+            $processedExistingIds = [];
+            
+            // Procesar cada opción nueva
             foreach ($validated['options'] as $index => $optionData) {
                 // Normalizar modificador de precio: vacío o null = 0
                 $priceModifier = isset($optionData['price_modifier']) && $optionData['price_modifier'] !== '' 
                     ? (float) $optionData['price_modifier'] 
                     : 0;
                 
-                VariableOption::create([
-                    'variable_id' => $variable->id,
-                    'name' => $optionData['name'],
-                    'price_modifier' => $priceModifier,
-                    'color_hex' => $optionData['color_hex'] ?? null,
-                    'sort_order' => $index,
-                ]);
+                // Buscar si existe una opción con el mismo nombre
+                $existingOption = $existingOptions->firstWhere('name', $optionData['name']);
+                
+                if ($existingOption) {
+                    // ACTUALIZAR opción existente (mantiene el ID)
+                    $existingOption->update([
+                        'price_modifier' => $priceModifier,
+                        'color_hex' => $optionData['color_hex'] ?? null,
+                        'sort_order' => $index,
+                    ]);
+                    $processedExistingIds[] = $existingOption->id;
+                } else {
+                    // CREAR nueva opción
+                    VariableOption::create([
+                        'variable_id' => $variable->id,
+                        'name' => $optionData['name'],
+                        'price_modifier' => $priceModifier,
+                        'color_hex' => $optionData['color_hex'] ?? null,
+                        'sort_order' => $index,
+                    ]);
+                }
+            }
+            
+            // ELIMINAR opciones que ya no existen en la nueva lista
+            $optionsToDelete = $existingOptions->whereNotIn('id', $processedExistingIds);
+            if ($optionsToDelete->count() > 0) {
+                $deletedIds = $optionsToDelete->pluck('id')->toArray();
+                
+                // Eliminar referencias en productos antes de eliminar las opciones
+                $this->cleanupDeletedOptionsFromProducts($variable->id, $deletedIds);
+                
+                // Eliminar las opciones
+                VariableOption::whereIn('id', $deletedIds)->delete();
             }
         } else {
-            // Si no hay opciones, eliminar las existentes
+            // Si no hay opciones, limpiar referencias en productos y eliminar las existentes
+            $existingOptionIds = $variable->options()->pluck('id')->toArray();
+            if (!empty($existingOptionIds)) {
+                $this->cleanupDeletedOptionsFromProducts($variable->id, $existingOptionIds);
+            }
             $variable->options()->delete();
         }
         
         return redirect()
             ->route('tenant.admin.variables.index', $store->slug)
             ->with('variable_updated', true);
+    }
+
+    /**
+     * Limpiar opciones eliminadas de los productos que las usan
+     */
+    protected function cleanupDeletedOptionsFromProducts($variableId, $deletedOptionIds)
+    {
+        // Obtener todos los productos que usan esta variable
+        $assignments = ProductVariableAssignment::where('variable_id', $variableId)
+            ->whereNotNull('selected_options')
+            ->get();
+        
+        foreach ($assignments as $assignment) {
+            $selectedOptions = $assignment->selected_options;
+            
+            // Filtrar opciones eliminadas
+            $updatedOptions = array_values(array_filter($selectedOptions, function($optionId) use ($deletedOptionIds) {
+                return !in_array($optionId, $deletedOptionIds);
+            }));
+            
+            // Si cambió algo, actualizar
+            if (count($updatedOptions) !== count($selectedOptions)) {
+                $assignment->update([
+                    'selected_options' => empty($updatedOptions) ? null : $updatedOptions
+                ]);
+            }
+        }
     }
 
     /**
