@@ -33,7 +33,7 @@ class OrderController extends Controller
         $store = $request->route('store');
         
         // Obtener productos del carrito desde sesión
-        $cartItems = $request->session()->get('cart_store_' . $store->id, []);
+        $cartItems = $request->session()->get('cart', []);
         
         if (empty($cartItems)) {
             return redirect()
@@ -240,7 +240,7 @@ class OrderController extends Controller
             'isDineIn' => $isDineIn,
             'order_type' => $request->input('order_type'),
             'request_data' => $request->except(['_token']),
-            'cart_items' => $request->session()->get('cart_store_' . $store->id, [])
+            'cart_items' => $request->session()->get('cart', [])
         ]);
         
         // Validación con manejo de errores
@@ -248,7 +248,7 @@ class OrderController extends Controller
             $validationRules = [
                 'customer_name' => 'required|string|max:255',
                 'customer_phone' => $isDineIn ? 'nullable|string|max:20' : 'required|string|max:20',
-                'delivery_type' => $isDineIn ? 'nullable' : 'required|in:pickup,local,nacional,national,domicilio',
+                'delivery_type' => $isDineIn ? 'nullable' : 'required|in:pickup,local,nacional,domicilio',
                 'payment_method' => 'required|in:efectivo,transferencia,contra_entrega,card',
                 'payment_method_id' => $isDineIn ? 'nullable' : 'required|exists:payment_methods,id',
                 'cash_amount' => 'nullable|numeric|min:1',
@@ -305,7 +305,7 @@ class OrderController extends Controller
         DB::beginTransaction();
         try {
             // Obtener carrito
-            $cartItems = $request->session()->get('cart_store_' . $store->id, []);
+            $cartItems = $request->session()->get('cart', []);
             
             \Log::info('OrderController@store - Cart check', [
                 'cart_items_count' => count($cartItems),
@@ -555,7 +555,7 @@ class OrderController extends Controller
             }
 
             // Limpiar carrito y sesión de dine_in
-            $request->session()->forget('cart_store_' . $store->id);
+            $request->session()->forget('cart');
             $request->session()->forget('dine_in_table_id');
             $request->session()->forget('dine_in_table_number');
             $request->session()->forget('dine_in_type');
@@ -981,7 +981,7 @@ class OrderController extends Controller
         }
 
         // Obtener carrito actual
-        $cart = $request->session()->get('cart_store_' . $store->id, []);
+        $cart = $request->session()->get('cart', []);
             \Log::info('🛒 CART BEFORE:', ['cart' => $cart]);
             
             // Crear clave única para el producto (incluye variantes)
@@ -1026,13 +1026,13 @@ class OrderController extends Controller
         }
 
             // Guardar en sesión con múltiples métodos
-        $request->session()->put('cart_store_' . $store->id, $cart);
+        $request->session()->put('cart', $cart);
             $request->session()->save(); // Forzar guardar
             
             \Log::info('🛒 CART AFTER SAVE:', [
                 'cart' => $cart,
                 'session_id' => session()->getId(),
-                'cart_verification' => $request->session()->get('cart_store_' . $store->id)
+                'cart_verification' => $request->session()->get('cart')
             ]);
             
             // Calcular totales (ya incluye modificadores de precio en product_price)
@@ -1087,7 +1087,7 @@ class OrderController extends Controller
         $store = $request->route('store');
         
         try {
-        $cart = $request->session()->get('cart_store_' . $store->id, []);
+        $cart = $request->session()->get('cart', []);
             
             \Log::info('🛒 GET CART REQUEST:', [
                 'store_id' => $store->id,
@@ -1241,7 +1241,7 @@ class OrderController extends Controller
                 'quantity' => 'required|integer|min:1|max:100'
             ]);
             
-            $cart = $request->session()->get('cart_store_' . $store->id, []);
+            $cart = $request->session()->get('cart', []);
             
             if (!isset($cart[$validated['item_key']])) {
                 return response()->json([
@@ -1260,7 +1260,7 @@ class OrderController extends Controller
             if (!$product) {
                 // Eliminar producto que ya no existe
                 unset($cart[$validated['item_key']]);
-                $request->session()->put('cart_store_' . $store->id, $cart);
+                $request->session()->put('cart', $cart);
                 
                 return response()->json([
                     'success' => false,
@@ -1272,7 +1272,7 @@ class OrderController extends Controller
             
             // Actualizar cantidad
             $cart[$validated['item_key']]['quantity'] = $validated['quantity'];
-            $request->session()->put('cart_store_' . $store->id, $cart);
+            $request->session()->put('cart', $cart);
             
             // Calcular totales
             $cartCount = array_sum(array_column($cart, 'quantity'));
@@ -1321,7 +1321,7 @@ class OrderController extends Controller
             // Asegurar que item_key sea string
             $itemKey = (string) $validated['item_key'];
 
-        $cart = $request->session()->get('cart_store_' . $store->id, []);
+        $cart = $request->session()->get('cart', []);
         
             \Log::info('🗑️ CART BEFORE REMOVE:', [
                 'cart_keys' => array_keys($cart),
@@ -1331,7 +1331,7 @@ class OrderController extends Controller
             
             if (isset($cart[$itemKey])) {
                 unset($cart[$itemKey]);
-            $request->session()->put('cart_store_' . $store->id, $cart);
+            $request->session()->put('cart', $cart);
                 \Log::info('✅ Item removed from cart');
             } else {
                 \Log::warning('⚠️ Item key not found in cart');
@@ -1367,7 +1367,7 @@ class OrderController extends Controller
     public function clearCart(Request $request): JsonResponse
     {
         try {
-        $request->session()->forget('cart_store_' . $store->id);
+        $request->session()->forget('cart');
 
         return response()->json([
             'success' => true,
@@ -1415,7 +1415,7 @@ class OrderController extends Controller
             }
             
             // Calcular subtotal del carrito
-            $cart = $request->session()->get('cart_store_' . $store->id, []);
+            $cart = $request->session()->get('cart', []);
             $cartTotal = $this->calculateCartTotal($cart, $store->id);
             
             if ($cartTotal <= 0) {
@@ -1659,7 +1659,7 @@ class OrderController extends Controller
                 'store_id' => $store->id,
                 'store_slug' => $store->slug,
                 'session_id' => session()->getId(),
-                'session_cart' => session('cart_store_' . $store->id),
+                'session_cart' => session('cart'),
                 'session_all' => session()->all(),
                 'request_method' => $request->method(),
                 'request_headers' => $request->headers->all(),
@@ -1667,7 +1667,7 @@ class OrderController extends Controller
                 'csrf_session' => session()->token()
             ]);
             
-            $cart = session('cart_store_' . $store->id, []);
+            $cart = session('cart', []);
 
         return response()->json([
             'success' => true,
@@ -1702,11 +1702,11 @@ class OrderController extends Controller
             \Log::info('🛒 DEBUG ADD TO CART:', [
                 'store_id' => $store->id,
                 'request_data' => $request->all(),
-                'session_before' => session('cart_store_' . $store->id, [])
+                'session_before' => session('cart', [])
             ]);
             
             // Obtener carrito actual
-            $cart = session('cart_store_' . $store->id, []);
+            $cart = session('cart', []);
             
             // Agregar item de prueba
             $testItem = [
@@ -1719,11 +1719,11 @@ class OrderController extends Controller
             $cart['test_item_' . time()] = $testItem;
             
             // Guardar en sesión
-            session()->put('cart_store_' . $store->id, $cart);
+            session()->put('cart', $cart);
             session()->save(); // Forzar guardar
             
             \Log::info('🛒 DEBUG CART SAVED:', [
-                'cart_after' => session('cart_store_' . $store->id),
+                'cart_after' => session('cart'),
                 'session_id' => session()->getId()
             ]);
             
@@ -1731,7 +1731,7 @@ class OrderController extends Controller
                 'success' => true,
                 'message' => 'Test item added',
                 'cart_before' => $cart,
-                'cart_after' => session('cart_store_' . $store->id),
+                'cart_after' => session('cart'),
                 'session_id' => session()->getId()
             ]);
             
