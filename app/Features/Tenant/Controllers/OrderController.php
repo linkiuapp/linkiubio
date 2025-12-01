@@ -317,8 +317,32 @@ class OrderController extends Controller
                 throw new \Exception('El carrito está vacío. Por favor agrega productos antes de enviar el pedido.');
             }
 
+            // Normalizar delivery_type ANTES del insert (ENUM: 'pickup', 'local', 'national')
+            $normalizedDeliveryType = 'pickup';
+            if (!$isDineIn) {
+                $inputDeliveryType = $validated['delivery_type'] ?? 'pickup';
+                
+                // Mapear valores del frontend al ENUM de la DB
+                switch ($inputDeliveryType) {
+                    case 'domicilio':
+                        $normalizedDeliveryType = 'local';
+                        break;
+                    case 'nacional':
+                        $normalizedDeliveryType = 'national';
+                        break;
+                    case 'local':
+                        $normalizedDeliveryType = 'local';
+                        break;
+                    case 'national':
+                        $normalizedDeliveryType = 'national';
+                        break;
+                    default:
+                        $normalizedDeliveryType = 'pickup';
+                }
+            }
+
             // Determinar order_type
-            $orderType = $isDineIn ? $validated['order_type'] : (($validated['delivery_type'] ?? 'pickup') === 'pickup' ? 'pickup' : 'delivery');
+            $orderType = $isDineIn ? $validated['order_type'] : ($normalizedDeliveryType === 'pickup' ? 'pickup' : 'delivery');
             
             // Crear orden
             $orderData = [
@@ -326,7 +350,7 @@ class OrderController extends Controller
                 'order_number' => Order::generateOrderNumber($store->id),
                 'customer_name' => $validated['customer_name'],
                 'customer_phone' => $isDineIn ? ($validated['customer_phone'] ?? 'N/A') : $validated['customer_phone'],
-                'delivery_type' => $isDineIn ? 'pickup' : ($validated['delivery_type'] ?? 'pickup'),
+                'delivery_type' => $normalizedDeliveryType,
                 'order_type' => $orderType,
                 'payment_method' => $validated['payment_method'],
                 'payment_method_id' => $isDineIn ? null : $validated['payment_method_id'],
@@ -380,48 +404,17 @@ class OrderController extends Controller
             
             // Solo procesar shipping si NO es dine_in/room_service
             if (!$isDineIn) {
-                // Mapear delivery_type para la base de datos (ENUM permite: 'pickup', 'local', 'national')
-                $dbDeliveryType = $validated['delivery_type'] ?? 'pickup';
-                
-                // Normalizar 'nacional' a 'national' (valor del ENUM)
-                if ($validated['delivery_type'] === 'nacional') {
-                    $dbDeliveryType = 'national';
-                }
-                // Normalizar 'domicilio' a 'local' (valor del ENUM)
-                if ($validated['delivery_type'] === 'domicilio') {
-                    $dbDeliveryType = 'local';
-                }
-                
-                // Determinar el tipo real para la lógica de shipping
-                $realDeliveryType = $validated['delivery_type'] ?? 'pickup';
-                if ($validated['delivery_type'] === 'domicilio') {
-                    // Si viene 'domicilio', determinar si es local o nacional según la ciudad
-                    if (isset($validated['department']) && !empty($validated['department'])) {
-                        $realDeliveryType = 'nacional';
-                    } else {
-                        $realDeliveryType = 'local';
-                    }
-                }
-                
-                // Actualizar en la orden (usar el valor compatible con ENUM)
-                // Agregar metadata del tipo real en las notas si es necesario
-                $orderNotes = $validated['notes'] ?? '';
-                if ($realDeliveryType !== $dbDeliveryType) {
-                    $orderNotes = "[SHIPPING_TYPE:{$realDeliveryType}] " . $orderNotes;
-                }
-                
-                $order->update([
-                    'delivery_type' => $dbDeliveryType,
-                    'notes' => $orderNotes
-                ]);
-                
                 // Verificar si shipping está habilitado
                 $shippingEnabled = featureEnabled($store, 'shipping');
                 
                 // Calcular shipping cost solo si shipping está habilitado
                 $shippingCost = 0;
                 if ($shippingEnabled) {
-                    if ($realDeliveryType === 'nacional' && isset($validated['city'])) {
+                    // Determinar si es nacional (tiene departamento y ciudad) o local
+                    $isNational = $normalizedDeliveryType === 'national' || 
+                                 ($normalizedDeliveryType === 'local' && isset($validated['department']) && !empty($validated['department']));
+                    
+                    if ($isNational && isset($validated['city'])) {
                         $simpleShipping = SimpleShipping::getOrCreateForStore($store->id);
                         $simpleShipping->load('activeZones');
                         
@@ -429,7 +422,7 @@ class OrderController extends Controller
                         if ($shippingResult['available']) {
                             $shippingCost = $shippingResult['cost'];
                         }
-                    } elseif ($realDeliveryType === 'local') {
+                    } elseif ($normalizedDeliveryType === 'local') {
                         $simpleShipping = SimpleShipping::getOrCreateForStore($store->id);
                         if ($simpleShipping->local_enabled) {
                             $shippingCost = $simpleShipping->local_cost;
@@ -984,6 +977,20 @@ class OrderController extends Controller
         $cart = $request->session()->get('cart', []);
             \Log::info('🛒 CART BEFORE:', ['cart' => $cart]);
             
+            // FILTRAR items de otras tiendas (mantener solo productos de la tienda actual)
+            $cartBeforeFilter = count($cart);
+            $cart = array_filter($cart, function($item) use ($store) {
+                return isset($item['store_id']) && $item['store_id'] === $store->id;
+            });
+            
+            if (count($cart) < $cartBeforeFilter) {
+                \Log::info('🧹 CART CLEANED: Productos de otras tiendas eliminados', [
+                    'items_before' => $cartBeforeFilter,
+                    'items_after' => count($cart),
+                    'current_store_id' => $store->id
+                ]);
+            }
+            
             // Crear clave única para el producto (incluye variantes)
             $cartKey = $validated['product_id'];
             if (!empty($validated['variants'])) {
@@ -1016,6 +1023,7 @@ class OrderController extends Controller
                 // Agregar nuevo producto
                 $cart[$cartKey] = [
                 'product_id' => $validated['product_id'],
+                    'store_id' => $store->id, // Identificador de tienda para filtrar
                     'product_name' => $product->name,
                     'product_price' => $totalPrice, // Precio total incluyendo modificadores
                 'quantity' => $validated['quantity'],
@@ -1095,6 +1103,22 @@ class OrderController extends Controller
                 'cart_raw' => $cart,
                 'cart_count' => count($cart)
             ]);
+            
+            // FILTRAR items de otras tiendas (mantener solo productos de la tienda actual)
+            $cartBeforeFilter = count($cart);
+            $cart = array_filter($cart, function($item) use ($store) {
+                return isset($item['store_id']) && $item['store_id'] === $store->id;
+            });
+            
+            // Si se filtraron items, actualizar la sesión
+            if (count($cart) < $cartBeforeFilter) {
+                \Log::info('🧹 GET CART: Productos de otras tiendas eliminados', [
+                    'items_before' => $cartBeforeFilter,
+                    'items_after' => count($cart),
+                    'current_store_id' => $store->id
+                ]);
+                $request->session()->put('cart', $cart);
+            }
             
             if (empty($cart)) {
                 return response()->json([
