@@ -19,17 +19,17 @@
     "isDynamicEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app--YWvvZWb.css",
+    "file": "assets/app-VnzItBbT.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/css/wizard.css": {
-    "file": "assets/wizard-DN__Bmew.css",
+    "file": "assets/wizard-BdG3FBJO.css",
     "src": "resources/css/wizard.css",
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-es9k8QsJ.js",
+    "file": "assets/app-DkNy6iZH.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -42,6 +42,7 @@
       "_litepicker-BcrdxbH7.js",
       "node_modules/preline/dist/index.mjs",
       "resources/js/cart.js",
+      "resources/js/favorites.js",
       "resources/js/components.js",
       "resources/js/navbar.js",
       "resources/js/sidebar.js",
@@ -89,6 +90,12 @@
     "file": "assets/envios-CsUqYuYg.js",
     "name": "envios",
     "src": "resources/js/envios.js",
+    "isDynamicEntry": true
+  },
+  "resources/js/favorites.js": {
+    "file": "assets/favorites-CXFb_nMg.js",
+    "name": "favorites",
+    "src": "resources/js/favorites.js",
     "isDynamicEntry": true
   },
   "resources/js/navbar.js": {

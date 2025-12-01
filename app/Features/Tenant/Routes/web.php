@@ -7,6 +7,7 @@ use App\Features\Tenant\Controllers\PageController;
 use App\Features\Tenant\Controllers\ReservationController;
 use App\Features\Tenant\Controllers\HotelReservationController;
 use App\Features\Tenant\Controllers\DineInController;
+use App\Features\Tenant\Controllers\FavoritesController;
 
 /*
 |--------------------------------------------------------------------------
@@ -85,6 +86,13 @@ Route::get('/contacto', [StorefrontController::class, 'contact'])->name('contact
 
 // Ruta de promociones/cupones
 Route::get('/promociones', [StorefrontController::class, 'promotions'])->name('promotions');
+
+// Rutas de Favoritos (protegidas por feature:favoritos)
+Route::middleware(['feature:favoritos'])->prefix('favoritos')->name('favorites.')->group(function () {
+    Route::get('/', [FavoritesController::class, 'index'])->name('index');
+    // API para obtener productos por IDs
+    Route::post('/api/products', [FavoritesController::class, 'getProductsByIds'])->name('api.products');
+});
 
 // Ruta de próximamente (reservas y otras funciones futuras)
 Route::get('/proximamente', function() {

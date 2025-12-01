@@ -39,6 +39,19 @@ if (window.location.pathname.includes('/admin') === false &&
     }).catch(error => {
         console.log('ℹ️ Cart.js not loaded (not in storefront):', error.message);
     });
+    
+    // Sistema de favoritos - Solo cargar en storefront
+    import('./favorites.js').then(module => {
+        console.log('❤️ Favorites.js loaded for storefront');
+        // Obtener slug de la tienda desde el meta tag
+        const storeSlug = document.querySelector('meta[name="store-slug"]')?.content;
+        if (storeSlug) {
+            module.initFavorites(storeSlug);
+            console.log('❤️ Favorites initialized for store:', storeSlug);
+        }
+    }).catch(error => {
+        console.log('ℹ️ Favorites.js not loaded:', error.message);
+    });
 }
 
 console.log('🟢 Pusher imported successfully');
