@@ -180,11 +180,13 @@
                             <!-- Botones de acción -->
                              <div class="flex flex-col gap-2">
                                 <x-add-to-cart-button :product="$product" :store="$store" />
-                                <button class="p-2 w-11 h-11 flex items-center justify-center transition-transform bg-brandError-50 hover:bg-brandError-300 rounded-lg hover:scale-110" 
-                                        data-favorite-btn
-                                        data-product-id="{{ $product->id }}">
-                                    <i data-lucide="heart" class="w-6 h-6 text-brandError-400 hover:text-brandError-50" style="fill: currentColor;"></i>
-                                </button>
+                                @if(featureEnabled($store, 'favoritos'))
+                                    <button class="p-2 w-11 h-11 flex items-center justify-center transition-transform bg-brandError-50 hover:bg-brandError-300 rounded-lg hover:scale-110" 
+                                            data-favorite-btn
+                                            data-product-id="{{ $product->id }}">
+                                        <i data-lucide="heart" class="w-6 h-6 text-brandError-400 hover:text-brandError-50" style="fill: currentColor;"></i>
+                                    </button>
+                                @endif
                              </div>
 
                             
