@@ -652,7 +652,8 @@ class StorefrontController extends Controller
     private function getExpiryText(Coupon $coupon): ?string
     {
         if ($coupon->end_date) {
-            $diffInDays = $coupon->end_date->diffInDays(now());
+            // Calcular días desde ahora hasta end_date (positivo si es futuro)
+            $diffInDays = (int) now()->diffInDays($coupon->end_date);
             
             if ($diffInDays === 0) {
                 return 'Vence hoy a las ' . $coupon->end_date->format('H:i');

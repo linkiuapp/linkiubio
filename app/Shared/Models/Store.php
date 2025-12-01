@@ -632,4 +632,31 @@ class Store extends Model
     {
         return $this->hasOne(ReservationSetting::class);
     }
+
+    /**
+     * Boot method - Invalidar caché cuando cambia business_category_id
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::updated(function ($store) {
+            // Si cambió la categoría de negocio, invalidar caché de features
+            if ($store->isDirty('business_category_id') && $store->business_category_id) {
+                \Log::info('🔄 Store: business_category_id cambió, invalidando caché de features', [
+                    'store_id' => $store->id,
+                    'old_category' => $store->getOriginal('business_category_id'),
+                    'new_category' => $store->business_category_id
+                ]);
+                
+                $featureResolver = app(\App\Shared\Services\FeatureResolver::class);
+                $featureResolver->invalidateCategoryCache($store->business_category_id);
+                
+                // También invalidar la categoría anterior si existía
+                if ($store->getOriginal('business_category_id')) {
+                    $featureResolver->invalidateCategoryCache($store->getOriginal('business_category_id'));
+                }
+            }
+        });
+    }
 } 
