@@ -1345,7 +1345,24 @@ class OrderController extends Controller
                 ], 404);
             }
             
-            // Stock validation omitido por ahora
+            // ✅ VERIFICAR DISPONIBILIDAD DE STOCK
+            $stockService = app(StockService::class);
+            $opcionesSeleccionadas = $this->convertirVariantesAOpciones($item['variants'] ?? []);
+            
+            $disponibilidad = $stockService->verificarDisponibilidad(
+                $product,
+                $opcionesSeleccionadas,
+                $validated['quantity']
+            );
+
+            if (!$disponibilidad['disponible']) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $disponibilidad['error'] ?? 'Stock insuficiente',
+                    'stock_disponible' => $disponibilidad['cantidad'] ?? 0,
+                    'max_quantity' => $disponibilidad['cantidad'] ?? 1
+                ], 400);
+            }
             
             // Actualizar cantidad
             $cart[$validated['item_key']]['quantity'] = $validated['quantity'];
