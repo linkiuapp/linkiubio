@@ -240,11 +240,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 loadCart();
                 // El carrito flotante se actualiza automáticamente vía cart.js
             } else {
-                showError(data.message || 'Error al actualizar cantidad');
+                // Mostrar error con toast si está disponible
+                if (window.toast) {
+                    window.toast.error('Stock insuficiente', data.message || 'No hay suficiente stock disponible');
+                } else {
+                    showError(data.message || 'Error al actualizar cantidad');
+                }
+                // Recargar carrito para mostrar cantidad correcta
+                loadCart();
             }
         } catch (error) {
             console.error('Error updating quantity:', error);
             showError('Error al actualizar cantidad');
+            loadCart();
         } finally {
             // Ocultar loading state
             if (itemElement) {
