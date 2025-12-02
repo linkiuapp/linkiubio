@@ -194,41 +194,15 @@
 
 @push('scripts')
 <script>
-    // Función para mostrar notificación de cupón copiado
+    // Función para mostrar notificación de cupón copiado usando el sistema unificado
     window.showCopiedNotification = function(couponCode) {
-        // Crear notificación temporal
-        const notification = document.createElement('div');
-        notification.className = 'fixed top-6 left-1/2 transform -translate-x-1/2 bg-brandSuccess-100 px-6 py-4 rounded-2xl shadow-2xl z-[9999] transition-all duration-500 -translate-y-32 opacity-0 min-w-[320px]';
-        notification.innerHTML = `
-            <div class="flex items-center gap-4">
-                <div class="flex-shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check text-brandSuccess-400"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-                </div>
- 
-                <div class="flex flex-col gap-1">
-                    <span class="caption-strong text-brandNeutral-500">¡Ufff! Cupón copiado exitosamente</span>
-                    <span class="caption text-brandNeutral-400">Código: <strong>${couponCode}</strong></span>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        // Animar entrada
-        setTimeout(() => {
-            notification.style.transform = 'translate(-50%, 0)';
-            notification.style.opacity = '1';
-        }, 10);
-        
-        // Remover después de 3 segundos
-        setTimeout(() => {
-            notification.style.transform = 'translate(-50%, -8rem)';
-            notification.style.opacity = '0';
-            
-            setTimeout(() => {
-                notification.remove();
-            }, 500);
-        }, 3000);
+        if (window.toast) {
+            window.toast.success(
+                '¡Ufff! Cupón copiado exitosamente',
+                `Código: ${couponCode}`,
+                5000
+            );
+        }
     };
 
     // Auto-scroll to copied coupon for better UX

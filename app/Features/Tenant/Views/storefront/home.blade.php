@@ -182,6 +182,19 @@
                             <i data-lucide="flame" class="w-4 h-4 sm:w-24px sm:h-24px"></i>
                             MÁS VENDIDO
                         </div>
+
+                        <!-- Badge de Stock -->
+                        @if($product->controlaStock() && !$product->tieneStockIlimitado())
+                            @if($product->estaAgotado())
+                                <div class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-lg text-xs font-medium z-10">
+                                    Agotado
+                                </div>
+                            @elseif($product->tieneStockBajo())
+                                <div class="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded-lg text-xs font-medium z-10">
+                                    Últimas {{ $product->stock_disponible }} unidades
+                                </div>
+                            @endif
+                        @endif
                         
                         <div class="flex items-center gap-3">
                             <!-- Imagen del producto -->

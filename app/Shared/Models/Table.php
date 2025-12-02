@@ -7,11 +7,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Builder;
+use App\Shared\Traits\BelongsToTenant;
 
 class Table extends Model
 {
+    use BelongsToTenant;
+    
     protected $fillable = [
         'store_id',
+        'tenant_id',
         'table_number',
         'type',
         'capacity',
@@ -48,6 +52,28 @@ class Table extends Model
         self::STATUS_OCCUPIED => 'Ocupada',
         self::STATUS_RESERVED => 'Reservada',
     ];
+
+    /**
+     * Boot del modelo para sincronizar tenant_id con store_id
+     */
+    protected static function boot()
+    {
+        parent::boot();
+        
+        // Sincronizar tenant_id con store_id al crear
+        static::creating(function ($table) {
+            if ($table->store_id && !$table->tenant_id) {
+                $table->tenant_id = $table->store_id;
+            }
+        });
+        
+        // Sincronizar tenant_id con store_id al actualizar
+        static::updating(function ($table) {
+            if ($table->isDirty('store_id')) {
+                $table->tenant_id = $table->store_id;
+            }
+        });
+    }
 
     /**
      * Relación con Store

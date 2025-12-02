@@ -95,13 +95,19 @@ Ejemplo: <x-stat-card title="Total" :value="150" icon="shopping-cart" color="pri
             </span>
         @endif
     </div>
-    <h3 class="text-3xl font-bold {{ $colors['valueColor'] }} mb-0">
-        @if(is_numeric($value))
-            {{ number_format($value) }}
-        @else
-            {{ $value }}
-        @endif
-    </h3>
+    @if($slot->isNotEmpty())
+        <div class="text-3xl font-bold {{ $colors['valueColor'] }} mb-0">
+            {{ $slot }}
+        </div>
+    @else
+        <h3 class="text-3xl font-bold {{ $colors['valueColor'] }} mb-0">
+            @if(is_numeric($value))
+                {{ number_format($value) }}
+            @else
+                {{ $value }}
+            @endif
+        </h3>
+    @endif
 </div>
 
 @push('scripts')

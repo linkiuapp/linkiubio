@@ -11,6 +11,7 @@ Ejemplo: <x-clipboard-tooltip text="npm install preline" buttonText="$ npm i pre
     'buttonText' => '',
     'targetId' => null,
     'successText' => 'Copiado',
+    'type' => 'text', // text, coupon, account
 ])
 
 @php
@@ -25,6 +26,7 @@ Ejemplo: <x-clipboard-tooltip text="npm install preline" buttonText="$ npm i pre
     data-clipboard-target="#{{ $uniqueId }}" 
     data-clipboard-action="copy" 
     data-clipboard-success-text="{{ $successText }}"
+    data-clipboard-type="{{ $type }}"
 >
     {{ $buttonText ?: $text }}
     <span class="border-s border-gray-200 ps-3.5">

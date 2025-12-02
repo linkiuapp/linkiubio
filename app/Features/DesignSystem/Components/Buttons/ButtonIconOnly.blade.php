@@ -24,11 +24,11 @@ Ejemplo: <x-button-icon-only type="solid" color="info" icon="plus" size="md" />
         'lg' => 'flex shrink-0 justify-center items-center gap-2 w-16 h-16 body-small',
     ];
     
-    // Icon sizes based on button size
+    // Icon sizes based on button size (aumentados para mejor visibilidad)
     $iconSizes = [
-        'sm' => 'w-3 h-3',
-        'md' => 'w-4 h-4',
-        'lg' => 'w-5 h-5',
+        'sm' => 'w-4 h-4',
+        'md' => 'w-5 h-5',
+        'lg' => 'w-6 h-6',
     ];
     
     // Type and color combinations

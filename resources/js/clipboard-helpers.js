@@ -22,8 +22,9 @@ function initClipboard() {
         const clipboard = new ClipboardJS(element);
         
         clipboard.on('success', function(e) {
-            // Obtener el texto de éxito
-            const successText = element.getAttribute('data-clipboard-success-text') || 'Copied';
+            // Obtener el texto de éxito y tipo de contenido
+            const successText = element.getAttribute('data-clipboard-success-text') || 'Copiado al portapapeles';
+            const contentType = element.getAttribute('data-clipboard-type') || 'text';
             
             // Ocultar icono por defecto y mostrar icono de éxito
             const defaultIcon = element.querySelector('.js-clipboard-default');
@@ -42,6 +43,17 @@ function initClipboard() {
             if (tooltip) {
                 tooltip.classList.remove('opacity-0', 'invisible', 'hidden');
                 tooltip.classList.add('opacity-100', 'visible');
+            }
+            
+            // Mostrar toast según el tipo de contenido
+            if (window.toast) {
+                if (contentType === 'coupon' || successText.toLowerCase().includes('cupón')) {
+                    window.toast.success('¡Cupón copiado!', successText, 3000);
+                } else if (contentType === 'account' || successText.toLowerCase().includes('cuenta')) {
+                    window.toast.info('¡Cuenta copiada!', successText, 3000);
+                } else {
+                    window.toast.info('¡Copiado!', successText, 3000);
+                }
             }
             
             // Restaurar después de 2 segundos

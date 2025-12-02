@@ -163,6 +163,128 @@ Permite crear nuevos productos con información básica, imágenes, categorías 
             </x-card-base>
             {{-- End SECTION: Información Básica Card --}}
 
+            {{-- SECTION: Gestión de Inventario --}}
+            <x-card-base title="Gestión de Inventario" shadow="sm">
+                <div x-data="{ 
+                    controlaStock: false, 
+                    tipoStock: 'ilimitado'
+                }">
+                    {{-- Toggle: Controlar stock --}}
+                    <div class="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
+                        <input 
+                            type="checkbox" 
+                            name="controla_stock" 
+                            id="controla_stock"
+                            x-model="controlaStock"
+                            value="1"
+                            class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 mt-0.5"
+                        >
+                        <div class="flex-1">
+                            <label for="controla_stock" class="block text-sm font-medium text-gray-800 cursor-pointer">
+                                Controlar inventario de este producto
+                            </label>
+                            <p class="text-xs text-gray-600 mt-1">
+                                Activa esto para limitar la cantidad disponible y evitar sobreventa
+                            </p>
+                        </div>
+                    </div>
+
+                    {{-- Configuración de stock (solo si está activo) --}}
+                    <div x-show="controlaStock" x-transition class="mt-4 space-y-4 p-4 border border-gray-200 rounded-lg">
+                        {{-- Tipo de stock --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-800 mb-3">Tipo de inventario</label>
+                            <div class="space-y-2">
+                                <label class="flex items-start gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                    <input 
+                                        type="radio" 
+                                        name="tipo_stock" 
+                                        value="ilimitado"
+                                        x-model="tipoStock"
+                                        class="w-4 h-4 mt-0.5 text-blue-600 focus:ring-blue-500"
+                                        checked
+                                    >
+                                    <div class="flex-1">
+                                        <span class="text-sm font-medium text-gray-800">Ilimitado</span>
+                                        <p class="text-xs text-gray-600 mt-0.5">El producto siempre estará disponible</p>
+                                    </div>
+                                </label>
+                                
+                                <label class="flex items-start gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                    <input 
+                                        type="radio" 
+                                        name="tipo_stock" 
+                                        value="limitado"
+                                        x-model="tipoStock"
+                                        class="w-4 h-4 mt-0.5 text-blue-600 focus:ring-blue-500"
+                                    >
+                                    <div class="flex-1">
+                                        <span class="text-sm font-medium text-gray-800">Limitado</span>
+                                        <p class="text-xs text-gray-600 mt-0.5">Controla la cantidad exacta disponible</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        {{-- Campos de stock limitado --}}
+                        <div x-show="tipoStock === 'limitado'" x-transition class="space-y-4 pt-4 border-t border-gray-200">
+                            {{-- Stock inicial (SOLO productos simples) --}}
+                            <div x-show="productType === 'simple'">
+                                <label for="cantidad_stock" class="block text-sm font-medium text-gray-800 mb-2">
+                                    Cantidad en stock
+                                </label>
+                                <input 
+                                    type="number" 
+                                    name="cantidad_stock" 
+                                    id="cantidad_stock"
+                                    value="{{ old('cantidad_stock', 0) }}"
+                                    min="0"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="0"
+                                >
+                                <p class="text-xs text-gray-600 mt-1">
+                                    Cantidad inicial disponible en tu inventario
+                                </p>
+                            </div>
+
+                            {{-- Umbral de alerta (solo simples) --}}
+                            <div x-show="productType === 'simple'">
+                                <label for="umbral_alerta_stock" class="block text-sm font-medium text-gray-800 mb-2">
+                                    Alerta de stock bajo
+                                </label>
+                                <input 
+                                    type="number" 
+                                    name="umbral_alerta_stock" 
+                                    id="umbral_alerta_stock"
+                                    value="{{ old('umbral_alerta_stock', 1) }}"
+                                    min="1"
+                                    max="100"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="1"
+                                >
+                                <p class="text-xs text-gray-600 mt-1">
+                                    Te notificaremos cuando el stock llegue a esta cantidad o menos
+                                </p>
+                            </div>
+
+                            {{-- Mensaje para productos VARIABLES --}}
+                            <div x-show="productType === 'variable'" class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <div class="flex gap-3">
+                                    <i data-lucide="info" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"></i>
+                                    <div>
+                                        <p class="text-sm font-medium text-blue-900">Stock por Variantes</p>
+                                        <p class="text-xs text-blue-700 mt-1">
+                                            Guarda el producto primero. Luego podrás editar y asignar variables con sus cantidades individuales de stock (ej: Talla S = 10 unidades, Talla M = 5 unidades).
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </x-card-base>
+            {{-- End SECTION: Gestión de Inventario --}}
+
             {{-- SECTION: Imágenes Card --}}
             <x-card-base title="Imágenes del Producto" shadow="sm">
                 <div class="space-y-4">

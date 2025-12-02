@@ -138,21 +138,17 @@ class Cart {
 
     // Limpiar carrito (ahora vía servidor)
     async clearCart() {
-        // Mostrar confirmación con SweetAlert
-        const result = await Swal.fire({
-            title: '¿Vaciar carrito?',
-            text: 'Se eliminarán todos los productos del carrito',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#ed2e45',
-            cancelButtonColor: '#9ca3af',
-            confirmButtonText: 'Sí, vaciar',
-            cancelButtonText: 'Cancelar',
-            reverseButtons: true
-        });
+        // Mostrar confirmación con el nuevo modal unificado
+        const confirmed = await window.toast.modal(
+            'warning',
+            '¿Vaciar carrito?',
+            'Se eliminarán todos los productos del carrito',
+            'Sí, vaciar',
+            'Cancelar'
+        );
 
         // Si el usuario cancela, no hacer nada
-        if (!result.isConfirmed) {
+        if (!confirmed) {
             return;
         }
 
@@ -169,14 +165,11 @@ class Cart {
                 this.updateCartDisplayFromServer(data);
                 
                 // Mostrar mensaje de éxito
-                Swal.fire({
-                    icon: 'success',
-                    title: '¡Carrito vaciado!',
-                    text: 'Todos los productos fueron eliminados',
-                    confirmButtonColor: '#00c76f',
-                    timer: 2000,
-                    timerProgressBar: true
-                });
+                window.toast.success(
+                    '¡Carrito vaciado!',
+                    'Todos los productos fueron eliminados',
+                    5000
+                );
             } else {
                 this.showError(data.message || 'Error al vaciar carrito');
             }
@@ -374,104 +367,41 @@ class Cart {
 
     // Mostrar feedback cuando se agrega producto
     showAddedFeedback(productName, cartData) {
-        // Usar datos del servidor directamente
-        const totalItems = cartData?.count || 0;
-        const totalPrice = cartData?.formatted_total || '$0';
-        
-        // Crear notificación temporal
-        const notification = document.createElement('div');
-        notification.className = 'fixed top-6 left-1/2 transform -translate-x-1/2 bg-brandSuccess-100 px-6 py-4 rounded-2xl shadow-2xl z-[9999] transition-all duration-500 -translate-y-32 opacity-0 min-w-[320px]';
-        notification.innerHTML = `
-            <div class="flex items-center gap-4">
-                <div class="flex-shrink-0">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-circle-check-icon lucide-circle-check"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
-                </div>
- 
-                <div class="flex flex-col gap-1">
-                    <span class="caption-strong text-brandNeutral-500">¡Hey! Tu producto se agregó al carrito</span>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        // Animar entrada
-        setTimeout(() => {
-            notification.classList.remove('-translate-y-32', 'opacity-0');
-        }, 100);
-        
-        // Animar salida y eliminar
-        setTimeout(() => {
-            notification.classList.add('-translate-y-32', 'opacity-0');
-            setTimeout(() => {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 300);
-        }, 2500);
+        // Usar el sistema unificado de toasts
+        if (window.toast) {
+            window.toast.success(
+                '¡Actualización exitosa!',
+                '¡Hey! Tu producto se agregó al carrito',
+                5000
+            );
+        }
     }
 
     // Mostrar error con manejo robusto
     showError(message, isNetworkError = false) {
-        // Evitar spam de notificaciones
-        const existingNotification = document.querySelector('.cart-error-notification');
-        if (existingNotification) {
-            existingNotification.remove();
-        }
-
         // Determinar el tipo de error y mensaje apropiado
+        let finalTitle = "¡Ups! Algo salió mal";
         let finalMessage = message;
-        let iconPath = "M6 18L18 6M6 6l12 12"; // X icon (default)
         
         if (isNetworkError) {
-            finalMessage = "Sin conexión. Verifica tu internet e intenta nuevamente.";
-            iconPath = "M18.364 5.636l-12.728 12.728"; // Network icon
+            finalTitle = "Sin conexión";
+            finalMessage = "Verifica tu internet e intenta nuevamente";
         } else if (message.includes('404')) {
-            finalMessage = "Producto no encontrado. La página será actualizada.";
+            finalTitle = "Producto no encontrado";
+            finalMessage = "La página será actualizada";
             setTimeout(() => window.location.reload(), 2000);
         } else if (message.includes('500')) {
-            finalMessage = "Error del servidor. Intenta nuevamente en unos momentos.";
+            finalTitle = "Error del servidor";
+            finalMessage = "Intenta nuevamente en unos momentos";
         } else if (message.includes('no disponible')) {
-            finalMessage = "Producto agotado o no disponible.";
+            finalTitle = "Producto agotado";
+            finalMessage = "Este producto ya no está disponible";
         }
 
-        const notification = document.createElement('div');
-        notification.className = 'cart-error-notification fixed top-4 right-4 bg-error-300 text-accent-50 px-4 py-2 rounded-lg shadow-lg z-50 transform transition-all duration-300 translate-x-full max-w-sm';
-        notification.innerHTML = `
-            <div class="flex items-start gap-2">
-                <svg class="w-5 h-5 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="${iconPath}"></path>
-                </svg>
-                <div class="flex-1">
-                    <span class="text-sm font-medium block">${finalMessage}</span>
-                    ${isNetworkError ? '<span class="text-xs opacity-75 block mt-1">Se reintentará automáticamente</span>' : ''}
-                </div>
-                <button onclick="this.parentElement.parentElement.remove()" class="ml-2 text-accent-50 hover:text-accent-200">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
-            </div>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.classList.remove('translate-x-full');
-        }, 100);
-        
-        // Auto-hide después de más tiempo si es un error de red
-        const hideTime = isNetworkError ? 5000 : 4000;
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.classList.add('translate-x-full');
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        notification.parentNode.removeChild(notification);
-                    }
-                }, 300);
-            }
-        }, hideTime);
+        // Usar el sistema unificado de toasts
+        if (window.toast) {
+            window.toast.error(finalTitle, finalMessage, isNetworkError ? 5000 : 4000);
+        }
     }
 
     // Actualizar badge de cantidad del producto

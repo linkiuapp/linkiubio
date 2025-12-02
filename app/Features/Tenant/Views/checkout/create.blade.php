@@ -606,7 +606,7 @@ function updateSubmitButtonText() {
     }
 }
 
-// Copiar al portapapeles
+// Copiar al portapapeles usando el sistema unificado de toasts
 function copyToClipboard(elementId) {
     const element = document.getElementById(elementId);
     const text = element.textContent;
@@ -618,12 +618,29 @@ function copyToClipboard(elementId) {
         button.textContent = '¡Copiado!';
         button.classList.add('bg-brandSuccess-300', 'text-brandWhite-100');
         
+        // Mostrar toast
+        if (window.toast) {
+            window.toast.info(
+                '¡Cuenta copiada!',
+                'Número de cuenta copiado al portapapeles',
+                5000
+            );
+        }
+        
         setTimeout(() => {
             button.textContent = originalText;
             button.classList.remove('bg-brandSuccess-300', 'text-brandWhite-100');
         }, 2000);
     }).catch(err => {
-        alert('No se pudo copiar. Copia manualmente: ' + text);
+        if (window.toast) {
+            window.toast.error(
+                'Error al copiar',
+                'No se pudo copiar. Intenta copiar manualmente',
+                5000
+            );
+        } else {
+            alert('No se pudo copiar. Copia manualmente: ' + text);
+        }
     });
 }
 

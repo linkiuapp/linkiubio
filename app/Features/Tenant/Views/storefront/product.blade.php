@@ -228,6 +228,35 @@
             </div>
         @endif
 
+        <!-- Indicador de Stock -->
+        @if($product->controla_stock && $product->tipo_stock === 'limitado')
+            <div class="p-3 bg-brandWhite-100 rounded-lg">
+                @if($product->type === 'simple')
+                    @php
+                        $stock = $product->cantidad_stock ?? 0;
+                    @endphp
+                    @if($stock > 0)
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="package-check" class="w-4 h-4 text-brandSuccess-300"></i>
+                            <span class="caption text-brandSuccess-300 font-medium">
+                                {{ $stock }} {{ $stock == 1 ? 'unidad disponible' : 'unidades disponibles' }}
+                            </span>
+                        </div>
+                    @else
+                        <div class="flex items-center gap-2">
+                            <i data-lucide="package-x" class="w-4 h-4 text-brandError-300"></i>
+                            <span class="caption text-brandError-300 font-medium">Agotado</span>
+                        </div>
+                    @endif
+                @else
+                    <div id="stock-indicator" class="flex items-center gap-2">
+                        <i data-lucide="info" class="w-4 h-4 text-brandPrimary-300"></i>
+                        <span id="stock-text" class="caption text-brandPrimary-300">Selecciona las opciones para ver disponibilidad</span>
+                    </div>
+                @endif
+            </div>
+        @endif
+
         <!-- Botón Agregar al Carrito -->
         <div class="pt-2">
             @if($product->type === 'simple')
@@ -291,6 +320,19 @@
     // Precio base del producto
     const basePrice = {{ $product->price }};
     let selectedVariables = {};
+
+    // Datos de stock por variantes
+    @if($product->controla_stock && $product->tipo_stock === 'limitado' && $product->type === 'variable')
+    const stockVariantes = @json($product->stocksVariantes->map(function($sv) {
+        return [
+            'combinacion' => $sv->combinacion_variables,
+            'stock' => $sv->cantidad_stock - $sv->cantidad_reservada,
+            'reservado' => $sv->cantidad_reservada
+        ];
+    }));
+    @else
+    const stockVariantes = [];
+    @endif
 
     function changeMainImage(imageUrl, index) {
         // Cambiar imagen principal
@@ -370,6 +412,7 @@
         labelElement.classList.add('border-brandPrimary-300', 'bg-brandPrimary-50');
         
         updateTotalPrice();
+        updateStockIndicator();
     }
 
     function toggleCheckbox(labelElement, variableId, optionId, optionName, priceModifier) {
@@ -399,6 +442,7 @@
         }
         
         updateTotalPrice();
+        updateStockIndicator();
     }
 
     function updateTotalPrice() {
@@ -418,6 +462,70 @@
                 minimumFractionDigits: 0,
                 maximumFractionDigits: 0
             }).format(totalPrice);
+        }
+    }
+
+    function updateStockIndicator() {
+        const stockIndicator = document.getElementById('stock-indicator');
+        const stockText = document.getElementById('stock-text');
+        const stockIcon = stockIndicator?.querySelector('i[data-lucide]');
+        
+        if (!stockIndicator || !stockText || stockVariantes.length === 0) return;
+        
+        // Convertir selectedVariables a formato compatible con combinacion
+        const selectedCombination = {};
+        Object.keys(selectedVariables).forEach(varId => {
+            if (selectedVariables[varId] && selectedVariables[varId].length > 0) {
+                selectedCombination[varId] = selectedVariables[varId][0].option_id.toString();
+            }
+        });
+        
+        // Buscar variante que coincida
+        const variante = stockVariantes.find(sv => {
+            const combo = sv.combinacion;
+            return Object.keys(combo).every(key => 
+                selectedCombination[key] && combo[key] == selectedCombination[key]
+            );
+        });
+        
+        if (variante) {
+            // Mostrar stock de la variante encontrada
+            if (variante.stock > 0) {
+                stockIcon?.setAttribute('data-lucide', 'package-check');
+                stockIcon?.classList.remove('text-brandPrimary-300', 'text-brandError-300');
+                stockIcon?.classList.add('text-brandSuccess-300');
+                
+                stockText.classList.remove('text-brandPrimary-300', 'text-brandError-300');
+                stockText.classList.add('text-brandSuccess-300', 'font-medium');
+                stockText.textContent = `${variante.stock} ${variante.stock == 1 ? 'unidad disponible' : 'unidades disponibles'}`;
+            } else {
+                stockIcon?.setAttribute('data-lucide', 'package-x');
+                stockIcon?.classList.remove('text-brandPrimary-300', 'text-brandSuccess-300');
+                stockIcon?.classList.add('text-brandError-300');
+                
+                stockText.classList.remove('text-brandPrimary-300', 'text-brandSuccess-300');
+                stockText.classList.add('text-brandError-300', 'font-medium');
+                stockText.textContent = 'Agotado';
+            }
+            
+            // Re-renderizar iconos de Lucide
+            if (window.createIcons && window.lucideIcons) {
+                window.createIcons({ icons: window.lucideIcons });
+            }
+        } else {
+            // No hay coincidencia o faltan opciones
+            stockIcon?.setAttribute('data-lucide', 'info');
+            stockIcon?.classList.remove('text-brandSuccess-300', 'text-brandError-300');
+            stockIcon?.classList.add('text-brandPrimary-300');
+            
+            stockText.classList.remove('text-brandSuccess-300', 'text-brandError-300', 'font-medium');
+            stockText.classList.add('text-brandPrimary-300');
+            stockText.textContent = 'Selecciona las opciones para ver disponibilidad';
+            
+            // Re-renderizar iconos de Lucide
+            if (window.createIcons && window.lucideIcons) {
+                window.createIcons({ icons: window.lucideIcons });
+            }
         }
     }
 

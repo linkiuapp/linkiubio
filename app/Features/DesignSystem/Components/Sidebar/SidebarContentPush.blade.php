@@ -22,9 +22,17 @@ Con dropdown mejorado (z-index alto) y tooltips en modo minified
         openDropdown: false,
         isDesktop: window.innerWidth >= 1024,
         dropdownPosition: { top: 'auto', left: '0px', bottom: 'auto' },
+        touchStartX: 0,
+        touchEndX: 0,
 
         init() {
-            console.log('🎬 Sidebar inicializando...');
+            // Verificar que Alpine esté disponible
+            if (typeof Alpine === 'undefined' || !Alpine.store) {
+                // Inicializar valores por defecto si Alpine no está disponible
+                this.isDesktop = window.innerWidth >= 1024;
+                this.isOpen = this.isDesktop;
+                return;
+            }
             
             // Inicializar Alpine store para compartir estado con navbar
             if (!Alpine.store('sidebar')) {
@@ -48,15 +56,23 @@ Con dropdown mejorado (z-index alto) y tooltips en modo minified
             }
 
             // Sincronizar con store
-            if (Alpine.store('sidebar')) {
-                Alpine.store('sidebar').isOpen = this.isOpen;
-                Alpine.store('sidebar').isMinified = this.isMinified;
-                Alpine.store('sidebar').isDesktop = this.isDesktop;
+            const sidebarStore = Alpine.store('sidebar');
+            if (sidebarStore) {
+                sidebarStore.isOpen = this.isOpen;
+                sidebarStore.isMinified = this.isMinified;
+                sidebarStore.isDesktop = this.isDesktop;
             }
 
-            // 🔔 Disparar evento inicial
+            // Disparar evento inicial
             this.$nextTick(() => {
                 this.dispatchStateChange();
+            });
+
+            // Escuchar cambios del store desde el navbar (para móvil)
+            window.addEventListener('sidebar-state-changed', (event) => {
+                if (event && event.detail && typeof event.detail.isOpen !== 'undefined' && !this.isDesktop) {
+                    this.isOpen = event.detail.isOpen;
+                }
             });
 
             // Escuchar cambios de tamaño de ventana
@@ -67,7 +83,7 @@ Con dropdown mejorado (z-index alto) y tooltips en modo minified
                 } else {
                     this.isOpen = false;
                 }
-                
+
                 // Asegurar que el store existe antes de actualizarlo
                 if (!Alpine.store('sidebar')) {
                     Alpine.store('sidebar', {
@@ -79,12 +95,11 @@ Con dropdown mejorado (z-index alto) y tooltips en modo minified
                     Alpine.store('sidebar').isOpen = this.isOpen;
                     Alpine.store('sidebar').isDesktop = this.isDesktop;
                 }
-                
-                // 🔔 Disparar evento
+
+                // Disparar evento
                 this.dispatchStateChange();
             });
-            
-            console.log('✅ Sidebar inicializado:', { isDesktop: this.isDesktop, isMinified: this.isMinified, isOpen: this.isOpen });
+
         },
 
         dispatchStateChange() {
@@ -95,7 +110,6 @@ Con dropdown mejorado (z-index alto) y tooltips en modo minified
                     isOpen: this.isOpen
                 }
             }));
-            console.log('🔔 Sidebar: evento disparado', { isMinified: this.isMinified, isDesktop: this.isDesktop });
         },
 
         toggleSidebar() {
@@ -169,23 +183,76 @@ Con dropdown mejorado (z-index alto) y tooltips en modo minified
                 const button = this.$refs.dropdownButton;
                 if (button) {
                     const rect = button.getBoundingClientRect();
+                    const dropdownHeight = 260; // Altura aproximada del dropdown
+                    const viewportHeight = window.innerHeight;
+                    const sidebarWidth = this.isMinified && this.isDesktop ? 65 : 288; // 288px = 72 * 4 (w-72)
+
                     if (this.isMinified && this.isDesktop) {
-                        // Posición a la derecha del botón (modo minified)
-                        this.dropdownPosition = {
-                            top: (rect.top - 140) + 'px',
-                            left: (rect.left + 60) + 'px',
-                            bottom: 'auto'
-                        };
+                        // Modo minified: dropdown a la derecha
+                        // Calcular si cabe arriba o abajo
+                        const spaceAbove = rect.top;
+                        const spaceBelow = viewportHeight - rect.bottom;
+
+                        if (spaceBelow >= dropdownHeight) {
+                            // Hay espacio abajo
+                            this.dropdownPosition = {
+                                top: rect.top + 'px',
+                                left: (rect.right + 8) + 'px',
+                                bottom: 'auto'
+                            };
+                        } else {
+                            // Mostrar arriba del botón
+                            this.dropdownPosition = {
+                                top: 'auto',
+                                left: (rect.right + 8) + 'px',
+                                bottom: (viewportHeight - rect.bottom) + 'px'
+                            };
+                        }
                     } else {
-                        // Posición arriba del botón (modo normal)
-                        this.dropdownPosition = {
-                            top: (rect.top - 100) + 'px',
-                            bottom: 'auto',
-                            left: (rect.left + 280) + 'px'
-                        };
+                        // Modo normal: dropdown arriba del botón
+                        const spaceAbove = rect.top;
+
+                        if (spaceAbove >= dropdownHeight) {
+                            // Hay espacio arriba - mostrar arriba
+                            this.dropdownPosition = {
+                                top: 'auto',
+                                left: '16px', // Margen desde el borde izquierdo
+                                bottom: (viewportHeight - rect.top + 8) + 'px'
+                            };
+                        } else {
+                            // Poco espacio arriba - mostrar abajo
+                            this.dropdownPosition = {
+                                top: (rect.bottom + 8) + 'px',
+                                left: '16px',
+                                bottom: 'auto'
+                            };
+                        }
                     }
                 }
             });
+        },
+
+        handleTouchStart(event) {
+            this.touchStartX = event.touches[0].clientX;
+        },
+
+        handleTouchEnd(event) {
+            this.touchEndX = event.changedTouches[0].clientX;
+            this.handleSwipe();
+        },
+
+        handleSwipe() {
+            const swipeDistance = this.touchEndX - this.touchStartX;
+            const minSwipeDistance = 50;
+
+            // Swipe hacia la izquierda para cerrar (solo en móvil)
+            if (!this.isDesktop && this.isOpen && swipeDistance < -minSwipeDistance) {
+                this.closeSidebar();
+            }
+            // Swipe hacia la derecha para abrir (solo en móvil)
+            else if (!this.isDesktop && !this.isOpen && swipeDistance > minSwipeDistance && this.touchStartX < 50) {
+                this.toggleSidebar();
+            }
         }
     }"
     x-on:click.away="closeDropdown()"
@@ -206,23 +273,23 @@ Con dropdown mejorado (z-index alto) y tooltips en modo minified
     @endif-->
     {{-- End Navigation Toggle --}}
 
-    {{-- Overlay (Mobile) --}}
-    <div 
-        x-show="isOpen"
-        x-transition:enter="transition-opacity ease-linear duration-300"
+    {{-- Overlay (Mobile) con mejores transiciones --}}
+    <div
+        x-show="isOpen && !isDesktop"
+        x-transition:enter="transition-opacity ease-out duration-300"
         x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100"
-        x-transition:leave="transition-opacity ease-linear duration-300"
+        x-transition:leave="transition-opacity ease-in duration-200"
         x-transition:leave-start="opacity-100"
         x-transition:leave-end="opacity-0"
         @click="closeSidebar()"
-        class="fixed inset-0 bg-gray-900 bg-opacity-50 z-50 lg:hidden"
+        class="fixed inset-0 bg-gray-900/60 backdrop-blur-sm z-[9998] lg:hidden"
         style="display: none;"
     ></div>
     {{-- End Overlay --}}
 
-    {{-- Sidebar --}}
-    <div 
+    {{-- Sidebar con soporte para gestos táctiles --}}
+    <div
         id="{{ $uniqueId }}"
         :class="{
             'translate-x-0': isOpen || isDesktop,
@@ -230,17 +297,19 @@ Con dropdown mejorado (z-index alto) y tooltips en modo minified
             'w-[65px]': isMinified && isDesktop,
             'w-72': !isMinified || !isDesktop
         }"
-        class="fixed top-0 start-0 bottom-0 z-60 bg-white border-e border-gray-200 transition-all duration-300 transform h-full overflow-hidden"
+        class="fixed top-0 start-0 bottom-0 z-[9999] bg-white border-e border-gray-200 transition-all duration-300 ease-out transform h-full overflow-hidden shadow-xl"
         role="dialog"
         tabindex="-1"
         aria-label="Sidebar"
         x-show="isOpen || isDesktop"
         x-transition:enter="transition ease-out duration-300 transform"
-        x-transition:enter-start="-translate-x-full"
-        x-transition:enter-end="translate-x-0"
-        x-transition:leave="transition ease-in duration-300 transform"
-        x-transition:leave-start="translate-x-0"
-        x-transition:leave-end="-translate-x-full"
+        x-transition:enter-start="-translate-x-full opacity-0"
+        x-transition:enter-end="translate-x-0 opacity-100"
+        x-transition:leave="transition ease-in duration-250 transform"
+        x-transition:leave-start="translate-x-0 opacity-100"
+        x-transition:leave-end="-translate-x-full opacity-0"
+        @touchstart="handleTouchStart($event)"
+        @touchend="handleTouchEnd($event)"
         style="display: none;"
     >
         <div class="relative flex flex-col h-full max-h-full">
@@ -288,9 +357,9 @@ Con dropdown mejorado (z-index alto) y tooltips en modo minified
                             @endphp
 
                             @if($itemType === 'section')
-                                {{-- SECTION: Título de sección --}}
-                                <li class="mt-4 mb-2 first:mt-0" x-show="!isMinified || !isDesktop">
-                                    <p class="px-2.5 py-1 text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                {{-- SECTION: Título de sección con mejor jerarquía visual --}}
+                                <li class="mt-5 mb-2 first:mt-0" x-show="!isMinified || !isDesktop">
+                                    <p class="px-2.5 py-1.5 text-xs font-bold text-gray-600 uppercase tracking-wide">
                                         {{ $item['title'] ?? '' }}
                                     </p>
                                 </li>
@@ -314,8 +383,8 @@ Con dropdown mejorado (z-index alto) y tooltips en modo minified
                                     $badgeColor = $item['badgeColor'] ?? null;
                                 @endphp
                                 <li>
-                                    <a 
-                                        class="min-h-[36px] w-full flex items-center gap-x-3.5 py-2 px-2.5 body-small text-gray-800 rounded-lg hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100 {{ $active ? 'bg-gray-100' : '' }} group" 
+                                    <a
+                                        class="min-h-[40px] w-full flex items-center gap-x-3 py-2.5 px-3 text-sm font-medium text-gray-700 rounded-lg transition-all duration-200 ease-in-out hover:bg-gray-100 hover:text-gray-900 focus:outline-hidden focus:bg-gray-100 focus:text-gray-900 {{ $active ? 'bg-gray-100 text-gray-900' : '' }} group"
                                         :class="isMinified && isDesktop ? 'justify-center' : 'justify-start'"
                                         href="{{ $url }}"
                                         x-data="{ showTooltip: false }"
@@ -331,17 +400,17 @@ Con dropdown mejorado (z-index alto) y tooltips en modo minified
                                         @mouseleave="showTooltip = false"
                                     >
                                         @if($icon)
-                                            <i data-lucide="{{ $icon }}" class="size-4 shrink-0"></i>
+                                            <i data-lucide="{{ $icon }}" class="size-5 shrink-0 transition-colors duration-200"></i>
                                         @endif
-                                        <span x-show="!isMinified || !isDesktop" class="{{ $badge ? 'text-nowrap flex-1 flex items-center justify-between' : '' }}">
+                                        <span x-show="!isMinified || !isDesktop" class="{{ $badge ? 'flex-1 flex items-center justify-between gap-x-2' : '' }}">
                                             {{ $label }}
                                             @if($badge)
                                                 @if($badgeColor)
-                                                    <span class="ms-auto py-0.5 px-1.5 inline-flex items-center gap-x-1.5 text-xs rounded-full font-medium {{ $badgeColor }}">
+                                                    <span class="ms-auto py-0.5 px-2 inline-flex items-center gap-x-1.5 text-xs rounded-full font-semibold {{ $badgeColor }} transition-all duration-200">
                                                         {{ $badge }}
                                                     </span>
                                                 @else
-                                                    <span class="ms-auto">
+                                                    <span class="ms-auto transition-all duration-200">
                                                         <x-badge-soft type="{{ $badgeType }}" text="{{ $badge }}" />
                                                     </span>
                                                 @endif
@@ -350,16 +419,16 @@ Con dropdown mejorado (z-index alto) y tooltips en modo minified
 
                                         {{-- Tooltip para modo minified (Teleported) --}}
                                         <template x-teleport="body">
-                                            <div 
+                                            <div
                                                 x-show="isMinified && isDesktop && showTooltip"
                                                 x-ref="tooltip"
-                                                x-transition:enter="transition ease-out duration-100"
-                                                x-transition:enter-start="opacity-0 scale-95"
-                                                x-transition:enter-end="opacity-100 scale-100"
-                                                x-transition:leave="transition ease-in duration-75"
-                                                x-transition:leave-start="opacity-100 scale-100"
-                                                x-transition:leave-end="opacity-0 scale-95"
-                                                class="fixed z-[99999] px-3 py-1.5 bg-gray-900 text-white text-sm rounded-md whitespace-nowrap pointer-events-none shadow-lg"
+                                                x-transition:enter="transition ease-out duration-150"
+                                                x-transition:enter-start="opacity-0 scale-95 -translate-x-2"
+                                                x-transition:enter-end="opacity-100 scale-100 translate-x-0"
+                                                x-transition:leave="transition ease-in duration-100"
+                                                x-transition:leave-start="opacity-100 scale-100 translate-x-0"
+                                                x-transition:leave-end="opacity-0 scale-95 -translate-x-2"
+                                                class="fixed z-[99999] px-3 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg whitespace-nowrap pointer-events-none shadow-xl"
                                                 style="display: none;"
                                             >
                                                 {{ $label }}
@@ -376,45 +445,47 @@ Con dropdown mejorado (z-index alto) y tooltips en modo minified
 
             {{-- Footer --}}
             @if($footer)
-                <footer class="mt-auto p-2 border-t border-gray-200">
+                <footer class="mt-auto p-3 border-t border-gray-200">
                     {{-- Account Dropdown --}}
                     <div class="relative w-full inline-flex">
-                        <button 
+                        <button
                             x-ref="dropdownButton"
-                            id="hs-sidebar-footer-{{ $uniqueId }}" 
-                            type="button" 
+                            id="hs-sidebar-footer-{{ $uniqueId }}"
+                            type="button"
                             @click="toggleDropdown()"
-                            class="w-full inline-flex shrink-0 items-center text-start text-sm text-gray-800 rounded-md hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100" 
-                            :class="isMinified && isDesktop ? '' : ' p-2 gap-x-2'"
-                            aria-haspopup="menu" 
+                            class="w-full inline-flex shrink-0 items-center text-start text-sm font-medium text-gray-800 rounded-lg transition-all duration-200 hover:bg-gray-100 focus:outline-hidden focus:bg-gray-100"
+                            :class="isMinified && isDesktop ? 'p-2 justify-center' : 'p-2.5 gap-x-3'"
+                            aria-haspopup="menu"
                             :aria-expanded="openDropdown"
-                            aria-label="Dropdown"
+                            aria-label="Menú de usuario"
                         >
                             @if(isset($footer['avatar']) && $footer['avatar'])
-                                <img 
+                                <div
                                     :class="{
-                                        'size-8': isMinified && isDesktop,
-                                        'size-12': !isMinified || !isDesktop
+                                        'size-9': isMinified && isDesktop,
+                                        'size-11': !isMinified || !isDesktop
                                     }"
-                                    class="shrink-0 rounded-full transition-all duration-300" 
-                                    src="{{ $footer['avatar'] }}" 
-                                    alt="Avatar"
+                                    class="shrink-0 rounded-full ring-2 ring-gray-100 transition-all duration-300 overflow-hidden"
                                 >
+                                    <img
+                                        class="w-full h-full object-cover"
+                                        src="{{ $footer['avatar'] }}"
+                                        alt="Avatar"
+                                    >
+                                </div>
                             @elseif(isset($footer['initials']))
-                                <div 
+                                <div
                                     :class="{
-                                        'size-8': isMinified && isDesktop,
-                                        'size-12': !isMinified || !isDesktop
+                                        'size-9 text-xs': isMinified && isDesktop,
+                                        'size-11 text-sm': !isMinified || !isDesktop
                                     }"
-                                    class="shrink-0 rounded-full bg-gray-200 flex items-center justify-center font-semibold text-gray-600 transition-all duration-300"
-                                    :class="isMinified && isDesktop ? 'text-[10px]' : 'text-xs'"
+                                    class="shrink-0 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center font-bold text-white ring-2 ring-blue-100 transition-all duration-300"
                                 >
                                     {{ $footer['initials'] }}
                                 </div>
                             @endif
-                            <span x-show="!isMinified || !isDesktop" class="caption">{{ $footer['name'] ?? 'Usuario' }}</span>
-                            <i data-lucide="ellipsis-vertical" class="shrink-0 size-6 ms-auto" x-show="isMinified && isDesktop"></i>
-                            <i data-lucide="ellipsis-vertical" class="shrink-0 size-6 ms-auto" x-show="!isMinified || !isDesktop"></i>
+                            <span x-show="!isMinified || !isDesktop" class="flex-1 text-sm font-semibold text-gray-900 truncate">{{ $footer['name'] ?? 'Usuario' }}</span>
+                            <i data-lucide="more-vertical" class="shrink-0 size-5 text-gray-500 transition-colors duration-200" :class="openDropdown ? 'text-gray-700' : ''" x-show="!isMinified || !isDesktop"></i>
                         </button>
                     </div>
                     {{-- End Account Dropdown --}}
@@ -428,27 +499,27 @@ Con dropdown mejorado (z-index alto) y tooltips en modo minified
 
     {{-- Dropdown Menu (Teleported to body for proper z-index) --}}
     @if($footer && isset($footer['dropdown']) && is_array($footer['dropdown']) && count($footer['dropdown']) > 0)
-        <div 
+        <div
             x-show="openDropdown"
-            x-transition:enter="transition ease-out duration-200"
-            x-transition:enter-start="opacity-0 scale-95"
-            x-transition:enter-end="opacity-100 scale-100"
-            x-transition:leave="transition ease-in duration-150"
-            x-transition:leave-start="opacity-100 scale-100"
-            x-transition:leave-end="opacity-0 scale-95"
-            class="fixed z-[9999] w-60 bg-white border border-gray-200 rounded-lg shadow-xl"
+            x-transition:enter="transition ease-out duration-200 transform"
+            x-transition:enter-start="opacity-0 scale-95 -translate-y-2"
+            x-transition:enter-end="opacity-100 scale-100 translate-y-0"
+            x-transition:leave="transition ease-in duration-150 transform"
+            x-transition:leave-start="opacity-100 scale-100 translate-y-0"
+            x-transition:leave-end="opacity-0 scale-95 -translate-y-2"
+            class="fixed z-[99999] w-64 bg-white border border-gray-200 rounded-xl shadow-2xl"
             :style="{
                 top: dropdownPosition.top,
                 left: dropdownPosition.left,
                 bottom: dropdownPosition.bottom
             }"
-            role="menu" 
-            aria-orientation="vertical" 
+            role="menu"
+            aria-orientation="vertical"
             aria-labelledby="hs-sidebar-footer-{{ $uniqueId }}"
             style="display: none;"
             @click.away="closeDropdown()"
         >
-            <div class="p-1">
+            <div class="p-2">
                 @foreach($footer['dropdown'] as $dropdownItem)
                     @php
                         $dropdownLabel = $dropdownItem['label'] ?? '';
@@ -459,25 +530,25 @@ Con dropdown mejorado (z-index alto) y tooltips en modo minified
                     @if($dropdownMethod === 'POST')
                         <form method="POST" action="{{ $dropdownUrl }}" class="inline w-full">
                             @csrf
-                            <button 
-                                type="submit" 
+                            <button
+                                type="submit"
                                 @click="closeDropdown()"
-                                class="w-full text-left flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-100"
+                                class="w-full text-left flex items-center gap-x-3 py-2.5 px-3 rounded-lg text-sm font-medium text-gray-700 transition-all duration-200 hover:bg-gray-100 hover:text-gray-900 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-100 focus:text-gray-900"
                             >
                                 @if($dropdownIcon)
-                                    <i data-lucide="{{ $dropdownIcon }}" class="shrink-0 size-4"></i>
+                                    <i data-lucide="{{ $dropdownIcon }}" class="shrink-0 size-5 transition-colors duration-200"></i>
                                 @endif
                                 {{ $dropdownLabel }}
                             </button>
                         </form>
                     @else
-                        <a 
+                        <a
                             @click="closeDropdown()"
-                            class="flex items-center gap-x-3 py-2 px-3 rounded-lg text-sm text-gray-800 hover:bg-gray-100 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-100" 
+                            class="flex items-center gap-x-3 py-2.5 px-3 rounded-lg text-sm font-medium text-gray-700 transition-all duration-200 hover:bg-gray-100 hover:text-gray-900 disabled:opacity-50 disabled:pointer-events-none focus:outline-hidden focus:bg-gray-100 focus:text-gray-900"
                             href="{{ $dropdownUrl }}"
                         >
                             @if($dropdownIcon)
-                                <i data-lucide="{{ $dropdownIcon }}" class="shrink-0 size-4"></i>
+                                <i data-lucide="{{ $dropdownIcon }}" class="shrink-0 size-5 transition-colors duration-200"></i>
                             @endif
                             {{ $dropdownLabel }}
                         </a>

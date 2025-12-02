@@ -289,6 +289,7 @@ class ComponentsServiceProvider extends ServiceProvider
             Blade::component('design-system::Modals.ModalScale', 'modal-scale');
             Blade::component('design-system::Modals.ModalSlideDown', 'modal-slide-down');
             Blade::component('design-system::Modals.ModalStaticBackdrop', 'modal-static-backdrop');
+            Blade::component('design-system::Modals.ModalGeneric', 'modal-generic');
             
             // Popover components - Preline UI Based
             Blade::component('design-system::Popovers.PopoverLeft', 'popover-left');
@@ -318,6 +319,7 @@ class ComponentsServiceProvider extends ServiceProvider
             Blade::component('design-system::Dashboard.QuickActionButton', 'quick-action-button');
             Blade::component('design-system::Dashboard.OrdersTableWidget', 'orders-table-widget');
             Blade::component('design-system::Dashboard.AnnouncementCarousel', 'announcement-carousel');
+            Blade::component('design-system::Dashboard.AnnouncementCarouselStatic', 'announcement-carousel-static');
             Blade::component('design-system::Dashboard.ChartWidget', 'chart-widget');
             Blade::component('design-system::Dashboard.PendingRequestsWidget', 'pending-requests-widget');
             Blade::component('design-system::Dashboard.LatestStoresTableWidget', 'latest-stores-table-widget');

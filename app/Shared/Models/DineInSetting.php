@@ -4,11 +4,15 @@ namespace App\Shared\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Shared\Traits\BelongsToTenant;
 
 class DineInSetting extends Model
 {
+    use BelongsToTenant;
+    
     protected $fillable = [
         'store_id',
+        'tenant_id',
         'is_enabled',
         'charge_service_fee',
         'service_fee_type',
@@ -30,6 +34,28 @@ class DineInSetting extends Model
         'allow_custom_tip' => 'boolean',
         'require_table_number' => 'boolean',
     ];
+
+    /**
+     * Boot del modelo para sincronizar tenant_id con store_id
+     */
+    protected static function boot()
+    {
+        parent::boot();
+        
+        // Sincronizar tenant_id con store_id al crear
+        static::creating(function ($setting) {
+            if ($setting->store_id && !$setting->tenant_id) {
+                $setting->tenant_id = $setting->store_id;
+            }
+        });
+        
+        // Sincronizar tenant_id con store_id al actualizar
+        static::updating(function ($setting) {
+            if ($setting->isDirty('store_id')) {
+                $setting->tenant_id = $setting->store_id;
+            }
+        });
+    }
 
     /**
      * Relación con Store

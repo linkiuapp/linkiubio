@@ -66,6 +66,59 @@
                                 <p class="text-sm text-gray-900">{{ $product->type === 'simple' ? 'Producto Simple' : 'Producto Variable' }}</p>
                             </div>
                         </div>
+
+                        {{-- Stock Management --}}
+                        @if($product->controla_stock)
+                        <div class="pt-4 border-t border-gray-200">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">Gestión de Stock</label>
+                            <div class="bg-gray-50 rounded-lg p-4 space-y-3">
+                                <div class="flex items-center justify-between">
+                                    <span class="text-sm text-gray-600">Tipo de inventario:</span>
+                                    <span class="text-sm font-medium text-gray-900">
+                                        {{ $product->tipo_stock === 'ilimitado' ? 'Ilimitado' : 'Limitado' }}
+                                    </span>
+                                </div>
+                                
+                                @if($product->tipo_stock === 'limitado')
+                                    @if($product->type === 'simple')
+                                        {{-- Stock para producto simple --}}
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-sm text-gray-600">Stock disponible:</span>
+                                            <span class="text-lg font-bold {{ $product->estaAgotado() ? 'text-red-600' : ($product->tieneStockBajo() ? 'text-yellow-600' : 'text-green-600') }}">
+                                                {{ $product->cantidad_stock ?? 0 }} unidades
+                                            </span>
+                                        </div>
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-sm text-gray-600">Umbral de alerta:</span>
+                                            <span class="text-sm font-medium text-gray-900">{{ $product->umbral_alerta_stock ?? 1 }} unidades</span>
+                                        </div>
+                                    @else
+                                        {{-- Stock para producto variable --}}
+                                        @php
+                                            $stockTotal = $product->stocksVariantes->sum('cantidad_stock');
+                                            $stockReservado = $product->stocksVariantes->sum('cantidad_reservada');
+                                            $stockDisponible = $stockTotal - $stockReservado;
+                                        @endphp
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-sm text-gray-600">Stock total:</span>
+                                            <span class="text-lg font-bold {{ $stockDisponible <= 0 ? 'text-red-600' : ($stockDisponible <= ($product->umbral_alerta_stock ?? 1) ? 'text-yellow-600' : 'text-green-600') }}">
+                                                {{ $stockDisponible }} unidades
+                                            </span>
+                                        </div>
+                                        @if($stockReservado > 0)
+                                        <div class="flex items-center justify-between">
+                                            <span class="text-sm text-gray-600">Stock reservado:</span>
+                                            <span class="text-sm font-medium text-gray-600">{{ $stockReservado }} unidades</span>
+                                        </div>
+                                        @endif
+                                        <div class="text-xs text-gray-500 mt-2">
+                                            Stock gestionado por variantes ({{ $product->stocksVariantes->count() }} variantes)
+                                        </div>
+                                    @endif
+                                @endif
+                            </div>
+                        </div>
+                        @endif
                         
                         {{-- Categorías --}}
                         @if($product->categories && $product->categories->count() > 0)

@@ -214,13 +214,16 @@ class Favorites {
     /**
      * Mostrar toast de notificación
      */
-    showToast(message) {
-        // Usar el sistema de toasts global si existe
-        if (typeof window.showToast === 'function') {
-            window.showToast('success', message);
-        } else {
-            // Fallback: console
-            console.log(message);
+    showToast(message, type = 'favorite') {
+        // Usar el sistema unificado de toasts
+        if (window.toast) {
+            if (message.includes('agregado')) {
+                window.toast.favorite('¡Añadido a favoritos!', message, 5000);
+            } else if (message.includes('eliminado')) {
+                window.toast.info('Favorito eliminado', message, 5000);
+            } else {
+                window.toast.info('Favoritos', message, 5000);
+            }
         }
     }
 }

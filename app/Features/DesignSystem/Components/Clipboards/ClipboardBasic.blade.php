@@ -10,6 +10,7 @@ Ejemplo: <x-clipboard-basic text="npm install preline" />
     'text' => '',
     'targetId' => null,
     'successText' => 'Copiado',
+    'type' => 'text', // text, coupon, account
 ])
 
 @php
@@ -27,6 +28,7 @@ Ejemplo: <x-clipboard-basic text="npm install preline" />
         data-clipboard-target="#{{ $uniqueId }}" 
         data-clipboard-action="copy" 
         data-clipboard-success-text="{{ $successText }}"
+        data-clipboard-type="{{ $type }}"
     >
         <i data-lucide="copy" class="js-clipboard-default size-4 group-hover:rotate-6 transition" x-init="lucide.createIcons()"></i>
         <i data-lucide="check" class="js-clipboard-success hidden size-4 text-blue-600" x-init="lucide.createIcons()"></i>

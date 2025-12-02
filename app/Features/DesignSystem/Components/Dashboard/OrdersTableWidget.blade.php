@@ -58,31 +58,33 @@ Ejemplo: <x-orders-table-widget :orders="$allOrders" title="Pedidos Recientes" :
     </div>
     
     @if(count($totalOrders) > 0)
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                            # Pedido
-                        </th>
-                        <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                            Cliente
-                        </th>
-                        <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                            Tipo
-                        </th>
-                        <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                            Estado
-                        </th>
-                        <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                            Total
-                        </th>
-                        <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                            Fecha
-                        </th>
-                    </tr>
-                </thead>
-                <tbody class="bg-white divide-y divide-gray-200" x-data="ordersTableWidget({{ json_encode($totalOrders) }}, '{{ $storeSlug }}', {{ $perPage }})">
+        <div x-data="ordersTableWidget({{ json_encode($totalOrders) }}, '{{ $storeSlug }}', {{ $perPage }})"
+             x-init="$watch('currentPage', () => { if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons(); })">
+            <div class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200">
+                    <thead class="bg-gray-50">
+                        <tr>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                # Pedido
+                            </th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                Cliente
+                            </th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                Tipo
+                            </th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                Estado
+                            </th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                Total
+                            </th>
+                            <th scope="col" class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                Fecha
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="bg-white divide-y divide-gray-200">
                     <template x-for="order in paginatedOrders" :key="order.id">
                         <tr class="hover:bg-gray-50 transition-colors cursor-pointer" 
                             @click="window.location.href = getOrderUrl(order.id)">
@@ -122,12 +124,12 @@ Ejemplo: <x-orders-table-widget :orders="$allOrders" title="Pedidos Recientes" :
                             </td>
                         </tr>
                     </template>
-                </tbody>
-            </table>
-        </div>
-        
-        {{-- Paginación --}}
-        <div x-show="totalPages > 1" class="mt-4 flex items-center justify-between border-t border-gray-200 pt-4">
+                    </tbody>
+                </table>
+            </div>
+            
+            {{-- Paginación --}}
+            <div x-show="totalPages > 1" class="mt-4 flex items-center justify-between border-t border-gray-200 pt-4">
             <div class="text-sm text-gray-700">
                 Mostrando <span x-text="startIndex + 1"></span> a <span x-text="endIndex"></span> de <span x-text="orders.length"></span> pedidos
             </div>
@@ -155,6 +157,7 @@ Ejemplo: <x-orders-table-widget :orders="$allOrders" title="Pedidos Recientes" :
                     <i data-lucide="chevron-right" class="w-4 h-4"></i>
                 </button>
             </nav>
+            </div>
         </div>
     @else
         <div class="text-center py-12">

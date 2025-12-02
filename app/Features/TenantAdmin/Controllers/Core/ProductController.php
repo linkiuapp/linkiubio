@@ -49,7 +49,7 @@ class ProductController extends Controller
         
         // Consulta base de productos
         $query = Product::byStore($store->id)
-            ->with(['images', 'categories', 'variants'])
+            ->with(['images', 'categories', 'variants', 'stocksVariantes'])
             ->orderBy('created_at', 'desc');
 
         // Aplicar filtros
@@ -136,6 +136,11 @@ class ProductController extends Controller
             'price' => 'required|numeric|min:0',
             'sku' => 'nullable|string|max:100',
             'is_active' => 'boolean',
+            // Campos de stock
+            'controla_stock' => 'boolean',
+            'tipo_stock' => 'nullable|in:ilimitado,limitado',
+            'cantidad_stock' => 'nullable|integer|min:0',
+            'umbral_alerta_stock' => 'nullable|integer|min:1|max:1000',
         ], [
             'name.required' => 'El nombre del producto es obligatorio',
             'name.max' => 'El nombre no puede exceder 255 caracteres',
@@ -154,6 +159,11 @@ class ProductController extends Controller
             'sku' => $request->sku,
             'is_active' => $request->boolean('is_active', true),
             'type' => $request->type ?? 'simple',
+            // Campos de stock
+            'controla_stock' => $request->boolean('controla_stock', false),
+            'tipo_stock' => $request->input('tipo_stock', 'ilimitado'),
+            'cantidad_stock' => $request->input('cantidad_stock'),
+            'umbral_alerta_stock' => $request->input('umbral_alerta_stock', 1),
         ]);
 
         // Procesar imágenes si se subieron
@@ -196,7 +206,8 @@ class ProductController extends Controller
             'images', 
             'categories', 
             'variants',
-            'variableAssignments.variable.activeOptions'
+            'variableAssignments.variable.activeOptions',
+            'stocksVariantes'
         ]);
         
         return view('tenant-admin::Core/products.show', compact('product', 'store'));
@@ -215,7 +226,7 @@ class ProductController extends Controller
             ->where('store_id', $store->id)
             ->firstOrFail();
         
-        $product->load(['images', 'categories', 'variants', 'variableAssignments']);
+        $product->load(['images', 'categories', 'variants', 'variableAssignments', 'stocksVariantes']);
         $categories = Category::where('store_id', $store->id)->get();
         $variables = ProductVariable::where('store_id', $store->id)->with('activeOptions')->get();
 
@@ -248,13 +259,18 @@ class ProductController extends Controller
             'sku' => 'nullable|string|max:100',
             'type' => 'required|in:simple,variable',
             'is_active' => 'boolean',
+            // Campos de stock
+            'controla_stock' => 'boolean',
+            'tipo_stock' => 'nullable|in:ilimitado,limitado',
+            'cantidad_stock' => 'nullable|integer|min:0',
+            'umbral_alerta_stock' => 'nullable|integer|min:1|max:1000',
         ]);
 
         // Obtener el tipo del request antes de actualizar
         $newType = $request->input('type', $product->type);
         $oldType = $product->type;
 
-        // Actualizar producto incluyendo el tipo
+        // Actualizar producto incluyendo el tipo y stock
         $product->update([
             'name' => $request->name,
             'description' => $request->description,
@@ -262,6 +278,11 @@ class ProductController extends Controller
             'sku' => $request->sku,
             'type' => $newType,
             'is_active' => $request->boolean('is_active', true),
+            // Campos de stock
+            'controla_stock' => $request->boolean('controla_stock', false),
+            'tipo_stock' => $request->input('tipo_stock', 'ilimitado'),
+            'cantidad_stock' => $request->input('cantidad_stock'),
+            'umbral_alerta_stock' => $request->input('umbral_alerta_stock', 1),
         ]);
 
         // Si cambió de variable a simple, eliminar todas las asignaciones de variables
@@ -491,5 +512,42 @@ class ProductController extends Controller
         
         // Actualizar las cantidades en el producto
         $product->update(['option_quantities' => !empty($optionQuantities) ? $optionQuantities : null]);
+        
+        // Sincronizar stock de variantes si el producto controla stock
+        if ($product->controla_stock && $product->tipo_stock === 'limitado') {
+            $this->syncStockVariantes($product, $optionQuantities);
+        }
+    }
+
+    /**
+     * Sincronizar stock de variantes del producto
+     */
+    protected function syncStockVariantes(Product $product, array $optionQuantities)
+    {
+        // Primero, limpiar todos los registros de stock de variantes existentes
+        $product->stocksVariantes()->delete();
+        
+        // Si no hay cantidades, no crear registros
+        if (empty($optionQuantities)) {
+            return;
+        }
+        
+        // Crear registros de stock para cada opción seleccionada
+        foreach ($optionQuantities as $variableId => $options) {
+            foreach ($options as $optionId => $cantidad) {
+                if ($cantidad > 0) {
+                    \App\Features\TenantAdmin\Models\StockVarianteProducto::create([
+                        'product_id' => $product->id,
+                        'combinacion_variables' => [
+                            (string)$variableId => (string)$optionId
+                        ],
+                        'sku' => $product->sku . '-V' . $variableId . '-O' . $optionId,
+                        'cantidad_stock' => $cantidad,
+                        'cantidad_reservada' => 0,
+                        'umbral_alerta_stock' => $product->umbral_alerta_stock ?? 1,
+                    ]);
+                }
+            }
+        }
     }
 } 

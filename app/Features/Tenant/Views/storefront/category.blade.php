@@ -89,7 +89,21 @@
             <div class="space-y-3">
                 @foreach($products as $product)
                     <a href="{{ route('tenant.product', [$store->slug, $product->slug]) }}" 
-                       class="bg-brandWhite-100 rounded-lg p-4 hover:bg-brandPrimary-50 hover:shadow-sm transition-all duration-200 block">
+                       class="bg-brandWhite-100 rounded-lg p-4 hover:bg-brandPrimary-50 hover:shadow-sm transition-all duration-200 block relative">
+                        
+                        <!-- Badge de Stock -->
+                        @if($product->controlaStock() && !$product->tieneStockIlimitado())
+                            @if($product->estaAgotado())
+                                <div class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-lg text-xs font-medium z-10">
+                                    Agotado
+                                </div>
+                            @elseif($product->tieneStockBajo())
+                                <div class="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded-lg text-xs font-medium z-10">
+                                    Últimas {{ $product->stock_disponible }} unidades
+                                </div>
+                            @endif
+                        @endif
+
                         <div class="flex items-center gap-3">
                             <!-- Imagen del producto -->
                             <div class="w-20 h-20 bg-brandWhite-100 rounded-lg flex-shrink-0 overflow-hidden">

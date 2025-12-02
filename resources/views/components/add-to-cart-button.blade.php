@@ -1,7 +1,20 @@
 @props(['product', 'store'])
 
+@php
+    $estaAgotado = $product->controlaStock() 
+                   && !$product->tieneStockIlimitado() 
+                   && $product->estaAgotado();
+@endphp
+
 <div class="flex-shrink-0 relative">
-    @if($product->type === 'variable')
+    @if($estaAgotado)
+        {{-- Producto agotado: Botón deshabilitado --}}
+        <button type="button"
+                disabled
+                class="bg-gray-300 w-11 h-11 rounded-lg flex items-center justify-center cursor-not-allowed opacity-50">
+                <i data-lucide="x" class="w-16px h-16px text-gray-500"></i>
+        </button>
+    @elseif($product->type === 'variable')
         {{-- Producto con variantes: Ver opciones --}}
         <button type="button"
                 onclick="event.stopPropagation(); event.preventDefault(); window.location.href='{{ route('tenant.product', [$store->slug, $product->slug]) }}';"

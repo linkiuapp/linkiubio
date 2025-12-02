@@ -12,6 +12,7 @@ use App\Features\TenantAdmin\Models\PaymentMethod;
 use App\Features\TenantAdmin\Models\BankAccount;
 use App\Features\TenantAdmin\Models\SimpleShipping;
 use App\Features\TenantAdmin\Models\SimpleShippingZone;
+use App\Features\TenantAdmin\Services\StockService;
 use App\Services\WhatsAppNotificationService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
@@ -382,6 +383,9 @@ class OrderController extends Controller
             $order = Order::create($orderData);
 
             // Agregar productos a la orden
+            // ✅ Inicializar StockService
+            $stockService = app(StockService::class);
+            
             foreach ($cartItems as $item) {
                 $product = Product::where('id', $item['product_id'])
                     ->where('store_id', $store->id)
@@ -397,6 +401,15 @@ class OrderController extends Controller
                 );
 
                 $order->items()->create($orderItemData);
+                
+                // ✅ DECREMENTAR STOCK después de confirmar venta
+                $opcionesSeleccionadas = $this->convertirVariantesAOpciones($item['variants'] ?? []);
+                $stockService->decrementarStock(
+                    $product,
+                    $opcionesSeleccionadas,
+                    $item['quantity'],
+                    $order->id
+                );
             }
 
             // Calcular subtotal primero
@@ -973,6 +986,24 @@ class OrderController extends Controller
                 ], 404);
         }
 
+        // ✅ VERIFICAR DISPONIBILIDAD DE STOCK
+        $stockService = app(StockService::class);
+        $opcionesSeleccionadas = $this->convertirVariantesAOpciones($validated['variants'] ?? []);
+        
+        $disponibilidad = $stockService->verificarDisponibilidad(
+            $product,
+            $opcionesSeleccionadas,
+            $validated['quantity']
+        );
+
+        if (!$disponibilidad['disponible']) {
+            return response()->json([
+                'success' => false,
+                'message' => $disponibilidad['error'] ?? 'Producto sin stock suficiente',
+                'stock_disponible' => $disponibilidad['cantidad'] ?? 0,
+            ], 400);
+        }
+
         // Obtener carrito actual
         $cart = $request->session()->get('cart', []);
             \Log::info('🛒 CART BEFORE:', ['cart' => $cart]);
@@ -1032,6 +1063,20 @@ class OrderController extends Controller
                     'added_at' => now()->toISOString()
             ];
         }
+
+            // ✅ RESERVAR STOCK
+            $reservado = $stockService->reservar(
+                $product,
+                $opcionesSeleccionadas,
+                $validated['quantity']
+            );
+
+            if (!$reservado) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se pudo reservar el stock. Intenta de nuevo.',
+                ], 400);
+            }
 
             // Guardar en sesión con múltiples métodos
         $request->session()->put('cart', $cart);
@@ -1354,6 +1399,21 @@ class OrderController extends Controller
             ]);
             
             if (isset($cart[$itemKey])) {
+                // ✅ LIBERAR RESERVA DE STOCK antes de eliminar
+                $item = $cart[$itemKey];
+                $producto = Product::find($item['product_id']);
+                
+                if ($producto) {
+                    $stockService = app(StockService::class);
+                    $opcionesSeleccionadas = $this->convertirVariantesAOpciones($item['variants'] ?? []);
+                    
+                    $stockService->liberarReserva(
+                        $producto,
+                        $opcionesSeleccionadas,
+                        $item['quantity']
+                    );
+                }
+                
                 unset($cart[$itemKey]);
             $request->session()->put('cart', $cart);
                 \Log::info('✅ Item removed from cart');
@@ -1391,6 +1451,23 @@ class OrderController extends Controller
     public function clearCart(Request $request): JsonResponse
     {
         try {
+            // ✅ LIBERAR TODAS LAS RESERVAS antes de vaciar
+            $cart = $request->session()->get('cart', []);
+            $stockService = app(StockService::class);
+            
+            foreach ($cart as $item) {
+                $producto = Product::find($item['product_id']);
+                
+                if ($producto) {
+                    $opcionesSeleccionadas = $this->convertirVariantesAOpciones($item['variants'] ?? []);
+                    $stockService->liberarReserva(
+                        $producto,
+                        $opcionesSeleccionadas,
+                        $item['quantity']
+                    );
+                }
+            }
+            
         $request->session()->forget('cart');
 
         return response()->json([
@@ -1789,5 +1866,36 @@ class OrderController extends Controller
         }
 
         return view('tenant::orders.tracking', compact('order', 'store'));
+    }
+
+    /**
+     * Convertir variantes del carrito a formato de opciones para StockService
+     * 
+     * Formato entrada (carrito):
+     * [
+     *   "1" => [["id" => 5, "name" => "38"]], // variable_id => [opcion]
+     *   "2" => [["id" => 8, "name" => "Negro"]]
+     * ]
+     * 
+     * Formato salida (StockService):
+     * [
+     *   "1" => 5, // variable_id => option_id
+     *   "2" => 8
+     * ]
+     */
+    private function convertirVariantesAOpciones(array $variantes): array
+    {
+        $opciones = [];
+        
+        foreach ($variantes as $variableId => $options) {
+            if (is_array($options) && !empty($options)) {
+                // Tomar el primer elemento (para radio buttons)
+                $primeraOpcion = is_array($options[0]) ? $options[0] : $options;
+                // Intentar obtener option_id primero, luego id, luego el valor directo
+                $opciones[$variableId] = $primeraOpcion['option_id'] ?? $primeraOpcion['id'] ?? $primeraOpcion;
+            }
+        }
+        
+        return $opciones;
     }
 }
