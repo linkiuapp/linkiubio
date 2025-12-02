@@ -64,24 +64,21 @@ Permite editar categorías existentes con icono, nombre, slug, descripción y co
             }
         }"
         x-on:keydown.escape.window="closeDeleteModal()"
-        class="max-w-4xl mx-auto space-y-6"
+        class="max-w-7xl mx-auto space-y-6"
     >
         {{-- SECTION: Header --}}
         <div class="flex items-center gap-3">
             <a href="{{ route('tenant.admin.categories.index', $store->slug) }}" class="inline-flex items-center justify-center">
                 <i data-lucide="arrow-left" class="w-5 h-5 text-gray-600 hover:text-gray-800"></i>
             </a>
-            <h1 class="text-lg font-semibold text-gray-800">Editar Categoría</h1>
+            <h1 class="text-lg font-bold text-gray-800">Editar Categoría</h1>
         </div>
         {{-- End SECTION: Header --}}
 
         {{-- SECTION: Info Alert --}}
-        {{-- COMPONENT: AlertSoft | props:{type:info} --}}
-        <x-alert-soft 
-            type="info"
-            :message="'Estás usando ' . $totalCategories . ' de ' . $categoryLimit . ' categorías disponibles en tu plan ' . $store->plan->name . '.'"
-        />
-        {{-- End COMPONENT: AlertSoft --}}
+        <div class="bg-blue-50 border border-blue-200 text-blue-800 text-sm rounded-lg px-4 py-3" role="alert">
+            Estás usando <strong>{{ $totalCategories }} de {{ $categoryLimit }}</strong> categorías disponibles en tu plan {{ e($store->plan->name) }}.
+        </div>
         {{-- End SECTION: Info Alert --}}
 
         {{-- SECTION: Form Card --}}
@@ -89,190 +86,264 @@ Permite editar categorías existentes con icono, nombre, slug, descripción y co
             @csrf
             @method('PUT')
 
-            <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
-                {{-- SECTION: Card Body --}}
-                <div class="p-6 space-y-6">
-                    {{-- SECTION: Icon Selector --}}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-800 mb-3">
-                            Icono de la categoría <span class="text-red-500">*</span>
-                        </label>
-                        
-                        {{-- COMPONENT: IconSelectorGrid | props:{name:icon_id, icons:$icons, selected:old('icon_id', $category->icon_id), required:true} --}}
-                        <x-icon-selector-grid 
-                            name="icon_id"
-                            :icons="$icons"
-                            :selected="old('icon_id', $category->icon_id)"
-                            :required="true"
-                            :searchable="true"
-                            :columns="['mobile' => 4, 'tablet' => 6, 'desktop' => 12]"
-                        />
-                        {{-- End COMPONENT: IconSelectorGrid --}}
-
-                        <p class="text-xs text-gray-500 mt-6">
-                            Mostrando {{ $icons->count() }} icono(s) disponibles para tu categoría de negocio
-                        </p>
-
-                        @error('icon_id')
-                            <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
-                        @enderror
-                    </div>
-                    {{-- End SECTION: Icon Selector --}}
-
-                    {{-- SECTION: Basic Information --}}
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {{-- ITEM: Name Field --}}
-                        <x-ds.text-input
-                            type="text"
-                            name="name"
-                            id="name"
-                            label="Nombre"
-                            placeholder="Ej: Hamburguesas"
-                            :value="old('name', $category->name)"
-                            :required="true"
-                            :error="$errors->first('name')"
-                        />
-                        {{-- End ITEM: Name Field --}}
-
-                        {{-- ITEM: Slug Field --}}
-                        <div>
-                            <x-ds.text-input
+            {{-- Grid: 1 columna en mobile/tablet, 2 columnas en desktop (1024px+) --}}
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                
+                {{-- CARD IZQUIERDA: Selector de Ícono --}}
+                <div class="bg-white rounded-lg border border-gray-200 p-6">
+                    <label class="block text-sm font-medium text-gray-800 mb-3">
+                        Ícono de la categoría <span class="text-red-500">*</span>
+                    </label>
+                    
+                    {{-- Icon Selector Grid --}}
+                    <div 
+                        x-data="{ 
+                            searchIcon: '',
+                            get visibleCount() {
+                                return Array.from(this.$el.querySelectorAll('.icon-option'))
+                                    .filter(el => window.getComputedStyle(el).display !== 'none').length;
+                            }
+                        }"
+                        class="icon-selector-container"
+                    >
+                        {{-- Search Input --}}
+                        <div class="relative mb-4">
+                            <input 
                                 type="text"
-                                name="slug"
-                                id="slug"
-                                label="Slug (URL)"
-                                placeholder="Se genera automáticamente"
-                                :value="old('slug', $category->slug)"
-                                :error="$errors->first('slug')"
-                            />
-                            <p class="mt-1 text-xs text-gray-500">
-                                URL: {{ config('app.url') }}/{{ $store->slug }}/categoria/<span id="slug-preview">{{ old('slug', $category->slug) }}</span>
+                                id="icon-search-input"
+                                placeholder="Buscar ícono..."
+                                x-model="searchIcon"
+                                class="py-2.5 ps-11 pe-4 block w-full border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500"
+                            >
+                            <div class="absolute inset-y-0 start-0 flex items-center pointer-events-none z-20 ps-4">
+                                <i data-lucide="search" class="flex-shrink-0 size-4 text-gray-400"></i>
+                            </div>
+                        </div>
+
+                        {{-- Icons Grid --}}
+                        <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                            <div class="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+                                @foreach($icons as $icon)
+                                    <label 
+                                        class="relative cursor-pointer icon-option"
+                                        x-show="searchIcon === '' || '{{ Str::lower(e($icon->display_name ?? $icon->name ?? '')) }}'.includes(searchIcon.toLowerCase())"
+                                    >
+                                        <input 
+                                            type="radio" 
+                                            name="icon_id" 
+                                            value="{{ $icon->id }}" 
+                                            class="sr-only peer"
+                                            {{ (old('icon_id', $category->icon_id) == $icon->id) ? 'checked' : '' }}
+                                            required
+                                        >
+                                        {{-- Contenedor del ícono con mejor feedback visual --}}
+                                        <div class="w-full aspect-square bg-white rounded-lg p-3 border-2 border-transparent
+                                                    peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:border-2 hover:border-blue-300
+                                                    hover:bg-gray-50
+                                                    transition-all duration-200 flex items-center justify-center relative">
+                                            @if(isset($icon->image_url))
+                                                <img 
+                                                    src="{{ $icon->image_url }}" 
+                                                    alt="{{ e($icon->display_name ?? $icon->name ?? 'Icono') }}" 
+                                                    class="max-w-full max-h-full object-contain"
+                                                    loading="lazy"
+                                                    onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                                                >
+                                                <i data-lucide="image" class="w-6 h-6 text-gray-400" style="display: none;"></i>
+                                            @elseif(isset($icon->icon))
+                                                <i data-lucide="{{ e($icon->icon) }}" class="w-6 h-6 text-gray-400"></i>
+                                            @else
+                                                <i data-lucide="image" class="w-6 h-6 text-gray-400"></i>
+                                            @endif
+                                        </div>
+                                        
+                                        {{-- Check mark con animación - hermano del input para que peer-checked funcione --}}
+                                        <div class="absolute -top-1.5 -right-1.5 bg-blue-600 rounded-full p-1 shadow-lg opacity-0 scale-0 peer-checked:opacity-100 peer-checked:scale-100 transition-all duration-200 pointer-events-none">
+                                            <i data-lucide="check" class="w-3 h-3 text-white stroke-[3]"></i>
+                                        </div>
+                                    </label>
+                                @endforeach
+                            </div>
+
+                            {{-- Empty State --}}
+                            <div 
+                                x-show="searchIcon !== '' && visibleCount === 0" 
+                                class="text-center py-8"
+                                x-cloak
+                            >
+                                <p class="text-sm text-gray-500">No se encontraron iconos con ese nombre</p>
+                            </div>
+
+                            <p class="text-xs text-gray-500 text-center mt-4">
+                                Mostrando {{ $icons->count() }} ícono(s) disponibles para tu categoría de negocio
                             </p>
                         </div>
-                        {{-- End ITEM: Slug Field --}}
                     </div>
-                    {{-- End SECTION: Basic Information --}}
+                    {{-- End Icon Selector Grid --}}
 
-                    {{-- SECTION: Description --}}
-                    <x-textarea-with-label
-                        textarea-name="description"
-                        textarea-id="description"
-                        label="Descripción"
-                        placeholder="Descripción opcional de la categoría"
-                        :rows="3"
-                        container-class="w-full"
-                        :error="$errors->first('description')"
-                    >
-                        {{ old('description', $category->description) }}
-                    </x-textarea-with-label>
-                    {{-- End SECTION: Description --}}
+                    @error('icon_id')
+                        <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                    @enderror
+                </div>
+                {{-- End CARD IZQUIERDA --}}
 
-                    {{-- SECTION: Parent Category --}}
-                    @if($parentCategories->count() > 0 || $category->parent_id)
+                {{-- CARD DERECHA: Formulario --}}
+                <div class="bg-white rounded-lg border border-gray-200 p-6">
+                    <div class="space-y-5">
+                        
+                        {{-- Nombre --}}
+                        <div>
+                            <label for="name" class="block text-sm font-medium text-gray-800 mb-2">
+                                Nombre <span class="text-red-500">*</span>
+                            </label>
+                            <input 
+                                type="text"
+                                id="name"
+                                name="name"
+                                placeholder="Ej: Hamburguesas"
+                                value="{{ old('name', $category->name) }}"
+                                maxlength="255"
+                                required
+                                class="py-2.5 px-4 block w-full border {{ $errors->first('name') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500' }} rounded-lg text-sm"
+                            >
+                            @error('name')
+                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Slug --}}
+                        <div>
+                            <label for="slug" class="block text-sm font-medium text-gray-800 mb-2">
+                                Slug (URL)
+                            </label>
+                            <input 
+                                type="text"
+                                id="slug"
+                                name="slug"
+                                placeholder="Se genera automáticamente"
+                                value="{{ old('slug', $category->slug) }}"
+                                maxlength="255"
+                                pattern="[a-z0-9\-]*"
+                                title="Solo letras minúsculas, números y guiones"
+                                class="py-2.5 px-4 block w-full border {{ $errors->first('slug') ? 'border-red-500 focus:border-red-500 focus:ring-red-500' : 'border-gray-300 focus:border-blue-500 focus:ring-blue-500' }} rounded-lg text-sm"
+                            >
+                            @error('slug')
+                                <p class="text-sm text-red-600 mt-1">{{ $message }}</p>
+                            @enderror
+                            <p class="mt-2 text-xs text-gray-500">
+                                URL: {{ config('app.url') }}/{{ e($store->slug) }}/categoria/<span id="slug-preview">{{ old('slug', $category->slug) }}</span>
+                            </p>
+                        </div>
+
+                        {{-- Descripción --}}
+                        <div>
+                            <label for="description" class="block text-sm font-medium text-gray-800 mb-2">
+                                Descripción
+                            </label>
+                            <textarea 
+                                id="description"
+                                name="description"
+                                rows="3"
+                                maxlength="500"
+                                placeholder="Descripción opcional de la categoría"
+                                class="py-2.5 px-4 block w-full border border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 resize-none"
+                            >{{ old('description', $category->description) }}</textarea>
+                            <p class="text-xs text-gray-500 mt-1 text-right">
+                                <span id="char-count">{{ strlen(old('description', $category->description)) }}</span>/500 caracteres
+                            </p>
+                            @error('description')
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        {{-- Categoría padre --}}
+                        @if($parentCategories->count() > 0 || $category->parent_id)
                         <div>
                             <label for="parent_id" class="block text-sm font-medium text-gray-800 mb-2">
                                 Categoría padre (opcional)
                             </label>
-                            {{-- COMPONENT: SelectBasic | props:{name:parent_id, select-id:parent_id} --}}
-                            <x-select-basic 
+                            <select 
+                                id="parent_id"
                                 name="parent_id"
-                                select-id="parent_id"
-                                :options="['' => 'Ninguna (será categoría principal)'] + $parentCategories->pluck('name', 'id')->toArray()"
-                                :selected="old('parent_id', $category->parent_id)"
-                                placeholder=""
-                            />
-                            {{-- End COMPONENT: SelectBasic --}}
+                                class="py-2.5 px-4 pe-9 block w-full border border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 bg-white"
+                            >
+                                <option value="">Ninguna (será categoría principal)</option>
+                                @foreach($parentCategories as $parent)
+                                    <option value="{{ $parent->id }}" {{ old('parent_id', $category->parent_id) == $parent->id ? 'selected' : '' }}>
+                                        {{ e($parent->name) }}
+                                    </option>
+                                @endforeach
+                            </select>
                             @error('parent_id')
-                                <p class="mt-2 text-sm text-red-600">{{ $message }}</p>
+                                <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
-                    @endif
-                    {{-- End SECTION: Parent Category --}}
+                        @endif
 
-                    {{-- SECTION: Additional Settings --}}
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {{-- ITEM: Active Status --}}
-                        <div>
+                        {{-- Toggle Categoría activa --}}
+                        <div class="border border-gray-200 rounded-lg p-4">
                             <input type="hidden" name="is_active" value="0">
-                            <label class="flex px-2 items-center gap-3 mb-2">
-                                {{-- COMPONENT: SwitchBasic | props:{switchName:is_active, checked:true} --}}
-                                <x-switch-basic 
-                                    switch-name="is_active"
-                                    :checked="old('is_active', $category->is_active)"
-                                    value="1"
-                                />
-                                {{-- End COMPONENT: SwitchBasic --}}
-                                <div class="flex flex-col">
-                                    <span class="text-sm font-medium text-gray-800">Categoría activa</span>
+                            <label class="flex items-center gap-3 cursor-pointer">
+                                <div class="relative inline-block w-11 h-6">
+                                    <input 
+                                        type="checkbox" 
+                                        id="is_active"
+                                        name="is_active"
+                                        value="1"
+                                        {{ old('is_active', $category->is_active) ? 'checked' : '' }}
+                                        class="peer sr-only"
+                                    >
+                                    <span class="absolute inset-0 bg-gray-300 rounded-full transition-colors peer-checked:bg-blue-600"></span>
+                                    <span class="absolute top-1/2 start-0.5 -translate-y-1/2 size-5 bg-white rounded-full shadow-sm transition-transform peer-checked:translate-x-full"></span>
+                                </div>
+                                <div class="flex-1">
+                                    <span class="block text-sm font-medium text-gray-800">Categoría activa</span>
                                     <p class="text-xs text-gray-500">
                                         Las categorías inactivas no se muestran en la tienda
                                     </p>
                                 </div>
                             </label>
                         </div>
-                        {{-- End ITEM: Active Status --}}
-                    </div>
-                    {{-- End SECTION: Additional Settings --}}
 
-                    {{-- SECTION: Warning Alerts --}}
-                    @if($category->children->count() > 0)
-                        {{-- COMPONENT: AlertSoft | props:{type:warning} --}}
-                        <x-alert-soft 
-                            type="warning"
-                            :message="'Esta categoría tiene ' . $category->children->count() . ' subcategoría(s). Si cambias esta categoría a subcategoría, sus subcategorías actuales se convertirán en categorías principales.'"
-                        />
-                        {{-- End COMPONENT: AlertSoft --}}
-                    @endif
-
-                    @if($category->products_count > 0)
-                        {{-- COMPONENT: AlertSoft | props:{type:info} --}}
-                        <x-alert-soft 
-                            type="info"
-                            :message="'Esta categoría tiene ' . $category->products_count . ' producto(s) asociado(s).'"
-                        />
-                        {{-- End COMPONENT: AlertSoft --}}
-                    @endif
-                    {{-- End SECTION: Warning Alerts --}}
-                </div>
-                {{-- End SECTION: Card Body --}}
-
-                {{-- SECTION: Card Footer --}}
-                <div class="bg-gray-50 px-6 py-4 flex justify-between items-center border-t border-gray-200">
-                    <div class="flex items-center gap-3">
-                        <a href="{{ route('tenant.admin.categories.index', $store->slug) }}">
-                            {{-- COMPONENT: ButtonBase | props:{type:outline, color:error, text:Cancelar} --}}
-                            <x-button-base 
-                                type="outline" 
-                                color="error" 
-                                size="md"
-                                text="Cancelar"
-                            />
-                            {{-- End COMPONENT: ButtonBase --}}
-                        </a>
-                        @if($category->products_count == 0)
-                            {{-- COMPONENT: ButtonBase | props:{type:outline, color:error, text:Eliminar} --}}
-                            <x-button-base 
-                                type="solid" 
-                                color="error" 
-                                size="md"
-                                text="Eliminar"
-                                @click="openDeleteModal()"
-                            />
-                            {{-- End COMPONENT: ButtonBase --}}
+                        {{-- Warning Alerts --}}
+                        @if($category->children->count() > 0)
+                            <div class="bg-yellow-50 border border-yellow-200 text-yellow-800 text-sm rounded-lg px-4 py-3" role="alert">
+                                Esta categoría tiene <strong>{{ $category->children->count() }}</strong> subcategoría(s). Si cambias esta categoría a subcategoría, sus subcategorías actuales se convertirán en categorías principales.
+                            </div>
                         @endif
+
+                        @if($category->products_count > 0)
+                            <div class="bg-blue-50 border border-blue-200 text-blue-800 text-sm rounded-lg px-4 py-3" role="alert">
+                                Esta categoría tiene <strong>{{ $category->products_count }}</strong> producto(s) asociado(s).
+                            </div>
+                        @endif
+
+                        {{-- Botones --}}
+                        <div class="flex justify-between items-center gap-3 pt-4">
+                            <div class="flex items-center gap-3">
+                                <a href="{{ route('tenant.admin.categories.index', $store->slug) }}">
+                                    <button type="button" 
+                                            class="inline-flex items-center gap-x-2 py-2.5 px-6 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-sm font-medium">
+                                        Cancelar
+                                    </button>
+                                </a>
+                                @if($category->products_count == 0)
+                                    <button type="button" 
+                                            @click="openDeleteModal()"
+                                            class="inline-flex items-center gap-x-2 py-2.5 px-6 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium">
+                                        Eliminar
+                                    </button>
+                                @endif
+                            </div>
+                            <button type="submit" 
+                                    class="inline-flex items-center gap-x-2 py-2.5 px-6 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors text-sm font-medium">
+                                <i data-lucide="check" class="shrink-0 size-4"></i>
+                                Guardar Cambios
+                            </button>
+                        </div>
                     </div>
-                    {{-- COMPONENT: ButtonIcon | props:{type:solid, color:dark, icon:save, text:Guardar Cambios} --}}
-                    <x-button-icon 
-                        type="solid" 
-                        color="dark" 
-                        icon="check"
-                        size="md"
-                        text="Guardar Cambios"
-                        html-type="submit"
-                    />
-                    {{-- End COMPONENT: ButtonIcon --}}
                 </div>
-                {{-- End SECTION: Card Footer --}}
+                {{-- End CARD DERECHA --}}
             </div>
         </form>
         {{-- End SECTION: Form Card --}}
@@ -415,10 +486,12 @@ Permite editar categorías existentes con icono, nombre, slug, descripción y co
             const nameInput = document.getElementById('name');
             const slugInput = document.getElementById('slug');
             const slugPreview = document.getElementById('slug-preview');
+            const descriptionTextarea = document.getElementById('description');
+            const charCount = document.getElementById('char-count');
 
             if (!nameInput || !slugInput || !slugPreview) return;
 
-            // Auto-generar slug desde el nombre (solo si está vacío o fue auto-generado)
+            // Auto-generar slug desde el nombre
             nameInput.addEventListener('input', function(e) {
                 const slug = e.target.value
                     .toLowerCase()
@@ -445,6 +518,29 @@ Permite editar categorías existentes con icono, nombre, slug, descripción y co
                     e.target.dataset.autoGenerated = 'false';
                 }
             });
+
+            // Contador de caracteres para descripción
+            if (descriptionTextarea && charCount) {
+                const updateCharCount = () => {
+                    const count = descriptionTextarea.value.length;
+                    charCount.textContent = count;
+                    
+                    // Cambiar color si se acerca al límite
+                    if (count >= 450) {
+                        charCount.classList.add('text-red-600', 'font-semibold');
+                    } else if (count >= 400) {
+                        charCount.classList.add('text-yellow-600', 'font-semibold');
+                        charCount.classList.remove('text-red-600');
+                    } else {
+                        charCount.classList.remove('text-red-600', 'text-yellow-600', 'font-semibold');
+                    }
+                };
+                
+                // Actualizar al cargar (por si hay old value)
+                updateCharCount();
+                
+                descriptionTextarea.addEventListener('input', updateCharCount);
+            }
 
             // Inicializar iconos Lucide
             if (typeof window.createIcons !== 'undefined' && typeof window.lucideIcons !== 'undefined') {

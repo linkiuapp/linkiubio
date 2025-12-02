@@ -153,9 +153,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 cartItems.appendChild(itemElement);
             });
 
-            // Actualizar totales
-            document.getElementById('cart-subtotal').textContent = data.formatted_total;
-            document.getElementById('cart-total').textContent = data.formatted_total;
+            // Actualizar totales solo si los elementos existen
+            const subtotalEl = document.getElementById('cart-subtotal');
+            const totalEl = document.getElementById('cart-total');
+            
+            if (subtotalEl) {
+                subtotalEl.textContent = data.formatted_total || '$0';
+            }
+            if (totalEl) {
+                totalEl.textContent = data.formatted_total || '$0';
+            }
         }
     }
 
@@ -309,63 +316,53 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // Event listener para vaciar carrito
+    // Event listener para vaciar carrito usando el sistema unificado
     document.getElementById('clear-cart-btn').addEventListener('click', async function() {
-        Swal.fire({
-            title: '¿Vaciar carrito?',
-            text: 'Todos los productos serán eliminados del carrito',
-            icon: 'warning',
-            showCancelButton: true,
-            confirmButtonColor: '#22c55e',
-            cancelButtonColor: '#ed2e45',
-            confirmButtonText: 'Sí, vaciar',
-            cancelButtonText: 'Cancelar'
-        }).then(async (result) => {
-            if (result.isConfirmed) {
-                try {
-                    const response = await fetch('{{ route("tenant.cart.clear", $store->slug) }}', {
-                        method: 'DELETE',
-                        headers: {
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
-                        }
-                    });
+        // Mostrar modal de confirmación
+        const confirmed = await window.toast.modal(
+            'warning',
+            '¿Vaciar tu carrito?',
+            'Todos los productos serán eliminados',
+            'Sí, vaciar',
+            'Cancelar'
+        );
 
-                    const data = await response.json();
-                    if (data.success) {
-                        loadCart();
-                        // El carrito flotante se actualiza automáticamente vía cart.js
-                        
-                        // Mostrar SweetAlert de éxito
-                        Swal.fire({
-                            icon: 'success',
-                            title: '¡Carrito vaciado!',
-                            text: 'Todos los productos fueron eliminados',
-                            confirmButtonColor: '#22c55e',
-                            confirmButtonText: 'OK',
-                            timer: 2000,
-                            timerProgressBar: true
-                        });
-                    } else {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: data.message || 'Error al vaciar el carrito',
-                            confirmButtonColor: '#ed2e45',
-                            confirmButtonText: 'OK'
-                        });
+        if (confirmed) {
+            try {
+                const response = await fetch('{{ route("tenant.cart.clear", $store->slug) }}', {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
                     }
-                } catch (error) {
-                    console.error('Error clearing cart:', error);
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: 'Error al vaciar el carrito',
-                        confirmButtonColor: '#ed2e45',
-                        confirmButtonText: 'OK'
-                    });
+                });
+
+                const data = await response.json();
+                if (data.success) {
+                    loadCart();
+                    // El carrito flotante se actualiza automáticamente vía cart.js
+                    
+                    // Mostrar toast de éxito
+                    window.toast.success(
+                        '¡Carrito vaciado!',
+                        'Todos los productos fueron eliminados',
+                        5000
+                    );
+                } else {
+                    window.toast.error(
+                        'Error',
+                        data.message || 'Error al vaciar el carrito',
+                        5000
+                    );
                 }
+            } catch (error) {
+                console.error('Error clearing cart:', error);
+                window.toast.error(
+                    'Error',
+                    'Error al vaciar el carrito',
+                    5000
+                );
             }
-        });
+        }
     });
 
     // Checkout button is now a direct link - no JavaScript needed

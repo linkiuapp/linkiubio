@@ -139,6 +139,132 @@
             </x-card-base>
             {{-- End SECTION: Información Básica Card --}}
 
+            {{-- SECTION: Gestión de Inventario --}}
+            <x-card-base title="Gestión de Inventario" shadow="sm">
+                <div x-data="{ 
+                    controlaStock: {{ old('controla_stock', $product->controla_stock) ? 'true' : 'false' }}, 
+                    tipoStock: '{{ old('tipo_stock', $product->tipo_stock ?? 'ilimitado') }}'
+                }">
+                    {{-- Toggle: Controlar stock --}}
+                    <div class="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
+                        <input 
+                            type="checkbox" 
+                            name="controla_stock" 
+                            id="controla_stock"
+                            x-model="controlaStock"
+                            value="1"
+                            class="w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-blue-500 mt-0.5"
+                        >
+                        <div class="flex-1">
+                            <label for="controla_stock" class="block text-sm font-medium text-gray-800 cursor-pointer">
+                                Controlar inventario de este producto
+                            </label>
+                            <p class="text-xs text-gray-600 mt-1">
+                                Activa esto para limitar la cantidad disponible y evitar sobreventa
+                            </p>
+                        </div>
+                    </div>
+
+                    {{-- Configuración de stock (solo si está activo) --}}
+                    <div x-show="controlaStock" x-transition class="mt-4 space-y-4 p-4 border border-gray-200 rounded-lg">
+                        {{-- Tipo de stock --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-800 mb-3">Tipo de inventario</label>
+                            <div class="space-y-2">
+                                <label class="flex items-start gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                    <input 
+                                        type="radio" 
+                                        name="tipo_stock" 
+                                        value="ilimitado"
+                                        x-model="tipoStock"
+                                        class="w-4 h-4 mt-0.5 text-blue-600 focus:ring-blue-500"
+                                    >
+                                    <div class="flex-1">
+                                        <span class="text-sm font-medium text-gray-800">Ilimitado</span>
+                                        <p class="text-xs text-gray-600 mt-0.5">El producto siempre estará disponible</p>
+                                    </div>
+                                </label>
+                                
+                                <label class="flex items-start gap-3 p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50 transition-colors">
+                                    <input 
+                                        type="radio" 
+                                        name="tipo_stock" 
+                                        value="limitado"
+                                        x-model="tipoStock"
+                                        class="w-4 h-4 mt-0.5 text-blue-600 focus:ring-blue-500"
+                                    >
+                                    <div class="flex-1">
+                                        <span class="text-sm font-medium text-gray-800">Limitado</span>
+                                        <p class="text-xs text-gray-600 mt-0.5">Controla la cantidad exacta disponible</p>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        {{-- Campos de stock limitado --}}
+                        <div x-show="tipoStock === 'limitado'" x-transition class="space-y-4 pt-4 border-t border-gray-200">
+                            {{-- Stock actual (SOLO productos simples) --}}
+                            @if($product->type === 'simple')
+                            <div>
+                                <label for="cantidad_stock" class="block text-sm font-medium text-gray-800 mb-2">
+                                    Cantidad en stock
+                                </label>
+                                <input 
+                                    type="number" 
+                                    name="cantidad_stock" 
+                                    id="cantidad_stock"
+                                    value="{{ old('cantidad_stock', $product->cantidad_stock ?? 0) }}"
+                                    min="0"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="0"
+                                >
+                                <p class="text-xs text-gray-600 mt-1">
+                                    Cantidad actual disponible en tu inventario
+                                </p>
+                            </div>
+
+                            {{-- Umbral de alerta --}}
+                            <div>
+                                <label for="umbral_alerta_stock" class="block text-sm font-medium text-gray-800 mb-2">
+                                    Alerta de stock bajo
+                                </label>
+                                <input 
+                                    type="number" 
+                                    name="umbral_alerta_stock" 
+                                    id="umbral_alerta_stock"
+                                    value="{{ old('umbral_alerta_stock', $product->umbral_alerta_stock ?? 1) }}"
+                                    min="1"
+                                    max="100"
+                                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                    placeholder="5"
+                                >
+                                <p class="text-xs text-gray-600 mt-1">
+                                    Te notificaremos cuando el stock llegue a esta cantidad o menos
+                                </p>
+                            </div>
+                            @else
+                            {{-- Mensaje para productos VARIABLES --}}
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <div class="flex gap-3">
+                                    <i data-lucide="info" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"></i>
+                                    <div>
+                                        <p class="text-sm font-medium text-blue-900">Stock por Variantes</p>
+                                        <p class="text-xs text-blue-700 mt-1">
+                                            Este producto tiene variables asignadas. El stock se maneja individualmente por cada opción seleccionada (ej: Talla S = 10 unidades, Talla M = 5 unidades).
+                                        </p>
+                                        <p class="text-xs text-blue-700 mt-2 font-medium">
+                                            Configura el stock de cada opción en la sección "Variables" más abajo.
+                                        </p>
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </x-card-base>
+            {{-- End SECTION: Gestión de Inventario --}}
+
             {{-- SECTION: Imágenes Actuales Card --}}
             @if($product->images && $product->images->count() > 0)
             <x-card-base title="Imágenes Actuales" shadow="sm">
@@ -391,10 +517,20 @@
                                                                 <div class="space-y-2">
                                                                     @foreach($variable->activeOptions as $option)
                                                                         @php
-                                                                            // Obtener cantidad existente del producto
+                                                                            // Obtener cantidad existente desde stock_variantes_producto
                                                                             $existingQuantity = 0;
-                                                                            if ($product->option_quantities && isset($product->option_quantities[$variable->id][$option->id])) {
-                                                                                $existingQuantity = (int) $product->option_quantities[$variable->id][$option->id];
+                                                                            
+                                                                            if ($product->controla_stock && $product->tipo_stock === 'limitado') {
+                                                                                // Buscar en stock_variantes_producto
+                                                                                $stockVariante = $product->stocksVariantes->first(function($sv) use ($variable, $option) {
+                                                                                    $combo = $sv->combinacion_variables ?? [];
+                                                                                    return isset($combo[(string)$variable->id]) && 
+                                                                                           $combo[(string)$variable->id] == (string)$option->id;
+                                                                                });
+                                                                                
+                                                                                if ($stockVariante) {
+                                                                                    $existingQuantity = $stockVariante->cantidad_stock;
+                                                                                }
                                                                             }
                                                                         @endphp
                                                                         <div class="flex items-center gap-3 p-2 rounded border border-gray-200 hover:border-blue-300 transition-colors option-item {{ in_array($option->id, $selectedOptions) ? 'border-blue-300 bg-blue-50' : '' }}" data-option-id="{{ $option->id }}" data-variable-id="{{ $variable->id }}">
@@ -410,7 +546,11 @@
                                                                                 >
                                                                                 <span class="text-sm text-gray-700 font-medium">{{ $option->name }}</span>
                                                                             </label>
-                                                                            <div class="option-quantity-field" style="display: {{ in_array($option->id, $selectedOptions) ? 'flex' : 'none' }}; align-items: center;">
+                                                                            @if($product->controla_stock && $product->tipo_stock === 'limitado')
+                                                                            <div 
+                                                                                class="option-quantity-field" 
+                                                                                style="display: {{ in_array($option->id, $selectedOptions) ? 'flex' : 'none' }}; align-items: center;"
+                                                                            >
                                                                                 <label class="text-xs text-gray-600 mr-2">Cantidad:</label>
                                                                                 <input 
                                                                                     type="number" 
@@ -423,6 +563,7 @@
                                                                                     data-option-id="{{ $option->id }}"
                                                                                 >
                                                                             </div>
+                                                                            @endif
                                                                         </div>
                                                                     @endforeach
                                                                 </div>

@@ -24,6 +24,11 @@ class Product extends Model
         'allow_sharing',
         'store_id',
         'option_quantities',
+        // Campos de stock
+        'controla_stock',
+        'tipo_stock',
+        'cantidad_stock',
+        'umbral_alerta_stock',
     ];
 
     protected $casts = [
@@ -31,6 +36,10 @@ class Product extends Model
         'is_active' => 'boolean',
         'allow_sharing' => 'boolean',
         'option_quantities' => 'array',
+        // Casts de stock
+        'controla_stock' => 'boolean',
+        'cantidad_stock' => 'integer',
+        'umbral_alerta_stock' => 'integer',
     ];
 
     /**
@@ -349,5 +358,99 @@ class Product extends Model
         }
 
         return $newProduct;
+    }
+
+    /**
+     * ========================================
+     * RELACIONES Y MÉTODOS DE STOCK
+     * ========================================
+     */
+
+    /**
+     * Relación con stock de variantes
+     */
+    public function stocksVariantes()
+    {
+        return $this->hasMany(StockVarianteProducto::class, 'product_id');
+    }
+
+    /**
+     * Relación con movimientos de stock
+     */
+    public function movimientosStock()
+    {
+        return $this->hasMany(MovimientoStock::class, 'product_id');
+    }
+
+    /**
+     * ¿Controla inventario?
+     */
+    public function controlaStock(): bool
+    {
+        return $this->controla_stock === true;
+    }
+
+    /**
+     * ¿Tiene stock ilimitado?
+     */
+    public function tieneStockIlimitado(): bool
+    {
+        return $this->tipo_stock === 'ilimitado';
+    }
+
+    /**
+     * Obtener stock disponible
+     */
+    public function getStockDisponibleAttribute(): int
+    {
+        // Sin control de stock = ilimitado
+        if (!$this->controlaStock()) {
+            return PHP_INT_MAX;
+        }
+
+        // Stock ilimitado
+        if ($this->tieneStockIlimitado()) {
+            return PHP_INT_MAX;
+        }
+
+        // Producto simple
+        if ($this->isSimple()) {
+            return $this->cantidad_stock ?? 0;
+        }
+
+        // Producto variable: sumar stock de todas las variantes activas
+        return $this->stocksVariantes()
+            ->where('is_active', true)
+            ->get()
+            ->sum('cantidad_disponible');
+    }
+
+    /**
+     * ¿Tiene stock disponible?
+     */
+    public function tieneStock(int $cantidad = 1): bool
+    {
+        return $this->stock_disponible >= $cantidad;
+    }
+
+    /**
+     * ¿Está agotado?
+     */
+    public function estaAgotado(): bool
+    {
+        return $this->stock_disponible <= 0;
+    }
+
+    /**
+     * ¿Tiene stock bajo?
+     */
+    public function tieneStockBajo(): bool
+    {
+        if (!$this->controlaStock() || $this->tieneStockIlimitado()) {
+            return false;
+        }
+
+        $disponible = $this->stock_disponible;
+        return $disponible > 0 && $disponible <= $this->umbral_alerta_stock;
     }
 }

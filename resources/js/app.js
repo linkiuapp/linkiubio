@@ -18,6 +18,8 @@ import './timepicker.js';
 import './apexcharts-helpers.js';
 // Importar helpers de Clipboard
 import './clipboard-helpers.js';
+// Importar sistema unificado de toasts
+import './toast.js';
 // Importar helpers de File Upload (Dropzone y lodash para Preline UI)
 import './file-upload-helpers.js';
 

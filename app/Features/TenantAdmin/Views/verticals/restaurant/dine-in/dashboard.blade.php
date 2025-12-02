@@ -23,15 +23,15 @@
                     <div class="flex items-center gap-3">
                         <button 
                             @click="refreshStatus"
-                            class="px-4 py-2 bg-accent-100 hover:bg-accent-200 text-black-400 rounded-lg text-sm transition-colors flex items-center gap-2"
-                            :disabled="loading"
+                            class="inline-flex items-center gap-x-2 font-medium rounded-lg focus:outline-none transition-colors disabled:opacity-50 disabled:pointer-events-none py-2 px-3 body-small bg-gray-100 text-gray-500 hover:bg-gray-200 focus:bg-gray-200 border border-transparent"
+                            x-bind:disabled="loading"
                         >
-                            <i data-lucide="refresh-cw" class="w-5 h-5" :class="{ 'animate-spin': loading }"></i>
+                            <i data-lucide="refresh-cw" class="w-5 h-5" x-bind:class="{ 'animate-spin': loading }"></i>
                             <span x-text="loading ? 'Actualizando...' : 'Actualizar'"></span>
                         </button>
                         <a 
                             href="{{ route('tenant.admin.dine-in.tables.index', ['store' => $store->slug, 'type' => $type]) }}" 
-                            class="px-4 py-2 bg-accent-100 hover:bg-accent-200 text-black-400 rounded-lg text-sm transition-colors flex items-center gap-2"
+                            class="inline-flex items-center gap-x-2 font-medium rounded-lg focus:outline-none transition-colors disabled:opacity-50 disabled:pointer-events-none py-2 px-3 body-small bg-gray-100 text-gray-500 hover:bg-gray-200 focus:bg-gray-200 border border-transparent"
                         >
                             <i data-lucide="settings" class="w-5 h-5"></i>
                             Gestión
@@ -43,21 +43,45 @@
             <!-- Resumen -->
             <div class="px-6 py-4 bg-accent-50 border-b border-accent-100">
                 <div class="grid grid-cols-4 gap-4">
-                    <div class="bg-white rounded-lg p-3 border border-accent-200">
-                        <p class="text-xs text-black-300 mb-1">Total {{ ucfirst($type) }}s</p>
-                        <p class="text-2xl font-semibold text-black-500" x-text="stats.total">{{ $stats['total'] }}</p>
+                    <div>
+                        <x-stat-card 
+                            title="Total {{ ucfirst($type) }}s"
+                            :value="$stats['total']"
+                            icon="{{ $type === 'mesa' ? 'utensils' : 'bed' }}"
+                            color="accent"
+                        >
+                            <h3 class="text-3xl font-bold text-gray-900 mb-0" x-text="stats.total"></h3>
+                        </x-stat-card>
                     </div>
-                    <div class="bg-success-50 rounded-lg p-3 border border-success-200">
-                        <p class="text-xs text-black-300 mb-1">Disponibles</p>
-                        <p class="text-2xl font-semibold text-success-400" x-text="stats.available">{{ $stats['available'] }}</p>
+                    <div>
+                        <x-stat-card 
+                            title="Disponibles"
+                            :value="$stats['available']"
+                            icon="check-circle"
+                            color="success"
+                        >
+                            <h3 class="text-3xl font-bold text-gray-900 mb-0" x-text="stats.available"></h3>
+                        </x-stat-card>
                     </div>
-                    <div class="bg-error-50 rounded-lg p-3 border border-error-200">
-                        <p class="text-xs text-black-300 mb-1">Ocupadas</p>
-                        <p class="text-2xl font-semibold text-error-400" x-text="stats.occupied">{{ $stats['occupied'] }}</p>
+                    <div>
+                        <x-stat-card 
+                            title="Ocupadas"
+                            :value="$stats['occupied']"
+                            icon="clock"
+                            color="warning"
+                        >
+                            <h3 class="text-3xl font-bold text-gray-900 mb-0" x-text="stats.occupied"></h3>
+                        </x-stat-card>
                     </div>
-                    <div class="bg-primary-50 rounded-lg p-3 border border-primary-200">
-                        <p class="text-xs text-black-300 mb-1">En Proceso</p>
-                        <p class="text-2xl font-semibold text-primary-300" x-text="formatCurrency(stats.total_revenue)">${{ number_format($stats['total_revenue'], 0, ',', '.') }}</p>
+                    <div>
+                        <x-stat-card 
+                            title="En Proceso"
+                            :value="number_format($stats['total_revenue'], 0, ',', '.')"
+                            icon="dollar-sign"
+                            color="primary"
+                        >
+                            <h3 class="text-3xl font-bold text-gray-900 mb-0" x-text="formatCurrency(stats.total_revenue)"></h3>
+                        </x-stat-card>
                     </div>
                 </div>
             </div>
@@ -122,26 +146,30 @@
                                 </div>
                                 <div class="flex items-center gap-2">
                                     <a 
-                                        :href="'/{{ $store->slug }}/admin/orders/' + table.order.id"
-                                        class="px-3 py-1.5 bg-primary-50 hover:bg-primary-100 text-primary-300 rounded-lg text-xs transition-colors"
+                                        x-bind:href="'/{{ $store->slug }}/admin/orders/' + table.order.id"
+                                        class="inline-flex items-center gap-x-2 font-medium rounded-lg focus:outline-none transition-colors disabled:opacity-50 disabled:pointer-events-none py-1.5 px-3 text-xs bg-primary-50 text-primary-300 hover:bg-primary-100 focus:bg-primary-100 border border-transparent"
                                     >
                                         Ver Detalles
                                     </a>
                                     <template x-if="table.order.status === 'preparing' || table.order.status === 'confirmed'">
-                                        <button 
+                                        <x-button-base 
+                                            type="soft" 
+                                            color="success" 
+                                            size="sm"
+                                            htmlType="button"
+                                            text="Marcar Listo"
                                             @click="markAsReady(table.order.id)"
-                                            class="px-3 py-1.5 bg-success-50 hover:bg-success-100 text-success-400 rounded-lg text-xs transition-colors"
-                                        >
-                                            Marcar Listo
-                                        </button>
+                                        />
                                     </template>
                                     <template x-if="table.order.status === 'delivered'">
-                                        <button 
+                                        <x-button-base 
+                                            type="solid" 
+                                            color="primary" 
+                                            size="sm"
+                                            htmlType="button"
+                                            text="Cobrar"
                                             @click="markAsPaid(table.order.id, table.id)"
-                                            class="px-3 py-1.5 bg-primary-200 hover:bg-primary-300 text-white rounded-lg text-xs transition-colors"
-                                        >
-                                            Cobrar
-                                        </button>
+                                        />
                                     </template>
                                 </div>
                             </div>
@@ -171,6 +199,32 @@
             </div>
         </div>
     </div>
+    
+    <!-- SECTION: Notificaciones en Tiempo Real -->
+    <template x-if="notifications.length > 0">
+        <div class="fixed top-4 right-4 z-[9999] space-y-2 max-w-md w-full">
+            <template x-for="(notification, index) in notifications" :key="notification.id">
+                <div 
+                    x-show="true"
+                    x-transition:enter="transition ease-out duration-300"
+                    x-transition:enter-start="opacity-0 transform translate-x-full"
+                    x-transition:enter-end="opacity-100 transform translate-x-0"
+                    x-transition:leave="transition ease-in duration-200"
+                    x-transition:leave-start="opacity-100 transform translate-x-0"
+                    x-transition:leave-end="opacity-0 transform translate-x-full"
+                    class="cursor-pointer"
+                    @click="removeNotification(notification.id)"
+                >
+                    <x-alert-bordered 
+                        :type="notification.type" 
+                        :title="notification.title" 
+                        :message="notification.message"
+                    />
+                </div>
+            </template>
+        </div>
+    </template>
+    {{-- End SECTION: Notificaciones en Tiempo Real --}}
 </div>
 
 @push('scripts')
@@ -189,6 +243,8 @@ function dineInDashboard(config) {
         activeTables: [],
         availableTables: [],
         refreshInterval: null,
+        previousActiveTablesCount: 0,
+        notifications: [],
         
         init() {
             this.loadStatus();
@@ -196,6 +252,9 @@ function dineInDashboard(config) {
             this.refreshInterval = setInterval(() => {
                 this.loadStatus();
             }, 30000);
+            
+            // Inicializar notificaciones en tiempo real
+            this.initRealtimeNotifications();
         },
         
         destroy() {
@@ -211,9 +270,20 @@ function dineInDashboard(config) {
                 .then(res => res.json())
                 .then(data => {
                     if (data.success) {
+                        const previousCount = this.activeTables.length;
                         this.stats = data.stats;
                         this.activeTables = data.active_tables || [];
                         this.availableTables = (data.tables || []).filter(t => t.status === 'available');
+                        
+                        // Detectar nuevos pedidos
+                        if (previousCount > 0 && this.activeTables.length > previousCount) {
+                            const newOrders = this.activeTables.slice(previousCount);
+                            newOrders.forEach(order => {
+                                this.showNewOrderNotification(order);
+                            });
+                        }
+                        
+                        this.previousActiveTablesCount = this.activeTables.length;
                     }
                 })
                 .catch(err => {
@@ -222,6 +292,90 @@ function dineInDashboard(config) {
                 .finally(() => {
                     this.loading = false;
                 });
+        },
+        
+        initRealtimeNotifications() {
+            // Verificar si Pusher/Echo está disponible
+            if (typeof window.Echo === 'undefined') {
+                console.warn('⚠️ Pusher/Echo no disponible, usando polling únicamente');
+                return;
+            }
+            
+            try {
+                const storeId = document.body.dataset.storeId;
+                if (!storeId) {
+                    console.warn('⚠️ No se encontró storeId para notificaciones');
+                    return;
+                }
+                
+                // Escuchar nuevos pedidos de dine-in/room-service
+                window.Echo.channel(`store.${storeId}.orders`)
+                    .listen('new.order', (data) => {
+                        // Solo mostrar si es pedido de dine-in o room-service
+                        if (data.order_type === 'dine_in' || data.order_type === 'room_service') {
+                            this.showNewOrderNotification(data);
+                            this.loadStatus(); // Refrescar estado
+                        }
+                    });
+                
+                console.log('✅ Notificaciones en tiempo real configuradas para dine-in');
+            } catch (error) {
+                console.error('❌ Error configurando notificaciones:', error);
+            }
+        },
+        
+        showNewOrderNotification(order) {
+            const orderNumber = order.order_number || order.id;
+            const customerName = order.customer_name || 'Cliente';
+            const total = this.formatCurrency(order.total || 0);
+            const tableNumber = order.table_number || '';
+            
+            // Notificación de escritorio
+            if (Notification.permission === 'granted') {
+                new Notification(`📦 Nuevo Pedido - ${this.type === 'mesa' ? 'Mesa' : 'Habitación'} ${tableNumber}`, {
+                    body: `Pedido #${orderNumber}\n${customerName}\nTotal: ${total}`,
+                    icon: '/favicon.ico',
+                    tag: `dine-in-order-${order.id}`,
+                    requireInteraction: false
+                });
+            }
+            
+            // Notificación in-app (alert-bordered)
+            this.notifications.push({
+                id: Date.now(),
+                type: 'success',
+                title: `📦 Nuevo Pedido - ${this.type === 'mesa' ? 'Mesa' : 'Habitación'} ${tableNumber}`,
+                message: `Pedido #${orderNumber} de ${customerName} - Total: ${total}`,
+                orderId: order.id
+            });
+            
+            // Auto-eliminar después de 8 segundos
+            setTimeout(() => {
+                const index = this.notifications.findIndex(n => n.id === this.notifications[this.notifications.length - 1].id);
+                if (index !== -1) {
+                    this.notifications.splice(index, 1);
+                }
+            }, 8000);
+            
+            // Sonido de notificación
+            this.playNotificationSound();
+        },
+        
+        playNotificationSound() {
+            try {
+                const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmIePjuVvDY=');
+                audio.volume = 0.5;
+                audio.play().catch(() => {});
+            } catch (e) {
+                // Sin sonido disponible
+            }
+        },
+        
+        removeNotification(id) {
+            const index = this.notifications.findIndex(n => n.id === id);
+            if (index !== -1) {
+                this.notifications.splice(index, 1);
+            }
         },
         
         refreshStatus() {

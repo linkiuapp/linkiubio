@@ -16,17 +16,53 @@ class SidebarBuilderService
     public function __construct(?Store $store = null)
     {
         $this->store = $store;
-        
+
         if ($store) {
             // Asegurar que la relación businessCategory esté cargada
             if (!$store->relationLoaded('businessCategory')) {
                 $store->load('businessCategory');
             }
-            
+
             $this->vertical = $store->businessCategory?->vertical;
         } else {
             $this->vertical = null;
         }
+    }
+
+    /**
+     * Sistema unificado de colores para badges del sidebar
+     *
+     * @param string $type Tipo de badge: 'count', 'important', 'warning', 'success', 'info', 'error', 'new', 'beta'
+     * @param int|null $value Valor para badges de tipo count (usado para calcular nivel de alerta)
+     * @param int|null $max Valor máximo para badges de tipo count
+     * @return string Clases de Tailwind CSS
+     */
+    protected function getBadgeColor(string $type = 'count', ?int $value = null, ?int $max = null): string
+    {
+        // Para badges de contador con valores/límites, calcular nivel de alerta automáticamente
+        if ($type === 'count' && $value !== null && $max !== null && $max > 0) {
+            $percent = ($value / $max) * 100;
+            if ($percent >= 90) {
+                return 'bg-red-500 text-white dark:bg-red-600';
+            } elseif ($percent >= 70) {
+                return 'bg-yellow-500 text-white dark:bg-yellow-600';
+            } else {
+                return 'bg-gray-500 text-white dark:bg-gray-600';
+            }
+        }
+
+        // Colores predefinidos por tipo
+        return match ($type) {
+            'new' => 'bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300',
+            'beta' => 'bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-300',
+            'important' => 'bg-red-500 text-white dark:bg-red-600',
+            'warning' => 'bg-yellow-500 text-white dark:bg-yellow-600',
+            'success' => 'bg-green-500 text-white dark:bg-green-600',
+            'info' => 'bg-blue-500 text-white dark:bg-blue-600',
+            'error' => 'bg-red-500 text-white dark:bg-red-600',
+            'count' => 'bg-gray-500 text-white dark:bg-gray-600',
+            default => 'bg-gray-500 text-white dark:bg-gray-600',
+        };
     }
 
     /**
@@ -390,8 +426,8 @@ class SidebarBuilderService
             'url'        => route('tenant.admin.orders.index', ['store' => $this->store->slug]),
             'icon'       => 'party-popper',
             'active'     => request()->routeIs('tenant.admin.orders.*'),
-            'badge'      => $pendingOrders > 0 ? (string)$pendingOrders : '0',
-            'badgeColor' => $pendingOrders > 0 ? 'bg-red-500 text-white' : 'bg-gray-500 text-white'
+            'badge'      => (string)$pendingOrders,
+            'badgeColor' => $pendingOrders > 0 ? $this->getBadgeColor('important') : $this->getBadgeColor('count')
         ];
 
         return $items;
@@ -407,52 +443,46 @@ class SidebarBuilderService
         // Categorías
         $categoriesUsed = $this->store->categories_count ?? 0;
         $categoriesLimit = $this->store->plan->max_categories;
-        $categoriesPercent = $categoriesLimit > 0 ? ($categoriesUsed / $categoriesLimit) * 100 : 0;
-        $categoriesBadgeColor = $categoriesPercent >= 90
-            ? 'bg-red-500 text-white'
-            : ($categoriesPercent >= 70 ? 'bg-yellow-500 text-white' : 'bg-gray-500 text-white');
-        
         $items[] = [
             'label'      => 'Categorías',
             'url'        => route('tenant.admin.categories.index', ['store' => $this->store->slug]),
             'icon'       => 'layout-list',
             'active'     => request()->routeIs('tenant.admin.categories.*'),
             'badge'      => "{$categoriesUsed}/{$categoriesLimit}",
-            'badgeColor' => $categoriesBadgeColor
+            'badgeColor' => $this->getBadgeColor('count', $categoriesUsed, $categoriesLimit)
         ];
 
         // Variables
         $variablesUsed = $this->store->variables_count ?? 0;
         $variablesLimit = $this->store->plan->max_variables ?? 50;
-        $variablesPercent = $variablesLimit > 0 ? ($variablesUsed / $variablesLimit) * 100 : 0;
-        $variablesBadgeColor = $variablesPercent >= 90
-            ? 'bg-red-500 text-white'
-            : ($variablesPercent >= 70 ? 'bg-yellow-500 text-white' : 'bg-gray-500 text-white');
-        
         $items[] = [
             'label'      => 'Variables',
             'url'        => route('tenant.admin.variables.index', ['store' => $this->store->slug]),
             'icon'       => 'tag',
             'active'     => request()->routeIs('tenant.admin.variables.*'),
             'badge'      => "{$variablesUsed}/{$variablesLimit}",
-            'badgeColor' => $variablesBadgeColor
+            'badgeColor' => $this->getBadgeColor('count', $variablesUsed, $variablesLimit)
         ];
 
         // Productos
         $productsUsed = $this->store->products_count ?? 0;
         $productsLimit = $this->store->plan->max_products;
-        $productsPercent = $productsLimit > 0 ? ($productsUsed / $productsLimit) * 100 : 0;
-        $productsBadgeColor = $productsPercent >= 90
-            ? 'bg-red-500 text-white'
-            : ($productsPercent >= 70 ? 'bg-yellow-500 text-white' : 'bg-gray-500 text-white');
-        
         $items[] = [
             'label'      => 'Productos',
             'url'        => route('tenant.admin.products.index', ['store' => $this->store->slug]),
             'icon'       => 'package',
-            'active'     => request()->routeIs('tenant.admin.products.*'),
+            'active'     => request()->routeIs('tenant.admin.products.*') && !request()->routeIs('tenant.admin.inventario.*'),
             'badge'      => "{$productsUsed}/{$productsLimit}",
-            'badgeColor' => $productsBadgeColor
+            'badgeColor' => $this->getBadgeColor('count', $productsUsed, $productsLimit)
+        ];
+
+        // Inventario (submenú de productos)
+        $items[] = [
+            'label'      => 'Inventario',
+            'url'        => route('tenant.admin.inventario.index', ['store' => $this->store->slug]),
+            'icon'       => 'warehouse',
+            'active'     => request()->routeIs('tenant.admin.inventario.*'),
+            'indent'     => true
         ];
 
         // Gestión de Envíos (si está habilitado)
@@ -463,18 +493,13 @@ class SidebarBuilderService
             $zoneLimits = ['explorer' => 2, 'master' => 3, 'legend' => 4];
             $planSlug = strtolower($this->store->plan->slug ?? 'explorer');
             $maxZones = $zoneLimits[$planSlug] ?? 2;
-            $zonesPercent = $maxZones > 0 ? ($currentZones / $maxZones) * 100 : 0;
-            $zonesBadgeColor = $zonesPercent >= 90
-                ? 'bg-red-500 text-white'
-                : ($zonesPercent >= 70 ? 'bg-yellow-500 text-white' : 'bg-gray-500 text-white');
-            
             $items[] = [
                 'label'      => 'Gestión de Envíos',
                 'url'        => route('tenant.admin.simple-shipping.index', ['store' => $this->store->slug]),
                 'icon'       => 'truck',
                 'active'     => request()->routeIs('tenant.admin.simple-shipping.*'),
                 'badge'      => "{$currentZones}/{$maxZones}",
-                'badgeColor' => $zonesBadgeColor
+                'badgeColor' => $this->getBadgeColor('count', $currentZones, $maxZones)
             ];
         }
 
@@ -489,18 +514,13 @@ class SidebarBuilderService
         // Sedes
         $locationsUsed = $this->store->locations_count ?? 0;
         $locationsLimit = $this->store->plan->max_locations ?? $this->store->plan->max_sedes ?? 1;
-        $locationsPercent = $locationsLimit > 0 ? ($locationsUsed / $locationsLimit) * 100 : 0;
-        $locationsBadgeColor = $locationsPercent >= 90
-            ? 'bg-red-500 text-white'
-            : ($locationsPercent >= 70 ? 'bg-yellow-500 text-white' : 'bg-gray-500 text-white');
-        
         $items[] = [
             'label'      => 'Sedes',
             'url'        => route('tenant.admin.locations.index', ['store' => $this->store->slug]),
             'icon'       => 'store',
             'active'     => request()->routeIs('tenant.admin.locations.*'),
             'badge'      => "{$locationsUsed}/{$locationsLimit}",
-            'badgeColor' => $locationsBadgeColor
+            'badgeColor' => $this->getBadgeColor('count', $locationsUsed, $locationsLimit)
         ];
 
         return $items;
@@ -600,35 +620,25 @@ class SidebarBuilderService
         // Cupones
         $couponsUsed = $this->store->active_coupons_count ?? 0;
         $couponsLimit = $this->store->plan->max_active_coupons;
-        $couponsPercent = $couponsLimit > 0 ? ($couponsUsed / $couponsLimit) * 100 : 0;
-        $couponsBadgeColor = $couponsPercent >= 90
-            ? 'bg-red-500 text-white'
-            : ($couponsPercent >= 70 ? 'bg-yellow-500 text-white' : 'bg-gray-500 text-white');
-        
         $items[] = [
             'label'      => 'Cupones',
             'url'        => route('tenant.admin.coupons.index', ['store' => $this->store->slug]),
             'icon'       => 'ticket-percent',
             'active'     => request()->routeIs('tenant.admin.coupons.*'),
             'badge'      => "{$couponsUsed}/{$couponsLimit}",
-            'badgeColor' => $couponsBadgeColor
+            'badgeColor' => $this->getBadgeColor('count', $couponsUsed, $couponsLimit)
         ];
 
         // Slider
         $slidersUsed = $this->store->sliders_count ?? 0;
         $slidersLimit = $this->store->plan->max_sliders ?? $this->store->plan->max_slider ?? 1;
-        $slidersPercent = $slidersLimit > 0 ? ($slidersUsed / $slidersLimit) * 100 : 0;
-        $slidersBadgeColor = $slidersPercent >= 90
-            ? 'bg-red-500 text-white'
-            : ($slidersPercent >= 70 ? 'bg-yellow-500 text-white' : 'bg-gray-500 text-white');
-        
         $items[] = [
             'label'      => 'Slider',
             'url'        => route('tenant.admin.sliders.index', ['store' => $this->store->slug]),
             'icon'       => 'images',
             'active'     => request()->routeIs('tenant.admin.sliders.*'),
             'badge'      => "{$slidersUsed}/{$slidersLimit}",
-            'badgeColor' => $slidersBadgeColor
+            'badgeColor' => $this->getBadgeColor('count', $slidersUsed, $slidersLimit)
         ];
 
         return $items;
@@ -649,7 +659,7 @@ class SidebarBuilderService
             'icon'       => 'server-crash',
             'active'     => request()->routeIs('tenant.admin.tickets.*'),
             'badge'      => $openTicketsCount > 0 ? (string)$openTicketsCount : null,
-            'badgeColor' => $openTicketsCount > 0 ? 'bg-red-500 text-white' : null
+            'badgeColor' => $openTicketsCount > 0 ? $this->getBadgeColor('error') : null
         ];
 
         // Anuncios de Linkiu
@@ -660,7 +670,7 @@ class SidebarBuilderService
             'icon'       => 'megaphone',
             'active'     => request()->routeIs('tenant.admin.announcements.*'),
             'badge'      => $unreadAnnouncements > 0 ? (string)$unreadAnnouncements : null,
-            'badgeColor' => $unreadAnnouncements > 0 ? 'bg-yellow-500 text-white' : null
+            'badgeColor' => $unreadAnnouncements > 0 ? $this->getBadgeColor('info') : null
         ];
 
         return $items;

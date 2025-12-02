@@ -87,7 +87,8 @@ class StorefrontController extends Controller
                 'mainImage', 
                 'categories.icon',
                 'variableAssignments.variable.activeOptions',
-                'variants'
+                'variants',
+                'stocksVariantes'
             ])
             ->first();
 

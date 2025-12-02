@@ -162,6 +162,9 @@
                                 Precio
                             </th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
+                                Stock
+                            </th>
+                            <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                                 Categorías
                             </th>
                             <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
@@ -218,6 +221,24 @@
                                     <span class="font-semibold text-gray-900">
                                         ${{ number_format($product->price, 2) }}
                                     </span>
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap text-sm">
+                                    @if($product->controla_stock && $product->tipo_stock === 'limitado')
+                                        @php
+                                            $stockTotal = $product->type === 'simple' 
+                                                ? ($product->cantidad_stock ?? 0) 
+                                                : $product->stocksVariantes->sum('cantidad_stock');
+                                            $umbral = $product->umbral_alerta_stock ?? 1;
+                                        @endphp
+                                        <span class="font-semibold {{ $stockTotal <= 0 ? 'text-red-600' : ($stockTotal <= $umbral ? 'text-yellow-600' : 'text-green-600') }}">
+                                            {{ $stockTotal }}
+                                        </span>
+                                        <span class="text-xs text-gray-500">uds</span>
+                                    @elseif($product->controla_stock && $product->tipo_stock === 'ilimitado')
+                                        <span class="text-xs text-gray-500">Ilimitado</span>
+                                    @else
+                                        <span class="text-xs text-gray-400">Sin stock</span>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm">
                                     @if($product->categories && $product->categories->count() > 0)
@@ -514,6 +535,34 @@
 
     @push('scripts')
     <script>
+        // Mostrar toast de éxito si hay mensaje
+        @if(session('success'))
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.toast) {
+                window.toast.success(
+                    '¡Listo!',
+                    '{{ session('success') }}',
+                    5000,
+                    'bottom-center'
+                );
+            }
+        });
+        @endif
+
+        // Mostrar toast de error si hay mensaje
+        @if(session('error'))
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.toast) {
+                window.toast.error(
+                    'Error',
+                    '{{ session('error') }}',
+                    5000,
+                    'bottom-center'
+                );
+            }
+        });
+        @endif
+
         document.addEventListener('alpine:init', () => {
             Alpine.data('productManagement', () => ({
                 selectedProducts: [],

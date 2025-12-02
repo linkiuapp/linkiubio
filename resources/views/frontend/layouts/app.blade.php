@@ -6,6 +6,7 @@
     <title>{{ $store->name ?? 'Linkiu Store' }}</title>
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="store-slug" content="{{ $store->slug }}">
+    <meta name="asset-url" content="{{ asset('') }}">
 
     @if($store->design && $store->design->favicon_url)
         <link rel="icon" type="image/x-icon" href="{{ $store->design->favicon_url }}">

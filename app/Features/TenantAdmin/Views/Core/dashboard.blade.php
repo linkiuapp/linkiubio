@@ -23,38 +23,25 @@
         </div>
         @endif
 
-        {{-- SECTION: Anuncios (solo aparece cuando hay anuncios) --}}
-        <div class="mb-6" 
-             x-data="{ 
-                hasBanners: false,
-                async init() {
-                    try {
-                        const response = await fetch('{{ route('tenant.admin.announcements.api.banners', $store->slug) }}');
-                        const data = await response.json();
-                        this.hasBanners = data && data.length > 0;
-                    } catch (error) {
-                        this.hasBanners = false;
-                    }
-                }
-             }"
-             x-init="init()"
-             x-show="hasBanners"
-             x-transition>
+        {{-- SECTION: Anuncios (✅ OPTIMIZADO: Datos cacheados en backend, sin fetch asíncrono) --}}
+        @if($banners->isNotEmpty())
+        <div class="mb-6">
             <div class="bg-white rounded-lg shadow-sm p-5">
                 <h3 class="text-lg font-semibold text-gray-900 mb-4">Anuncios</h3>
-                <x-announcement-carousel 
-                    :apiUrl="route('tenant.admin.announcements.api.banners', $store->slug)"
+                <x-announcement-carousel-static 
+                    :banners="$banners"
                     height="h-64"
                 />
             </div>
         </div>
+        @endif
 
         {{-- SECTION: Estadísticas Principales --}}
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-6">
             <x-stat-card title="Total" :value="$stats['total']" icon="shopping-cart" color="accent" />
             <x-stat-card title="Pendientes" :value="$stats['pending']" icon="clock" color="warning" />
             <x-stat-card title="Confirmados" :value="$stats['confirmed']" icon="check-circle" color="info" />
-            <x-stat-card title="Preparando" :value="$stats['preparing']" icon="utensils-crossed" color="secondary" />
+            <x-stat-card title="Preparando" :value="$stats['preparing']" icon="package" color="secondary" />
             <x-stat-card title="Enviados" :value="$stats['shipped']" icon="truck" color="primary" />
             <x-stat-card title="Entregados" :value="$stats['delivered']" icon="check-circle-2" color="success" />
         </div>

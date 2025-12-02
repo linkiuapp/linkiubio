@@ -10,6 +10,7 @@ use App\Features\TenantAdmin\Controllers\Core\StoreDesignController;
 use App\Features\TenantAdmin\Controllers\Core\CategoryController;
 use App\Features\TenantAdmin\Controllers\Core\VariableController;
 use App\Features\TenantAdmin\Controllers\Core\ProductController;
+use App\Features\TenantAdmin\Controllers\Core\InventarioController;
 use App\Features\TenantAdmin\Controllers\Core\SliderController;
 use App\Features\TenantAdmin\Controllers\Core\LocationController;
 use App\Features\TenantAdmin\Controllers\Core\SimpleShippingController;
@@ -24,7 +25,6 @@ use App\Features\TenantAdmin\Controllers\Verticals\Hotel\RoomTypeController;
 use App\Features\TenantAdmin\Controllers\Verticals\Hotel\RoomController;
 use App\Features\TenantAdmin\Controllers\Verticals\Hotel\HotelReservationController;
 use App\Features\TenantAdmin\Controllers\Verticals\Restaurant\TableController;
-use App\Features\TenantAdmin\Controllers\Verticals\Restaurant\DineInSettingController;
 
 
 /*
@@ -133,6 +133,11 @@ Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreAppro
         Route::post('/{product}/toggle-status', [ProductController::class, 'toggleStatus'])->name('toggle-status');
         Route::post('/{product}/set-main-image', [ProductController::class, 'setMainImage'])->name('set-main-image');
         Route::post('/{product}/toggle-sharing', [ProductController::class, 'toggleSharing'])->name('toggle-sharing');
+    });
+
+    // Inventario Routes
+    Route::prefix('inventario')->name('inventario.')->group(function () {
+        Route::get('/', [InventarioController::class, 'index'])->name('index');
     });
 
     // Sliders Routes
