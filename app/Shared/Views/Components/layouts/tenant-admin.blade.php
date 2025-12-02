@@ -596,22 +596,37 @@
     @stack('scripts')
     {{-- End SECTION: Scripts Stack --}}
 
-    {{-- SECTION: Real-time Order Notifications --}}
+    {{-- SECTION: Hybrid Order Notifications (Pusher + Polling Fallback) --}}
     <script>
+        // Sistema híbrido: Pusher (instantáneo) + Polling (fallback)
+        window.orderNotificationSystem = {
+            storeSlug: '{{ $store->slug }}',
+            lastOrderCount: null,
+            pollingInterval: null,
+            pusherWorking: false,
+            lastNotificationTime: 0
+        };
+
         document.addEventListener('DOMContentLoaded', function() {
-            // Verificar que Laravel Echo esté disponible
+            const system = window.orderNotificationSystem;
+            
+            // 1️⃣ PUSHER: Notificaciones instantáneas (principal)
             if (typeof Echo !== 'undefined') {
                 const storeId = {{ $store->id }};
                 
-                // Escuchar nuevos pedidos en el canal de la tienda
+                // Escuchar nuevos pedidos
                 Echo.channel('store.' + storeId + '.orders')
                     .listen('.new.order', (event) => {
+                        system.pusherWorking = true;
+                        system.lastNotificationTime = Date.now();
                         mostrarToastPedido(event, 'Nuevo Pedido');
                     });
 
                 // Escuchar reservas de mesa
                 Echo.channel('store.' + storeId + '.table-reservations')
                     .listen('.new.table.reservation', (event) => {
+                        system.pusherWorking = true;
+                        system.lastNotificationTime = Date.now();
                         mostrarToastPedido({
                             order_id: event.reservation_id,
                             order_number: 'MESA-' + event.table_number,
@@ -624,6 +639,8 @@
                 // Escuchar pedidos de mesa (Dine-in)
                 Echo.channel('store.' + storeId + '.dine-in-orders')
                     .listen('.new.dine.in.order', (event) => {
+                        system.pusherWorking = true;
+                        system.lastNotificationTime = Date.now();
                         mostrarToastPedido({
                             order_id: event.order_id,
                             order_number: 'MESA-' + event.table_number,
@@ -636,6 +653,8 @@
                 // Escuchar reservas de hotel
                 Echo.channel('store.' + storeId + '.hotel-reservations')
                     .listen('.new.hotel.reservation', (event) => {
+                        system.pusherWorking = true;
+                        system.lastNotificationTime = Date.now();
                         mostrarToastPedido({
                             order_id: event.reservation_id,
                             order_number: 'HOTEL-' + event.room_number,
@@ -645,6 +664,57 @@
                         }, 'Nueva Reserva de Hotel');
                     });
             }
+
+            // 2️⃣ POLLING: Fallback confiable cada 30 segundos
+            async function checkForNewOrders() {
+                try {
+                    const response = await fetch(`/stores/${system.storeSlug}/orders/api/count`);
+                    
+                    if (response.ok) {
+                        const data = await response.json();
+                        
+                        if (data.success) {
+                            // Inicializar conteo en primera carga
+                            if (system.lastOrderCount === null) {
+                                system.lastOrderCount = data.count;
+                                return;
+                            }
+                            
+                            // Detectar nuevos pedidos
+                            if (data.count > system.lastOrderCount) {
+                                // Solo mostrar si Pusher no ha notificado recientemente (últimos 10 segundos)
+                                const timeSinceLastNotification = Date.now() - system.lastNotificationTime;
+                                if (timeSinceLastNotification > 10000) {
+                                    if (data.latest_order) {
+                                        mostrarToastPedido({
+                                            order_id: data.latest_order.id,
+                                            order_number: data.latest_order.order_number,
+                                            customer_name: data.latest_order.customer_name,
+                                            total: data.latest_order.total,
+                                            url: `/stores/${system.storeSlug}/orders/${data.latest_order.id}`
+                                        }, 'Nuevo Pedido');
+                                    }
+                                }
+                                
+                                system.lastOrderCount = data.count;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error en polling de pedidos:', error);
+                }
+            }
+
+            // Iniciar polling cada 30 segundos
+            checkForNewOrders(); // Primera llamada inmediata
+            system.pollingInterval = setInterval(checkForNewOrders, 30000);
+
+            // Limpiar al salir
+            window.addEventListener('beforeunload', () => {
+                if (system.pollingInterval) {
+                    clearInterval(system.pollingInterval);
+                }
+            });
         });
 
         // Función auxiliar para mostrar toast de pedido/reserva
@@ -678,10 +748,8 @@
                 ordersBadge.classList.remove('hidden');
             }
         }
-            }
-        });
     </script>
-    {{-- End SECTION: Real-time Order Notifications --}}
+    {{-- End SECTION: Hybrid Order Notifications --}}
 
     {{-- SECTION: Store Data and Announcement Popups --}}
     <script>
