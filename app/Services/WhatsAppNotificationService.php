@@ -299,12 +299,12 @@ class WhatsAppNotificationService
         // Usar el número del admin/store owner
         $adminPhone = $this->formatPhone($store->owner_phone ?? $this->phone);
         
-        // Usar plantilla: order_registration_notification_es
+        // Usar plantilla: new_order_admin_es_v2
         // Variables: {{1}} = pedido, {{2}} = cliente, {{3}} = total
-        return $this->sendTemplateMessage($adminPhone, 'order_registration_notification_es', [
+        return $this->sendTemplateMessage($adminPhone, 'new_order_admin_es_v2', [
             ['type' => 'text', 'text' => $order->order_number],
             ['type' => 'text', 'text' => $order->customer_name],
-            ['type' => 'text', 'text' => $order->formatted_total]
+            ['type' => 'text', 'text' => '$' . number_format($order->total, 0, ',', '.')]
         ]);
     }
 
