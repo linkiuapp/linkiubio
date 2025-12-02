@@ -665,10 +665,10 @@
                     });
             }
 
-            // 2️⃣ POLLING: Fallback confiable cada 30 segundos
+            // 2️⃣ POLLING: Fallback confiable cada 15 segundos
             async function checkForNewOrders() {
                 try {
-                    const response = await fetch(`/stores/${system.storeSlug}/orders/api/count`);
+                    const response = await fetch(`/${system.storeSlug}/admin/orders/api/count`);
                     
                     if (response.ok) {
                         const data = await response.json();
@@ -684,6 +684,7 @@
                             if (data.count > system.lastOrderCount) {
                                 // Solo mostrar si Pusher no ha notificado recientemente (últimos 10 segundos)
                                 const timeSinceLastNotification = Date.now() - system.lastNotificationTime;
+                                
                                 if (timeSinceLastNotification > 10000) {
                                     if (data.latest_order) {
                                         mostrarToastPedido({
@@ -691,7 +692,7 @@
                                             order_number: data.latest_order.order_number,
                                             customer_name: data.latest_order.customer_name,
                                             total: data.latest_order.total,
-                                            url: `/stores/${system.storeSlug}/orders/${data.latest_order.id}`
+                                            url: `/${system.storeSlug}/admin/orders/${data.latest_order.id}`
                                         }, 'Nuevo Pedido');
                                     }
                                 }
@@ -701,13 +702,13 @@
                         }
                     }
                 } catch (error) {
-                    console.error('Error en polling de pedidos:', error);
+                    // Error silencioso
                 }
             }
 
-            // Iniciar polling cada 30 segundos
+            // Iniciar polling cada 15 segundos
             checkForNewOrders(); // Primera llamada inmediata
-            system.pollingInterval = setInterval(checkForNewOrders, 30000);
+            system.pollingInterval = setInterval(checkForNewOrders, 15000);
 
             // Limpiar al salir
             window.addEventListener('beforeunload', () => {
