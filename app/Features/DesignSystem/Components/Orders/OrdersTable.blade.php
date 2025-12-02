@@ -147,12 +147,11 @@ Ejemplo: <x-orders-table :orders="$orders" :store="$store" />
                             <div class="text-sm">
                                 <p class="text-gray-900" x-text="getPaymentMethodLabel(order.payment_method)"></p>
                                 <template x-if="order.payment_proof_url">
-                                    <a :href="order.payment_proof_url" 
-                                       target="_blank" 
-                                       download
-                                       class="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1 underline transition-colors mt-1">
-                                        <i data-lucide="download" class="w-3 h-3"></i>
-                                        Descargar comprobante
+                                    <a href="javascript:void(0)" 
+                                       @click="window.verComprobante(order.payment_proof_url, order.order_number)"
+                                       class="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer transition-colors mt-1">
+                                        <i data-lucide="file-text" class="w-3 h-3"></i>
+                                        Ver comprobante
                                     </a>
                                 </template>
                             </div>

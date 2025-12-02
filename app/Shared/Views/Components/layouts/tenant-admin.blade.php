@@ -67,150 +67,7 @@
     @stack('styles')
     {{-- End SECTION: Additional Head Content --}}
 
-    {{-- SECTION: Desktop Notifications Script --}}
-    <script>
-        (function() {
-            'use strict';
-
-            let lastOrderCount = 0;
-            let notificationInterval = null;
-            const storeSlug = '{{ $store->slug ?? "" }}';
-
-            function initDesktopNotifications() {
-                if (Notification.permission === 'default') {
-                    Notification.requestPermission().then(permission => {
-                        if (permission === 'granted') {
-                            showWelcomeNotification();
-                            startOrderPolling();
-                        }
-                    });
-                } else if (Notification.permission === 'granted') {
-                    showWelcomeNotification();
-                    startOrderPolling();
-                }
-            }
-
-            function showWelcomeNotification() {
-                const notification = new Notification('Sistema de pedidos activado', {
-                    body: 'Te notificaremos cuando lleguen nuevos pedidos',
-                    icon: '/favicon.ico',
-                    tag: 'welcome',
-                    silent: true
-                });
-
-                setTimeout(() => notification.close(), 3000);
-            }
-
-            function startOrderPolling() {
-                loadInitialCount();
-
-                notificationInterval = setInterval(() => {
-                    checkForNewOrders();
-                }, 15000);
-
-                window.addEventListener('focus', () => {
-                    checkForNewOrders();
-                });
-
-                document.addEventListener('visibilitychange', () => {
-                    if (!document.hidden) {
-                        checkForNewOrders();
-                    }
-                });
-            }
-
-            async function loadInitialCount() {
-                if (!storeSlug) return;
-
-                try {
-                    const response = await fetch(`/${storeSlug}/admin/orders/api/count`);
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data.success) {
-                            lastOrderCount = data.count;
-                        }
-                    }
-                } catch (error) {
-                    // Error silencioso
-                }
-            }
-
-            async function checkForNewOrders() {
-                if (!storeSlug) return;
-
-                try {
-                    const response = await fetch(`/${storeSlug}/admin/orders/api/count`);
-                    if (response.ok) {
-                        const data = await response.json();
-                        if (data.success) {
-                            const currentCount = data.count;
-
-                            if (currentCount > lastOrderCount && lastOrderCount > 0) {
-                                const newOrdersCount = currentCount - lastOrderCount;
-                                showNewOrderNotification(newOrdersCount, data.latest_order);
-                            }
-
-                            lastOrderCount = currentCount;
-                        }
-                    }
-                } catch (error) {
-                    // Error silencioso
-                }
-            }
-
-            function showNewOrderNotification(count, latestOrder) {
-                if (Notification.permission !== 'granted') return;
-
-                const title = count === 1 ? 'Nuevo pedido' : `${count} nuevos pedidos`;
-                let body = 'Revisa el panel de pedidos';
-
-                if (latestOrder) {
-                    const total = new Intl.NumberFormat('es-CO').format(latestOrder.total);
-                    body = `Pedido #${latestOrder.order_number}\n$${total}\n${latestOrder.customer_name}\n\nClick para ver detalles`;
-                }
-
-                const notification = new Notification(title, {
-                    body: body,
-                    icon: '/favicon.ico',
-                    tag: 'new-order',
-                    requireInteraction: true,
-                    silent: false,
-                    renotify: true,
-                    vibrate: [200, 100, 200]
-                });
-
-                try {
-                    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmIePjuVvDY=');
-                    audio.volume = 0.5;
-                    audio.play().catch(() => { });
-                } catch (e) {
-                    // Sin sonido disponible
-                }
-
-                notification.onclick = () => {
-                    window.focus();
-                    notification.close();
-
-                    if (latestOrder && latestOrder.id) {
-                        window.location.href = `/${storeSlug}/admin/orders/${latestOrder.id}`;
-                    } else {
-                        window.location.href = `/${storeSlug}/admin/orders`;
-                    }
-                };
-            }
-
-            document.addEventListener('DOMContentLoaded', () => {
-                initDesktopNotifications();
-            });
-
-            window.addEventListener('beforeunload', () => {
-                if (notificationInterval) {
-                    clearInterval(notificationInterval);
-                }
-            });
-        })();
-    </script>
-    {{-- End SECTION: Desktop Notifications Script --}}
+    {{-- Desktop Notifications deshabilitadas - Ahora usamos Toast en tiempo real con Laravel Echo --}}
 
     {{-- SECTION: SweetAlert2 --}}
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
@@ -738,6 +595,93 @@
     {{-- SECTION: Scripts Stack --}}
     @stack('scripts')
     {{-- End SECTION: Scripts Stack --}}
+
+    {{-- SECTION: Real-time Order Notifications --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar que Laravel Echo esté disponible
+            if (typeof Echo !== 'undefined') {
+                const storeId = {{ $store->id }};
+                
+                // Escuchar nuevos pedidos en el canal de la tienda
+                Echo.channel('store.' + storeId + '.orders')
+                    .listen('.new.order', (event) => {
+                        mostrarToastPedido(event, 'Nuevo Pedido');
+                    });
+
+                // Escuchar reservas de mesa
+                Echo.channel('store.' + storeId + '.table-reservations')
+                    .listen('.new.table.reservation', (event) => {
+                        mostrarToastPedido({
+                            order_id: event.reservation_id,
+                            order_number: 'MESA-' + event.table_number,
+                            customer_name: event.customer_name + ' - ' + event.people_count + ' personas',
+                            total: 0,
+                            url: event.url || '#'
+                        }, 'Nueva Reserva de Mesa');
+                    });
+
+                // Escuchar pedidos de mesa (Dine-in)
+                Echo.channel('store.' + storeId + '.dine-in-orders')
+                    .listen('.new.dine.in.order', (event) => {
+                        mostrarToastPedido({
+                            order_id: event.order_id,
+                            order_number: 'MESA-' + event.table_number,
+                            customer_name: event.table_name || 'Mesa ' + event.table_number,
+                            total: event.total,
+                            url: event.url || '#'
+                        }, 'Nuevo Pedido de Mesa');
+                    });
+
+                // Escuchar reservas de hotel
+                Echo.channel('store.' + storeId + '.hotel-reservations')
+                    .listen('.new.hotel.reservation', (event) => {
+                        mostrarToastPedido({
+                            order_id: event.reservation_id,
+                            order_number: 'HOTEL-' + event.room_number,
+                            customer_name: event.customer_name + ' - ' + event.nights + ' noches',
+                            total: event.total || 0,
+                            url: event.url || '#'
+                        }, 'Nueva Reserva de Hotel');
+                    });
+            }
+        });
+
+        // Función auxiliar para mostrar toast de pedido/reserva
+        function mostrarToastPedido(event, tipoMensaje = 'Nuevo Pedido') {
+            // Mostrar toast
+            if (window.toast) {
+                window.toast.order({
+                    order_id: event.order_id,
+                    order_number: event.order_number,
+                    customer_name: event.customer_name,
+                    total: event.total,
+                    delivery_type: event.delivery_type,
+                    url: event.url
+                }, 15000);
+            }
+            
+            // Reproducir sonido (opcional, sin bloquear si falla)
+            try {
+                const audio = new Audio('{{ asset('sounds/order-notification.mp3') }}');
+                audio.volume = 0.5;
+                audio.play().catch(e => {});
+            } catch (e) {
+                // Ignorar si no hay sonido
+            }
+            
+            // Actualizar badge de pedidos en el menú (si existe)
+            const ordersBadge = document.querySelector('[data-orders-badge]');
+            if (ordersBadge) {
+                const currentCount = parseInt(ordersBadge.textContent) || 0;
+                ordersBadge.textContent = currentCount + 1;
+                ordersBadge.classList.remove('hidden');
+            }
+        }
+            }
+        });
+    </script>
+    {{-- End SECTION: Real-time Order Notifications --}}
 
     {{-- SECTION: Store Data and Announcement Popups --}}
     <script>

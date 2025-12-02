@@ -19,17 +19,17 @@
     "isDynamicEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-a7BXqERP.css",
+    "file": "assets/app-B8fPJnB9.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
   "resources/css/wizard.css": {
-    "file": "assets/wizard-BmoDScz6.css",
+    "file": "assets/wizard-Dwojl2Rc.css",
     "src": "resources/css/wizard.css",
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-Ch0pyL9N.js",
+    "file": "assets/app-CrlpGJWR.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,

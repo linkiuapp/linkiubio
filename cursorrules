@@ -1,0 +1,333 @@
+# REGLAS LINKIU - ANÁLISIS Y OPTIMIZACIÓN DE CÓDIGO
+
+## PROCESO OBLIGATORIO
+
+Antes de modificar cualquier código:
+
+1. ⏸️ **DETENTE** - Lee este checklist completo
+2. 📋 **ANALIZA** - Verifica qué items NO cumple
+3. 📝 **REPORTA** - Usa formato obligatorio abajo
+4. 💡 **PROPÓN** - Correcciones + mejoras MVP + archivos a borrar
+5. ⏳ **ESPERA** - Aprobación del usuario
+6. ✅ **EJECUTA** - Aplica cambios aprobados
+7. 🔄 **VERIFICA** - Revisa checklist nuevamente
+
+---
+
+## ✅ CHECKLIST (25 ITEMS CRÍTICOS)
+
+### 🧹 LIMPIEZA (4)
+- [ ] Sin `dd()`, `dump()`, `var_dump()`, `console.log()`
+- [ ] Sin código comentado ni comentarios obsoletos
+- [ ] Sin imports/variables/funciones no utilizadas
+- [ ] Nombres descriptivos en español (variables, funciones, métodos)
+
+### 📚 DOCUMENTACIÓN (2)
+- [ ] PHPDoc completo en funciones públicas: `@param`, `@return`, `@throws`, descripción
+- [ ] Todo en español (código, comentarios, documentación)
+
+### 🎨 UI/UX - Solo Frontend (3)
+- [ ] Usa SOLO Tailwind CSS del `tailwind.config.js` (no CSS inline ni `<style>`)
+- [ ] Usa componentes Preline UI + DesignSystem (`app/Features/DesignSystem/Components/`)
+- [ ] Alpine.js para interactividad (NO jQuery, NO vanilla JS complejo)
+
+### 🔒 SEGURIDAD (4)
+- [ ] FormRequest para validación (NUNCA validar en controllers)
+- [ ] Trait `BelongsToTenant` en Models multi-tenant
+- [ ] Policies/Gates verificadas para autorización
+- [ ] CSRF tokens (`@csrf`) + escape correcto (`{{ }}` default, `{!! !!}` solo cuando necesario)
+
+### ⚡ RENDIMIENTO (3)
+- [ ] Eager loading en relaciones (`->with()`) para evitar N+1 queries
+- [ ] Paginación en listados grandes (`->paginate()`)
+- [ ] Cache en queries pesadas (`Cache::remember()`)
+
+### 🏗️ ARQUITECTURA VERTICAL (4)
+- [ ] Controllers delgados (solo orquestan Request/Response)
+- [ ] Lógica de negocio en Services (dentro del slice vertical)
+- [ ] Models: solo relaciones, scopes, casts (NO lógica compleja)
+- [ ] Jobs en cola para tareas pesadas (emails, PDFs, optimización imágenes)
+
+### 🔄 LÓGICA DE NEGOCIO (2)
+- [ ] Transacciones DB donde aplique (`DB::transaction()`)
+- [ ] Try-catch + logs informativos (sin datos sensibles)
+
+### 🏢 MULTI-TENANT CRÍTICO (2)
+- [ ] Trait `BelongsToTenant` aplicado en Model
+- [ ] Queries respetan tenant_id (verificar con `->withoutGlobalScope()` si necesario)
+
+### 🚀 MVP OPTIMIZATION (1)
+- [ ] Proponer mejora para MVP si aplica (simplificación, UX, performance)
+
+---
+
+## 🚨 FORMATO DE REPORTE OBLIGATORIO
+
+Siempre responde en este formato:
+
+```
+### 📋 ANÁLISIS: [nombre_funcion]
+
+**Slice Vertical:** [nombre_slice]
+**Ruta:** [path/al/archivo]
+**Tipo:** [Controller/Service/Model/Component]
+
+---
+
+#### ❌ INCUMPLIMIENTOS DETECTADOS:
+
+**Limpieza:**
+- [Item específico] - [Descripción del problema]
+
+**Documentación:**
+- [Item específico] - [Descripción del problema]
+
+**Seguridad:**
+- [Item específico] - [Descripción del problema]
+
+**Rendimiento:**
+- [Item específico] - [Descripción del problema]
+
+**Arquitectura:**
+- [Item específico] - [Descripción del problema]
+
+**Multi-tenant:**
+- [Item específico] - [Descripción del problema]
+
+---
+
+#### 🗑️ ARCHIVOS/CÓDIGO A BORRAR:
+
+- `[ruta/archivo.php]` - Razón: [no usado/obsoleto/duplicado]
+- `[import no usado]` - Línea X
+- `[función no usada]` - Línea Y
+
+---
+
+#### 🔧 PLAN DE CORRECCIÓN:
+
+**1. Limpieza:**
+   - Acción específica
+   - Código ejemplo si aplica
+
+**2. Documentación:**
+   - Acción específica
+
+**3. Seguridad:**
+   - Acción específica
+
+**4. Rendimiento:**
+   - Acción específica
+
+**5. Arquitectura:**
+   - Acción específica
+
+**6. Multi-tenant:**
+   - Acción específica
+
+---
+
+#### 💡 MEJORA MVP (Opcional):
+
+- **Propuesta:** [Descripción de mejora]
+- **Beneficio:** [Qué mejora: UX/Performance/Simplicidad]
+- **Esfuerzo:** [Bajo/Medio/Alto]
+- **Impacto:** [Descripción del impacto]
+
+---
+
+#### 📊 RESUMEN:
+
+- ✅ Items que SÍ cumple: [número]/25
+- ❌ Items que NO cumple: [número]/25
+- 🗑️ Archivos a borrar: [número]
+- 💡 Mejoras MVP propuestas: [número]
+
+---
+
+⏸️ ESPERANDO APROBACIÓN
+
+¿Deseas que proceda con las correcciones? Responde:
+- ✅ "Aprobado" para continuar
+- 🔄 "Modificar [punto]" para ajustar
+- ❌ "Cancelar" para no hacer cambios
+```
+
+---
+
+## ❌ PROHIBICIONES ABSOLUTAS
+
+### NUNCA:
+- Dejar `dd()`, `dump()`, `console.log()` en commits
+- Lógica de negocio en Controllers
+- Validación en Controllers (usar FormRequests)
+- Models sin trait `BelongsToTenant` en contexto multi-tenant
+- CSS inline o `<style>` en Blade
+- jQuery (usar Alpine.js)
+- Queries sin eager loading cuando hay relaciones en loops
+- Avanzar sin aprobación del usuario
+
+### SIEMPRE:
+- FormRequests para validación
+- Services para lógica de negocio
+- Trait `BelongsToTenant` en Models multi-tenant
+- Eager loading (`->with()`) en relaciones
+- Alpine.js para interactividad
+- Componentes Preline UI y DesignSystem
+- PHPDoc en funciones públicas
+- **BORRAR archivos/código no utilizado**
+- Esperar aprobación antes de ejecutar cambios
+
+---
+
+## 🔥 TOP 3 BUGS RECURRENTES
+
+1. **Olvidar trait `BelongsToTenant`** → Queries cruzan datos entre tenants (CRÍTICO)
+2. **N+1 queries** → Falta `->with()` en relaciones
+3. **Lógica en Controllers** → Código no reutilizable, difícil de testear
+
+---
+
+## 🎯 EJEMPLOS RÁPIDOS
+
+### ✅ CORRECTO
+
+**Controller delgado:**
+```php
+public function index()
+{
+    $orders = app(OrderService::class)->getRecent();
+    return view('orders.index', compact('orders'));
+}
+```
+
+**Model con trait:**
+```php
+use App\Shared\Traits\BelongsToTenant;
+
+class Order extends Model
+{
+    use BelongsToTenant; // ✅ CRÍTICO
+}
+```
+
+**Query con eager loading:**
+```php
+Order::with(['items.product', 'customer'])->get(); // ✅
+```
+
+### ❌ INCORRECTO
+
+**Lógica en controller:**
+```php
+public function index()
+{
+    $orders = Order::where(...)->get()->map(...); // ❌
+}
+```
+
+**Sin trait:**
+```php
+class Order extends Model { } // ❌ Cruza tenants
+```
+
+**N+1 query:**
+```php
+$orders = Order::all();
+foreach($orders as $order) {
+    $order->items; // ❌ Query por cada iteración
+}
+```
+
+---
+
+## 📝 CONVENCIONES
+
+**Naming:**
+- Controllers: `ProductController` (singular + Controller)
+- Services: `ProductService` (singular + Service)
+- Models: `Product` (singular)
+- Variables PHP: `$orderNumber` (camelCase)
+- Métodos: `procesarImagen()` (camelCase, español)
+- Rutas: `/admin/productos` (kebab-case, español)
+- Archivos Blade: `product-list.blade.php` (kebab-case)
+
+**Estructura Vertical Slicing:**
+```
+app/Features/[Feature]/
+├── Controllers/
+├── Services/         # ← Lógica de negocio
+├── Requests/         # ← FormRequests
+├── Models/           # ← Solo relaciones/scopes
+├── Policies/
+└── Views/
+
+app/Shared/
+├── Models/           # ← Models compartidos
+├── Services/
+├── Traits/
+│   └── BelongsToTenant.php  # ← CRÍTICO
+└── Scopes/
+```
+
+---
+
+## 📦 DEPENDENCIAS OBLIGATORIAS
+
+**Backend:**
+- `BelongsToTenant` trait para Models
+- FormRequests para validación
+- Services para lógica negocio
+- ImageOptimizationService para imágenes
+- SendGrid para emails (templates obligatorios)
+
+**Frontend:**
+- Alpine.js para interactividad
+- Preline UI para componentes
+- Tailwind CSS (solo clases del config)
+- Lucide Icons para iconografía
+
+---
+
+## 🧪 TESTING
+
+**Tests Obligatorios:**
+- Feature tests para flujos críticos
+- Tests de multi-tenancy (verificar aislamiento)
+- Tests con `RefreshDatabase`
+
+**Ejecutar:**
+```bash
+composer test
+# o
+php artisan test
+```
+
+---
+
+## ✅ VERIFICACIÓN FINAL
+
+Antes de commit:
+- [ ] 25 items del checklist cumplidos
+- [ ] Archivos no usados borrados
+- [ ] Tests pasan
+- [ ] Multi-tenancy verificado
+- [ ] Sin debugs
+- [ ] PHPDoc completo
+- [ ] Commit message en español
+
+---
+
+## 💡 TIPS RÁPIDOS
+
+1. **¿Duda si crear Service?** → Si hay lógica de negocio, SÍ
+2. **¿Duda si crear FormRequest?** → Si hay validación, SÍ
+3. **¿Duda si usar `->with()`?** → Si accedes relación en loop, SÍ
+4. **¿Duda si agregar trait?** → Si el Model es multi-tenant, SÍ
+5. **¿Duda si documentar?** → Si es función pública, SÍ
+6. **¿Duda si borrar?** → Si no se usa, SÍ
+
+---
+
+**Versión:** 2.0  
+**Optimizado para:** Minimal token usage + Maximum clarity
