@@ -540,7 +540,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             if (window.toast) {
                 window.toast.success(
-                    '¡Listo!',
+                    '¡Hey! felicidades',
                     '{{ session('success') }}',
                     5000,
                     'bottom-center'
@@ -554,7 +554,7 @@
         document.addEventListener('DOMContentLoaded', function() {
             if (window.toast) {
                 window.toast.error(
-                    'Error',
+                    '¡Ups! algo salió mal',
                     '{{ session('error') }}',
                     5000,
                     'bottom-center'

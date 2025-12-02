@@ -44,11 +44,11 @@ class ToastManager {
         notification.innerHTML = `
             <div class="flex items-center gap-6">
                 <div class="flex-shrink-0">
-                    <img src="${imageUrl}" alt="${type}" class="w-14 h-14 md:w-16 md:h-16">
+                    <img src="${imageUrl}" alt="${type}" class="w-16 h-16 md:w-20 md:h-20">
                 </div>
 
                 <div class="flex flex-col gap-1 flex-1">
-                    <span class="text-sm md:text-lg font-bold text-white">${title}</span>
+                    <span class="text-sm md:text-base font-bold text-white">${title}</span>
                     <span class="text-xs md:text-base font-normal text-white">${message}</span>
                 </div>
                 
@@ -128,6 +128,87 @@ class ToastManager {
 
     shop(title, message, duration = 5000, position = 'top-center') {
         this.show('shop', title, message, duration, position);
+    }
+
+    /**
+     * Toast para nuevo pedido
+     * @param {object} orderData - Datos del pedido {order_number, customer_name, total, delivery_type, order_id}
+     * @param {number} duration - Duración en ms (default: 15000)
+     */
+    order(orderData, duration = 15000) {
+        const imageUrl = `${this.assetUrl}images-ui/emoji_toast_Linkiu_shop.svg`;
+        const position = 'bottom-center';
+        
+        const initialTransform = 'translate-y-full';
+        const animationOut = 'translate-y-full';
+        
+        // Crear notificación temporal
+        const notification = document.createElement('div');
+        notification.className = `fixed bottom-6 left-1/2 -translate-x-1/2 ${initialTransform} bg-slate-900 items-center justify-center px-4 py-3 rounded-full shadow-2xl z-[9999] transition-all duration-500 opacity-0 min-w-[380px] md:min-w-[420px]`;
+        notification.dataset.animationOut = animationOut;
+        notification.dataset.orderId = orderData.order_id;
+        notification.innerHTML = `
+            <div class="flex items-center gap-6">
+                <div class="flex-shrink-0">
+                    <img src="${imageUrl}" alt="order" class="w-14 h-14 md:w-16 md:h-16">
+                </div>
+
+                <div class="flex flex-col gap-1 flex-1">
+                    <span class="text-sm md:text-base font-bold text-white">¡Nuevo Pedido! #${orderData.order_number}</span>
+                    <span class="text-xs md:text-base font-normal text-white">${orderData.customer_name} - $${orderData.total.toLocaleString('es-CO')}</span>
+                </div>
+                
+                <div class="flex-shrink-0 flex items-center gap-4">
+                    <button class="view-order-btn px-4 py-3 bg-yellow-500 hover:bg-yellow-600 rounded-full text-sm md:text-base font-medium text-black transition-colors" data-order-id="${orderData.order_id}">
+                        Ver pedido
+                    </button>
+                    <button class="close-toast hover:opacity-70 transition-opacity">
+                        <i data-lucide="circle-x" class="w-5 h-5 text-white"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Inicializar iconos de Lucide
+        if (window.createIcons && window.lucideIcons) {
+            window.createIcons({ icons: window.lucideIcons });
+        }
+        
+        // Evento botón "Ver"
+        const viewBtn = notification.querySelector('.view-order-btn');
+        if (viewBtn) {
+            viewBtn.addEventListener('click', () => {
+                // Si viene URL en orderData, usarla; sino construir ruta básica
+                if (orderData.url) {
+                    window.location.href = orderData.url;
+                } else {
+                    window.location.href = `/admin/orders/${orderData.order_id}`;
+                }
+            });
+        }
+        
+        // Evento cerrar
+        const closeBtn = notification.querySelector('.close-toast');
+        if (closeBtn) {
+            closeBtn.addEventListener('click', () => {
+                this.closeToast(notification);
+            });
+        }
+        
+        // Animar entrada
+        setTimeout(() => {
+            notification.classList.remove('translate-y-full', '-translate-y-full', 'opacity-0');
+            notification.classList.add('translate-y-0');
+        }, 100);
+        
+        // Auto-cerrar después de la duración (si no es infinito)
+        if (duration !== Infinity) {
+            setTimeout(() => {
+                this.closeToast(notification);
+            }, duration);
+        }
     }
 
     /**

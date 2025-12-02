@@ -8,7 +8,7 @@
         <div class="mb-6 bg-white border-l-4 border-warning-400 rounded-lg p-6 shadow-sm">
             <div class="flex items-start gap-4">
                 <div class="flex-shrink-0">
-                    <div class="w-12 h-12 bg-warning-100 rounded-full flex items-center justify-center">
+                    <div class="w-12 h-12 bg-swarning-100 rounded-full flex items-center justify-center">
                         <i data-lucide="clock" class="w-6 h-6 text-warning-500"></i>
                     </div>
                 </div>

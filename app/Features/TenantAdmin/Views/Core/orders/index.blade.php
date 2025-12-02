@@ -794,6 +794,82 @@ document.addEventListener('DOMContentLoaded', function() {
         lucide.createIcons();
     }
 });
+
+// Función global para ver comprobante en modal
+window.verComprobante = function(imageUrl, orderNumber) {
+    // Crear backdrop
+    const backdrop = document.createElement('div');
+    backdrop.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-[9998] transition-opacity duration-300 opacity-0';
+    backdrop.style.backdropFilter = 'blur(4px)';
+    
+    // Crear modal
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-4 opacity-0 scale-95 transition-all duration-300';
+    modal.innerHTML = `
+        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[56vh] overflow-hidden">
+            <div class="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between z-10">
+                <h3 class="text-base font-semibold text-gray-900">Comprobante - Pedido #${orderNumber}</h3>
+                <button onclick="window.cerrarModalComprobante()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+            <div class="p-4 overflow-y-auto max-h-[calc(56vh-100px)] flex items-center justify-center bg-gray-50">
+                <img src="${imageUrl}" alt="Comprobante" class="max-w-full object-contain object-center rounded-lg shadow-lg">
+            </div>
+            <div class="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3 flex gap-2 justify-end">
+                <a href="${imageUrl}" download class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
+                    Descargar
+                </a>
+                <button onclick="window.cerrarModalComprobante()" class="px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(backdrop);
+    document.body.appendChild(modal);
+    
+    // Inicializar iconos
+    if (window.createIcons && window.lucideIcons) {
+        window.createIcons({ icons: window.lucideIcons });
+    }
+    
+    // Animar entrada
+    setTimeout(() => {
+        backdrop.classList.remove('opacity-0');
+        modal.classList.remove('opacity-0', 'scale-95');
+    }, 10);
+    
+    // Cerrar con ESC
+    const handleEsc = (e) => {
+        if (e.key === 'Escape') {
+            window.cerrarModalComprobante();
+        }
+    };
+    document.addEventListener('keydown', handleEsc);
+    modal.dataset.escListener = 'true';
+    
+    // Cerrar con click en backdrop
+    backdrop.addEventListener('click', window.cerrarModalComprobante);
+};
+
+window.cerrarModalComprobante = function() {
+    const backdrop = document.querySelector('.fixed.inset-0.bg-black\\/80');
+    const modal = document.querySelector('.fixed.inset-0.z-\\[9999\\]');
+    
+    if (backdrop) {
+        backdrop.classList.add('opacity-0');
+    }
+    if (modal) {
+        modal.classList.add('opacity-0', 'scale-95');
+    }
+    
+    setTimeout(() => {
+        if (backdrop && backdrop.parentNode) backdrop.parentNode.removeChild(backdrop);
+        if (modal && modal.parentNode) modal.parentNode.removeChild(modal);
+    }, 300);
+};
 </script>
 @endpush
 @endsection
