@@ -349,11 +349,17 @@ class PaymentMethodController extends Controller
             
             $config = $request->config;
             
-            // Update basic config
-            $method->update([
+            $updateData = [
                 'available_for_pickup' => $config['available_for_pickup'] ?? true,
                 'available_for_delivery' => $config['available_for_delivery'] ?? true
-            ]);
+            ];
+            
+            // Solo transferencia bancaria soporta require_proof
+            if ($request->type === 'bank_transfer') {
+                $updateData['require_proof'] = $config['require_proof'] ?? false;
+            }
+            
+            $method->update($updateData);
             
             // Handle method-specific config
             $methodConfig = PaymentMethodConfig::getForStore($store->id);

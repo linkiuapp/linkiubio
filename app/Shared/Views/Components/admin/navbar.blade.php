@@ -18,6 +18,7 @@ Se adapta automáticamente al estado del sidebar (abierto/minificado/cerrado)
                 'superlinkiu.invoices.*' => 'receipt',
                 'superlinkiu.billing-settings.*' => 'settings',
                 'superlinkiu.tickets.*' => 'ticket',
+                'superlinkiu.tools.*' => 'wrench',
                 'superlinkiu.announcements.*' => 'megaphone',
                 'superlinkiu.email.*' => 'mail',
                 'superlinkiu.business-categories.*' => 'tag',
@@ -195,6 +196,17 @@ Se adapta automáticamente al estado del sidebar (abierto/minificado/cerrado)
                 @endif
             </a>
             {{-- End ITEM: Mensajes de Tiendas --}}
+
+            {{-- ITEM: Herramientas --}}
+            <a 
+                href="{{ route('superlinkiu.tools.delete-order') }}" 
+                class="relative p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors"
+                aria-label="Herramientas"
+                title="Herramientas"
+            >
+                <i data-lucide="wrench" class="w-6 h-6"></i>
+            </a>
+            {{-- End ITEM: Herramientas --}}
         </div>
         {{-- End SECTION: Right Side --}}
     </div>
