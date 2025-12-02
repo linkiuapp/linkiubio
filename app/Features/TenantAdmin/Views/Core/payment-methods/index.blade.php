@@ -3,413 +3,490 @@
 @section('title', 'Métodos de Pago')
 
 @section('content')
-<div class="container-fluid" x-data="paymentMethodsSimple">
-
-    {{-- Header --}}
-    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6 px-6">
-        <div>
-            <h1 class="text-body-large font-bold text-black-400">Métodos de Pago</h1>
-            <p class="text-caption text-black-300 mt-1">Activa y configura los métodos de pago para tus clientes</p>
-        </div>
-    </div>
-
-    {{-- Información rápida --}}
-    <div class="bg-gradient-to-r from-primary-300 to-accent-300 rounded-lg p-4 mb-6 border border-accent-300">
-        <div class="flex items-center gap-3">
-            <div class="rounded-full bg-accent-300 p-2">
-                <x-solar-info-circle-outline class="w-5 h-5 text-primary-300" />
-            </div>
-            <div class="flex-1">
-                <h3 class="text-body-large font-bold text-accent-50">Gestión de Métodos de Pago</h3>
-                <p class="text-caption text-accent-50">Activa los métodos que necesites y configura sus opciones específicas. Solo uno puede ser predeterminado.</p>
-            </div>
-        </div>
-    </div>
-
-    {{-- Métodos de Pago Predefinidos --}}
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 lg:gap-6">
-        
-        {{-- 1. TRANSFERENCIA BANCARIA --}}
-        @php
-            $bankTransferMethod = $paymentMethods->firstWhere('type', 'bank_transfer');
-            $isDefaultBank = $defaultMethod && $bankTransferMethod && $defaultMethod->id === $bankTransferMethod->id;
-        @endphp
-        
-        <div class="payment-method-card bg-accent-50 rounded-lg p-4 lg:p-6 shadow-sm border border-accent-200 {{ $bankTransferMethod && $bankTransferMethod->is_active ? 'active' : 'inactive' }}">
-            {{-- Header --}}
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-lg bg-primary-50 flex items-center justify-center">
-                        <x-solar-card-transfer-outline class="w-6 h-6 text-primary-300" />
-                    </div>
-                    <div>
-                        <h3 class="text-body-large font-bold text-black-400 flex items-center gap-2">
-                            Transferencia Bancaria
-                            @if($isDefaultBank)
-                                <span class="bg-primary-300 text-accent-50 px-2 py-1 rounded-full text-caption font-bold flex items-center gap-1">
-                                    <x-solar-star-bold class="w-3 h-3" />
-                                    Predeterminado
-                                </span>
-                            @endif
-                        </h3>
-                        <p class="text-caption text-black-300">Pago mediante transferencia a cuentas bancarias</p>
-                    </div>
+<div x-data="paymentMethodsManager()" class="space-y-4">
+    {{-- Header Card --}}
+    <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <div class="border-b border-gray-200 bg-gray-50 py-4 px-6">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-1">Métodos de Pago</h2>
+                    <p class="text-sm text-gray-600">Configura cómo tus clientes pueden pagar sus pedidos</p>
                 </div>
+            </div>
+        </div>
+
+        {{-- Grid de métodos --}}
+        <div class="p-6">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                 
-                {{-- Toggle principal --}}
-                <button @click="toggleMethod('bank_transfer', {{ $bankTransferMethod ? ($bankTransferMethod->is_active ? 'true' : 'false') : 'false' }})" 
-                        class="toggle-switch focus:outline-none">
-                    <div class="flex items-center gap-3">
-                        <span class="text-caption font-bold {{ $bankTransferMethod && $bankTransferMethod->is_active ? 'text-success-500' : 'text-black-300' }}">
-                            {{ $bankTransferMethod && $bankTransferMethod->is_active ? 'Activo' : 'Inactivo' }}
-                        </span>
-                        <div class="relative inline-block w-12 h-6 transition duration-200 ease-in-out {{ $bankTransferMethod && $bankTransferMethod->is_active ? 'bg-success-300' : 'bg-black-200' }} rounded-full">
-                            <span class="absolute left-0 inline-block w-5 h-5 mt-0.5 ml-0.5 transition duration-200 ease-in-out transform bg-accent-50 rounded-full {{ $bankTransferMethod && $bankTransferMethod->is_active ? 'translate-x-6' : 'translate-x-0' }}"></span>
+                {{-- TRANSFERENCIA BANCARIA --}}
+                @php
+                    $bankTransferMethod = $paymentMethods->firstWhere('type', 'bank_transfer');
+                    $isDefaultBank = $defaultMethod && $bankTransferMethod && $defaultMethod->id === $bankTransferMethod->id;
+                @endphp
+                
+                <div class="bg-white rounded-xl border-2 transition-all duration-200 {{ $bankTransferMethod && $bankTransferMethod->is_active ? 'border-blue-200 shadow-sm' : 'border-gray-200' }}">
+                    <div class="p-5">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-xl {{ $bankTransferMethod && $bankTransferMethod->is_active ? 'bg-blue-100' : 'bg-gray-100' }} flex items-center justify-center">
+                                    <i data-lucide="landmark" class="w-6 h-6 {{ $bankTransferMethod && $bankTransferMethod->is_active ? 'text-blue-600' : 'text-gray-400' }}"></i>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h3 class="font-semibold text-gray-900">Transferencia Bancaria</h3>
+                                        @if($isDefaultBank)
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                                                <i data-lucide="star" class="w-3 h-3 fill-current"></i>
+                                                Principal
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <p class="text-sm text-gray-500">Transferencia a cuentas bancarias</p>
+                                </div>
+                            </div>
+                            
+                            {{-- Toggle estilo productos --}}
+                            <label class="relative inline-block w-11 h-6 cursor-pointer">
+                                <input type="checkbox" 
+                                       class="peer sr-only"
+                                       {{ $bankTransferMethod && $bankTransferMethod->is_active ? 'checked' : '' }}
+                                       @change="toggleMethod('bank_transfer', {{ $bankTransferMethod ? ($bankTransferMethod->is_active ? 'true' : 'false') : 'false' }})">
+                                <span class="absolute inset-0 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out peer-checked:bg-blue-600"></span>
+                                <span class="absolute top-1/2 start-0.5 -translate-y-1/2 size-5 bg-white rounded-full shadow-xs transition-transform duration-200 ease-in-out peer-checked:translate-x-full"></span>
+                            </label>
                         </div>
-                    </div>
-                </button>
-            </div>
-            
-            @if($bankTransferMethod && $bankTransferMethod->is_active)
-                {{-- Configuraciones --}}
-                <div class="border-t border-accent-200 pt-4 mb-4">
-                    <div class="flex flex-wrap gap-2 mb-4">
-                        <span class="config-badge {{ $bankTransferMethod->available_for_pickup ? 'active' : '' }}">
-                            {{ $bankTransferMethod->available_for_pickup ? '✅' : '❌' }} Recojo
-                        </span>
-                        <span class="config-badge {{ $bankTransferMethod->available_for_delivery ? 'active' : '' }}">
-                            {{ $bankTransferMethod->available_for_delivery ? '✅' : '❌' }} Entrega
-                        </span>
-                        @if(!$isDefaultBank)
-                            <button @click="setAsDefault('bank_transfer')" class="text-caption font-bold text-primary-300 hover:text-primary-200 flex items-center gap-1">
-                                <x-solar-star-outline class="w-3 h-3" />
-                                Hacer predeterminado
-                            </button>
-                        @endif
-                    </div>
-                    
-                    <div class="flex gap-3">
-                        <button @click="configureMethod('bank_transfer')" 
-                                class="text-caption font-bold bg-secondary-300 text-accent-50 px-3 py-1 rounded-lg hover:bg-primary-200 hover:text-accent-50 transition-colors flex items-center gap-1">
-                            <x-solar-settings-outline class="w-5 h-5" /> <span class="text-caption font-bold text-accent-50">Configurar</span>
-                        </button>
-                        <button @click="manageBankAccounts()" 
-                                class="text-caption font-bold bg-primary-300 text-accent-50 px-3 py-1 rounded-lg hover:bg-primary-200 hover:text-accent-50 transition-colors flex items-center gap-1">
-                            <x-solar-card-2-outline class="w-5 h-5" /> Gestionar Cuentas <span class="text-caption font-bold text-accent-50">({{ $bankTransferMethod->bankAccounts->count() }})</span>
-                        </button>
-                    </div>
-                </div>
-                
-                {{-- Vista previa de cuentas bancarias --}}
-                @if($bankTransferMethod->bankAccounts->isNotEmpty())
-                    <div class="bg-accent-50 rounded-lg p-2">
-                        <h5 class="text-caption font-bold text-black-300 mb-2">Cuentas configuradas:</h5>
-                        <div class="space-y-1 max-h-16 overflow-y-auto">
-                            @foreach($bankTransferMethod->bankAccounts->take(2) as $account)
-                                <div class="bank-account-mini bg-success-50 rounded p-2">
-                                    <div class="flex justify-between items-center">
-                                        <span class="text-caption font-bold text-black-300">{{ $account->bank_name }}</span>
-                                        <span class="text-caption font-bold text-black-300">•••{{ substr($account->account_number, -4) }}</span>
+                        
+                        @if($bankTransferMethod && $bankTransferMethod->is_active)
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium {{ $bankTransferMethod->available_for_pickup ? 'bg-blue-50 text-blue-700' : 'bg-gray-100 text-gray-500' }}">
+                                    <i data-lucide="{{ $bankTransferMethod->available_for_pickup ? 'check' : 'x' }}" class="w-3 h-3"></i>
+                                    Recogida
+                                </span>
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium {{ $bankTransferMethod->available_for_delivery ? 'bg-blue-50 text-blue-700' : 'bg-gray-100 text-gray-500' }}">
+                                    <i data-lucide="{{ $bankTransferMethod->available_for_delivery ? 'check' : 'x' }}" class="w-3 h-3"></i>
+                                    Entrega
+                                </span>
+                                @if($bankTransferMethod->require_proof)
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-700">
+                                        <i data-lucide="file-check" class="w-3 h-3"></i>
+                                        Comprobante obligatorio
+                                    </span>
+                                @endif
+                            </div>
+                            
+                            @if($bankTransferMethod->bankAccounts->isNotEmpty())
+                                <div class="bg-gray-50 rounded-lg p-3 mb-4">
+                                    <p class="text-xs font-medium text-gray-500 mb-2">{{ $bankTransferMethod->bankAccounts->count() }} cuenta(s) configurada(s)</p>
+                                    <div class="space-y-1">
+                                        @foreach($bankTransferMethod->bankAccounts->take(2) as $account)
+                                            <div class="flex items-center justify-between text-sm">
+                                                <span class="text-gray-700">{{ $account->bank_name }}</span>
+                                                <span class="text-gray-400 font-mono text-xs">****{{ substr($account->account_number, -4) }}</span>
+                                            </div>
+                                        @endforeach
+                                        @if($bankTransferMethod->bankAccounts->count() > 2)
+                                            <p class="text-xs text-gray-400">+{{ $bankTransferMethod->bankAccounts->count() - 2 }} más</p>
+                                        @endif
                                     </div>
                                 </div>
-                            @endforeach
-                            @if($bankTransferMethod->bankAccounts->count() > 2)
-                                <div class="text-center">
-                                    <span class="text-caption text-black-300">+{{ $bankTransferMethod->bankAccounts->count() - 2 }} más</span>
+                            @endif
+                            
+                            <div class="flex flex-wrap gap-2">
+                                <button @click="configureMethod('bank_transfer')" 
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                                    <i data-lucide="settings" class="w-4 h-4"></i>
+                                    Configurar
+                                </button>
+                                <button @click="manageBankAccounts()" 
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors">
+                                    <i data-lucide="credit-card" class="w-4 h-4"></i>
+                                    Cuentas
+                                </button>
+                                @if(!$isDefaultBank)
+                                    <button @click="setAsDefault('bank_transfer')" 
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-700 hover:text-blue-800 transition-colors">
+                                        <i data-lucide="star" class="w-4 h-4"></i>
+                                        Hacer principal
+                                    </button>
+                                @endif
+                            </div>
+                        @endif
+                    </div>
+                </div>
+
+                {{-- EFECTIVO --}}
+                @php
+                    $cashMethod = $paymentMethods->firstWhere('type', 'cash');
+                    $isDefaultCash = $defaultMethod && $cashMethod && $defaultMethod->id === $cashMethod->id;
+                @endphp
+                
+                <div class="bg-white rounded-xl border-2 transition-all duration-200 {{ $cashMethod && $cashMethod->is_active ? 'border-blue-200 shadow-sm' : 'border-gray-200' }}">
+                    <div class="p-5">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-xl {{ $cashMethod && $cashMethod->is_active ? 'bg-blue-100' : 'bg-gray-100' }} flex items-center justify-center">
+                                    <i data-lucide="banknote" class="w-6 h-6 {{ $cashMethod && $cashMethod->is_active ? 'text-blue-600' : 'text-gray-400' }}"></i>
                                 </div>
-                            @endif
+                                <div>
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h3 class="font-semibold text-gray-900">Efectivo</h3>
+                                        @if($isDefaultCash)
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                                                <i data-lucide="star" class="w-3 h-3 fill-current"></i>
+                                                Principal
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <p class="text-sm text-gray-500">Pago en efectivo al momento</p>
+                                </div>
+                            </div>
+                            
+                            <label class="relative inline-block w-11 h-6 cursor-pointer">
+                                <input type="checkbox" 
+                                       class="peer sr-only"
+                                       {{ $cashMethod && $cashMethod->is_active ? 'checked' : '' }}
+                                       @change="toggleMethod('cash', {{ $cashMethod ? ($cashMethod->is_active ? 'true' : 'false') : 'false' }})">
+                                <span class="absolute inset-0 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out peer-checked:bg-blue-600"></span>
+                                <span class="absolute top-1/2 start-0.5 -translate-y-1/2 size-5 bg-white rounded-full shadow-xs transition-transform duration-200 ease-in-out peer-checked:translate-x-full"></span>
+                            </label>
                         </div>
-                    </div>
-                @else
-                    <div class="bg-accent-50 rounded-lg p-2 text-center flex flex-col items-center justify-center">
-                        <p class="text-caption text-black-300 mb-1">No hay cuentas bancarias configuradas</p>
-                        <button @click="manageBankAccounts()" class="text-caption font-bold bg-primary-300 text-accent-50 px-3 py-1 rounded-lg hover:bg-primary-200 hover:text-accent-50 transition-colors flex items-center gap-1">
-                            <x-solar-add-circle-outline class="w-5 h-5" /> <span class="text-caption font-bold text-accent-50">Agregar primera cuenta</span>
-                        </button>
-                    </div>
-                @endif
-            @endif
-        </div>
-
-        {{-- 2. EFECTIVO --}}
-        @php
-            $cashMethod = $paymentMethods->firstWhere('type', 'cash');
-            $isDefaultCash = $defaultMethod && $cashMethod && $defaultMethod->id === $cashMethod->id;
-        @endphp
-        
-        <div class="payment-method-card bg-accent-50 rounded-lg p-4 lg:p-6 shadow-sm border border-accent-200 {{ $cashMethod && $cashMethod->is_active ? 'active' : 'inactive' }}">
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-lg bg-primary-50 flex items-center justify-center">
-                        <x-solar-wallet-money-outline class="w-6 h-6 text-primary-300" />
-                    </div>
-                    <div>
-                        <h3 class="text-body-large font-bold text-black-400 flex items-center gap-2">
-                            Efectivo
-                            @if($isDefaultCash)
-                                <span class="bg-primary-300 text-accent-50 px-2 py-1 rounded-full text-caption font-bold flex items-center gap-1">
-                                    <x-solar-star-bold class="w-3 h-3" />
-                                    Predeterminado
+                        
+                        @if($cashMethod && $cashMethod->is_active)
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium {{ $cashMethod->available_for_pickup ? 'bg-blue-50 text-blue-700' : 'bg-gray-100 text-gray-500' }}">
+                                    <i data-lucide="{{ $cashMethod->available_for_pickup ? 'check' : 'x' }}" class="w-3 h-3"></i>
+                                    Recogida
                                 </span>
-                            @endif
-                        </h3>
-                        <p class="text-caption text-black-300">Pago en efectivo al momento de entrega</p>
-                    </div>
-                </div>
-                
-                <button @click="toggleMethod('cash', {{ $cashMethod ? ($cashMethod->is_active ? 'true' : 'false') : 'false' }})" 
-                        class="toggle-switch focus:outline-none">
-                    <div class="flex items-center gap-3">
-                        <span class="text-caption font-bold {{ $cashMethod && $cashMethod->is_active ? 'text-success-500' : 'text-black-300' }}">
-                            {{ $cashMethod && $cashMethod->is_active ? 'Activo' : 'Inactivo' }}
-                        </span>
-                        <div class="relative inline-block w-12 h-6 transition duration-200 ease-in-out {{ $cashMethod && $cashMethod->is_active ? 'bg-success-300' : 'bg-black-200' }} rounded-full">
-                            <span class="absolute left-0 inline-block w-5 h-5 mt-0.5 ml-0.5 transition duration-200 ease-in-out transform bg-accent-50 rounded-full {{ $cashMethod && $cashMethod->is_active ? 'translate-x-6' : 'translate-x-0' }}"></span>
-                        </div>
-                    </div>
-                </button>
-            </div>
-            
-            @if($cashMethod && $cashMethod->is_active)
-                <div class="border-t border-accent-200 pt-4">
-                    <div class="flex flex-wrap gap-2 mb-4">
-                        <span class="config-badge {{ $cashMethod->available_for_pickup ? 'active' : '' }}">
-                            {{ $cashMethod->available_for_pickup ? '✅' : '❌' }} Recojo
-                        </span>
-                        <span class="config-badge {{ $cashMethod->available_for_delivery ? 'active' : '' }}">
-                            {{ $cashMethod->available_for_delivery ? '✅' : '❌' }} Entrega
-                        </span>
-                            <span class="config-badge active">✅ Permitir cambio</span>
-                        @if(!$isDefaultCash)
-                            <button @click="setAsDefault('cash')" class="text-caption font-bold text-primary-300 hover:text-primary-200 flex items-center gap-1">
-                                <x-solar-star-outline class="w-3 h-3" />
-                                Hacer predeterminado
-                            </button>
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium {{ $cashMethod->available_for_delivery ? 'bg-blue-50 text-blue-700' : 'bg-gray-100 text-gray-500' }}">
+                                    <i data-lucide="{{ $cashMethod->available_for_delivery ? 'check' : 'x' }}" class="w-3 h-3"></i>
+                                    Entrega
+                                </span>
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-blue-50 text-blue-700">
+                                    <i data-lucide="check" class="w-3 h-3"></i>
+                                    Permite cambio
+                                </span>
+                            </div>
+                            
+                            <div class="flex flex-wrap gap-2">
+                                <button @click="configureMethod('cash')" 
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                                    <i data-lucide="settings" class="w-4 h-4"></i>
+                                    Configurar
+                                </button>
+                                @if(!$isDefaultCash)
+                                    <button @click="setAsDefault('cash')" 
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-700 hover:text-blue-800 transition-colors">
+                                        <i data-lucide="star" class="w-4 h-4"></i>
+                                        Hacer principal
+                                    </button>
+                                @endif
+                            </div>
                         @endif
                     </div>
-                    
-                    <button @click="configureMethod('cash')" 
-                            class="text-caption font-bold bg-secondary-300 text-accent-50 px-3 py-1 rounded-lg hover:bg-primary-200 hover:text-accent-50 transition-colors flex items-center gap-1">
-                            <x-solar-settings-outline class="w-5 h-5" /> <span class="text-caption font-bold text-accent-50">Configurar</span>
-                    </button>
                 </div>
-            @endif
-        </div>
 
-        {{-- 3. DATÁFONO --}}
-        @php
-            $cardMethod = $paymentMethods->firstWhere('type', 'card_terminal');
-            $isDefaultCard = $defaultMethod && $cardMethod && $defaultMethod->id === $cardMethod->id;
-        @endphp
-        
-        <div class="payment-method-card bg-accent-50 rounded-lg p-4 lg:p-6 shadow-sm border border-accent-200 {{ $cardMethod && $cardMethod->is_active ? 'active' : 'inactive' }}">
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-lg bg-primary-50 flex items-center justify-center">
-                        <x-solar-card-outline class="w-6 h-6 text-primary-300" />
-                    </div>
-                    <div>
-                        <h3 class="text-body-large font-bold text-black-400 flex items-center gap-2">
-                            Datáfono
-                            @if($isDefaultCard)
-                                <span class="bg-primary-300 text-accent-50 px-2 py-1 rounded-full text-caption font-bold flex items-center gap-1">
-                                    <x-solar-star-bold class="w-3 h-3" />
-                                    Predeterminado
-                                </span>
-                            @endif
-                        </h3>
-                        <p class="text-caption text-black-300">Pago con tarjeta de crédito o débito</p>
-                    </div>
-                </div>
+                {{-- DATÁFONO --}}
+                @php
+                    $cardMethod = $paymentMethods->firstWhere('type', 'card_terminal');
+                    $isDefaultCard = $defaultMethod && $cardMethod && $defaultMethod->id === $cardMethod->id;
+                @endphp
                 
-                <button @click="toggleMethod('card_terminal', {{ $cardMethod ? ($cardMethod->is_active ? 'true' : 'false') : 'false' }})" 
-                        class="toggle-switch focus:outline-none">
-                    <div class="flex items-center gap-3">
-                        <span class="text-caption font-bold {{ $cardMethod && $cardMethod->is_active ? 'text-success-500' : 'text-black-300' }}">
-                            {{ $cardMethod && $cardMethod->is_active ? 'Activo' : 'Inactivo' }}
-                        </span>
-                        <div class="relative inline-block w-12 h-6 transition duration-200 ease-in-out {{ $cardMethod && $cardMethod->is_active ? 'bg-success-300' : 'bg-black-200' }} rounded-full">
-                            <span class="absolute left-0 inline-block w-5 h-5 mt-0.5 ml-0.5 transition duration-200 ease-in-out transform bg-accent-50 rounded-full {{ $cardMethod && $cardMethod->is_active ? 'translate-x-6' : 'translate-x-0' }}"></span>
+                <div class="bg-white rounded-xl border-2 transition-all duration-200 {{ $cardMethod && $cardMethod->is_active ? 'border-blue-200 shadow-sm' : 'border-gray-200' }}">
+                    <div class="p-5">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-xl {{ $cardMethod && $cardMethod->is_active ? 'bg-blue-100' : 'bg-gray-100' }} flex items-center justify-center">
+                                    <i data-lucide="smartphone-nfc" class="w-6 h-6 {{ $cardMethod && $cardMethod->is_active ? 'text-blue-600' : 'text-gray-400' }}"></i>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h3 class="font-semibold text-gray-900">Datáfono</h3>
+                                        @if($isDefaultCard)
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                                                <i data-lucide="star" class="w-3 h-3 fill-current"></i>
+                                                Principal
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <p class="text-sm text-gray-500">Tarjeta de crédito o débito</p>
+                                </div>
+                            </div>
+                            
+                            <label class="relative inline-block w-11 h-6 cursor-pointer">
+                                <input type="checkbox" 
+                                       class="peer sr-only"
+                                       {{ $cardMethod && $cardMethod->is_active ? 'checked' : '' }}
+                                       @change="toggleMethod('card_terminal', {{ $cardMethod ? ($cardMethod->is_active ? 'true' : 'false') : 'false' }})">
+                                <span class="absolute inset-0 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out peer-checked:bg-blue-600"></span>
+                                <span class="absolute top-1/2 start-0.5 -translate-y-1/2 size-5 bg-white rounded-full shadow-xs transition-transform duration-200 ease-in-out peer-checked:translate-x-full"></span>
+                            </label>
                         </div>
-                    </div>
-                </button>
-            </div>
-            
-            @if($cardMethod && $cardMethod->is_active)
-                <div class="border-t border-accent-200 pt-4">
-                    <div class="flex flex-wrap gap-2 mb-4">
-                        <span class="config-badge {{ $cardMethod->available_for_pickup ? 'active' : '' }}">
-                            {{ $cardMethod->available_for_pickup ? '✅' : '❌' }} Recojo
-                        </span>
-                        <span class="config-badge {{ $cardMethod->available_for_delivery ? 'active' : '' }}">
-                            {{ $cardMethod->available_for_delivery ? '✅' : '❌' }} Entrega
-                        </span>
-                        <span class="config-badge active">✅ Visa, Mastercard</span>
-                        @if(!$isDefaultCard)
-                            <button @click="setAsDefault('card_terminal')" class="text-caption font-bold text-primary-300 hover:text-primary-200 flex items-center gap-1">
-                                <x-solar-star-outline class="w-3 h-3" />
-                                Hacer predeterminado
-                            </button>
+                        
+                        @if($cardMethod && $cardMethod->is_active)
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium {{ $cardMethod->available_for_pickup ? 'bg-blue-50 text-blue-700' : 'bg-gray-100 text-gray-500' }}">
+                                    <i data-lucide="{{ $cardMethod->available_for_pickup ? 'check' : 'x' }}" class="w-3 h-3"></i>
+                                    Recogida
+                                </span>
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium {{ $cardMethod->available_for_delivery ? 'bg-blue-50 text-blue-700' : 'bg-gray-100 text-gray-500' }}">
+                                    <i data-lucide="{{ $cardMethod->available_for_delivery ? 'check' : 'x' }}" class="w-3 h-3"></i>
+                                    Entrega
+                                </span>
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-purple-50 text-purple-700">
+                                    <i data-lucide="credit-card" class="w-3 h-3"></i>
+                                    Visa, Mastercard
+                                </span>
+                            </div>
+                            
+                            <div class="flex flex-wrap gap-2">
+                                <button @click="configureMethod('card_terminal')" 
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                                    <i data-lucide="settings" class="w-4 h-4"></i>
+                                    Configurar
+                                </button>
+                                @if(!$isDefaultCard)
+                                    <button @click="setAsDefault('card_terminal')" 
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-700 hover:text-blue-800 transition-colors">
+                                        <i data-lucide="star" class="w-4 h-4"></i>
+                                        Hacer principal
+                                    </button>
+                                @endif
+                            </div>
                         @endif
                     </div>
-                    
-                    <button @click="configureMethod('card_terminal')" 
-                            class="text-caption font-bold bg-secondary-300 text-accent-50 px-3 py-1 rounded-lg hover:bg-primary-200 hover:text-accent-50 transition-colors flex items-center gap-1">
-                            <x-solar-settings-outline class="w-5 h-5" /> <span class="text-caption font-bold text-accent-50">Configurar</span>
-                    </button>
                 </div>
-            @endif
-        </div>
 
-        {{-- 4. CONTRA ENTREGA --}}
-        @php
-            $codMethod = $paymentMethods->firstWhere('type', 'cash_on_delivery');
-            $isDefaultCod = $defaultMethod && $codMethod && $defaultMethod->id === $codMethod->id;
-        @endphp
-        
-        <div class="payment-method-card bg-accent-50 rounded-lg p-4 lg:p-6 shadow-sm {{ $codMethod && $codMethod->is_active ? 'active' : 'inactive' }}">
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 rounded-lg bg-primary-50 flex items-center justify-center">
-                        <x-solar-delivery-outline class="w-6 h-6 text-primary-300" />
-                    </div>
-                    <div>
-                        <h3 class="text-body-large font-bold text-black-400 flex items-center gap-2">
-                            Contra Entrega
-                            @if($isDefaultCod)
-                                <span class="bg-primary-300 text-accent-50 px-2 py-1 rounded-full text-caption font-bold flex items-center gap-1">
-                                    <x-solar-star-bold class="w-3 h-3" />
-                                    Predeterminado
-                                </span>
-                            @endif
-                        </h3>
-                        <p class="text-caption text-black-300">El cliente paga al recibir el producto</p>
-                    </div>
-                </div>
+                {{-- CONTRA ENTREGA --}}
+                @php
+                    $codMethod = $paymentMethods->firstWhere('type', 'cash_on_delivery');
+                    $isDefaultCod = $defaultMethod && $codMethod && $defaultMethod->id === $codMethod->id;
+                @endphp
                 
-                <button @click="toggleMethod('cash_on_delivery', {{ $codMethod ? ($codMethod->is_active ? 'true' : 'false') : 'false' }})" 
-                        class="toggle-switch focus:outline-none">
-                    <div class="flex items-center gap-3">
-                        <span class="text-caption font-bold {{ $codMethod && $codMethod->is_active ? 'text-success-500' : 'text-black-300' }}">
-                            {{ $codMethod && $codMethod->is_active ? 'Activo' : 'Inactivo' }}
-                        </span>
-                        <div class="relative inline-block w-12 h-6 transition duration-200 ease-in-out {{ $codMethod && $codMethod->is_active ? 'bg-success-300' : 'bg-black-200' }} rounded-full">
-                            <span class="absolute left-0 inline-block w-5 h-5 mt-0.5 ml-0.5 transition duration-200 ease-in-out transform bg-accent-50 rounded-full {{ $codMethod && $codMethod->is_active ? 'translate-x-6' : 'translate-x-0' }}"></span>
+                <div class="bg-white rounded-xl border-2 transition-all duration-200 {{ $codMethod && $codMethod->is_active ? 'border-blue-200 shadow-sm' : 'border-gray-200' }}">
+                    <div class="p-5">
+                        <div class="flex items-start justify-between mb-4">
+                            <div class="flex items-center gap-3">
+                                <div class="w-12 h-12 rounded-xl {{ $codMethod && $codMethod->is_active ? 'bg-blue-100' : 'bg-gray-100' }} flex items-center justify-center">
+                                    <i data-lucide="truck" class="w-6 h-6 {{ $codMethod && $codMethod->is_active ? 'text-blue-600' : 'text-gray-400' }}"></i>
+                                </div>
+                                <div>
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <h3 class="font-semibold text-gray-900">Contra Entrega</h3>
+                                        @if($isDefaultCod)
+                                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700">
+                                                <i data-lucide="star" class="w-3 h-3 fill-current"></i>
+                                                Principal
+                                            </span>
+                                        @endif
+                                    </div>
+                                    <p class="text-sm text-gray-500">Pago al recibir el producto</p>
+                                </div>
+                            </div>
+                            
+                            <label class="relative inline-block w-11 h-6 cursor-pointer">
+                                <input type="checkbox" 
+                                       class="peer sr-only"
+                                       {{ $codMethod && $codMethod->is_active ? 'checked' : '' }}
+                                       @change="toggleMethod('cash_on_delivery', {{ $codMethod ? ($codMethod->is_active ? 'true' : 'false') : 'false' }})">
+                                <span class="absolute inset-0 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out peer-checked:bg-blue-600"></span>
+                                <span class="absolute top-1/2 start-0.5 -translate-y-1/2 size-5 bg-white rounded-full shadow-xs transition-transform duration-200 ease-in-out peer-checked:translate-x-full"></span>
+                            </label>
                         </div>
-                    </div>
-                </button>
-            </div>
-            
-            @if($codMethod && $codMethod->is_active)
-                <div class="border-t border-accent-200 pt-4">
-                    <div class="flex flex-wrap gap-2 mb-4">
-                        <span class="config-badge">✅ Recojo</span>
-                        <span class="config-badge {{ $codMethod->available_for_delivery ? 'active' : '' }}">
-                            {{ $codMethod->available_for_delivery ? '✅' : '❌' }} Entrega
-                        </span>
-                        @if(!$isDefaultCod)
-                            <button @click="setAsDefault('cash_on_delivery')" class="text-caption font-bold text-primary-300 hover:text-primary-200 flex items-center gap-1">
-                                <x-solar-star-outline class="w-3 h-3" />
-                                Hacer predeterminado
-                            </button>
+                        
+                        @if($codMethod && $codMethod->is_active)
+                            <div class="flex flex-wrap gap-2 mb-4">
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium bg-gray-100 text-gray-500">
+                                    <i data-lucide="x" class="w-3 h-3"></i>
+                                    Recogida
+                                </span>
+                                <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs font-medium {{ $codMethod->available_for_delivery ? 'bg-blue-50 text-blue-700' : 'bg-gray-100 text-gray-500' }}">
+                                    <i data-lucide="{{ $codMethod->available_for_delivery ? 'check' : 'x' }}" class="w-3 h-3"></i>
+                                    Entrega
+                                </span>
+                            </div>
+                            
+                            <div class="flex flex-wrap gap-2">
+                                <button @click="configureMethod('cash_on_delivery')" 
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                                    <i data-lucide="settings" class="w-4 h-4"></i>
+                                    Configurar
+                                </button>
+                                @if(!$isDefaultCod)
+                                    <button @click="setAsDefault('cash_on_delivery')" 
+                                            class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-blue-700 hover:text-blue-800 transition-colors">
+                                        <i data-lucide="star" class="w-4 h-4"></i>
+                                        Hacer principal
+                                    </button>
+                                @endif
+                            </div>
                         @endif
                     </div>
-                    
-                    <button @click="configureMethod('cash_on_delivery')" 
-                            class="text-caption font-bold bg-secondary-300 text-accent-50 px-3 py-1 rounded-lg hover:bg-primary-200 hover:text-accent-50 transition-colors flex items-center gap-1">
-                            <x-solar-settings-outline class="w-5 h-5" /> <span class="text-caption font-bold text-accent-50">Configurar</span>
-                    </button>
                 </div>
-            @endif
-        </div>
-    </div>
 
-    {{-- Información adicional --}}
-    <div class="mt-8 bg-accent-50 rounded-lg p-4 border border-accent-200 mb-8">
-        <div class="flex items-start gap-3">
-            <x-solar-lightbulb-minimalistic-outline class="w-5 h-5 text-warning-300 mt-1 flex-shrink-0" />
-            <div>
-                <h4 class="text-body-large font-bold text-black-400 mb-1">Consejos para configurar métodos de pago</h4>
-                <ul class="text-caption text-black-300 space-y-1">
-                    <li>• <strong>Transferencia:</strong> Agrega al menos una cuenta bancaria activa</li>
-                    <li>• <strong>Efectivo:</strong> Ideal para pickup y entregas locales</li>
-                    <li>• <strong>Datáfono:</strong> Perfecto para ventas presenciales</li>
-                    <li>• <strong>Contra entrega:</strong> Genera confianza pero solo para domicilios</li>
-                </ul>
+            </div>
+        </div>
+
+        {{-- Footer con consejos --}}
+        <div class="border-t border-gray-200 bg-amber-50 px-6 py-4">
+            <div class="flex items-start gap-3">
+                <i data-lucide="lightbulb" class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0"></i>
+                <div class="text-sm text-amber-800">
+                    <p class="font-medium mb-1">Consejos</p>
+                    <ul class="text-amber-700 space-y-0.5">
+                        <li>Agrega al menos una cuenta bancaria para recibir transferencias</li>
+                        <li>Contra entrega solo está disponible para envíos a domicilio</li>
+                    </ul>
+                </div>
             </div>
         </div>
     </div>
 
-    {{-- Modals simples aquí (configuración y cuentas bancarias) --}}
-    {{-- Modal de configuración --}}
+    {{-- Modal de Configuración --}}
     <div x-show="showConfigModal" 
-         x-transition:enter="transition ease-out duration-300"
+         x-cloak
+         x-transition:enter="transition ease-out duration-200"
          x-transition:enter-start="opacity-0"
          x-transition:enter-end="opacity-100"
-         class="fixed inset-0 z-50 flex items-center justify-center bg-black-400 bg-opacity-50">
-        <div x-show="showConfigModal"
-             x-transition:enter="transition ease-out duration-300"
-             x-transition:enter-start="opacity-0 scale-95"
-             x-transition:enter-end="opacity-100 scale-100"
-             class="bg-white rounded-lg shadow-xl p-6 w-full max-w-md mx-4">
-            <h3 class="text-lg font-semibold text-black-400 mb-4" x-text="'Configurar ' + currentMethodName"></h3>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="flex items-center gap-2" :class="currentMethodType === 'cash_on_delivery' ? 'opacity-50 cursor-not-allowed' : ''">
-                        <input type="checkbox" 
-                               x-model="methodConfig.available_for_pickup" 
-                               :disabled="currentMethodType === 'cash_on_delivery'"
-                               class="rounded">
-                        <span class="text-caption font-medium text-black-400">Disponible para Recojo</span>
-                    </label>
-                    <p x-show="currentMethodType === 'cash_on_delivery'" class="text-caption text-warning-300 mt-1 ml-6">
-                        Contra entrega solo está disponible para domicilio
-                    </p>
-                </div>
-                <div>
-                    <label class="flex items-center gap-2">
-                        <input type="checkbox" x-model="methodConfig.available_for_delivery" class="rounded">
-                        <span class="text-caption font-medium text-black-400">Disponible para Entrega</span>
-                    </label>
+         x-transition:leave="transition ease-in duration-150"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 overflow-y-auto"
+         @keydown.escape.window="showConfigModal = false">
+        
+        <div class="fixed inset-0 bg-black/50" @click="showConfigModal = false"></div>
+        
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div x-show="showConfigModal"
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 scale-95"
+                 x-transition:enter-end="opacity-100 scale-100"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 scale-100"
+                 x-transition:leave-end="opacity-0 scale-95"
+                 class="relative bg-white rounded-2xl shadow-xl w-full max-w-md p-6"
+                 @click.stop>
+                
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold text-gray-900" x-text="'Configurar ' + currentMethodName"></h3>
+                    <button @click="showConfigModal = false" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <i data-lucide="x" class="w-6 h-6"></i>
+                    </button>
                 </div>
                 
-                {{-- Configuraciones específicas por método --}}
-                <div x-show="currentMethodType === 'cash'">
-                    <label class="flex items-center gap-2">
-                        <input type="checkbox" x-model="methodConfig.allow_change" class="rounded">
-                        <span class="text-caption font-medium text-black-400">Permitir que el cliente solicite cambio</span>
-                    </label>
-                </div>
-                
-                <div x-show="currentMethodType === 'card_terminal'">
-                    <label class="block text-caption font-bold text-black-400 mb-2">Tarjetas Aceptadas:</label>
-                    <div class="space-y-2">
-                        <label class="flex items-center gap-2">
-                            <input type="checkbox" x-model="methodConfig.accept_visa" class="rounded">
-                            <span class="text-caption font-medium text-black-400">Visa</span>
+                <div class="space-y-4">
+                    {{-- Disponibilidad --}}
+                    <div class="space-y-3">
+                        <p class="text-sm font-medium text-gray-700">Disponibilidad</p>
+                        
+                        <label class="flex items-center justify-between p-3 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors"
+                               :class="currentMethodType === 'cash_on_delivery' ? 'opacity-50' : ''">
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="store" class="w-5 h-5 text-gray-500"></i>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-900">Disponible para recogida</span>
+                                    <p x-show="currentMethodType === 'cash_on_delivery'" class="text-xs text-amber-600 mt-0.5">
+                                        Solo disponible para domicilio
+                                    </p>
+                                </div>
+                            </div>
+                            <label class="relative inline-block w-11 h-6 cursor-pointer" :class="currentMethodType === 'cash_on_delivery' ? 'pointer-events-none opacity-50' : ''">
+                                <input type="checkbox" class="peer sr-only" x-model="methodConfig.available_for_pickup" :disabled="currentMethodType === 'cash_on_delivery'">
+                                <span class="absolute inset-0 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out peer-checked:bg-blue-600"></span>
+                                <span class="absolute top-1/2 start-0.5 -translate-y-1/2 size-5 bg-white rounded-full shadow-xs transition-transform duration-200 ease-in-out peer-checked:translate-x-full"></span>
+                            </label>
                         </label>
-                        <label class="flex items-center gap-2">
-                            <input type="checkbox" x-model="methodConfig.accept_mastercard" class="rounded">
-                            <span class="text-caption font-medium text-black-400">Mastercard</span>
+                        
+                        <label class="flex items-center justify-between p-3 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="truck" class="w-5 h-5 text-gray-500"></i>
+                                <span class="text-sm font-medium text-gray-900">Disponible para entrega</span>
+                            </div>
+                            <label class="relative inline-block w-11 h-6 cursor-pointer">
+                                <input type="checkbox" class="peer sr-only" x-model="methodConfig.available_for_delivery">
+                                <span class="absolute inset-0 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out peer-checked:bg-blue-600"></span>
+                                <span class="absolute top-1/2 start-0.5 -translate-y-1/2 size-5 bg-white rounded-full shadow-xs transition-transform duration-200 ease-in-out peer-checked:translate-x-full"></span>
+                            </label>
                         </label>
-                        <label class="flex items-center gap-2">
-                            <input type="checkbox" x-model="methodConfig.accept_american_express" class="rounded">
-                            <span class="text-caption font-medium text-black-400">American Express</span>
+                    </div>
+                    
+                    {{-- Configuración de Efectivo --}}
+                    <div x-show="currentMethodType === 'cash'" class="pt-2 border-t border-gray-200">
+                        <label class="flex items-center justify-between p-3 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="coins" class="w-5 h-5 text-gray-500"></i>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-900">Permitir solicitar cambio</span>
+                                    <p class="text-xs text-gray-500 mt-0.5">El cliente indica con cuánto pagará</p>
+                                </div>
+                            </div>
+                            <label class="relative inline-block w-11 h-6 cursor-pointer">
+                                <input type="checkbox" class="peer sr-only" x-model="methodConfig.allow_change">
+                                <span class="absolute inset-0 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out peer-checked:bg-blue-600"></span>
+                                <span class="absolute top-1/2 start-0.5 -translate-y-1/2 size-5 bg-white rounded-full shadow-xs transition-transform duration-200 ease-in-out peer-checked:translate-x-full"></span>
+                            </label>
+                        </label>
+                    </div>
+                    
+                    {{-- Configuración de Datáfono --}}
+                    <div x-show="currentMethodType === 'card_terminal'" class="pt-2 border-t border-gray-200">
+                        <p class="text-sm font-medium text-gray-700 mb-3">Tarjetas aceptadas</p>
+                        <div class="grid grid-cols-3 gap-2">
+                            <label class="flex flex-col items-center gap-2 p-3 rounded-lg border-2 cursor-pointer transition-all"
+                                   :class="methodConfig.accept_visa ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:bg-gray-50'"
+                                   @click="methodConfig.accept_visa = !methodConfig.accept_visa">
+                                <i data-lucide="credit-card" class="w-5 h-5" :class="methodConfig.accept_visa ? 'text-green-600' : 'text-gray-400'"></i>
+                                <span class="text-sm font-medium" :class="methodConfig.accept_visa ? 'text-green-700' : 'text-gray-700'">Visa</span>
+                            </label>
+                            <label class="flex flex-col items-center gap-2 p-3 rounded-lg border-2 cursor-pointer transition-all"
+                                   :class="methodConfig.accept_mastercard ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:bg-gray-50'"
+                                   @click="methodConfig.accept_mastercard = !methodConfig.accept_mastercard">
+                                <i data-lucide="credit-card" class="w-5 h-5" :class="methodConfig.accept_mastercard ? 'text-green-600' : 'text-gray-400'"></i>
+                                <span class="text-sm font-medium" :class="methodConfig.accept_mastercard ? 'text-green-700' : 'text-gray-700'">Mastercard</span>
+                            </label>
+                            <label class="flex flex-col items-center gap-2 p-3 rounded-lg border-2 cursor-pointer transition-all"
+                                   :class="methodConfig.accept_american_express ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:bg-gray-50'"
+                                   @click="methodConfig.accept_american_express = !methodConfig.accept_american_express">
+                                <i data-lucide="credit-card" class="w-5 h-5" :class="methodConfig.accept_american_express ? 'text-green-600' : 'text-gray-400'"></i>
+                                <span class="text-sm font-medium" :class="methodConfig.accept_american_express ? 'text-green-700' : 'text-gray-700'">Amex</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    {{-- Requerir comprobante (solo transferencia) --}}
+                    <div x-show="currentMethodType === 'bank_transfer'" class="pt-4 border-t border-gray-200">
+                        <label class="flex items-center justify-between p-3 rounded-lg border border-gray-200 cursor-pointer hover:bg-gray-50 transition-colors">
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="file-check" class="w-5 h-5 text-gray-500"></i>
+                                <div>
+                                    <span class="text-sm font-medium text-gray-900">Requerir comprobante de pago</span>
+                                    <p class="text-xs text-gray-500 mt-0.5">El cliente debe subir foto del comprobante</p>
+                                </div>
+                            </div>
+                            <label class="relative inline-block w-11 h-6 cursor-pointer">
+                                <input type="checkbox" class="peer sr-only" x-model="methodConfig.require_proof">
+                                <span class="absolute inset-0 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out peer-checked:bg-blue-600"></span>
+                                <span class="absolute top-1/2 start-0.5 -translate-y-1/2 size-5 bg-white rounded-full shadow-xs transition-transform duration-200 ease-in-out peer-checked:translate-x-full"></span>
+                            </label>
                         </label>
                     </div>
                 </div>
-            </div>
-            
-            <div class="flex gap-3 mt-6">
-                <button @click="showConfigModal = false" 
-                        class="flex-1 px-4 py-2 border border-accent-200 text-black-400 rounded-lg hover:bg-accent-50">
-                    Cancelar
-                </button>
-                <button @click="saveMethodConfig()" 
-                        class="flex-1 px-4 py-2 bg-primary-300 text-accent-50 rounded-lg hover:bg-primary-200">
-                    Guardar
-                </button>
+                
+                <div class="flex gap-3 mt-6 pt-4 border-t border-gray-200">
+                    <button @click="showConfigModal = false" 
+                            class="flex-1 px-4 py-2.5 text-sm font-medium text-gray-700 bg-gray-100 rounded-lg hover:bg-gray-200 transition-colors">
+                        Cancelar
+                    </button>
+                    <button @click="saveMethodConfig()" 
+                            :disabled="isLoading"
+                            class="flex-1 px-4 py-2.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors disabled:opacity-50">
+                        <span x-show="!isLoading">Guardar cambios</span>
+                        <span x-show="isLoading" class="flex items-center justify-center gap-2">
+                            <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
+                            Guardando...
+                        </span>
+                    </button>
+                </div>
             </div>
         </div>
     </div>
@@ -417,33 +494,33 @@
 
 @push('scripts')
 <script>
-document.addEventListener('alpine:init', () => {
-    Alpine.data('paymentMethodsSimple', () => ({
-        // Estados
+function paymentMethodsManager() {
+    return {
         isLoading: false,
-        showNotification: false,
-        notificationMessage: '',
-        notificationType: 'success',
         showConfigModal: false,
         currentMethodType: '',
         currentMethodName: '',
         
-        // Configuración del método actual
         methodConfig: {
             available_for_pickup: true,
             available_for_delivery: true,
             allow_change: true,
             accept_visa: true,
             accept_mastercard: true,
-            accept_american_express: false
+            accept_american_express: false,
+            require_proof: false
         },
         
         init() {
-            // Inicialización
+            this.$nextTick(() => {
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            });
         },
         
-        // Toggle activar/desactivar método
         async toggleMethod(type, isActive) {
+            if (this.isLoading) return;
             this.isLoading = true;
             
             try {
@@ -453,10 +530,7 @@ document.addEventListener('alpine:init', () => {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
-                    body: JSON.stringify({ 
-                        type: type,
-                        is_active: !isActive
-                    })
+                    body: JSON.stringify({ type, is_active: !isActive })
                 });
                 
                 const data = await response.json();
@@ -464,39 +538,20 @@ document.addEventListener('alpine:init', () => {
                 if (data.success) {
                     const methodName = this.getMethodName(type);
                     const action = !isActive ? 'activado' : 'desactivado';
-                    await Swal.fire({
-                        icon: 'success',
-                        title: '¡Éxito!',
-                        text: `${methodName} ${action} exitosamente`,
-                        confirmButtonColor: '#00c76f',
-                        confirmButtonText: 'OK',
-                        timer: 2000,
-                        timerProgressBar: true
-                    }).then(() => {
-                        window.location.reload();
-                    });
+                    window.toast.success('¡Actualización exitosa!', `${methodName} ${action}`, 3000, 'bottom-center');
+                    setTimeout(() => window.location.reload(), 1000);
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: data.message || 'Error al cambiar estado del método',
-                        confirmButtonColor: '#ed2e45'
-                    });
+                    window.toast.error('Error', data.message || 'No se pudo actualizar', 5000, 'bottom-center');
                 }
             } catch (error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error de conexión',
-                    text: 'Intenta nuevamente',
-                    confirmButtonColor: '#ed2e45'
-                });
+                window.toast.error('Error', 'Error de conexión', 5000, 'bottom-center');
             } finally {
                 this.isLoading = false;
             }
         },
         
-        // Establecer como predeterminado
         async setAsDefault(type) {
+            if (this.isLoading) return;
             this.isLoading = true;
             
             try {
@@ -506,55 +561,36 @@ document.addEventListener('alpine:init', () => {
                         'Content-Type': 'application/json',
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                     },
-                    body: JSON.stringify({ type: type })
+                    body: JSON.stringify({ type })
                 });
                 
                 const data = await response.json();
                 
                 if (data.success) {
-                    const methodName = this.getMethodName(type);
-                    await Swal.fire({
-                        icon: 'success',
-                        title: '¡Éxito!',
-                        text: `${methodName} establecido como predeterminado`,
-                        confirmButtonColor: '#00c76f',
-                        confirmButtonText: 'OK',
-                        timer: 2000,
-                        timerProgressBar: true
-                    }).then(() => {
-                        window.location.reload();
-                    });
+                    window.toast.success('¡Actualización exitosa!', `${this.getMethodName(type)} es ahora el principal`, 3000, 'bottom-center');
+                    setTimeout(() => window.location.reload(), 1000);
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: data.message || 'Error al establecer predeterminado',
-                        confirmButtonColor: '#ed2e45'
-                    });
+                    window.toast.error('Error', data.message || 'No se pudo actualizar', 5000, 'bottom-center');
                 }
             } catch (error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error de conexión',
-                    text: 'Intenta nuevamente',
-                    confirmButtonColor: '#ed2e45'
-                });
+                window.toast.error('Error', 'Error de conexión', 5000, 'bottom-center');
             } finally {
                 this.isLoading = false;
             }
         },
         
-        // Configurar método
         configureMethod(type) {
             this.currentMethodType = type;
             this.currentMethodName = this.getMethodName(type);
-            
-            // Cargar configuración actual
             this.loadMethodConfig(type);
             this.showConfigModal = true;
+            this.$nextTick(() => {
+                if (typeof lucide !== 'undefined') {
+                    lucide.createIcons();
+                }
+            });
         },
         
-        // Obtener nombre del método
         getMethodName(type) {
             const names = {
                 'bank_transfer': 'Transferencia Bancaria',
@@ -565,13 +601,22 @@ document.addEventListener('alpine:init', () => {
             return names[type] || type;
         },
         
-        // Cargar configuración del método
         loadMethodConfig(type) {
-            // Cargar configuración actual del método desde el PHP
+            this.methodConfig = {
+                available_for_pickup: true,
+                available_for_delivery: true,
+                allow_change: true,
+                accept_visa: true,
+                accept_mastercard: true,
+                accept_american_express: false,
+                require_proof: false
+            };
+            
             @if($bankTransferMethod)
             if (type === 'bank_transfer') {
                 this.methodConfig.available_for_pickup = {{ $bankTransferMethod->available_for_pickup ? 'true' : 'false' }};
                 this.methodConfig.available_for_delivery = {{ $bankTransferMethod->available_for_delivery ? 'true' : 'false' }};
+                this.methodConfig.require_proof = {{ $bankTransferMethod->require_proof ? 'true' : 'false' }};
             }
             @endif
             
@@ -579,7 +624,7 @@ document.addEventListener('alpine:init', () => {
             if (type === 'cash') {
                 this.methodConfig.available_for_pickup = {{ $cashMethod->available_for_pickup ? 'true' : 'false' }};
                 this.methodConfig.available_for_delivery = {{ $cashMethod->available_for_delivery ? 'true' : 'false' }};
-                this.methodConfig.allow_change = true; // Siempre permitir cambio por defecto
+                this.methodConfig.allow_change = true;
             }
             @endif
             
@@ -595,14 +640,14 @@ document.addEventListener('alpine:init', () => {
             
             @if($codMethod)
             if (type === 'cash_on_delivery') {
-                this.methodConfig.available_for_pickup = false; // COD no disponible para pickup
+                this.methodConfig.available_for_pickup = false;
                 this.methodConfig.available_for_delivery = {{ $codMethod->available_for_delivery ? 'true' : 'false' }};
             }
             @endif
         },
         
-        // Guardar configuración
         async saveMethodConfig() {
+            if (this.isLoading) return;
             this.isLoading = true;
             
             try {
@@ -622,53 +667,27 @@ document.addEventListener('alpine:init', () => {
                 
                 if (data.success) {
                     this.showConfigModal = false;
-                    await Swal.fire({
-                        icon: 'success',
-                        title: '¡Éxito!',
-                        text: 'Configuración guardada exitosamente',
-                        confirmButtonColor: '#00c76f',
-                        confirmButtonText: 'OK',
-                        timer: 2000,
-                        timerProgressBar: true
-                    }).then(() => {
-                        window.location.reload();
-                    });
+                    window.toast.success('¡Actualización exitosa!', 'Configuración guardada', 3000, 'bottom-center');
+                    setTimeout(() => window.location.reload(), 1000);
                 } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: data.message || 'Error al guardar configuración',
-                        confirmButtonColor: '#ed2e45'
-                    });
+                    window.toast.error('Error', data.message || 'No se pudo guardar', 5000, 'bottom-center');
                 }
             } catch (error) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'Error al guardar la configuración',
-                    confirmButtonColor: '#ed2e45'
-                });
+                window.toast.error('Error', 'Error al guardar', 5000, 'bottom-center');
             } finally {
                 this.isLoading = false;
             }
         },
         
-        // Gestionar cuentas bancarias
         manageBankAccounts() {
-            // Encontrar el ID del método de transferencia bancaria
             @if($bankTransferMethod)
                 window.location.href = '{{ route("tenant.admin.payment-methods.bank-accounts.index", ["store" => $store->slug, "paymentMethod" => $bankTransferMethod->id]) }}';
             @else
-                Swal.fire({
-                    icon: 'warning',
-                    title: 'Método no activo',
-                    text: 'Primero activa el método de transferencia bancaria',
-                    confirmButtonColor: '#ffad0d'
-                });
+                window.toast.warning('Atención', 'Primero activa Transferencia Bancaria', 4000, 'bottom-center');
             @endif
         }
-    }));
-});
+    }
+}
 </script>
 @endpush
 

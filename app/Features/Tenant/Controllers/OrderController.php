@@ -246,6 +246,13 @@ class OrderController extends Controller
         
         // Validación con manejo de errores
         try {
+            // Verificar si el método de pago requiere comprobante
+            $requiresProof = false;
+            if (!$isDineIn && $request->filled('payment_method_id')) {
+                $paymentMethod = \App\Features\TenantAdmin\Models\PaymentMethod::find($request->input('payment_method_id'));
+                $requiresProof = $paymentMethod && $paymentMethod->require_proof;
+            }
+            
             $validationRules = [
                 'customer_name' => 'required|string|max:255',
                 'customer_phone' => $isDineIn ? 'nullable|string|max:20' : 'required|string|max:20',
@@ -255,7 +262,7 @@ class OrderController extends Controller
                 'cash_amount' => 'nullable|numeric|min:1',
                 'coupon_code' => 'nullable|string|max:50',
                 'notes' => 'nullable|string|max:500',
-                'payment_proof' => 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120', // 5MB máximo
+                'payment_proof' => $requiresProof ? 'required|file|mimes:jpg,jpeg,png,pdf|max:5120' : 'nullable|file|mimes:jpg,jpeg,png,pdf|max:5120',
             ];
             
             // Reglas para dine_in/room_service

@@ -11,6 +11,7 @@ use App\Features\SuperLinkiu\Controllers\ProfileController;
 use App\Features\SuperLinkiu\Controllers\BillingSettingController;
 use App\Features\SuperLinkiu\Controllers\MasterKeyRecoveryController;
 use App\Features\SuperLinkiu\Controllers\StoreReportController;
+use App\Features\SuperLinkiu\Controllers\OrderToolsController;
 use Illuminate\Support\Facades\Route;
 
 // Rutas de SuperLinkiu
@@ -146,6 +147,14 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
             ->name('tickets.add-response');
         Route::post('tickets/{ticket}/status', [TicketController::class, 'updateStatus'])
             ->name('tickets.update-status');
+
+        // Herramientas - Gestión de pedidos
+        Route::prefix('tools')->name('tools.')->group(function () {
+            Route::get('/delete-order', [OrderToolsController::class, 'deleteOrderForm'])->name('delete-order');
+            Route::post('/search-order', [OrderToolsController::class, 'searchOrder'])->name('search-order');
+            Route::post('/delete-order', [OrderToolsController::class, 'deleteOrder'])->name('delete-order.execute');
+            Route::get('/deletion-logs', [OrderToolsController::class, 'deletionLogs'])->name('deletion-logs');
+        });
         Route::post('tickets/{ticket}/assign', [TicketController::class, 'assign'])
             ->name('tickets.assign');
         Route::post('tickets/{ticket}/priority', [TicketController::class, 'updatePriority'])

@@ -155,6 +155,9 @@ class SidebarBuilderService
         // Gestión de tickets
         $items = array_merge($items, $this->buildSuperAdminTicketsSection());
 
+        // Herramientas
+        $items = array_merge($items, $this->buildSuperAdminToolsSection());
+
         // Anuncios y Configuración
         $items = array_merge($items, $this->buildSuperAdminAnnouncementsSection());
 
@@ -303,6 +306,24 @@ class SidebarBuilderService
             'active'     => request()->routeIs('superlinkiu.tickets.*') && !request()->routeIs('superlinkiu.email.*'),
             'badge'      => $openTicketsCount > 0 ? (string)$openTicketsCount : null,
             'badgeColor' => $openTicketsCount > 0 ? 'bg-error-200 text-accent-50' : null
+        ];
+
+        return $items;
+    }
+
+    /**
+     * Construir sección de herramientas para SuperAdmin
+     */
+    protected function buildSuperAdminToolsSection(): array
+    {
+        $items = [];
+
+        // Eliminar Pedidos
+        $items[] = [
+            'label'  => 'Eliminar Pedidos',
+            'url'    => route('superlinkiu.tools.delete-order'),
+            'icon'   => 'trash-2',
+            'active' => request()->routeIs('superlinkiu.tools.*')
         ];
 
         return $items;
