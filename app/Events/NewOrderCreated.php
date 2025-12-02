@@ -5,16 +5,43 @@ namespace App\Events;
 use App\Shared\Models\Order;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class NewOrderCreated implements ShouldBroadcastNow
+class NewOrderCreated implements ShouldBroadcast, ShouldQueue
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     public $order;
     public $storeId;
+    
+    /**
+     * The number of times the job may be attempted.
+     */
+    public $tries = 3;
+    
+    /**
+     * The number of seconds before the job should be processed.
+     */
+    public $delay = 0;
+    
+    /**
+     * Determine if the event should broadcast.
+     * Si Pusher falla, no debe romper la creación del pedido
+     */
+    public function shouldBroadcast(): bool
+    {
+        try {
+            // Solo broadcast si Pusher está configurado correctamente
+            return config('broadcasting.default') === 'pusher' 
+                && !empty(config('broadcasting.connections.pusher.key'));
+        } catch (\Exception $e) {
+            \Log::warning('Broadcasting check failed for NewOrderCreated: ' . $e->getMessage());
+            return false;
+        }
+    }
 
     /**
      * Create a new event instance.
