@@ -568,8 +568,16 @@ class OrderController extends Controller
 
             DB::commit();
 
-            // 🔔 Disparar evento de nuevo pedido para notificar al admin
-            event(new \App\Events\NewOrderCreated($order));
+            // 🔔 Disparar evento de nuevo pedido para notificar al admin (no bloqueante)
+            try {
+                event(new \App\Events\NewOrderCreated($order));
+            } catch (\Exception $e) {
+                \Log::error('Error disparando evento NewOrderCreated', [
+                    'order_id' => $order->id,
+                    'error' => $e->getMessage()
+                ]);
+                // No lanzar excepción, el pedido ya está creado
+            }
 
             // 📱 Enviar notificaciones WhatsApp
             try {
