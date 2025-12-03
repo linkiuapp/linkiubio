@@ -110,7 +110,7 @@ Ejemplo: <x-orders-stats-widget :stats="$stats" />
             </div>
             <div>
                 <div class="text-xl font-bold text-emerald-600">${{ number_format($stats['total_revenue'] ?? 0, 0, ',', '.') }}</div>
-                <div class="text-xs text-gray-500">Productos</div>
+                <div class="text-xs text-gray-500">Total ingresos por productos</div>
             </div>
         </div>
     </div>
@@ -123,7 +123,7 @@ Ejemplo: <x-orders-stats-widget :stats="$stats" />
             </div>
             <div>
                 <div class="text-xl font-bold text-slate-600">${{ number_format($stats['total_shipping'] ?? 0, 0, ',', '.') }}</div>
-                <div class="text-xs text-gray-500">Envíos</div>
+                <div class="text-xs text-gray-500">Total ingresos por envíos</div>
             </div>
         </div>
     </div>
