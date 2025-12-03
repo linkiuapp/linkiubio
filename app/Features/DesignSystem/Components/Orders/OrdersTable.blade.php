@@ -42,7 +42,7 @@ Ejemplo: <x-orders-table :orders="$orders" :store="$store" />
                         Pago
                     </th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
-                        Total
+                        Ingresos
                     </th>
                     <th scope="col" class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">
                         Fecha
@@ -66,6 +66,7 @@ Ejemplo: <x-orders-table :orders="$orders" :store="$store" />
                            'payment_method' => $order->payment_method,
                            'payment_proof_path' => $order->payment_proof_path,
                            'payment_proof_url' => $order->payment_proof_url,
+                           'subtotal' => (float) ($order->subtotal ?? $order->total),
                            'total' => (float) $order->total,
                            'shipping_cost' => (float) ($order->shipping_cost ?? 0),
                            'created_at' => $order->created_at->toISOString(),
@@ -158,12 +159,17 @@ Ejemplo: <x-orders-table :orders="$orders" :store="$store" />
                         </td>
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm">
-                                <p class="font-semibold text-gray-900">
-                                    $<span x-text="formatCurrency(order.total)"></span>
+                                <p class="font-semibold text-green-600" title="Ingreso por productos">
+                                    $<span x-text="formatCurrency(order.subtotal)"></span>
                                 </p>
                                 <template x-if="order.shipping_cost > 0">
                                     <p class="text-xs text-gray-500">
-                                        + $<span x-text="formatCurrency(order.shipping_cost)"></span> envío
+                                        Envío: $<span x-text="formatCurrency(order.shipping_cost)"></span>
+                                    </p>
+                                </template>
+                                <template x-if="order.shipping_cost > 0">
+                                    <p class="text-xs text-gray-400">
+                                        Total: $<span x-text="formatCurrency(order.total)"></span>
                                     </p>
                                 </template>
                             </div>

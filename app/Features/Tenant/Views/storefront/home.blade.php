@@ -219,8 +219,13 @@
                                 @endif
 
                                 <!-- Precio prominente -->
-                                <div class="body-lg-bold text-brandNeutral-400 mb-1">
-                                    ${{ number_format($product->price, 0, ',', '.') }}
+                                <div class="flex items-center gap-2 mb-1">
+                                    @if($product->tienePromocionActiva())
+                                        <span class="body-sm text-brandNeutral-300 line-through">${{ number_format($product->price, 0, ',', '.') }}</span>
+                                        <span class="body-lg-bold text-brandError-400">${{ number_format($product->precio_promocional, 0, ',', '.') }}</span>
+                                    @else
+                                        <span class="body-lg-bold text-brandNeutral-400">${{ number_format($product->price, 0, ',', '.') }}</span>
+                                    @endif
                                 </div>
 
                                 <!-- Categorías pequeñas -->
@@ -302,8 +307,13 @@
 
 
                                 <!-- Precio prominente -->
-                                <div class="body-lg-bold text-brandNeutral-400">
-                                    ${{ number_format($product->price, 0, ',', '.') }}
+                                <div class="flex items-center gap-2">
+                                    @if($product->tienePromocionActiva())
+                                        <span class="body-sm text-brandNeutral-300 line-through">${{ number_format($product->price, 0, ',', '.') }}</span>
+                                        <span class="body-lg-bold text-brandError-400">${{ number_format($product->precio_promocional, 0, ',', '.') }}</span>
+                                    @else
+                                        <span class="body-lg-bold text-brandNeutral-400">${{ number_format($product->price, 0, ',', '.') }}</span>
+                                    @endif
                                 </div>
 
                                 <!-- Categorías pequeñas -->

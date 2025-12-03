@@ -29,6 +29,11 @@ class Product extends Model
         'tipo_stock',
         'cantidad_stock',
         'umbral_alerta_stock',
+        // Campos de precio promocional
+        'precio_promocional',
+        'promocion_activa',
+        'promocion_fecha_inicio',
+        'promocion_fecha_fin',
     ];
 
     protected $casts = [
@@ -40,6 +45,11 @@ class Product extends Model
         'controla_stock' => 'boolean',
         'cantidad_stock' => 'integer',
         'umbral_alerta_stock' => 'integer',
+        // Casts de precio promocional
+        'precio_promocional' => 'decimal:2',
+        'promocion_activa' => 'boolean',
+        'promocion_fecha_inicio' => 'date',
+        'promocion_fecha_fin' => 'date',
     ];
 
     /**
@@ -208,6 +218,60 @@ class Product extends Model
     public function getFormattedPriceAttribute(): string
     {
         return '$' . number_format($this->price, 0, ',', '.');
+    }
+
+    /**
+     * Verificar si la promoción está vigente
+     */
+    public function tienePromocionActiva(): bool
+    {
+        if (!$this->promocion_activa || !$this->precio_promocional) {
+            return false;
+        }
+
+        $hoy = now()->startOfDay();
+
+        // Si hay fecha de inicio, verificar que ya pasó
+        if ($this->promocion_fecha_inicio && $hoy->lt($this->promocion_fecha_inicio)) {
+            return false;
+        }
+
+        // Si hay fecha de fin, verificar que no ha pasado
+        if ($this->promocion_fecha_fin && $hoy->gt($this->promocion_fecha_fin)) {
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Obtener el precio final (promocional si aplica, normal si no)
+     */
+    public function getPrecioFinalAttribute(): float
+    {
+        if ($this->tienePromocionActiva()) {
+            return (float) $this->precio_promocional;
+        }
+        return (float) $this->price;
+    }
+
+    /**
+     * Obtener el precio final formateado
+     */
+    public function getFormattedPrecioFinalAttribute(): string
+    {
+        return '$' . number_format($this->precio_final, 0, ',', '.');
+    }
+
+    /**
+     * Obtener porcentaje de descuento
+     */
+    public function getPorcentajeDescuentoAttribute(): int
+    {
+        if (!$this->tienePromocionActiva() || $this->price <= 0) {
+            return 0;
+        }
+        return (int) round((($this->price - $this->precio_promocional) / $this->price) * 100);
     }
 
     /**

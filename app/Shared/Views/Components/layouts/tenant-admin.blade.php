@@ -604,11 +604,26 @@
             lastOrderCount: null,
             pollingInterval: null,
             pusherWorking: false,
-            lastNotificationTime: 0
+            lastNotificationTime: 0,
+            notifiedOrderIds: new Set() // Registro de pedidos ya notificados
         };
 
         document.addEventListener('DOMContentLoaded', function() {
             const system = window.orderNotificationSystem;
+            
+            // Función para verificar si ya se notificó este pedido
+            function yaNotificado(orderId) {
+                if (system.notifiedOrderIds.has(orderId)) {
+                    return true;
+                }
+                system.notifiedOrderIds.add(orderId);
+                // Limpiar IDs antiguos (mantener solo los últimos 50)
+                if (system.notifiedOrderIds.size > 50) {
+                    const arr = Array.from(system.notifiedOrderIds);
+                    system.notifiedOrderIds = new Set(arr.slice(-50));
+                }
+                return false;
+            }
             
             // 1️⃣ PUSHER: Notificaciones instantáneas (principal)
             if (typeof Echo !== 'undefined') {
@@ -617,6 +632,7 @@
                 // Escuchar nuevos pedidos
                 Echo.channel('store.' + storeId + '.orders')
                     .listen('.new.order', (event) => {
+                        if (yaNotificado(event.order_id)) return;
                         system.pusherWorking = true;
                         system.lastNotificationTime = Date.now();
                         mostrarToastPedido(event, 'Nuevo Pedido');
@@ -625,6 +641,7 @@
                 // Escuchar reservas de mesa
                 Echo.channel('store.' + storeId + '.table-reservations')
                     .listen('.new.table.reservation', (event) => {
+                        if (yaNotificado('mesa-' + event.reservation_id)) return;
                         system.pusherWorking = true;
                         system.lastNotificationTime = Date.now();
                         mostrarToastPedido({
@@ -639,6 +656,7 @@
                 // Escuchar pedidos de mesa (Dine-in)
                 Echo.channel('store.' + storeId + '.dine-in-orders')
                     .listen('.new.dine.in.order', (event) => {
+                        if (yaNotificado('dine-' + event.order_id)) return;
                         system.pusherWorking = true;
                         system.lastNotificationTime = Date.now();
                         mostrarToastPedido({
@@ -653,6 +671,7 @@
                 // Escuchar reservas de hotel
                 Echo.channel('store.' + storeId + '.hotel-reservations')
                     .listen('.new.hotel.reservation', (event) => {
+                        if (yaNotificado('hotel-' + event.reservation_id)) return;
                         system.pusherWorking = true;
                         system.lastNotificationTime = Date.now();
                         mostrarToastPedido({
@@ -682,11 +701,9 @@
                             
                             // Detectar nuevos pedidos
                             if (data.count > system.lastOrderCount) {
-                                // Solo mostrar si Pusher no ha notificado recientemente (últimos 10 segundos)
-                                const timeSinceLastNotification = Date.now() - system.lastNotificationTime;
-                                
-                                if (timeSinceLastNotification > 10000) {
-                                    if (data.latest_order) {
+                                if (data.latest_order) {
+                                    // Verificar si ya se notificó este pedido
+                                    if (!yaNotificado(data.latest_order.id)) {
                                         mostrarToastPedido({
                                             order_id: data.latest_order.id,
                                             order_number: data.latest_order.order_number,

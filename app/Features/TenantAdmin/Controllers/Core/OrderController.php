@@ -126,10 +126,13 @@ class OrderController extends Controller
             'cancelled' => $statusCounts['cancelled'] ?? 0,
             'total_revenue' => Order::byStore($store->id)
                 ->whereIn('status', ['delivered'])
-                ->sum('total'),
+                ->sum('subtotal'), // Usar subtotal para ingresos reales (sin envío)
+            'total_shipping' => Order::byStore($store->id)
+                ->whereIn('status', ['delivered'])
+                ->sum('shipping_cost'), // Total cobrado por envíos
             'avg_order_value' => Order::byStore($store->id)
                 ->whereIn('status', ['delivered'])
-                ->avg('total') ?? 0,
+                ->avg('subtotal') ?? 0,
             // Conteos por tipo de orden
             'by_type' => [
                 'delivery' => $orderTypeCounts['delivery'] ?? 0,
@@ -231,10 +234,13 @@ class OrderController extends Controller
             'cancelled' => $statusCounts['cancelled'] ?? 0,
             'total_revenue' => Order::byStore($store->id)
                 ->whereIn('status', ['delivered'])
-                ->sum('total'),
+                ->sum('subtotal'), // Usar subtotal para ingresos reales (sin envío)
+            'total_shipping' => Order::byStore($store->id)
+                ->whereIn('status', ['delivered'])
+                ->sum('shipping_cost'), // Total cobrado por envíos
             'avg_order_value' => Order::byStore($store->id)
                 ->whereIn('status', ['delivered'])
-                ->avg('total') ?? 0,
+                ->avg('subtotal') ?? 0,
             'by_type' => [
                 'delivery' => $orderTypeCounts['delivery'] ?? 0,
                 'pickup' => $orderTypeCounts['pickup'] ?? 0,
