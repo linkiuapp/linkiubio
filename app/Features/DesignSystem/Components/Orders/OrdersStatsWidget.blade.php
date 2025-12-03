@@ -10,7 +10,7 @@ Ejemplo: <x-orders-stats-widget :stats="$stats" />
     'stats' => [],
 ])
 
-<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-9 gap-4">
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
     {{-- Total --}}
     <div class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
         <div class="flex items-center gap-3">

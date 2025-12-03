@@ -8,9 +8,9 @@
     <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div class="border-b border-gray-200 bg-gray-50 py-4 px-6">
             <div class="flex items-center justify-between flex-wrap gap-4">
-                <div>
+        <div>
                     <div class="flex items-center gap-3 mb-1">
-                        <a href="{{ route('tenant.admin.payment-methods.index', ['store' => $store->slug]) }}" 
+                <a href="{{ route('tenant.admin.payment-methods.index', ['store' => $store->slug]) }}" 
                            class="text-gray-400 hover:text-gray-600 transition-colors">
                             <i data-lucide="arrow-left" class="w-5 h-5"></i>
                         </a>
@@ -21,21 +21,21 @@
                     </p>
                 </div>
                 <div class="flex items-center gap-3">
-                    @if($remainingSlots > 0)
-                        <a href="{{ route('tenant.admin.payment-methods.bank-accounts.create', ['store' => $store->slug, 'paymentMethod' => $paymentMethod->id]) }}" 
+                @if($remainingSlots > 0)
+                <a href="{{ route('tenant.admin.payment-methods.bank-accounts.create', ['store' => $store->slug, 'paymentMethod' => $paymentMethod->id]) }}" 
                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors">
                             <i data-lucide="plus" class="w-4 h-4"></i>
-                            Nueva Cuenta
-                        </a>
-                    @else
+                    Nueva Cuenta
+                </a>
+                @else
                         <span class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-400 bg-gray-100 rounded-lg cursor-not-allowed">
                             <i data-lucide="lock" class="w-4 h-4"></i>
-                            Límite Alcanzado
+                    Límite Alcanzado
                         </span>
-                    @endif
-                </div>
+                @endif
             </div>
         </div>
+    </div>
 
         {{-- Barra de progreso --}}
         <div class="px-6 py-3 bg-gray-50 border-b border-gray-200">
@@ -62,17 +62,17 @@
                            class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors">
                             <i data-lucide="plus" class="w-4 h-4"></i>
                             Agregar primera cuenta
-                        </a>
+                    </a>
                     @endif
                 </div>
             @else
                 <div class="space-y-3">
-                    @foreach($bankAccounts as $account)
+                            @foreach($bankAccounts as $account)
                         <div class="flex items-center justify-between p-4 bg-white border rounded-xl {{ $account->is_active ? 'border-blue-200' : 'border-gray-200' }} transition-all">
                             <div class="flex items-center gap-4">
                                 <div class="w-12 h-12 rounded-xl {{ $account->is_active ? 'bg-blue-100' : 'bg-gray-100' }} flex items-center justify-center">
                                     <i data-lucide="landmark" class="w-6 h-6 {{ $account->is_active ? 'text-blue-600' : 'text-gray-400' }}"></i>
-                                </div>
+                                            </div>
                                 <div>
                                     <div class="flex items-center gap-2">
                                         <h4 class="font-semibold text-gray-900">{{ $account->bank_name }}</h4>
@@ -108,18 +108,18 @@
                                 </a>
                                 
                                 {{-- Eliminar --}}
-                                <button type="button" 
+                                            <button type="button" 
                                         class="p-2 text-red-600 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors"
                                         @click="@if($store->isActionProtected('bank_accounts', 'delete'))
                                                     openMasterKey('{{ $account->bank_name }} - ****{{ substr($account->account_number, -4) }}', '{{ route('tenant.admin.payment-methods.bank-accounts.destroy', ['store' => $store->slug, 'paymentMethod' => $paymentMethod->id, 'bankAccount' => $account->id]) }}')
                                                 @else
                                                     openDeleteModal('{{ $account->bank_name }}', '{{ route('tenant.admin.payment-methods.bank-accounts.destroy', ['store' => $store->slug, 'paymentMethod' => $paymentMethod->id, 'bankAccount' => $account->id]) }}')
-                                                @endif">
+                                                            @endif">
                                     <i data-lucide="trash-2" class="w-5 h-5"></i>
-                                </button>
-                            </div>
+                                            </button>
+                                        </div>
                         </div>
-                    @endforeach
+                            @endforeach
                 </div>
                 
                 @if($remainingSlots <= 0)
@@ -349,9 +349,9 @@ function bankAccountsManager() {
         },
         
         toggleActive(url, action) {
-            const form = document.createElement('form');
-            form.method = 'POST';
-            form.action = url;
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = url;
             form.innerHTML = `<input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]').getAttribute('content')}">`;
             document.body.appendChild(form);
             form.submit();
@@ -382,8 +382,8 @@ function bankAccountsManager() {
                 <input type="hidden" name="_token" value="${document.querySelector('meta[name="csrf-token"]').getAttribute('content')}">
                 <input type="hidden" name="_method" value="DELETE">
             `;
-            document.body.appendChild(form);
-            form.submit();
+        document.body.appendChild(form);
+        form.submit();
         },
         
         openMasterKey(name, url) {
