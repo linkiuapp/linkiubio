@@ -10,55 +10,121 @@ Ejemplo: <x-orders-stats-widget :stats="$stats" />
     'stats' => [],
 ])
 
-<div class="bg-white rounded-lg shadow-sm p-4">
-    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-8 gap-3">
-        {{-- Total --}}
-        <div class="text-center p-3 bg-gradient-to-r from-primary-100 to-primary-50 rounded-lg border-l-4 border-primary-400">
-            <div class="text-xl font-bold text-gray-900">{{ $stats['total'] ?? 0 }}</div>
-            <div class="text-xs text-gray-600 mt-1">Total</div>
+<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-9 gap-4">
+    {{-- Total --}}
+    <div class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 flex items-center justify-center bg-blue-100 text-blue-600 rounded-xl">
+                <i data-lucide="shopping-cart" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <div class="text-2xl font-bold text-gray-900">{{ $stats['total'] ?? 0 }}</div>
+                <div class="text-xs text-gray-500">Total</div>
+            </div>
         </div>
-        
-        {{-- Pendientes --}}
-        <div class="text-center p-3 bg-gradient-to-r from-warning-100 to-warning-50 rounded-lg border-l-4 border-warning-400">
-            <div class="text-xl font-bold text-gray-900">{{ $stats['pending'] ?? 0 }}</div>
-            <div class="text-xs text-gray-600 mt-1">Pendientes</div>
+    </div>
+    
+    {{-- Pendientes --}}
+    <div class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 flex items-center justify-center bg-amber-100 text-amber-600 rounded-xl">
+                <i data-lucide="clock" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <div class="text-2xl font-bold text-gray-900">{{ $stats['pending'] ?? 0 }}</div>
+                <div class="text-xs text-gray-500">Pendientes</div>
+            </div>
         </div>
-        
-        {{-- Confirmados --}}
-        <div class="text-center p-3 bg-gradient-to-r from-info-100 to-info-50 rounded-lg border-l-4 border-info-400">
-            <div class="text-xl font-bold text-gray-900">{{ $stats['confirmed'] ?? 0 }}</div>
-            <div class="text-xs text-gray-600 mt-1">Confirmados</div>
+    </div>
+    
+    {{-- Confirmados --}}
+    <div class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 flex items-center justify-center bg-green-100 text-green-600 rounded-xl">
+                <i data-lucide="check-circle" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <div class="text-2xl font-bold text-gray-900">{{ $stats['confirmed'] ?? 0 }}</div>
+                <div class="text-xs text-gray-500">Confirmados</div>
+            </div>
         </div>
-        
-        {{-- Preparando --}}
-        <div class="text-center p-3 bg-gradient-to-r from-secondary-100 to-secondary-50 rounded-lg border-l-4 border-secondary-400">
-            <div class="text-xl font-bold text-gray-900">{{ $stats['preparing'] ?? 0 }}</div>
-            <div class="text-xs text-gray-600 mt-1">Preparando</div>
+    </div>
+    
+    {{-- Preparando --}}
+    <div class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 flex items-center justify-center bg-purple-100 text-purple-600 rounded-xl">
+                <i data-lucide="package" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <div class="text-2xl font-bold text-gray-900">{{ $stats['preparing'] ?? 0 }}</div>
+                <div class="text-xs text-gray-500">Preparando</div>
+            </div>
         </div>
-        
-        {{-- Enviados --}}
-        <div class="text-center p-3 bg-gradient-to-r from-primary-100 to-primary-50 rounded-lg border-l-4 border-primary-400">
-            <div class="text-xl font-bold text-gray-900">{{ $stats['shipped'] ?? 0 }}</div>
-            <div class="text-xs text-gray-600 mt-1">Enviados</div>
+    </div>
+    
+    {{-- Enviados --}}
+    <div class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 flex items-center justify-center bg-indigo-100 text-indigo-600 rounded-xl">
+                <i data-lucide="truck" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <div class="text-2xl font-bold text-gray-900">{{ $stats['shipped'] ?? 0 }}</div>
+                <div class="text-xs text-gray-500">Enviados</div>
+            </div>
         </div>
-        
-        {{-- Entregados --}}
-        <div class="text-center p-3 bg-gradient-to-r from-success-100 to-success-50 rounded-lg border-l-4 border-success-400">
-            <div class="text-xl font-bold text-gray-900">{{ $stats['delivered'] ?? 0 }}</div>
-            <div class="text-xs text-gray-600 mt-1">Entregados</div>
+    </div>
+    
+    {{-- Entregados --}}
+    <div class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 flex items-center justify-center bg-green-100 text-green-600 rounded-xl">
+                <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <div class="text-2xl font-bold text-gray-900">{{ $stats['delivered'] ?? 0 }}</div>
+                <div class="text-xs text-gray-500">Entregados</div>
+            </div>
         </div>
-        
-        {{-- Cancelados --}}
-        <div class="text-center p-3 bg-gradient-to-r from-red-100 to-red-50 rounded-lg border-l-4 border-red-400">
-            <div class="text-xl font-bold text-gray-900">{{ $stats['cancelled'] ?? 0 }}</div>
-            <div class="text-xs text-gray-600 mt-1">Cancelados</div>
+    </div>
+    
+    {{-- Cancelados --}}
+    <div class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 flex items-center justify-center bg-red-100 text-red-600 rounded-xl">
+                <i data-lucide="x-circle" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <div class="text-2xl font-bold text-gray-900">{{ $stats['cancelled'] ?? 0 }}</div>
+                <div class="text-xs text-gray-500">Cancelados</div>
+            </div>
         </div>
-        
-        {{-- Ingresos --}}
-        <div class="text-center p-3 bg-gradient-to-r from-success-100 to-success-50 rounded-lg border-l-4 border-success-400">
-            <div class="text-lg font-bold text-gray-900">${{ number_format($stats['total_revenue'] ?? 0, 0, ',', '.') }}</div>
-            <div class="text-xs text-gray-600 mt-1">Ingresos</div>
+    </div>
+    
+    {{-- Ingresos por Productos --}}
+    <div class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 flex items-center justify-center bg-green-100 text-green-600 rounded-xl">
+                <i data-lucide="banknote" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <div class="text-xl font-bold text-emerald-600">${{ number_format($stats['total_revenue'] ?? 0, 0, ',', '.') }}</div>
+                <div class="text-xs text-gray-500">Productos</div>
+            </div>
+        </div>
+    </div>
+    
+    {{-- Envíos Cobrados --}}
+    <div class="bg-white rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+        <div class="flex items-center gap-3">
+            <div class="w-12 h-12 flex items-center justify-center bg-gray-100 text-gray-600 rounded-xl">
+                <i data-lucide="package-check" class="w-6 h-6"></i>
+            </div>
+            <div>
+                <div class="text-xl font-bold text-slate-600">${{ number_format($stats['total_shipping'] ?? 0, 0, ',', '.') }}</div>
+                <div class="text-xs text-gray-500">Envíos</div>
+            </div>
         </div>
     </div>
 </div>
-

@@ -164,6 +164,11 @@ class ProductController extends Controller
             'tipo_stock' => $request->input('tipo_stock', 'ilimitado'),
             'cantidad_stock' => $request->input('cantidad_stock'),
             'umbral_alerta_stock' => $request->input('umbral_alerta_stock', 1),
+            // Campos de precio promocional
+            'precio_promocional' => $request->input('precio_promocional'),
+            'promocion_activa' => $request->boolean('promocion_activa', false),
+            'promocion_fecha_inicio' => $request->input('promocion_fecha_inicio'),
+            'promocion_fecha_fin' => $request->input('promocion_fecha_fin'),
         ]);
 
         // Procesar imágenes si se subieron
@@ -283,6 +288,11 @@ class ProductController extends Controller
             'tipo_stock' => $request->input('tipo_stock', 'ilimitado'),
             'cantidad_stock' => $request->input('cantidad_stock'),
             'umbral_alerta_stock' => $request->input('umbral_alerta_stock', 1),
+            // Campos de precio promocional
+            'precio_promocional' => $request->input('precio_promocional'),
+            'promocion_activa' => $request->boolean('promocion_activa', false),
+            'promocion_fecha_inicio' => $request->input('promocion_fecha_inicio'),
+            'promocion_fecha_fin' => $request->input('promocion_fecha_fin'),
         ]);
 
         // Si cambió de variable a simple, eliminar todas las asignaciones de variables

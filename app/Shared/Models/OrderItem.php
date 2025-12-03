@@ -163,16 +163,31 @@ class OrderItem extends Model
 
         $display = [];
         foreach ($this->variant_details as $key => $value) {
-            // Saltar si es precio_modificador o si el valor es un array
-            if ($key === 'precio_modificador' || is_array($value)) {
+            // Saltar precio_modificador
+            if ($key === 'precio_modificador') {
                 continue;
             }
             
-            // Si el key es numérico o es un array, solo mostrar el valor
-            if (is_numeric($key) || is_array($key)) {
+            // Si el valor es un array (nuevo formato de variantes)
+            if (is_array($value)) {
+                foreach ($value as $option) {
+                    // Extraer el nombre de la opción del array
+                    if (isset($option['option_name'])) {
+                        $display[] = $option['option_name'];
+                    } elseif (isset($option['value'])) {
+                        $display[] = $option['value'];
+                    } elseif (isset($option['name'])) {
+                        $display[] = $option['name'];
+                    }
+                }
+                continue;
+            }
+            
+            // Si el key es numérico, solo mostrar el valor
+            if (is_numeric($key)) {
                 $display[] = $value;
             } else {
-                // Asegurar que tanto key como value son strings
+                // Formato: Key: Value
                 $display[] = ucfirst((string)$key) . ': ' . (string)$value;
             }
         }
@@ -199,8 +214,8 @@ class OrderItem extends Model
      */
     public static function createFromProduct(Product $product, int $quantity = 1, ?array $variantDetails = null): array
     {
-        // Calcular precio final considerando variantes
-        $basePrice = $product->price;
+        // Calcular precio final considerando promoción y variantes
+        $basePrice = $product->precio_final; // Usa precio promocional si está activo
         $priceModifier = 0;
 
         if ($variantDetails) {

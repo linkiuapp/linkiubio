@@ -55,8 +55,14 @@
             <div class="flex items-start justify-between gap-3">
                 <div class="flex-1">
                     <h1 class="body-lg-bold text-brandNeutral-400 mb-1">{{ $product->name }}</h1>
-                    <div class="body-lg-bold text-brandNeutral-400">
-                        ${{ number_format($product->price, 0, ',', '.') }}
+                    <div class="flex items-center gap-2">
+                        @if($product->tienePromocionActiva())
+                            <span class="body-sm text-brandNeutral-300 line-through">${{ number_format($product->price, 0, ',', '.') }}</span>
+                            <span class="body-lg-bold text-brandError-400">${{ number_format($product->precio_promocional, 0, ',', '.') }}</span>
+                            <span class="px-2 py-0.5 bg-brandError-400 text-brandWhite-50 text-xs font-bold rounded">-{{ $product->porcentaje_descuento }}%</span>
+                        @else
+                            <span class="body-lg-bold text-brandNeutral-400">${{ number_format($product->price, 0, ',', '.') }}</span>
+                        @endif
                     </div>
                 </div>
                 
@@ -221,8 +227,8 @@
                 <!-- Precio total actualizado -->
                 <div class="flex items-center justify-between p-4 bg-brandWhite-100 rounded-lg">
                     <span class="body-lg-bold text-brandNeutral-400">Precio Total:</span>
-                    <span id="total-price" class="body-lg-bold text-brandNeutral-400">
-                        ${{ number_format($product->price, 0, ',', '.') }}
+                    <span id="total-price" class="body-lg-bold {{ $product->tienePromocionActiva() ? 'text-brandError-400' : 'text-brandNeutral-400' }}">
+                        ${{ number_format($product->precio_final, 0, ',', '.') }}
                     </span>
                 </div>
             </div>
@@ -317,8 +323,8 @@
 
 @push('scripts')
 <script>
-    // Precio base del producto
-    const basePrice = {{ $product->price }};
+    // Precio base del producto (usa precio promocional si está activo)
+    const basePrice = {{ $product->precio_final }};
     let selectedVariables = {};
 
     // Datos de stock por variantes

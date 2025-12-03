@@ -1043,8 +1043,8 @@ class OrderController extends Controller
                 $cartKey .= '_' . md5(json_encode($validated['variants']));
             }
             
-            // Calcular precio total incluyendo modificadores de variables
-            $basePrice = $product->price;
+            // Calcular precio total (usa precio promocional si está activo)
+            $basePrice = $product->precio_final;
             $priceModifier = 0;
             
             if (!empty($validated['variants'])) {
@@ -1238,14 +1238,17 @@ class OrderController extends Controller
             if ($product) {
                         $itemTotal = $product->price * $item['quantity'];
                         
+                        $productPrice = $product->precio_final; // Usa precio promocional si está activo
+                        $itemTotal = $productPrice * $item['quantity'];
+                        
                         $items[] = [
                     'key' => $key,
                             'product_id' => $product->id,
                             'product_name' => $product->name,
-                            'product_price' => $product->price,
+                            'product_price' => $productPrice,
                             'quantity' => $item['quantity'],
                             'item_total' => $itemTotal,
-                            'formatted_price' => '$' . number_format($product->price, 0, ',', '.'),
+                            'formatted_price' => '$' . number_format($productPrice, 0, ',', '.'),
                             'formatted_total' => '$' . number_format($itemTotal, 0, ',', '.'),
                             'variants' => $item['variants'] ?? [],
                             'variant_display' => $this->formatVariants($item['variants'] ?? []),

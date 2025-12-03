@@ -145,6 +145,67 @@ Permite crear nuevos productos con información básica, imágenes, categorías 
                         {{-- End ITEM: Tipo --}}
                     </div>
 
+                    {{-- SECTION: Precio Promocional --}}
+                    <div class="border border-orange-200 rounded-lg p-4 bg-orange-50/50" x-data="{ promocionActiva: {{ old('promocion_activa') ? 'true' : 'false' }} }">
+                        <div class="flex items-center justify-between mb-4">
+                            <div class="flex items-center gap-2">
+                                <i data-lucide="tag" class="w-5 h-5 text-orange-600"></i>
+                                <span class="text-sm font-medium text-gray-800">Precio Promocional</span>
+                            </div>
+                            <input type="hidden" name="promocion_activa" value="0">
+                            <x-switch-basic 
+                                switch-name="promocion_activa"
+                                switch-id="promocion_activa"
+                                :checked="old('promocion_activa')"
+                                value="1"
+                                x-model="promocionActiva"
+                            />
+                        </div>
+                        
+                        <div x-show="promocionActiva" x-collapse class="space-y-4">
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                {{-- Precio Promocional --}}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Precio Oferta</label>
+                                    <div class="relative">
+                                        <span class="absolute left-3 top-2.5 text-gray-500">$</span>
+                                        <input type="number" 
+                                               name="precio_promocional" 
+                                               value="{{ old('precio_promocional') }}"
+                                               min="0" 
+                                               step="0.01"
+                                               class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500"
+                                               placeholder="25000">
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1">Debe ser menor al precio original</p>
+                                </div>
+                                
+                                {{-- Fecha Inicio --}}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Inicio (opcional)</label>
+                                    <input type="date" 
+                                           name="promocion_fecha_inicio" 
+                                           value="{{ old('promocion_fecha_inicio') }}"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                </div>
+                                
+                                {{-- Fecha Fin --}}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Fecha Fin (opcional)</label>
+                                    <input type="date" 
+                                           name="promocion_fecha_fin" 
+                                           value="{{ old('promocion_fecha_fin') }}"
+                                           class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500">
+                                </div>
+                            </div>
+                            <p class="text-xs text-gray-500">
+                                <i data-lucide="info" class="w-3 h-3 inline"></i>
+                                Si no defines fechas, la promoción estará activa indefinidamente mientras el toggle esté encendido.
+                            </p>
+                        </div>
+                    </div>
+                    {{-- End SECTION: Precio Promocional --}}
+
                     {{-- ITEM: Estado Activo --}}
                     <div class="flex items-center gap-3">
                         <input type="hidden" name="is_active" value="0">
