@@ -100,7 +100,39 @@ class LogTrafficMiddleware
      */
     protected function sanitizeRequest(Request $request): array
     {
-        $data = $request->all();
+        // Obtener solo los datos del request (excluyendo archivos)
+        $data = $request->except(array_keys($request->allFiles()));
+        
+        // Procesar archivos por separado (convertir a información serializable)
+        $files = [];
+        foreach ($request->allFiles() as $key => $file) {
+            if (is_array($file)) {
+                // Múltiples archivos
+                foreach ($file as $index => $singleFile) {
+                    if ($singleFile instanceof \Illuminate\Http\UploadedFile) {
+                        $files[$key][$index] = [
+                            'name' => $singleFile->getClientOriginalName(),
+                            'size' => $singleFile->getSize(),
+                            'mime_type' => $singleFile->getMimeType(),
+                            'extension' => $singleFile->getClientOriginalExtension(),
+                        ];
+                    }
+                }
+            } elseif ($file instanceof \Illuminate\Http\UploadedFile) {
+                // Archivo único
+                $files[$key] = [
+                    'name' => $file->getClientOriginalName(),
+                    'size' => $file->getSize(),
+                    'mime_type' => $file->getMimeType(),
+                    'extension' => $file->getClientOriginalExtension(),
+                ];
+            }
+        }
+        
+        // Agregar información de archivos si existen
+        if (!empty($files)) {
+            $data['_files'] = $files;
+        }
         
         // Campos sensibles a remover/ocultar
         $sensitiveFields = [
