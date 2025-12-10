@@ -7,6 +7,9 @@ Muestra todos los sliders con filtros, acciones y paginación
     @section('title', 'Sliders')
 
     @section('content')
+    {{-- Auto-iniciar tour --}}
+    <x-tour-trigger tour="gestionar_sliders" :autoStart="true" :showButton="false" />
+    
     {{-- SECTION: Empty State Configuration --}}
     @php
         $emptyStateSvg = 'base_ui_empty_sliders.svg';
@@ -21,96 +24,7 @@ Muestra todos los sliders con filtros, acciones y paginación
         class="space-y-4" 
         x-init="init()"
     >
-        {{-- SECTION: Success Alert - Slider Created --}}
-        @if(session('slider_created'))
-            <div 
-                x-data="{ show: true }"
-                x-show="show"
-                x-cloak
-                x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 transform translate-y-2"
-                x-transition:enter-end="opacity-100 transform translate-y-0"
-                x-transition:leave="transition ease-in duration-200"
-                x-transition:leave-start="opacity-100 transform translate-y-0"
-                x-transition:leave-end="opacity-0 transform translate-y-2"
-                x-init="setTimeout(() => show = false, 5000)"
-            >
-                <x-alert-bordered 
-                    type="success" 
-                    title="Actualización exitosa" 
-                    message="El slider se ha creado correctamente."
-                />
-            </div>
-        @endif
-        {{-- End SECTION: Success Alert - Slider Created --}}
-
-        {{-- SECTION: Success Alert - Slider Updated --}}
-        @if(session('slider_updated'))
-            <div 
-                x-data="{ show: true }"
-                x-show="show"
-                x-cloak
-                x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 transform translate-y-2"
-                x-transition:enter-end="opacity-100 transform translate-y-0"
-                x-transition:leave="transition ease-in duration-200"
-                x-transition:leave-start="opacity-100 transform translate-y-0"
-                x-transition:leave-end="opacity-0 transform translate-y-2"
-                x-init="setTimeout(() => show = false, 5000)"
-            >
-                <x-alert-bordered 
-                    type="success" 
-                    title="Actualización exitosa" 
-                    message="El slider se ha actualizado correctamente."
-                />
-            </div>
-        @endif
-        {{-- End SECTION: Success Alert - Slider Updated --}}
-
-        {{-- SECTION: Success Alert - Slider Deleted --}}
-        <div 
-            x-show="showSuccessAlert"
-            x-cloak
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 transform translate-y-2"
-            x-transition:enter-end="opacity-100 transform translate-y-0"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 transform translate-y-0"
-            x-transition:leave-end="opacity-0 transform translate-y-2"
-            style="display: none;"
-        >
-            <x-alert-bordered 
-                type="success" 
-                title="Actualización exitosa" 
-                message="El slider se ha eliminado correctamente."
-            />
-        </div>
-        {{-- End SECTION: Success Alert - Slider Deleted --}}
-
-        {{-- SECTION: Success Alert - Bulk Delete --}}
-        <div 
-            x-show="showBulkDeleteSuccessAlert"
-            x-cloak
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 transform translate-y-2"
-            x-transition:enter-end="opacity-100 transform translate-y-0"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 transform translate-y-0"
-            x-transition:leave-end="opacity-0 transform translate-y-2"
-            style="display: none;"
-        >
-            <template x-if="bulkDeleteError">
-                <x-alert-bordered type="warning" title="Eliminación parcial">
-                    <span x-text="bulkDeleteError"></span>
-                </x-alert-bordered>
-            </template>
-            <template x-if="!bulkDeleteError">
-                <x-alert-bordered type="success" title="Actualización exitosa">
-                    <span x-text="'Se eliminaron ' + bulkDeleteSuccessCount + (bulkDeleteSuccessCount === 1 ? ' slider correctamente.' : ' sliders correctamente.')"></span>
-                </x-alert-bordered>
-            </template>
-        </div>
-        {{-- End SECTION: Success Alert - Bulk Delete --}}
+        <x-toast-notification />
 
         {{-- SECTION: Content Card --}}
         <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -135,7 +49,7 @@ Muestra todos los sliders con filtros, acciones y paginación
                             </button>
                         </div>
                         @if($currentCount < $maxSliders)
-                            <a href="{{ route('tenant.admin.sliders.create', $store->slug) }}">
+                            <a href="{{ route('tenant.admin.sliders.create', $store->slug) }}" data-tour="slider-button">
                                 {{-- COMPONENT: ButtonIcon | props:{type:solid, color:info, icon:plus-circle} --}}
                                 <x-button-icon 
                                     type="solid" 
@@ -795,26 +709,45 @@ Muestra todos los sliders con filtros, acciones y paginación
             Alpine.data('sliderManagement', () => ({
                 filterStatus: '{{ request('status', '') }}',
                 filterScheduled: '{{ request('scheduling', '') }}',
-                showSuccessAlert: false,
                 selectedSliders: [],
                 selectAll: false,
                 showBulkDeleteModal: false,
                 bulkDeleteLoading: false,
                 bulkDeleteError: null,
                 bulkDeleteSuccessCount: 0,
-                showBulkDeleteSuccessAlert: false,
 
                 init() {
+                    @if(session('slider_created'))
+                    if (window.toast) {
+                        window.toast.success(
+                            'Actualización exitosa',
+                            'El slider se ha creado correctamente.',
+                            5000,
+                            'bottom-center'
+                        );
+                    }
+                    @endif
+
+                    @if(session('slider_updated'))
+                    if (window.toast) {
+                        window.toast.success(
+                            'Actualización exitosa',
+                            'El slider se ha actualizado correctamente.',
+                            5000,
+                            'bottom-center'
+                        );
+                    }
+                    @endif
+
                     window.addEventListener('show-success-alert', () => {
-                        this.showSuccessAlert = true;
-                        this.$nextTick(() => {
-                            if (typeof window.createIcons !== 'undefined' && typeof window.lucideIcons !== 'undefined') {
-                                window.createIcons({ icons: window.lucideIcons });
-                            }
-                        });
-                        setTimeout(() => {
-                            this.showSuccessAlert = false;
-                        }, 5000);
+                        if (window.toast) {
+                            window.toast.success(
+                                'Actualización exitosa',
+                                'El slider se ha eliminado correctamente.',
+                                5000,
+                                'bottom-center'
+                            );
+                        }
                     });
 
                     // Inicializar iconos Lucide
@@ -958,47 +891,30 @@ Muestra todos los sliders con filtros, acciones y paginación
                         this.checkAndShowEmptyState();
                         
                         if (errorCount === 0) {
-                            this.bulkDeleteSuccessCount = successCount;
-                            
-                            // Mostrar alerta de éxito
-                            this.showBulkDeleteSuccessAlert = true;
-                            
-                            // Inicializar iconos Lucide después de mostrar la alerta
-                            this.$nextTick(() => {
-                                if (typeof window.createIcons !== 'undefined' && typeof window.lucideIcons !== 'undefined') {
-                                    window.createIcons({ icons: window.lucideIcons });
-                                }
-                            });
-                            
-                            // Scroll suave hacia arriba para ver la alerta
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                            
-                            // Ocultar alerta después de 5 segundos
-                            setTimeout(() => {
-                                this.showBulkDeleteSuccessAlert = false;
-                            }, 5000);
+                            // Mostrar toast de éxito
+                            if (window.toast) {
+                                const message = successCount === 1 
+                                    ? 'Se eliminó 1 slider correctamente.'
+                                    : `Se eliminaron ${successCount} sliders correctamente.`;
+                                window.toast.success(
+                                    'Actualización exitosa',
+                                    message,
+                                    5000,
+                                    'bottom-center'
+                                );
+                            }
                         } else {
-                            // Mostrar alerta de error si hubo errores
-                            this.bulkDeleteError = `Se eliminaron ${successCount} sliders. ${errorCount > 0 ? `${errorCount} sliders no pudieron ser eliminados.` : ''}`;
+                            // Mostrar toast de advertencia si hubo errores
+                            const errorMessage = `Se eliminaron ${successCount} sliders. ${errorCount > 0 ? `${errorCount} sliders no pudieron ser eliminados.` : ''}`;
                             
-                            // Mostrar alerta de error en lugar de modal
-                            this.bulkDeleteSuccessCount = successCount;
-                            this.showBulkDeleteSuccessAlert = true;
-                            
-                            // Inicializar iconos Lucide
-                            this.$nextTick(() => {
-                                if (typeof window.createIcons !== 'undefined' && typeof window.lucideIcons !== 'undefined') {
-                                    window.createIcons({ icons: window.lucideIcons });
-                                }
-                            });
-                            
-                            // Scroll suave hacia arriba para ver la alerta
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                            
-                            // Ocultar alerta después de 5 segundos
-                            setTimeout(() => {
-                                this.showBulkDeleteSuccessAlert = false;
-                            }, 5000);
+                            if (window.toast) {
+                                window.toast.warning(
+                                    'Eliminación parcial',
+                                    errorMessage,
+                                    5000,
+                                    'bottom-center'
+                                );
+                            }
                         }
                     }, 350);
                 },
@@ -1081,10 +997,21 @@ Muestra todos los sliders con filtros, acciones y paginación
                 }
             }
             
-            // Toggle functionality
+            // Toggle de estado de slider
             if (e.target.classList.contains('slider-toggle')) {
+                e.stopPropagation(); // Prevenir que otros listeners capturen el evento
+                
                 const sliderId = e.target.dataset.sliderId;
                 const url = e.target.dataset.url;
+                const originalChecked = e.target.checked;
+                const row = e.target.closest('tr');
+                
+                // Verificar que la URL sea para sliders
+                if (!url || !url.includes('sliders')) {
+                    console.error('URL incorrecta para toggle de slider:', url);
+                    e.target.checked = !originalChecked;
+                    return;
+                }
                 
                 fetch(url, {
                     method: 'PATCH',
@@ -1096,17 +1023,59 @@ Muestra todos los sliders con filtros, acciones y paginación
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        window.location.reload();
+                        // Actualizar el badge de estado en la misma fila
+                        if (row) {
+                            // El badge de estado está en la tercera columna (después de checkbox y slider info)
+                            const statusCell = row.querySelector('td:nth-child(3)');
+                            if (statusCell) {
+                                if (data.is_active) {
+                                    statusCell.innerHTML = '<span class="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-lg text-xs font-medium bg-green-100 text-green-800">Activo</span>';
+                                } else {
+                                    statusCell.innerHTML = '<span class="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-lg text-xs font-medium bg-red-100 text-red-800">Inactivo</span>';
+                                }
+                            }
+                        }
+                        
+                        // Mostrar toast de éxito
+                        if (window.toast) {
+                            const message = data.is_active
+                                ? 'El slider se ha activado correctamente.'
+                                : 'El slider se ha desactivado correctamente.';
+                            window.toast.success(
+                                'Estado actualizado',
+                                message,
+                                5000,
+                                'bottom-center'
+                            );
+                        }
                     } else {
-                        alert(data.error || 'Error al cambiar el estado');
-                        e.target.checked = !e.target.checked;
+                        e.target.checked = !originalChecked;
+                        // Mostrar error con toast
+                        if (window.toast) {
+                            window.toast.error(
+                                'Error',
+                                data.error || 'Error al cambiar el estado del slider',
+                                5000,
+                                'bottom-center'
+                            );
+                        }
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    alert('Error al cambiar el estado');
-                    e.target.checked = !e.target.checked;
+                    console.error('Error al cambiar estado del slider:', error);
+                    e.target.checked = !originalChecked;
+                    // Mostrar error con toast
+                    if (window.toast) {
+                        window.toast.error(
+                            'Error',
+                            'Error al cambiar el estado del slider',
+                            5000,
+                            'bottom-center'
+                        );
+                    }
                 });
+                
+                return false; // Prevenir propagación adicional
             }
         });
     </script>

@@ -325,6 +325,68 @@ class OrderController extends Controller
                 throw new \Exception('El carrito está vacío. Por favor agrega productos antes de enviar el pedido.');
             }
 
+            // 🔒 VALIDAR STOCK ANTES DE CREAR PEDIDO
+            $stockService = app(StockService::class);
+            $stockErrors = [];
+            $unavailableProducts = [];
+            
+            foreach ($cartItems as $item) {
+                $product = Product::where('id', $item['product_id'])
+                    ->where('store_id', $store->id)
+                    ->active()
+                    ->first();
+                    
+                if (!$product) continue;
+                
+                // Convertir variantes a opciones seleccionadas
+                $opcionesSeleccionadas = $this->convertirVariantesAOpciones($item['variants'] ?? []);
+                
+                // Verificar disponibilidad
+                $disponibilidad = $stockService->verificarDisponibilidad(
+                    $product,
+                    $opcionesSeleccionadas,
+                    $item['quantity']
+                );
+                
+                if (!$disponibilidad['disponible']) {
+                    $cantidadDisponible = $disponibilidad['cantidad'] ?? 0;
+                    $stockErrors[] = "{$product->name}: " . ($disponibilidad['error'] ?? "Solo hay {$cantidadDisponible} unidades disponibles");
+                    $unavailableProducts[] = [
+                        'product' => $product,
+                        'requested' => $item['quantity'],
+                        'available' => $cantidadDisponible
+                    ];
+                }
+            }
+            
+            if (!empty($stockErrors)) {
+                DB::rollback();
+                
+                // Si es una petición AJAX, devolver JSON
+                if ($request->wantsJson() || $request->ajax()) {
+                    return response()->json([
+                        'success' => false,
+                        'error' => 'stock_unavailable',
+                        'message' => '¡Lo sentimos! Algunos productos ya no están disponibles',
+                        'details' => 'Mientras preparabas tu pedido, alguien más compró estos productos.',
+                        'stock_errors' => $stockErrors,
+                        'unavailable_products' => collect($unavailableProducts)->map(fn($p) => [
+                            'name' => $p['product']->name,
+                            'requested' => $p['requested'],
+                            'available' => $p['available']
+                        ])
+                    ], 409); // 409 Conflict
+                }
+                
+                // Guardar errores en sesión para mostrar en checkout (form tradicional)
+                session()->flash('stock_errors', $stockErrors);
+                session()->flash('unavailable_products', $unavailableProducts);
+                
+                return redirect()->back()
+                    ->withErrors(['stock' => $stockErrors])
+                    ->withInput();
+            }
+
             // Normalizar delivery_type ANTES del insert (ENUM: 'pickup', 'local', 'national')
             $normalizedDeliveryType = 'pickup';
             if (!$isDineIn) {
@@ -736,7 +798,7 @@ class OrderController extends Controller
         
         try {
             // Verificar si shipping está habilitado
-            $shippingEnabled = featureEnabled($store, 'shipping');
+            $shippingEnabled = featureEnabled($store, 'zonas_entrega');
             
             if ($shippingEnabled) {
                 // Usar el NUEVO sistema

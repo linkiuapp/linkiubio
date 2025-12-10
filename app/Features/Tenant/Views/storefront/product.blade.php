@@ -108,128 +108,157 @@
             @endif
         </div>
 
-        <!-- Variables del Producto (si aplica) -->
-        @if($product->type === 'variable' && $product->variableAssignments->count() > 0)
-            <div class="border-t border-brandNeutral-50 pt-4 space-y-4" id="product-variables">
-                <h3 class="body-lg-bold text-brandNeutral-400">Personaliza tu producto</h3>
+        <!-- Variables del Producto (si aplica) - Diseño moderno estilo Zara/Nike -->
+        @if($product->type === 'variable' && $product->variables->count() > 0)
+            <div class="border-t border-brandNeutral-50 pt-4 space-y-5" id="product-variables" x-data="variableSelector()">
+                <h3 class="body-lg-bold text-brandNeutral-400">Selecciona las opciones</h3>
                 
-                @foreach($product->variableAssignments as $assignment)
+                @foreach($product->variables as $variable)
                     @php
-                        $variable = $assignment->variable;
-                        $label = $assignment->custom_label ?: $variable->name;
-                        $isRequired = $assignment->is_required;
-                        
-                        // Obtener solo las opciones seleccionadas para este producto
-                        $selectedOptionIds = $assignment->selected_options ?? [];
-                        $availableOptions = $variable->activeOptions->whereIn('id', $selectedOptionIds);
+                        $isColorVariable = $variable->type === 'color' || 
+                                          str_contains(strtolower($variable->name), 'color') ||
+                                          $variable->options->contains(fn($opt) => !empty($opt->color_hex));
+                        $isTextVariable = $variable->type === 'text';
+                        $isNumericVariable = $variable->type === 'numeric';
+                        $requiresOptions = $variable->requiresOptions();
                     @endphp
-                    
-                    <div class="space-y-2" 
-                         data-variable-id="{{ $variable->id }}"
-                         data-variable-name="{{ $label }}"
-                         data-variable-required="{{ $isRequired ? 'true' : 'false' }}">
-                        <label class="caption text-brandNeutral-400">
-                            {{ $label }}
-                            @if($isRequired)
-                                <span class="text-brandError-300">*</span>
-                            @else
-                                <span class="caption text-brandNeutral-400">(opcional)</span>
+                    <div class="space-y-3" data-variable-id="{{ $variable->id }}">
+                        <div class="flex items-center justify-between">
+                            <label class="caption text-brandNeutral-400 font-medium">
+                                {{ $variable->name }}
+                                @if($variable->is_required_default)
+                                    <span class="text-brandError-400">*</span>
+                                @endif
+                            </label>
+                            @if($requiresOptions)
+                            <span class="caption text-brandNeutral-300" 
+                                  x-show="selectedOptions[{{ $variable->id }}]"
+                                  x-text="getOptionName({{ $variable->id }})">
+                            </span>
                             @endif
-                        </label>
-
-                        @if($variable->type === 'radio')
-                            {{-- Selección única (radio) --}}
-                            <div class="space-y-2">
-                                @foreach($availableOptions as $option)
-                                    <label class="flex items-center gap-3 p-3 border border-brandPrimary-300 rounded-lg cursor-pointer hover:bg-brandPrimary-50 transition-all"
-                                           onclick="selectOption(this, {{ $variable->id }}, {{ $option->id }}, '{{ $option->name }}', {{ $option->price_modifier }}, 'radio')">
-                                        <input type="radio" 
-                                               name="variable_{{ $variable->id }}" 
-                                               value="{{ $option->id }}"
-                                               class="w-4 h-4 text-brandPrimary-300"
-                                               {{ $isRequired && $loop->first ? 'checked' : '' }}
-                                               data-variable-id="{{ $variable->id }}"
-                                               data-option-id="{{ $option->id }}"
-                                               data-price-modifier="{{ $option->price_modifier }}">
-                                        <div class="flex-1 flex items-center justify-between">
-                                            <div class="flex items-center gap-2">
-                                                @if($option->color_hex)
-                                                    <div class="w-5 h-5 rounded-full border border-brandNeutral-50" 
-                                                         style="background-color: {{ $option->color_hex }};"></div>
-                                                @endif
-                                                <span class="caption text-brandNeutral-400">{{ $option->name }}</span>
-                                            </div>
-                                            @if($option->price_modifier != 0)
-                                                <span class="caption text-brandNeutral-400 {{ $option->price_modifier > 0 ? 'text-brandSuccess-300' : 'text-brandError-300' }}">
-                                                    {{ $option->formatted_price_modifier }}
-                                                </span>
-                                            @endif
-                                        </div>
-                                    </label>
+                        </div>
+                        
+                        {{-- Input oculto para mantener compatibilidad --}}
+                        <input type="hidden" id="variable_{{ $variable->id }}" x-model="selectedOptions[{{ $variable->id }}]">
+                        
+                        @if($isTextVariable)
+                            {{-- Variable de TEXTO LIBRE --}}
+                            <textarea
+                                id="variable_text_{{ $variable->id }}"
+                                x-model="textInputs[{{ $variable->id }}]"
+                                @input="updateTextVariable({{ $variable->id }}, $event.target.value)"
+                                placeholder="Escribe aquí..."
+                                rows="3"
+                                class="w-full px-4 py-3 border border-brandNeutral-200 rounded-lg caption focus:border-brandPrimary-300 focus:ring-1 focus:ring-brandPrimary-300 focus:outline-none resize-none"
+                                :required="{{ $variable->is_required_default ? 'true' : 'false' }}"
+                            ></textarea>
+                        @elseif($isNumericVariable)
+                            {{-- Variable NUMÉRICA --}}
+                            <input
+                                type="number"
+                                id="variable_numeric_{{ $variable->id }}"
+                                x-model="numericInputs[{{ $variable->id }}]"
+                                @input="updateNumericVariable({{ $variable->id }}, $event.target.value)"
+                                placeholder="Ingresa un número"
+                                @if($variable->min_value !== null) min="{{ $variable->min_value }}" @endif
+                                @if($variable->max_value !== null) max="{{ $variable->max_value }}" @endif
+                                step="any"
+                                class="w-full px-4 py-3 border border-brandNeutral-200 rounded-lg caption focus:border-brandPrimary-300 focus:ring-1 focus:ring-brandPrimary-300 focus:outline-none"
+                                :required="{{ $variable->is_required_default ? 'true' : 'false' }}"
+                            >
+                            @if($variable->min_value !== null || $variable->max_value !== null)
+                                <p class="text-xs text-brandNeutral-300 mt-1">
+                                    @if($variable->min_value !== null && $variable->max_value !== null)
+                                        Rango: {{ number_format($variable->min_value, 0, ',', '.') }} - {{ number_format($variable->max_value, 0, ',', '.') }}
+                                    @elseif($variable->min_value !== null)
+                                        Mínimo: {{ number_format($variable->min_value, 0, ',', '.') }}
+                                    @elseif($variable->max_value !== null)
+                                        Máximo: {{ number_format($variable->max_value, 0, ',', '.') }}
+                                    @endif
+                                </p>
+                            @endif
+                        @elseif($isColorVariable)
+                            {{-- Selector de COLORES como círculos --}}
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($variable->options as $option)
+                                    <button type="button"
+                                            @click="selectOption({{ $variable->id }}, '{{ $option->id }}', '{{ addslashes($option->name) }}')"
+                                            :class="{
+                                                'ring-2 ring-offset-2 ring-brandPrimary-300 scale-110': selectedOptions[{{ $variable->id }}] === '{{ $option->id }}',
+                                                'opacity-40 cursor-not-allowed line-through': !isOptionAvailable({{ $variable->id }}, '{{ $option->id }}'),
+                                                'hover:scale-105': isOptionAvailable({{ $variable->id }}, '{{ $option->id }}')
+                                            }"
+                                            :disabled="!isOptionAvailable({{ $variable->id }}, '{{ $option->id }}')"
+                                            class="w-10 h-10 rounded-full transition-all duration-200 relative group"
+                                            style="background-color: {{ $option->color_hex ?? '#CCCCCC' }};"
+                                            title="{{ $option->name }}">
+                                        {{-- Indicador de selección --}}
+                                        <span x-show="selectedOptions[{{ $variable->id }}] === '{{ $option->id }}'"
+                                              class="absolute inset-0 flex items-center justify-center">
+                                            <svg class="w-5 h-5 {{ $option->color_hex && $option->color_hex !== '#FFFFFF' && $option->color_hex !== '#ffffff' ? 'text-white' : 'text-brandNeutral-400' }}" fill="currentColor" viewBox="0 0 20 20">
+                                                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
+                                            </svg>
+                                        </span>
+                                        {{-- Tachado para agotado --}}
+                                        <span x-show="!isOptionAvailable({{ $variable->id }}, '{{ $option->id }}')"
+                                              class="absolute inset-0 flex items-center justify-center">
+                                            <span class="w-full h-0.5 bg-brandError-300 rotate-45 absolute"></span>
+                                        </span>
+                                    </button>
                                 @endforeach
                             </div>
-
-                        @elseif($variable->type === 'checkbox')
-                            {{-- Selección múltiple (checkbox) --}}
-                            <div class="space-y-2">
-                                @foreach($availableOptions as $option)
-                                    <label class="flex items-center gap-3 p-3 border border-brandPrimary-300 rounded-lg cursor-pointer hover:bg-brandPrimary-50 transition-all"
-                                           onclick="toggleCheckbox(this, {{ $variable->id }}, {{ $option->id }}, '{{ $option->name }}', {{ $option->price_modifier }})">
-                                        <input type="checkbox" 
-                                               name="variable_{{ $variable->id }}[]" 
-                                               value="{{ $option->id }}"
-                                               class="w-4 h-4 text-brandPrimary-300 rounded"
-                                               data-variable-id="{{ $variable->id }}"
-                                               data-option-id="{{ $option->id }}"
-                                               data-price-modifier="{{ $option->price_modifier }}">
-                                        <div class="flex-1 flex items-center justify-between">
-                                            <div class="flex items-center gap-2">
-                                                @if($option->color_hex)
-                                                    <div class="w-5 h-5 rounded-full border border-brandPrimary-300" 
-                                                         style="background-color: {{ $option->color_hex }};"></div>
-                                                @endif
-                                                <span class="caption text-brandNeutral-400">{{ $option->name }}</span>
-                                            </div>
-                                            @if($option->price_modifier != 0)
-                                                <span class="caption text-brandNeutral-400 {{ $option->price_modifier > 0 ? 'text-brandSuccess-300' : 'text-brandError-300' }}">
-                                                    {{ $option->formatted_price_modifier }}
-                                                </span>
-                                            @endif
-                                        </div>
-                                    </label>
+                        @else
+                            {{-- Selector de TALLAS/OTROS como chips/botones --}}
+                            <div class="flex flex-wrap gap-2">
+                                @foreach($variable->options as $option)
+                                    <button type="button"
+                                            @click="selectOption({{ $variable->id }}, '{{ $option->id }}', '{{ addslashes($option->name) }}')"
+                                            :class="{
+                                                'bg-green-600 text-white border-green-900 shadow-md': selectedOptions[{{ $variable->id }}] === '{{ $option->id }}',
+                                                'bg-gray-50 text-gray-900 border-gray-200 hover:border-gray-600': selectedOptions[{{ $variable->id }}] !== '{{ $option->id }}' && isOptionAvailable({{ $variable->id }}, '{{ $option->id }}'),
+                                                'bg-gray-100 text-gray-900 border-gray-100 cursor-not-allowed line-through': !isOptionAvailable({{ $variable->id }}, '{{ $option->id }}')
+                                            }"
+                                            :disabled="!isOptionAvailable({{ $variable->id }}, '{{ $option->id }}')"
+                                            class="px-4 py-2 rounded-lg border-2 caption font-medium transition-all duration-200 min-w-[3rem] text-center">
+                                        {{ $option->name }}
+                                    </button>
                                 @endforeach
                             </div>
-
-                        @elseif($variable->type === 'text')
-                            {{-- Texto libre --}}
-                            <textarea 
-                                   name="variable_{{ $variable->id }}"
-                                   placeholder="Escribe aquí..."
-                                   rows="3"
-                                   class="w-full p-3 border border-brandPrimary-300 rounded-lg outline-none caption resize-y"
-                                   data-variable-id="{{ $variable->id }}"
-                                   {{ $isRequired ? 'required' : '' }}></textarea>
-
-                        @elseif($variable->type === 'numeric')
-                            {{-- Numérico --}}
-                            <input type="number" 
-                                   name="variable_{{ $variable->id }}"
-                                   placeholder="Ingresa un número"
-                                   class="w-full p-3 border border-brandPrimary-300 rounded-lg outline-none caption"
-                                   data-variable-id="{{ $variable->id }}"
-                                   min="{{ $variable->min_value }}"
-                                   max="{{ $variable->max_value }}"
-                                   {{ $isRequired ? 'required' : '' }}>
+                        @endif
+                        
+                        {{-- Stock por opción (solo si controla stock) --}}
+                        @if($product->controla_stock && $product->tipo_stock === 'limitado')
+                            <div x-show="selectedOptions[{{ $variable->id }}]" 
+                                 x-transition
+                                 class="flex items-center gap-1">
+                                <template x-if="getOptionStock({{ $variable->id }}) > 0 && getOptionStock({{ $variable->id }}) <= 5">
+                                    <span class="text-sm text-red-600 flex items-center gap-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert-icon lucide-triangle-alert"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>                                        ¡Solo quedan <span x-text="getOptionStock({{ $variable->id }})"></span>!
+                                    </span>
+                                </template>
+                            </div>
                         @endif
                     </div>
                 @endforeach
-
-                <!-- Precio total actualizado -->
-                <div class="flex items-center justify-between p-4 bg-brandWhite-100 rounded-lg">
-                    <span class="body-lg-bold text-brandNeutral-400">Precio Total:</span>
-                    <span id="total-price" class="body-lg-bold {{ $product->tienePromocionActiva() ? 'text-brandError-400' : 'text-brandNeutral-400' }}">
-                        ${{ number_format($product->precio_final, 0, ',', '.') }}
-                    </span>
+                
+                {{-- Indicador de combinación no disponible --}}
+                <div x-show="allOptionsSelected && !currentVariant" 
+                     x-transition
+                     class="p-3 bg-brandError-50 border border-brandError-200 rounded-lg flex items-center gap-2">
+                    <svg class="w-5 h-5 text-brandError-400" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                    <span class="caption text-brandError-400">Esta combinación no está disponible</span>
+                </div>
+                
+                {{-- Precio dinámico --}}
+                <div x-show="currentVariant && currentVariant.price_modifier !== 0" 
+                     x-transition
+                     class="p-3 bg-brandSuccess-50 border border-brandSuccess-200 rounded-lg">
+                    <div class="flex items-center justify-between">
+                        <span class="caption text-brandNeutral-400">Precio con esta selección:</span>
+                        <span class="body-lg-bold text-brandSuccess-400" x-text="'$' + calculateTotalPrice().toLocaleString('es-CO')"></span>
+                    </div>
                 </div>
             </div>
         @endif
@@ -243,20 +272,20 @@
                     @endphp
                     @if($stock > 0)
                         <div class="flex items-center gap-2">
-                            <i data-lucide="package-check" class="w-4 h-4 text-brandSuccess-300"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package-icon lucide-package"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></svg>
                             <span class="caption text-brandSuccess-300 font-medium">
                                 {{ $stock }} {{ $stock == 1 ? 'unidad disponible' : 'unidades disponibles' }}
                             </span>
                         </div>
                     @else
                         <div class="flex items-center gap-2">
-                            <i data-lucide="package-x" class="w-4 h-4 text-brandError-300"></i>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package-x-icon lucide-package-x"><path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"/><path d="m7.5 4.27 9 5.15"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" x2="12" y1="22" y2="12"/><path d="m17 13 5 5m-5 0 5-5"/></svg>
                             <span class="caption text-brandError-300 font-medium">Agotado</span>
                         </div>
                     @endif
                 @else
                     <div id="stock-indicator" class="flex items-center gap-2">
-                        <i data-lucide="info" class="w-4 h-4 text-brandPrimary-300"></i>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info-icon lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
                         <span id="stock-text" class="caption text-brandPrimary-300">Selecciona las opciones para ver disponibilidad</span>
                     </div>
                 @endif
@@ -285,10 +314,24 @@
         </div>
     </div>
 
-    <!-- Productos Relacionados -->
+    <!-- Productos Relacionados / Alternativas -->
     @if($relatedProducts->count() > 0)
         <div class="space-y-3">
-            <h2 class="caption text-brandNeutral-400">Productos Relacionados</h2>
+            @if($product->estaAgotado())
+                {{-- Mensaje especial si el producto está agotado --}}
+                <div class="bg-brandWarning-50 border border-brandWarning-200 rounded-lg p-4 text-center">
+                    <div class="flex items-center justify-center gap-2 mb-2">
+                        <svg class="w-5 h-5 text-brandWarning-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                        </svg>
+                        <span class="caption-strong text-brandWarning-500">Este producto está agotado</span>
+                    </div>
+                    <p class="caption text-brandNeutral-400">¡Pero tenemos estas alternativas que te pueden interesar!</p>
+                </div>
+                <h2 class="caption-strong text-brandSuccess-400">✨ Productos Similares Disponibles</h2>
+            @else
+                <h2 class="caption text-brandNeutral-400">Productos Relacionados</h2>
+            @endif
             
             <div class="grid grid-cols-2 gap-3">
                 @foreach($relatedProducts as $relatedProduct)
@@ -321,24 +364,201 @@
     @endif
 </div>
 
+@php
+    // Preparar datos de variables con opciones completas
+    $variablesData = $product->variables->map(function($var) {
+        return [
+            'id' => $var->id,
+            'name' => $var->name,
+            'type' => $var->type,
+            'is_required' => $var->is_required_default ?? false,
+            'min_value' => $var->min_value,
+            'max_value' => $var->max_value,
+            'options' => $var->options->map(fn($opt) => [
+                'id' => $opt->id,
+                'name' => $opt->name,
+                'color_hex' => $opt->color_hex
+            ])
+        ];
+    });
+
+    // Preparar datos de variaciones
+    $variantsData = [];
+    if ($product->type === 'variable') {
+        $variantsData = $product->variants->map(function($variant) {
+            return [
+                'id' => $variant->id,
+                'options' => $variant->variant_options,
+                'stock' => $variant->stock,
+                'price_modifier' => (float)$variant->price_modifier,
+                'sku' => $variant->sku
+            ];
+        })->toArray();
+    }
+@endphp
+
 @push('scripts')
 <script>
     // Precio base del producto (usa precio promocional si está activo)
     const basePrice = {{ $product->precio_final }};
-    let selectedVariables = {};
+    
+    // Variables activas del producto
+    const productVariables = @json($variablesData);
 
-    // Datos de stock por variantes
-    @if($product->controla_stock && $product->tipo_stock === 'limitado' && $product->type === 'variable')
-    const stockVariantes = @json($product->stocksVariantes->map(function($sv) {
-        return [
-            'combinacion' => $sv->combinacion_variables,
-            'stock' => $sv->cantidad_stock - $sv->cantidad_reservada,
-            'reservado' => $sv->cantidad_reservada
-        ];
-    }));
-    @else
-    const stockVariantes = [];
-    @endif
+    // Variaciones del producto con stock y precio
+    const productVariants = @json($variantsData);
+
+    let selectedOptions = {}; // {variable_id: option_id}
+    let currentVariant = null; // Variación actual seleccionada
+    
+    // Alpine.js component para selector de variables
+    function variableSelector() {
+        return {
+            selectedOptions: {},
+            optionNames: {},
+            textInputs: {},
+            numericInputs: {},
+            currentVariant: null,
+            allOptionsSelected: false,
+            
+            init() {
+                // Escuchar cambios para actualizar el estado global
+                this.$watch('selectedOptions', () => {
+                    this.updateVariantSelection();
+                });
+            },
+            
+            selectOption(variableId, optionId, optionName) {
+                // Verificar disponibilidad antes de seleccionar
+                if (!this.isOptionAvailable(variableId, optionId)) {
+                    return;
+                }
+                
+                // Toggle: si ya está seleccionado, deseleccionar
+                if (this.selectedOptions[variableId] === optionId) {
+                    delete this.selectedOptions[variableId];
+                    delete this.optionNames[variableId];
+                } else {
+                    this.selectedOptions[variableId] = optionId;
+                    this.optionNames[variableId] = optionName;
+                }
+                
+                // Actualizar el objeto global
+                selectedOptions = { ...this.selectedOptions };
+                
+                // Forzar actualización del input hidden
+                const hiddenInput = document.getElementById(`variable_${variableId}`);
+                if (hiddenInput) {
+                    hiddenInput.value = this.selectedOptions[variableId] || '';
+                    hiddenInput.dispatchEvent(new Event('change'));
+                }
+            },
+            
+            getOptionName(variableId) {
+                return this.optionNames[variableId] || '';
+            },
+            
+            isOptionAvailable(variableId, optionId) {
+                // Si no hay otras opciones seleccionadas, verificar si hay alguna variante con esta opción
+                const otherSelections = { ...this.selectedOptions };
+                delete otherSelections[variableId];
+                
+                // Buscar variantes que contengan esta opción
+                const matchingVariants = productVariants.filter(variant => {
+                    const variantOptions = variant.options || {};
+                    
+                    // Verificar que esta opción esté en la variante
+                    if (String(variantOptions[variableId]) !== String(optionId)) {
+                        return false;
+                    }
+                    
+                    // Verificar que las otras selecciones también coincidan
+                    for (const [key, value] of Object.entries(otherSelections)) {
+                        if (variantOptions[key] && String(variantOptions[key]) !== String(value)) {
+                            return false;
+                        }
+                    }
+                    
+                    return true;
+                });
+                
+                // Verificar si alguna variante tiene stock (si controla stock)
+                @if($product->controla_stock && $product->tipo_stock === 'limitado')
+                return matchingVariants.some(v => v.stock > 0);
+                @else
+                return matchingVariants.length > 0;
+                @endif
+            },
+            
+            getOptionStock(variableId) {
+                // Obtener stock disponible para la combinación actual
+                if (!this.currentVariant) return 0;
+                return this.currentVariant.stock || 0;
+            },
+            
+            updateVariantSelection() {
+                // Filtrar variables que requieren opciones (radio, checkbox) para la búsqueda de variantes
+                const variablesRequiringOptions = productVariables.filter(v => {
+                    return v.type === 'radio' || v.type === 'checkbox';
+                });
+                
+                // Verificar si todas las opciones de variables con opciones están seleccionadas
+                const variableIdsRequiringOptions = variablesRequiringOptions.map(v => v.id);
+                const allRequiredOptionsSelected = variableIdsRequiringOptions.every(id => this.selectedOptions[id]);
+                
+                // Verificar si todas las variables (incluyendo texto y numérico) están completas
+                const allVariableIds = productVariables.map(v => v.id);
+                this.allOptionsSelected = allVariableIds.every(id => {
+                    // Para variables de texto y numérico, verificar que tengan valor
+                    const variable = productVariables.find(v => v.id === id);
+                    if (variable && (variable.type === 'text' || variable.type === 'numeric')) {
+                        return this.selectedOptions[id] && this.selectedOptions[id].toString().trim() !== '';
+                    }
+                    // Para variables con opciones, verificar que estén seleccionadas
+                    return this.selectedOptions[id];
+                });
+                
+                // Buscar variación que coincida exactamente (solo con variables que requieren opciones)
+                if (allRequiredOptionsSelected && variableIdsRequiringOptions.length > 0) {
+                    this.currentVariant = productVariants.find(variant => {
+                        const variantOptions = variant.options || {};
+                        const selectedKeys = variableIdsRequiringOptions.filter(id => this.selectedOptions[id]);
+                        const variantKeys = Object.keys(variantOptions);
+
+                        if (selectedKeys.length !== variantKeys.length) {
+                            return false;
+                        }
+
+                        return selectedKeys.every(key => {
+                            return variantOptions[key] && String(variantOptions[key]) === String(this.selectedOptions[key]);
+                        });
+                    });
+                } else {
+                    // Si no hay variables con opciones o no están todas seleccionadas, no hay variante
+                    this.currentVariant = null;
+                }
+                
+                // Actualizar variable global
+                currentVariant = this.currentVariant;
+                
+                // Actualizar precio
+                updatePrice();
+                
+                // Actualizar stock
+                @if($product->controla_stock && $product->tipo_stock === 'limitado' && $product->type === 'variable')
+                updateStockIndicator();
+                @endif
+            },
+            
+            calculateTotalPrice() {
+                let total = basePrice;
+                if (this.currentVariant && this.currentVariant.price_modifier) {
+                    total += this.currentVariant.price_modifier;
+                }
+                return total;
+            }
+        };
+    }
 
     function changeMainImage(imageUrl, index) {
         // Cambiar imagen principal
@@ -397,244 +617,141 @@
         window.open(whatsappUrl, '_blank');
     }
 
-    // Funciones para manejar variables
-    function selectOption(labelElement, variableId, optionId, optionName, priceModifier, type) {
-        // Actualizar el objeto de variables seleccionadas
-        if (type === 'radio') {
-            selectedVariables[variableId] = [{
-                option_id: optionId,
-                option_name: optionName,
-                price_modifier: parseFloat(priceModifier)
-            }];
-        }
-        
-        // Actualizar borde del seleccionado
-        const container = labelElement.parentElement;
-        container.querySelectorAll('label').forEach(label => {
-            label.classList.remove('border-brandPrimary-300', 'bg-brandPrimary-50');
-            label.classList.add('border-brandNeutral-50');
+    // Actualizar selección de variación (mantiene compatibilidad con Alpine.js)
+    function updateVariantSelection() {
+        // Recopilar opciones seleccionadas desde los inputs hidden
+        selectedOptions = {};
+        productVariables.forEach(variable => {
+            const input = document.getElementById(`variable_${variable.id}`);
+            if (input && input.value) {
+                selectedOptions[variable.id] = input.value;
+            }
         });
-        labelElement.classList.remove('border-brandNeutral-50');
-        labelElement.classList.add('border-brandPrimary-300', 'bg-brandPrimary-50');
-        
-        updateTotalPrice();
-        updateStockIndicator();
-    }
 
-    function toggleCheckbox(labelElement, variableId, optionId, optionName, priceModifier) {
-        const checkbox = labelElement.querySelector('input[type="checkbox"]');
-        
-        // Inicializar array si no existe
-        if (!selectedVariables[variableId]) {
-            selectedVariables[variableId] = [];
-        }
-        
-        if (checkbox.checked) {
-            // Agregar opción
-            selectedVariables[variableId].push({
-                option_id: optionId,
-                option_name: optionName,
-                price_modifier: parseFloat(priceModifier)
+        // Buscar variación que coincida exactamente
+        currentVariant = productVariants.find(variant => {
+            const variantOptions = variant.options || {};
+            const selectedKeys = Object.keys(selectedOptions);
+            const variantKeys = Object.keys(variantOptions);
+
+            if (selectedKeys.length !== variantKeys.length) {
+                return false;
+            }
+
+            return selectedKeys.every(key => {
+                return variantOptions[key] && String(variantOptions[key]) === String(selectedOptions[key]);
             });
-            labelElement.classList.remove('border-brandNeutral-50');
-            labelElement.classList.add('border-brandPrimary-300', 'bg-brandPrimary-50');
-        } else {
-            // Remover opción
-            selectedVariables[variableId] = selectedVariables[variableId].filter(
-                opt => opt.option_id !== optionId
-            );
-            labelElement.classList.remove('border-brandPrimary-300', 'bg-brandPrimary-50');
-            labelElement.classList.add('border-brandNeutral-50');
-        }
+        });
+
+        // Actualizar precio
+        updatePrice();
         
-        updateTotalPrice();
+        // Actualizar stock si el producto controla stock
+        @if($product->controla_stock && $product->tipo_stock === 'limitado' && $product->type === 'variable')
         updateStockIndicator();
+        @endif
     }
 
-    function updateTotalPrice() {
+    // Actualizar precio total
+    function updatePrice() {
         let totalPrice = basePrice;
         
-        // Sumar los modificadores de precio de todas las opciones seleccionadas
-        Object.values(selectedVariables).forEach(options => {
-            options.forEach(option => {
-                totalPrice += option.price_modifier;
-            });
-        });
-        
-        // Actualizar el precio mostrado
-        const totalPriceElement = document.getElementById('total-price');
-        if (totalPriceElement) {
-            totalPriceElement.textContent = '$' + new Intl.NumberFormat('es-CO', {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0
-            }).format(totalPrice);
+        if (currentVariant && currentVariant.price_modifier) {
+            totalPrice += currentVariant.price_modifier;
+        }
+
+        const priceElement = document.getElementById('total-price');
+        if (priceElement) {
+            priceElement.textContent = '$' + totalPrice.toLocaleString('es-CO', { maximumFractionDigits: 0 });
         }
     }
 
+    // Actualizar indicador de stock
     function updateStockIndicator() {
         const stockIndicator = document.getElementById('stock-indicator');
-        const stockText = document.getElementById('stock-text');
-        const stockIcon = stockIndicator?.querySelector('i[data-lucide]');
-        
-        if (!stockIndicator || !stockText || stockVariantes.length === 0) return;
-        
-        // Convertir selectedVariables a formato compatible con combinacion
-        const selectedCombination = {};
-        Object.keys(selectedVariables).forEach(varId => {
-            if (selectedVariables[varId] && selectedVariables[varId].length > 0) {
-                selectedCombination[varId] = selectedVariables[varId][0].option_id.toString();
-            }
-        });
-        
-        // Buscar variante que coincida
-        const variante = stockVariantes.find(sv => {
-            const combo = sv.combinacion;
-            return Object.keys(combo).every(key => 
-                selectedCombination[key] && combo[key] == selectedCombination[key]
-            );
-        });
-        
-        if (variante) {
-            // Mostrar stock de la variante encontrada
-            if (variante.stock > 0) {
-                stockIcon?.setAttribute('data-lucide', 'package-check');
-                stockIcon?.classList.remove('text-brandPrimary-300', 'text-brandError-300');
-                stockIcon?.classList.add('text-brandSuccess-300');
-                
-                stockText.classList.remove('text-brandPrimary-300', 'text-brandError-300');
-                stockText.classList.add('text-brandSuccess-300', 'font-medium');
-                stockText.textContent = `${variante.stock} ${variante.stock == 1 ? 'unidad disponible' : 'unidades disponibles'}`;
+        if (!stockIndicator) return;
+
+        if (currentVariant) {
+            const stock = currentVariant.stock || 0;
+            if (stock > 0) {
+                stockIndicator.innerHTML = `
+                    <i data-lucide="package-check" class="w-4 h-4 text-brandSuccess-300"></i>
+                    <span class="caption text-brandSuccess-300 font-medium">
+                        ${stock} ${stock == 1 ? 'unidad disponible' : 'unidades disponibles'}
+                    </span>
+                `;
             } else {
-                stockIcon?.setAttribute('data-lucide', 'package-x');
-                stockIcon?.classList.remove('text-brandPrimary-300', 'text-brandSuccess-300');
-                stockIcon?.classList.add('text-brandError-300');
-                
-                stockText.classList.remove('text-brandPrimary-300', 'text-brandSuccess-300');
-                stockText.classList.add('text-brandError-300', 'font-medium');
-                stockText.textContent = 'Agotado';
+                stockIndicator.innerHTML = `
+                    <i data-lucide="package-x" class="w-4 h-4 text-brandError-300"></i>
+                    <span class="caption text-brandError-300 font-medium">Agotado</span>
+                `;
             }
-            
-            // Re-renderizar iconos de Lucide
-            if (window.createIcons && window.lucideIcons) {
-                window.createIcons({ icons: window.lucideIcons });
+            // Reinicializar iconos de Lucide
+            if (window.lucide) {
+                window.lucide.createIcons();
             }
         } else {
-            // No hay coincidencia o faltan opciones
-            stockIcon?.setAttribute('data-lucide', 'info');
-            stockIcon?.classList.remove('text-brandSuccess-300', 'text-brandError-300');
-            stockIcon?.classList.add('text-brandPrimary-300');
-            
-            stockText.classList.remove('text-brandSuccess-300', 'text-brandError-300', 'font-medium');
-            stockText.classList.add('text-brandPrimary-300');
-            stockText.textContent = 'Selecciona las opciones para ver disponibilidad';
-            
-            // Re-renderizar iconos de Lucide
-            if (window.createIcons && window.lucideIcons) {
-                window.createIcons({ icons: window.lucideIcons });
+            stockIndicator.innerHTML = `
+                <i data-lucide="info" class="w-4 h-4 text-brandPrimary-300"></i>
+                <span class="caption text-brandPrimary-300 font-medium">Selecciona las opciones para ver disponibilidad</span>
+            `;
+            if (window.lucide) {
+                window.lucide.createIcons();
             }
         }
     }
 
+
     function addVariableProductToCart() {
-        // Validar que se hayan seleccionado todas las variables requeridas
-        const requiredVariables = document.querySelectorAll('#product-variables textarea[required], #product-variables input[required]:not([type="radio"]):not([type="checkbox"])');
-        let allValid = true;
-        let missingFieldsMessage = '';
-        
-        requiredVariables.forEach(input => {
-            if (!input.value || input.value.trim() === '') {
-                allValid = false;
-                input.classList.add('border-brandError-300');
-            } else {
-                input.classList.remove('border-brandError-300');
-            }
-        });
-        
-        // Validar radio buttons requeridos (variables de tipo selection)
-        const requiredRadios = document.querySelectorAll('#product-variables input[type="radio"][required]');
-        const radioGroups = {};
-        requiredRadios.forEach(radio => {
-            const name = radio.name;
-            if (!radioGroups[name]) {
-                radioGroups[name] = [];
-            }
-            radioGroups[name].push(radio);
-        });
-        
-        Object.values(radioGroups).forEach(group => {
-            const isChecked = group.some(radio => radio.checked);
-            if (!isChecked) {
-                allValid = false;
-            }
-        });
-        
-        // Validar que haya al menos una opción seleccionada si la variable es requerida
-        const variableContainers = document.querySelectorAll('#product-variables [data-variable-required="true"]');
-        variableContainers.forEach(container => {
-            const variableId = container.dataset.variableId;
-            
-            // Verificar si es variable de selección (radio/checkbox)
-            const hasSelection = selectedVariables[variableId] && selectedVariables[variableId].length > 0;
-            
-            // Verificar si es variable de texto o numérico
-            const textInput = container.querySelector(`textarea[data-variable-id="${variableId}"], input[type="number"][data-variable-id="${variableId}"]`);
-            const hasTextValue = textInput && textInput.value && textInput.value.trim() !== '';
-            
-            // Si es requerida, debe tener selección O valor de texto
-            if (!hasSelection && !hasTextValue) {
-                allValid = false;
-                const variableName = container.dataset.variableName || 'Variable';
-                missingFieldsMessage = `Debes escoger al menos una opción para: ${variableName}`;
-                
-                // Marcar campo de texto como error si existe
-                if (textInput) {
-                    textInput.classList.add('border-brandError-300');
-                }
-            } else if (textInput) {
-                // Limpiar error si tiene valor
-                textInput.classList.remove('border-brandError-300');
-            }
-        });
-        
-        if (!allValid) {
-            // Mostrar alerta bonita estilo carrito
-            showVariableAlert(missingFieldsMessage || 'Debes escoger una opción');
+        // Validar que se haya seleccionado una variación válida
+        if (!currentVariant) {
+            showVariableAlert('Por favor selecciona todas las opciones del producto');
             return;
         }
-        
-        // Recopilar datos de variables seleccionadas
-        const variants = selectedVariables;
-        
-        // Recopilar valores de text y numeric
-        const textInputs = document.querySelectorAll('#product-variables textarea[data-variable-id], #product-variables input[type="number"]');
-        textInputs.forEach(input => {
-            const variableId = input.dataset.variableId;
-            if (input.value && input.value.trim() !== '') {
-                variants[variableId] = [{
-                    value: input.value.trim(),
-                    type: input.tagName.toLowerCase() === 'textarea' ? 'text' : input.type
-                }];
-            }
-        });
-        
+
+        // Validar stock si el producto controla stock
+        @if($product->controla_stock && $product->tipo_stock === 'limitado')
+        if (currentVariant.stock <= 0) {
+            showVariableAlert('Esta variación está agotada');
+            return;
+        }
+        @endif
+
         // Calcular precio total
         let totalPrice = basePrice;
-        Object.values(selectedVariables).forEach(options => {
-            options.forEach(option => {
-                if (option.price_modifier) {
-                    totalPrice += option.price_modifier;
-                }
-            });
+        if (currentVariant.price_modifier) {
+            totalPrice += currentVariant.price_modifier;
+        }
+
+        // Construir objeto de variantes para el carrito
+        const variantsForCart = {};
+        Object.keys(selectedOptions).forEach(variableId => {
+            const optionId = selectedOptions[variableId];
+            const variable = productVariables.find(v => v.id == variableId);
+            
+            // Buscar el nombre de la opción desde los datos de variables
+            let optionName = '';
+            if (variable && variable.options) {
+                const option = variable.options.find(o => String(o.id) === String(optionId));
+                optionName = option ? option.name : '';
+            }
+            
+            variantsForCart[variableId] = [{
+                option_id: parseInt(optionId),
+                option_name: optionName
+            }];
         });
-        
+
         // Agregar al carrito
         if (window.cart) {
             window.cart.addProduct({
                 id: {{ $product->id }},
                 name: {!! json_encode($product->name) !!},
                 price: totalPrice,
+                quantity: 1,
                 image: {!! json_encode($product->main_image_url) !!},
-                variants: variants
+                variants: variantsForCart,
+                variant_id: currentVariant.id
             });
         } else {
             console.error('Cart not initialized');
@@ -678,25 +795,10 @@
 
     // Calcular precio inicial si hay opciones preseleccionadas
     document.addEventListener('DOMContentLoaded', function() {
-        // Inicializar variables seleccionadas con las opciones marcadas por defecto
-        const checkedRadios = document.querySelectorAll('#product-variables input[type="radio"]:checked');
-        checkedRadios.forEach(radio => {
-            const variableId = radio.dataset.variableId;
-            const optionId = parseInt(radio.dataset.optionId);
-            const priceModifier = parseFloat(radio.dataset.priceModifier);
-            const optionName = radio.value;
-            
-            selectedVariables[variableId] = [{
-                option_id: optionId,
-                option_name: optionName,
-                price_modifier: priceModifier
-            }];
-            
-            // Marcar visualmente como seleccionado
-            radio.closest('label').classList.add('border-brandPrimary-300', 'bg-brandPrimary-50');
-        });
-        
-        updateTotalPrice();
+        // Inicializar indicador de stock para productos variables
+        @if($product->controla_stock && $product->tipo_stock === 'limitado' && $product->type === 'variable')
+        updateStockIndicator();
+        @endif
     });
 </script>
 @endpush

@@ -174,8 +174,12 @@
         @if($topProducts->count() > 0)
             <div class="space-y-6">
                 @foreach($topProducts as $product)
+                    @php
+                        $estaAgotado = $product->controlaStock() && !$product->tieneStockIlimitado() && $product->estaAgotado();
+                        $tieneStockBajo = $product->controlaStock() && !$product->tieneStockIlimitado() && $product->tieneStockBajo();
+                    @endphp
                     <a href="{{ route('tenant.product', [$store->slug, $product->slug]) }}" 
-                       class="bg-brandWhite-100 hover:bg-brandPrimary-50 rounded-lg p-4 hover:shadow-sm transition-all duration-200 block relative">
+                       class="bg-brandWhite-100 hover:bg-brandPrimary-50 rounded-lg p-4 hover:shadow-sm transition-all duration-200 block relative {{ $estaAgotado ? 'opacity-60' : '' }}">
                         
                        <!-- Badge MÁS VENDIDO -->
                         <div class="flex gap-1 items-center absolute -top-4 -left-2 bg-brandError-300 text-brandError-50 caption px-2 py-1 rounded-full z-10 shadow-sm">
@@ -184,16 +188,14 @@
                         </div>
 
                         <!-- Badge de Stock -->
-                        @if($product->controlaStock() && !$product->tieneStockIlimitado())
-                            @if($product->estaAgotado())
-                                <div class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-lg text-xs font-medium z-10">
-                                    Agotado
-                                </div>
-                            @elseif($product->tieneStockBajo())
-                                <div class="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded-lg text-xs font-medium z-10">
-                                    Últimas {{ $product->stock_disponible }} unidades
-                                </div>
-                            @endif
+                        @if($estaAgotado)
+                            <div class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-lg text-xs font-medium z-10">
+                                Agotado
+                            </div>
+                        @elseif($tieneStockBajo)
+                            <div class="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded-lg text-xs font-medium z-10 animate-pulse">
+                                ¡Solo {{ $product->stock_disponible }}!
+                            </div>
                         @endif
                         
                         <div class="flex items-center gap-3">

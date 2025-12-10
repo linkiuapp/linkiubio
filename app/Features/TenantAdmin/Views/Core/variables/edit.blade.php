@@ -130,8 +130,8 @@ Permite editar variables existentes con tipo, configuración y opciones dinámic
                                 select-id="type"
                                 :options="[
                                     '' => 'Selecciona un tipo',
-                                    'radio' => 'Selección única',
-                                    'checkbox' => 'Selección múltiple',
+                                    'radio' => 'Selección única (Compatible con Variantes)',
+                                    'checkbox' => 'Selección múltiple (NO Compatible con Variantes)',
                                     'text' => 'Texto libre',
                                     'numeric' => 'Numérico'
                                 ]"
@@ -142,6 +142,22 @@ Permite editar variables existentes con tipo, configuración y opciones dinámic
                                 :error="$errors->first('type')"
                                 :required="true"
                             />
+
+                            {{-- Alerta para Checkbox --}}
+                            <div x-show="variableType === 'checkbox'" x-cloak class="mt-3">
+                                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                                    <div class="flex gap-2">
+                                        <i data-lucide="alert-triangle" class="w-5 h-5 text-yellow-600 flex-shrink-0"></i>
+                                        <div class="text-sm text-yellow-800">
+                                            <p class="font-medium">Limitación de Checkbox</p>
+                                            <p class="mt-1 text-xs">
+                                                Las variables de selección múltiple <strong>no permiten controlar stock por combinaciones</strong> (variantes). 
+                                                Úsalas solo para productos simples donde el stock no depende de la combinación.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         {{-- End ITEM: Type Field --}}
 
@@ -256,7 +272,7 @@ Permite editar variables existentes con tipo, configuración y opciones dinámic
                     {{-- COMPONENT: AlertSoft | props:{type:info} --}}
                     <x-alert-soft 
                         type="info"
-                        message="Si una opción no tiene precio adicional, puedes dejar el modificador de precio vacío (se asumirá 0)."
+                        message="Importante: Si planeas usar Variantes (controlar stock por combinaciones), los precios que definas aquí serán ignorados. En ese caso, definirás el precio final directamente en cada variante."
                     />
                     {{-- End COMPONENT: AlertSoft --}}
                     {{-- End ITEM: Options Info Alert --}}
@@ -309,7 +325,7 @@ Permite editar variables existentes con tipo, configuración y opciones dinámic
                                             class="py-3 px-4 block w-full rounded-lg border border-gray-200 text-sm text-gray-800 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none bg-white"
                                             placeholder="0.00 (vacío = 0)"
                                         >
-                                        <p class="mt-1 text-xs text-gray-500">Dejar vacío si no hay precio adicional</p>
+                                        <p class="mt-1 text-xs text-gray-500">Solo aplica para productos simples (sin variantes combinadas)</p>
                                     </div>
                                     {{-- End ITEM: Price Modifier --}}
 

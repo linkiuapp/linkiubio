@@ -19,6 +19,9 @@ class PlatformAnnouncement extends Model
         'type',
         'priority',
         'banner_image',
+        'banner_html',
+        'banner_background_color',
+        'banner_text_color',
         'banner_link',
         'show_as_banner',
         'target_plans',
@@ -53,6 +56,16 @@ class PlatformAnnouncement extends Model
     public function reads(): HasMany
     {
         return $this->hasMany(AnnouncementRead::class, 'announcement_id');
+    }
+
+    public function channels(): HasMany
+    {
+        return $this->hasMany(NotificationChannel::class, 'announcement_id');
+    }
+
+    public function deliveries(): HasMany
+    {
+        return $this->hasMany(NotificationDelivery::class, 'announcement_id');
     }
 
     // Scopes
@@ -218,5 +231,29 @@ class PlatformAnnouncement extends Model
     public function markAsReadBy(int $storeId): AnnouncementRead
     {
         return AnnouncementRead::markAsRead($this->id, $storeId);
+    }
+
+    /**
+     * Get banner HTML or fallback to image
+     */
+    public function getBannerDisplayAttribute(): ?string
+    {
+        if ($this->banner_html) {
+            return $this->banner_html;
+        }
+        
+        if ($this->banner_image) {
+            return '<img src="' . $this->banner_image_url . '" alt="' . e($this->title) . '" class="w-full h-auto object-cover rounded-lg">';
+        }
+        
+        return null;
+    }
+
+    /**
+     * Check if announcement has HTML banner
+     */
+    public function hasHtmlBanner(): bool
+    {
+        return !empty($this->banner_html);
     }
 } 

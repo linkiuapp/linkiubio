@@ -52,6 +52,20 @@ class RoomController extends Controller
     {
         $store = view()->shared('currentStore');
         
+        // Validar límite de habitaciones del plan
+        $maxRooms = $store->plan->max_rooms ?? 0;
+        
+        if ($maxRooms > 0) { // 0 = ilimitado
+            $currentRooms = Room::where('store_id', $store->id)->count();
+            
+            if ($currentRooms >= $maxRooms) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "Has alcanzado el límite de {$maxRooms} habitaciones para tu plan {$store->plan->name}. Actualiza tu plan para agregar más habitaciones."
+                ], 422);
+            }
+        }
+        
         $validator = Validator::make($request->all(), [
             'room_type_id' => 'required|exists:room_types,id',
             'room_number' => [

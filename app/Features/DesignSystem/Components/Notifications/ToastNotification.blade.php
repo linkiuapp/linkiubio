@@ -42,19 +42,18 @@ Ejemplo:
                          'bg-blue-100': type === 'info',
                          'bg-yellow-100': type === 'warning'
                      }">
-                    <i data-lucide="check-circle" 
-                       x-show="type === 'success'"
-                       class="w-5 h-5 text-teal-600"
-                       x-bind:data-lucide="type === 'success' ? 'check-circle' : (type === 'error' ? 'x-circle' : (type === 'warning' ? 'alert-triangle' : 'info'))"></i>
-                    <i data-lucide="x-circle" 
-                       x-show="type === 'error'"
-                       class="w-5 h-5 text-red-600"></i>
-                    <i data-lucide="alert-triangle" 
-                       x-show="type === 'warning'"
-                       class="w-5 h-5 text-yellow-600"></i>
-                    <i data-lucide="info" 
-                       x-show="type === 'info'"
-                       class="w-5 h-5 text-blue-600"></i>
+                    <template x-if="type === 'success'">
+                        <i data-lucide="check-circle" class="w-5 h-5 text-teal-600"></i>
+                    </template>
+                    <template x-if="type === 'error'">
+                        <i data-lucide="x-circle" class="w-5 h-5 text-red-600"></i>
+                    </template>
+                    <template x-if="type === 'warning'">
+                        <i data-lucide="alert-triangle" class="w-5 h-5 text-yellow-600"></i>
+                    </template>
+                    <template x-if="type === 'info'">
+                        <i data-lucide="info" class="w-5 h-5 text-blue-600"></i>
+                    </template>
                 </div>
             </div>
             <div class="flex-1 min-w-0">

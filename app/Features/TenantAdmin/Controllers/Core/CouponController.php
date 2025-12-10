@@ -201,9 +201,6 @@ class CouponController extends Controller
             $coupon->products()->attach($request->products);
         }
         
-        // Marcar paso de onboarding como completado
-        \App\Shared\Models\StoreOnboardingStep::markAsCompleted($store->id, 'coupons');
-        
         return redirect()
             ->route('tenant.admin.coupons.index', $store->slug)
             ->with('coupon_created', true);

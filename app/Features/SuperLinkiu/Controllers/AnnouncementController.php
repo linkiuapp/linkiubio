@@ -7,6 +7,10 @@ use App\Shared\Models\PlatformAnnouncement;
 use App\Shared\Models\AnnouncementRead;
 use App\Shared\Models\Store;
 use App\Shared\Models\Plan;
+use App\Shared\Models\NotificationChannel;
+use App\Shared\Models\NotificationTemplate;
+use App\Services\AnnouncementNotificationService;
+use App\Services\NotificationTemplateService;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\View\View;
@@ -16,6 +20,16 @@ use Illuminate\Support\Str;
 
 class AnnouncementController extends Controller
 {
+    protected $notificationService;
+    protected $templateService;
+
+    public function __construct(
+        AnnouncementNotificationService $notificationService,
+        NotificationTemplateService $templateService
+    ) {
+        $this->notificationService = $notificationService;
+        $this->templateService = $templateService;
+    }
     /**
      * Display a listing of announcements.
      */
@@ -61,12 +75,22 @@ class AnnouncementController extends Controller
     /**
      * Show the form for creating a new announcement.
      */
-    public function create(): View
+    public function create(Request $request): View
     {
         $plans = Plan::where('is_active', true)->orderBy('name')->get();
         $stores = Store::where('status', 'active')->orderBy('name')->get();
+        $templates = $this->templateService->getActiveTemplates();
+        
+        // Si hay un template_id, aplicar template
+        $announcement = null;
+        if ($request->has('template_id')) {
+            $template = NotificationTemplate::find($request->template_id);
+            if ($template) {
+                $announcement = $this->templateService->createFromTemplate($template);
+            }
+        }
 
-        return view('superlinkiu::announcements.create', compact('plans', 'stores'));
+        return view('superlinkiu::announcements.create', compact('plans', 'stores', 'templates', 'announcement'));
     }
 
     /**
@@ -84,11 +108,14 @@ class AnnouncementController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'type' => 'required|in:critical,important,info',
-            'priority' => 'required|integer|min:1|max:5', // ✅ Actualizado a 5 niveles
+            'priority' => 'required|integer|min:1|max:5',
             'banner_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'banner_html' => 'nullable|string',
+            'banner_background_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+            'banner_text_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
             'banner_link' => 'nullable|url',
             'target_plans' => 'nullable|array',
-            'target_plans.*' => 'string|in:' . implode(',', $validPlans), // ✅ Validación dinámica
+            'target_plans.*' => 'string|in:' . implode(',', $validPlans),
             'target_stores' => 'nullable|array',
             'target_stores.*' => 'integer|exists:stores,id',
             'published_at' => 'nullable|date',
@@ -96,7 +123,9 @@ class AnnouncementController extends Controller
             'is_active' => 'boolean',
             'show_popup' => 'boolean',
             'send_email' => 'boolean',
-            'auto_mark_read_after' => 'nullable|integer|min:1|max:365'
+            'auto_mark_read_after' => 'nullable|integer|min:1|max:365',
+            'channels' => 'nullable|array',
+            'channels.*' => 'in:whatsapp,email,in_app',
         ]);
 
         // Procesar imagen del banner si existe
@@ -110,8 +139,33 @@ class AnnouncementController extends Controller
             }
         }
 
+        // Separar canales del validated
+        $channels = $validated['channels'] ?? ['in_app'];
+        unset($validated['channels']);
+
         // Crear anuncio
         $announcement = PlatformAnnouncement::create($validated);
+
+        // Crear canales de notificación
+        foreach ($channels as $channel) {
+            NotificationChannel::create([
+                'announcement_id' => $announcement->id,
+                'channel' => $channel,
+                'enabled' => true,
+            ]);
+        }
+
+        // Si está activo, enviar notificaciones
+        if ($announcement->is_active && $request->boolean('send_now', false)) {
+            try {
+                $this->notificationService->sendAnnouncement($announcement);
+            } catch (\Exception $e) {
+                \Log::error('Failed to send announcement notifications', [
+                    'announcement_id' => $announcement->id,
+                    'error' => $e->getMessage()
+                ]);
+            }
+        }
 
         // 🔔 Disparar evento de nuevo anuncio para notificar a todos los admins de tiendas
         if ($announcement->is_active) {
@@ -158,10 +212,11 @@ class AnnouncementController extends Controller
      */
     public function edit(PlatformAnnouncement $announcement): View
     {
-        $announcement->load('reads.store');
+        $announcement->load('reads.store', 'channels');
 
         $plans = Plan::where('is_active', true)->orderBy('name')->get();
         $stores = Store::where('status', 'active')->orderBy('name')->get();
+        $templates = $this->templateService->getActiveTemplates();
 
         // Estadísticas de lectura
         $totalStores = Store::where('status', 'active')->count();
@@ -175,7 +230,10 @@ class AnnouncementController extends Controller
             'read_percentage' => $totalStores > 0 ? round(($readCount / $totalStores) * 100, 1) : 0
         ];
 
-        return view('superlinkiu::announcements.edit', compact('announcement', 'plans', 'stores', 'readStats'));
+        // Get existing channels
+        $existingChannels = $announcement->channels->pluck('channel')->toArray();
+
+        return view('superlinkiu::announcements.edit', compact('announcement', 'plans', 'stores', 'readStats', 'templates', 'existingChannels'));
     }
 
     /**
@@ -193,11 +251,14 @@ class AnnouncementController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'required|string',
             'type' => 'required|in:critical,important,info',
-            'priority' => 'required|integer|min:1|max:5', // ✅ Actualizado a 5 niveles
+            'priority' => 'required|integer|min:1|max:5',
             'banner_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            'banner_html' => 'nullable|string',
+            'banner_background_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
+            'banner_text_color' => 'nullable|string|regex:/^#[0-9A-Fa-f]{6}$/',
             'banner_link' => 'nullable|url',
             'target_plans' => 'nullable|array',
-            'target_plans.*' => 'string|in:' . implode(',', $validPlans), // ✅ Validación dinámica
+            'target_plans.*' => 'string|in:' . implode(',', $validPlans),
             'target_stores' => 'nullable|array',
             'target_stores.*' => 'integer|exists:stores,id',
             'published_at' => 'nullable|date',
@@ -206,7 +267,9 @@ class AnnouncementController extends Controller
             'show_popup' => 'boolean',
             'send_email' => 'boolean',
             'auto_mark_read_after' => 'nullable|integer|min:1|max:365',
-            'remove_banner' => 'boolean'
+            'remove_banner' => 'boolean',
+            'channels' => 'nullable|array',
+            'channels.*' => 'in:whatsapp,email,in_app',
         ]);
 
         // Manejar eliminación de banner
@@ -232,8 +295,27 @@ class AnnouncementController extends Controller
             }
         }
 
+        // Separar canales del validated
+        $channels = $validated['channels'] ?? null;
+        unset($validated['channels']);
+
         // Actualizar anuncio
         $announcement->update($validated);
+
+        // Actualizar canales si se proporcionaron
+        if ($channels !== null) {
+            // Eliminar canales existentes
+            $announcement->channels()->delete();
+            
+            // Crear nuevos canales
+            foreach ($channels as $channel) {
+                NotificationChannel::create([
+                    'announcement_id' => $announcement->id,
+                    'channel' => $channel,
+                    'enabled' => true,
+                ]);
+            }
+        }
 
         return redirect()
             ->route('superlinkiu.announcements.show', $announcement)
@@ -355,5 +437,37 @@ class AnnouncementController extends Controller
         );
 
         return $newFilename;
+    }
+
+    /**
+     * Send notifications for announcement
+     */
+    public function sendNotifications(PlatformAnnouncement $announcement): JsonResponse
+    {
+        try {
+            $results = $this->notificationService->sendAnnouncement($announcement);
+            
+            return response()->json([
+                'success' => true,
+                'message' => 'Notificaciones enviadas exitosamente',
+                'results' => $results,
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al enviar notificaciones: ' . $e->getMessage(),
+            ], 500);
+        }
+    }
+
+    /**
+     * Show analytics for announcement
+     */
+    public function analytics(PlatformAnnouncement $announcement): View
+    {
+        $stats = $this->notificationService->getDeliveryStats($announcement);
+        $announcement->load('deliveries.store', 'channels');
+
+        return view('superlinkiu::announcements.analytics', compact('announcement', 'stats'));
     }
 } 

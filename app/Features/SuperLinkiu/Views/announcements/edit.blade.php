@@ -3,26 +3,27 @@
 @section('title', 'Editar Anuncio')
 
 @section('content')
-<div class="container-fluid" x-data="editAnnouncement()">
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-        <div>
-            <h1 class="text-lg font-bold text-black-400">Editar Anuncio</h1>
-            <p class="text-sm text-black-300">{{ $announcement->title }}</p>
+<div class="max-w-6xl mx-auto space-y-6 mt-6" x-data="editAnnouncement()">
+    {{-- SECTION: Header --}}
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <a href="{{ route('superlinkiu.announcements.index') }}" class="inline-flex items-center justify-center">
+                <i data-lucide="arrow-left" class="w-5 h-5 text-gray-600 hover:text-gray-800"></i>
+            </a>
+            <div>
+                <h1 class="text-lg font-semibold text-gray-800">Editar Anuncio</h1>
+                <p class="text-sm text-gray-600 mt-1">{{ $announcement->title }}</p>
+            </div>
         </div>
         <div class="flex items-center gap-3">
             <a href="{{ route('superlinkiu.announcements.show', $announcement) }}" 
-               class="btn-outline-info px-4 py-2 rounded-lg flex items-center gap-2">
-                <x-solar-eye-outline class="w-4 h-4" />
+               class="bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 px-4 py-2 rounded-lg flex items-center gap-2 font-medium transition-colors">
+                <i data-lucide="eye" class="w-4 h-4"></i>
                 Ver Detalle
-            </a>
-            <a href="{{ route('superlinkiu.announcements.index') }}" 
-               class="btn-outline-secondary px-4 py-2 rounded-lg flex items-center gap-2">
-                <x-solar-arrow-left-outline class="w-4 h-4" />
-                Volver
             </a>
         </div>
     </div>
+    {{-- End SECTION: Header --}}
 
     <form action="{{ route('superlinkiu.announcements.update', $announcement) }}" 
           method="POST" 
@@ -31,92 +32,93 @@
         @method('PUT')
 
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <!-- Contenido Principal -->
+            {{-- SECTION: Contenido Principal --}}
             <div class="lg:col-span-2 space-y-6">
-                <!-- Información Básica -->
-                <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
-                    <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                        <h2 class="text-lg font-semibold text-black-400 mb-0">Información Básica</h2>
+                {{-- SECTION: Información Básica --}}
+                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div class="border-b border-gray-200 bg-gray-50 py-4 px-6">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-0">Información Básica</h2>
                     </div>
                     
                     <div class="p-6 space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-black-300 mb-2">
-                                Título del Anuncio <span class="text-error-300">*</span>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Título del Anuncio <span class="text-red-500">*</span>
                             </label>
                             <input type="text" 
                                    name="title" 
                                    value="{{ old('title', $announcement->title) }}"
                                    placeholder="Ej: Mantenimiento Programado del Sistema"
-                                   class="w-full px-4 py-2 border border-accent-200 rounded-lg focus:border-primary-200 focus:ring-1 focus:ring-primary-200 focus:outline-none @error('title') border-error-200 @enderror"
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none @error('title') border-red-300 @enderror"
                                    required>
                             @error('title')
-                                <p class="text-error-300 text-xs mt-1">{{ $message }}</p>
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
-                                <label class="block text-sm font-medium text-black-300 mb-2">
-                                    Tipo <span class="text-error-300">*</span>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Tipo <span class="text-red-500">*</span>
                                 </label>
                                 <select name="type" 
                                         x-model="formData.type"
-                                        class="w-full px-4 py-2 border border-accent-200 rounded-lg focus:border-primary-200 focus:ring-1 focus:ring-primary-200 focus:outline-none @error('type') border-error-200 @enderror"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none @error('type') border-red-300 @enderror"
                                         required>
                                     <option value="">Seleccionar tipo</option>
-                                    <option value="critical" {{ old('type', $announcement->type) === 'critical' ? 'selected' : '' }}>🚨 Crítico</option>
-                                    <option value="important" {{ old('type', $announcement->type) === 'important' ? 'selected' : '' }}>⭐ Importante</option>
-                                    <option value="info" {{ old('type', $announcement->type) === 'info' ? 'selected' : '' }}>ℹ️ Información</option>
+                                    <option value="critical" {{ old('type', $announcement->type) === 'critical' ? 'selected' : '' }}>Crítico</option>
+                                    <option value="important" {{ old('type', $announcement->type) === 'important' ? 'selected' : '' }}>Importante</option>
+                                    <option value="info" {{ old('type', $announcement->type) === 'info' ? 'selected' : '' }}>Información</option>
                                 </select>
                                 @error('type')
-                                    <p class="text-error-300 text-xs mt-1">{{ $message }}</p>
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-black-300 mb-2">
-                                    Prioridad <span class="text-error-300">*</span>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Prioridad <span class="text-red-500">*</span>
                                 </label>
                                 <select name="priority" 
-                                        class="w-full px-4 py-2 border border-accent-200 rounded-lg focus:border-primary-200 focus:ring-1 focus:ring-primary-200 focus:outline-none @error('priority') border-error-200 @enderror"
+                                        class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none @error('priority') border-red-300 @enderror"
                                         required>
                                     <option value="">Seleccionar prioridad</option>
-                                    <option value="5" {{ old('priority', $announcement->priority) == 5 ? 'selected' : '' }}>🔴 Crítica (Máxima urgencia)</option>
-                                    <option value="4" {{ old('priority', $announcement->priority) == 4 ? 'selected' : '' }}>🟠 Alta (Muy importante)</option>
-                                    <option value="3" {{ old('priority', $announcement->priority) == 3 ? 'selected' : '' }}>🟡 Media (Importancia normal)</option>
-                                    <option value="2" {{ old('priority', $announcement->priority) == 2 ? 'selected' : '' }}>🟢 Baja (Información general)</option>
-                                    <option value="1" {{ old('priority', $announcement->priority) == 1 ? 'selected' : '' }}>⚪ Muy Baja (Anuncios menores)</option>
+                                    <option value="5" {{ old('priority', $announcement->priority) == 5 ? 'selected' : '' }}>Crítica (Máxima urgencia)</option>
+                                    <option value="4" {{ old('priority', $announcement->priority) == 4 ? 'selected' : '' }}>Alta (Muy importante)</option>
+                                    <option value="3" {{ old('priority', $announcement->priority) == 3 ? 'selected' : '' }}>Media (Importancia normal)</option>
+                                    <option value="2" {{ old('priority', $announcement->priority) == 2 ? 'selected' : '' }}>Baja (Información general)</option>
+                                    <option value="1" {{ old('priority', $announcement->priority) == 1 ? 'selected' : '' }}>Muy Baja (Anuncios menores)</option>
                                 </select>
                                 @error('priority')
-                                    <p class="text-error-300 text-xs mt-1">{{ $message }}</p>
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
-                                <p class="text-xs text-black-200 mt-1">
+                                <p class="text-xs text-gray-500 mt-1">
                                     Los anuncios se ordenan por prioridad. Crítica aparece primero.
                                 </p>
                             </div>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-black-300 mb-2">
-                                Contenido del Anuncio <span class="text-error-300">*</span>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Contenido del Anuncio <span class="text-red-500">*</span>
                             </label>
                             <textarea name="content" 
                                       rows="8"
                                       placeholder="Describe detalladamente el contenido del anuncio..."
-                                      class="w-full px-4 py-2 border border-accent-200 rounded-lg focus:border-primary-200 focus:ring-1 focus:ring-primary-200 focus:outline-none @error('content') border-error-200 @enderror"
+                                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none @error('content') border-red-300 @enderror"
                                       required>{{ old('content', $announcement->content) }}</textarea>
                             @error('content')
-                                <p class="text-error-300 text-xs mt-1">{{ $message }}</p>
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
                         </div>
                     </div>
                 </div>
+                {{-- End SECTION: Información Básica --}}
 
-                <!-- Banner Configuration -->
-                <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
-                    <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                        <h2 class="text-lg font-semibold text-black-400 mb-0">Configuración de Banner</h2>
+                {{-- SECTION: Banner Configuration --}}
+                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div class="border-b border-gray-200 bg-gray-50 py-4 px-6">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-0">Configuración de Banner</h2>
                     </div>
                     
                     <div class="p-6 space-y-4">
@@ -126,219 +128,265 @@
                                    value="1"
                                    x-model="formData.showAsBanner"
                                    {{ old('show_as_banner', $announcement->show_as_banner) ? 'checked' : '' }}
-                                   class="h-4 w-4 text-primary-300 focus:ring-primary-200 border-accent-200 rounded">
-                            <label class="text-sm font-medium text-black-400">
-                                Mostrar como banner deslizable en dashboard
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <label class="text-sm font-medium text-gray-700">
+                                Mostrar como banner en dashboard
                             </label>
                         </div>
 
                         <div x-show="formData.showAsBanner" x-transition class="space-y-4">
-                            <!-- Banner Actual -->
-                            @if($announcement->banner_image)
-                                <div class="p-4 bg-info-50 rounded-lg border border-info-100">
-                                    <h4 class="text-sm font-medium text-info-300 mb-2">Banner Actual</h4>
-                                    <div class="flex items-center gap-4">
-                                        <img src="{{ $announcement->banner_image_url }}" 
-                                             alt="Banner actual" 
-                                             class="border border-accent-200 rounded"
-                                             style="width: 160px; height: 50px; object-fit: cover;">
-                                        <div class="flex-1">
-                                            <p class="text-sm text-black-400">{{ $announcement->banner_image }}</p>
-                                            <label class="flex items-center gap-2 mt-2">
-                                                <input type="checkbox" 
-                                                       name="remove_banner" 
-                                                       value="1"
-                                                       x-model="formData.removeBanner"
-                                                       class="h-4 w-4 text-error-300 focus:ring-error-200 border-accent-200 rounded">
-                                                <span class="text-sm text-error-300">Eliminar banner actual</span>
+                            {{-- HTML Banner --}}
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    HTML del Banner <span class="text-red-500">*</span>
+                                </label>
+                                <textarea name="banner_html" 
+                                          id="banner_html"
+                                          rows="8"
+                                          placeholder="<div class='w-full py-6 px-8 rounded-lg'><h2>Tu título</h2><p>Tu contenido</p></div>"
+                                          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none font-mono text-sm @error('banner_html') border-red-300 @enderror">{{ old('banner_html', $announcement->banner_html ?? '') }}</textarea>
+                                @error('banner_html')
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
+                                @enderror
+                                <p class="text-xs text-gray-500 mt-1">
+                                    Usa HTML para crear banners personalizados. El banner ocupará todo el ancho disponible.
+                                </p>
+                            </div>
+
+                            {{-- Imagen Opcional --}}
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
+                                    Imagen de Acompañamiento (Opcional)
+                                </label>
+                                
+                                @if($announcement->banner_image)
+                                    <div class="mb-3 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                                        <div class="flex items-center justify-between">
+                                            <div class="flex items-center gap-3">
+                                                <img src="{{ $announcement->banner_image_url }}" 
+                                                     alt="Banner actual" 
+                                                     class="w-16 h-10 object-cover rounded border border-gray-200">
+                                                <div>
+                                                    <p class="text-sm text-gray-700 font-medium">Imagen actual</p>
+                                                    <p class="text-xs text-gray-500">{{ basename($announcement->banner_image) }}</p>
+                                                </div>
+                                            </div>
+                                            <label class="flex items-center gap-2 text-sm text-red-600 cursor-pointer hover:text-red-700">
+                                                <input type="checkbox" name="remove_banner_image" value="1" class="h-4 w-4 text-red-600">
+                                                Eliminar
                                             </label>
                                         </div>
                                     </div>
-                                </div>
-                            @endif
-
-                            <div x-show="!formData.removeBanner">
-                                <label class="block text-sm font-medium text-black-300 mb-2">
-                                    {{ $announcement->banner_image ? 'Reemplazar Imagen del Banner' : 'Imagen del Banner' }} (628x200px)
-                                </label>
+                                @endif
+                                
                                 <input type="file" 
                                        name="banner_image" 
                                        accept="image/*"
                                        @change="handleImagePreview"
-                                       class="w-full px-4 py-2 border border-accent-200 rounded-lg focus:border-primary-200 focus:ring-1 focus:ring-primary-200 focus:outline-none @error('banner_image') border-error-200 @enderror">
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none @error('banner_image') border-red-300 @enderror">
                                 @error('banner_image')
-                                    <p class="text-error-300 text-xs mt-1">{{ $message }}</p>
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
-                                <p class="text-xs text-black-200 mt-1">
-                                    📐 Formatos: JPG, PNG, WebP. <strong>Tamaño exacto: 628x200 píxeles</strong>. Máximo 2MB.
+                                <p class="text-xs text-gray-500 mt-1">
+                                    Formatos: JPG, PNG, WebP. Máximo 2MB. Esta imagen acompañará al banner HTML.
                                 </p>
                                 
-                                <div x-show="imagePreview" class="mt-4 bg-accent-100 p-4 rounded-lg">
-                                    <p class="text-xs text-black-300 mb-2 font-medium">Vista previa (tamaño real):</p>
+                                <div x-show="imagePreview" class="mt-4 bg-gray-50 p-4 rounded-lg">
+                                    <p class="text-xs text-gray-600 mb-2 font-medium">Vista previa de nueva imagen:</p>
                                     <img :src="imagePreview" 
                                          alt="Preview" 
-                                         class="border-2 border-accent-200 rounded shadow-sm" 
-                                         style="width: 628px; height: 200px; max-width: 100%; object-fit: cover;">
-                                    <p class="text-xs text-black-200 mt-2">
-                                        ⚠️ La imagen debe ser exactamente 628x200px para verse correctamente
-                                    </p>
+                                         class="border-2 border-gray-200 rounded shadow-sm max-w-md">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Color de Fondo
+                                    </label>
+                                    <div class="flex gap-2">
+                                        <input type="color" 
+                                               name="banner_background_color" 
+                                               x-model="formData.bannerBackgroundColor"
+                                               @input="formData.bannerBackgroundColor = $event.target.value"
+                                               value="{{ old('banner_background_color', $announcement->banner_background_color ?? '#667eea') }}"
+                                               class="h-10 w-20 border border-gray-300 rounded cursor-pointer">
+                                        <input type="text" 
+                                               name="banner_background_color" 
+                                               x-model="formData.bannerBackgroundColor"
+                                               @input="formData.bannerBackgroundColor = $event.target.value"
+                                               value="{{ old('banner_background_color', $announcement->banner_background_color ?? '#667eea') }}"
+                                               pattern="^#[0-9A-Fa-f]{6}$"
+                                               placeholder="#667eea"
+                                               class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none font-mono text-sm">
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">
+                                        Color de Texto
+                                    </label>
+                                    <div class="flex gap-2">
+                                        <input type="color" 
+                                               name="banner_text_color" 
+                                               x-model="formData.bannerTextColor"
+                                               @input="formData.bannerTextColor = $event.target.value"
+                                               value="{{ old('banner_text_color', $announcement->banner_text_color ?? '#ffffff') }}"
+                                               class="h-10 w-20 border border-gray-300 rounded cursor-pointer">
+                                        <input type="text" 
+                                               name="banner_text_color" 
+                                               x-model="formData.bannerTextColor"
+                                               @input="formData.bannerTextColor = $event.target.value"
+                                               value="{{ old('banner_text_color', $announcement->banner_text_color ?? '#ffffff') }}"
+                                               pattern="^#[0-9A-Fa-f]{6}$"
+                                               placeholder="#ffffff"
+                                               class="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none font-mono text-sm">
+                                    </div>
+                                </div>
+                            </div>
+
+                            {{-- Preview HTML --}}
+                            <div class="mt-4 bg-gray-50 p-4 rounded-lg">
+                                <p class="text-xs text-gray-600 mb-2 font-medium">Vista previa del banner (en tiempo real):</p>
+                                <div class="bg-white rounded-lg p-4 border border-gray-200 min-h-[100px]" 
+                                     :style="'background-color: ' + (formData.bannerBackgroundColor || '#667eea') + '; color: ' + (formData.bannerTextColor || '#ffffff') + ';'"
+                                     x-html="formData.bannerHtmlPreview || '<p class=\'text-sm\'>Tu HTML aparecerá aquí</p>'">
                                 </div>
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-black-300 mb-2">
+                                <label class="block text-sm font-medium text-gray-700 mb-2">
                                     Enlace del Banner (Opcional)
                                 </label>
                                 <input type="url" 
                                        name="banner_link" 
-                                       value="{{ old('banner_link', $announcement->banner_link) }}"
+                                       value="{{ old('banner_link', $announcement->banner_link ?? '') }}"
                                        placeholder="https://..."
-                                       class="w-full px-4 py-2 border border-accent-200 rounded-lg focus:border-primary-200 focus:ring-1 focus:ring-primary-200 focus:outline-none @error('banner_link') border-error-200 @enderror">
+                                       class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none @error('banner_link') border-red-300 @enderror">
                                 @error('banner_link')
-                                    <p class="text-error-300 text-xs mt-1">{{ $message }}</p>
+                                    <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                                 @enderror
-                                <p class="text-xs text-black-200 mt-1">
+                                <p class="text-xs text-gray-500 mt-1">
                                     URL a la que dirigir cuando hagan clic en el banner
                                 </p>
                             </div>
                         </div>
                     </div>
                 </div>
+                {{-- End SECTION: Banner Configuration --}}
             </div>
+            {{-- End SECTION: Contenido Principal --}}
 
-            <!-- Configuración Lateral -->
+            {{-- SECTION: Configuración Lateral --}}
             <div class="space-y-6">
-                <!-- Estadísticas -->
-                <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
-                    <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                        <h2 class="text-lg font-semibold text-black-400 mb-0">Estadísticas</h2>
-                    </div>
-                    
-                    <div class="p-6 space-y-3">
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-black-300">Creado:</span>
-                            <span class="text-sm text-black-400">{{ $announcement->created_at->format('d/m/Y H:i') }}</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-black-300">Modificado:</span>
-                            <span class="text-sm text-black-400">{{ $announcement->updated_at->format('d/m/Y H:i') }}</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-black-300">Lecturas:</span>
-                            <span class="text-sm text-black-400">{{ $announcement->reads->count() }}</span>
-                        </div>
-                        <div class="flex justify-between items-center">
-                            <span class="text-sm text-black-300">Estado:</span>
-                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-{{ $announcement->is_active ? 'success' : 'black' }}-100 text-{{ $announcement->is_active ? 'success' : 'black' }}-300">
-                                {{ $announcement->is_active ? 'Activo' : 'Inactivo' }}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Segmentación -->
-                <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
-                    <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                        <h2 class="text-lg font-semibold text-black-400 mb-0">Segmentación</h2>
+                {{-- SECTION: Segmentación --}}
+                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div class="border-b border-gray-200 bg-gray-50 py-4 px-6">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-0">Segmentación</h2>
                     </div>
                     
                     <div class="p-6 space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-black-300 mb-3">Planes Target</label>
-                            <div class="space-y-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">Planes Target</label>
+                            <div class="space-y-2 max-h-48 overflow-y-auto">
                                 @forelse($plans as $plan)
-                                    <label class="flex items-center gap-3 p-2 hover:bg-accent-100 rounded cursor-pointer">
+                                    <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
                                         <input type="checkbox" 
                                                name="target_plans[]" 
                                                value="{{ strtolower($plan->name) }}"
                                                {{ in_array(strtolower($plan->name), old('target_plans', $announcement->target_plans ?? [])) ? 'checked' : '' }}
-                                               class="h-4 w-4 text-primary-300 focus:ring-primary-200 border-accent-200 rounded">
-                                        <span class="text-sm text-black-400">{{ $plan->name }}</span>
-                                        <span class="text-xs text-black-200">
+                                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                                        <span class="text-sm text-gray-700">{{ $plan->name }}</span>
+                                        <span class="text-xs text-gray-500">
                                             ({{ number_format($plan->price, 0, ',', '.') }} {{ $plan->currency }})
                                         </span>
                                     </label>
                                 @empty
-                                    <p class="text-sm text-black-300">No hay planes activos disponibles</p>
+                                    <p class="text-sm text-gray-600">No hay planes activos disponibles</p>
                                 @endforelse
                             </div>
-                            <p class="text-xs text-black-200 mt-2">
+                            <p class="text-xs text-gray-500 mt-2">
                                 Si no seleccionas ninguno, se mostrará a todos los planes
                             </p>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-black-300 mb-3">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">
                                 Tiendas Específicas (Opcional)
                             </label>
-                            <div class="max-h-48 overflow-y-auto border border-accent-200 rounded-lg p-3 space-y-2">
+                            <div class="max-h-48 overflow-y-auto border border-gray-200 rounded-lg p-3 space-y-2">
                                 @forelse($stores as $store)
-                                    <label class="flex items-center gap-3 p-2 hover:bg-accent-100 rounded cursor-pointer">
+                                    <label class="flex items-center gap-3 p-2 hover:bg-gray-50 rounded cursor-pointer">
                                         <input type="checkbox" 
                                                name="target_stores[]" 
                                                value="{{ $store->id }}"
                                                {{ in_array($store->id, old('target_stores', $announcement->target_stores ?? [])) ? 'checked' : '' }}
-                                               class="h-4 w-4 text-primary-300 focus:ring-primary-200 border-accent-200 rounded">
+                                               class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                                         <div class="flex-1">
-                                            <span class="text-sm text-black-400 block">{{ $store->name }}</span>
-                                            <span class="text-xs text-black-300">
+                                            <span class="text-sm text-gray-700 block">{{ $store->name }}</span>
+                                            <span class="text-xs text-gray-500">
                                                 @{{ $store->slug }} • {{ $store->plan->name ?? 'Sin plan' }}
                                             </span>
                                         </div>
                                     </label>
                                 @empty
-                                    <p class="text-sm text-black-300 p-2">No hay tiendas activas disponibles</p>
+                                    <p class="text-sm text-gray-600 p-2">No hay tiendas activas disponibles</p>
                                 @endforelse
                             </div>
-                            <p class="text-xs text-black-200 mt-2">
-                                💡 Deja vacío para enviar a todas las tiendas del plan seleccionado
+                            <p class="text-xs text-gray-500 mt-2">
+                                Deja vacío para enviar a todas las tiendas del plan seleccionado
                             </p>
                         </div>
                     </div>
                 </div>
+                {{-- End SECTION: Segmentación --}}
 
-                <!-- Fechas -->
-                <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
-                    <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                        <h2 class="text-lg font-semibold text-black-400 mb-0">Programación</h2>
+                {{-- SECTION: Programación --}}
+                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div class="border-b border-gray-200 bg-gray-50 py-4 px-6">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-0">Programación</h2>
                     </div>
                     
                     <div class="p-6 space-y-4">
                         <div>
-                            <label class="block text-sm font-medium text-black-300 mb-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
                                 Fecha de Publicación (Opcional)
                             </label>
                             <input type="datetime-local" 
                                    name="published_at" 
                                    value="{{ old('published_at', $announcement->published_at ? $announcement->published_at->format('Y-m-d\TH:i') : '') }}"
-                                   class="w-full px-4 py-2 border border-accent-200 rounded-lg focus:border-primary-200 focus:ring-1 focus:ring-primary-200 focus:outline-none @error('published_at') border-error-200 @enderror">
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none @error('published_at') border-red-300 @enderror">
                             @error('published_at')
-                                <p class="text-error-300 text-xs mt-1">{{ $message }}</p>
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
-                            <p class="text-xs text-black-200 mt-1">
-                                ⚡ Si lo dejas vacío, se publicará inmediatamente al activarlo
+                            <p class="text-xs text-gray-500 mt-1">
+                                Si lo dejas vacío, se publicará inmediatamente al activarlo
                             </p>
                         </div>
 
                         <div>
-                            <label class="block text-sm font-medium text-black-300 mb-2">
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
                                 Fecha de Expiración
                             </label>
                             <input type="datetime-local" 
                                    name="expires_at" 
                                    value="{{ old('expires_at', $announcement->expires_at ? $announcement->expires_at->format('Y-m-d\TH:i') : '') }}"
-                                   class="w-full px-4 py-2 border border-accent-200 rounded-lg focus:border-primary-200 focus:ring-1 focus:ring-primary-200 focus:outline-none @error('expires_at') border-error-200 @enderror">
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none @error('expires_at') border-red-300 @enderror">
                             @error('expires_at')
-                                <p class="text-error-300 text-xs mt-1">{{ $message }}</p>
+                                <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
+                            <p class="text-xs text-gray-500 mt-1">
+                                Déjalo vacío para que sea permanente
+                            </p>
                         </div>
                     </div>
                 </div>
+                {{-- End SECTION: Programación --}}
 
-                <!-- Comportamiento -->
-                <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
-                    <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                        <h2 class="text-lg font-semibold text-black-400 mb-0">Comportamiento</h2>
+                {{-- SECTION: Comportamiento --}}
+                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div class="border-b border-gray-200 bg-gray-50 py-4 px-6">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-0">Comportamiento</h2>
                     </div>
                     
                     <div class="p-6 space-y-4">
@@ -347,8 +395,8 @@
                                    name="is_active" 
                                    value="1"
                                    {{ old('is_active', $announcement->is_active) ? 'checked' : '' }}
-                                   class="h-4 w-4 text-primary-300 focus:ring-primary-200 border-accent-200 rounded">
-                            <span class="text-sm text-black-400">Activo</span>
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <span class="text-sm text-gray-700">Activar inmediatamente</span>
                         </label>
 
                         <label class="flex items-center gap-3" x-show="formData.type === 'critical'">
@@ -356,8 +404,8 @@
                                    name="show_popup" 
                                    value="1"
                                    {{ old('show_popup', $announcement->show_popup) ? 'checked' : '' }}
-                                   class="h-4 w-4 text-primary-300 focus:ring-primary-200 border-accent-200 rounded">
-                            <span class="text-sm text-black-400">Mostrar popup automático</span>
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <span class="text-sm text-gray-700">Mostrar popup automático</span>
                         </label>
 
                         <label class="flex items-center gap-3" x-show="formData.type === 'critical'">
@@ -365,101 +413,127 @@
                                    name="send_email" 
                                    value="1"
                                    {{ old('send_email', $announcement->send_email) ? 'checked' : '' }}
-                                   class="h-4 w-4 text-primary-300 focus:ring-primary-200 border-accent-200 rounded">
-                            <span class="text-sm text-black-400">Enviar email</span>
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <span class="text-sm text-gray-700">Enviar email</span>
                         </label>
-
-                        <div x-data="{ autoMarkDays: '{{ old('auto_mark_read_after', $announcement->auto_mark_read_after) }}' }">
-                            <label class="block text-sm font-medium text-black-300 mb-2">
-                                Auto-marcar como leído (días)
-                            </label>
-                            
-                            <div class="flex gap-2 mb-2">
-                                <button type="button" 
-                                        @click="autoMarkDays = '7'"
-                                        class="flex-1 px-3 py-2 text-xs border border-accent-200 rounded hover:bg-primary-50 hover:border-primary-200 transition-colors"
-                                        :class="autoMarkDays == '7' ? 'bg-primary-100 border-primary-200 text-primary-300 font-medium' : 'bg-accent-50'">
-                                    7 días
-                                </button>
-                                <button type="button" 
-                                        @click="autoMarkDays = '30'"
-                                        class="flex-1 px-3 py-2 text-xs border border-accent-200 rounded hover:bg-primary-50 hover:border-primary-200 transition-colors"
-                                        :class="autoMarkDays == '30' ? 'bg-primary-100 border-primary-200 text-primary-300 font-medium' : 'bg-accent-50'">
-                                    30 días
-                                </button>
-                                <button type="button" 
-                                        @click="autoMarkDays = '90'"
-                                        class="flex-1 px-3 py-2 text-xs border border-accent-200 rounded hover:bg-primary-50 hover:border-primary-200 transition-colors"
-                                        :class="autoMarkDays == '90' ? 'bg-primary-100 border-primary-200 text-primary-300 font-medium' : 'bg-accent-50'">
-                                    90 días
-                                </button>
-                            </div>
-                            
-                            <input type="number" 
-                                   name="auto_mark_read_after" 
-                                   x-model="autoMarkDays"
-                                   min="1" 
-                                   max="365"
-                                   placeholder="O ingresa días personalizados"
-                                   class="w-full px-4 py-2 border border-accent-200 rounded-lg focus:border-primary-200 focus:ring-1 focus:ring-primary-200 focus:outline-none @error('auto_mark_read_after') border-error-200 @enderror">
-                            @error('auto_mark_read_after')
-                                <p class="text-error-300 text-xs mt-1">{{ $message }}</p>
-                            @enderror
-                            <p class="text-xs text-black-200 mt-1">
-                                ⏱️ Días después de los cuales se marcará automáticamente como leído
-                            </p>
-                        </div>
                     </div>
                 </div>
+                {{-- End SECTION: Comportamiento --}}
 
-                <!-- Botones de Acción -->
-                <div class="bg-accent-50 rounded-lg p-6">
+                {{-- SECTION: Canales de Notificación --}}
+                <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
+                    <div class="border-b border-gray-200 bg-gray-50 py-4 px-6">
+                        <h2 class="text-lg font-semibold text-gray-900 mb-0">Canales de Notificación</h2>
+                    </div>
+                    
+                    <div class="p-6 space-y-3">
+                        <p class="text-sm text-gray-600 mb-4">Selecciona los canales por los que se enviará este anuncio:</p>
+                        
+                        <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                            <input type="checkbox" 
+                                   name="channels[]" 
+                                   value="in_app"
+                                   {{ in_array('in_app', old('channels', $existingChannels ?? ['in_app'])) ? 'checked' : '' }}
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <div class="flex-1">
+                                <span class="text-sm font-medium text-gray-700">In-App</span>
+                                <p class="text-xs text-gray-500">Notificación en el dashboard de la tienda</p>
+                            </div>
+                        </label>
+
+                        <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                            <input type="checkbox" 
+                                   name="channels[]" 
+                                   value="email"
+                                   {{ in_array('email', old('channels', $existingChannels ?? [])) ? 'checked' : '' }}
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <div class="flex-1">
+                                <span class="text-sm font-medium text-gray-700">Email</span>
+                                <p class="text-xs text-gray-500">Enviar por correo electrónico</p>
+                            </div>
+                        </label>
+
+                        <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer">
+                            <input type="checkbox" 
+                                   name="channels[]" 
+                                   value="whatsapp"
+                                   {{ in_array('whatsapp', old('channels', $existingChannels ?? [])) ? 'checked' : '' }}
+                                   class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                            <div class="flex-1">
+                                <span class="text-sm font-medium text-gray-700">WhatsApp</span>
+                                <p class="text-xs text-gray-500">Enviar por WhatsApp Business</p>
+                            </div>
+                        </label>
+                    </div>
+                </div>
+                {{-- End SECTION: Canales de Notificación --}}
+
+                {{-- SECTION: Botones de Acción --}}
+                <div class="bg-white rounded-lg border border-gray-200 p-6">
                     <div class="space-y-3">
                         <button type="submit" 
-                                class="w-full btn-primary px-4 py-3 rounded-lg flex items-center justify-center gap-2">
-                            <x-solar-diskette-outline class="w-5 h-5" />
-                            Actualizar Anuncio
+                                class="w-full bg-gray-900 hover:bg-gray-800 text-white px-4 py-3 rounded-lg flex items-center justify-center gap-2 font-medium transition-colors">
+                            <i data-lucide="save" class="w-5 h-5"></i>
+                            Guardar Cambios
                         </button>
                         
                         <a href="{{ route('superlinkiu.announcements.show', $announcement) }}" 
-                           class="w-full btn-outline-info px-4 py-3 rounded-lg flex items-center justify-center gap-2">
-                            <x-solar-eye-outline class="w-5 h-5" />
-                            Ver Detalle
-                        </a>
-
-                        <form method="POST" 
-                              action="{{ route('superlinkiu.announcements.duplicate', $announcement) }}" 
-                              class="w-full">
-                            @csrf
-                            <button type="submit" 
-                                    class="w-full btn-outline-warning px-4 py-3 rounded-lg flex items-center justify-center gap-2">
-                                <x-solar-copy-outline class="w-5 h-5" />
-                                Duplicar
-                            </button>
-                        </form>
-                        
-                        <a href="{{ route('superlinkiu.announcements.index') }}" 
-                           class="w-full btn-outline-secondary px-4 py-3 rounded-lg flex items-center justify-center gap-2">
-                            <x-solar-close-circle-outline class="w-5 h-5" />
+                           class="w-full bg-white hover:bg-gray-50 text-gray-700 border border-gray-300 px-4 py-3 rounded-lg flex items-center justify-center gap-2 font-medium transition-colors">
+                            <i data-lucide="x" class="w-5 h-5"></i>
                             Cancelar
                         </a>
                     </div>
                 </div>
+                {{-- End SECTION: Botones de Acción --}}
             </div>
+            {{-- End SECTION: Configuración Lateral --}}
         </div>
     </form>
 </div>
 
 @push('scripts')
 <script>
+// Manejar mensajes flash con toasts
+@if(session('success'))
+    window.toast.success('Éxito', '{{ session('success') }}', 5000, 'top-center');
+@endif
+
+@if(session('error'))
+    window.toast.error('Error', '{{ session('error') }}', 5000, 'top-center');
+@endif
+
+@if($errors->any())
+    @foreach($errors->all() as $error)
+        window.toast.error('Error de validación', '{{ $error }}', 5000, 'top-center');
+    @endforeach
+@endif
+
 function editAnnouncement() {
     return {
         formData: {
             type: '{{ old('type', $announcement->type) }}',
             showAsBanner: {{ old('show_as_banner', $announcement->show_as_banner) ? 'true' : 'false' }},
-            removeBanner: false
+            bannerHtmlPreview: @if($announcement->banner_html) {!! json_encode($announcement->banner_html) !!} @else null @endif,
+            bannerBackgroundColor: '{{ old('banner_background_color', $announcement->banner_background_color ?? '#667eea') }}',
+            bannerTextColor: '{{ old('banner_text_color', $announcement->banner_text_color ?? '#ffffff') }}'
         },
         imagePreview: null,
+        
+        init() {
+            // Watch for HTML changes and update preview in real-time
+            const htmlTextarea = document.getElementById('banner_html');
+            if (htmlTextarea) {
+                // Update preview as user types
+                htmlTextarea.addEventListener('input', (e) => {
+                    this.formData.bannerHtmlPreview = e.target.value;
+                });
+                
+                // Initialize preview with existing content
+                if (htmlTextarea.value) {
+                    this.formData.bannerHtmlPreview = htmlTextarea.value;
+                }
+            }
+        },
         
         handleImagePreview(event) {
             const file = event.target.files[0];
@@ -477,4 +551,4 @@ function editAnnouncement() {
 }
 </script>
 @endpush
-@endsection 
+@endsection

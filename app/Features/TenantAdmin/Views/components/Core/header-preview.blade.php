@@ -5,7 +5,7 @@
 
 {{-- Vista previa del header de la tienda --}}
 <div
-    class="mx-auto"
+    class="w-full max-w-full overflow-hidden"
     x-data="(() => ({
         defaults: {
             name: @js($store->name),
@@ -64,7 +64,7 @@
 >
     {{-- Header --}}
     <div 
-        class="p-6 py-8 rounded-xl w-[480px]"
+        class="p-6 py-8 rounded-xl w-full max-w-full mx-auto"
         :style="{ backgroundColor: preview.bgColor }"
     >
         {{-- Logo y Nombre --}}

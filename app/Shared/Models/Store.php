@@ -279,11 +279,6 @@ class Store extends Model
         return $this->hasMany(Ticket::class);
     }
 
-    public function onboardingSteps()
-    {
-        return $this->hasMany(StoreOnboardingStep::class);
-    }
-
     /**
      * Get count of unread support responses for this store.
      * Support responses are responses from super_admin users created after
@@ -338,6 +333,14 @@ class Store extends Model
     public function getOrdersCountAttribute()
     {
         return $this->orders()->count();
+    }
+
+    /**
+     * Get all coupons for this store.
+     */
+    public function coupons()
+    {
+        return $this->hasMany(\App\Features\TenantAdmin\Models\Coupon::class);
     }
 
     /**

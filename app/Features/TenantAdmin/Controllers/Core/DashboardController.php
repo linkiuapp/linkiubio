@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Shared\Models\Order;
 use App\Shared\Models\PlatformAnnouncement;
+use App\Services\KiuBotAssistantService;
+use App\Services\StoreInsightsService;
 
 class DashboardController extends Controller
 {
@@ -26,8 +28,8 @@ class DashboardController extends Controller
 
         $user = auth()->user();
         
-        // Eager loading del plan
-        $store->load('plan');
+        // Eager loading del plan y businessCategory (necesario para tours)
+        $store->load('plan', 'businessCategory');
         
         // Estadísticas con caché de 5 minutos
         $stats = \Cache::remember("tenant_dashboard_stats_{$store->id}", 300, function () use ($store) {
@@ -163,7 +165,18 @@ class DashboardController extends Controller
                 return $this->mapOrder($order);
             });
 
-        return view('tenant-admin::Core/dashboard', compact('store', 'stats', 'allOrders', 'banners'));
+        // ✅ NUEVO: Cargar insights inteligentes para KiuBot
+        $insights = [];
+        if ($store->plan && $store->plan->kiubot_enabled) {
+            try {
+                $insightsService = app(StoreInsightsService::class)->setStore($store);
+                $insights = $insightsService->getAllInsights();
+            } catch (\Exception $e) {
+                \Log::warning('Failed to load store insights', ['error' => $e->getMessage()]);
+            }
+        }
+
+        return view('tenant-admin::Core/dashboard', compact('store', 'stats', 'allOrders', 'banners', 'insights'));
     }
     
     /**
@@ -192,5 +205,49 @@ class DashboardController extends Controller
                 ];
             })
         ];
+    }
+
+    /**
+     * Procesar mensaje del asistente virtual
+     */
+    public function chat(Request $request, $store)
+    {
+        $validated = $request->validate([
+            'message' => 'required|string|max:1000',
+            'session_id' => 'nullable|string|max:255'
+        ]);
+
+        $store = view()->shared('currentStore');
+        $user = auth()->user();
+
+        // Verificar que el usuario pertenezca a la tienda
+        if ($user->store_id !== $store->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No autorizado'
+            ], 403);
+        }
+
+        try {
+            $assistant = app(KiuBotAssistantService::class);
+            $result = $assistant->processMessage(
+                $validated['message'],
+                $store,
+                $user,
+                $validated['session_id'] ?? null
+            );
+
+            return response()->json($result);
+        } catch (\Exception $e) {
+            \Log::error('Dashboard chat error', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Ocurrió un error al procesar tu mensaje. Por favor intenta nuevamente.'
+            ], 500);
+        }
     }
 } 

@@ -1,0 +1,23 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+    - phpstan-baseline.neon
+
+parameters:
+    paths:
+        - app/
+    
+    # Excluir directorios que no necesitan análisis
+    excludePaths:
+        analyseAndScan:
+            - bootstrap/*
+            - storage/*
+            - vendor/*
+    
+    # Nivel de análisis (0-9)
+    # 0 = menos estricto, 9 = más estricto
+    # Recomendado empezar con 5 y subir gradualmente
+    level: 5
+    
+    # Memoria (aumentar si es necesario)
+    tmpDir: storage/framework/phpstan
+    

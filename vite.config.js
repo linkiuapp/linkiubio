@@ -7,7 +7,9 @@ export default defineConfig({
             input: [
                 'resources/css/app.css',
                 'resources/css/wizard.css',
+                'resources/css/tours.css',
                 'resources/js/app.js',
+                'resources/js/tours/tour-manager.js',
             ],
             refresh: true,
         }),
@@ -37,6 +39,9 @@ export default defineConfig({
                     }
                     if (id.includes('alpinejs') || id.includes('alpine')) {
                         return 'alpine';
+                    }
+                    if (id.includes('driver.js') || id.includes('driver')) {
+                        return 'driver';
                     }
                 },
             },

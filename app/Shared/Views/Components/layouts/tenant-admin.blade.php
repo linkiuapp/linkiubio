@@ -56,7 +56,7 @@
     {{-- End SECTION: Fonts --}}
 
     {{-- SECTION: Styles --}}
-    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    @vite(['resources/css/app.css', 'resources/css/tours.css', 'resources/js/app.js', 'resources/js/tours/tour-manager.js'])
     {{-- End SECTION: Styles --}}
 
     {{-- SECTION: Alpine.js --}}
@@ -76,19 +76,8 @@
     {{-- SECTION: Session Messages Script --}}
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            {{-- Los mensajes de éxito ahora se muestran con AlertBordered en lugar de SweetAlert --}}
-            @if(session('swal_success'))
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Éxito',
-                    text: '{{ session('swal_success') }}',
-                    confirmButtonColor: '#00c76f',
-                    confirmButtonText: 'OK',
-                    timer: 3000,
-                    timerProgressBar: true
-                });
-            @endif
-
+            {{-- Los mensajes ahora se manejan con el sistema de toasts en cada vista --}}
+            
             @if(session('onboarding_step_completed'))
                 if (typeof window.confetti === 'function') {
                     const stepKey = 'confetti_step_shown_{{ now()->timestamp }}';
@@ -159,16 +148,6 @@
                     session()->forget('onboarding_just_completed');
                 @endphp
             @endif
-
-            @if(session('error'))
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: '{{ session('error') }}',
-                    confirmButtonColor: '#ed2e45',
-                    confirmButtonText: 'OK'
-                });
-            @endif
         });
     </script>
     {{-- End SECTION: Session Messages Script --}}
@@ -182,6 +161,8 @@
     {{-- End SECTION: Alpine.js Initialization --}}
 </head>
 <body class="bg-secondary-50 font-body tenant-admin" data-store-id="{{ $store->id }}">
+    {{-- Maintenance Notice --}}
+    <x-maintenance-notice variant="admin" />
 
     {{-- SECTION: Preview Mode Banner --}}
     @if(session('preview_mode'))
@@ -323,24 +304,7 @@
             {{-- End SECTION: Page Header --}}
 
             {{-- SECTION: Flash Messages --}}
-            @if(session('error'))
-                <div 
-                    class="alert alert-error mb-6" 
-                    x-data="{ show: true }" 
-                    x-show="show"
-                    x-init="setTimeout(() => show = false, 5000)"
-                >
-                    <div class="flex items-center gap-3">
-                        <x-solar-close-circle-outline class="w-5 h-5 text-error-300" />
-                        <span>{{ session('error') }}</span>
-                        <button @click="show = false" class="ml-auto">
-                            <x-solar-close-circle-outline class="w-4 h-4" />
-                        </button>
-                    </div>
-                </div>
-            @endif
-
-            {{-- Las alertas de validación ahora se manejan en las vistas individuales con el componente AlertBordered --}}
+            {{-- Los mensajes flash ahora se manejan con el sistema de toasts en cada vista --}}
             {{-- End SECTION: Flash Messages --}}
 
             {{-- SECTION: Content Area --}}
@@ -862,5 +826,8 @@
         }
     </script>
     {{-- End SECTION: Store Data and Announcement Popups --}}
+    
+    {{-- KiuBot Floating Button --}}
+    <x-kiubot-floating-button />
 </body>
 </html>

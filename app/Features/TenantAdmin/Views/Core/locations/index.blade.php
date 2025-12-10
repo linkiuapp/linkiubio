@@ -7,60 +7,16 @@ Muestra todas las sedes con filtros, acciones y paginación siguiendo el patrón
     @section('title', 'Gestión de Sedes')
 
     @section('content')
+    {{-- Auto-iniciar tour --}}
+    <x-tour-trigger tour="gestionar_sedes" :autoStart="true" :showButton="false" />
+    
     {{-- SECTION: Main Container --}}
     <div
         class="space-y-4"
         x-data="locationsPage()"
         x-init="init()"
     >
-        {{-- SECTION: Session Alerts --}}
-        @foreach ([
-            'location_created' => 'La sede se ha creado correctamente.',
-            'location_updated' => 'La sede se ha actualizado correctamente.',
-            'location_deleted' => 'La sede se ha eliminado correctamente.',
-        ] as $sessionKey => $message)
-            @if(session($sessionKey))
-                <div
-                    x-data="{ show: true }"
-                    x-show="show"
-                    x-cloak
-                    x-transition:enter="transition ease-out duration-300"
-                    x-transition:enter-start="opacity-0 translate-y-2"
-                    x-transition:enter-end="opacity-100 translate-y-0"
-                    x-transition:leave="transition ease-in duration-200"
-                    x-transition:leave-start="opacity-100 translate-y-0"
-                    x-transition:leave-end="opacity-0 translate-y-2"
-                    x-init="setTimeout(() => show = false, 5000)"
-                >
-                    <x-alert-bordered
-                        type="success"
-                        title="Actualización exitosa"
-                        :message="$message"
-                    />
-                </div>
-            @endif
-        @endforeach
-        {{-- End SECTION: Session Alerts --}}
-
-        {{-- SECTION: Delete Success Alert --}}
-        <div
-            x-show="showSuccessAlert"
-            x-cloak
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 translate-y-2"
-            x-transition:enter-end="opacity-100 translate-y-0"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 translate-y-0"
-            x-transition:leave-end="opacity-0 translate-y-2"
-        >
-            <x-alert-bordered
-                type="success"
-                title="Acción exitosa"
-            >
-                <span x-text="successMessage"></span>
-            </x-alert-bordered>
-        </div>
-        {{-- End SECTION: Delete Success Alert --}}
+        <x-toast-notification />
 
         @php
             $emptyStateSvg = 'base_ui_empty_locations.svg';
@@ -81,7 +37,7 @@ Muestra todas las sedes con filtros, acciones y paginación siguiendo el patrón
                     </div>
                     <div class="flex items-center gap-3">
                         @if($remainingSlots > 0)
-                            <a href="{{ route('tenant.admin.locations.create', ['store' => $store->slug]) }}">
+                            <a href="{{ route('tenant.admin.locations.create', ['store' => $store->slug]) }}" data-tour="location-button">
                                 <x-button-icon
                                     type="solid"
                                     color="info"
@@ -301,42 +257,72 @@ Muestra todas las sedes con filtros, acciones y paginación siguiendo el patrón
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('locationsPage', () => ({
-                showSuccessAlert: false,
-                successMessage: '',
                 init() {
                     if (typeof window.createIcons !== 'undefined' && typeof window.lucideIcons !== 'undefined') {
                         window.createIcons({ icons: window.lucideIcons });
                     }
 
+                    @if(session('location_created'))
+                    if (window.toast) {
+                        window.toast.success(
+                            'Actualización exitosa',
+                            'La sede se ha creado correctamente.',
+                            5000,
+                            'bottom-center'
+                        );
+                    }
+                    @endif
+
+                    @if(session('location_updated'))
+                    if (window.toast) {
+                        window.toast.success(
+                            'Actualización exitosa',
+                            'La sede se ha actualizado correctamente.',
+                            5000,
+                            'bottom-center'
+                        );
+                    }
+                    @endif
+
+                    @if(session('location_deleted'))
+                    if (window.toast) {
+                        window.toast.success(
+                            'Actualización exitosa',
+                            'La sede se ha eliminado correctamente.',
+                            5000,
+                            'bottom-center'
+                        );
+                    }
+                    @endif
+
                     const storedMessage = window.localStorage.getItem('locations-success-message');
                     if (storedMessage) {
-                        this.successMessage = storedMessage;
                         window.localStorage.removeItem('locations-success-message');
-                        this.triggerSuccessAlert();
+                        if (window.toast) {
+                            window.toast.success(
+                                'Actualización exitosa',
+                                storedMessage,
+                                5000,
+                                'bottom-center'
+                            );
+                        }
                     }
 
                     window.addEventListener('show-success-alert', (event) => {
                         const detail = event.detail || {};
-                        this.successMessage = detail.message || 'Operación realizada correctamente.';
-                        this.triggerSuccessAlert();
+                        const message = detail.message || 'Operación realizada correctamente.';
+                        if (window.toast) {
+                            window.toast.success(
+                                'Actualización exitosa',
+                                message,
+                                5000,
+                                'bottom-center'
+                            );
+                        }
                     });
 
                     this.registerToggleHandlers();
                     this.registerSetAsMainHandlers();
-                },
-                triggerSuccessAlert() {
-                    if (!this.successMessage) {
-                        this.successMessage = 'Operación realizada correctamente.';
-                    }
-                    this.showSuccessAlert = true;
-                    this.$nextTick(() => {
-                        if (typeof window.createIcons !== 'undefined' && typeof window.lucideIcons !== 'undefined') {
-                            window.createIcons({ icons: window.lucideIcons });
-                        }
-                    });
-                    setTimeout(() => {
-                        this.showSuccessAlert = false;
-                    }, 5000);
                 },
                 deleteLocation(id, name, event) {
                     const rowElement = event.target.closest('tr');
@@ -366,7 +352,14 @@ Muestra todas las sedes con filtros, acciones y paginación siguiendo el patrón
                         .then(data => {
                             if (!data.success) {
                                 checkbox.checked = !isChecked;
-                                alert(data.message || 'No se pudo actualizar el estado.');
+                                if (window.toast) {
+                                    window.toast.error(
+                                        'Error',
+                                        data.message || 'No se pudo actualizar el estado.',
+                                        5000,
+                                        'bottom-center'
+                                    );
+                                }
                                 checkbox.disabled = false;
                                 return;
                             }
@@ -374,7 +367,14 @@ Muestra todas las sedes con filtros, acciones y paginación siguiendo el patrón
                         })
                         .catch(() => {
                             checkbox.checked = !isChecked;
-                            alert('Ocurrió un error al actualizar el estado.');
+                            if (window.toast) {
+                                window.toast.error(
+                                    'Error',
+                                    'Ocurrió un error al actualizar el estado.',
+                                    5000,
+                                    'bottom-center'
+                                );
+                            }
                             checkbox.disabled = false;
                         });
                     });
@@ -400,14 +400,28 @@ Muestra todas las sedes con filtros, acciones y paginación siguiendo el patrón
                         .then(response => response.json())
                         .then(data => {
                             if (!data.success) {
-                                alert(data.message || 'No se pudo establecer la sede como principal.');
+                                if (window.toast) {
+                                    window.toast.error(
+                                        'Error',
+                                        data.message || 'No se pudo establecer la sede como principal.',
+                                        5000,
+                                        'bottom-center'
+                                    );
+                                }
                                 button.disabled = false;
                                 return;
                             }
                             this.setMainSuccess(row, button, data.message);
                         })
                         .catch(() => {
-                            alert('Ocurrió un error al establecer la sede como principal.');
+                            if (window.toast) {
+                                window.toast.error(
+                                    'Error',
+                                    'Ocurrió un error al establecer la sede como principal.',
+                                    5000,
+                                    'bottom-center'
+                                );
+                            }
                             button.disabled = false;
                         });
                     });
@@ -421,8 +435,15 @@ Muestra todas las sedes con filtros, acciones y paginación siguiendo el patrón
                     }
 
                     this.markRowAsMain(newMainRow, button);
-                    this.successMessage = message;
-                    this.triggerSuccessAlert();
+                    
+                    if (window.toast) {
+                        window.toast.success(
+                            'Actualización exitosa',
+                            message,
+                            5000,
+                            'bottom-center'
+                        );
+                    }
                 },
                 markRowAsMain(row, button) {
                     row.dataset.locationMain = 'true';

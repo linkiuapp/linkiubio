@@ -9,21 +9,25 @@ Permite crear nuevas variables con tipo, configuración y opciones dinámicas
     @section('content')
     <div class="max-w-4xl mx-auto space-y-6">
         {{-- SECTION: Header --}}
-        <div class="flex items-center gap-3">
-            <a href="{{ route('tenant.admin.variables.index', $store->slug) }}" class="inline-flex items-center justify-center">
-                <i data-lucide="arrow-left" class="w-5 h-5 text-gray-600 hover:text-gray-800"></i>
-            </a>
-            <h1 class="text-lg font-semibold text-gray-800">Nueva Variable</h1>
-        </div>
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <a href="{{ route('tenant.admin.variables.index', $store->slug) }}" class="inline-flex items-center justify-center">
+                        <i data-lucide="arrow-left" class="w-5 h-5 text-gray-600 hover:text-gray-800"></i>
+                    </a>
+                    <h1 class="text-lg font-semibold text-gray-800">Nueva Variable</h1>
+                </div>
+            </div>
         {{-- End SECTION: Header --}}
 
         {{-- SECTION: Info Alert --}}
-        {{-- COMPONENT: AlertSoft | props:{type:info} --}}
-        <x-alert-soft 
-            type="info"
-            :message="'Estás usando ' . $totalVariables . ' de ' . $variableLimit . ' variables disponibles en tu plan ' . $store->plan->name . '.'"
-        />
-        {{-- End COMPONENT: AlertSoft --}}
+        <div data-tour="consumo">
+            {{-- COMPONENT: AlertSoft | props:{type:info} --}}
+            <x-alert-soft 
+                type="info"
+                :message="'Estás usando ' . $totalVariables . ' de ' . $variableLimit . ' variables disponibles en tu plan ' . $store->plan->name . '.'"
+            />
+            {{-- End COMPONENT: AlertSoft --}}
+        </div>
         {{-- End SECTION: Info Alert --}}
 
         {{-- SECTION: Validation Errors Alert --}}
@@ -60,6 +64,7 @@ Permite crear nuevas variables con tipo, configuración y opciones dinámicas
                                 :value="old('name')"
                                 :required="true"
                                 :error="$errors->first('name')"
+                                data-tour="variable-name"
                             />
                         </div>
                         {{-- End ITEM: Name Field --}}
@@ -71,8 +76,8 @@ Permite crear nuevas variables con tipo, configuración y opciones dinámicas
                                 select-id="type"
                                 :options="[
                                     '' => 'Selecciona un tipo',
-                                    'radio' => 'Selección única',
-                                    'checkbox' => 'Selección múltiple',
+                                    'radio' => 'Selección única (Compatible con Variantes)',
+                                    'checkbox' => 'Selección múltiple (NO Compatible con Variantes)',
                                     'text' => 'Texto libre',
                                     'numeric' => 'Numérico'
                                 ]"
@@ -82,12 +87,29 @@ Permite crear nuevas variables con tipo, configuración y opciones dinámicas
                                 @change="handleTypeChange()"
                                 :error="$errors->first('type')"
                                 :required="true"
+                                data-tour="variable-type"
                             />
+                            
+                            {{-- Alerta para Checkbox --}}
+                            <div x-show="variableType === 'checkbox'" x-cloak class="mt-3">
+                                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3">
+                                    <div class="flex gap-2">
+                                        <i data-lucide="alert-triangle" class="w-5 h-5 text-yellow-600 flex-shrink-0"></i>
+                                        <div class="text-sm text-yellow-800">
+                                            <p class="font-medium">Limitación de Checkbox</p>
+                                            <p class="mt-1 text-xs">
+                                                Las variables de selección múltiple <strong>no permiten controlar stock por combinaciones</strong> (variantes). 
+                                                Úsalas solo para opciones simples (ej: toppings de pizza) donde el stock no depende de la combinación.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                         {{-- End ITEM: Type Field --}}
 
                         {{-- ITEM: Required Default --}}
-                        <div>
+                        <div data-tour="variable-required-default">
                             <input type="hidden" name="is_required_default" value="0">
                             <label class="flex items-center gap-3">
                                 {{-- COMPONENT: SwitchBasic | props:{switchName:is_required_default, checked:false} --}}
@@ -197,7 +219,7 @@ Permite crear nuevas variables con tipo, configuración y opciones dinámicas
                     {{-- COMPONENT: AlertSoft | props:{type:info} --}}
                     <x-alert-soft 
                         type="info"
-                        message="Si una opción no tiene precio adicional, puedes dejar el modificador de precio vacío (se asumirá 0)."
+                        message="Importante: Si planeas usar Variantes (controlar stock por combinaciones), los precios que definas aquí serán ignorados. En ese caso, definirás el precio final directamente en cada variante."
                     />
                     {{-- End COMPONENT: AlertSoft --}}
                     {{-- End ITEM: Options Info Alert --}}
@@ -250,7 +272,7 @@ Permite crear nuevas variables con tipo, configuración y opciones dinámicas
                                             class="py-3 px-4 block w-full rounded-lg border border-gray-200 text-sm text-gray-800 focus:border-blue-500 focus:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none bg-white"
                                             placeholder="0.00 (vacío = 0)"
                                         >
-                                        <p class="mt-1 text-xs text-gray-500">Dejar vacío si no hay precio adicional</p>
+                                        <p class="mt-1 text-xs text-gray-500">Solo aplica para productos simples (sin variantes combinadas)</p>
                                     </div>
                                     {{-- End ITEM: Price Modifier --}}
 
@@ -299,6 +321,7 @@ Permite crear nuevas variables con tipo, configuración y opciones dinámicas
                         size="md"
                         text="Crear Variable"
                         html-type="submit"
+                        data-tour="save-button"
                     />
                     {{-- End COMPONENT: ButtonIcon --}}
                 </div>

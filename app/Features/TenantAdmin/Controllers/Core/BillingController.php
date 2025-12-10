@@ -20,6 +20,7 @@ use App\Shared\Models\Location;
 use App\Features\TenantAdmin\Models\PaymentMethod;
 use App\Shared\Models\PlanChangeRequest;
 use App\Services\PlanUsageService;
+use App\Services\BillingService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -78,6 +79,11 @@ class BillingController extends Controller
         // Obtener próxima facturación
         $nextInvoice = $this->getNextInvoiceInfo($subscription);
 
+        // Obtener información de trial period
+        $billingService = new BillingService();
+        $isInTrial = $billingService->isInTrialPeriod($store);
+        $trialDaysRemaining = $billingService->getRemainingTrialDays($store);
+
         // Obtener solicitudes de cambio pendientes
         $pendingRequests = PlanChangeRequest::forStore($store->id)
             ->with(['currentPlan', 'requestedPlan'])
@@ -92,7 +98,9 @@ class BillingController extends Controller
             'planUsage',
             'invoices',
             'nextInvoice',
-            'pendingRequests'
+            'pendingRequests',
+            'isInTrial',
+            'trialDaysRemaining'
         ));
     }
 
@@ -233,21 +241,29 @@ class BillingController extends Controller
         }
 
         // Cancelar con período de gracia hasta el final del período actual
-        $success = $subscription->cancel($validated['reason'], $subscription->current_period_end);
+        try {
+            $success = $subscription->cancel($validated['reason'], $subscription->current_period_end);
 
-        if ($success) {
+            if ($success) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Suscripción cancelada exitosamente. Mantendrás acceso hasta ' . 
+                               $subscription->current_period_end->locale('es')->isoFormat('D [de] MMMM [de] YYYY'),
+                    'redirect' => route('tenant.admin.billing.index', $store->slug)
+                ]);
+            }
+
             return response()->json([
-                'success' => true,
-                'message' => 'Suscripción cancelada exitosamente. Mantendrás acceso hasta ' . 
-                           $subscription->current_period_end->format('d/m/Y'),
-                'redirect' => route('tenant.admin.billing.index', $store->slug)
-            ]);
+                'success' => false,
+                'message' => 'Error al cancelar la suscripción'
+            ], 500);
+        } catch (\Exception $e) {
+            // Capturar error de protección anti-abuso
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 422);
         }
-
-        return response()->json([
-            'success' => false,
-            'message' => 'Error al cancelar la suscripción'
-        ], 500);
     }
 
     /**
@@ -405,6 +421,7 @@ class BillingController extends Controller
         
         $validated = $request->validate([
             'plan_id' => 'required|exists:plans,id',
+            'billing_period' => 'required|in:monthly,quarterly,semester,annual',
             'reason' => 'nullable|string|max:1000',
             'password' => 'required|string'
         ]);
@@ -450,10 +467,11 @@ class BillingController extends Controller
         $type = $isUpgrade ? PlanChangeRequest::TYPE_UPGRADE : PlanChangeRequest::TYPE_DOWNGRADE;
 
         // Crear solicitud
-        $request = PlanChangeRequest::create([
+        $planChangeRequest = PlanChangeRequest::create([
             'store_id' => $store->id,
             'current_plan_id' => $subscription->plan_id,
             'requested_plan_id' => $newPlan->id,
+            'requested_billing_period' => $validated['billing_period'],
             'type' => $type,
             'status' => PlanChangeRequest::STATUS_PENDING,
             'reason' => $validated['reason'],
@@ -461,8 +479,8 @@ class BillingController extends Controller
         ]);
 
         $message = $isUpgrade 
-            ? "Solicitud de upgrade a Plan {$newPlan->name} enviada exitosamente. Será procesada dentro de 24-48 horas."
-            : "Solicitud de downgrade a Plan {$newPlan->name} enviada exitosamente. Se aplicará al final del período actual.";
+            ? "Solicitud de mejora a Plan {$newPlan->name} enviada exitosamente. Se procesará en las próximas 24-48 horas."
+            : "Solicitud de cambio a Plan {$newPlan->name} enviada exitosamente. Se aplicará al finalizar tu período actual.";
 
         return response()->json([
             'success' => true,

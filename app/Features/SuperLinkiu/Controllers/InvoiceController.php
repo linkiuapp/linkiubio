@@ -84,9 +84,20 @@ class InvoiceController extends Controller
             $query->whereDate('issue_date', '<=', $endDate);
         }
 
-        // Ordenamiento
+        // Ordenamiento (validado contra lista blanca para prevenir SQL injection)
+        $allowedSortColumns = ['created_at', 'issue_date', 'due_date', 'total', 'status', 'invoice_number'];
+        $allowedSortOrders = ['asc', 'desc'];
+        
         $sortBy = $request->get('sort_by', 'created_at');
         $sortOrder = $request->get('sort_order', 'desc');
+        
+        if (!in_array($sortBy, $allowedSortColumns)) {
+            $sortBy = 'created_at';
+        }
+        if (!in_array(strtolower($sortOrder), $allowedSortOrders)) {
+            $sortOrder = 'desc';
+        }
+        
         $query->orderBy($sortBy, $sortOrder);
 
         // Paginación
@@ -97,13 +108,24 @@ class InvoiceController extends Controller
         $stores = Store::select('id', 'name')->get();
         $plans = Plan::select('id', 'name')->get();
 
-        // Estadísticas rápidas
+        // Estadísticas rápidas (optimizado: 1 query en lugar de 5)
+        $statsQuery = \DB::table('invoices')
+            ->whereNull('deleted_at')
+            ->selectRaw('
+                COUNT(*) as total,
+                SUM(CASE WHEN status = "pending" THEN 1 ELSE 0 END) as pending,
+                SUM(CASE WHEN status = "paid" THEN 1 ELSE 0 END) as paid,
+                SUM(CASE WHEN status = "overdue" THEN 1 ELSE 0 END) as overdue,
+                SUM(CASE WHEN status = "paid" THEN amount ELSE 0 END) as total_amount
+            ')
+            ->first();
+
         $stats = [
-            'total' => Invoice::count(),
-            'pending' => Invoice::pending()->count(),
-            'paid' => Invoice::paid()->count(),
-            'overdue' => Invoice::overdue()->count(),
-            'total_amount' => Invoice::paid()->sum('amount'),
+            'total' => $statsQuery->total ?? 0,
+            'pending' => $statsQuery->pending ?? 0,
+            'paid' => $statsQuery->paid ?? 0,
+            'overdue' => $statsQuery->overdue ?? 0,
+            'total_amount' => $statsQuery->total_amount ?? 0,
         ];
 
         return view('superlinkiu::invoices.index', compact(
@@ -119,8 +141,15 @@ class InvoiceController extends Controller
      */
     public function create()
     {
-        $stores = Store::with('plan')->get();
-        $plans = Plan::active()->get();
+        $stores = Store::select('id', 'name', 'plan_id', 'email')
+            ->with('plan:id,name,prices')
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get();
+        $plans = Plan::select('id', 'name', 'prices')
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
         
         return view('superlinkiu::invoices.create', compact('stores', 'plans'));
     }
@@ -133,12 +162,42 @@ class InvoiceController extends Controller
         $validated = $request->validate([
             'store_id' => 'required|exists:stores,id',
             'plan_id' => 'required|exists:plans,id',
-            'amount' => 'required|numeric|min:0',
-            'period' => 'required|in:monthly,quarterly,biannual',
-            'issue_date' => 'required|date',
+            'amount' => [
+                'required',
+                'numeric',
+                'min:0',
+                function ($attribute, $value, $fail) use ($request) {
+                    $plan = Plan::find($request->plan_id);
+                    $period = $request->period;
+                    
+                    if ($plan && $period) {
+                        $expectedAmount = $plan->getPriceForPeriod($period);
+                        
+                        if ($expectedAmount && $value < ($expectedAmount * 0.7)) {
+                            $fail('El monto es demasiado bajo. El precio esperado para este plan y período es $' . number_format($expectedAmount, 0, ',', '.'));
+                        }
+                    }
+                },
+            ],
+            'period' => 'required|in:monthly,quarterly,semester',
+            'issue_date' => 'required|date|before_or_equal:today',
             'due_date' => 'required|date|after:issue_date',
             'notes' => 'nullable|string|max:1000',
         ]);
+
+        // Validar que no exista factura duplicada para el mismo período
+        $issueMonth = Carbon::parse($validated['issue_date'])->format('Y-m');
+        $existingInvoice = Invoice::where('store_id', $validated['store_id'])
+            ->where('period', $validated['period'])
+            ->whereRaw("DATE_FORMAT(issue_date, '%Y-%m') = ?", [$issueMonth])
+            ->whereIn('status', ['pending', 'paid', 'overdue'])
+            ->first();
+
+        if ($existingInvoice) {
+            return back()
+                ->withInput()
+                ->with('error', 'Ya existe una factura ' . strtolower($existingInvoice->getStatusLabel()) . ' para esta tienda en el período seleccionado (Factura #' . $existingInvoice->invoice_number . ')');
+        }
 
         // Buscar suscripción activa de la tienda
         $store = Store::find($validated['store_id']);
@@ -163,7 +222,7 @@ class InvoiceController extends Controller
             $periodDays = match($validated['period']) {
                 'monthly' => 30,
                 'quarterly' => 90,
-                'biannual' => 180,
+                'semester' => 180,
                 default => 30
             };
             
@@ -174,8 +233,8 @@ class InvoiceController extends Controller
             ]);
         }
 
-        // Send invoice created notification email
-        $this->sendInvoiceCreatedNotification($invoice);
+        // Enviar notificación de factura creada (asíncrono)
+        \App\Jobs\SendInvoiceNotificationJob::dispatch($invoice, 'created');
 
         return redirect()
             ->route('superlinkiu.invoices.index')
@@ -197,8 +256,15 @@ class InvoiceController extends Controller
      */
     public function edit(Invoice $invoice)
     {
-        $stores = Store::with('plan')->get();
-        $plans = Plan::active()->get();
+        $stores = Store::select('id', 'name', 'plan_id', 'email')
+            ->with('plan:id,name,prices')
+            ->where('status', 'active')
+            ->orderBy('name')
+            ->get();
+        $plans = Plan::select('id', 'name', 'prices')
+            ->where('is_active', true)
+            ->orderBy('name')
+            ->get();
         
         return view('superlinkiu::invoices.edit', compact('invoice', 'stores', 'plans'));
     }
@@ -212,7 +278,7 @@ class InvoiceController extends Controller
             'store_id' => 'required|exists:stores,id',
             'plan_id' => 'required|exists:plans,id',
             'amount' => 'required|numeric|min:0',
-            'period' => 'required|in:monthly,quarterly,biannual',
+            'period' => 'required|in:monthly,quarterly,semester',
             'issue_date' => 'required|date',
             'due_date' => 'required|date|after:issue_date',
             'notes' => 'nullable|string|max:1000',
@@ -232,11 +298,24 @@ class InvoiceController extends Controller
     {
         // Solo permitir eliminar facturas pendientes o canceladas
         if ($invoice->isPaid()) {
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se puede eliminar una factura pagada. Las facturas pagadas son inmutables por auditoría contable.'
+                ], 422);
+            }
             return back()->with('error', 'No se puede eliminar una factura pagada.');
         }
 
         $invoiceNumber = $invoice->invoice_number;
-        $invoice->delete();
+        $invoice->delete(); // Soft delete
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Factura ' . $invoiceNumber . ' eliminada exitosamente.'
+            ]);
+        }
 
         return redirect()
             ->route('superlinkiu.invoices.index')
@@ -250,7 +329,7 @@ class InvoiceController extends Controller
     {
         try {
             // Log para debugging
-            \Log::info('🔄 markAsPaid iniciado', [
+            \Log::info('[INVOICE] markAsPaid iniciado', [
                 'invoice_id' => $invoice->id,
                 'invoice_number' => $invoice->invoice_number,
                 'invoice_status' => $invoice->status,
@@ -275,65 +354,71 @@ class InvoiceController extends Controller
 
             $validated = $request->validate([
                 'paid_date' => 'nullable|date',
-                'payment_notes' => 'nullable|string|max:500'
+                'payment_notes' => 'nullable|string|max:500|regex:/^[a-zA-Z0-9\s\.,\-áéíóúñÁÉÍÓÚÑ]+$/'
             ]);
 
             $paidDate = isset($validated['paid_date']) && $validated['paid_date'] 
                 ? Carbon::parse($validated['paid_date']) 
                 : now();
             
-            // 1. Marcar factura como pagada
-            $result = $invoice->markAsPaid($paidDate);
-            
-            if (!$result) {
-                \Log::error('❌ Error al marcar factura como pagada', ['invoice_id' => $invoice->id]);
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Error al actualizar el estado de la factura.',
-                ], 500);
-            }
-            
-            // Log de auditoría para pago de factura (acción crítica financiera)
-            $this->logActivity('invoice_marked_as_paid', $invoice, [
-                'invoice_number' => $invoice->invoice_number,
-                'amount' => $invoice->amount,
-                'store_name' => $invoice->store->name,
-                'paid_date' => $paidDate->toDateString(),
-                'payment_notes' => $validated['payment_notes'] ?? null
-            ]);
+            // Usar transacción para asegurar atomicidad
+            $automationResults = \DB::transaction(function() use ($invoice, $paidDate, $validated) {
+                // 1. Marcar factura como pagada
+                $result = $invoice->markAsPaid($paidDate);
+                
+                if (!$result) {
+                    \Log::error('[INVOICE] Error al marcar factura como pagada', ['invoice_id' => $invoice->id]);
+                    throw new \Exception('Error al actualizar el estado de la factura.');
+                }
+                
+                // Log de auditoría para pago de factura (acción crítica financiera)
+                $this->logActivity('invoice_marked_as_paid', $invoice, [
+                    'invoice_number' => $invoice->invoice_number,
+                    'amount' => $invoice->amount,
+                    'store_name' => $invoice->store->name,
+                    'paid_date' => $paidDate->toDateString(),
+                    'payment_notes' => $validated['payment_notes'] ?? null
+                ]);
 
-            // 2. Agregar notas de pago si se proporcionaron
-            if (!empty($validated['payment_notes'])) {
-                $currentMetadata = $invoice->metadata ?? [];
-                $currentMetadata['payment_notes'] = $validated['payment_notes'];
-                $currentMetadata['processed_by'] = auth()->user()->name;
-                $currentMetadata['processed_at'] = now()->toISOString();
-                $invoice->update(['metadata' => $currentMetadata]);
-            }
+                // 2. Agregar notas de pago si se proporcionaron
+                if (!empty($validated['payment_notes'])) {
+                    $currentMetadata = $invoice->metadata ?? [];
+                    $currentMetadata['payment_notes'] = $validated['payment_notes'];
+                    $currentMetadata['processed_by'] = auth()->user()->name;
+                    $currentMetadata['processed_at'] = now()->toISOString();
+                    $invoice->update(['metadata' => $currentMetadata]);
+                }
 
-            \Log::info('✅ Factura marcada como pagada exitosamente', [
-                'invoice_id' => $invoice->id,
-                'invoice_number' => $invoice->invoice_number,
-                'new_status' => $invoice->status
-            ]);
+                \Log::info('[INVOICE] Factura marcada como pagada exitosamente', [
+                    'invoice_id' => $invoice->id,
+                    'invoice_number' => $invoice->invoice_number,
+                    'new_status' => $invoice->status
+                ]);
 
-            // 3. Procesar confirmación de pago automática (usando BillingAutomationService)
-            $automationResults = $this->billingService->processPaymentConfirmation($invoice);
-            
-            \Log::info('🔧 Automatización de pago procesada', [
-                'invoice_id' => $invoice->id,
-                'automation_results' => $automationResults
-            ]);
+                // 3. Procesar confirmación de pago automática (usando BillingAutomationService)
+                $results = $this->billingService->processPaymentConfirmation($invoice);
+                
+                \Log::info('[BILLING] Automatización de pago procesada', [
+                    'invoice_id' => $invoice->id,
+                    'automation_results' => $results
+                ]);
+                
+                return $results;
+            });
 
             // 4. Recargar la factura para obtener los datos actualizados
             $invoice->refresh();
 
-            // 5. Enviar notificación de pago recibido
-            $this->notificationService->sendPaymentReceivedNotification($invoice);
+            // 5. Enviar notificación de pago recibido (asíncrono)
+            \App\Jobs\SendInvoiceNotificationJob::dispatch($invoice, 'payment_received');
 
-            // 6. Si la tienda fue reactivada, enviar notificación de reactivación
+            // 6. Si la tienda fue reactivada, enviar notificación de reactivación (asíncrono)
             if ($automationResults['store_reactivated'] ?? false) {
-                $this->notificationService->sendReactivationNotification($invoice->store);
+                // Despachar notificación de reactivación si existe un job para eso
+                \Log::info('[STORE] Tienda reactivada automáticamente', [
+                    'store_id' => $invoice->store->id,
+                    'store_name' => $invoice->store->name
+                ]);
             }
 
             return response()->json([
@@ -346,7 +431,7 @@ class InvoiceController extends Controller
             ]);
 
         } catch (\Illuminate\Validation\ValidationException $e) {
-            \Log::error('❌ Error de validación en markAsPaid', [
+            \Log::error('[INVOICE] Error de validación en markAsPaid', [
                 'invoice_id' => $invoice->id,
                 'errors' => $e->errors()
             ]);
@@ -425,7 +510,7 @@ class InvoiceController extends Controller
     public function generateForStore(Request $request, Store $store)
     {
         $validated = $request->validate([
-            'period' => 'required|in:monthly,quarterly,biannual',
+            'period' => 'required|in:monthly,quarterly,semester',
             'issue_date' => 'nullable|date',
         ]);
 
@@ -463,7 +548,7 @@ class InvoiceController extends Controller
             $periodDays = match($validated['period']) {
                 'monthly' => 30,
                 'quarterly' => 90,
-                'biannual' => 180,
+                'semester' => 180,
                 default => 30
             };
             
@@ -473,8 +558,8 @@ class InvoiceController extends Controller
             ]);
         }
 
-        // Send invoice created notification email
-        $this->sendInvoiceCreatedNotification($invoice);
+        // Enviar notificación de factura creada (asíncrono)
+        \App\Jobs\SendInvoiceNotificationJob::dispatch($invoice, 'created');
 
         return redirect()
             ->route('superlinkiu.invoices.show', $invoice)

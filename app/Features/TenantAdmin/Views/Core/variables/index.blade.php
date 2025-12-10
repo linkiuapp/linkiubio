@@ -22,90 +22,6 @@ Muestra todas las variables con filtros, acciones y paginación
         class="space-y-4" 
         x-init="init()"
     >
-        {{-- SECTION: Success Alert - Variable Created --}}
-        @if(session('variable_created'))
-            <div 
-                x-data="{ show: true }"
-                x-show="show"
-                x-cloak
-                x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 transform translate-y-2"
-                x-transition:enter-end="opacity-100 transform translate-y-0"
-                x-transition:leave="transition ease-in duration-200"
-                x-transition:leave-start="opacity-100 transform translate-y-0"
-                x-transition:leave-end="opacity-0 transform translate-y-2"
-                x-init="setTimeout(() => show = false, 5000)"
-            >
-                <x-alert-bordered 
-                    type="success" 
-                    title="Actualización exitosa" 
-                    message="La variable se ha creado correctamente."
-                />
-            </div>
-        @endif
-        {{-- End SECTION: Success Alert - Variable Created --}}
-
-        {{-- SECTION: Success Alert - Variable Updated --}}
-        @if(session('variable_updated'))
-            <div 
-                x-data="{ show: true }"
-                x-show="show"
-                x-cloak
-                x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 transform translate-y-2"
-                x-transition:enter-end="opacity-100 transform translate-y-0"
-                x-transition:leave="transition ease-in duration-200"
-                x-transition:leave-start="opacity-100 transform translate-y-0"
-                x-transition:leave-end="opacity-0 transform translate-y-2"
-                x-init="setTimeout(() => show = false, 5000)"
-            >
-                <x-alert-bordered 
-                    type="success" 
-                    title="Actualización exitosa" 
-                    message="La variable se ha actualizado correctamente."
-                />
-            </div>
-        @endif
-        {{-- End SECTION: Success Alert - Variable Updated --}}
-
-        {{-- SECTION: Success Alert - Variable Deleted --}}
-        <div 
-            x-show="showSuccessAlert"
-            x-cloak
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 transform translate-y-2"
-            x-transition:enter-end="opacity-100 transform translate-y-0"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 transform translate-y-0"
-            x-transition:leave-end="opacity-0 transform translate-y-2"
-            style="display: none;"
-        >
-            <x-alert-bordered 
-                type="success" 
-                title="Actualización exitosa" 
-                message="La variable se ha eliminado correctamente."
-            />
-        </div>
-        {{-- End SECTION: Success Alert - Variable Deleted --}}
-
-        {{-- SECTION: Success Alert - Bulk Delete --}}
-        <div 
-            x-show="showBulkDeleteSuccessAlert"
-            x-cloak
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 transform translate-y-2"
-            x-transition:enter-end="opacity-100 transform translate-y-0"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 transform translate-y-0"
-            x-transition:leave-end="opacity-0 transform translate-y-2"
-            style="display: none;"
-        >
-            <x-alert-bordered type="success" title="Actualización exitosa">
-                <span x-text="'Se eliminaron ' + bulkDeleteSuccessCount + (bulkDeleteSuccessCount === 1 ? ' variable correctamente.' : ' variables correctamente.')"></span>
-            </x-alert-bordered>
-        </div>
-        {{-- End SECTION: Success Alert - Bulk Delete --}}
-
         {{-- SECTION: Toggle Error Alert --}}
         <div 
             x-show="showToggleError"
@@ -157,6 +73,7 @@ Muestra todas las variables con filtros, acciones y paginación
                                     size="md" 
                                     icon="plus-circle"
                                     text="Nueva Variable"
+                                    data-tour="variable-button"
                                 />
                                 {{-- End COMPONENT: ButtonIcon --}}
                             </a>
@@ -172,6 +89,7 @@ Muestra todas las variables con filtros, acciones y paginación
                             />
                             {{-- End COMPONENT: ButtonIcon --}}
                         @endif
+                        <x-tour-trigger tour="gestionar_variables" :autoStart="true" :showButton="false" />
                     </div>
                 </div>
             </div>
@@ -630,20 +548,19 @@ Muestra todas las variables con filtros, acciones y paginación
 
                 init() {
                     window.addEventListener('show-success-alert', () => {
-                        this.showSuccessAlert = true;
+                        if (window.toast) {
+                            window.toast.success('¡Listo!', 'Variable eliminada correctamente', 5000, 'bottom-center');
+                        }
                         this.$nextTick(() => {
-                            if (typeof window.createIcons !== 'undefined' && typeof window.lucideIcons !== 'undefined') {
-                                window.createIcons({ icons: window.lucideIcons });
+                            if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                                lucide.createIcons();
                             }
                         });
-                        setTimeout(() => {
-                            this.showSuccessAlert = false;
-                        }, 5000);
                     });
 
                     // Inicializar iconos Lucide
-                    if (typeof window.createIcons !== 'undefined' && typeof window.lucideIcons !== 'undefined') {
-                        window.createIcons({ icons: window.lucideIcons });
+                    if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                        lucide.createIcons();
                     }
                 },
 
@@ -812,23 +729,17 @@ Muestra todas las variables con filtros, acciones y paginación
                         if (errorCount === 0) {
                             this.bulkDeleteSuccessCount = successCount;
                             
-                            // Mostrar alerta de éxito
-                            this.showBulkDeleteSuccessAlert = true;
+                            // Mostrar toast de éxito
+                            if (window.toast) {
+                                window.toast.success('¡Listo!', `Se eliminaron ${successCount} ${successCount === 1 ? 'variable' : 'variables'} correctamente`, 5000, 'bottom-center');
+                            }
                             
-                            // Inicializar iconos Lucide después de mostrar la alerta
+                            // Inicializar iconos Lucide después de mostrar el toast
                             this.$nextTick(() => {
-                                if (typeof window.createIcons !== 'undefined' && typeof window.lucideIcons !== 'undefined') {
-                                    window.createIcons({ icons: window.lucideIcons });
+                                if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                                    lucide.createIcons();
                                 }
                             });
-                            
-                            // Scroll suave hacia arriba para ver la alerta
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                            
-                            // Ocultar alerta después de 5 segundos
-                            setTimeout(() => {
-                                this.showBulkDeleteSuccessAlert = false;
-                            }, 5000);
                         } else {
                             this.bulkDeleteError = `Se eliminaron ${successCount} variables. ${errorCount > 0 ? `${errorCount} variables no pudieron ser eliminadas.` : ''}`;
                             this.showBulkDeleteModal = true;
@@ -948,6 +859,23 @@ Muestra todas las variables con filtros, acciones y paginación
                 updateDeleteButtonState(variableId, productsCount);
             });
         });
+
+        // Mostrar toast de sesión si existe
+        @if(session('variable_created'))
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.toast) {
+                window.toast.success('¡Listo!', 'Variable creada exitosamente', 5000, 'bottom-center');
+            }
+        });
+        @endif
+        
+        @if(session('variable_updated'))
+        document.addEventListener('DOMContentLoaded', function() {
+            if (window.toast) {
+                window.toast.success('¡Listo!', 'Variable actualizada exitosamente', 5000, 'bottom-center');
+            }
+        });
+        @endif
     </script>
     @endpush
     @endsection

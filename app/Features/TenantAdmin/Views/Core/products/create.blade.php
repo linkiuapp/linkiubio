@@ -19,17 +19,24 @@ Permite crear nuevos productos con información básica, imágenes, categorías 
                     <p class="text-sm text-gray-600 mt-1">Crea un nuevo producto para tu tienda</p>
                 </div>
             </div>
-            <div class="bg-gray-100 rounded-lg px-4 py-2 border border-gray-200">
-                <span class="text-sm text-gray-700 font-medium">{{ $currentCount }}/{{ $maxProducts }} productos</span>
+            <div class="flex items-center gap-3">
+                <div class="bg-gray-100 rounded-lg px-4 py-2 border border-gray-200">
+                    <span class="text-sm text-gray-700 font-medium">{{ $currentCount }}/{{ $maxProducts }} productos</span>
+                </div>
             </div>
         </div>
         {{-- End SECTION: Header --}}
+        
+        {{-- Auto-iniciar tour si es primer producto --}}
+        <x-tour-trigger tour="crear_producto" :autoStart="true" :showButton="false" />
 
         {{-- SECTION: Info Alert --}}
-        <x-alert-soft 
-            type="info"
-            :message="'Estás usando ' . $currentCount . ' de ' . $maxProducts . ' productos disponibles en tu plan ' . $store->plan->name . '.'"
-        />
+        <div data-tour="consumo">
+            <x-alert-soft 
+                type="info"
+                :message="'Estás usando ' . $currentCount . ' de ' . $maxProducts . ' productos disponibles en tu plan ' . $store->plan->name . '.'"
+            />
+        </div>
         {{-- End SECTION: Info Alert --}}
 
         {{-- SECTION: Validation Errors Alert --}}
@@ -53,33 +60,37 @@ Permite crear nuevos productos con información básica, imágenes, categorías 
                 <div class="space-y-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {{-- ITEM: Nombre --}}
-                        <x-ds.text-input
-                            type="text"
-                            name="name"
-                            id="name"
-                            label="Nombre del Producto"
-                            placeholder="Ej: Camiseta Básica Blanca"
-                            :value="old('name')"
-                            :required="true"
-                            :error="$errors->first('name')"
-                        />
+                        <div data-tour="product-name">
+                            <x-ds.text-input
+                                type="text"
+                                name="name"
+                                id="name"
+                                label="Nombre del Producto"
+                                placeholder="Ej: Camiseta Básica Blanca"
+                                :value="old('name')"
+                                :required="true"
+                                :error="$errors->first('name')"
+                            />
+                        </div>
                         {{-- End ITEM: Nombre --}}
 
                         {{-- ITEM: SKU --}}
-                        <x-ds.text-input
-                            type="text"
-                            name="sku"
-                            id="sku"
-                            label="SKU (Código)"
-                            placeholder="Ej: CAM-BAS-001"
-                            :value="old('sku')"
-                            :error="$errors->first('sku')"
-                        />
+                        <div data-tour="product-sku">
+                            <x-ds.text-input
+                                type="text"
+                                name="sku"
+                                id="sku"
+                                label="SKU (Código)"
+                                placeholder="Ej: CAM-BAS-001"
+                                :value="old('sku')"
+                                :error="$errors->first('sku')"
+                            />
+                        </div>
                         {{-- End ITEM: SKU --}}
                     </div>
 
                     {{-- ITEM: Descripción --}}
-                    <div>
+                    <div x-data="kiubotManager()" data-tour="product-description">
                         <label for="description" class="block text-sm font-medium text-gray-800 mb-2">
                             Descripción
                         </label>
@@ -87,17 +98,59 @@ Permite crear nuevos productos con información básica, imágenes, categorías 
                             id="description" 
                             name="description" 
                             rows="4"
+                            x-ref="descriptionTextarea"
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('description') border-red-300 @enderror"
                             placeholder="Describe las características principales del producto...">{{ old('description') }}</textarea>
                         @error('description')
                             <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                         @enderror
+                        
+                        {{-- Botón KiuBot --}}
+                        @if($store->plan && $store->plan->kiubot_enabled)
+                        <div class="mt-2" data-tour="kiubot-button">
+                            <button 
+                                type="button"
+                                @click="improveDescription()"
+                                :disabled="improving"
+                                class="inline-flex items-center gap-2 text-white bg-gradient-to-r from-purple-500 via-purple-600 to-blue-600 hover:bg-gradient-to-br shadow-xl shadow-indigo-500/50 inset-shadow-lg inset-shadow-indigo-500/50 font-medium rounded-full text-sm px-4 py-2.5 text-center leading-5 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+                            >
+                                <img x-show="!improving" src="{{ asset('images-ui/emoji_kiubot_linkiu.svg') }}" alt="KiuBot" class="w-5 h-5">
+                                <svg x-show="improving" x-cloak class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                </svg>
+                                <span x-text="improving ? 'Mejorando con KiuBot...' : 'Mejorar con KiuBot'"></span>
+                            </button>
+                        </div>
+                        @endif
+                        
+                        {{-- Animación de escritura tipo lazy load --}}
+                        <div 
+                            x-show="animating" 
+                            x-cloak
+                            class="mt-3 p-4 bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-200 rounded-lg"
+                        >
+                            <div class="flex items-center gap-3">
+                                <svg class="w-5 h-5 text-purple-600 animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z"></path>
+                                </svg>
+                                <div class="flex-1">
+                                    <p class="text-sm font-medium text-purple-900 mb-1">KiuBot está escribiendo...</p>
+                                    <div class="relative h-1 bg-purple-200 rounded-full overflow-hidden">
+                                        <div class="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 animate-pulse"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Modal de comparación --}}
+                        @include('tenant-admin::Core.products.partials.kiubot-modal')
                     </div>
                     {{-- End ITEM: Descripción --}}
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {{-- ITEM: Precio --}}
-                        <div>
+                        <div data-tour="product-price">
                             <label for="price" class="block text-sm font-medium text-gray-800 mb-2">
                                 Precio <span class="text-red-500">*</span>
                             </label>
@@ -121,7 +174,7 @@ Permite crear nuevos productos con información básica, imágenes, categorías 
                         {{-- End ITEM: Precio --}}
 
                         {{-- ITEM: Tipo --}}
-                        <div>
+                        <div data-tour="product-type">
                             <label for="type" class="block text-sm font-medium text-gray-800 mb-2">
                                 Tipo de Producto <span class="text-red-500">*</span>
                             </label>
@@ -146,7 +199,7 @@ Permite crear nuevos productos con información básica, imágenes, categorías 
                     </div>
 
                     {{-- SECTION: Precio Promocional --}}
-                    <div class="border border-orange-200 rounded-lg p-4 bg-orange-50/50" x-data="{ promocionActiva: {{ old('promocion_activa') ? 'true' : 'false' }} }">
+                    <div class="border border-orange-200 rounded-lg p-4 bg-orange-50/50" x-data="{ promocionActiva: {{ old('promocion_activa') ? 'true' : 'false' }} }" data-tour="product-promotional-price">
                         <div class="flex items-center justify-between mb-4">
                             <div class="flex items-center gap-2">
                                 <i data-lucide="tag" class="w-5 h-5 text-orange-600"></i>
@@ -229,7 +282,7 @@ Permite crear nuevos productos con información básica, imágenes, categorías 
                 <div x-data="{ 
                     controlaStock: false, 
                     tipoStock: 'ilimitado'
-                }">
+                }" data-tour="product-stock">
                     {{-- Toggle: Controlar stock --}}
                     <div class="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
                         <input 
@@ -348,7 +401,7 @@ Permite crear nuevos productos con información básica, imágenes, categorías 
 
             {{-- SECTION: Imágenes Card --}}
             <x-card-base title="Imágenes del Producto" shadow="sm">
-                <div class="space-y-4">
+                <div class="space-y-4" data-tour="product-images">
                     <div 
                         class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center bg-gray-50 hover:bg-gray-100 transition-colors duration-200 cursor-pointer" 
                         id="image-upload-area"
@@ -385,7 +438,7 @@ Permite crear nuevos productos con información básica, imágenes, categorías 
             {{-- SECTION: Categorías Card --}}
             @if($categories->count() > 0)
             <x-card-base title="Categorías" shadow="sm">
-                <div class="space-y-4">
+                <div class="space-y-4" data-tour="product-categories">
                     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         @foreach($categories as $category)
                         <label class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
@@ -418,7 +471,7 @@ Permite crear nuevos productos con información básica, imágenes, categorías 
 
             {{-- SECTION: Variables Card (solo para productos variables) --}}
             <x-card-base shadow="sm" id="variables-section" style="display: none;">
-                <div class="mb-4 pb-4 border-b border-gray-200">
+                <div class="mb-4 pb-4 border-b border-gray-200" data-tour="product-variables">
                     <div class="flex items-center justify-between mb-4">
                         <div>
                             <h3 class="text-lg font-semibold text-gray-900">Variables del Producto</h3>
@@ -510,143 +563,71 @@ Permite crear nuevos productos con información básica, imágenes, categorías 
                                             class="variable-card border rounded-lg p-4 transition-all duration-200 border-gray-200 hover:border-blue-300 bg-white"
                                             data-variable-id="{{ $variable->id }}"
                                             data-variable-name="{{ strtolower($variable->name) }}"
+                                            data-variable-icon="{{ $variable->icon ?? 'box' }}"
+                                            data-variable-options='@json($variable->activeOptions->map(fn($opt) => ["id" => $opt->id, "name" => $opt->name, "color_hex" => $opt->color_hex]))'
                                         >
-                                            <div class="flex items-start gap-4">
-                                                {{-- Checkbox para seleccionar variable --}}
-                                                <div class="flex items-center h-6 pt-0.5">
+                                            <div class="flex items-center gap-4">
+                                                {{-- Checkbox para habilitar variable --}}
+                                                <div class="flex items-center">
                                                     <input 
                                                         type="checkbox" 
                                                         id="variable_{{ $variable->id }}"
                                                         name="variables[{{ $variable->id }}][enabled]"
                                                         value="1"
-                                                        class="variable-checkbox w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                                                        class="variable-checkbox w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
                                                         data-variable-id="{{ $variable->id }}"
                                                     >
                                                 </div>
-                                                
-                                                {{-- Info de la variable --}}
-                                                <div class="flex-1">
-                                                    <label for="variable_{{ $variable->id }}" class="cursor-pointer flex items-center gap-2 mb-2">
-                                                        @php
-                                                            $typeIcons = [
-                                                                'radio' => 'radio',
-                                                                'checkbox' => 'check-square',
-                                                                'text' => 'type',
-                                                                'numeric' => 'hash'
-                                                            ];
-                                                            $icon = $typeIcons[$variable->type] ?? 'settings';
-                                                        @endphp
-                                                        <i data-lucide="{{ $icon }}" class="w-4 h-4 text-gray-500"></i>
-                                                        <h4 class="text-sm font-medium text-gray-800">{{ $variable->name }}</h4>
-                                                        <span class="px-2 py-0.5 bg-blue-100 text-blue-800 rounded text-xs font-medium">{{ $variable->type_name }}</span>
-                                                        @if($variable->is_active)
-                                                            <span class="px-2 py-0.5 bg-green-100 text-green-800 rounded text-xs font-medium">Activa</span>
-                                                        @else
-                                                            <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs font-medium">Inactiva</span>
-                                                        @endif
-                                                        @if($variable->assignments_count > 0)
-                                                            <span class="px-2 py-0.5 bg-gray-100 text-gray-600 rounded text-xs font-medium">
-                                                                {{ $variable->assignments_count }} producto(s)
-                                                            </span>
-                                                        @endif
-                                                    </label>
-                                                    @if($variable->requiresOptions())
-                                                        <p class="text-xs text-gray-500 mt-1">
-                                                            {{ $variable->activeOptions->count() }} opciones disponibles
-                                                        </p>
-                                                    @endif
-                                                    
-                                                    {{-- Opciones de la variable (se muestran al seleccionar) --}}
-                                                    <div 
-                                                        class="mt-3 space-y-3 variable-options transition-all duration-200" 
-                                                        id="options_{{ $variable->id }}"
-                                                        style="display: none; opacity: 0; transform: translateY(-10px);"
-                                                    >
-                                                        {{-- Opciones disponibles para seleccionar --}}
-                                                        @if($variable->requiresOptions() && $variable->activeOptions->count() > 0)
-                                                            <div class="bg-white border border-gray-200 rounded-lg p-3">
-                                                                <label class="text-xs font-semibold text-gray-700 mb-2 block">
-                                                                    Selecciona las opciones que usará este producto <span class="text-red-500">*</span>
-                                                                </label>
-                                                                <div class="space-y-2">
-                                                                    @foreach($variable->activeOptions as $option)
-                                                                        <div class="flex items-center gap-3 p-2 rounded border border-gray-200 hover:border-blue-300 transition-colors option-item" data-option-id="{{ $option->id }}" data-variable-id="{{ $variable->id }}">
-                                                                            <label class="flex items-center gap-2 cursor-pointer flex-1">
-                                                                                <input 
-                                                                                    type="checkbox" 
-                                                                                    name="variables[{{ $variable->id }}][options][]"
-                                                                                    value="{{ $option->id }}"
-                                                                                    class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500 variable-option-checkbox"
-                                                                                    data-variable-id="{{ $variable->id }}"
-                                                                                    data-option-id="{{ $option->id }}"
-                                                                                >
-                                                                                <span class="text-sm text-gray-700 font-medium">{{ $option->name }}</span>
-                                                                            </label>
-                                                                            <div class="option-quantity-field" style="display: none;">
-                                                                                <label class="text-xs text-gray-600 mr-2">Cantidad:</label>
-                                                                                <input 
-                                                                                    type="number" 
-                                                                                    name="variables[{{ $variable->id }}][quantities][{{ $option->id }}]"
-                                                                                    value="0"
-                                                                                    min="0"
-                                                                                    step="1"
-                                                                                    placeholder="0"
-                                                                                    class="w-20 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500 option-quantity-input"
-                                                                                    data-option-id="{{ $option->id }}"
-                                                                                >
-                                                                            </div>
-                                                                        </div>
-                                                                    @endforeach
-                                                                </div>
-                                                                <p 
-                                                                    class="text-xs text-red-600 mt-2 flex items-center gap-1 variable-error-{{ $variable->id }}"
-                                                                    style="display: none;"
-                                                                >
-                                                                    <i data-lucide="alert-circle" class="w-3 h-3"></i>
-                                                                    Debes seleccionar al menos una opción
-                                                                </p>
-                                                            </div>
-                                                        @endif
-                                                        
-                                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                                            {{-- Toggle Requerido --}}
-                                                            <div class="flex items-center gap-2">
-                                                                <input type="hidden" name="variables[{{ $variable->id }}][is_required]" value="0">
-                                                                <x-switch-basic 
-                                                                    switch-name="variables[{{ $variable->id }}][is_required]"
-                                                                    :checked="$variable->is_required_default"
-                                                                    value="1"
-                                                                />
-                                                                <label class="text-sm text-gray-700 cursor-pointer">
-                                                                    Campo requerido
-                                                                </label>
-                                                            </div>
-                                                            
-                                                            {{-- Orden de visualización --}}
-                                                            <div>
-                                                                <label class="text-xs text-gray-600 mb-1 block">Orden</label>
-                                                                <input 
-                                                                    type="number" 
-                                                                    name="variables[{{ $variable->id }}][display_order]"
-                                                                    value="{{ $loop->iteration }}"
-                                                                    min="1"
-                                                                    class="w-20 px-2 py-1 text-sm border border-gray-300 rounded focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                                                >
-                                                            </div>
-                                                        </div>
-                                                        
-                                                        {{-- Etiqueta personalizada --}}
-                                                        <div>
-                                                            <label class="text-xs text-gray-600 mb-1 block">Etiqueta personalizada (opcional)</label>
-                                                            <input 
-                                                                type="text" 
-                                                                name="variables[{{ $variable->id }}][custom_label]"
-                                                                placeholder="Ej: Selecciona tu color favorito"
-                                                                class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500"
-                                                            >
-                                                        </div>
+
+                                                {{-- Icono de la variable --}}
+                                                <div class="flex-shrink-0">
+                                                    <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
+                                                        <i data-lucide="{{ $variable->icon ?? 'box' }}" class="w-5 h-5 text-blue-600"></i>
                                                     </div>
                                                 </div>
+                                                
+                                                {{-- Nombre de la variable --}}
+                                                <div class="flex-1">
+                                                    <label for="variable_{{ $variable->id }}" class="cursor-pointer">
+                                                        <h4 class="text-sm font-semibold text-gray-900">{{ $variable->name }}</h4>
+                                                        <p class="text-xs text-gray-500 mt-0.5">
+                                                            {{ $variable->activeOptions->count() }} opciones disponibles
+                                                        </p>
+                                                    </label>
+                                                </div>
+
+                                                {{-- Toggle Obligatorio --}}
+                                                <div class="flex items-center gap-2">
+                                                    <input type="hidden" name="variables[{{ $variable->id }}][is_required]" value="0">
+                                                    <x-switch-basic 
+                                                        switch-name="variables[{{ $variable->id }}][is_required]"
+                                                        :checked="false"
+                                                        value="1"
+                                                    />
+                                                    <span class="text-xs text-gray-600">Obligatorio</span>
+                                                </div>
+
+                                                {{-- Input nombre personalizado --}}
+                                                <div class="w-64">
+                                                    <input 
+                                                        type="text" 
+                                                        name="variables[{{ $variable->id }}][custom_label]"
+                                                        placeholder="Nombre personalizado"
+                                                        class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                                    >
+                                                </div>
+
+                                                {{-- Badge tipo --}}
+                                                <span class="px-2 py-1 bg-blue-100 text-blue-800 rounded-lg text-xs font-medium">
+                                                    {{ $variable->type_name }}
+                                                </span>
+
+                                                {{-- Badge estado --}}
+                                                @if($variable->is_active)
+                                                    <span class="px-2 py-1 bg-green-100 text-green-800 rounded-lg text-xs font-medium">Activa</span>
+                                                @else
+                                                    <span class="px-2 py-1 bg-gray-100 text-gray-600 rounded-lg text-xs font-medium">Inactiva</span>
+                                                @endif
                                             </div>
                                         </div>
                                     @endforeach
@@ -668,6 +649,172 @@ Permite crear nuevos productos con información básica, imágenes, categorías 
             </x-card-base>
             {{-- End SECTION: Variables Card --}}
 
+            {{-- SECTION: Variaciones Manuales (solo para productos variables) --}}
+            <x-card-base shadow="sm" id="variations-section" style="display: none;">
+                <div x-data="variationsManager()">
+                    <div class="mb-4 pb-4 border-b border-gray-200">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900">Variaciones del Producto</h3>
+                                <p class="text-sm text-gray-600 mt-1">Crea las combinaciones específicas que venderás</p>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                {{-- Botón Generar Todas las Combinaciones --}}
+                                <button 
+                                    type="button"
+                                    @click="generateAllCombinations()"
+                                    class="inline-flex items-center gap-2 text-gray-700 bg-gray-100 hover:bg-gray-200 border border-gray-300 font-medium rounded-full text-sm px-4 py-2.5 text-center leading-5 transition-colors"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                                    </svg>
+                                    Generar Todas
+                                </button>
+                                {{-- Botón Agregar Variación Manual --}}
+                                <button 
+                                    type="button"
+                                    @click="addVariation()"
+                                    class="inline-flex items-center gap-2 text-white bg-gradient-to-r from-purple-500 via-purple-600 to-blue-600 hover:bg-gradient-to-br shadow-xl shadow-indigo-500/50 inset-shadow-lg inset-shadow-indigo-500/50 font-medium rounded-full text-sm px-4 py-2.5 text-center leading-5"
+                                >
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                                    </svg>
+                                    Agregar Manual
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {{-- Lista de variaciones --}}
+                    <div class="space-y-4">
+                        <template x-for="(variation, index) in variations" :key="variation.id">
+                            <div class="p-4 bg-gray-50 border border-gray-200 rounded-lg">
+                                <div class="flex items-center justify-between mb-3">
+                                    <h4 class="font-semibold text-gray-800" x-text="'Variación #' + (index + 1)"></h4>
+                                    <button 
+                                        type="button"
+                                        @click="removeVariation(index)"
+                                        class="text-red-600 hover:text-red-700 p-1"
+                                    >
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                                        </svg>
+                                    </button>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                                    {{-- Selects dinámicos para cada variable habilitada --}}
+                                    <template x-for="variable in activeVariables" :key="'var-' + variable.id">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-700 mb-1">
+                                                <span x-text="variable.name"></span>
+                                                <span class="text-xs text-gray-500 ml-1">(puede dejarse vacío)</span>
+                                            </label>
+                                            <select 
+                                                :name="'variations[' + variation.id + '][options][' + variable.id + ']'"
+                                                x-model="variation.options[variable.id]"
+                                                @change="checkDuplicate(index)"
+                                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                                            >
+                                                <option value="">-- Cualquiera --</option>
+                                                <template x-for="option in variable.options" :key="option.id">
+                                                    <option 
+                                                        :value="String(option.id)" 
+                                                        :selected="String(option.id) === String(variation.options[variable.id])"
+                                                        x-text="option.name"
+                                                    ></option>
+                                                </template>
+                                            </select>
+                                        </div>
+                                    </template>
+
+                                    {{-- Stock --}}
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Stock</label>
+                                        <input 
+                                            type="number"
+                                            :name="'variations[' + variation.id + '][stock]'"
+                                            x-model="variation.stock"
+                                            min="0"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                                            placeholder="0"
+                                        >
+                                    </div>
+
+                                    {{-- Precio Adicional --}}
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">Precio Adicional</label>
+                                        <div class="relative">
+                                            <span class="absolute left-3 top-2 text-gray-500 text-sm">$</span>
+                                            <input 
+                                                type="number"
+                                                :name="'variations[' + variation.id + '][price_modifier]'"
+                                                x-model="variation.price_modifier"
+                                                step="0.01"
+                                                class="w-full pl-7 pr-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                                                placeholder="0"
+                                            >
+                                        </div>
+                                        <p class="text-xs text-gray-500 mt-1">Usa valores negativos para descuento</p>
+                                    </div>
+
+                                    {{-- SKU (opcional) --}}
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-700 mb-1">SKU (Opcional)</label>
+                                        <input 
+                                            type="text"
+                                            :name="'variations[' + variation.id + '][sku]'"
+                                            x-model="variation.sku"
+                                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm"
+                                            placeholder="Ej: CAM-ROJO-M"
+                                        >
+                                    </div>
+                                </div>
+
+                                {{-- Preview del precio final --}}
+                                <div class="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                    <div class="flex items-center justify-between text-sm">
+                                        <span class="text-gray-700">Precio base del producto:</span>
+                                        <span class="font-semibold text-gray-900" x-text="'$' + formatPrice(getBasePrice())"></span>
+                                    </div>
+                                    <div class="flex items-center justify-between text-sm mt-1">
+                                        <span class="text-gray-700">Precio final de esta variación:</span>
+                                        <span class="font-bold text-blue-600" x-text="'$' + formatPrice(getBasePrice() + (parseFloat(variation.price_modifier) || 0))"></span>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+
+                        {{-- Empty state --}}
+                        <div x-show="variations.length === 0" class="text-center py-8">
+                            <svg class="w-16 h-16 mx-auto text-gray-400 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                            </svg>
+                            <p class="text-gray-600 text-sm">No hay variaciones creadas</p>
+                            <p class="text-gray-500 text-xs mt-1">Haz clic en "Agregar Variación" para crear la primera combinación</p>
+                        </div>
+                    </div>
+
+                    {{-- Info helper --}}
+                    <div class="mt-4 p-4 bg-blue-50 border border-blue-200 rounded-lg" x-show="variations.length > 0">
+                        <div class="flex items-start gap-3">
+                            <svg class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                            <div class="text-sm text-blue-900">
+                                <p class="font-semibold mb-1">Gestión de Variaciones:</p>
+                                <ul class="list-disc list-inside space-y-1 text-xs">
+                                    <li>Cada variación es una combinación única (ej: Rojo + Talla M)</li>
+                                    <li>El stock y precio se manejan individualmente por variación</li>
+                                    <li>Marca como "Obligatorio" las opciones que el cliente debe elegir</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </x-card-base>
+            {{-- End SECTION: Variaciones Manuales --}}
+
             {{-- SECTION: Action Buttons --}}
             <div class="bg-white rounded-lg border border-gray-200 p-6">
                 <div class="flex justify-end gap-3">
@@ -687,6 +834,7 @@ Permite crear nuevos productos con información básica, imágenes, categorías 
                         text="Crear Producto"
                         html-type="submit"
                         @click.prevent="confirmSubmit()"
+                        data-tour="save-button"
                     />
                 </div>
             </div>
@@ -718,13 +866,21 @@ Permite crear nuevos productos con información básica, imágenes, categorías 
                     
                     toggleVariablesSection() {
                         const variablesSection = document.getElementById('variables-section');
+                        const variationsSection = document.getElementById('variations-section');
+                        
                         if (this.productType === 'variable') {
                             if (variablesSection) {
                                 variablesSection.style.display = 'block';
                             }
+                            if (variationsSection) {
+                                variationsSection.style.display = 'block';
+                            }
                         } else {
                             if (variablesSection) {
                                 variablesSection.style.display = 'none';
+                            }
+                            if (variationsSection) {
+                                variationsSection.style.display = 'none';
                             }
                         }
                     },
@@ -1076,6 +1232,315 @@ Permite crear nuevos productos con información básica, imágenes, categorías 
                 window.createIcons({ icons: window.lucideIcons });
             }
         });
+
+        // ===========================================
+        // Gestor de Variaciones Manuales
+        // ===========================================
+        function variationsManager() {
+            return {
+                variations: [],
+                nextId: 1,
+                activeVariables: [], // Cache de variables activas para evitar re-renderizados
+                
+                init() {
+                    // Inicializar variables activas
+                    this.$nextTick(() => {
+                        this.updateActiveVariables();
+                    });
+
+                    // Escuchar cambios en checkboxes de variables para actualizar la lista
+                    document.addEventListener('change', (e) => {
+                        if (e.target.classList.contains('variable-checkbox')) {
+                            // Pequeño delay para asegurar que el DOM del checkbox se actualizó
+                            setTimeout(() => {
+                                this.updateActiveVariables();
+                            }, 50);
+                        }
+                    });
+                },
+
+                updateActiveVariables() {
+                    this.activeVariables = this.getSelectedVariables();
+                },
+                
+                addVariation() {
+                    // Asegurar que tenemos las variables actualizadas
+                    this.updateActiveVariables();
+                    const selectedVars = this.activeVariables;
+                    
+                    if (selectedVars.length === 0) {
+                        window.toast.error('Sin variables', 'Selecciona al menos una variable primero', 5000, 'bottom-center');
+                        return;
+                    }
+                    
+                    const newVariation = {
+                        id: this.nextId++,
+                        options: {},
+                        stock: 0,
+                        price_modifier: 0,
+                        sku: ''
+                    };
+                    
+                    // Inicializar is_required para cada variable
+                    selectedVars.forEach(variable => {
+                        newVariation['is_required_' + variable.id] = false;
+                    });
+                    
+                    this.variations.push(newVariation);
+                },
+                
+                removeVariation(index) {
+                    this.variations.splice(index, 1);
+                },
+                
+                // Generar TODAS las combinaciones posibles automáticamente
+                generateAllCombinations() {
+                    this.updateActiveVariables();
+                    const selectedVars = this.activeVariables;
+                    
+                    if (selectedVars.length === 0) {
+                        window.toast.error('Sin variables', 'Selecciona al menos una variable primero', 5000, 'bottom-center');
+                        return;
+                    }
+                    
+                    // Verificar que todas las variables tengan opciones
+                    const varsWithOptions = selectedVars.filter(v => v.options && v.options.length > 0);
+                    if (varsWithOptions.length === 0) {
+                        window.toast.error('Sin opciones', 'Las variables seleccionadas no tienen opciones definidas', 5000, 'bottom-center');
+                        return;
+                    }
+                    
+                    // Calcular total de combinaciones
+                    const totalCombinations = varsWithOptions.reduce((total, v) => total * v.options.length, 1);
+                    
+                    if (totalCombinations > 50) {
+                        window.toast.warning('Muchas combinaciones', `Se generarán ${totalCombinations} variaciones. Esto puede tardar.`, 5000, 'bottom-center');
+                    }
+                    
+                    // Generar producto cartesiano
+                    // Usamos los IDs originales (números) para que coincidan con el x-for de las opciones
+                    const combinations = this.cartesianProduct(varsWithOptions.map(v => 
+                        v.options.map(opt => ({ variableId: v.id, optionId: opt.id, optionName: opt.name }))
+                    ));
+                    
+                    // Limpiar variaciones existentes
+                    this.variations = [];
+                    this.nextId = 1;
+                    
+                    // Crear una variación por cada combinación
+                    combinations.forEach(combo => {
+                        const newVariation = {
+                            id: this.nextId++,
+                            options: {},
+                            stock: 0,
+                            price_modifier: 0,
+                            sku: ''
+                        };
+                        
+                        // Asignar cada opción a su variable (como STRING para match con select value)
+                        combo.forEach(item => {
+                            newVariation.options[item.variableId] = String(item.optionId);
+                        });
+                        
+                        this.variations.push(newVariation);
+                    });
+                    
+                    window.toast.success('¡Listo!', `Se generaron ${this.variations.length} combinaciones automáticamente`, 5000, 'bottom-center');
+                },
+                
+                // Función auxiliar: Producto cartesiano de arrays
+                cartesianProduct(arrays) {
+                    if (arrays.length === 0) return [[]];
+                    
+                    return arrays.reduce((acc, curr) => {
+                        const result = [];
+                        acc.forEach(a => {
+                            curr.forEach(b => {
+                                result.push([...a, b]);
+                            });
+                        });
+                        return result;
+                    }, [[]]);
+                },
+                
+                getSelectedVariables() {
+                    // Obtener las variables que están seleccionadas (checkbox marcado)
+                    const variables = [];
+                    const checkboxes = document.querySelectorAll('.variable-checkbox:checked');
+                    
+                    checkboxes.forEach(checkbox => {
+                        const variableId = parseInt(checkbox.dataset.variableId);
+                        const variableCard = checkbox.closest('.variable-card');
+                        
+                        if (variableCard) {
+                            const variableName = variableCard.dataset.variableName;
+                            const optionsData = variableCard.dataset.variableOptions;
+                            
+                            try {
+                                const options = optionsData ? JSON.parse(optionsData) : [];
+                                variables.push({
+                                    id: variableId,
+                                    name: variableName,
+                                    options: options
+                                });
+                            } catch (e) {
+                                console.error('Error parsing variable options:', e);
+                            }
+                        }
+                    });
+                    
+                    return variables;
+                },
+                
+                // Verificar si la combinación actual ya existe en otra variación
+                checkDuplicate(currentIndex) {
+                    const currentVariation = this.variations[currentIndex];
+                    if (!currentVariation) return;
+                    
+                    // Crear key de la combinación actual
+                    const currentKey = this.getVariationKey(currentVariation);
+                    
+                    // Si no tiene opciones seleccionadas, no verificar
+                    if (!currentKey) return;
+                    
+                    // Buscar si existe en otra variación
+                    for (let i = 0; i < this.variations.length; i++) {
+                        if (i === currentIndex) continue;
+                        
+                        const otherKey = this.getVariationKey(this.variations[i]);
+                        
+                        if (currentKey === otherKey) {
+                            // Encontró duplicado - resetear la última opción cambiada
+                            window.toast.warning(
+                                'Combinación duplicada', 
+                                `Esta combinación ya existe en la variación #${i + 1}. Elige otra opción.`,
+                                5000, 
+                                'bottom-center'
+                            );
+                            
+                            // Resetear todas las opciones de esta variación
+                            this.variations[currentIndex].options = {};
+                            return;
+                        }
+                    }
+                },
+                
+                // Generar una key única para una variación basada en sus opciones
+                getVariationKey(variation) {
+                    if (!variation.options || Object.keys(variation.options).length === 0) {
+                        return null;
+                    }
+                    
+                    // Filtrar opciones vacías y ordenar para consistencia
+                    const entries = Object.entries(variation.options)
+                        .filter(([key, val]) => val && val !== '')
+                        .sort(([a], [b]) => a.localeCompare(b));
+                    
+                    if (entries.length === 0) return null;
+                    
+                    return entries.map(([k, v]) => `${k}:${v}`).join('|');
+                },
+                
+                getBasePrice() {
+                    const priceInput = document.getElementById('price');
+                    return parseFloat(priceInput?.value || 0);
+                },
+                
+                formatPrice(price) {
+                    return new Intl.NumberFormat('es-CO').format(price);
+                }
+            };
+        }
+
+        // ===========================================
+        // KiuBot - Asistente para mejorar textos
+        // ===========================================
+        function kiubotManager() {
+            return {
+                improving: false,
+                animating: false,
+                showModal: false,
+                originalText: '',
+                improvedText: '',
+                
+                improveDescription() {
+                    // Obtener el texto actual
+                    const description = this.$refs.descriptionTextarea.value.trim();
+                    
+                    if (!description) {
+                        window.toast.error('Campo vacío', 'Por favor escribe una descripción primero', 5000, 'bottom-center');
+                        return;
+                    }
+                    
+                    if (description.length < 10) {
+                        window.toast.error('Texto muy corto', 'La descripción debe tener al menos 10 caracteres', 5000, 'bottom-center');
+                        return;
+                    }
+                    
+                    this.improving = true;
+                    this.animating = true;
+                    this.originalText = description;
+                    
+                    // Obtener el nombre del producto para contexto
+                    const productName = document.getElementById('name')?.value || '';
+                    
+                    // Llamar al API
+                    fetch('{{ route('tenant.admin.products.improve-description', $store->slug) }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                            'Accept': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            description: description,
+                            product_name: productName
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            this.improvedText = data.improved_text;
+                            
+                            // Pequeño delay para efecto de finalización
+                            setTimeout(() => {
+                                this.animating = false;
+                                this.improving = false;
+                                this.showModal = true;
+                            }, 500);
+                        } else {
+                            this.animating = false;
+                            this.improving = false;
+                            window.toast.error('Error', data.error || 'No se pudo mejorar la descripción', 5000, 'bottom-center');
+                        }
+                    })
+                    .catch(error => {
+                        this.animating = false;
+                        this.improving = false;
+                        console.error('Error:', error);
+                        window.toast.error('Error', 'Error al comunicarse con KiuBot. Verifica tu conexión a internet', 5000, 'bottom-center');
+                    });
+                },
+                
+                useImprovedText() {
+                    this.$refs.descriptionTextarea.value = this.improvedText;
+                    this.closeModal();
+                    window.toast.success('Descripción actualizada', 'El texto ha sido mejorado por KiuBot', 5000, 'bottom-center');
+                },
+                
+                regenerate() {
+                    this.closeModal();
+                    // Pequeña pausa para que se cierre el modal
+                    setTimeout(() => {
+                        this.improveDescription();
+                    }, 300);
+                },
+                
+                closeModal() {
+                    this.showModal = false;
+                }
+            };
+        }
     </script>
     @endpush
     @endsection

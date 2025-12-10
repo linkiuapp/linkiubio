@@ -91,9 +91,20 @@ class StoreController extends Controller
             $query->whereDate('created_at', '<=', $endDate);
         }
 
-        // Ordenamiento
+        // Ordenamiento (validado contra lista blanca para prevenir SQL injection)
+        $allowedSortColumns = ['created_at', 'name', 'email', 'status', 'verified', 'document_number'];
+        $allowedSortOrders = ['asc', 'desc'];
+        
         $sortBy = $request->get('sort_by', 'created_at');
         $sortOrder = $request->get('sort_order', 'desc');
+        
+        if (!in_array($sortBy, $allowedSortColumns)) {
+            $sortBy = 'created_at';
+        }
+        if (!in_array(strtolower($sortOrder), $allowedSortOrders)) {
+            $sortOrder = 'desc';
+        }
+        
         $query->orderBy($sortBy, $sortOrder);
 
         // Exportar si se solicita

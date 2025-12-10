@@ -54,10 +54,6 @@ class PaymentMethodController extends Controller
             // Toggle the active status (this includes validation to ensure at least one method remains active)
             $this->paymentMethodService->toggleActive($paymentMethod);
             
-            // Marcar paso de onboarding como completado si se activa un método
-            if ($paymentMethod->is_active) {
-                \App\Shared\Models\StoreOnboardingStep::markAsCompleted($store->id, 'payments');
-            }
             
             // Clear cache
             $this->paymentMethodService->clearPaymentMethodsCache($store->id);
@@ -229,10 +225,6 @@ class PaymentMethodController extends Controller
             // Update active status
             $method->update(['is_active' => $request->is_active]);
             
-            // Marcar paso de onboarding como completado si se activa un método
-            if ($request->is_active) {
-                \App\Shared\Models\StoreOnboardingStep::markAsCompleted($store->id, 'payments');
-            }
             
             // Clear cache
             $this->paymentMethodService->clearPaymentMethodsCache($store->id);

@@ -10,6 +10,9 @@
             </a>
             <h1 class="text-lg font-semibold text-gray-800">Nuevo cupón</h1>
         </div>
+        
+        {{-- Auto-iniciar tour si es primer cupón --}}
+        <x-tour-trigger tour="crear_cupon" :autoStart="true" :showButton="false" />
 
         {{-- Estado de uso --}}
         {{-- COMPONENT: AlertSoft | props:{type:info, message:"Estás usando ..."} --}}
@@ -28,7 +31,7 @@
                     {{-- Información básica --}}
                     <section class="space-y-4">
                         <div class="grid gap-4 md:grid-cols-2">
-                            <div>
+                            <div data-tour="coupon-name">
                                 <x-input-with-label
                                     label="Nombre del cupón"
                                     name="name"
@@ -44,7 +47,7 @@
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
-                            <div>
+                            <div data-tour="coupon-code">
                                 <x-input-with-label
                                     label="Código del cupón (opcional)"
                                     name="code"
@@ -60,21 +63,23 @@
                                 @enderror
                             </div>
                         </div>
-                        <x-textarea-with-label
-                            label="Descripción (opcional)"
-                            textarea-name="description"
-                            textarea-id="coupon-description"
-                            container-class="w-full"
-                            rows="3"
-                            placeholder="Comparte un mensaje que explique el beneficio del cupón"
-                            x-model="form.description"
-                        >{{ old('description') }}</x-textarea-with-label>
+                        <div data-tour="coupon-description">
+                            <x-textarea-with-label
+                                label="Descripción (opcional)"
+                                textarea-name="description"
+                                textarea-id="coupon-description"
+                                container-class="w-full"
+                                rows="3"
+                                placeholder="Comparte un mensaje que explique el beneficio del cupón"
+                                x-model="form.description"
+                            >{{ old('description') }}</x-textarea-with-label>
+                        </div>
                     </section>
 
                     {{-- Descuento y alcance --}}
                     <section class="space-y-4">
                         <div class="grid gap-4 md:grid-cols-3">
-                            <div>
+                            <div data-tour="coupon-apply-to">
                                 <x-select-with-label
                                     label="Aplicar a"
                                     name="type"
@@ -87,7 +92,7 @@
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
-                            <div>
+                            <div data-tour="coupon-type">
                                 <x-select-with-label
                                     label="Tipo de descuento"
                                     name="discount_type"
@@ -100,7 +105,7 @@
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
-                            <div>
+                            <div data-tour="coupon-value">
                                 <x-input-with-label
                                     label="Valor del descuento"
                                     type="number"
@@ -122,7 +127,7 @@
                             </div>
                         </div>
                         <div class="grid gap-4 md:grid-cols-2">
-                            <div x-show="form.discountType === 'percentage'" x-cloak>
+                            <div x-show="form.discountType === 'percentage'" x-cloak data-tour="coupon-max-discount">
                                 <x-input-with-label
                                     label="Descuento máximo ($)"
                                     type="number"
@@ -138,7 +143,7 @@
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
-                            <div>
+                            <div data-tour="coupon-min-purchase">
                                 <x-input-with-label
                                     label="Compra mínima ($)"
                                     type="number"
@@ -158,8 +163,8 @@
                     </section>
 
                     {{-- Aplicabilidad --}}
-                    <section class="space-y-4" x-show="form.type !== 'global'" x-cloak>
-                        <div x-show="form.type === 'categories'">
+                    <section class="space-y-4" x-show="form.type !== 'global'" x-cloak data-tour="coupon-applicability-section">
+                        <div x-show="form.type === 'categories'" data-tour="coupon-categories">
                             <p class="text-sm font-medium text-gray-600">Selecciona las categorías en las que se aplicará el cupón.</p>
                             <div class="max-h-60 space-y-2 overflow-y-auto pr-1">
                                 @foreach($categories as $category)
@@ -179,7 +184,7 @@
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
-                        <div x-show="form.type === 'products'" x-cloak>
+                        <div x-show="form.type === 'products'" x-cloak data-tour="coupon-products">
                             <p class="text-sm font-medium text-gray-600">Selecciona los productos donde el cupón será válido.</p>
                             <div class="max-h-60 space-y-2 overflow-y-auto pr-1">
                                 @foreach($products as $product)
@@ -204,7 +209,7 @@
                     {{-- Restricciones y límites --}}
                     <section class="space-y-6">
                         <div class="grid gap-4 md:grid-cols-2">
-                            <div>
+                            <div data-tour="coupon-max-uses">
                                 <x-input-with-label
                                     label="Límite total de usos (opcional)"
                                     type="number"
@@ -219,7 +224,7 @@
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
-                            <div>
+                            <div data-tour="coupon-uses-per-customer">
                                 <x-input-with-label
                                     label="Usos por cliente (opcional)"
                                     type="number"
@@ -235,8 +240,8 @@
                                 @enderror
                             </div>
                         </div>
-                        <div class="grid gap-4 md:grid-cols-2">
-                            <div>
+                        <div class="grid gap-4 md:grid-cols-2" data-tour="coupon-dates">
+                            <div data-tour="coupon-start-date">
                                 <x-input-with-label
                                     label="Fecha de inicio (opcional)"
                                     type="datetime-local"
@@ -249,7 +254,7 @@
                                     <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                                 @enderror
                             </div>
-                            <div>
+                            <div data-tour="coupon-end-date">
                                 <x-input-with-label
                                     label="Fecha de fin (opcional)"
                                     type="datetime-local"
@@ -263,7 +268,7 @@
                                 @enderror
                             </div>
                         </div>
-                        <div class="border-t border-gray-200 pt-5">
+                        <div class="border-t border-gray-200 pt-5" data-tour="coupon-time-restrictions">
                             <div class="flex items-center justify-between">
                                 <div>
                                     <h4 class="text-sm font-semibold text-gray-800">Restricciones horarias</h4>
@@ -337,7 +342,7 @@
                                 <p class="text-xs text-gray-500">El cupón estará disponible inmediatamente.</p>
                             </div>
                         </div>
-                        <div class="col-span-1 flex items-center gap-3">
+                        <div class="col-span-1 flex items-center gap-3" data-tour="coupon-public">
                             <input type="hidden" name="is_public" value="0">
                             <x-switch-basic switch-id="is-public" switch-name="is_public" value="1" :checked="(bool) old('is_public')" />
                             <div>
@@ -345,7 +350,7 @@
                                 <p class="text-xs text-gray-500">Visible en la tienda para todos los clientes.</p>
                             </div>
                         </div>
-                        <div class="col-span-1 flex items-center gap-3">
+                        <div class="col-span-1 flex items-center gap-3" data-tour="coupon-automatic">
                             <input type="hidden" name="is_automatic" value="0">
                             <x-switch-basic switch-id="is-automatic" switch-name="is_automatic" value="1" :checked="(bool) old('is_automatic')" />
                             <div>
@@ -381,7 +386,8 @@
                                 color="dark" 
                                 icon="check" 
                                 text="Crear cupón" 
-                                html-type="submit" 
+                                html-type="submit"
+                                data-tour="save-button"
                             />
                             <a href="{{ route('tenant.admin.coupons.index', $store->slug) }}">
                                 <x-button-base type="outline" color="error" text="cancelar" />

@@ -10,14 +10,17 @@
                 <p class="text-sm text-gray-600 mt-1">Controla el stock de tus productos en tiempo real</p>
             </div>
             <div class="flex gap-3">
-                <a href="{{ route('tenant.admin.products.index', $store->slug) }}" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                <a href="{{ route('tenant.admin.products.index', $store->slug) }}" data-tour="ver-productos" class="inline-flex items-center gap-2 px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
                     Ver Productos
                 </a>
             </div>
         </div>
+        
+        {{-- Auto-iniciar tour --}}
+        <x-tour-trigger tour="gestionar_inventario" :autoStart="true" :showButton="false" />
 
         {{-- Estadísticas --}}
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4" data-tour="stats-cards">
             {{-- Total Productos --}}
             <div class="bg-white rounded-lg p-6 border border-gray-200">
                 <div class="flex items-center justify-between">
@@ -83,16 +86,32 @@
 
         {{-- Productos con Stock Bajo --}}
         @if($productosStockBajo->isNotEmpty())
-        <div id="stock-bajo" class="bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-6">
+        <div id="stock-bajo" data-tour="stock-bajo" 
+             x-data="{ expanded: false, itemsToShow: 5 }"
+             class="bg-yellow-50 border-l-4 border-yellow-400 rounded-lg p-6">
             <div class="flex items-start gap-4">
                 <i data-lucide="alert-triangle" class="w-6 h-6 text-yellow-600 flex-shrink-0 mt-1"></i>
                 <div class="flex-1">
-                    <h3 class="text-base font-semibold text-yellow-900 mb-4">
-                        Productos con Stock Bajo ({{ $productosStockBajo->count() }})
-                    </h3>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-base font-semibold text-yellow-900">
+                            Productos con Stock Bajo ({{ $productosStockBajo->count() }})
+                        </h3>
+                        @if($productosStockBajo->count() > 5)
+                        <button 
+                            @click="expanded = !expanded"
+                            class="text-sm text-yellow-700 hover:text-yellow-900 font-medium flex items-center gap-1">
+                            <span x-text="expanded ? 'Ver menos' : 'Ver todos'"></span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 transition-transform" :class="{ 'rotate-180': expanded }"></i>
+                        </button>
+                        @endif
+                    </div>
                     <div class="space-y-3">
-                        @foreach($productosStockBajo as $producto)
-                        <div class="bg-white rounded-lg p-4 flex items-center justify-between">
+                        @foreach($productosStockBajo as $index => $producto)
+                        <div x-show="expanded || {{ $index }} < itemsToShow"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 transform -translate-y-2"
+                             x-transition:enter-end="opacity-100 transform translate-y-0"
+                             class="bg-white rounded-lg p-4 flex items-center justify-between">
                             <div class="flex items-center gap-4">
                                 <img 
                                     src="{{ $producto->main_image_url }}" 
@@ -123,6 +142,11 @@
                         </div>
                         @endforeach
                     </div>
+                    @if($productosStockBajo->count() > 5)
+                    <p x-show="!expanded" class="text-sm text-yellow-700 mt-3 text-center">
+                        ... y {{ $productosStockBajo->count() - 5 }} productos más
+                    </p>
+                    @endif
                 </div>
             </div>
         </div>
@@ -130,16 +154,32 @@
 
         {{-- Productos Agotados --}}
         @if($productosAgotados->isNotEmpty())
-        <div id="agotados" class="bg-red-50 border-l-4 border-red-400 rounded-lg p-6">
+        <div id="agotados" data-tour="productos-agotados" 
+             x-data="{ expanded: false, itemsToShow: 5 }"
+             class="bg-red-50 border-l-4 border-red-400 rounded-lg p-6">
             <div class="flex items-start gap-4">
                 <i data-lucide="x-circle" class="w-6 h-6 text-red-600 flex-shrink-0 mt-1"></i>
                 <div class="flex-1">
-                    <h3 class="text-base font-semibold text-red-900 mb-4">
-                        Productos Agotados ({{ $productosAgotados->count() }})
-                    </h3>
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-base font-semibold text-red-900">
+                            Productos Agotados ({{ $productosAgotados->count() }})
+                        </h3>
+                        @if($productosAgotados->count() > 5)
+                        <button 
+                            @click="expanded = !expanded"
+                            class="text-sm text-red-700 hover:text-red-900 font-medium flex items-center gap-1">
+                            <span x-text="expanded ? 'Ver menos' : 'Ver todos'"></span>
+                            <i data-lucide="chevron-down" class="w-4 h-4 transition-transform" :class="{ 'rotate-180': expanded }"></i>
+                        </button>
+                        @endif
+                    </div>
                     <div class="space-y-3">
-                        @foreach($productosAgotados as $producto)
-                        <div class="bg-white rounded-lg p-4 flex items-center justify-between">
+                        @foreach($productosAgotados as $index => $producto)
+                        <div x-show="expanded || {{ $index }} < itemsToShow"
+                             x-transition:enter="transition ease-out duration-200"
+                             x-transition:enter-start="opacity-0 transform -translate-y-2"
+                             x-transition:enter-end="opacity-100 transform translate-y-0"
+                             class="bg-white rounded-lg p-4 flex items-center justify-between">
                             <div class="flex items-center gap-4">
                                 <img 
                                     src="{{ $producto->main_image_url }}" 
@@ -166,13 +206,18 @@
                         </div>
                         @endforeach
                     </div>
+                    @if($productosAgotados->count() > 5)
+                    <p x-show="!expanded" class="text-sm text-red-700 mt-3 text-center">
+                        ... y {{ $productosAgotados->count() - 5 }} productos más
+                    </p>
+                    @endif
                 </div>
             </div>
         </div>
         @endif
 
         {{-- Movimientos Recientes --}}
-        <div class="bg-white rounded-lg border border-gray-200 p-6">
+        <div class="bg-white rounded-lg border border-gray-200 p-6" data-tour="movimientos-recientes">
             <h3 class="text-base font-semibold text-gray-900 mb-4">Movimientos Recientes</h3>
             
             @if($movimientosRecientes->isEmpty())

@@ -31,6 +31,10 @@ class Order extends Model
         'payment_method_id',
         'cash_amount',
         'payment_proof_path',
+        'proof_validation_status',
+        'proof_validation_score',
+        'proof_validation_details',
+        'proof_validated_at',
         'subtotal',
         'coupon_discount',
         'service_charge',
@@ -50,6 +54,9 @@ class Order extends Model
         'tip_percentage' => 'integer',
         'total' => 'decimal:2',
         'cash_amount' => 'decimal:2',
+        'proof_validation_score' => 'integer',
+        'proof_validation_details' => 'array',
+        'proof_validated_at' => 'datetime',
         'created_at' => 'datetime',
         'updated_at' => 'datetime'
     ];

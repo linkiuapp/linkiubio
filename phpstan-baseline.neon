@@ -1,0 +1,3229 @@
+parameters:
+	ignoreErrors:
+		-
+			message: '#^Right side of && is always true\.$#'
+			identifier: booleanAnd.rightAlwaysTrue
+			count: 1
+			path: app/Console/Commands/AssignFeatureToVertical.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/AutoCloseInactiveTickets.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$slug\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/AutoCloseInactiveTickets.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:admins\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Console/Commands/AutoCloseInactiveTickets.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\BusinessCategory\:\:\$features\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/BusinessCategoriesSuggestVerticals.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 3
+			path: app/Console/Commands/CachePaymentProofTemplates.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>email" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Console/Commands/CheckPendingStoreRequests.php
+
+		-
+			message: '#^Call to an undefined method App\\Console\\Commands\\CleanDuplicateBillingCommand\:\:success\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Console/Commands/CleanDuplicateBillingCommand.php
+
+		-
+			message: '#^Parameter \#1 \$keys of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Shared\\Models\\Invoice\>\:\:except\(\) expects array\<mixed\>\|null, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Console/Commands/CleanDuplicateBillingCommand.php
+
+		-
+			message: '#^Relation ''subscription'' is not found in App\\Shared\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Console/Commands/CleanDuplicateBillingCommand.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/CleanupExpiredStoreDrafts.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/CleanupExpiredStoreDrafts.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$admins\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Console/Commands/CleanupOldStoreRequests.php
+
+		-
+			message: '#^Parameter \#1 \$value of method Carbon\\Carbon\:\:subDays\(\) expects float\|int, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Console/Commands/CleanupOldStoreRequests.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>email" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Console/Commands/CleanupOldStoreRequests.php
+
+		-
+			message: '#^Call to static method create\(\) on an unknown class App\\Models\\User\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Console/Commands/CreateSuperAdmin.php
+
+		-
+			message: '#^Call to static method where\(\) on an unknown class App\\Models\\User\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Console/Commands/CreateSuperAdmin.php
+
+		-
+			message: '#^Cannot call method format\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Console/Commands/DebugTenantLogin.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$plan\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/DiagnoseAutoBillingCommand.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$subscription\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/DiagnoseAutoBillingCommand.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Shared\\Models\\Store\>\:\:\$plan\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/DiagnoseAutoBillingCommand.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Shared\\Models\\Store\>\:\:\$subscription\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/DiagnoseAutoBillingCommand.php
+
+		-
+			message: '#^Relation ''invoices'' is not found in App\\Shared\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 3
+			path: app/Console/Commands/DiagnoseAutoBillingCommand.php
+
+		-
+			message: '#^Relation ''plan'' is not found in App\\Shared\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Console/Commands/DiagnoseAutoBillingCommand.php
+
+		-
+			message: '#^Relation ''subscription'' is not found in App\\Shared\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 4
+			path: app/Console/Commands/DiagnoseAutoBillingCommand.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$plan\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/DiagnoseProductionIssues.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 9
+			path: app/Console/Commands/DiagnoseProductionIssues.php
+
+		-
+			message: '#^Relation ''plan'' is not found in App\\Shared\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Console/Commands/DiagnoseProductionIssues.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 9
+			path: app/Console/Commands/DiagnoseStorageCommand.php
+
+		-
+			message: '#^Relation ''admins'' is not found in App\\Shared\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Console/Commands/DiagnoseTenantIssues.php
+
+		-
+			message: '#^Relation ''plan'' is not found in App\\Shared\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Console/Commands/DiagnoseTenantIssues.php
+
+		-
+			message: '#^Relation ''store'' is not found in App\\Shared\\Models\\User model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Console/Commands/DiagnoseTenantIssues.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\User\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/DiagnoseUserAuth.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\View\\ViewFinderInterface\:\:getHints\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Console/Commands/DiagnoseViewNamespacesCommand.php
+
+		-
+			message: '#^Relation ''admins'' is not found in App\\Shared\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Console/Commands/FixStoreAdminsCommand.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Console/Commands/GenerateMonthlyInvoicesCommand.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Console/Commands/GenerateMonthlyInvoicesCommand.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$store_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/GenerateMonthlyInvoicesCommand.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:getFormattedPriceForPeriod\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Console/Commands/GenerateMonthlyInvoicesCommand.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:getPriceForPeriod\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Console/Commands/GenerateMonthlyInvoicesCommand.php
+
+		-
+			message: '#^Match arm comparison between ''biannual'' and ''biannual'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 1
+			path: app/Console/Commands/GenerateMonthlyInvoicesCommand.php
+
+		-
+			message: '#^Parameter \#1 \$subscription of method App\\Console\\Commands\\GenerateMonthlyInvoicesCommand\:\:processSubscription\(\) expects App\\Shared\\Models\\Subscription, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Console/Commands/GenerateMonthlyInvoicesCommand.php
+
+		-
+			message: '#^Call to an undefined method App\\Services\\WhatsAppNotificationService\:\:listTemplates\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Console/Commands/ListWhatsAppTemplates.php
+
+		-
+			message: '#^Variable \$tableData in empty\(\) always exists and is not falsy\.$#'
+			identifier: empty.variable
+			count: 1
+			path: app/Console/Commands/ListWhatsAppTemplates.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$plan\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/MigrateStoreSubscriptions.php
+
+		-
+			message: '#^Match arm comparison between ''suspended'' and ''suspended'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 1
+			path: app/Console/Commands/MigrateStoreSubscriptions.php
+
+		-
+			message: '#^Relation ''plan'' is not found in App\\Shared\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Console/Commands/MigrateStoreSubscriptions.php
+
+		-
+			message: '#^Relation ''subscription'' is not found in App\\Shared\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Console/Commands/MigrateStoreSubscriptions.php
+
+		-
+			message: '#^Call to private method getThreshold\(\) of class App\\Features\\SuperLinkiu\\Services\\ErrorMonitoringService\.$#'
+			identifier: method.private
+			count: 1
+			path: app/Console/Commands/MonitorWizardErrors.php
+
+		-
+			message: '#^Parameter \#1 \$alertId of method App\\Features\\SuperLinkiu\\Services\\ErrorMonitoringService\:\:resolveAlert\(\) expects int, array\|string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Console/Commands/MonitorWizardErrors.php
+
+		-
+			message: '#^Parameter \#4 \$maxHeight of job class App\\Jobs\\OptimizeImageJob constructor expects int\|null in App\\Jobs\\OptimizeImageJob\:\:dispatch\(\), string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Console/Commands/OptimizeExistingImagesCommand.php
+
+		-
+			message: '#^Parameter \#5 \$modelType of job class App\\Jobs\\OptimizeImageJob constructor expects string\|null in App\\Jobs\\OptimizeImageJob\:\:dispatch\(\), int given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Console/Commands/OptimizeExistingImagesCommand.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Invoice\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Console/Commands/ProcessBillingSuspensionsCommand.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$subscription\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/ProcessBillingSuspensionsCommand.php
+
+		-
+			message: '#^Parameter \#2 \$forceDays of method App\\Console\\Commands\\ProcessBillingSuspensionsCommand\:\:processAutomaticSuspensions\(\) expects int\|null, string\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Console/Commands/ProcessBillingSuspensionsCommand.php
+
+		-
+			message: '#^Parameter \#3 \$daysOverdue of method App\\Console\\Commands\\ProcessBillingSuspensionsCommand\:\:suspendStore\(\) expects int, float given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Console/Commands/ProcessBillingSuspensionsCommand.php
+
+		-
+			message: '#^Relation ''store'' is not found in App\\Shared\\Models\\Invoice model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Console/Commands/ProcessBillingSuspensionsCommand.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Invoice\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Console/Commands/SendBillingNotificationsCommand.php
+
+		-
+			message: '#^Parameter \#2 \$days of method App\\Console\\Commands\\SendBillingNotificationsCommand\:\:sendDueReminders\(\) expects int\|null, string\|null given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Console/Commands/SendBillingNotificationsCommand.php
+
+		-
+			message: '#^Parameter \#2 \$days of method App\\Console\\Commands\\SendBillingNotificationsCommand\:\:sendOverdueNotifications\(\) expects int\|null, string\|null given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Console/Commands/SendBillingNotificationsCommand.php
+
+		-
+			message: '#^Relation ''plan'' is not found in App\\Shared\\Models\\Invoice model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Console/Commands/SendBillingNotificationsCommand.php
+
+		-
+			message: '#^Relation ''store'' is not found in App\\Shared\\Models\\Invoice model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Console/Commands/SendBillingNotificationsCommand.php
+
+		-
+			message: '#^Call to static method sendTestEmail\(\) on an unknown class App\\Services\\EmailService\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Console/Commands/SendEmailTest.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/SendHotelCheckinReminders.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Invoice\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 5
+			path: app/Console/Commands/SendPaymentReminders.php
+
+		-
+			message: '#^Parameter \#1 \$num of function number_format expects float, string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Console/Commands/SendPaymentReminders.php
+
+		-
+			message: '#^Relation ''store'' is not found in App\\Shared\\Models\\Invoice model\.$#'
+			identifier: larastan.relationExistence
+			count: 3
+			path: app/Console/Commands/SendPaymentReminders.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/SendReservationReminders.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 8
+			path: app/Console/Commands/SendSubscriptionNotifications.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$slug\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Console/Commands/SendSubscriptionNotifications.php
+
+		-
+			message: '#^Call to static method sendWithTemplate\(\) on an unknown class App\\Services\\EmailService\.$#'
+			identifier: class.notFound
+			count: 4
+			path: app/Console/Commands/SendSubscriptionNotifications.php
+
+		-
+			message: '#^Method App\\Console\\Commands\\SendSubscriptionNotifications\:\:getEmailSubject\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: app/Console/Commands/SendSubscriptionNotifications.php
+
+		-
+			message: '#^Parameter \#3 \$daysLeft of method App\\Console\\Commands\\SendSubscriptionNotifications\:\:sendGracePeriodEndingEmail\(\) expects int, float given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Console/Commands/SendSubscriptionNotifications.php
+
+		-
+			message: '#^Call to static method getActive\(\) on an unknown class App\\Shared\\Models\\EmailConfiguration\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Console/Commands/SendTestEmailCommand.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Invoice\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Console/Commands/SuspendOverdueStores.php
+
+		-
+			message: '#^Relation ''store'' is not found in App\\Shared\\Models\\Invoice model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Console/Commands/SuspendOverdueStores.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 7
+			path: app/Console/Commands/SyncInvoicesWithSubscriptions.php
+
+		-
+			message: '#^Match arm comparison between ''biannual'' and ''biannual'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 1
+			path: app/Console/Commands/SyncInvoicesWithSubscriptions.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 2
+			path: app/Console/Commands/TestAlertEmailCommand.php
+
+		-
+			message: '#^Call to static method getActive\(\) on an unknown class App\\Shared\\Models\\EmailConfiguration\.$#'
+			identifier: class.notFound
+			count: 2
+			path: app/Console/Commands/TestEmailSystemCommand.php
+
+		-
+			message: '#^Call to static method sendTestEmail\(\) on an unknown class App\\Services\\EmailService\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Console/Commands/TestEmailSystemCommand.php
+
+		-
+			message: '#^Call to static method getByKey\(\) on an unknown class App\\Models\\EmailTemplate\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Console/Commands/TestEmailTemplateCommand.php
+
+		-
+			message: '#^Call to static method sendWithTemplate\(\) on an unknown class App\\Services\\EmailService\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Console/Commands/TestEmailTemplateCommand.php
+
+		-
+			message: '#^Relation ''admins'' is not found in App\\Shared\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Console/Commands/TestStoreAssignmentCommand.php
+
+		-
+			message: '#^Relation ''store'' is not found in App\\Shared\\Models\\User model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Console/Commands/TestStoreAssignmentCommand.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\View\\ViewFinderInterface\:\:getHints\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Console/Commands/TestViewResolutionCommand.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Invoice\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Console/Commands/UpdateOverdueInvoicesCommand.php
+
+		-
+			message: '#^Relation ''plan'' is not found in App\\Shared\\Models\\Invoice model\.$#'
+			identifier: larastan.relationExistence
+			count: 3
+			path: app/Console/Commands/UpdateOverdueInvoicesCommand.php
+
+		-
+			message: '#^Relation ''store'' is not found in App\\Shared\\Models\\Invoice model\.$#'
+			identifier: larastan.relationExistence
+			count: 3
+			path: app/Console/Commands/UpdateOverdueInvoicesCommand.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>email" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Events/StoreRequestCreated.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Events/StoreRequestCreated.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 3
+			path: app/Exceptions/Handler.php
+
+		-
+			message: '#^Class Warning not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Exceptions/Handler.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PendingRegistration\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\PendingRegistration\>\:\:\$createdStore\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Features/Public/Controllers/RegistrationWizardController.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Plan\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Shared\\Models\\Plan\>\:\:\$monthly_price\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Features/Public/Controllers/RegistrationWizardController.php
+
+		-
+			message: '#^Relation ''category'' is not found in App\\Models\\PendingRegistration model\.$#'
+			identifier: larastan.relationExistence
+			count: 3
+			path: app/Features/Public/Controllers/RegistrationWizardController.php
+
+		-
+			message: '#^Relation ''createdStore'' is not found in App\\Models\\PendingRegistration model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/Public/Controllers/RegistrationWizardController.php
+
+		-
+			message: '#^Relation ''features'' is not found in App\\Shared\\Models\\BusinessCategory model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/Public/Controllers/RegistrationWizardController.php
+
+		-
+			message: '#^Relation ''plan'' is not found in App\\Models\\PendingRegistration model\.$#'
+			identifier: larastan.relationExistence
+			count: 3
+			path: app/Features/Public/Controllers/RegistrationWizardController.php
+
+		-
+			message: '#^Parameter \#1 \$view of function view expects view\-string\|null, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/AnnouncementController.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\BusinessCategory\:\:\$feature_ids\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/BusinessCategoryController.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\BusinessCategory\:\:\$features\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Features/SuperLinkiu/Controllers/BusinessCategoryController.php
+
+		-
+			message: '#^Relation ''features'' is not found in App\\Shared\\Models\\BusinessCategory model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Features/SuperLinkiu/Controllers/BusinessCategoryController.php
+
+		-
+			message: '#^Negated boolean expression is always false\.$#'
+			identifier: booleanNot.alwaysFalse
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/CategoryIconController.php
+
+		-
+			message: '#^Relation ''businessCategories'' is not found in App\\Shared\\Models\\CategoryIcon model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/CategoryIconController.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/DashboardController.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\StorePlanExtension\:\:\$plan\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/DashboardController.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\StorePlanExtension\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/DashboardController.php
+
+		-
+			message: '#^Comparison operation "\>" between 0 and 0 is always false\.$#'
+			identifier: greater.alwaysFalse
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/DashboardController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Shared\\Models\\Store\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/DashboardController.php
+
+		-
+			message: '#^Relation ''plan'' is not found in App\\Shared\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 4
+			path: app/Features/SuperLinkiu/Controllers/DashboardController.php
+
+		-
+			message: '#^Relation ''plan'' is not found in App\\Shared\\Models\\StorePlanExtension model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/DashboardController.php
+
+		-
+			message: '#^Relation ''store'' is not found in App\\Shared\\Models\\StorePlanExtension model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/DashboardController.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Invoice\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 8
+			path: app/Features/SuperLinkiu/Controllers/InvoiceController.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$plan\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/InvoiceController.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$subscription\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/InvoiceController.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Shared\\Models\\Store\>\:\:\$subscription\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/InvoiceController.php
+
+		-
+			message: '#^Method App\\Features\\SuperLinkiu\\Controllers\\InvoiceController\:\:sendInvoiceCreatedNotification\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/InvoiceController.php
+
+		-
+			message: '#^Parameter \#1 \$num of function number_format expects float, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/InvoiceController.php
+
+		-
+			message: '#^Relation ''plan'' is not found in App\\Shared\\Models\\Invoice model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/InvoiceController.php
+
+		-
+			message: '#^Relation ''plan'' is not found in App\\Shared\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Features/SuperLinkiu/Controllers/InvoiceController.php
+
+		-
+			message: '#^Relation ''store'' is not found in App\\Shared\\Models\\Invoice model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Features/SuperLinkiu/Controllers/InvoiceController.php
+
+		-
+			message: '#^Relation ''approvedByUser'' is not found in App\\Shared\\Models\\MasterKeyRecoveryRequest model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/MasterKeyRecoveryController.php
+
+		-
+			message: '#^Relation ''requestedByUser'' is not found in App\\Shared\\Models\\MasterKeyRecoveryRequest model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/MasterKeyRecoveryController.php
+
+		-
+			message: '#^Relation ''store'' is not found in App\\Shared\\Models\\MasterKeyRecoveryRequest model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/MasterKeyRecoveryController.php
+
+		-
+			message: '#^Method App\\Features\\SuperLinkiu\\Controllers\\MonitoringAlertController\:\:store\(\) should return Illuminate\\Http\\RedirectResponse but returns Illuminate\\Http\\JsonResponse\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/MonitoringAlertController.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Order\:\:\$customer_email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/OrderToolsController.php
+
+		-
+			message: '#^Parameter \#1 \$view of function view expects view\-string\|null, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/OrderToolsController.php
+
+		-
+			message: '#^Relation ''deletedByUser'' is not found in App\\Features\\SuperLinkiu\\Models\\OrderDeletionLog model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Features/SuperLinkiu/Controllers/OrderToolsController.php
+
+		-
+			message: '#^Relation ''category'' is not found in App\\Models\\PendingRegistration model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/PendingRegistrationController.php
+
+		-
+			message: '#^Relation ''plan'' is not found in App\\Models\\PendingRegistration model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/PendingRegistrationController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$subscription\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/PlanChangeRequestController.php
+
+		-
+			message: '#^Array has 2 duplicate keys with value ''trial_days'' \(''trial_days'', ''trial_days''\)\.$#'
+			identifier: array.duplicateKey
+			count: 2
+			path: app/Features/SuperLinkiu/Controllers/PlanController.php
+
+		-
+			message: '#^Method App\\Features\\SuperLinkiu\\Controllers\\ProfileController\:\:updateEnvVariable\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/ProfileController.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$plan\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/StoreApprovalController.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$subscription\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/StoreApprovalController.php
+
+		-
+			message: '#^Parameter \#1 \$num of function number_format expects float, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/StoreApprovalController.php
+
+		-
+			message: '#^Relation ''admins'' is not found in App\\Shared\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 3
+			path: app/Features/SuperLinkiu/Controllers/StoreApprovalController.php
+
+		-
+			message: '#^Relation ''approvedBy'' is not found in App\\Shared\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/StoreApprovalController.php
+
+		-
+			message: '#^Relation ''businessCategory'' is not found in App\\Shared\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Features/SuperLinkiu/Controllers/StoreApprovalController.php
+
+		-
+			message: '#^Relation ''plan'' is not found in App\\Shared\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Features/SuperLinkiu/Controllers/StoreApprovalController.php
+
+		-
+			message: '#^Access to an undefined property App\\Features\\SuperLinkiu\\Controllers\\StoreController\:\:\$batchManager\.$#'
+			identifier: property.notFound
+			count: 6
+			path: app/Features/SuperLinkiu/Controllers/StoreController.php
+
+		-
+			message: '#^Call to static method getChartData\(\) on an unknown class App\\Features\\SuperLinkiu\\Controllers\\BulkImportLog\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/StoreController.php
+
+		-
+			message: '#^Call to static method getContextEmail\(\) on an unknown class App\\Services\\EmailService\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/StoreController.php
+
+		-
+			message: '#^Call to static method getStatistics\(\) on an unknown class App\\Features\\SuperLinkiu\\Controllers\\BulkImportLog\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/StoreController.php
+
+		-
+			message: '#^Call to static method sendWithTemplate\(\) on an unknown class App\\Services\\EmailService\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/StoreController.php
+
+		-
+			message: '#^Call to static method with\(\) on an unknown class App\\Features\\SuperLinkiu\\Controllers\\BulkImportLog\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/StoreController.php
+
+		-
+			message: '#^Instantiated class App\\Features\\SuperLinkiu\\Exports\\BulkImportCredentialsExport not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/StoreController.php
+
+		-
+			message: '#^Instantiated class App\\Features\\SuperLinkiu\\Exports\\BulkImportResultsExport not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/StoreController.php
+
+		-
+			message: '#^Method App\\Features\\SuperLinkiu\\Controllers\\StoreController\:\:handleSlugUpdate\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/StoreController.php
+
+		-
+			message: '#^Parameter \#1 \$view of function view expects view\-string\|null, string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Features/SuperLinkiu/Controllers/StoreController.php
+
+		-
+			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(string\)\: bool\)\|null, ''trim'' given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/StoreController.php
+
+		-
+			message: '#^Relation ''admins'' is not found in App\\Shared\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Features/SuperLinkiu/Controllers/StoreController.php
+
+		-
+			message: '#^Relation ''design'' is not found in App\\Shared\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/StoreController.php
+
+		-
+			message: '#^Relation ''plan'' is not found in App\\Shared\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Features/SuperLinkiu/Controllers/StoreController.php
+
+		-
+			message: '#^Variable \$message might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/StoreController.php
+
+		-
+			message: '#^Variable \$type might not be defined\.$#'
+			identifier: variable.undefined
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/StoreController.php
+
+		-
+			message: '#^Relation ''reports'' is not found in App\\Shared\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/StoreReportController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/TicketController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Features/SuperLinkiu/Controllers/TicketController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$slug\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Features/SuperLinkiu/Controllers/TicketController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:admins\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Features/SuperLinkiu/Controllers/TicketController.php
+
+		-
+			message: '#^Relation ''store'' is not found in App\\Shared\\Models\\User model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/SuperLinkiu/Controllers/UserManagementController.php
+
+		-
+			message: '#^Relation ''admins'' is not found in App\\Shared\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/SuperLinkiu/Requests/CreateStoreRequest.php
+
+		-
+			message: '#^Relation ''store'' is not found in App\\Shared\\Models\\User model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/SuperLinkiu/Requests/CreateStoreRequest.php
+
+		-
+			message: '#^Regex pattern is invalid\: Delimiter must not be alphanumeric, backslash, or NUL in pattern\: Cédula debe tener entre 6 y 10 dígitos$#'
+			identifier: regexp.pattern
+			count: 1
+			path: app/Features/SuperLinkiu/Services/FiscalValidationService.php
+
+		-
+			message: '#^Regex pattern is invalid\: Delimiter must not be alphanumeric, backslash, or NUL in pattern\: NIT debe tener 9 dígitos \+ dígito de verificación$#'
+			identifier: regexp.pattern
+			count: 1
+			path: app/Features/SuperLinkiu/Services/FiscalValidationService.php
+
+		-
+			message: '#^Regex pattern is invalid\: Delimiter must not be alphanumeric, backslash, or NUL in pattern\: RFC debe tener 4 letras \+ 6 números \+ 3 caracteres$#'
+			identifier: regexp.pattern
+			count: 1
+			path: app/Features/SuperLinkiu/Services/FiscalValidationService.php
+
+		-
+			message: '#^Regex pattern is invalid\: Delimiter must not be alphanumeric, backslash, or NUL in pattern\: RUT debe tener 8 dígitos \+ dígito verificador$#'
+			identifier: regexp.pattern
+			count: 1
+			path: app/Features/SuperLinkiu/Services/FiscalValidationService.php
+
+		-
+			message: '#^Comparison operation "\>" between int\<1, max\> and 0 is always true\.$#'
+			identifier: greater.alwaysTrue
+			count: 2
+			path: app/Features/SuperLinkiu/Services/PerformanceMonitoringService.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$plan\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Features/SuperLinkiu/Services/StoreService.php
+
+		-
+			message: '#^Call to function method_exists\(\) with App\\Shared\\Models\\Store and ''orders'' will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Features/SuperLinkiu/Services/StoreService.php
+
+		-
+			message: '#^Negated boolean expression is always false\.$#'
+			identifier: booleanNot.alwaysFalse
+			count: 1
+			path: app/Features/SuperLinkiu/Services/StoreService.php
+
+		-
+			message: '#^Constant App\\Features\\SuperLinkiu\\Services\\ValidationCacheService\:\:DEFAULT_TTL is unused\.$#'
+			identifier: classConstant.unused
+			count: 1
+			path: app/Features/SuperLinkiu/Services/ValidationCacheService.php
+
+		-
+			message: '#^Call to function is_object\(\) with mixed will always evaluate to false\.$#'
+			identifier: function.impossibleType
+			count: 1
+			path: app/Features/Tenant/Controllers/DineInController.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>url" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Features/Tenant/Controllers/DineInController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$slug\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/Tenant/Controllers/FavoritesController.php
+
+		-
+			message: '#^Parameter \#1 \$num of function number_format expects float, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Features/Tenant/Controllers/FavoritesController.php
+
+		-
+			message: '#^Access to an undefined property App\\Features\\TenantAdmin\\Models\\Coupon\:\:\$min_amount\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/Tenant/Controllers/OrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$account_holder\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/Tenant/Controllers/OrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$account_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/Tenant/Controllers/OrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$account_type\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/Tenant/Controllers/OrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$bank_name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/Tenant/Controllers/OrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$cities\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/Tenant/Controllers/OrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$document_number\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/Tenant/Controllers/OrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/Tenant/Controllers/OrderController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:getAccountHolderWithDocument\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Features/Tenant/Controllers/OrderController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:getFormattedAccountNumber\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Features/Tenant/Controllers/OrderController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:getFullAccountInfo\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Features/Tenant/Controllers/OrderController.php
+
+		-
+			message: '#^Offset ''available''\|''occupied''\|''reserved'' on array\{available\: ''Disponible'', occupied\: ''Ocupada'', reserved\: ''Reservada''\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Features/Tenant/Controllers/OrderController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Features\\TenantAdmin\\Models\\PaymentMethod\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Features/Tenant/Controllers/OrderController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Features/Tenant/Controllers/OrderController.php
+
+		-
+			message: '#^Parameter \#1 \$num of function number_format expects float, string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Features/Tenant/Controllers/OrderController.php
+
+		-
+			message: '#^Parameter \#1 \$subtotal of method App\\Features\\TenantAdmin\\Models\\Coupon\:\:calculateDiscount\(\) expects float, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Features/Tenant/Controllers/OrderController.php
+
+		-
+			message: '#^Parameter \#1 \$subtotal of method App\\Features\\TenantAdmin\\Models\\Coupon\:\:isApplicable\(\) expects float, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Features/Tenant/Controllers/OrderController.php
+
+		-
+			message: '#^Parameter \#1 \$view of function view expects view\-string\|null, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Features/Tenant/Controllers/OrderController.php
+
+		-
+			message: '#^Parameter \#2 \$subtotal of method App\\Features\\TenantAdmin\\Models\\SimpleShipping\:\:calculateShippingCost\(\) expects float, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Features/Tenant/Controllers/OrderController.php
+
+		-
+			message: '#^Undefined variable\: \$realDeliveryType$#'
+			identifier: variable.undefined
+			count: 1
+			path: app/Features/Tenant/Controllers/OrderController.php
+
+		-
+			message: '#^Variable \$isDineIn in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.variable
+			count: 1
+			path: app/Features/Tenant/Controllers/OrderController.php
+
+		-
+			message: '#^Variable \$isDineIn on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: app/Features/Tenant/Controllers/OrderController.php
+
+		-
+			message: '#^Method App\\Features\\Tenant\\Controllers\\ReservationController\:\:selectType\(\) should return Illuminate\\Contracts\\View\\View but returns Illuminate\\Http\\RedirectResponse\.$#'
+			identifier: return.type
+			count: 2
+			path: app/Features/Tenant/Controllers/ReservationController.php
+
+		-
+			message: '#^Access to an undefined property App\\Features\\TenantAdmin\\Models\\Coupon\:\:\$conditions_text\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/Tenant/Controllers/StorefrontController.php
+
+		-
+			message: '#^Access to an undefined property App\\Features\\TenantAdmin\\Models\\Coupon\:\:\$expiry_text\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/Tenant/Controllers/StorefrontController.php
+
+		-
+			message: '#^Access to an undefined property App\\Features\\TenantAdmin\\Models\\Coupon\:\:\$status_info\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/Tenant/Controllers/StorefrontController.php
+
+		-
+			message: '#^Parameter \#1 \$num of function number_format expects float, string given\.$#'
+			identifier: argument.type
+			count: 4
+			path: app/Features/Tenant/Controllers/StorefrontController.php
+
+		-
+			message: '#^Relation ''children'' is not found in App\\Features\\TenantAdmin\\Models\\Category model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/Tenant/Controllers/StorefrontController.php
+
+		-
+			message: '#^Relation ''icon'' is not found in App\\Features\\TenantAdmin\\Models\\Category model\.$#'
+			identifier: larastan.relationExistence
+			count: 4
+			path: app/Features/Tenant/Controllers/StorefrontController.php
+
+		-
+			message: '#^Relation ''parent'' is not found in App\\Features\\TenantAdmin\\Models\\Category model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/Tenant/Controllers/StorefrontController.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\PlatformAnnouncement\:\:\$viewed_by_store\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Features/TenantAdmin/Controllers/Core/AnnouncementController.php
+
+		-
+			message: '#^Method App\\Features\\TenantAdmin\\Controllers\\Core\\BankAccountController\:\:create\(\) should return Illuminate\\View\\View but returns Illuminate\\Http\\RedirectResponse\.$#'
+			identifier: return.type
+			count: 2
+			path: app/Features/TenantAdmin/Controllers/Core/BankAccountController.php
+
+		-
+			message: '#^Method App\\Features\\TenantAdmin\\Controllers\\Core\\BankAccountController\:\:index\(\) should return Illuminate\\View\\View but returns Illuminate\\Http\\RedirectResponse\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/BankAccountController.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$plan\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/BillingController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/BillingController.php
+
+		-
+			message: '#^Method App\\Features\\TenantAdmin\\Controllers\\Core\\BillingController\:\:calculatePercentages\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/BillingController.php
+
+		-
+			message: '#^Method App\\Features\\TenantAdmin\\Controllers\\Core\\BillingController\:\:calculateUsage\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/BillingController.php
+
+		-
+			message: '#^Method App\\Features\\TenantAdmin\\Controllers\\Core\\BillingController\:\:getPlanLimits\(\) is unused\.$#'
+			identifier: method.unused
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/BillingController.php
+
+		-
+			message: '#^Relation ''plan'' is not found in App\\Shared\\Models\\Invoice model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/BillingController.php
+
+		-
+			message: '#^Cannot access property \$slug on array\|float\|int\|string\|false\.$#'
+			identifier: property.nonObject
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/BusinessProfileController.php
+
+		-
+			message: '#^Access to an undefined property App\\Features\\TenantAdmin\\Models\\Category\:\:\$children\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Features/TenantAdmin/Controllers/Core/CategoryController.php
+
+		-
+			message: '#^Relation ''businessCategories'' is not found in App\\Shared\\Models\\CategoryIcon model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Features/TenantAdmin/Controllers/Core/CategoryController.php
+
+		-
+			message: '#^Relation ''children'' is not found in App\\Features\\TenantAdmin\\Models\\Category model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/CategoryController.php
+
+		-
+			message: '#^Relation ''icon'' is not found in App\\Features\\TenantAdmin\\Models\\Category model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/CategoryController.php
+
+		-
+			message: '#^Relation ''parent'' is not found in App\\Features\\TenantAdmin\\Models\\Category model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/CategoryController.php
+
+		-
+			message: '#^Anonymous function should return Illuminate\\Support\\Collection\<int, array\{id\: int, title\: string, banner_image_url\: string\|null, banner_link\: string\|null, show_url\: string\}\> but returns Illuminate\\Support\\Collection\<int, array\{id\: int, title\: string, banner_image_url\: string\|null, banner_link\: string\|null, show_url\: string\}\>\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/DashboardController.php
+
+		-
+			message: '#^Relation ''producto'' is not found in App\\Features\\TenantAdmin\\Models\\MovimientoStock model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/InventarioController.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Location\:\:\$currentStatus\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/LocationController.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Location\:\:\$schedules\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Features/TenantAdmin/Controllers/Core/LocationController.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Location\:\:\$socialLinks\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Features/TenantAdmin/Controllers/Core/LocationController.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Order\:\:\$can_be_edited\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Features/TenantAdmin/Controllers/Core/OrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$cities\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/OrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$cost\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/OrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/OrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/OrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$order_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/OrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$product\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/OrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$quantity\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Features/TenantAdmin/Controllers/Core/OrderController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$store_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/OrderController.php
+
+		-
+			message: '#^Call to an undefined method App\\Features\\TenantAdmin\\Models\\SimpleShippingZone\:\:getFinalCost\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/OrderController.php
+
+		-
+			message: '#^Call to an undefined method App\\Features\\TenantAdmin\\Models\\SimpleShippingZone\:\:getFreeShippingMessage\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/OrderController.php
+
+		-
+			message: '#^Call to an undefined method App\\Features\\TenantAdmin\\Models\\SimpleShippingZone\:\:hasFreeShipping\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/OrderController.php
+
+		-
+			message: '#^Method App\\Features\\TenantAdmin\\Controllers\\Core\\OrderController\:\:edit\(\) should return Illuminate\\View\\View but returns Illuminate\\Http\\RedirectResponse\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/OrderController.php
+
+		-
+			message: '#^Parameter \#4 \$notas of method App\\Features\\TenantAdmin\\Services\\StockService\:\:incrementarStock\(\) expects string\|null, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/OrderController.php
+
+		-
+			message: '#^Property App\\Shared\\Models\\Order\:\:\$order_number \(string\) does not accept null\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/OrderController.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\User\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/PasswordResetController.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\User\|Illuminate\\Database\\Eloquent\\Collection\<int, App\\Shared\\Models\\User\>\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/PasswordResetController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$email\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/PasswordResetController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/PasswordResetController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$password\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/PasswordResetController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$store_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/PasswordResetController.php
+
+		-
+			message: '#^If condition is always true\.$#'
+			identifier: if.alwaysTrue
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/PasswordResetController.php
+
+		-
+			message: '#^Parameter \#1 \$string of function str_pad expects string, int\<0, 999999\> given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Features/TenantAdmin/Controllers/Core/PasswordResetController.php
+
+		-
+			message: '#^Relation ''store'' is not found in App\\Shared\\Models\\User model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/PasswordResetController.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\User\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/PreviewController.php
+
+		-
+			message: '#^Method App\\Features\\TenantAdmin\\Controllers\\Core\\ProductController\:\:create\(\) should return Illuminate\\View\\View but returns Illuminate\\Http\\RedirectResponse\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/ProductController.php
+
+		-
+			message: '#^Relation ''activeOptions'' is not found in App\\Features\\TenantAdmin\\Models\\ProductVariable model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Features/TenantAdmin/Controllers/Core/ProductController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 8
+			path: app/Features/TenantAdmin/Controllers/Core/ShippingMethodController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$plan\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Features/TenantAdmin/Controllers/Core/ShippingMethodController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$slug\.$#'
+			identifier: property.notFound
+			count: 5
+			path: app/Features/TenantAdmin/Controllers/Core/ShippingMethodController.php
+
+		-
+			message: '#^Parameter \#1 \$view of function view expects view\-string\|null, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/ShippingMethodController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:zones\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/SimpleShippingController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:active\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Features/TenantAdmin/Controllers/Core/SimpleShippingController.php
+
+		-
+			message: '#^Parameter \#1 \$shipping of method App\\Features\\TenantAdmin\\Controllers\\Core\\SimpleShippingController\:\:getExistingCitiesInZones\(\) expects App\\Features\\TenantAdmin\\Models\\SimpleShipping, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/SimpleShippingController.php
+
+		-
+			message: '#^Method App\\Features\\TenantAdmin\\Controllers\\Core\\SliderController\:\:create\(\) should return Illuminate\\View\\View but returns Illuminate\\Http\\RedirectResponse\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/SliderController.php
+
+		-
+			message: '#^Offset 0 on non\-empty\-list\<string\> in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.offset
+			count: 2
+			path: app/Features/TenantAdmin/Controllers/Core/SliderController.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between string and false will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/StoreDesignController.php
+
+		-
+			message: '#^Variable \$validated on left side of \?\? is never defined\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/StoreDesignController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Features/TenantAdmin/Controllers/Core/TicketController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$slug\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Features/TenantAdmin/Controllers/Core/TicketController.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:admins\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Features/TenantAdmin/Controllers/Core/TicketController.php
+
+		-
+			message: '#^Call to static method error\(\) on an unknown class App\\Features\\TenantAdmin\\Controllers\\Core\\Log\.$#'
+			identifier: class.notFound
+			count: 2
+			path: app/Features/TenantAdmin/Controllers/Core/TicketController.php
+
+		-
+			message: '#^Call to static method info\(\) on an unknown class App\\Features\\TenantAdmin\\Controllers\\Core\\Log\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/TicketController.php
+
+		-
+			message: '#^Call to static method warning\(\) on an unknown class App\\Features\\TenantAdmin\\Controllers\\Core\\Log\.$#'
+			identifier: class.notFound
+			count: 2
+			path: app/Features/TenantAdmin/Controllers/Core/TicketController.php
+
+		-
+			message: '#^Match arm comparison between ''low'' and ''low'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/TicketController.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/TicketController.php
+
+		-
+			message: '#^Access to an undefined property App\\Features\\TenantAdmin\\Models\\ProductVariable\:\:\$options\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/VariableController.php
+
+		-
+			message: '#^Relation ''options'' is not found in App\\Features\\TenantAdmin\\Models\\ProductVariable model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Core/VariableController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Features/TenantAdmin/Controllers/Verticals/Restaurant/TableController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$currentOrder\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Controllers/Verticals/Restaurant/TableController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Features/TenantAdmin/Controllers/Verticals/Restaurant/TableController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$items\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Features/TenantAdmin/Controllers/Verticals/Restaurant/TableController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$order_number\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Features/TenantAdmin/Controllers/Verticals/Restaurant/TableController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Features/TenantAdmin/Controllers/Verticals/Restaurant/TableController.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$total\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Features/TenantAdmin/Controllers/Verticals/Restaurant/TableController.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Shared\\Models\\Table\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 2
+			path: app/Features/TenantAdmin/Controllers/Verticals/Restaurant/TableController.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$plan\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Events/StorePlanChanged.php
+
+		-
+			message: '#^Call to method handlePlanDowngrade\(\) on an unknown class App\\Features\\TenantAdmin\\Services\\BankAccountService\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Listeners/HandleBankAccountsOnPlanChange.php
+
+		-
+			message: '#^PHPDoc tag @param for parameter \$bankAccountService with type App\\Features\\TenantAdmin\\Services\\BankAccountService is not subtype of native type App\\Features\\TenantAdmin\\Services\\Core\\BankAccountService\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: app/Features/TenantAdmin/Listeners/HandleBankAccountsOnPlanChange.php
+
+		-
+			message: '#^Parameter \$bankAccountService of method App\\Features\\TenantAdmin\\Listeners\\HandleBankAccountsOnPlanChange\:\:__construct\(\) has invalid type App\\Features\\TenantAdmin\\Services\\BankAccountService\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Listeners/HandleBankAccountsOnPlanChange.php
+
+		-
+			message: '#^Property App\\Features\\TenantAdmin\\Listeners\\HandleBankAccountsOnPlanChange\:\:\$bankAccountService \(App\\Features\\TenantAdmin\\Services\\BankAccountService\) does not accept App\\Features\\TenantAdmin\\Services\\Core\\BankAccountService\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Features/TenantAdmin/Listeners/HandleBankAccountsOnPlanChange.php
+
+		-
+			message: '#^Property App\\Features\\TenantAdmin\\Listeners\\HandleBankAccountsOnPlanChange\:\:\$bankAccountService has unknown class App\\Features\\TenantAdmin\\Services\\BankAccountService as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Listeners/HandleBankAccountsOnPlanChange.php
+
+		-
+			message: '#^PHPDoc type array\<int, string\> of property App\\Features\\TenantAdmin\\Models\\BankAccount\:\:\$fillable is not covariant with PHPDoc type list\<string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$fillable\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: app/Features/TenantAdmin/Models/BankAccount.php
+
+		-
+			message: '#^Access to an undefined property App\\Features\\TenantAdmin\\Models\\Category\:\:\$parent\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Models/Category.php
+
+		-
+			message: '#^Offset ''categories''\|''global''\|''products'' on array\{global\: ''Global'', categories\: ''Categorías…'', products\: ''Productos…''\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Features/TenantAdmin/Models/Coupon.php
+
+		-
+			message: '#^Offset ''fixed''\|''percentage'' on array\{fixed\: ''Valor Fijo'', percentage\: ''Porcentaje''\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Features/TenantAdmin/Models/Coupon.php
+
+		-
+			message: '#^Parameter \#1 \$num of function number_format expects float, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Features/TenantAdmin/Models/Coupon.php
+
+		-
+			message: '#^Right side of && is always true\.$#'
+			identifier: booleanAnd.rightAlwaysTrue
+			count: 1
+			path: app/Features/TenantAdmin/Models/Coupon.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between ''products'' and ''products'' will always evaluate to true\.$#'
+			identifier: identical.alwaysTrue
+			count: 1
+			path: app/Features/TenantAdmin/Models/Coupon.php
+
+		-
+			message: '#^Ternary operator condition is always true\.$#'
+			identifier: ternary.alwaysTrue
+			count: 2
+			path: app/Features/TenantAdmin/Models/Coupon.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: app/Features/TenantAdmin/Models/Coupon.php
+
+		-
+			message: '#^Parameter \#1 \$num of function number_format expects float, string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Features/TenantAdmin/Models/CouponUsageLog.php
+
+		-
+			message: '#^PHPDoc type array\<int, string\> of property App\\Features\\TenantAdmin\\Models\\PaymentMethod\:\:\$fillable is not covariant with PHPDoc type list\<string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$fillable\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: app/Features/TenantAdmin/Models/PaymentMethod.php
+
+		-
+			message: '#^PHPDoc type array\<int, string\> of property App\\Features\\TenantAdmin\\Models\\PaymentMethodConfig\:\:\$fillable is not covariant with PHPDoc type list\<string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$fillable\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: app/Features/TenantAdmin/Models/PaymentMethodConfig.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Features/TenantAdmin/Models/Product.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$image_path\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Features/TenantAdmin/Models/Product.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$product_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Features/TenantAdmin/Models/Product.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$sku\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Models/Product.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$slug\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Models/Product.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$thumbnail_path\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Features/TenantAdmin/Models/Product.php
+
+		-
+			message: '#^Parameter \#1 \$num of function number_format expects float, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Features/TenantAdmin/Models/Product.php
+
+		-
+			message: '#^Parameter \#1 \$string of function str_pad expects string, int\<1, 999999\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Features/TenantAdmin/Models/Product.php
+
+		-
+			message: '#^Property App\\Features\\TenantAdmin\\Models\\Product\:\:\$sku \(string\) does not accept null\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Features/TenantAdmin/Models/Product.php
+
+		-
+			message: '#^Property App\\Features\\TenantAdmin\\Models\\Product\:\:\$slug \(string\) does not accept null\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Features/TenantAdmin/Models/Product.php
+
+		-
+			message: '#^Relation ''activeOptions'' is not found in App\\Features\\TenantAdmin\\Models\\ProductVariable model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/TenantAdmin/Models/Product.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:images\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Models/ProductImage.php
+
+		-
+			message: '#^Match arm comparison between ''numeric'' and ''numeric'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 1
+			path: app/Features/TenantAdmin/Models/ProductVariable.php
+
+		-
+			message: '#^Offset ''checkbox''\|''numeric''\|''radio''\|''text'' on array\{radio\: ''Selección única'', checkbox\: ''Selección múltiple'', text\: ''Texto libre'', numeric\: ''Numérico''\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Features/TenantAdmin/Models/ProductVariable.php
+
+		-
+			message: '#^Access to an undefined property App\\Features\\TenantAdmin\\Models\\ProductVariableAssignment\:\:\$variable\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Models/ProductVariableAssignment.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$price\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Models/ProductVariant.php
+
+		-
+			message: '#^Parameter \#1 \$num of function abs expects float\|int, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Features/TenantAdmin/Models/ProductVariant.php
+
+		-
+			message: '#^Parameter \#1 \$num of function number_format expects float, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Features/TenantAdmin/Models/ProductVariant.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Location\:\:\$schedules\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Models/ShippingMethod.php
+
+		-
+			message: '#^Match arm comparison between ''pickup'' and ''pickup'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 1
+			path: app/Features/TenantAdmin/Models/ShippingMethod.php
+
+		-
+			message: '#^Negated boolean expression is always false\.$#'
+			identifier: booleanNot.alwaysFalse
+			count: 1
+			path: app/Features/TenantAdmin/Models/ShippingMethod.php
+
+		-
+			message: '#^Offset ''1h''\|''2h''\|''30min''\|''4h'' on array\{''30min''\: ''30 minutos'', ''1h''\: ''1 hora'', ''2h''\: ''2 horas'', ''4h''\: ''4 horas''\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Features/TenantAdmin/Models/ShippingMethod.php
+
+		-
+			message: '#^Offset ''domicilio''\|''pickup'' on array\{domicilio\: ''Envío a Domicilio'', pickup\: ''Recoger en Tienda''\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Features/TenantAdmin/Models/ShippingMethod.php
+
+		-
+			message: '#^Relation ''schedules'' is not found in App\\Shared\\Models\\Location model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Features/TenantAdmin/Models/ShippingMethod.php
+
+		-
+			message: '#^Variable \$label on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: app/Features/TenantAdmin/Models/ShippingMethod.php
+
+		-
+			message: '#^Method App\\Features\\TenantAdmin\\Models\\ShippingZone\:\:getFinalCost\(\) should return float but returns string\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Features/TenantAdmin/Models/ShippingZone.php
+
+		-
+			message: '#^Parameter \#1 \$num of function number_format expects float, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Features/TenantAdmin/Models/ShippingZone.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$cost\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Models/SimpleShipping.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Models/SimpleShipping.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Models/SimpleShipping.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:getDeliveryTimeLabelAttribute\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Models/SimpleShipping.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:getFormattedCostAttribute\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Models/SimpleShipping.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:hasCity\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Models/SimpleShipping.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasMany\:\:active\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Models/SimpleShipping.php
+
+		-
+			message: '#^Method App\\Features\\TenantAdmin\\Models\\SimpleShipping\:\:findZoneForCity\(\) should return App\\Features\\TenantAdmin\\Models\\SimpleShippingZone\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Features/TenantAdmin/Models/SimpleShipping.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,Illuminate\\Database\\Eloquent\\Model\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Features/TenantAdmin/Models/SimpleShipping.php
+
+		-
+			message: '#^Parameter \#1 \$price of method App\\Features\\TenantAdmin\\Models\\SimpleShipping\:\:formatPrice\(\) expects float, string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Features/TenantAdmin/Models/SimpleShipping.php
+
+		-
+			message: '#^Negated boolean expression is always false\.$#'
+			identifier: booleanNot.alwaysFalse
+			count: 4
+			path: app/Features/TenantAdmin/Models/SimpleShippingZone.php
+
+		-
+			message: '#^Parameter \#1 \$num of function number_format expects float, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Features/TenantAdmin/Models/SimpleShippingZone.php
+
+		-
+			message: '#^Offset ''3''\|''5''\|''7'' on array\{3\: ''3 segundos'', 5\: ''5 segundos'', 7\: ''7 segundos''\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Features/TenantAdmin/Models/Slider.php
+
+		-
+			message: '#^Offset ''external''\|''internal''\|''none'' on array\{internal\: ''Interna'', external\: ''Externa'', none\: ''Sin enlace''\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Features/TenantAdmin/Models/Slider.php
+
+		-
+			message: '#^Offset 0 on non\-empty\-list\<string\> in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.offset
+			count: 2
+			path: app/Features/TenantAdmin/Models/Slider.php
+
+		-
+			message: '#^Parameter \#1 \$num of function number_format expects float, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Features/TenantAdmin/Models/VariableOption.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\User\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Features/TenantAdmin/Policies/BankAccountPolicy.php
+
+		-
+			message: '#^Call to method canCreateBankAccount\(\) on an unknown class App\\Features\\TenantAdmin\\Services\\BankAccountService\.$#'
+			identifier: class.notFound
+			count: 2
+			path: app/Features/TenantAdmin/Policies/BankAccountPolicy.php
+
+		-
+			message: '#^Call to method getBankAccountLimit\(\) on an unknown class App\\Features\\TenantAdmin\\Services\\BankAccountService\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Policies/BankAccountPolicy.php
+
+		-
+			message: '#^PHPDoc tag @param for parameter \$bankAccountService with type App\\Features\\TenantAdmin\\Services\\BankAccountService is not subtype of native type App\\Features\\TenantAdmin\\Services\\Core\\BankAccountService\.$#'
+			identifier: parameter.phpDocType
+			count: 1
+			path: app/Features/TenantAdmin/Policies/BankAccountPolicy.php
+
+		-
+			message: '#^Parameter \$bankAccountService of method App\\Features\\TenantAdmin\\Policies\\BankAccountPolicy\:\:__construct\(\) has invalid type App\\Features\\TenantAdmin\\Services\\BankAccountService\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Policies/BankAccountPolicy.php
+
+		-
+			message: '#^Property App\\Features\\TenantAdmin\\Policies\\BankAccountPolicy\:\:\$bankAccountService \(App\\Features\\TenantAdmin\\Services\\BankAccountService\) does not accept App\\Features\\TenantAdmin\\Services\\Core\\BankAccountService\.$#'
+			identifier: assign.propertyType
+			count: 1
+			path: app/Features/TenantAdmin/Policies/BankAccountPolicy.php
+
+		-
+			message: '#^Property App\\Features\\TenantAdmin\\Policies\\BankAccountPolicy\:\:\$bankAccountService has unknown class App\\Features\\TenantAdmin\\Services\\BankAccountService as its type\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Policies/BankAccountPolicy.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Support\\HigherOrderCollectionProxy\<string, Illuminate\\Database\\Eloquent\\Model, Illuminate\\Database\\Eloquent\\Collection\>\:\:\$bankAccounts\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Services/Core/PaymentMethodService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isAvailableFor\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Services/Core/PaymentMethodService.php
+
+		-
+			message: '#^Parameter \#1 \$image of method App\\Features\\TenantAdmin\\Services\\Core\\ProductImageService\:\:deleteImage\(\) expects App\\Features\\TenantAdmin\\Models\\ProductImage, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Features/TenantAdmin/Services/Core/ProductImageService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$variant_options\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Features/TenantAdmin/Services/Core/ProductVariantService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:duplicate\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Features/TenantAdmin/Services/Core/ProductVariantService.php
+
+		-
+			message: '#^Call to static method whereIn\(\) on an unknown class App\\Features\\TenantAdmin\\Models\\Variable\.$#'
+			identifier: class.notFound
+			count: 3
+			path: app/Features/TenantAdmin/Services/Core/ProductVariantService.php
+
+		-
+			message: '#^Method App\\Features\\TenantAdmin\\Services\\Core\\StoreDesignImageService\:\:handleLogo\(\) should return array\{logo_url\: string, logo_webp_url\: string\} but returns array\{logo_url\: string\|false, logo_webp_url\: null\}\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Features/TenantAdmin/Services/Core/StoreDesignImageService.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Table\:\:\$is_from_room_system\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Features/TenantAdmin/Services/verticals/restaurant/TableService.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Table\:\:\$room_id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Features/TenantAdmin/Services/verticals/restaurant/TableService.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Table\:\:\$room_type_name\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Features/TenantAdmin/Services/verticals/restaurant/TableService.php
+
+		-
+			message: '#^Call to function is_numeric\(\) with int will always evaluate to true\.$#'
+			identifier: function.alreadyNarrowedType
+			count: 1
+			path: app/Features/TenantAdmin/Services/verticals/restaurant/TableService.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: app/Features/TenantAdmin/Services/verticals/restaurant/TableService.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: app/Features/TenantAdmin/Services/verticals/restaurant/TableService.php
+
+		-
+			message: '#^Class App\\Http\\Middleware\\Authenticate not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Http/Kernel.php
+
+		-
+			message: '#^Class App\\Http\\Middleware\\EncryptCookies not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Http/Kernel.php
+
+		-
+			message: '#^Class App\\Http\\Middleware\\PreventRequestsDuringMaintenance not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Http/Kernel.php
+
+		-
+			message: '#^Class App\\Http\\Middleware\\RedirectIfAuthenticated not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Http/Kernel.php
+
+		-
+			message: '#^Class App\\Http\\Middleware\\TrimStrings not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Http/Kernel.php
+
+		-
+			message: '#^Class App\\Http\\Middleware\\TrustProxies not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Http/Kernel.php
+
+		-
+			message: '#^Class App\\Http\\Middleware\\ValidateSignature not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Http/Kernel.php
+
+		-
+			message: '#^Class App\\Http\\Middleware\\VerifyCsrfToken not found\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Http/Kernel.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 3
+			path: app/Http/Middleware/DebugAuthMiddleware.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 2
+			path: app/Http/Middleware/LogTrafficMiddleware.php
+
+		-
+			message: '#^Parameter \#1 \$responseTime of class App\\Jobs\\CheckSlowResponseAlert constructor expects int, float given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Middleware/LogTrafficMiddleware.php
+
+		-
+			message: '#^Parameter \#1 \$responseTime of job class App\\Jobs\\CheckSlowResponseAlert constructor expects int in App\\Jobs\\CheckSlowResponseAlert\:\:dispatch\(\), float given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Http/Middleware/LogTrafficMiddleware.php
+
+		-
+			message: '#^Right side of && is always true\.$#'
+			identifier: booleanAnd.rightAlwaysTrue
+			count: 1
+			path: app/Jobs/OptimizeImageJob.php
+
+		-
+			message: '#^Variable \$backupPath in isset\(\) always exists and is not nullable\.$#'
+			identifier: isset.variable
+			count: 1
+			path: app/Jobs/OptimizeImageJob.php
+
+		-
+			message: '#^Variable \$backupPath on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: app/Jobs/OptimizeImageJob.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Invoice\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Jobs/SendInvoiceNotificationJob.php
+
+		-
+			message: '#^Parameter \#1 \$num of function number_format expects float, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Jobs/SendInvoiceNotificationJob.php
+
+		-
+			message: '#^Call to static method getActive\(\) on an unknown class App\\Shared\\Models\\EmailConfiguration\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Jobs/SendTestEmailJob.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\PendingRegistration\:\:\$plan\.$#'
+			identifier: property.notFound
+			count: 5
+			path: app/Models/PendingRegistration.php
+
+		-
+			message: '#^Relation ''admins'' is not found in App\\Shared\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 2
+			path: app/Observers/UserObserver.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 3
+			path: app/Services/AWSPaymentProofValidationService.php
+
+		-
+			message: '#^Comparison operation "\>" between int\<1, max\> and 0 is always true\.$#'
+			identifier: greater.alwaysTrue
+			count: 1
+			path: app/Services/AWSPaymentProofValidationService.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 6
+			path: app/Services/AlertService.php
+
+		-
+			message: '#^Left side of && is always true\.$#'
+			identifier: booleanAnd.leftAlwaysTrue
+			count: 1
+			path: app/Services/AlertService.php
+
+		-
+			message: '#^Match arm comparison between ''custom'' and ''custom'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 1
+			path: app/Services/AlertService.php
+
+		-
+			message: '#^Match arm comparison between ''in_app'' and ''in_app'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 1
+			path: app/Services/AlertService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$channel\.$#'
+			identifier: property.notFound
+			count: 5
+			path: app/Services/AnnouncementNotificationService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/AnnouncementNotificationService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$sent_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/AnnouncementNotificationService.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 5
+			path: app/Services/AnnouncementNotificationService.php
+
+		-
+			message: '#^Comparison operation "\>" between int\<1, max\> and 0 is always true\.$#'
+			identifier: greater.alwaysTrue
+			count: 2
+			path: app/Services/AnnouncementNotificationService.php
+
+		-
+			message: '#^Parameter \#2 \$store of method App\\Services\\AnnouncementNotificationService\:\:sendViaChannel\(\) expects App\\Shared\\Models\\Store, Illuminate\\Database\\Eloquent\\Model given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/AnnouncementNotificationService.php
+
+		-
+			message: '#^Relation ''plan'' is not found in App\\Shared\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Services/AnnouncementNotificationService.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Invoice\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/BillingAutomationService.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Invoice\:\:\$subscription\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/BillingAutomationService.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$subscription\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/BillingAutomationService.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$suspension_reason\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/BillingAutomationService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 5
+			path: app/Services/BillingAutomationService.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 3
+			path: app/Services/BillingAutomationService.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:getPriceForPeriod\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Services/BillingAutomationService.php
+
+		-
+			message: '#^Match arm comparison between ''biannual'' and ''biannual'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 1
+			path: app/Services/BillingAutomationService.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Invoice\:\:\$plan\.$#'
+			identifier: property.notFound
+			count: 6
+			path: app/Services/BillingNotificationService.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Invoice\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 16
+			path: app/Services/BillingNotificationService.php
+
+		-
+			message: '#^Call to an undefined method App\\Shared\\Models\\Store\:\:users\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Services/BillingNotificationService.php
+
+		-
+			message: '#^Parameter \#1 \$num of function number_format expects float, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/BillingNotificationService.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$plan\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/BillingService.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$subscription\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/BillingService.php
+
+		-
+			message: '#^Match arm comparison between ''annual'' and ''annual'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 1
+			path: app/Services/BillingService.php
+
+		-
+			message: '#^Method App\\Services\\BillingService\:\:getRemainingTrialDays\(\) should return int but returns float\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/BillingService.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$vertical\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/KiuBotAssistantService.php
+
+		-
+			message: '#^Undefined variable\: \$X$#'
+			identifier: variable.undefined
+			count: 1
+			path: app/Services/KiuBotAssistantService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\ErrorLog\:\:\$date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/MonitoringService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\TrafficLog\:\:\$avg_time\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/MonitoringService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\TrafficLog\:\:\$count\.$#'
+			identifier: property.notFound
+			count: 6
+			path: app/Services/MonitoringService.php
+
+		-
+			message: '#^Access to an undefined property App\\Models\\TrafficLog\:\:\$date\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/MonitoringService.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<\(int\|string\),Illuminate\\Database\\Eloquent\\Collection\<int, App\\Models\\ErrorLog\>\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 1
+			path: app/Services/MonitoringService.php
+
+		-
+			message: '#^Parameter \#1 \$callback of method Illuminate\\Database\\Eloquent\\Collection\<int,App\\Models\\TrafficLog\>\:\:map\(\) contains unresolvable type\.$#'
+			identifier: argument.unresolvableType
+			count: 6
+			path: app/Services/MonitoringService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/MonitoringService.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 5
+			path: app/Services/OTPSmsService.php
+
+		-
+			message: '#^Method Illuminate\\Http\\Client\\Response\:\:header\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: app/Services/OTPSmsService.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$plan\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/PlanUsageService.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$simpleShipping\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/PlanUsageService.php
+
+		-
+			message: '#^Negated boolean expression is always true\.$#'
+			identifier: booleanNot.alwaysTrue
+			count: 1
+			path: app/Services/SendGridEmailService.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Order\:\:\$count\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/StoreInsightsService.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Order\:\:\$hour\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Services/StoreInsightsService.php
+
+		-
+			message: '#^Method App\\Services\\StoreInsightsService\:\:getDaysSinceLastOrder\(\) should return int but returns float\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Services/StoreInsightsService.php
+
+		-
+			message: '#^Offset ''high''\|''low''\|''medium'' on array\{high\: 0, medium\: 1, low\: 2\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 2
+			path: app/Services/StoreInsightsService.php
+
+		-
+			message: '#^Parameter \#2 \$daysUntil of method App\\Services\\StoreInsightsService\:\:generateSeasonalSuggestion\(\) expects int, float given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/StoreInsightsService.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 1
+			path: app/Services/SystemDebugService.php
+
+		-
+			message: '#^Expression on left side of \?\? is not nullable\.$#'
+			identifier: nullCoalesce.expr
+			count: 1
+			path: app/Services/SystemDebugService.php
+
+		-
+			message: '#^Parameter \#1 \$bytes of static method App\\Services\\SystemDebugService\:\:formatBytes\(\) expects int, float\|false given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Services/SystemDebugService.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$simpleShipping\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Services/TourService.php
+
+		-
+			message: '#^Call to an undefined method App\\Shared\\Models\\Store\:\:roomTypes\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Services/TourService.php
+
+		-
+			message: '#^Call to an undefined method App\\Shared\\Models\\Store\:\:rooms\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: app/Services/TourService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>is_enabled" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/TourService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>logo" in empty\(\) is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/TourService.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>vertical" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Services/TourService.php
+
+		-
+			message: '#^Called ''env'' outside of the config directory which returns null when the config is cached, use ''config''\.$#'
+			identifier: larastan.noEnvCallsOutsideOfConfig
+			count: 4
+			path: app/Services/WhatsAppNotificationService.php
+
+		-
+			message: '#^Offset 0 on non\-empty\-list\<string\> on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Shared/Http/Middleware/EnsureFeatureEnabled.php
+
+		-
+			message: '#^Variable \$features on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.variable
+			count: 1
+			path: app/Shared/Http/Middleware/EnsureFeatureEnabled.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\User\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Shared/Middleware/CheckStoreApprovalStatus.php
+
+		-
+			message: '#^Relation ''plan'' is not found in App\\Shared\\Models\\Store model\.$#'
+			identifier: larastan.relationExistence
+			count: 1
+			path: app/Shared/Middleware/TenantIdentificationMiddleware.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Shared/Models/DineInSetting.php
+
+		-
+			message: '#^Parameter \#1 \$string of function str_pad expects string, int\<1, 999\> given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Shared/Models/HotelReservation.php
+
+		-
+			message: '#^Match arm comparison between ''biannual'' and ''biannual'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 1
+			path: app/Shared/Models/Invoice.php
+
+		-
+			message: '#^Match arm comparison between ''biannual'' and ''semester'' is always false\.$#'
+			identifier: match.alwaysFalse
+			count: 1
+			path: app/Shared/Models/Invoice.php
+
+		-
+			message: '#^Match arm comparison between ''cancelled'' and ''cancelled'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 3
+			path: app/Shared/Models/Invoice.php
+
+		-
+			message: '#^Method App\\Shared\\Models\\Invoice\:\:getDaysOverdue\(\) should return int but returns float\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Shared/Models/Invoice.php
+
+		-
+			message: '#^Method App\\Shared\\Models\\Invoice\:\:getDaysUntilDue\(\) should return int but returns float\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Shared/Models/Invoice.php
+
+		-
+			message: '#^Parameter \#1 \$num of function number_format expects float, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Shared/Models/Invoice.php
+
+		-
+			message: '#^Parameter \#1 \$string of function str_pad expects string, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Shared/Models/Invoice.php
+
+		-
+			message: '#^Offset ''facebook''\|''instagram''\|''linkiu''\|''tiktok''\|''whatsapp''\|''youtube'' on array\{instagram\: ''solar\-link\-linear'', facebook\: ''solar\-user\-circle…'', tiktok\: ''solar\-music\-note\-2…'', youtube\: ''solar\-play\-circle…'', whatsapp\: ''solar\-chat\-round…'', linkiu\: ''solar\-link\-circle…''\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Shared/Models/LocationSocialLink.php
+
+		-
+			message: '#^Offset ''facebook''\|''instagram''\|''linkiu''\|''tiktok''\|''whatsapp''\|''youtube'' on array\{instagram\: ''text\-pink\-600'', facebook\: ''text\-blue\-600'', tiktok\: ''text\-black\-400'', youtube\: ''text\-red\-600'', whatsapp\: ''text\-green\-600'', linkiu\: ''text\-primary\-200''\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Shared/Models/LocationSocialLink.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\MasterKeyRecoveryRequest\:\:\$store\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Shared/Models/MasterKeyRecoveryRequest.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$status\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Shared/Models/Order.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$timeline_data\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Shared/Models/Order.php
+
+		-
+			message: '#^Access to property \$id on an unknown class App\\Models\\User\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Shared/Models/Order.php
+
+		-
+			message: '#^Cannot call method canBeCancelled\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Shared/Models/Order.php
+
+		-
+			message: '#^Cannot call method getNextPossibleStatuses\(\) on string\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: app/Shared/Models/Order.php
+
+		-
+			message: '#^Match arm comparison between ''cancelled'' and ''cancelled'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 2
+			path: app/Shared/Models/Order.php
+
+		-
+			message: '#^Match arm comparison between ''cancelled''\|''delivered'' and ''out_for_delivery'' is always false\.$#'
+			identifier: match.alwaysFalse
+			count: 2
+			path: app/Shared/Models/Order.php
+
+		-
+			message: '#^Match arm comparison between ''cancelled''\|''delivered''\|''shipped'' and ''ready_for_pickup'' is always false\.$#'
+			identifier: match.alwaysFalse
+			count: 2
+			path: app/Shared/Models/Order.php
+
+		-
+			message: '#^Match arm comparison between ''shipped'' and ''ready_for_pickup'' is always false\.$#'
+			identifier: match.alwaysFalse
+			count: 1
+			path: app/Shared/Models/Order.php
+
+		-
+			message: '#^Match arm comparison between ''shipped'' and ''shipped'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 1
+			path: app/Shared/Models/Order.php
+
+		-
+			message: '#^Offset ''cancelled''\|''confirmed''\|''delivered''\|''pending''\|''preparing''\|''shipped'' on array\{pending\: ''Pendiente'', confirmed\: ''Confirmado'', preparing\: ''Preparando'', ready_for_pickup\: ''Listo para Recoger'', shipped\: ''Enviado'', out_for_delivery\: ''En Ruta de Entrega'', delivered\: ''Entregado'', cancelled\: ''Cancelado''\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 2
+			path: app/Shared/Models/Order.php
+
+		-
+			message: '#^Offset ''contra_entrega''\|''efectivo''\|''transferencia'' on array\{transferencia\: ''Transferencia…'', contra_entrega\: ''Pago Contra Entrega'', efectivo\: ''Efectivo''\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Shared/Models/Order.php
+
+		-
+			message: '#^Offset ''domicilio''\|''pickup'' on array\{domicilio\: ''Envío a Domicilio'', pickup\: ''Recoger en Tienda''\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Shared/Models/Order.php
+
+		-
+			message: '#^Parameter \#1 \$num of function number_format expects float, string given\.$#'
+			identifier: argument.type
+			count: 3
+			path: app/Shared/Models/Order.php
+
+		-
+			message: '#^Parameter \#1 \$string of function str_pad expects string, int given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Shared/Models/Order.php
+
+		-
+			message: '#^Parameter \$changedBy of method App\\Shared\\Models\\Order\:\:updateStatus\(\) has invalid type App\\Models\\User\.$#'
+			identifier: class.notFound
+			count: 1
+			path: app/Shared/Models/Order.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between ''cancelled''\|''confirmed''\|''delivered''\|''pending''\|''preparing''\|''shipped'' and ''out_for_delivery'' will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Shared/Models/Order.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between ''cancelled''\|''confirmed''\|''delivered''\|''pending''\|''preparing''\|''shipped'' and ''ready_for_pickup'' will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Shared/Models/Order.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$price_modifier\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Shared/Models/OrderItem.php
+
+		-
+			message: '#^Comparison operation "\>" between int\<1, max\> and 0 is always true\.$#'
+			identifier: greater.alwaysTrue
+			count: 1
+			path: app/Shared/Models/OrderItem.php
+
+		-
+			message: '#^Negated boolean expression is always false\.$#'
+			identifier: booleanNot.alwaysFalse
+			count: 1
+			path: app/Shared/Models/OrderItem.php
+
+		-
+			message: '#^Parameter \#1 \$num of function number_format expects float, string given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Shared/Models/OrderItem.php
+
+		-
+			message: '#^Match arm comparison between ''cancelled'' and ''cancelled'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 1
+			path: app/Shared/Models/OrderStatusHistory.php
+
+		-
+			message: '#^Offset ''cancelled''\|''confirmed''\|''delivered''\|''pending''\|''preparing''\|''shipped'' on array\{pending\: ''Pendiente'', confirmed\: ''Confirmado'', preparing\: ''Preparando'', shipped\: ''Enviado'', delivered\: ''Entregado'', cancelled\: ''Cancelado''\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 2
+			path: app/Shared/Models/OrderStatusHistory.php
+
+		-
+			message: '#^Method App\\Shared\\Models\\Plan\:\:getPriceForPeriod\(\) should return float\|null but returns string\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Shared/Models/Plan.php
+
+		-
+			message: '#^Parameter \#1 \$num of function number_format expects float, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Shared/Models/Plan.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$price\.$#'
+			identifier: property.notFound
+			count: 2
+			path: app/Shared/Models/PlanChangeRequest.php
+
+		-
+			message: '#^Match arm comparison between ''downgrade'' and ''downgrade'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 1
+			path: app/Shared/Models/PlanChangeRequest.php
+
+		-
+			message: '#^Match arm comparison between ''rejected'' and ''rejected'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 1
+			path: app/Shared/Models/PlanChangeRequest.php
+
+		-
+			message: '#^Strict comparison using \=\=\= between ''approved''\|''pending''\|''rejected'' and ''completed'' will always evaluate to false\.$#'
+			identifier: identical.alwaysFalse
+			count: 1
+			path: app/Shared/Models/PlanChangeRequest.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\PlatformAnnouncement\:\:\$is_published\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Shared/Models/PlatformAnnouncement.php
+
+		-
+			message: '#^Match arm comparison between ''info'' and ''info'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 3
+			path: app/Shared/Models/PlatformAnnouncement.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$plan\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Shared/Models/Store.php
+
+		-
+			message: '#^Method App\\Shared\\Models\\StorePlanExtension\:\:getDurationInDays\(\) should return int but returns float\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Shared/Models/StorePlanExtension.php
+
+		-
+			message: '#^Offset ''cobro_incorrecto''\|''contenido…''\|''envio_tardio''\|''fraude''\|''mal_servicio''\|''otro''\|''producto_defectuoso'' on array\{producto_defectuoso\: ''Producto defectuoso'', envio_tardio\: ''Envío tardío'', mal_servicio\: ''Mal servicio al…'', cobro_incorrecto\: ''Cobro incorrecto'', fraude\: ''Posible fraude'', contenido_inapropiado\: ''Contenido…'', otro\: ''Otro motivo''\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Shared/Models/StoreReport.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Shared/Models/Subscription.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Shared/Models/Subscription.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:getPriceForPeriod\(\)\.$#'
+			identifier: method.notFound
+			count: 3
+			path: app/Shared/Models/Subscription.php
+
+		-
+			message: '#^Match arm comparison between ''biannual'' and ''biannual'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 2
+			path: app/Shared/Models/Subscription.php
+
+		-
+			message: '#^Match arm comparison between ''grace_period'' and ''grace_period'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 1
+			path: app/Shared/Models/Subscription.php
+
+		-
+			message: '#^Negated boolean expression is always false\.$#'
+			identifier: booleanNot.alwaysFalse
+			count: 1
+			path: app/Shared/Models/Subscription.php
+
+		-
+			message: '#^Parameter \#1 \$num of function number_format expects float, string given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Shared/Models/Subscription.php
+
+		-
+			message: '#^Parameter \#1 \$store of method App\\Services\\PlanUsageService\:\:clearUsageCache\(\) expects App\\Shared\\Models\\Store, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Shared/Models/Subscription.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type Illuminate\\Http\\Request\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 2
+			path: app/Shared/Models/Subscription.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>role" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 1
+			path: app/Shared/Models/Subscription.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 5
+			path: app/Shared/Models/SubscriptionHistory.php
+
+		-
+			message: '#^Match arm comparison between ''creation'' and ''creation'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 1
+			path: app/Shared/Models/SubscriptionHistory.php
+
+		-
+			message: '#^Match arm comparison between ''system'' and ''system'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 1
+			path: app/Shared/Models/SubscriptionHistory.php
+
+		-
+			message: '#^Using nullsafe method call on non\-nullable type Illuminate\\Http\\Request\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 6
+			path: app/Shared/Models/SubscriptionHistory.php
+
+		-
+			message: '#^Using nullsafe property access "\?\-\>role" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
+			identifier: nullsafe.neverNull
+			count: 3
+			path: app/Shared/Models/SubscriptionHistory.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$tenant_id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Shared/Models/Table.php
+
+		-
+			message: '#^Offset ''available''\|''occupied''\|''reserved'' on array\{available\: ''Disponible'', occupied\: ''Ocupada'', reserved\: ''Reservada''\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Shared/Models/Table.php
+
+		-
+			message: '#^Offset ''habitacion''\|''mesa'' on array\{mesa\: ''Mesa'', habitacion\: ''Habitación''\} on left side of \?\? always exists and is not nullable\.$#'
+			identifier: nullCoalesce.offset
+			count: 1
+			path: app/Shared/Models/Table.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$created_at\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Shared/Models/Ticket.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Shared/Models/Ticket.php
+
+		-
+			message: '#^Match arm comparison between ''closed'' and ''closed'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 2
+			path: app/Shared/Models/Ticket.php
+
+		-
+			message: '#^Match arm comparison between ''feature_request'' and ''feature_request'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 1
+			path: app/Shared/Models/Ticket.php
+
+		-
+			message: '#^Match arm comparison between ''low'' and ''low'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 1
+			path: app/Shared/Models/Ticket.php
+
+		-
+			message: '#^Match arm comparison between ''urgent'' and ''urgent'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 2
+			path: app/Shared/Models/Ticket.php
+
+		-
+			message: '#^Method App\\Shared\\Models\\Ticket\:\:addResponse\(\) should return App\\Shared\\Models\\TicketResponse but returns Illuminate\\Database\\Eloquent\\Model\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Shared/Models/Ticket.php
+
+		-
+			message: '#^Method App\\Shared\\Models\\Ticket\:\:getResolutionTimeAttribute\(\) should return int\|null but returns float\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Shared/Models/Ticket.php
+
+		-
+			message: '#^Method App\\Shared\\Models\\Ticket\:\:getResponseTimeAttribute\(\) should return int\|null but returns float\.$#'
+			identifier: return.type
+			count: 1
+			path: app/Shared/Models/Ticket.php
+
+		-
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$role\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Shared/Models/TicketResponse.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Model\:\:isSuperAdmin\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: app/Shared/Models/TicketResponse.php
+
+		-
+			message: '#^Match arm comparison between ''status_change'' and ''status_change'' is always true\.$#'
+			identifier: match.alwaysTrue
+			count: 1
+			path: app/Shared/Models/TicketResponse.php
+
+		-
+			message: '#^PHPDoc type array\<int, string\> of property App\\Shared\\Models\\User\:\:\$fillable is not covariant with PHPDoc type list\<string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$fillable\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: app/Shared/Models/User.php
+
+		-
+			message: '#^PHPDoc type array\<int, string\> of property App\\Shared\\Models\\User\:\:\$hidden is not covariant with PHPDoc type list\<string\> of overridden property Illuminate\\Database\\Eloquent\\Model\:\:\$hidden\.$#'
+			identifier: property.phpDocType
+			count: 1
+			path: app/Shared/Models/User.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$businessCategory\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Shared/Services/FeatureResolver.php
+
+		-
+			message: '#^Parameter \#1 \$store of method App\\Shared\\Services\\HotelReservationService\:\:assignRoom\(\) expects App\\Shared\\Models\\Store, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Shared/Services/HotelReservationService.php
+
+		-
+			message: '#^Parameter \#1 \$store of method App\\Shared\\Services\\HotelReservationService\:\:invalidateAvailabilityCache\(\) expects App\\Shared\\Models\\Store, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 3
+			path: app/Shared/Services/HotelReservationService.php
+
+		-
+			message: '#^Parameter \#2 \$roomType of method App\\Shared\\Services\\HotelReservationService\:\:assignRoom\(\) expects App\\Shared\\Models\\RoomType, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Shared/Services/HotelReservationService.php
+
+		-
+			message: '#^Parameter \#1 \$store of method App\\Shared\\Services\\ReservationService\:\:assignTable\(\) expects App\\Shared\\Models\\Store, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 2
+			path: app/Shared/Services/ReservationService.php
+
+		-
+			message: '#^Parameter \#1 \$store of method App\\Shared\\Services\\ReservationService\:\:checkAvailability\(\) expects App\\Shared\\Models\\Store, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 1
+			path: app/Shared/Services/ReservationService.php
+
+		-
+			message: '#^Parameter \#1 \$store of method App\\Shared\\Services\\ReservationService\:\:invalidateAvailabilityCache\(\) expects App\\Shared\\Models\\Store, Illuminate\\Database\\Eloquent\\Model\|null given\.$#'
+			identifier: argument.type
+			count: 4
+			path: app/Shared/Services/ReservationService.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$businessCategory\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Shared/Services/SidebarBuilderService.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$design\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Shared/Services/SidebarBuilderService.php
+
+		-
+			message: '#^Access to an undefined property App\\Shared\\Models\\Store\:\:\$plan\.$#'
+			identifier: property.notFound
+			count: 4
+			path: app/Shared/Services/SidebarBuilderService.php
+
+		-
+			message: '#^Right side of \|\| is always false\.$#'
+			identifier: booleanOr.rightAlwaysFalse
+			count: 1
+			path: app/Shared/Services/SidebarBuilderService.php
+
+		-
+			message: '#^File ends with a trailing whitespace\. This may cause problems when running the code in the web browser\. Remove the closing \?\> mark or remove the whitespace\.$#'
+			identifier: whitespace.fileEnd
+			count: 1
+			path: app/Shared/Services/TicketEmailService.php

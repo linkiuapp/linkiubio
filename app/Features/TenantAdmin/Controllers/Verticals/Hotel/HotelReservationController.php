@@ -285,6 +285,21 @@ class HotelReservationController extends Controller
                 'created_by' => auth()->id()
             ];
             
+            // Validar límite de reservas diarias del plan
+            $maxDailyReservations = $store->plan->max_daily_hotel_reservations ?? 0;
+            
+            if ($maxDailyReservations > 0) { // 0 = ilimitado
+                $reservationsForDate = HotelReservation::where('store_id', $store->id)
+                    ->whereDate('check_in_date', $request->input('check_in_date'))
+                    ->count();
+                
+                if ($reservationsForDate >= $maxDailyReservations) {
+                    return back()
+                        ->withErrors(['error' => "Has alcanzado el límite de {$maxDailyReservations} reservas de hotel por día para tu plan {$store->plan->name}. Actualiza tu plan para aceptar más reservas."])
+                        ->withInput();
+                }
+            }
+            
             // Si viene con habitación asignada y status confirmed, asignar directamente
             if ($roomId && $request->input('status') === HotelReservationStatus::CONFIRMED->value) {
                 $data['room_id'] = $roomId;

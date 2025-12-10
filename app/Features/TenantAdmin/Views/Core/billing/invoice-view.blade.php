@@ -7,22 +7,22 @@
     <!-- Header -->
     <div class="flex flex-wrap items-center justify-between gap-3 mb-6">
         <div>
-            <h1 class="text-h5 font-bold text-black-500">Factura #{{ $invoice->invoice_number }}</h1>
-            <p class="text-caption text-black-300 mt-1">Gestiona y descarga tu factura</p>
+            <h1 class="text-lg font-semibold text-gray-900">Factura #{{ $invoice->invoice_number }}</h1>
+            <p class="text-sm text-gray-600 mt-1">Gestiona y descarga tu factura</p>
         </div>
         <div class="flex gap-3">
             <a href="{{ route('tenant.admin.billing.index', ['store' => $invoice->store->slug]) }}" 
-               class="btn-secondary text-caption font-bold px-4 py-2 rounded-lg flex items-center gap-2">
-                <x-solar-arrow-left-outline class="w-4 h-4 mr-2" />
+               class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg text-sm font-medium flex items-center gap-2">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
                 Volver
             </a>
             <a href="{{ route('tenant.admin.invoices.download', ['store' => $invoice->store->slug, 'invoice' => $invoice]) }}" 
-               class="btn-warning text-white text-caption font-bold px-4 py-2 rounded-lg flex items-center gap-2">
-                <x-solar-download-minimalistic-outline class="w-4 h-4 mr-2" />
+               class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium flex items-center gap-2">
+                <i data-lucide="download" class="w-4 h-4"></i>
                 Descargar PDF
             </a>
-            <button onclick="printInvoice()" class="btn-info text-white text-caption font-bold px-4 py-2 rounded-lg flex items-center gap-2">
-                <x-solar-printer-minimalistic-outline class="w-4 h-4 mr-2" />
+            <button onclick="printInvoice()" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium flex items-center gap-2">
+                <i data-lucide="printer" class="w-4 h-4"></i>
                 Imprimir
             </button>
         </div>
@@ -34,7 +34,7 @@
             <!-- Header de la factura -->
             <div class="flex flex-wrap justify-between gap-6 border-b border-gray-200 pb-6 mb-6">
                 <div>
-                    <h2 class="text-h5 font-bold text-black-500 mb-1">Factura #{{ $invoice->invoice_number }}</h2>
+                    <h2 class="text-lg font-bold text-black-500 mb-1">Factura #{{ $invoice->invoice_number }}</h2>
                     <p class="text-caption text-black-300 mb-1">Fecha de emisión: {{ $invoice->issue_date->format('d/m/Y') }}</p>
                     <p class="text-caption text-black-300">Fecha de vencimiento: {{ $invoice->due_date->format('d/m/Y') }}</p>
                 </div>

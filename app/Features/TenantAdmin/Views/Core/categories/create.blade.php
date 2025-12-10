@@ -9,16 +9,52 @@ Layout de 2 columnas: Selector de íconos a la izquierda, formulario a la derech
     @section('content')
     <div class="max-w-7xl mx-auto space-y-6">
         {{-- SECTION: Header --}}
-        <div class="flex items-center gap-3">
-            <a href="{{ route('tenant.admin.categories.index', $store->slug) }}" class="inline-flex items-center justify-center">
-                <i data-lucide="arrow-left" class="w-5 h-5 text-gray-600 hover:text-gray-800"></i>
-            </a>
-            <h1 class="text-lg font-bold text-gray-800">Nueva Categoría</h1>
+        <div class="flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="{{ route('tenant.admin.categories.index', $store->slug) }}" class="inline-flex items-center justify-center">
+                    <i data-lucide="arrow-left" class="w-5 h-5 text-gray-600 hover:text-gray-800"></i>
+                </a>
+                <h1 class="text-lg font-bold text-gray-800">Nueva Categoría</h1>
+            </div>
         </div>
         {{-- End SECTION: Header --}}
+        
+        {{-- Auto-iniciar tour si es primera categoría o viene de diseño de tienda --}}
+        @php
+            $autoStartTour = session()->has('auto_start_create_category_tour') || 
+                           (isset($totalCategories) && $totalCategories === 0);
+        @endphp
+        @if($autoStartTour)
+            @push('scripts')
+            <script>
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Verificar si el tour ya fue completado
+                    const tourCompleted = localStorage.getItem('tour_crear_categoria_completed') === 'true';
+                    
+                    // Solo auto-iniciar si no ha sido completado
+                    if (!tourCompleted) {
+                        const shouldAutoStart = sessionStorage.getItem('auto_start_create_category_tour') === '1' || 
+                                              {{ ($totalCategories ?? 0) === 0 ? 'true' : 'false' }};
+                        
+                        if (shouldAutoStart) {
+                            sessionStorage.removeItem('auto_start_create_category_tour');
+                            
+                            setTimeout(function() {
+                                if (window.LinkiuTours && window.LinkiuTours.start) {
+                                    window.LinkiuTours.start('crear_categoria', false);
+                                } else if (window.startTour) {
+                                    window.startTour('crear_categoria', false);
+                                }
+                            }, 800);
+                        }
+                    }
+                });
+            </script>
+            @endpush
+        @endif
 
         {{-- SECTION: Info Alert --}}
-        <div class="bg-blue-50 border border-blue-200 text-blue-800 text-sm rounded-lg px-4 py-3" role="alert">
+        <div class="bg-blue-50 border border-blue-200 text-blue-800 text-sm rounded-lg px-4 py-3" role="alert" data-tour="consumo">
             Estás usando <strong>{{ $totalCategories }} de {{ $categoryLimit }}</strong> categorías disponibles en tu plan {{ e($store->plan->name) }}.@if($parentCategories->count() > 0) Crear una subcategoría también cuenta para el límite.@endif
         </div>
         {{-- End SECTION: Info Alert --}}
@@ -31,7 +67,7 @@ Layout de 2 columnas: Selector de íconos a la izquierda, formulario a la derech
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 
                 {{-- CARD IZQUIERDA: Selector de Ícono --}}
-                <div class="bg-white rounded-lg border border-gray-200 p-6">
+                <div class="bg-white rounded-lg border border-gray-200 p-6" data-tour="icon-selector">
                     <label class="block text-sm font-medium text-gray-800 mb-3">
                         Ícono de la categoría <span class="text-red-500">*</span>
                     </label>
@@ -133,7 +169,7 @@ Layout de 2 columnas: Selector de íconos a la izquierda, formulario a la derech
                     <div class="space-y-5">
                         
                         {{-- Nombre --}}
-                        <div>
+                        <div data-tour="category-name">
                             <label for="name" class="block text-sm font-medium text-gray-800 mb-2">
                                 Nombre <span class="text-red-500">*</span>
                             </label>
@@ -153,7 +189,7 @@ Layout de 2 columnas: Selector de íconos a la izquierda, formulario a la derech
                         </div>
 
                         {{-- Slug --}}
-                        <div>
+                        <div data-tour="slug-input">
                             <label for="slug" class="block text-sm font-medium text-gray-800 mb-2">
                                 Slug (URL)
                             </label>
@@ -177,7 +213,7 @@ Layout de 2 columnas: Selector de íconos a la izquierda, formulario a la derech
                         </div>
 
                         {{-- Descripción --}}
-                        <div>
+                        <div data-tour="category-description">
                             <label for="description" class="block text-sm font-medium text-gray-800 mb-2">
                                 Descripción
                             </label>
@@ -219,6 +255,8 @@ Layout de 2 columnas: Selector de íconos a la izquierda, formulario a la derech
                                 <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                             @enderror
                         </div>
+                        @else
+                        <div data-tour="parent-category" style="display: none;"></div>
                         @endif
 
                         {{-- Toggle Categoría activa --}}
@@ -255,6 +293,7 @@ Layout de 2 columnas: Selector de íconos a la izquierda, formulario a la derech
                                 </button>
                             </a>
                             <button type="submit" 
+                                    data-tour="save-button"
                                     class="inline-flex items-center gap-x-2 py-2.5 px-6 bg-gray-800 text-white rounded-lg hover:bg-gray-900 transition-colors text-sm font-medium">
                                 <i data-lucide="plus" class="shrink-0 size-4"></i>
                                 Crear Categoría

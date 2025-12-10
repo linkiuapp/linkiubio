@@ -3,7 +3,7 @@
 namespace App\Features\TenantAdmin\Services;
 
 use App\Features\TenantAdmin\Models\Product;
-use App\Features\TenantAdmin\Models\StockVarianteProducto;
+use App\Features\TenantAdmin\Models\ProductVariant;
 use App\Features\TenantAdmin\Models\MovimientoStock;
 use Illuminate\Support\Facades\DB;
 
@@ -58,13 +58,14 @@ class StockService
         }
 
         return [
-            'disponible' => $stockVariante->cantidad_disponible >= $cantidad,
-            'cantidad' => $stockVariante->cantidad_disponible,
+            'disponible' => $stockVariante->stock >= $cantidad,
+            'cantidad' => $stockVariante->stock,
         ];
     }
 
     /**
      * Reservar stock (al agregar al carrito)
+     * NOTA: El nuevo sistema NO tiene reservas, solo validamos disponibilidad
      * 
      * @param Product $producto
      * @param array $opcionesSeleccionadas
@@ -77,40 +78,24 @@ class StockService
             return true;
         }
 
-        return DB::transaction(function () use ($producto, $opcionesSeleccionadas, $cantidad) {
-            if ($producto->isSimple()) {
-                // Para productos simples, solo validamos disponibilidad
-                // (no tenemos campo reserved_quantity en products)
-                return $producto->cantidad_stock >= $cantidad;
-            }
+        // Solo validamos disponibilidad, no reservamos stock
+        if ($producto->isSimple()) {
+            return ($producto->cantidad_stock ?? 0) >= $cantidad;
+        }
 
-            // Producto variable
-            $stockVariante = $this->buscarStockVariante($producto->id, $opcionesSeleccionadas);
-            
-            if (!$stockVariante || $stockVariante->cantidad_disponible < $cantidad) {
-                return false;
-            }
+        // Producto variable
+        $stockVariante = $this->buscarStockVariante($producto->id, $opcionesSeleccionadas);
+        
+        if (!$stockVariante || !$stockVariante->is_active) {
+            return false;
+        }
 
-            // Incrementar cantidad reservada
-            $cantidadAntes = $stockVariante->cantidad_stock - $stockVariante->cantidad_reservada;
-            $stockVariante->reservar($cantidad);
-
-            // Registrar movimiento
-            $this->crearMovimiento(
-                $producto->id,
-                $stockVariante->id,
-                MovimientoStock::TIPO_RESERVA,
-                -$cantidad,
-                $cantidadAntes,
-                $stockVariante->cantidad_stock - $stockVariante->cantidad_reservada
-            );
-
-            return true;
-        });
+        return $stockVariante->stock >= $cantidad;
     }
 
     /**
      * Liberar reserva (al eliminar del carrito)
+     * NOTA: El nuevo sistema NO tiene reservas, este método no hace nada
      * 
      * @param Product $producto
      * @param array $opcionesSeleccionadas
@@ -119,33 +104,8 @@ class StockService
      */
     public function liberarReserva(Product $producto, array $opcionesSeleccionadas, int $cantidad): void
     {
-        if (!$producto->controlaStock() || $producto->tieneStockIlimitado()) {
-            return;
-        }
-
-        DB::transaction(function () use ($producto, $opcionesSeleccionadas, $cantidad) {
-            if ($producto->isSimple()) {
-                return;
-            }
-
-            $stockVariante = $this->buscarStockVariante($producto->id, $opcionesSeleccionadas);
-            if (!$stockVariante) {
-                return;
-            }
-
-            $cantidadAntes = $stockVariante->cantidad_stock - $stockVariante->cantidad_reservada;
-            $stockVariante->liberarReserva($cantidad);
-
-            // Registrar movimiento
-            $this->crearMovimiento(
-                $producto->id,
-                $stockVariante->id,
-                MovimientoStock::TIPO_LIBERACION,
-                $cantidad,
-                $cantidadAntes,
-                $stockVariante->cantidad_stock - $stockVariante->cantidad_reservada
-            );
-        });
+        // El nuevo sistema no tiene reservas, solo se decrementa al confirmar la venta
+        return;
     }
 
     /**
@@ -188,8 +148,9 @@ class StockService
                 return false;
             }
 
-            $cantidadAntes = $stockVariante->cantidad_stock;
-            $stockVariante->decrementarStock($cantidad, true);
+            $cantidadAntes = $stockVariante->stock;
+            $stockVariante->decrement('stock', $cantidad);
+            $stockVariante->refresh();
 
             $this->crearMovimiento(
                 $producto->id,
@@ -197,7 +158,7 @@ class StockService
                 MovimientoStock::TIPO_VENTA,
                 -$cantidad,
                 $cantidadAntes,
-                $stockVariante->cantidad_stock,
+                $stockVariante->stock,
                 'Order',
                 $ordenId
             );
@@ -240,8 +201,9 @@ class StockService
             // Producto variable
             $stockVariante = $this->buscarStockVariante($producto->id, $opcionesSeleccionadas);
             if ($stockVariante) {
-                $cantidadAntes = $stockVariante->cantidad_stock;
-                $stockVariante->incrementarStock($cantidad);
+                $cantidadAntes = $stockVariante->stock;
+                $stockVariante->increment('stock', $cantidad);
+                $stockVariante->refresh();
 
                 $this->crearMovimiento(
                     $producto->id,
@@ -249,7 +211,7 @@ class StockService
                     MovimientoStock::TIPO_ENTRADA,
                     $cantidad,
                     $cantidadAntes,
-                    $stockVariante->cantidad_stock,
+                    $stockVariante->stock,
                     null,
                     null,
                     $notas
@@ -294,9 +256,9 @@ class StockService
             // Producto variable
             $stockVariante = $this->buscarStockVariante($producto->id, $opcionesSeleccionadas);
             if ($stockVariante) {
-                $cantidadAntes = $stockVariante->cantidad_stock;
+                $cantidadAntes = $stockVariante->stock;
                 $diferencia = $nuevaCantidad - $cantidadAntes;
-                $stockVariante->cantidad_stock = $nuevaCantidad;
+                $stockVariante->stock = $nuevaCantidad;
                 $stockVariante->save();
 
                 $this->crearMovimiento(
@@ -319,15 +281,15 @@ class StockService
      * 
      * @param int $productoId
      * @param array $opcionesSeleccionadas
-     * @return StockVarianteProducto|null
+     * @return ProductVariant|null
      */
-    protected function buscarStockVariante(int $productoId, array $opcionesSeleccionadas): ?StockVarianteProducto
+    protected function buscarStockVariante(int $productoId, array $opcionesSeleccionadas): ?ProductVariant
     {
-        return StockVarianteProducto::where('product_id', $productoId)
+        return ProductVariant::where('product_id', $productoId)
             ->where('is_active', true)
             ->get()
-            ->first(function ($stock) use ($opcionesSeleccionadas) {
-                $combinacion = $stock->combinacion_variables;
+            ->first(function ($variant) use ($opcionesSeleccionadas) {
+                $combinacion = $variant->variant_options;
                 
                 // Verificar que todas las opciones coincidan
                 foreach ($opcionesSeleccionadas as $varId => $optId) {
@@ -391,7 +353,7 @@ class StockService
         $productos = Product::where('store_id', $tiendaId)
             ->where('controla_stock', true)
             ->where('tipo_stock', 'limitado')
-            ->with(['mainImage', 'stocksVariantes'])
+            ->with(['mainImage', 'variants'])
             ->get();
 
         return $productos->filter(function ($producto) {
@@ -414,7 +376,7 @@ class StockService
         $productos = Product::where('store_id', $tiendaId)
             ->where('controla_stock', true)
             ->where('tipo_stock', 'limitado')
-            ->with(['mainImage', 'stocksVariantes'])
+            ->with(['mainImage', 'variants'])
             ->get();
 
         return $productos->filter(function ($producto) {
@@ -434,7 +396,7 @@ class StockService
         $productos = Product::where('store_id', $tiendaId)
             ->where('controla_stock', true)
             ->where('tipo_stock', 'limitado')
-            ->with('stocksVariantes')
+            ->with('variants')
             ->get();
 
         $total = $productos->count();
@@ -481,7 +443,7 @@ class StockService
         }
 
         // Producto variable: sumar stock de todas las variantes
-        return $producto->stocksVariantes->sum('cantidad_stock');
+        return $producto->variants->sum('stock');
     }
 }
 

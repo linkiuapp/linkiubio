@@ -22,107 +22,6 @@ Muestra todas las categorías con filtros, acciones y paginación
         class="space-y-4" 
         x-init="init()"
     >
-        {{-- SECTION: Success Alert - Category Created --}}
-        @if(session('category_created'))
-            <div 
-                x-data="{ show: true }"
-                x-show="show"
-                x-cloak
-                x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 transform translate-y-2"
-                x-transition:enter-end="opacity-100 transform translate-y-0"
-                x-transition:leave="transition ease-in duration-200"
-                x-transition:leave-start="opacity-100 transform translate-y-0"
-                x-transition:leave-end="opacity-0 transform translate-y-2"
-                x-init="setTimeout(() => show = false, 5000)"
-            >
-                <x-alert-bordered 
-                    type="success" 
-                    title="Actualización exitosa" 
-                    message="La categoría se ha creado correctamente."
-                />
-            </div>
-        @endif
-        {{-- End SECTION: Success Alert - Category Created --}}
-
-        {{-- SECTION: Success Alert - Category Updated --}}
-        @if(session('category_updated'))
-            <div 
-                x-data="{ show: true }"
-                x-show="show"
-                x-cloak
-                x-transition:enter="transition ease-out duration-300"
-                x-transition:enter-start="opacity-0 transform translate-y-2"
-                x-transition:enter-end="opacity-100 transform translate-y-0"
-                x-transition:leave="transition ease-in duration-200"
-                x-transition:leave-start="opacity-100 transform translate-y-0"
-                x-transition:leave-end="opacity-0 transform translate-y-2"
-                x-init="setTimeout(() => show = false, 5000)"
-            >
-                <x-alert-bordered 
-                    type="success" 
-                    title="Actualización exitosa" 
-                    message="La categoría se ha actualizado correctamente."
-                />
-            </div>
-        @endif
-        {{-- End SECTION: Success Alert - Category Updated --}}
-
-        {{-- SECTION: Success Alert - Category Deleted --}}
-        <div 
-            x-show="showSuccessAlert"
-            x-cloak
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 transform translate-y-2"
-            x-transition:enter-end="opacity-100 transform translate-y-0"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 transform translate-y-0"
-            x-transition:leave-end="opacity-0 transform translate-y-2"
-            style="display: none;"
-        >
-            <x-alert-bordered 
-                type="success" 
-                title="Actualización exitosa" 
-                message="La categoría se ha eliminado correctamente."
-            />
-        </div>
-        {{-- End SECTION: Success Alert - Category Deleted --}}
-
-        {{-- SECTION: Success Alert - Bulk Delete --}}
-        <div 
-            x-show="showBulkDeleteSuccessAlert"
-            x-cloak
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 transform translate-y-2"
-            x-transition:enter-end="opacity-100 transform translate-y-0"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 transform translate-y-0"
-            x-transition:leave-end="opacity-0 transform translate-y-2"
-            style="display: none;"
-        >
-            <x-alert-bordered type="success" title="Actualización exitosa">
-                <span x-text="'Se eliminaron ' + bulkDeleteSuccessCount + (bulkDeleteSuccessCount === 1 ? ' categoría correctamente.' : ' categorías correctamente.')"></span>
-            </x-alert-bordered>
-        </div>
-        {{-- End SECTION: Success Alert - Bulk Delete --}}
-
-        {{-- SECTION: Toggle Error Alert --}}
-        <div 
-            x-show="showToggleError"
-            x-cloak
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 transform translate-y-2"
-            x-transition:enter-end="opacity-100 transform translate-y-0"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 transform translate-y-0"
-            x-transition:leave-end="opacity-0 transform translate-y-2"
-            style="display: none;"
-        >
-            <x-alert-bordered type="error" title="Error">
-                <span x-text="toggleErrorMessage"></span>
-            </x-alert-bordered>
-        </div>
-        {{-- End SECTION: Toggle Error Alert --}}
 
         {{-- SECTION: Content Card --}}
         <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -147,6 +46,7 @@ Muestra todas las categorías con filtros, acciones y paginación
                             </button>
                         </div>
                         @if($totalCategories < $categoryLimit)
+
                             <a href="{{ route('tenant.admin.categories.create', $store->slug) }}">
                                 <x-button-icon 
                                     type="solid" 
@@ -154,6 +54,7 @@ Muestra todas las categorías con filtros, acciones y paginación
                                     size="md" 
                                     icon="plus-circle"
                                     text="Nueva Categoría"
+                                    data-tour="category-button"
                                 />
                             </a>
                         @else
@@ -166,6 +67,7 @@ Muestra todas las categorías con filtros, acciones y paginación
                                 :disabled="true"
                             />
                         @endif
+                        <x-tour-trigger tour="gestionar_categorias" :autoStart="true" :showButton="false" />
                     </div>
                 </div>
             </div>
@@ -184,9 +86,9 @@ Muestra todas las categorías con filtros, acciones y paginación
                                 @change="applyFilters()"
                                 class="py-2 px-3 pr-9 block w-full border border-gray-300 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none bg-white text-gray-700"
                             >
-                                <option value="">Todas</option>
-                                <option value="active">Activas</option>
-                                <option value="inactive">Inactivas</option>
+                                <option value="">Todos los estados ({{ $categories->count() }})</option>
+                                <option value="active" {{ request('status') === 'active' ? 'selected' : '' }}>Activas ({{ $categories->where('is_active', true)->count() }})</option>
+                                <option value="inactive" {{ request('status') === 'inactive' ? 'selected' : '' }}>Inactivas ({{ $categories->where('is_active', false)->count() }})</option>
                             </select>
                         </div>
                         {{-- End ITEM: Status Filter --}}
@@ -206,6 +108,19 @@ Muestra todas las categorías con filtros, acciones y paginación
                             </select>
                         </div>
                         {{-- End ITEM: Type Filter --}}
+                        
+                        {{-- ITEM: Reset Filters Button --}}
+                        @if(request('status') || request('type'))
+                        <button
+                            type="button"
+                            @click="resetFilters()"
+                            class="inline-flex items-center gap-x-2 px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
+                        >
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                            Limpiar filtros
+                        </button>
+                        @endif
+                        {{-- End ITEM: Reset Filters Button --}}
                     </div>
 
                     <div class="text-sm text-gray-600">
@@ -602,31 +517,50 @@ Muestra todas las categorías con filtros, acciones y paginación
         }
 
         document.addEventListener('alpine:init', () => {
-            Alpine.data('categoryManagement', () => ({
-                filterStatus: '{{ request('status', '') }}',
-                filterType: '{{ request('type', '') }}',
-                showSuccessAlert: false,
-                selectedCategories: [],
-                selectAll: false,
-                showBulkDeleteModal: false,
-                bulkDeleteLoading: false,
-                bulkDeleteError: null,
-                bulkDeleteSuccessCount: 0,
-                showBulkDeleteSuccessAlert: false,
-                showToggleError: false,
-                toggleErrorMessage: '',
+            Alpine.data('categoryManagement', function() {
+                return {
+                    filterStatus: '{{ request('status', '') }}',
+                    filterType: '{{ request('type', '') }}',
+                    selectedCategories: [],
+                    selectAll: false,
+                    showBulkDeleteModal: false,
+                    bulkDeleteLoading: false,
+                    bulkDeleteError: null,
+                    bulkDeleteSuccessCount: 0,
 
                 init() {
+                    // Mostrar toast de éxito si hay mensaje de sesión
+                    @if(session('category_created'))
+                    if (window.toast) {
+                        window.toast.success(
+                            'Actualización exitosa',
+                            'La categoría se ha creado correctamente.',
+                            5000,
+                            'bottom-center'
+                        );
+                    }
+                    @endif
+
+                    @if(session('category_updated'))
+                    if (window.toast) {
+                        window.toast.success(
+                            'Actualización exitosa',
+                            'La categoría se ha actualizado correctamente.',
+                            5000,
+                            'bottom-center'
+                        );
+                    }
+                    @endif
+
                     window.addEventListener('show-success-alert', () => {
-                        this.showSuccessAlert = true;
-                        this.$nextTick(() => {
-                            if (typeof window.createIcons !== 'undefined' && typeof window.lucideIcons !== 'undefined') {
-                                window.createIcons({ icons: window.lucideIcons });
-                            }
-                        });
-                        setTimeout(() => {
-                            this.showSuccessAlert = false;
-                        }, 5000);
+                        if (window.toast) {
+                            window.toast.success(
+                                'Actualización exitosa',
+                                'La categoría se ha eliminado correctamente.',
+                                5000,
+                                'bottom-center'
+                            );
+                        }
                     });
 
                     // Inicializar iconos Lucide
@@ -661,6 +595,12 @@ Muestra todas las categorías con filtros, acciones y paginación
                     }
                     
                     window.location.search = params.toString();
+                },
+
+                resetFilters() {
+                    this.filterStatus = '';
+                    this.filterType = '';
+                    window.location.search = '';
                 },
 
                 toggleSelectAll() {
@@ -800,23 +740,16 @@ Muestra todas las categorías con filtros, acciones y paginación
                         if (errorCount === 0) {
                             this.bulkDeleteSuccessCount = successCount;
                             
-                            // Mostrar alerta de éxito
-                            this.showBulkDeleteSuccessAlert = true;
-                            
-                            // Inicializar iconos Lucide después de mostrar la alerta
-                            this.$nextTick(() => {
-                                if (typeof window.createIcons !== 'undefined' && typeof window.lucideIcons !== 'undefined') {
-                                    window.createIcons({ icons: window.lucideIcons });
-                                }
-                            });
-                            
-                            // Scroll suave hacia arriba para ver la alerta
-                            window.scrollTo({ top: 0, behavior: 'smooth' });
-                            
-                            // Ocultar alerta después de 5 segundos
-                            setTimeout(() => {
-                                this.showBulkDeleteSuccessAlert = false;
-                            }, 5000);
+                            // Mostrar toast de éxito
+                            if (window.toast) {
+                                const message = 'Se eliminaron ' + successCount + (successCount === 1 ? ' categoría correctamente.' : ' categorías correctamente.');
+                                window.toast.success(
+                                    'Actualización exitosa',
+                                    message,
+                                    5000,
+                                    'bottom-center'
+                                );
+                            }
                         } else {
                             this.bulkDeleteError = `Se eliminaron ${successCount} categorías. ${errorCount > 0 ? `${errorCount} categorías no pudieron ser eliminadas.` : ''}`;
                             this.showBulkDeleteModal = true;
@@ -892,8 +825,9 @@ Muestra todas las categorías con filtros, acciones y paginación
                         }
                     }, 400); // Esperar un poco más que la animación de eliminación (300ms)
                 }
-            }));
+            };
         });
+    });
 
         // Checkbox functionality
         document.addEventListener('change', function(e) {
@@ -969,41 +903,68 @@ Muestra todas las categorías con filtros, acciones y paginación
                             if (row) {
                                 const statusCell = row.querySelector('td:nth-child(4)');
                                 if (statusCell) {
-                                    if (e.target.checked) {
+                                    if (data.is_active) {
                                         statusCell.innerHTML = '<span class="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-lg text-xs font-medium bg-green-100 text-green-800">Activa</span>';
                                     } else {
                                         statusCell.innerHTML = '<span class="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-lg text-xs font-medium bg-red-100 text-red-800">Inactiva</span>';
                                     }
                                 }
                             }
+                            if (window.toast) {
+                                const message = originalChecked 
+                                    ? 'La categoría se ha activado correctamente.'
+                                    : 'La categoría se ha desactivado correctamente.';
+                                window.toast.success(
+                                    'Estado actualizado',
+                                    message,
+                                    5000,
+                                    'bottom-center'
+                                );
+                            }
                         } else {
                             e.target.checked = !originalChecked;
-                            // Mostrar error con AlertBordered
-                            const categoryManagement = Alpine.$data(document.querySelector('[x-data="categoryManagement"]'));
-                            if (categoryManagement) {
-                                categoryManagement.showToggleError = true;
-                                categoryManagement.toggleErrorMessage = data.error || 'Error al cambiar el estado';
-                                setTimeout(() => {
-                                    categoryManagement.showToggleError = false;
-                                }, 5000);
+                            if (window.toast) {
+                                window.toast.error(
+                                    'Error',
+                                    data.error || 'Error al cambiar el estado',
+                                    5000,
+                                    'bottom-center');
                             }
                         }
                     })
                     .catch(error => {
                         e.target.checked = !originalChecked;
-                        // Mostrar error con AlertBordered
-                        const categoryManagement = Alpine.$data(document.querySelector('[x-data="categoryManagement"]'));
-                        if (categoryManagement) {
-                            categoryManagement.showToggleError = true;
-                            categoryManagement.toggleErrorMessage = 'Error al cambiar el estado';
-                            setTimeout(() => {
-                                categoryManagement.showToggleError = false;
-                            }, 5000);
+                        // Mostrar error con toast
+                        if (window.toast) {
+                            window.toast.error(
+                                'Error',
+                                'Error al cambiar el estado',
+                                5000,
+                                'bottom-center'
+                            );
                         }
                     });
                 }
             });
         });
+
+        // Auto-iniciar tour de crear categoría si viene de diseño de tienda
+        const autoStartCategoryTour = sessionStorage.getItem('auto_start_category_tour');
+        if (autoStartCategoryTour === '1') {
+            sessionStorage.removeItem('auto_start_category_tour');
+            
+            // Esperar a que la página cargue completamente
+            setTimeout(() => {
+                const createButton = document.querySelector('[data-tour="create-category-button"]');
+                if (createButton) {
+                    // Marcar que debemos activar el tour cuando llegue a crear categoría
+                    sessionStorage.setItem('auto_start_create_category_tour', '1');
+                    
+                    // Redirigir directamente a crear categoría
+                    window.location.href = createButton.href;
+                }
+            }, 1000);
+        }
     </script>
     @endpush
     @endsection

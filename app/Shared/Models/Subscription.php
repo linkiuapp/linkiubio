@@ -6,6 +6,8 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Artisan;
 use Carbon\Carbon;
 
 class Subscription extends Model
@@ -25,6 +27,8 @@ class Subscription extends Model
         'grace_period_end',
         'next_billing_date',
         'next_billing_amount',
+        'pending_charges',
+        'pending_charges_details',
         'metadata'
     ];
 
@@ -37,6 +41,8 @@ class Subscription extends Model
         'grace_period_end' => 'datetime',
         'next_billing_date' => 'date',
         'next_billing_amount' => 'decimal:2',
+        'pending_charges' => 'decimal:2',
+        'pending_charges_details' => 'array',
         'metadata' => 'array'
     ];
 
@@ -205,6 +211,21 @@ class Subscription extends Model
      */
     public function cancel(string $reason = null, Carbon $endDate = null): bool
     {
+        // 🔒 PROTECCIÓN ANTI-ABUSO: No permitir cancelación si hay cargos pendientes
+        if ($this->pending_charges > 0) {
+            \Log::warning('⚠️ Intento de cancelación con cargos pendientes', [
+                'store_id' => $this->store_id,
+                'pending_charges' => $this->pending_charges,
+                'pending_details' => $this->pending_charges_details
+            ]);
+            
+            throw new \Exception(
+                "No puedes cancelar tu suscripción mientras tengas cargos pendientes de \$" . 
+                number_format($this->pending_charges, 0, ',', '.') . 
+                ". Estos se cobrarán en tu próxima factura."
+            );
+        }
+        
         $this->update([
             'status' => self::STATUS_CANCELLED,
             'cancelled_at' => now(),
@@ -213,6 +234,11 @@ class Subscription extends Model
                 'cancellation_reason' => $reason,
                 'cancelled_by' => auth()->id()
             ])
+        ]);
+
+        \Log::info('✅ Suscripción cancelada', [
+            'store_id' => $this->store_id,
+            'grace_period_until' => $this->grace_period_end
         ]);
 
         return true;
@@ -241,18 +267,90 @@ class Subscription extends Model
     {
         $oldPlan = $this->plan;
         
-        $this->update([
-            'plan_id' => $newPlan->id,
-            'next_billing_amount' => $newPlan->getPriceForPeriod($this->billing_cycle)
-        ]);
+        // Obtener precios para comparación
+        $oldPrice = $oldPlan->getPriceForPeriod($this->billing_cycle);
+        $newPrice = $newPlan->getPriceForPeriod($this->billing_cycle);
+        $isUpgrade = $newPrice > $oldPrice;
+        
+        // Calcular días restantes en el período actual
+        $daysInPeriod = $this->current_period_start->diffInDays($this->current_period_end);
+        $daysRemaining = max(0, now()->diffInDays($this->current_period_end, false));
+        
+        // UPGRADE: Cambio inmediato + cargo pendiente
+        if ($isUpgrade) {
+            // Calcular prorrateo (diferencia por días restantes)
+            $priceDifference = $newPrice - $oldPrice;
+            $prorationCharge = ($priceDifference / $daysInPeriod) * $daysRemaining;
+            
+            // Agregar a cargos pendientes
+            $currentDetails = $this->pending_charges_details ?? [];
+            $currentDetails[] = [
+                'type' => 'plan_upgrade',
+                'description' => "Mejora de {$oldPlan->name} a {$newPlan->name}",
+                'old_plan' => $oldPlan->name,
+                'new_plan' => $newPlan->name,
+                'price_difference' => $priceDifference,
+                'amount' => round($prorationCharge, 2),
+                'days_remaining' => $daysRemaining,
+                'days_in_period' => $daysInPeriod,
+                'created_at' => now()->toDateTimeString(),
+                'reason' => $reason
+            ];
+            
+            $this->update([
+                'plan_id' => $newPlan->id,
+                'next_billing_amount' => $newPrice,
+                'pending_charges' => ($this->pending_charges ?? 0) + $prorationCharge,
+                'pending_charges_details' => $currentDetails
+            ]);
+            
+            \Log::info('✅ UPGRADE INMEDIATO - Cargo pendiente agregado', [
+                'store_id' => $this->store_id,
+                'old_plan' => $oldPlan->name,
+                'new_plan' => $newPlan->name,
+                'proration_charge' => round($prorationCharge, 2),
+                'days_remaining' => $daysRemaining,
+                'total_pending_charges' => $this->pending_charges
+            ]);
+        }
+        // DOWNGRADE: Cambio en próximo ciclo (sin cargos pendientes)
+        else {
+            $this->update([
+                'plan_id' => $newPlan->id,
+                'next_billing_amount' => $newPrice,
+            ]);
+            
+            \Log::info('⏰ DOWNGRADE - Programado para próximo ciclo', [
+                'store_id' => $this->store_id,
+                'old_plan' => $oldPlan->name,
+                'new_plan' => $newPlan->name,
+            ]);
+        }
 
-        $this->recordChange($oldPlan->id < $newPlan->id ? 'plan_upgrade' : 'plan_downgrade', [
+        // Actualizar plan_id de la tienda
+        $this->store->update(['plan_id' => $newPlan->id]);
+        $this->store->refresh()->load('plan');
+
+        // Registrar cambio en historial
+        $changeType = $isUpgrade ? 'plan_upgrade' : 'plan_downgrade';
+        $this->recordChange($changeType, [
             'old_plan_id' => $oldPlan->id,
             'new_plan_id' => $newPlan->id,
-            'old_amount' => $oldPlan->getPriceForPeriod($this->billing_cycle),
-            'new_amount' => $newPlan->getPriceForPeriod($this->billing_cycle),
+            'old_amount' => $oldPrice,
+            'new_amount' => $newPrice,
+            'proration_amount' => $isUpgrade ? round($prorationCharge, 2) : 0,
             'change_reason' => $reason
         ]);
+
+        // Invalidar caches
+        Cache::forget("store.{$this->store_id}.usage");
+        Cache::forget("store.{$this->store_id}.limits");
+        Cache::forget("store.{$this->store_id}.features");
+        
+        if (class_exists(\App\Services\PlanUsageService::class)) {
+            $usageService = app(\App\Services\PlanUsageService::class);
+            $usageService->clearUsageCache($this->store);
+        }
 
         return true;
     }
@@ -278,6 +376,9 @@ class Subscription extends Model
             'old_amount' => $oldAmount,
             'new_amount' => $newAmount
         ]);
+
+        // Invalidar cache
+        \Cache::forget("store.{$this->store_id}.usage");
 
         return true;
     }
@@ -329,16 +430,36 @@ class Subscription extends Model
         $changes = $this->getDirty();
         
         if (isset($changes['plan_id'])) {
-            $this->recordChange('plan_change', [
-                'old_plan_id' => $this->getOriginal('plan_id'),
-                'new_plan_id' => $changes['plan_id']
-            ]);
+            // Determinar si es upgrade o downgrade basándose en precios
+            $oldPlan = Plan::find($this->getOriginal('plan_id'));
+            $newPlan = Plan::find($changes['plan_id']);
+            
+            if ($oldPlan && $newPlan) {
+                $oldPrice = $oldPlan->getPriceForPeriod($this->billing_cycle);
+                $newPrice = $newPlan->getPriceForPeriod($this->billing_cycle);
+                $changeType = $newPrice > $oldPrice ? 'plan_upgrade' : 'plan_downgrade';
+                
+                $this->recordChange($changeType, [
+                    'old_plan_id' => $this->getOriginal('plan_id'),
+                    'new_plan_id' => $changes['plan_id']
+                ]);
+            }
         }
 
         if (isset($changes['status'])) {
-            $this->recordChange('status_change', [
+            // Determinar tipo de cambio de estado
+            $newStatus = $changes['status'];
+            $changeType = match($newStatus) {
+                'cancelled' => 'cancellation',
+                'active' => 'reactivation',
+                'suspended' => 'suspension',
+                'expired' => 'expiration',
+                default => 'suspension' // Fallback
+            };
+            
+            $this->recordChange($changeType, [
                 'old_status' => $this->getOriginal('status'),
-                'new_status' => $changes['status']
+                'new_status' => $newStatus
             ]);
         }
 

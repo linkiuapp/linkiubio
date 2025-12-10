@@ -7,13 +7,17 @@ use App\Features\TenantAdmin\Models\ProductImage;
 use App\Features\TenantAdmin\Models\Category;
 use App\Features\TenantAdmin\Models\ProductVariable;
 use App\Features\TenantAdmin\Models\ProductVariableAssignment;
+use App\Features\TenantAdmin\Models\VariableOption;
+use App\Features\TenantAdmin\Models\ProductVariant;
 use App\Features\TenantAdmin\Services\Core\ProductImageService;
+use App\Services\KiuBotService;
 use App\Shared\Models\Store;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\Rule;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\JsonResponse;
@@ -49,7 +53,7 @@ class ProductController extends Controller
         
         // Consulta base de productos
         $query = Product::byStore($store->id)
-            ->with(['images', 'categories', 'variants', 'stocksVariantes'])
+            ->with(['images', 'categories', 'variants'])
             ->orderBy('created_at', 'desc');
 
         // Aplicar filtros
@@ -186,10 +190,12 @@ class ProductController extends Controller
         if ($product->type === 'variable' && $request->has('variables')) {
             $this->syncProductVariables($product, $request->variables);
         }
-        
-        // Marcar paso de onboarding como completado
-        \App\Shared\Models\StoreOnboardingStep::markAsCompleted($store->id, 'products');
 
+        // Crear variaciones manuales si vienen del formulario
+        if ($product->type === 'variable' && $request->has('variations')) {
+            $this->createManualVariations($product, $request->variations);
+        }
+        
         return redirect()->route('tenant.admin.products.index', $store->slug)
             ->with('success', 'Producto creado exitosamente');
     }
@@ -211,8 +217,7 @@ class ProductController extends Controller
             'images', 
             'categories', 
             'variants',
-            'variableAssignments.variable.activeOptions',
-            'stocksVariantes'
+            'variableAssignments.variable.activeOptions'
         ]);
         
         return view('tenant-admin::Core/products.show', compact('product', 'store'));
@@ -231,7 +236,7 @@ class ProductController extends Controller
             ->where('store_id', $store->id)
             ->firstOrFail();
         
-        $product->load(['images', 'categories', 'variants', 'variableAssignments', 'stocksVariantes']);
+        $product->load(['images', 'categories', 'variants', 'variableAssignments']);
         $categories = Category::where('store_id', $store->id)->get();
         $variables = ProductVariable::where('store_id', $store->id)->with('activeOptions')->get();
 
@@ -337,6 +342,11 @@ class ProductController extends Controller
                     $product->variableAssignments()->delete();
                 }
             }
+            
+            // Actualizar variaciones manuales
+            if ($request->has('variations')) {
+                $this->createManualVariations($product, $request->variations);
+            }
         }
 
         return redirect()->route('tenant.admin.products.index', $store->slug)
@@ -404,11 +414,8 @@ class ProductController extends Controller
         try {
             $product->update(['is_active' => !$product->is_active]);
 
-            $status = $product->is_active ? 'activado' : 'desactivado';
-            
             return response()->json([
                 'success' => true,
-                'message' => "Producto {$status} exitosamente.",
                 'is_active' => $product->is_active
             ]);
         } catch (\Exception $e) {
@@ -468,8 +475,7 @@ class ProductController extends Controller
 
             return response()->json([
                 'success' => true,
-                'allow_sharing' => $product->allow_sharing,
-                'message' => $product->allow_sharing ? 'Compartir activado' : 'Compartir desactivado'
+                'allow_sharing' => $product->allow_sharing
             ]);
         } catch (\Exception $e) {
             return response()->json([
@@ -490,6 +496,9 @@ class ProductController extends Controller
         // Preparar estructura de cantidades por opción
         $optionQuantities = [];
         
+        // Preparar datos para la tabla pivote product_variable (sistema manual)
+        $pivotData = [];
+        
         // Crear nuevas asignaciones
         foreach ($variables as $variableId => $data) {
             // Solo procesar si está marcado como enabled
@@ -502,6 +511,14 @@ class ProductController extends Controller
                     'display_order' => $data['display_order'] ?? 999,
                     'selected_options' => isset($data['options']) && is_array($data['options']) ? $data['options'] : null,
                 ]);
+                
+                // Preparar datos para la tabla pivote (sistema manual)
+                $pivotData[$variableId] = [
+                    'is_active' => true,
+                    'custom_label' => $data['custom_label'] ?? null,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ];
                 
                 // Guardar cantidades por opción si existen
                 if (isset($data['quantities']) && is_array($data['quantities'])) {
@@ -520,44 +537,158 @@ class ProductController extends Controller
             }
         }
         
-        // Actualizar las cantidades en el producto
-        $product->update(['option_quantities' => !empty($optionQuantities) ? $optionQuantities : null]);
+        // Sincronizar la tabla pivote product_variable (sistema manual para storefront)
+        $product->variables()->sync($pivotData);
         
-        // Sincronizar stock de variantes si el producto controla stock
-        if ($product->controla_stock && $product->tipo_stock === 'limitado') {
-            $this->syncStockVariantes($product, $optionQuantities);
-        }
+        // ⚠️ YA NO SE USA option_quantities ni stock_variantes_productos
+        // El stock ahora se maneja directamente en product_variants
     }
 
     /**
-     * Sincronizar stock de variantes del producto
+     * Crear variaciones manuales del producto
      */
-    protected function syncStockVariantes(Product $product, array $optionQuantities)
+    protected function createManualVariations(Product $product, array $variations)
     {
-        // Primero, limpiar todos los registros de stock de variantes existentes
-        $product->stocksVariantes()->delete();
-        
-        // Si no hay cantidades, no crear registros
-        if (empty($optionQuantities)) {
+        // Eliminar variaciones existentes
+        $product->variants()->delete();
+
+        if (empty($variations)) {
             return;
         }
-        
-        // Crear registros de stock para cada opción seleccionada
-        foreach ($optionQuantities as $variableId => $options) {
-            foreach ($options as $optionId => $cantidad) {
-                if ($cantidad > 0) {
-                    \App\Features\TenantAdmin\Models\StockVarianteProducto::create([
-                        'product_id' => $product->id,
-                        'combinacion_variables' => [
-                            (string)$variableId => (string)$optionId
-                        ],
-                        'sku' => $product->sku . '-V' . $variableId . '-O' . $optionId,
-                        'cantidad_stock' => $cantidad,
-                        'cantidad_reservada' => 0,
-                        'umbral_alerta_stock' => $product->umbral_alerta_stock ?? 1,
-                    ]);
+
+        Log::info('Creando variaciones manuales', [
+            'product_id' => $product->id,
+            'variations_count' => count($variations)
+        ]);
+
+        foreach ($variations as $variationData) {
+            // Validar que tenga opciones seleccionadas
+            if (empty($variationData['options'])) {
+                continue;
+            }
+
+            // Construir variant_options y is_required
+            $variantOptions = [];
+            $requiredOptions = [];
+
+            foreach ($variationData['options'] as $variableId => $optionId) {
+                if (!empty($optionId)) {
+                    $variantOptions[$variableId] = $optionId;
+                    
+                    // Verificar si esta opción es obligatoria
+                    if (isset($variationData['is_required'][$variableId])) {
+                        $requiredOptions[$variableId] = true;
+                    }
                 }
             }
+
+            // Si no tiene opciones válidas, saltar
+            if (empty($variantOptions)) {
+                continue;
+            }
+
+            // Generar SKU si no viene del formulario
+            $sku = $variationData['sku'] ?? $this->generateVariantSkuFromOptions($product, $variantOptions);
+
+            // Crear la variación
+            $product->variants()->create([
+                'sku' => $sku,
+                'price_modifier' => $variationData['price_modifier'] ?? 0,
+                'stock' => $variationData['stock'] ?? 0,
+                'is_active' => true,
+                'variant_options' => $variantOptions,
+                'required_options' => !empty($requiredOptions) ? $requiredOptions : null
+            ]);
+        }
+
+        Log::info('Variaciones manuales creadas', [
+            'product_id' => $product->id,
+            'total_variants' => $product->variants()->count()
+        ]);
+    }
+
+    /**
+     * Generar SKU para variación basado en las opciones seleccionadas
+     */
+    protected function generateVariantSkuFromOptions(Product $product, array $variantOptions): string
+    {
+        $baseSku = $product->sku ?? 'VAR';
+        $suffix = [];
+
+        foreach ($variantOptions as $variableId => $optionId) {
+            $option = VariableOption::find($optionId);
+            if ($option) {
+                $suffix[] = strtoupper(substr($option->name, 0, 2));
+            }
+        }
+
+        $sku = $baseSku . '-' . implode('-', $suffix);
+        
+        // Asegurar que sea único
+        $counter = 1;
+        $originalSku = $sku;
+        while (ProductVariant::where('sku', $sku)->exists()) {
+            $sku = $originalSku . '-' . $counter;
+            $counter++;
+        }
+
+        return $sku;
+    }
+
+
+
+    /**
+     * Mejorar descripción de producto usando KiuBot
+     */
+    public function improveDescription(Request $request): JsonResponse
+    {
+        try {
+            // Validar la solicitud
+            $request->validate([
+                'description' => 'required|string|min:10|max:5000',
+                'product_name' => 'nullable|string|max:255'
+            ]);
+
+            $originalText = $request->input('description');
+            $productName = $request->input('product_name');
+
+            // Obtener la tienda y su vertical
+            $store = view()->shared('currentStore');
+            $vertical = $store->businessCategory->vertical ?? 'ecommerce';
+
+            // Llamar al servicio de KiuBot
+            $kiuBot = app(KiuBotService::class);
+            $result = $kiuBot->improveProductDescription($originalText, $productName, $vertical);
+
+            if (!$result['success']) {
+                return response()->json([
+                    'success' => false,
+                    'error' => $result['error'] ?? 'Error al mejorar la descripción'
+                ], 500);
+            }
+
+            return response()->json([
+                'success' => true,
+                'original_text' => $originalText,
+                'improved_text' => $result['improved_text'],
+                'tokens_used' => $result['tokens_used'] ?? 0
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Validación fallida: ' . $e->getMessage()
+            ], 422);
+        } catch (\Exception $e) {
+            \Log::error('Error en improveDescription', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'error' => 'Error interno del servidor'
+            ], 500);
         }
     }
 } 

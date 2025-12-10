@@ -12,6 +12,11 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Registrar middlewares globales para el grupo 'web'
+        $middleware->web(append: [
+            \App\Http\Middleware\LogTrafficMiddleware::class, // 📊 Traffic logging
+        ]);
+        
         // Registrar middlewares personalizados
         $middleware->alias([
             'super.admin' => \App\Shared\Middleware\SuperAdminMiddleware::class,

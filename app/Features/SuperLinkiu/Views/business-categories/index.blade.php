@@ -3,62 +3,92 @@
 @section('title', 'Categorías de Negocio')
 
 @section('content')
-<div class="container-fluid" x-data="categoryManager">
+<div class="max-w-7xl mx-auto space-y-6 mt-6" x-data="categoryManager">
     {{-- Header --}}
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex items-center justify-between">
         <div>
-            <h1 class="text-body-large font-bold text-black-500">Categorías de Negocio</h1>
-            <p class="text-body-regular text-black-300 mt-1">Gestiona las categorías de negocio y configura la aprobación automática</p>
+            <h1 class="text-lg font-semibold text-gray-800">Categorías de Negocio</h1>
+            <p class="text-sm text-gray-600 mt-1">Gestiona las categorías y configura la aprobación automática</p>
         </div>
         <div class="flex gap-3">
             @php
                 $categoriesWithoutVertical = \App\Shared\Models\BusinessCategory::withoutVertical()->count();
             @endphp
             @if($categoriesWithoutVertical > 0)
-                <a href="{{ route('superlinkiu.business-categories.migrate-verticals') }}" class="btn-secondary flex items-center gap-2">
-                    <x-solar-refresh-outline class="w-5 h-5" />
+                <a href="{{ route('superlinkiu.business-categories.migrate-verticals') }}" class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
                     Migrar Verticales
-                    @if($categoriesWithoutVertical > 0)
-                        <span class="bg-warning-300 text-white text-xs px-2 py-0.5 rounded-full">{{ $categoriesWithoutVertical }}</span>
-                    @endif
+                    <span class="bg-white text-yellow-800 text-xs px-2 py-0.5 rounded-full font-bold">{{ $categoriesWithoutVertical }}</span>
                 </a>
             @endif
-            <button @click="openCreateModal()" class="btn-primary flex items-center gap-2">
-                <x-solar-add-circle-outline class="w-5 h-5 mr-2" />
+            <button @click="openCreateModal()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+                <i data-lucide="plus" class="w-4 h-4"></i>
                 Nueva Categoría
             </button>
         </div>
     </div>
 
     {{-- Stats Cards --}}
-    <div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-        <div class="bg-white border border-gray-200 rounded-lg p-4">
-            <p class="text-xs font-medium text-gray-500 uppercase">Total</p>
-            <p class="text-2xl font-bold text-gray-900">{{ $categories->total() }}</p>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-gray-600 uppercase">Total</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $categories->total() }}</p>
+                </div>
+                <div class="p-3 bg-blue-100 rounded-lg">
+                    <i data-lucide="layers" class="w-6 h-6 text-blue-600"></i>
+                </div>
+            </div>
         </div>
-        <div class="bg-success-50 border border-success-200 rounded-lg p-4">
-            <p class="text-xs font-medium text-success-600 uppercase">Auto-Aprobación</p>
-            <p class="text-2xl font-bold text-success-700">{{ $categories->where('requires_manual_approval', false)->where('is_active', true)->count() }}</p>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-gray-600 uppercase">Auto-Aprobación</p>
+                    <p class="text-2xl font-bold text-green-600">{{ $categories->where('requires_manual_approval', false)->where('is_active', true)->count() }}</p>
+                </div>
+                <div class="p-3 bg-green-100 rounded-lg">
+                    <i data-lucide="check-circle" class="w-6 h-6 text-green-600"></i>
+                </div>
+            </div>
         </div>
-        <div class="bg-warning-50 border border-warning-200 rounded-lg p-4">
-            <p class="text-xs font-medium text-warning-600 uppercase">Revisión Manual</p>
-            <p class="text-2xl font-bold text-warning-700">{{ $categories->where('requires_manual_approval', true)->where('is_active', true)->count() }}</p>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-gray-600 uppercase">Revisión Manual</p>
+                    <p class="text-2xl font-bold text-yellow-600">{{ $categories->where('requires_manual_approval', true)->where('is_active', true)->count() }}</p>
+                </div>
+                <div class="p-3 bg-yellow-100 rounded-lg">
+                    <i data-lucide="eye" class="w-6 h-6 text-yellow-600"></i>
+                </div>
+            </div>
         </div>
-        <div class="bg-gray-50 border border-gray-200 rounded-lg p-4">
-            <p class="text-xs font-medium text-gray-500 uppercase">Inactivas</p>
-            <p class="text-2xl font-bold text-gray-700">{{ $categories->where('is_active', false)->count() }}</p>
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-xs font-medium text-gray-600 uppercase">Inactivas</p>
+                    <p class="text-2xl font-bold text-gray-600">{{ $categories->where('is_active', false)->count() }}</p>
+                </div>
+                <div class="p-3 bg-gray-100 rounded-lg">
+                    <i data-lucide="x-circle" class="w-6 h-6 text-gray-600"></i>
+                </div>
+            </div>
         </div>
     </div>
 
     {{-- Lista de Categorías --}}
     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-base font-semibold text-gray-900">Todas las Categorías</h2>
+        </div>
+        
         <div class="overflow-x-auto">
             <table class="min-w-full divide-y divide-gray-200">
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Categoría</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Vertical</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo de Aprobación</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aprobación</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Estado</th>
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tiendas</th>
                         <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">Acciones</th>
@@ -66,15 +96,13 @@
                 </thead>
                 <tbody class="bg-white divide-y divide-gray-200">
                     @forelse($categories as $category)
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="flex items-center">
-                                    <div>
-                                        <div class="text-sm font-medium text-gray-900">{{ $category->name }}</div>
-                                        @if($category->description)
-                                            <div class="text-xs text-gray-500">{{ Str::limit($category->description, 50) }}</div>
-                                        @endif
-                                    </div>
+                        <tr class="hover:bg-gray-50" :data-id="{{ $category->id }}">
+                            <td class="px-6 py-4">
+                                <div>
+                                    <div class="text-sm font-medium text-gray-900">{{ $category->name }}</div>
+                                    @if($category->description)
+                                        <div class="text-xs text-gray-500">{{ Str::limit($category->description, 60) }}</div>
+                                    @endif
                                 </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -93,24 +121,24 @@
                                             'dropshipping' => 'bg-green-100 text-green-800'
                                         ];
                                     @endphp
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium {{ $verticalColors[$category->vertical] ?? 'bg-gray-100 text-gray-800' }}">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold {{ $verticalColors[$category->vertical] ?? 'bg-gray-100 text-gray-800' }}">
                                         {{ $verticalNames[$category->vertical] ?? $category->vertical }}
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-gray-100 text-gray-500">
                                         Sin asignar
                                     </span>
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 @if($category->requires_manual_approval)
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning-100 text-warning-800">
-                                        <x-solar-eye-outline class="w-3 h-3 mr-1" />
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-800">
+                                        <i data-lucide="eye" class="w-3 h-3 mr-1"></i>
                                         Revisión Manual
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success-100 text-success-800">
-                                        <x-solar-check-circle-outline class="w-3 h-3 mr-1" />
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-800">
+                                        <i data-lucide="check-circle" class="w-3 h-3 mr-1"></i>
                                         Auto-Aprobación
                                     </span>
                                 @endif
@@ -118,34 +146,32 @@
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <button type="button" 
                                         @click="toggleStatus({{ $category->id }}, {{ $category->is_active ? 'true' : 'false' }})"
-                                        class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {{ $category->is_active ? 'bg-success-300' : 'bg-gray-300' }}"
-                                        :class="{'bg-success-300': categoryStates[{{ $category->id }}], 'bg-gray-300': !categoryStates[{{ $category->id }}]}">
+                                        class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {{ $category->is_active ? 'bg-blue-600' : 'bg-gray-300' }}"
+                                        :class="{'bg-blue-600': categoryStates[{{ $category->id }}], 'bg-gray-300': !categoryStates[{{ $category->id }}]}">
                                     <span class="inline-block h-4 w-4 transform rounded-full bg-white transition-transform {{ $category->is_active ? 'translate-x-6' : 'translate-x-1' }}"
                                           :class="{'translate-x-6': categoryStates[{{ $category->id }}], 'translate-x-1': !categoryStates[{{ $category->id }}]}"></span>
                                 </button>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                            <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-semibold">
                                 {{ $category->stores_count ?? 0 }}
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                <button @click="openEditModal(@js(['id' => $category->id, 'name' => $category->name, 'icon' => $category->icon, 'description' => $category->description, 'vertical' => $category->vertical, 'requires_manual_approval' => $category->requires_manual_approval, 'is_active' => $category->is_active, 'features' => $category->feature_ids]))" class="text-primary-200 hover:text-primary-300 mr-3">
-                    Editar
-                </button>
-                                <form action="{{ route('superlinkiu.business-categories.destroy', $category) }}" method="POST" class="inline" onsubmit="return confirm('¿Estás seguro de eliminar esta categoría?');">
-                                    @csrf
-                                    @method('DELETE')
-                                    <button type="submit" class="text-danger-300 hover:text-danger-400">
-                                        Eliminar
-                                    </button>
-                                </form>
+                                <button @click="openEditModal(@js(['id' => $category->id, 'name' => $category->name, 'icon' => $category->icon, 'description' => $category->description, 'vertical' => $category->vertical, 'requires_manual_approval' => $category->requires_manual_approval, 'is_active' => $category->is_active, 'features' => $category->feature_ids]))" 
+                                        class="text-blue-600 hover:text-blue-800 mr-3">
+                                    <i data-lucide="edit-2" class="w-4 h-4 inline"></i>
+                                </button>
+                                <button @click="$dispatch('delete-category', {id: {{ $category->id }}, name: '{{ addslashes($category->name) }}'})"
+                                        class="text-red-600 hover:text-red-800">
+                                    <i data-lucide="trash-2" class="w-4 h-4 inline"></i>
+                                </button>
                             </td>
                         </tr>
                     @empty
                         <tr>
                             <td colspan="6" class="px-6 py-12 text-center text-gray-500">
-                                <x-solar-document-outline class="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                                <i data-lucide="folder-open" class="w-16 h-16 text-gray-300 mx-auto mb-4"></i>
                                 <p class="text-lg">No hay categorías registradas</p>
-                                <button @click="openCreateModal()" class="mt-4 text-primary-200 hover:text-primary-300">
+                                <button @click="openCreateModal()" class="mt-4 text-blue-600 hover:text-blue-800">
                                     Crear primera categoría
                                 </button>
                             </td>
@@ -156,9 +182,11 @@
         </div>
 
         {{-- Paginación --}}
+        @if($categories->hasPages())
         <div class="px-6 py-4 border-t border-gray-200">
             {{ $categories->links() }}
         </div>
+        @endif
     </div>
 
     {{-- Modal Crear/Editar --}}
@@ -176,7 +204,7 @@
                  x-transition:leave="ease-in duration-200"
                  x-transition:leave-start="opacity-100"
                  x-transition:leave-end="opacity-0"
-                 class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" 
+                 class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity" 
                  aria-hidden="true"
                  @click="closeModal()"></div>
 
@@ -195,29 +223,32 @@
                     @csrf
                     <input type="hidden" name="_method" x-bind:value="isEditing ? 'PUT' : 'POST'">
                     
-                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                        <h3 class="text-lg font-medium text-gray-900 mb-4" x-text="isEditing ? 'Editar Categoría' : 'Nueva Categoría'"></h3>
+                    <div class="bg-white px-6 py-5">
+                        <h3 class="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
+                            <i :data-lucide="isEditing ? 'edit' : 'plus'" class="w-5 h-5 text-blue-600"></i>
+                            <span x-text="isEditing ? 'Editar Categoría' : 'Nueva Categoría'"></span>
+                        </h3>
                         
                         <div class="space-y-4">
                             {{-- Nombre --}}
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Nombre *</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nombre <span class="text-red-500">*</span></label>
                                 <input type="text" name="name" x-model="form.name" required
-                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-200 focus:border-primary-200">
+                                       class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                             </div>
 
                             {{-- Descripción --}}
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-1">Descripción</label>
                                 <textarea name="description" x-model="form.description" rows="3"
-                                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-200 focus:border-primary-200"></textarea>
+                                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"></textarea>
                             </div>
 
                             {{-- Vertical --}}
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-1">Vertical *</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Vertical <span class="text-red-500">*</span></label>
                                 <select name="vertical" x-model="form.vertical" @change="onVerticalChange()" required
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-primary-200 focus:border-primary-200">
+                                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
                                     <option value="">Selecciona un vertical</option>
                                     <option value="ecommerce">Ecommerce</option>
                                     <option value="restaurant">Restaurante</option>
@@ -225,105 +256,188 @@
                                     <option value="dropshipping">Dropshipping</option>
                                 </select>
                                 <p class="text-xs text-gray-500 mt-1">
-                                    Los features se asignarán automáticamente según el vertical seleccionado.
+                                    Los features se asignarán automáticamente según el vertical.
                                 </p>
                             </div>
 
                             {{-- Tipo de Aprobación --}}
                             <div>
-                                <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Aprobación *</label>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Tipo de Aprobación <span class="text-red-500">*</span></label>
                                 <div class="space-y-2">
-                                    <label class="flex items-start p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                    <label class="flex items-start p-3 border-2 rounded-lg cursor-pointer transition-all" 
+                                           :class="form.requires_manual_approval === '0' ? 'border-green-500 bg-green-50' : 'border-gray-200 hover:border-gray-300'">
                                         <input type="radio" name="requires_manual_approval" value="0" x-model="form.requires_manual_approval" class="mt-1 mr-3">
                                         <div>
-                                            <span class="font-medium text-gray-900">Auto-Aprobación</span>
-                                            <p class="text-xs text-gray-500">Aprobar automáticamente si el documento es válido</p>
+                                            <span class="font-medium text-gray-900 flex items-center gap-1.5">
+                                                <i data-lucide="zap" class="w-4 h-4 text-green-600"></i>
+                                                Auto-Aprobación
+                                            </span>
+                                            <p class="text-xs text-gray-600 mt-0.5">Aprobar automáticamente si el documento es válido</p>
                                         </div>
                                     </label>
-                                    <label class="flex items-start p-3 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
+                                    <label class="flex items-start p-3 border-2 rounded-lg cursor-pointer transition-all"
+                                           :class="form.requires_manual_approval === '1' ? 'border-yellow-500 bg-yellow-50' : 'border-gray-200 hover:border-gray-300'">
                                         <input type="radio" name="requires_manual_approval" value="1" x-model="form.requires_manual_approval" class="mt-1 mr-3">
                                         <div>
-                                            <span class="font-medium text-gray-900">Revisión Manual</span>
-                                            <p class="text-xs text-gray-500">Requiere aprobación del SuperAdmin</p>
+                                            <span class="font-medium text-gray-900 flex items-center gap-1.5">
+                                                <i data-lucide="shield-check" class="w-4 h-4 text-yellow-600"></i>
+                                                Revisión Manual
+                                            </span>
+                                            <p class="text-xs text-gray-600 mt-0.5">Requiere aprobación del SuperAdmin</p>
                                         </div>
                                     </label>
                                 </div>
                             </div>
 
                             {{-- Estado --}}
-                            <div>
-                                <label class="flex items-center">
-                                    <input type="checkbox" name="is_active" value="1" x-model="form.is_active" class="mr-2">
-                                    <span class="text-sm font-medium text-gray-700">Categoría activa</span>
+                            <div class="flex items-center gap-3 p-3 border border-gray-200 rounded-lg hover:bg-gray-50">
+                                <input type="checkbox" name="is_active" value="1" x-model="form.is_active" 
+                                       class="w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500" 
+                                       id="is_active">
+                                <label for="is_active" class="flex-1 cursor-pointer">
+                                    <span class="block text-sm font-medium text-gray-900">Categoría activa</span>
+                                    <span class="block text-xs text-gray-600">Visible para nuevos registros</span>
                                 </label>
                             </div>
 
-                            {{-- Features Asignados (Solo mostrar si NO hay vertical seleccionado) --}}
-                            <div x-show="!form.vertical" class="border-t border-gray-200 pt-4">
-                                <label class="block text-sm font-medium text-gray-700 mb-3">Features Habilitados</label>
-                                
-                                <div class="max-h-64 overflow-y-auto border border-gray-200 rounded-lg p-3 bg-gray-50">
-                                    <div class="space-y-2">
-                                        <template x-for="feature in availableFeatures" :key="feature.id">
-                                            <label class="flex items-start p-2 hover:bg-white rounded cursor-pointer transition-colors" :class="{'bg-success-50 border border-success-200': feature.is_default}">
-                                                <input type="checkbox" 
-                                                       name="features[]" 
-                                                       :value="feature.id"
-                                                       x-model="form.features"
-                                                       :disabled="feature.is_default"
-                                                       :checked="feature.is_default"
-                                                       class="mt-1 mr-3 text-primary-300 focus:ring-primary-200">
-                                                <div class="flex-1">
-                                                    <span class="text-sm font-medium text-gray-900" x-text="feature.name"></span>
-                                                    <p class="text-xs text-gray-500" x-text="feature.description || feature.key"></p>
-                                                    <span x-show="feature.is_default" class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-success-100 text-success-700 mt-1">
-                                                        ✓ Siempre habilitado
-                                                    </span>
-                                                </div>
-                                            </label>
-                                        </template>
-                                        <template x-if="availableFeatures.length === 0">
-                                            <p class="text-sm text-gray-500 text-center py-4">No hay features disponibles</p>
-                                        </template>
-                                    </div>
-                                </div>
-                                <p class="text-xs text-gray-500 mt-2">
-                                    Features base están siempre habilitados. Selecciona adicionales según tipo de negocio.
-                                </p>
-                            </div>
-
-                            {{-- Información de Features Automáticos (Solo mostrar si hay vertical seleccionado) --}}
-                            <div x-show="form.vertical" class="border-t border-gray-200 pt-4">
-                                <div class="bg-info-50 border border-info-200 rounded-lg p-4">
-                                    <div class="flex items-start">
-                                        <x-solar-info-circle-outline class="w-5 h-5 text-info-300 mr-2 mt-0.5 flex-shrink-0" />
-                                        <div>
-                                            <p class="text-sm font-medium text-info-800 mb-1">Features asignados automáticamente</p>
-                                            <p class="text-xs text-info-700">
-                                                Los features se asignarán automáticamente según el vertical "<span x-text="getVerticalName(form.vertical)" class="font-semibold"></span>".
-                                                No es necesario seleccionarlos manualmente.
-                                            </p>
-                                        </div>
+                            {{-- Información de Features --}}
+                            <div x-show="form.vertical" class="border-l-4 border-blue-500 bg-blue-50 p-4 rounded">
+                                <div class="flex items-start gap-2">
+                                    <i data-lucide="info" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"></i>
+                                    <div>
+                                        <p class="text-sm font-medium text-blue-900">Features asignados automáticamente</p>
+                                        <p class="text-xs text-blue-700 mt-1">
+                                            Los features del vertical "<span x-text="getVerticalName(form.vertical)" class="font-semibold"></span>" se asignarán automáticamente.
+                                        </p>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                        <button type="submit" class="btn-primary w-full sm:w-auto sm:ml-3">
-                            <span x-text="isEditing ? 'Actualizar' : 'Crear'"></span>
-                        </button>
-                        <button type="button" @click="closeModal()" class="btn-secondary w-full sm:w-auto mt-3 sm:mt-0">
+                    <div class="bg-gray-50 px-6 py-4 flex items-center justify-end gap-3">
+                        <button type="button" @click="closeModal()" class="px-4 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors">
                             Cancelar
+                        </button>
+                        <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+                            <i data-lucide="save" class="w-4 h-4"></i>
+                            <span x-text="isEditing ? 'Actualizar' : 'Crear'"></span>
                         </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+
+    {{-- Modal de Eliminación (igual que productos) --}}
+    <div x-show="open" 
+         x-cloak
+         x-on:delete-category.window="openModal($event.detail.id, $event.detail.name)"
+         x-on:keydown.escape.window="closeModal()"
+         x-data="deleteModalData()"
+         class="fixed inset-0 z-50 overflow-y-auto"
+         aria-labelledby="modal-title" 
+         role="dialog" 
+         aria-modal="true">
+        
+        {{-- Backdrop --}}
+        <div x-show="open"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @click="closeModal()"
+             class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity">
+        </div>
+
+        {{-- Modal --}}
+        <div x-show="open"
+             x-transition:enter="ease-out duration-300"
+             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave="ease-in duration-200"
+             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+             class="fixed inset-0 z-10 overflow-x-hidden overflow-y-auto pointer-events-none">
+            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg pointer-events-auto">
+                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                                <i data-lucide="alert-triangle" class="h-6 w-6 text-red-600"></i>
+                            </div>
+                            <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                <h3 class="text-base font-semibold leading-6 text-gray-900" id="modal-title">
+                                    Eliminar Categoría
+                                </h3>
+                                <div class="mt-2">
+                                    <p class="text-sm text-gray-500">
+                                        ¿Estás seguro de que deseas eliminar la categoría <span class="font-semibold text-gray-900" x-text="categoryName"></span>?
+                                        Esta acción no se puede deshacer.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 gap-2">
+                        <button type="button" 
+                                @click="confirmDelete()"
+                                :disabled="loading"
+                                class="inline-flex w-full justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 disabled:opacity-50 sm:w-auto">
+                            <span x-show="!loading">Sí, eliminar</span>
+                            <span x-show="loading" class="flex items-center gap-2">
+                                <i data-lucide="loader" class="size-4 animate-spin"></i>
+                                Eliminando...
+                            </span>
+                        </button>
+                        <button type="button" 
+                                @click="closeModal()"
+                                :disabled="loading"
+                                class="mt-3 inline-flex w-full justify-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 sm:mt-0 sm:w-auto">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
+{{-- Mostrar toast de éxito si hay mensaje --}}
+@if(session('success'))
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.toast) {
+        window.toast.success(
+            '¡Hey! felicidades',
+            '{{ session('success') }}',
+            5000,
+            'bottom-center'
+        );
+    }
+});
+</script>
+@endif
+
+{{-- Mostrar toast de error si hay mensaje --}}
+@if(session('error'))
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.toast) {
+        window.toast.error(
+            '¡Ups! algo salió mal',
+            '{{ session('error') }}',
+            5000,
+            'bottom-center'
+        );
+    }
+});
+</script>
+@endif
+
+@push('scripts')
 <script>
 document.addEventListener('alpine:init', () => {
     Alpine.data('categoryManager', () => ({
@@ -347,7 +461,6 @@ document.addEventListener('alpine:init', () => {
             this.isEditing = false;
             this.editingId = null;
             
-            // Preseleccionar features base (is_default = true)
             const defaultFeatureIds = this.availableFeatures
                 .filter(f => f.is_default)
                 .map(f => f.id);
@@ -362,6 +475,10 @@ document.addEventListener('alpine:init', () => {
                 features: defaultFeatureIds
             };
             this.showModal = true;
+            
+            this.$nextTick(() => {
+                if (window.createIcons) window.createIcons({ icons: window.lucideIcons });
+            });
         },
 
         openEditModal(category) {
@@ -377,6 +494,10 @@ document.addEventListener('alpine:init', () => {
                 features: category.features || []
             };
             this.showModal = true;
+            
+            this.$nextTick(() => {
+                if (window.createIcons) window.createIcons({ icons: window.lucideIcons });
+            });
         },
 
         closeModal() {
@@ -384,8 +505,7 @@ document.addEventListener('alpine:init', () => {
         },
 
         onVerticalChange() {
-            // Cuando cambia el vertical, los features se asignarán automáticamente en el backend
-            // No necesitamos hacer nada aquí, solo mostrar el mensaje informativo
+            // Features se asignarán automáticamente en el backend
         },
 
         getVerticalName(vertical) {
@@ -414,25 +534,145 @@ document.addEventListener('alpine:init', () => {
                 if (data.success) {
                     this.categoryStates[categoryId] = data.is_active;
                     
-                    // Mostrar notificación de éxito
-                    this.$dispatch('notify', {
-                        type: 'success',
-                        message: data.message
-                    });
+                    if (window.toast) {
+                        window.toast.success(
+                            '¡Estado actualizado!',
+                            data.message,
+                            3000,
+                            'bottom-center'
+                        );
+                    }
                 } else {
                     throw new Error(data.message || 'Error al cambiar el estado');
                 }
             } catch (error) {
                 console.error('Error:', error);
-                alert('Error al cambiar el estado de la categoría: ' + error.message);
+                if (window.toast) {
+                    window.toast.error(
+                        '¡Ups! algo salió mal',
+                        'Error al cambiar el estado de la categoría',
+                        3000,
+                        'bottom-center'
+                    );
+                }
+            }
+        }
+    }));
+
+    // Modal de eliminación
+    Alpine.data('deleteModalData', () => ({
+        open: false,
+        categoryId: null,
+        categoryName: '',
+        loading: false,
+
+        openModal(id, name) {
+            this.categoryId = id;
+            this.categoryName = name;
+            this.open = true;
+            this.loading = false;
+            
+            this.$nextTick(() => {
+                if (window.createIcons) window.createIcons({ icons: window.lucideIcons });
+            });
+        },
+
+        closeModal() {
+            if (this.loading) return;
+            this.open = false;
+            this.categoryId = null;
+            this.categoryName = '';
+        },
+
+        async confirmDelete() {
+            if (!this.categoryId) return;
+            
+            this.loading = true;
+            
+            try {
+                const response = await fetch(`/superlinkiu/business-categories/${this.categoryId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    // Cerrar modal y mostrar toast de error
+                    this.loading = false;
+                    const categoryName = this.categoryName;
+                    this.closeModal();
+                    
+                    if (window.toast) {
+                        window.toast.error(
+                            '¡Ups! algo salió mal',
+                            data.message || 'Error al eliminar la categoría',
+                            5000,
+                            'bottom-center'
+                        );
+                    }
+                    return;
+                }
+                
+                this.loading = false;
+                const categoryName = this.categoryName;
+                this.closeModal();
+                
+                // Remover la fila con animación
+                const row = document.querySelector(`tr[data-id="${this.categoryId}"]`);
+                if (row) {
+                    row.style.transition = 'opacity 0.3s ease-out';
+                    row.style.opacity = '0';
+                    setTimeout(() => {
+                        if (row.parentNode) {
+                            row.remove();
+                            
+                            if (window.toast) {
+                                window.toast.success(
+                                    '¡Hey! felicidades',
+                                    `Categoría "${categoryName}" eliminada exitosamente`,
+                                    5000,
+                                    'bottom-center'
+                                );
+                            }
+                        }
+                    }, 300);
+                } else {
+                    window.location.reload();
+                }
+            } catch (error) {
+                // Cerrar modal y mostrar toast de error
+                this.loading = false;
+                const categoryName = this.categoryName;
+                this.closeModal();
+                
+                if (window.toast) {
+                    window.toast.error(
+                        '¡Ups! algo salió mal',
+                        error.message || 'Error al eliminar la categoría',
+                        5000,
+                        'bottom-center'
+                    );
+                }
             }
         }
     }));
 });
+
+// Inicializar iconos Lucide
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.createIcons && window.lucideIcons) {
+        window.createIcons({ icons: window.lucideIcons });
+    }
+});
 </script>
+@endpush
 
 <style>
 [x-cloak] { display: none !important; }
 </style>
 @endsection
-

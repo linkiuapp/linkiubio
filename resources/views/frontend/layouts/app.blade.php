@@ -21,6 +21,8 @@
     <script src="https://cdn.lordicon.com/lordicon.js"></script>
 </head>
 <body class="bg-brandWhite-50 md:max-w-[480px] max-w-full mx-auto overflow-x-hidden">
+    {{-- Maintenance Notice --}}
+    <x-maintenance-notice variant="tenant" />
 
     <!-- Header -->
     <header class="relative overflow-hidden" style="background: {{ $store->design ? $store->design->header_background_color : '' }}">

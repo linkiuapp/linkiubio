@@ -20,10 +20,12 @@
     },
     "dependencies": {
         "@alpinejs/collapse": "^3.14.9",
+        "@rive-app/canvas": "^2.32.2",
         "alpinejs": "^3.13.0",
         "apexcharts": "^5.3.6",
         "canvas-confetti": "^1.9.4",
         "clipboard": "^2.0.11",
+        "driver.js": "^1.4.0",
         "dropzone": "^6.0.0-beta.2",
         "litepicker": "^2.0.12",
         "lodash": "^4.17.21",

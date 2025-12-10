@@ -13,7 +13,8 @@ class PlanController extends Controller
      */
     public function index()
     {
-        $plans = Plan::orderBy('sort_order')
+        $plans = Plan::withCount('stores')
+            ->orderBy('sort_order')
             ->orderBy('created_at')
             ->paginate(10);
             
@@ -34,7 +35,7 @@ class PlanController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:plans,name',
+            'name' => 'required|string|max:255|unique:plans,name,NULL,id,deleted_at,NULL',
             'description' => 'nullable|string',
             'allow_custom_slug' => 'boolean',
             'price' => 'required|numeric|min:0',
@@ -44,45 +45,82 @@ class PlanController extends Controller
             // Imagen del plan
             'plan_image' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
             
-            // Precios por período
+            // Precios por período con descuentos
             'prices.monthly' => 'nullable|numeric|min:0',
             'prices.quarterly' => 'nullable|numeric|min:0',
             'prices.semester' => 'nullable|numeric|min:0',
+            'prices.annual' => 'nullable|numeric|min:0',
             
-            // ✅ Límites validados (Solo los que existen en BD y se usan)
+            // PRODUCTOS Y CATÁLOGO
             'max_products' => 'required|integer|min:1',
             'max_categories' => 'required|integer|min:1',
             'max_variables' => 'required|integer|min:1',
-            'max_slider' => 'required|integer|min:0',  // Singular - coincide con BD
+            'max_product_images' => 'required|integer|min:1',
+            
+            // DISEÑO Y MARKETING
+            'max_slider' => 'required|integer|min:0',
             'max_active_coupons' => 'required|integer|min:0',
-            'max_sedes' => 'required|integer|min:1',  // Nombre en BD
+            
+            // ENVÍOS Y LOGÍSTICA
+            'max_sedes' => 'required|integer|min:1',
             'max_delivery_zones' => 'required|integer|min:1',
+            
+            // PAGOS
+            'max_payment_methods' => 'required|integer|min:1',
             'max_bank_accounts' => 'required|integer|min:1',
+            
+            // ADMINISTRACIÓN
             'max_admins' => 'required|integer|min:1',
+            'max_tickets_per_month' => 'required|integer|min:1',
+            'order_history_months' => 'required|integer|min:1',
             'analytics_retention_days' => 'required|integer|min:30',
             
-            // Soporte
+            // INVENTARIO
+            'inventory_tracking' => 'boolean',
+            
+            // INTEGRACIONES
+            'whatsapp_integration' => 'boolean',
+            'kiubot_enabled' => 'boolean',
+            'trial_days' => 'nullable|integer|min:0|max:90',
+            
+            // LÍMITES VERTICAL RESTAURANT
+            'max_tables' => 'nullable|integer|min:0',
+            'max_daily_reservations' => 'nullable|integer|min:0',
+            
+            // LÍMITES VERTICAL HOTEL
+            'max_rooms' => 'nullable|integer|min:0',
+            'max_room_types' => 'nullable|integer|min:0',
+            'max_daily_hotel_reservations' => 'nullable|integer|min:0',
+            
+            // SOPORTE
             'support_level' => 'required|in:basic,priority,premium',
             'support_response_time' => 'required|integer|min:1',
             
-            // Configuración
+            // CONFIGURACIÓN
             'is_active' => 'boolean',
             'is_public' => 'boolean',
             'is_featured' => 'boolean',
             'sort_order' => 'nullable|integer',
             'trial_days' => 'nullable|integer|min:0',
             
-            // Features
+            // CARACTERÍSTICAS
             'features_list' => 'nullable|array',
             'features_list.*' => 'string',
         ]);
 
-        // Preparar datos
+        // Preparar datos booleanos
         $validated['allow_custom_slug'] = $request->boolean('allow_custom_slug');
         $validated['is_active'] = $request->boolean('is_active');
         $validated['is_public'] = $request->boolean('is_public');
         $validated['is_featured'] = $request->boolean('is_featured');
+        $validated['inventory_tracking'] = $request->boolean('inventory_tracking', true);
+        $validated['whatsapp_integration'] = $request->boolean('whatsapp_integration', false);
+        $validated['kiubot_enabled'] = $request->boolean('kiubot_enabled', false);
         $validated['version'] = '1.0';
+        
+        // Asegurar valores por defecto si vienen vacíos
+        $validated['sort_order'] = $validated['sort_order'] ?? 0;
+        $validated['trial_days'] = $validated['trial_days'] ?? 0;
         
         // Manejar subida de imagen
         if ($request->hasFile('plan_image')) {
@@ -117,7 +155,7 @@ class PlanController extends Controller
 
         return redirect()
             ->route('superlinkiu.plans.index')
-            ->with('success', 'Plan creado exitosamente.');
+            ->with('success', 'Plan creado exitosamente');
     }
 
     /**
@@ -143,7 +181,7 @@ class PlanController extends Controller
     public function update(Request $request, Plan $plan)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255|unique:plans,name,' . $plan->id,
+            'name' => 'required|string|max:255|unique:plans,name,' . $plan->id . ',id,deleted_at,NULL',
             'description' => 'nullable|string',
             'allow_custom_slug' => 'boolean',
             'price' => 'required|numeric|min:0',
@@ -154,40 +192,77 @@ class PlanController extends Controller
             'prices.monthly' => 'nullable|numeric|min:0',
             'prices.quarterly' => 'nullable|numeric|min:0',
             'prices.semester' => 'nullable|numeric|min:0',
+            'prices.annual' => 'nullable|numeric|min:0',
             
-            // ✅ Límites validados (Solo los que existen en BD y se usan)
+            // PRODUCTOS Y CATÁLOGO
             'max_products' => 'required|integer|min:1',
             'max_categories' => 'required|integer|min:1',
             'max_variables' => 'required|integer|min:1',
-            'max_slider' => 'required|integer|min:0',  // Singular - coincide con BD
+            'max_product_images' => 'required|integer|min:1',
+            
+            // DISEÑO Y MARKETING
+            'max_slider' => 'required|integer|min:0',
             'max_active_coupons' => 'required|integer|min:0',
-            'max_sedes' => 'required|integer|min:1',  // Nombre en BD
+            
+            // ENVÍOS Y LOGÍSTICA
+            'max_sedes' => 'required|integer|min:1',
             'max_delivery_zones' => 'required|integer|min:1',
+            
+            // PAGOS
+            'max_payment_methods' => 'required|integer|min:1',
             'max_bank_accounts' => 'required|integer|min:1',
+            
+            // ADMINISTRACIÓN
             'max_admins' => 'required|integer|min:1',
+            'max_tickets_per_month' => 'required|integer|min:1',
+            'order_history_months' => 'required|integer|min:1',
             'analytics_retention_days' => 'required|integer|min:30',
             
-            // Soporte
+            // INVENTARIO
+            'inventory_tracking' => 'boolean',
+            
+            // INTEGRACIONES
+            'whatsapp_integration' => 'boolean',
+            'kiubot_enabled' => 'boolean',
+            'trial_days' => 'nullable|integer|min:0|max:90',
+            
+            // LÍMITES VERTICAL RESTAURANT
+            'max_tables' => 'nullable|integer|min:0',
+            'max_daily_reservations' => 'nullable|integer|min:0',
+            
+            // LÍMITES VERTICAL HOTEL
+            'max_rooms' => 'nullable|integer|min:0',
+            'max_room_types' => 'nullable|integer|min:0',
+            'max_daily_hotel_reservations' => 'nullable|integer|min:0',
+            
+            // SOPORTE
             'support_level' => 'required|in:basic,priority,premium',
             'support_response_time' => 'required|integer|min:1',
             
-            // Configuración
+            // CONFIGURACIÓN
             'is_active' => 'boolean',
             'is_public' => 'boolean',
             'is_featured' => 'boolean',
             'sort_order' => 'nullable|integer',
             'trial_days' => 'nullable|integer|min:0',
             
-            // Features
+            // CARACTERÍSTICAS
             'features_list' => 'nullable|array',
             'features_list.*' => 'string',
         ]);
 
-        // Preparar datos
+        // Preparar datos booleanos
         $validated['allow_custom_slug'] = $request->boolean('allow_custom_slug');
         $validated['is_active'] = $request->boolean('is_active');
         $validated['is_public'] = $request->boolean('is_public');
         $validated['is_featured'] = $request->boolean('is_featured');
+        $validated['inventory_tracking'] = $request->boolean('inventory_tracking', true);
+        $validated['whatsapp_integration'] = $request->boolean('whatsapp_integration', false);
+        $validated['kiubot_enabled'] = $request->boolean('kiubot_enabled', false);
+        
+        // Asegurar valores por defecto si vienen vacíos
+        $validated['sort_order'] = $validated['sort_order'] ?? $plan->sort_order ?? 0;
+        $validated['trial_days'] = $validated['trial_days'] ?? $plan->trial_days ?? 0;
         
         // Incrementar versión si hay cambios significativos
         $significantChanges = ['price', 'max_products', 'max_categories', 'max_sedes'];
@@ -223,7 +298,7 @@ class PlanController extends Controller
 
         return redirect()
             ->route('superlinkiu.plans.index')
-            ->with('success', 'Plan actualizado exitosamente.');
+            ->with('success', 'Plan actualizado exitosamente');
     }
 
     /**
@@ -233,13 +308,26 @@ class PlanController extends Controller
     {
         // Verificar si tiene tiendas activas
         if ($plan->hasActiveStores()) {
-            return back()->with('error', 'No se puede eliminar un plan con tiendas activas.');
+            if (request()->wantsJson()) {
+                return response()->json([
+                    'error' => 'No se puede eliminar un plan con tiendas activas'
+                ], 422);
+            }
+            return back()->with('error', 'No se puede eliminar un plan con tiendas activas');
         }
 
+        $planName = $plan->name;
         $plan->delete();
+
+        if (request()->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => "Plan \"{$planName}\" eliminado exitosamente"
+            ]);
+        }
 
         return redirect()
             ->route('superlinkiu.plans.index')
-            ->with('success', 'Plan eliminado exitosamente.');
+            ->with('success', "Plan \"{$planName}\" eliminado exitosamente");
     }
 }

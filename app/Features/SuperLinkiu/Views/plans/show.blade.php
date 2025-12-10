@@ -3,229 +3,277 @@
 @section('title', 'Detalles del Plan - ' . $plan->name)
 
 @section('content')
-<div class="container-fluid">
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-        <div>
-            <h1 class="text-body-large font-bold text-black-500 mb-0">{{ $plan->name }}</h1>
-            <p class="text-black-300 mt-1">Información detallada del plan</p>
-        </div>
-        <div class="flex gap-2">
-            <a href="{{ route('superlinkiu.plans.index') }}" class="bg-accent-100 hover:bg-accent-200 text-black-400 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
-                <x-solar-arrow-left-outline class="w-5 h-5" />
-                Volver a Planes
+<div class="max-w-7xl mx-auto space-y-6 mt-6">
+    {{-- Header --}}
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <a href="{{ route('superlinkiu.plans.index') }}" class="inline-flex items-center justify-center">
+                <i data-lucide="arrow-left" class="w-5 h-5 text-gray-600 hover:text-gray-800"></i>
             </a>
-            <a href="{{ route('superlinkiu.plans.edit', $plan) }}" class="bg-primary-200 hover:bg-primary-300 text-accent-50 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
-                <x-solar-pen-outline class="w-5 h-5" />
-                Editar Plan
-            </a>
+            <div>
+                <div class="flex items-center gap-3">
+                    <h1 class="text-lg font-semibold text-gray-800">{{ $plan->name }}</h1>
+                    @if($plan->is_featured)
+                        <span class="px-2 py-1 text-xs font-semibold bg-yellow-100 text-yellow-800 rounded-full">DESTACADO</span>
+                    @endif
+                    @if($plan->is_active)
+                        <span class="px-2 py-1 text-xs font-semibold bg-green-100 text-green-800 rounded-full">ACTIVO</span>
+                    @else
+                        <span class="px-2 py-1 text-xs font-semibold bg-red-100 text-red-800 rounded-full">INACTIVO</span>
+                    @endif
+                </div>
+                <p class="text-sm text-gray-600 mt-1">Detalles completos del plan de suscripción</p>
+            </div>
         </div>
+        <a href="{{ route('superlinkiu.plans.edit', $plan) }}" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+            <i data-lucide="edit" class="w-4 h-4"></i>
+            Editar Plan
+        </a>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <!-- Información Principal -->
+        {{-- Columna Principal --}}
         <div class="lg:col-span-2 space-y-6">
-            <!-- Información Básica -->
-            <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
-                <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                    <h2 class="text-body-large font-bold text-black-500 mb-0">Información Básica</h2>
+            
+            {{-- Información Básica --}}
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-base font-semibold text-gray-900 flex items-center gap-2">
+                        <i data-lucide="info" class="w-5 h-5 text-blue-600"></i>
+                        Información Básica
+                    </h2>
                 </div>
                 <div class="p-6">
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-sm font-medium text-black-400 mb-1">Nombre</label>
-                            <p class="text-black-500 font-medium">{{ $plan->name }}</p>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Nombre del Plan</label>
+                            <p class="text-gray-900 font-semibold">{{ $plan->name }}</p>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-black-400 mb-1">Precio Base</label>
-                            <p class="text-black-500 font-medium">{{ $plan->getPriceFormatted() }}</p>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Versión</label>
+                            <p class="text-gray-900 font-semibold">{{ $plan->version }}</p>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-black-400 mb-1">Moneda</label>
-                            <p class="text-black-500 font-medium">{{ $plan->currency }}</p>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Orden de Visualización</label>
+                            <p class="text-gray-900 font-semibold">{{ $plan->sort_order ?? 0 }}</p>
                         </div>
                         <div>
-                            <label class="block text-sm font-medium text-black-400 mb-1">Duración</label>
-                            <p class="text-black-500 font-medium">{{ $plan->duration_in_days }} días</p>
-                        </div>
-                        @if($plan->trial_days > 0)
-                        <div>
-                            <label class="block text-sm font-medium text-black-400 mb-1">Días de Prueba</label>
-                            <p class="text-black-500 font-medium">{{ $plan->trial_days }} días</p>
-                        </div>
-                        @endif
-                        <div>
-                            <label class="block text-sm font-medium text-black-400 mb-1">Versión</label>
-                            <p class="text-black-500 font-medium">{{ $plan->version }}</p>
+                            <label class="block text-xs font-medium text-gray-600 mb-1">Días de Prueba</label>
+                            <p class="text-gray-900 font-semibold">
+                                {{ $plan->trial_days ?? 0 }} 
+                                @if($plan->trial_days > 0)
+                                    <span class="text-green-600 text-xs">(Activo)</span>
+                                @else
+                                    <span class="text-gray-500 text-xs">(Sin prueba)</span>
+                                @endif
+                            </p>
                         </div>
                     </div>
                     
                     @if($plan->description)
-                    <div class="mt-6">
-                        <label class="block text-sm font-medium text-black-400 mb-2">Descripción</label>
-                        <p class="text-black-400 leading-relaxed">{{ $plan->description }}</p>
+                    <div class="mt-4 pt-4 border-t border-gray-200">
+                        <label class="block text-xs font-medium text-gray-600 mb-2">Descripción</label>
+                        <p class="text-sm text-gray-700 leading-relaxed">{{ $plan->description }}</p>
                     </div>
                     @endif
                 </div>
             </div>
 
-            <!-- Precios por Período -->
-            @if($plan->prices)
-            <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
-                <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                    <h2 class="text-body-large font-bold text-black-500 mb-0">Precios por Período</h2>
+            {{-- Precios por Período --}}
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-base font-semibold text-gray-900 flex items-center gap-2">
+                        <i data-lucide="dollar-sign" class="w-5 h-5 text-green-600"></i>
+                        Precios y Facturación
+                    </h2>
                 </div>
                 <div class="p-6">
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        @foreach(['monthly' => 'Mensual', 'quarterly' => 'Trimestral', 'semester' => 'Semestral'] as $period => $label)
-                            @if(isset($plan->prices[$period]) && $plan->prices[$period] > 0)
-                                <div class="text-center p-4 bg-accent-100 rounded-lg">
-                                    <h3 class="text-sm font-medium text-black-400 mb-1">{{ $label }}</h3>
-                                    <p class="text-2xl font-bold text-primary-300">{{ $plan->getFormattedPriceForPeriod($period) }}</p>
-                                    @if($discount = $plan->getDiscountForPeriod($period))
-                                        <p class="text-sm text-success-300 font-medium">Ahorro: {{ $discount }}%</p>
-                                    @endif
+                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+                        {{-- Mensual --}}
+                        <div class="relative p-3 rounded-lg border-2 border-blue-200 bg-gradient-to-br from-blue-50 to-white">
+                            <div class="text-center">
+                                <p class="text-xs font-medium text-gray-600 mb-1">Mensual</p>
+                                <p class="text-lg font-bold text-gray-900">${{ number_format($plan->price, 0, ',', '.') }}</p>
+                                <p class="text-xs text-gray-500">COP/mes</p>
+                            </div>
+                        </div>
+
+                        {{-- Trimestral --}}
+                        @php
+                            $prices = $plan->prices ?? [];
+                            $quarterlyPrice = $prices['quarterly'] ?? 0;
+                            $quarterlyDiscount = $quarterlyPrice > 0 && $plan->price > 0 
+                                ? round(100 - (($quarterlyPrice / 3) / $plan->price * 100)) 
+                                : 0;
+                        @endphp
+                        <div class="relative p-3 rounded-lg border-2 border-purple-200 bg-gradient-to-br from-purple-50 to-white">
+                            @if($quarterlyDiscount > 0)
+                                <div class="absolute -top-2 -right-2 bg-purple-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+                                    -{{ $quarterlyDiscount }}%
                                 </div>
                             @endif
-                        @endforeach
+                            <div class="text-center">
+                                <p class="text-xs font-medium text-gray-600 mb-1">Trimestral</p>
+                                <p class="text-lg font-bold text-gray-900">${{ number_format($quarterlyPrice, 0, ',', '.') }}</p>
+                                <p class="text-xs text-gray-500">COP/3 meses</p>
+                            </div>
+                        </div>
+
+                        {{-- Semestral --}}
+                        @php
+                            $semesterPrice = $prices['semester'] ?? 0;
+                            $semesterDiscount = $semesterPrice > 0 && $plan->price > 0 
+                                ? round(100 - (($semesterPrice / 6) / $plan->price * 100)) 
+                                : 0;
+                        @endphp
+                        <div class="relative p-3 rounded-lg border-2 border-orange-200 bg-gradient-to-br from-orange-50 to-white">
+                            @if($semesterDiscount > 0)
+                                <div class="absolute -top-2 -right-2 bg-orange-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+                                    -{{ $semesterDiscount }}%
+                                </div>
+                            @endif
+                            <div class="text-center">
+                                <p class="text-xs font-medium text-gray-600 mb-1">Semestral</p>
+                                <p class="text-lg font-bold text-gray-900">${{ number_format($semesterPrice, 0, ',', '.') }}</p>
+                                <p class="text-xs text-gray-500">COP/6 meses</p>
+                            </div>
+                        </div>
+
+                        {{-- Anual --}}
+                        @php
+                            $annualPrice = $prices['annual'] ?? 0;
+                            $annualDiscount = $annualPrice > 0 && $plan->price > 0 
+                                ? round(100 - (($annualPrice / 12) / $plan->price * 100)) 
+                                : 0;
+                        @endphp
+                        <div class="relative p-3 rounded-lg border-2 border-green-200 bg-gradient-to-br from-green-50 to-white">
+                            @if($annualDiscount > 0)
+                                <div class="absolute -top-2 -right-2 bg-green-600 text-white text-xs font-bold px-1.5 py-0.5 rounded-full">
+                                    -{{ $annualDiscount }}%
+                                </div>
+                            @endif
+                            <div class="text-center">
+                                <p class="text-xs font-medium text-gray-600 mb-1">Anual</p>
+                                <p class="text-lg font-bold text-gray-900">${{ number_format($annualPrice, 0, ',', '.') }}</p>
+                                <p class="text-xs text-gray-500">COP/año</p>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            @endif
 
-            <!-- Límites del Plan -->
-            <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
-                <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                    <h2 class="text-body-large font-bold text-black-500 mb-0">Límites del Plan</h2>
+            {{-- Límites del Plan --}}
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-base font-semibold text-gray-900 flex items-center gap-2">
+                        <i data-lucide="sliders" class="w-5 h-5 text-purple-600"></i>
+                        Límites del Plan
+                    </h2>
                 </div>
                 <div class="p-6">
-                    <!-- 📦 PRODUCTOS Y CATÁLOGO -->
-                    <div class="mb-6">
-                        <h4 class="text-base font-semibold text-black-500 mb-3">📦 Productos y Catálogo</h4>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div class="text-center p-3 bg-accent-100 rounded-lg">
-                                <x-solar-box-outline class="w-8 h-8 mx-auto mb-2 text-primary-300" />
-                                <p class="text-sm text-black-400">Productos totales</p>
-                                <p class="text-lg font-bold text-black-500">{{ $plan->max_products ?? 0 }}</p>
-                            </div>
-                            <div class="text-center p-3 bg-accent-100 rounded-lg">
-                                <x-solar-folder-outline class="w-8 h-8 mx-auto mb-2 text-primary-300" />
-                                <p class="text-sm text-black-400">Categorías</p>
-                                <p class="text-lg font-bold text-black-500">{{ $plan->max_categories ?? 0 }}</p>
-                            </div>
-                            <div class="text-center p-3 bg-accent-100 rounded-lg">
-                                <x-solar-settings-outline class="w-8 h-8 mx-auto mb-2 text-primary-300" />
-                                <p class="text-sm text-black-400">Variables de producto</p>
-                                <p class="text-lg font-bold text-black-500">{{ $plan->max_variables ?? 0 }}</p>
-                            </div>
-                            <div class="text-center p-3 bg-accent-100 rounded-lg">
-                                <x-solar-gallery-outline class="w-8 h-8 mx-auto mb-2 text-primary-300" />
-                                <p class="text-sm text-black-400">Imágenes por producto</p>
-                                <p class="text-lg font-bold text-black-500">{{ $plan->max_product_images ?? 0 }}</p>
-                            </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-1 text-sm">
+                        {{-- Productos y Catálogo --}}
+                        <div class="flex justify-between py-1.5 border-b border-gray-100">
+                            <span class="text-gray-600">Productos</span>
+                            <span class="font-semibold text-gray-900">{{ number_format($plan->max_products ?? 0) }}</span>
                         </div>
-                    </div>
-
-                    <!-- 🎨 DISEÑO Y MARKETING -->
-                    <div class="mb-6">
-                        <h4 class="text-base font-semibold text-black-500 mb-3">🎨 Diseño y Marketing</h4>
-                        <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
-                            <div class="text-center p-3 bg-accent-100 rounded-lg">
-                                <x-solar-gallery-outline class="w-8 h-8 mx-auto mb-2 text-primary-300" />
-                                <p class="text-sm text-black-400">Sliders homepage</p>
-                                <p class="text-lg font-bold text-black-500">{{ $plan->max_sliders ?? $plan->max_slider ?? 0 }}</p>
-                            </div>
-                            <div class="text-center p-3 bg-accent-100 rounded-lg">
-                                <x-solar-ticket-outline class="w-8 h-8 mx-auto mb-2 text-primary-300" />
-                                <p class="text-sm text-black-400">Cupones activos</p>
-                                <p class="text-lg font-bold text-black-500">{{ $plan->max_active_coupons ?? 0 }}</p>
-                            </div>
+                        <div class="flex justify-between py-1.5 border-b border-gray-100">
+                            <span class="text-gray-600">Categorías</span>
+                            <span class="font-semibold text-gray-900">{{ number_format($plan->max_categories ?? 0) }}</span>
                         </div>
-                    </div>
-
-                    <!-- 🚚 ENVÍOS Y LOGÍSTICA -->
-                    <div class="mb-6">
-                        <h4 class="text-base font-semibold text-black-500 mb-3">🚚 Envíos y Logística</h4>
-                        <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
-                            <div class="text-center p-3 bg-accent-100 rounded-lg">
-                                <x-solar-buildings-outline class="w-8 h-8 mx-auto mb-2 text-primary-300" />
-                                <p class="text-sm text-black-400">Sedes físicas</p>
-                                <p class="text-lg font-bold text-black-500">{{ $plan->max_locations ?? $plan->max_sedes ?? 0 }}</p>
-                            </div>
-                            <div class="text-center p-3 bg-accent-100 rounded-lg">
-                                <x-solar-map-point-outline class="w-8 h-8 mx-auto mb-2 text-primary-300" />
-                                <p class="text-sm text-black-400">Zonas de envío nacional</p>
-                                <p class="text-lg font-bold text-black-500">{{ $plan->max_delivery_zones ?? 0 }}</p>
-                            </div>
+                        <div class="flex justify-between py-1.5 border-b border-gray-100">
+                            <span class="text-gray-600">Variables de producto</span>
+                            <span class="font-semibold text-gray-900">{{ number_format($plan->max_variables ?? 0) }}</span>
                         </div>
-                    </div>
-
-                    <!-- 💰 PAGOS -->
-                    <div class="mb-6">
-                        <h4 class="text-base font-semibold text-black-500 mb-3">💰 Pagos</h4>
-                        <div class="grid grid-cols-2 md:grid-cols-2 gap-4">
-                            <div class="text-center p-3 bg-accent-100 rounded-lg">
-                                <x-solar-card-outline class="w-8 h-8 mx-auto mb-2 text-primary-300" />
-                                <p class="text-sm text-black-400">Métodos de pago activos</p>
-                                <p class="text-lg font-bold text-black-500">{{ $plan->max_payment_methods ?? 0 }}</p>
-                            </div>
-                            <div class="text-center p-3 bg-accent-100 rounded-lg">
-                                <x-solar-card-outline class="w-8 h-8 mx-auto mb-2 text-primary-300" />
-                                <p class="text-sm text-black-400">Cuentas bancarias</p>
-                                <p class="text-lg font-bold text-black-500">{{ $plan->max_bank_accounts ?? 0 }}</p>
-                            </div>
+                        <div class="flex justify-between py-1.5 border-b border-gray-100">
+                            <span class="text-gray-600">Imágenes por producto</span>
+                            <span class="font-semibold text-gray-900">{{ number_format($plan->max_product_images ?? 0) }}</span>
                         </div>
-                    </div>
-
-                    <!-- 📊 VENTAS Y PEDIDOS -->
-                    <div class="mb-6">
-                        <h4 class="text-base font-semibold text-black-500 mb-3">📊 Ventas y Pedidos</h4>
-                        <div class="grid grid-cols-1 gap-4">
-                            <div class="text-center p-3 bg-accent-100 rounded-lg">
-                                <x-solar-history-outline class="w-8 h-8 mx-auto mb-2 text-primary-300" />
-                                <p class="text-sm text-black-400">Meses de historial de pedidos</p>
-                                <p class="text-lg font-bold text-black-500">{{ $plan->order_history_months ?? 0 }}</p>
-                            </div>
+                        
+                        {{-- Diseño y Marketing --}}
+                        <div class="flex justify-between py-1.5 border-b border-gray-100">
+                            <span class="text-gray-600">Banners/Sliders</span>
+                            <span class="font-semibold text-gray-900">{{ number_format($plan->max_slider ?? 0) }}</span>
                         </div>
-                    </div>
-
-                    <!-- 👥 ADMINISTRACIÓN -->
-                    <div class="mb-6">
-                        <h4 class="text-base font-semibold text-black-500 mb-3">👥 Administración</h4>
-                        <div class="grid grid-cols-2 md:grid-cols-3 gap-4">
-                            <div class="text-center p-3 bg-accent-100 rounded-lg">
-                                <x-solar-users-group-rounded-outline class="w-8 h-8 mx-auto mb-2 text-primary-300" />
-                                <p class="text-sm text-black-400">Usuarios administradores</p>
-                                <p class="text-lg font-bold text-black-500">{{ $plan->max_admins ?? 0 }}</p>
-                            </div>
-                            <div class="text-center p-3 bg-accent-100 rounded-lg">
-                                <x-solar-chat-round-outline class="w-8 h-8 mx-auto mb-2 text-primary-300" />
-                                <p class="text-sm text-black-400">Tickets mensuales</p>
-                                <p class="text-lg font-bold text-black-500">{{ $plan->max_tickets_per_month ?? 0 }}</p>
-                            </div>
-                            <div class="text-center p-3 bg-accent-100 rounded-lg">
-                                <x-solar-shield-check-outline class="w-8 h-8 mx-auto mb-2 text-primary-300" />
-                                <p class="text-sm text-black-400">Nivel de soporte</p>
-                                <p class="text-lg font-bold text-black-500">{{ ucfirst($plan->support_level ?? 'basic') }}</p>
-                            </div>
+                        <div class="flex justify-between py-1.5 border-b border-gray-100">
+                            <span class="text-gray-600">Cupones activos</span>
+                            <span class="font-semibold text-gray-900">{{ number_format($plan->max_active_coupons ?? 0) }}</span>
                         </div>
-                    </div>
-
-                    <!-- 📈 ANALÍTICAS -->
-                    <div class="mb-6">
-                        <h4 class="text-base font-semibold text-black-500 mb-3">📈 Analíticas</h4>
-                        <div class="grid grid-cols-1 gap-4">
-                            <div class="text-center p-3 bg-accent-100 rounded-lg">
-                                <x-solar-chart-outline class="w-8 h-8 mx-auto mb-2 text-primary-300" />
-                                <p class="text-sm text-black-400">Días de retención de analytics</p>
-                                <p class="text-lg font-bold text-black-500">{{ $plan->analytics_retention_days ?? 0 }}</p>
-                            </div>
+                        
+                        {{-- Envíos --}}
+                        <div class="flex justify-between py-1.5 border-b border-gray-100">
+                            <span class="text-gray-600">Sedes/Ubicaciones</span>
+                            <span class="font-semibold text-gray-900">{{ number_format($plan->max_sedes ?? 0) }}</span>
                         </div>
+                        <div class="flex justify-between py-1.5 border-b border-gray-100">
+                            <span class="text-gray-600">Zonas de reparto</span>
+                            <span class="font-semibold text-gray-900">{{ number_format($plan->max_delivery_zones ?? 0) }}</span>
+                        </div>
+                        
+                        {{-- Pagos --}}
+                        <div class="flex justify-between py-1.5 border-b border-gray-100">
+                            <span class="text-gray-600">Métodos de pago</span>
+                            <span class="font-semibold text-gray-900">{{ number_format($plan->max_payment_methods ?? 0) }}</span>
+                        </div>
+                        <div class="flex justify-between py-1.5 border-b border-gray-100">
+                            <span class="text-gray-600">Cuentas bancarias</span>
+                            <span class="font-semibold text-gray-900">{{ number_format($plan->max_bank_accounts ?? 0) }}</span>
+                        </div>
+                        
+                        {{-- Administración --}}
+                        <div class="flex justify-between py-1.5 border-b border-gray-100">
+                            <span class="text-gray-600">Administradores</span>
+                            <span class="font-semibold text-gray-900">{{ number_format($plan->max_admins ?? 0) }}</span>
+                        </div>
+                        <div class="flex justify-between py-1.5 border-b border-gray-100">
+                            <span class="text-gray-600">Tickets mensuales</span>
+                            <span class="font-semibold text-gray-900">{{ number_format($plan->max_tickets_per_month ?? 0) }}</span>
+                        </div>
+                        <div class="flex justify-between py-1.5 border-b border-gray-100">
+                            <span class="text-gray-600">Retención pedidos</span>
+                            <span class="font-semibold text-gray-900">{{ number_format($plan->order_history_months ?? 0) }} meses</span>
+                        </div>
+                        <div class="flex justify-between py-1.5 border-b border-gray-100">
+                            <span class="text-gray-600">Retención analíticas</span>
+                            <span class="font-semibold text-gray-900">{{ number_format($plan->analytics_retention_days ?? 0) }} días</span>
+                        </div>
+                        
+                        {{-- Límites Verticales --}}
+                        @if(($plan->max_tables ?? 0) > 0)
+                        <div class="flex justify-between py-1.5 border-b border-gray-100">
+                            <span class="text-gray-600">Mesas (Restaurant)</span>
+                            <span class="font-semibold text-gray-900">{{ number_format($plan->max_tables) }}</span>
+                        </div>
+                        @endif
+                        @if(($plan->max_daily_reservations ?? 0) > 0)
+                        <div class="flex justify-between py-1.5 border-b border-gray-100">
+                            <span class="text-gray-600">Reservas diarias (Restaurant)</span>
+                            <span class="font-semibold text-gray-900">{{ number_format($plan->max_daily_reservations) }}</span>
+                        </div>
+                        @endif
+                        @if(($plan->max_rooms ?? 0) > 0)
+                        <div class="flex justify-between py-1.5 border-b border-gray-100">
+                            <span class="text-gray-600">Habitaciones (Hotel)</span>
+                            <span class="font-semibold text-gray-900">{{ number_format($plan->max_rooms) }}</span>
+                        </div>
+                        @endif
+                        @if(($plan->max_room_types ?? 0) > 0)
+                        <div class="flex justify-between py-1.5 border-b border-gray-100">
+                            <span class="text-gray-600">Tipos de habitación</span>
+                            <span class="font-semibold text-gray-900">{{ number_format($plan->max_room_types) }}</span>
+                        </div>
+                        @endif
+                        @if(($plan->max_daily_hotel_reservations ?? 0) > 0)
+                        <div class="flex justify-between py-1.5 border-b border-gray-100">
+                            <span class="text-gray-600">Reservas Hotel/Día</span>
+                            <span class="font-semibold text-gray-900">{{ number_format($plan->max_daily_hotel_reservations) }}</span>
+                        </div>
+                        @endif
                     </div>
                 </div>
             </div>
 
-            <!-- Características -->
+            {{-- Características Incluidas --}}
             @php
                 $features = $plan->features_list;
                 if (is_string($features)) {
@@ -234,16 +282,19 @@
                 $features = is_array($features) ? $features : [];
             @endphp
             @if($features && count($features) > 0)
-            <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
-                <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                    <h2 class="text-body-large font-bold text-black-500 mb-0">Características Incluidas</h2>
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div class="px-6 py-4 border-b border-gray-200">
+                    <h2 class="text-base font-semibold text-gray-900 flex items-center gap-2">
+                        <i data-lucide="sparkles" class="w-5 h-5 text-yellow-600"></i>
+                        Características Incluidas
+                    </h2>
                 </div>
                 <div class="p-6">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                         @foreach($features as $feature)
-                            <div class="flex items-start">
-                                <x-solar-check-circle-outline class="w-5 h-5 text-success-300 mr-3 flex-shrink-0 mt-0.5" />
-                                <span class="text-black-400">{{ $feature }}</span>
+                            <div class="flex items-start gap-2 p-2 bg-green-50 rounded border border-green-100">
+                                <i data-lucide="check-circle" class="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5"></i>
+                                <span class="text-sm text-gray-700">{{ $feature }}</span>
                             </div>
                         @endforeach
                     </div>
@@ -252,123 +303,130 @@
             @endif
         </div>
 
-        <!-- Panel Lateral -->
+        {{-- Sidebar --}}
         <div class="space-y-6">
-            <!-- Estado del Plan -->
-            <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
-                <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                    <h2 class="text-body-large font-bold text-black-500 mb-0">Estado</h2>
+            
+            {{-- Estado del Plan --}}
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div class="px-6 py-3 border-b border-gray-200">
+                    <h2 class="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                        <i data-lucide="toggle-right" class="w-4 h-4 text-blue-600"></i>
+                        Estado
+                    </h2>
                 </div>
-                <div class="p-6 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <span class="text-black-400">Activo</span>
+                <div class="p-4 space-y-3">
+                    <div class="flex items-center justify-between py-1.5 border-b border-gray-100">
+                        <span class="text-xs text-gray-600">Activo</span>
                         @if($plan->is_active)
-                            <span class="bg-success-200 text-accent-50 px-2 py-1 rounded text-sm">Sí</span>
+                            <span class="px-2 py-0.5 text-xs font-semibold bg-green-100 text-green-800 rounded-full">Sí</span>
                         @else
-                            <span class="bg-error-200 text-accent-50 px-2 py-1 rounded text-sm">No</span>
+                            <span class="px-2 py-0.5 text-xs font-semibold bg-red-100 text-red-800 rounded-full">No</span>
                         @endif
                     </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-black-400">Público</span>
+                    <div class="flex items-center justify-between py-1.5 border-b border-gray-100">
+                        <span class="text-xs text-gray-600">Público</span>
                         @if($plan->is_public)
-                            <span class="bg-success-200 text-accent-50 px-2 py-1 rounded text-sm">Sí</span>
+                            <span class="px-2 py-0.5 text-xs font-semibold bg-green-100 text-green-800 rounded-full">Sí</span>
                         @else
-                            <span class="bg-error-200 text-accent-50 px-2 py-1 rounded text-sm">No</span>
+                            <span class="px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-800 rounded-full">No</span>
                         @endif
                     </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-black-400">Destacado</span>
+                    <div class="flex items-center justify-between py-1.5 border-b border-gray-100">
+                        <span class="text-xs text-gray-600">Destacado</span>
                         @if($plan->is_featured)
-                            <span class="bg-warning-200 text-black-400 px-2 py-1 rounded text-sm">Sí</span>
+                            <span class="px-2 py-0.5 text-xs font-semibold bg-yellow-100 text-yellow-800 rounded-full">Sí</span>
                         @else
-                            <span class="bg-accent-200 text-black-400 px-2 py-1 rounded text-sm">No</span>
+                            <span class="px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-800 rounded-full">No</span>
                         @endif
                     </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-black-400">Slug Personalizado</span>
-                        @if($plan->allow_custom_slug)
-                            <span class="bg-success-200 text-accent-50 px-2 py-1 rounded text-sm">Permitido</span>
+                    <div class="flex items-center justify-between py-1.5 border-b border-gray-100">
+                        <span class="text-xs text-gray-600">Inventario</span>
+                        @if($plan->inventory_tracking)
+                            <span class="px-2 py-0.5 text-xs font-semibold bg-blue-100 text-blue-800 rounded-full">✓</span>
                         @else
-                            <span class="bg-error-200 text-accent-50 px-2 py-1 rounded text-sm">No Permitido</span>
+                            <span class="px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-800 rounded-full">-</span>
                         @endif
                     </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-black-400">Orden</span>
-                        <span class="text-black-500 font-medium">{{ $plan->sort_order }}</span>
+                    <div class="flex items-center justify-between py-1.5">
+                        <span class="text-xs text-gray-600">WhatsApp</span>
+                        @if($plan->whatsapp_integration)
+                            <span class="px-2 py-0.5 text-xs font-semibold bg-green-100 text-green-800 rounded-full">✓</span>
+                        @else
+                            <span class="px-2 py-0.5 text-xs font-semibold bg-gray-100 text-gray-800 rounded-full">-</span>
+                        @endif
                     </div>
                 </div>
             </div>
 
-            <!-- Soporte -->
-            <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
-                <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                    <h2 class="text-body-large font-bold text-black-500 mb-0">Soporte</h2>
+            {{-- Soporte --}}
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div class="px-6 py-3 border-b border-gray-200">
+                    <h2 class="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                        <i data-lucide="headphones" class="w-4 h-4 text-green-600"></i>
+                        Soporte
+                    </h2>
                 </div>
-                <div class="p-6 space-y-4">
+                <div class="p-4 space-y-3">
                     <div>
-                        <label class="block text-sm font-medium text-black-400 mb-1">Nivel</label>
-                        <span class="bg-info-200 text-accent-50 px-2 py-1 rounded text-sm capitalize">{{ $plan->support_level }}</span>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Nivel</label>
+                        @php
+                            $levelColors = [
+                                'basic' => 'bg-gray-100 text-gray-800',
+                                'priority' => 'bg-blue-100 text-blue-800',
+                                'premium' => 'bg-purple-100 text-purple-800',
+                            ];
+                            $levelLabels = [
+                                'basic' => 'Básico',
+                                'priority' => 'Prioritario',
+                                'premium' => 'Premium',
+                            ];
+                        @endphp
+                        <span class="px-2 py-1 text-xs font-semibold {{ $levelColors[$plan->support_level ?? 'basic'] }} rounded">
+                            {{ $levelLabels[$plan->support_level ?? 'basic'] }}
+                        </span>
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-black-400 mb-1">Tiempo de Respuesta</label>
-                        <p class="text-black-500 font-medium">{{ $plan->support_response_time }} horas</p>
+                        <label class="block text-xs font-medium text-gray-600 mb-1">Tiempo de Respuesta</label>
+                        <p class="text-gray-900 font-semibold text-sm">{{ $plan->support_response_time ?? 24 }} hrs</p>
                     </div>
                 </div>
             </div>
 
-            <!-- Estadísticas -->
-            <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
-                <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                    <h2 class="text-body-large font-bold text-black-500 mb-0">Estadísticas</h2>
+            {{-- Estadísticas --}}
+            <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                <div class="px-6 py-3 border-b border-gray-200">
+                    <h2 class="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                        <i data-lucide="bar-chart-2" class="w-4 h-4 text-purple-600"></i>
+                        Estadísticas
+                    </h2>
                 </div>
-                <div class="p-6 space-y-4">
-                    <div class="flex items-center justify-between">
-                        <span class="text-black-400">Tiendas Activas</span>
-                        <span class="text-black-500 font-bold">{{ $plan->stores_count ?? 0 }}</span>
+                <div class="p-4 space-y-3">
+                    <div class="flex items-center justify-between py-1.5 border-b border-gray-100">
+                        <span class="text-xs text-gray-600">Tiendas Activas</span>
+                        <span class="text-base font-bold text-gray-900">{{ $plan->stores_count ?? 0 }}</span>
                     </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-black-400">Creado</span>
-                        <span class="text-black-400 text-sm">{{ $plan->created_at->format('d/m/Y') }}</span>
+                    <div class="flex items-center justify-between py-1.5 border-b border-gray-100">
+                        <span class="text-xs text-gray-600">Creado</span>
+                        <span class="text-xs text-gray-900">{{ $plan->created_at->format('d/m/Y') }}</span>
                     </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-black-400">Actualizado</span>
-                        <span class="text-black-400 text-sm">{{ $plan->updated_at->format('d/m/Y') }}</span>
+                    <div class="flex items-center justify-between py-1.5">
+                        <span class="text-xs text-gray-600">Actualizado</span>
+                        <span class="text-xs text-gray-900">{{ $plan->updated_at->format('d/m/Y') }}</span>
                     </div>
-                </div>
-            </div>
-
-            <!-- Acciones -->
-            <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
-                <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-                    <h2 class="text-body-large font-bold text-black-500 mb-0">Acciones</h2>
-                </div>
-                <div class="p-6 space-y-3">
-                    <a href="{{ route('superlinkiu.plans.edit', $plan) }}" 
-                       class="w-full bg-primary-300 hover:bg-primary-400 text-accent-50 py-2 rounded-lg text-center transition-colors block">
-                        <x-solar-pen-outline class="w-4 h-4 inline mr-2" />
-                        Editar Plan
-                    </a>
-                    
-                    @if(!$plan->hasActiveStores())
-                        <form action="{{ route('superlinkiu.plans.destroy', $plan) }}" method="POST" class="w-full">
-                            @csrf
-                            @method('DELETE')
-                            <button type="submit"
-                                    onclick="return confirm('¿Estás seguro de eliminar este plan?')"
-                                    class="w-full bg-error-300 hover:bg-error-500 text-accent-50 py-2 rounded-lg transition-colors">
-                                <x-solar-trash-bin-trash-outline class="w-4 h-4 inline mr-2" />
-                                Eliminar Plan
-                            </button>
-                        </form>
-                    @else
-                        <div class="text-center py-2 text-sm text-black-300">
-                            <x-solar-info-circle-outline class="w-4 h-4 inline mr-1" />
-                            No se puede eliminar: tiene tiendas activas
-                        </div>
-                    @endif
                 </div>
             </div>
         </div>
     </div>
 </div>
-@endsection 
+
+@push('scripts')
+<script>
+// Inicializar iconos Lucide
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.createIcons && window.lucideIcons) {
+        window.createIcons({ icons: window.lucideIcons });
+    }
+});
+</script>
+@endpush
+@endsection

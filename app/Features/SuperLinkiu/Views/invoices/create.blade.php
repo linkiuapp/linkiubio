@@ -3,198 +3,261 @@
 @section('title', 'Crear Nueva Factura')
 
 @section('content')
-<div class="container-fluid">
-    <!-- Header -->
-    <div class="flex justify-between items-center mb-6">
-        <div>
-            <h1 class="text-lg text-black-500 mb-0">Crear Nueva Factura</h1>
-            <p class="text-black-300 mt-1">Genera una nueva factura para una tienda</p>
+<div class="max-w-4xl mx-auto space-y-6 mt-6">
+    {{-- Header --}}
+    <div class="flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <a href="{{ route('superlinkiu.invoices.index') }}" class="inline-flex items-center justify-center">
+                <i data-lucide="arrow-left" class="w-5 h-5 text-gray-600 hover:text-gray-800"></i>
+            </a>
+            <div>
+                <h1 class="text-lg font-semibold text-gray-800">Crear Nueva Factura</h1>
+                <p class="text-sm text-gray-600 mt-1">Genera una nueva factura para una tienda</p>
+            </div>
         </div>
-        <a href="{{ route('superlinkiu.invoices.index') }}" class="bg-accent-100 hover:bg-accent-200 text-black-400 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors">
-            <x-solar-arrow-left-outline class="w-5 h-5" />
-            Volver a Facturas
-        </a>
     </div>
 
-    <!-- Formulario -->
-    <div class="bg-accent-50 rounded-lg p-0 overflow-hidden">
-        <div class="border-b border-accent-100 bg-accent-50 py-4 px-6">
-            <h2 class="text-lg text-black-500 mb-0">Información de la Factura</h2>
+    {{-- Validation Errors --}}
+    @if($errors->any())
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4">
+            <div class="flex items-start gap-3">
+                <i data-lucide="alert-circle" class="w-5 h-5 text-red-600 flex-shrink-0 mt-0.5"></i>
+                <div>
+                    <p class="font-medium text-red-800 mb-2">Por favor corrige los siguientes errores:</p>
+                    <ul class="list-disc list-inside space-y-1 text-sm text-red-700">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
         </div>
+    @endif
+
+    {{-- Formulario --}}
+    <form action="{{ route('superlinkiu.invoices.store') }}" method="POST" x-data="createInvoice()">
+        @csrf
         
-        <form action="{{ route('superlinkiu.invoices.store') }}" method="POST" class="p-6" x-data="createInvoice">
-            @csrf
-            
-            <!-- Selección de Tienda y Plan -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <div>
-                    <label class="block text-sm font-medium text-black-400 mb-2">
-                        Tienda <span class="text-error-300">*</span>
-                    </label>
-                    <select name="store_id" 
-                            x-model="selectedStore"
-                            @change="updatePlanFromStore()"
-                            class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('store_id') border-error-200 @enderror">
-                        <option value="">Seleccionar tienda</option>
-                        @foreach($stores as $store)
-                            <option value="{{ $store->id }}" 
-                                    data-plan-id="{{ $store->plan_id }}"
-                                    data-plan-name="{{ $store->plan->name }}"
-                                    {{ old('store_id') == $store->id ? 'selected' : '' }}>
-                                {{ $store->name }} - {{ $store->plan->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('store_id')
-                        <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
-                    @enderror
-                </div>
+        {{-- Sección: Tienda y Plan --}}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-base font-semibold text-gray-900 flex items-center gap-2">
+                    <i data-lucide="building" class="w-5 h-5 text-blue-600"></i>
+                    Tienda y Plan
+                </h2>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Tienda <span class="text-red-500">*</span>
+                        </label>
+                        <select name="store_id" 
+                                x-model="selectedStore"
+                                @change="updatePlanFromStore()"
+                                required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('store_id') border-red-300 @enderror">
+                            <option value="">Seleccionar tienda</option>
+                            @foreach($stores as $store)
+                                <option value="{{ $store->id }}" 
+                                        data-plan-id="{{ $store->plan_id }}"
+                                        data-plan-name="{{ $store->plan->name }}"
+                                        {{ old('store_id') == $store->id ? 'selected' : '' }}>
+                                    {{ $store->name }} - {{ $store->plan->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('store_id')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-black-400 mb-2">
-                        Plan <span class="text-error-300">*</span>
-                    </label>
-                    <select name="plan_id" 
-                            x-model="selectedPlan"
-                            @change="updateAmountFromPlan()"
-                            class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('plan_id') border-error-200 @enderror">
-                        <option value="">Seleccionar plan</option>
-                        @foreach($plans as $plan)
-                            <option value="{{ $plan->id }}" 
-                                    data-prices="{{ json_encode($plan->prices) }}"
-                                    {{ old('plan_id') == $plan->id ? 'selected' : '' }}>
-                                {{ $plan->name }}
-                            </option>
-                        @endforeach
-                    </select>
-                    @error('plan_id')
-                        <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
-                    @enderror
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Plan <span class="text-red-500">*</span>
+                        </label>
+                        <select name="plan_id" 
+                                x-model="selectedPlan"
+                                @change="updateAmountFromPlan()"
+                                required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('plan_id') border-red-300 @enderror">
+                            <option value="">Seleccionar plan</option>
+                            @foreach($plans as $plan)
+                                <option value="{{ $plan->id }}" 
+                                        data-prices="{{ json_encode($plan->prices) }}"
+                                        {{ old('plan_id') == $plan->id ? 'selected' : '' }}>
+                                    {{ $plan->name }}
+                                </option>
+                            @endforeach
+                        </select>
+                        @error('plan_id')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Período y Monto -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <div>
-                    <label class="block text-sm font-medium text-black-400 mb-2">
-                        Período <span class="text-error-300">*</span>
-                    </label>
-                    <select name="period" 
-                            x-model="selectedPeriod"
-                            @change="updateAmountFromPlan()"
-                            class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('period') border-error-200 @enderror">
-                        <option value="">Seleccionar período</option>
-                        <option value="monthly" {{ old('period') == 'monthly' ? 'selected' : '' }}>Mensual</option>
-                        <option value="quarterly" {{ old('period') == 'quarterly' ? 'selected' : '' }}>Trimestral</option>
-                        <option value="biannual" {{ old('period') == 'biannual' ? 'selected' : '' }}>Semestral</option>
-                    </select>
-                    @error('period')
-                        <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
-                    @enderror
-                </div>
+        {{-- Sección: Período y Monto --}}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-base font-semibold text-gray-900 flex items-center gap-2">
+                    <i data-lucide="dollar-sign" class="w-5 h-5 text-green-600"></i>
+                    Facturación
+                </h2>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Período <span class="text-red-500">*</span>
+                        </label>
+                        <select name="period" 
+                                x-model="selectedPeriod"
+                                @change="updateAmountFromPlan()"
+                                required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('period') border-red-300 @enderror">
+                            <option value="">Seleccionar</option>
+                            <option value="monthly" {{ old('period') == 'monthly' ? 'selected' : '' }}>Mensual</option>
+                            <option value="quarterly" {{ old('period') == 'quarterly' ? 'selected' : '' }}>Trimestral</option>
+                            <option value="semester" {{ old('period') == 'semester' ? 'selected' : '' }}>Semestral</option>
+                        </select>
+                        @error('period')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-black-400 mb-2">
-                        Monto (COP) <span class="text-error-300">*</span>
-                    </label>
-                    <input type="number" 
-                           name="amount" 
-                           x-model="amount"
-                           value="{{ old('amount') }}"
-                           min="0"
-                           step="1000"
-                           class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('amount') border-error-200 @enderror"
-                           placeholder="60000">
-                    @error('amount')
-                        <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
-                    @enderror
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Monto (COP) <span class="text-red-500">*</span>
+                        </label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2.5 text-gray-500">$</span>
+                            <input type="number" 
+                                   name="amount" 
+                                   x-model="amount"
+                                   value="{{ old('amount') }}"
+                                   min="0"
+                                   step="1000"
+                                   required
+                                   class="w-full pl-8 pr-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('amount') border-red-300 @enderror"
+                                   placeholder="49900">
+                        </div>
+                        @error('amount')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Fechas -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <div>
-                    <label class="block text-sm font-medium text-black-400 mb-2">
-                        Fecha de Emisión <span class="text-error-300">*</span>
-                    </label>
-                    <input type="date" 
-                           name="issue_date" 
-                           value="{{ old('issue_date', now()->format('Y-m-d')) }}"
-                           class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('issue_date') border-error-200 @enderror">
-                    @error('issue_date')
-                        <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
-                    @enderror
-                </div>
+        {{-- Sección: Fechas --}}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-base font-semibold text-gray-900 flex items-center gap-2">
+                    <i data-lucide="calendar" class="w-5 h-5 text-purple-600"></i>
+                    Fechas
+                </h2>
+            </div>
+            <div class="p-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Fecha de Emisión <span class="text-red-500">*</span>
+                        </label>
+                        <input type="date" 
+                               name="issue_date" 
+                               value="{{ old('issue_date', now()->format('Y-m-d')) }}"
+                               required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('issue_date') border-red-300 @enderror">
+                        @error('issue_date')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
 
-                <div>
-                    <label class="block text-sm font-medium text-black-400 mb-2">
-                        Fecha de Vencimiento <span class="text-error-300">*</span>
-                    </label>
-                    <input type="date" 
-                           name="due_date" 
-                           value="{{ old('due_date', now()->addDays(15)->format('Y-m-d')) }}"
-                           class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('due_date') border-error-200 @enderror">
-                    @error('due_date')
-                        <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
-                    @enderror
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-2">
+                            Fecha de Vencimiento <span class="text-red-500">*</span>
+                        </label>
+                        <input type="date" 
+                               name="due_date" 
+                               value="{{ old('due_date', now()->addDays(15)->format('Y-m-d')) }}"
+                               required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('due_date') border-red-300 @enderror">
+                        <p class="mt-1 text-xs text-gray-600">Por defecto: 15 días desde emisión</p>
+                        @error('due_date')
+                            <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
+                        @enderror
+                    </div>
                 </div>
             </div>
+        </div>
 
-            <!-- Notas -->
-            <div class="mb-8">
-                <label class="block text-sm font-medium text-black-400 mb-2">
-                    Notas
-                </label>
+        {{-- Sección: Notas --}}
+        <div class="bg-white rounded-lg shadow-sm border border-gray-200 mb-6">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h2 class="text-base font-semibold text-gray-900 flex items-center gap-2">
+                    <i data-lucide="file-text" class="w-5 h-5 text-gray-600"></i>
+                    Notas Adicionales
+                </h2>
+            </div>
+            <div class="p-6">
                 <textarea name="notes" 
                           rows="4"
-                          class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200 focus:border-transparent @error('notes') border-error-200 @enderror"
-                          placeholder="Notas adicionales sobre la factura">{{ old('notes') }}</textarea>
+                          class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 @error('notes') border-red-300 @enderror"
+                          placeholder="Notas adicionales sobre la factura (opcional)">{{ old('notes') }}</textarea>
                 @error('notes')
-                    <p class="mt-1 text-sm text-error-300">{{ $message }}</p>
+                    <p class="mt-1 text-sm text-red-600">{{ $message }}</p>
                 @enderror
             </div>
+        </div>
 
-            <!-- Resumen -->
-            <div class="bg-accent-100 rounded-lg p-4 mb-8" x-show="selectedStore && selectedPlan && selectedPeriod">
-                <h3 class="text-sm font-semibold text-black-400 mb-3">Resumen de la Factura</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <p class="text-sm text-black-300">Tienda:</p>
-                        <p class="text-sm font-medium text-black-500" x-text="getStoreName()"></p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-black-300">Plan:</p>
-                        <p class="text-sm font-medium text-black-500" x-text="getPlanName()"></p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-black-300">Período:</p>
-                        <p class="text-sm font-medium text-black-500" x-text="getPeriodLabel()"></p>
-                    </div>
-                    <div>
-                        <p class="text-sm text-black-300">Monto:</p>
-                        <p class="text-lg font-bold text-primary-300" x-text="getFormattedAmount()"></p>
-                    </div>
+        {{-- Resumen --}}
+        <div x-show="selectedStore && selectedPlan && selectedPeriod" 
+             class="bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border-2 border-blue-200 p-6 mb-6">
+            <h3 class="text-sm font-semibold text-gray-800 mb-4 flex items-center gap-2">
+                <i data-lucide="info" class="w-4 h-4 text-blue-600"></i>
+                Resumen de la Factura
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <p class="text-xs text-gray-600">Tienda:</p>
+                    <p class="text-sm font-semibold text-gray-900" x-text="getStoreName()"></p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-600">Plan:</p>
+                    <p class="text-sm font-semibold text-gray-900" x-text="getPlanName()"></p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-600">Período:</p>
+                    <p class="text-sm font-semibold text-gray-900" x-text="getPeriodLabel()"></p>
+                </div>
+                <div>
+                    <p class="text-xs text-gray-600">Monto Total:</p>
+                    <p class="text-lg font-bold text-blue-600" x-text="getFormattedAmount()"></p>
                 </div>
             </div>
+        </div>
 
-            <!-- Botones -->
-            <div class="flex justify-end gap-3">
-                <a href="{{ route('superlinkiu.invoices.index') }}" 
-                   class="bg-accent-100 hover:bg-accent-200 text-black-400 px-6 py-2 rounded-lg transition-colors">
-                    Cancelar
-                </a>
-                <button type="submit" 
-                        class="bg-primary-200 hover:bg-primary-300 text-accent-50 px-6 py-2 rounded-lg transition-colors">
-                    Crear Factura
-                </button>
-            </div>
-        </form>
-    </div>
+        {{-- Botones --}}
+        <div class="flex justify-end gap-3">
+            <a href="{{ route('superlinkiu.invoices.index') }}" 
+               class="px-6 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-medium transition-colors">
+                Cancelar
+            </a>
+            <button type="submit" 
+                    class="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+                <i data-lucide="check" class="w-4 h-4"></i>
+                Crear Factura
+            </button>
+        </div>
+    </form>
 </div>
 
+@push('scripts')
 <script>
-document.addEventListener('alpine:init', () => {
-    Alpine.data('createInvoice', () => ({
+function createInvoice() {
+    return {
         selectedStore: '{{ old('store_id') }}',
         selectedPlan: '{{ old('plan_id') }}',
         selectedPeriod: '{{ old('period') }}',
@@ -242,7 +305,7 @@ document.addEventListener('alpine:init', () => {
             const labels = {
                 'monthly': 'Mensual',
                 'quarterly': 'Trimestral',
-                'biannual': 'Semestral'
+                'semester': 'Semestral'
             };
             return labels[this.selectedPeriod] || '';
         },
@@ -250,7 +313,15 @@ document.addEventListener('alpine:init', () => {
         getFormattedAmount() {
             return '$' + new Intl.NumberFormat('es-CO').format(this.amount);
         }
-    }));
+    };
+}
+
+// Inicializar iconos Lucide
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.createIcons && window.lucideIcons) {
+        window.createIcons({ icons: window.lucideIcons });
+    }
 });
 </script>
-@endsection 
+@endpush
+@endsection

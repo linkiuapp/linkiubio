@@ -4,6 +4,9 @@
 
 @section('content')
 <div x-data="paymentMethodsManager()" class="space-y-4">
+    {{-- Auto-iniciar tour --}}
+    <x-tour-trigger tour="gestionar_metodos_pago" :autoStart="true" :showButton="false" />
+    
     {{-- Header Card --}}
     <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
         <div class="border-b border-gray-200 bg-gray-50 py-4 px-6">
@@ -25,7 +28,7 @@
                     $isDefaultBank = $defaultMethod && $bankTransferMethod && $defaultMethod->id === $bankTransferMethod->id;
                 @endphp
                 
-                <div class="bg-white rounded-xl border-2 transition-all duration-200 {{ $bankTransferMethod && $bankTransferMethod->is_active ? 'border-blue-200 shadow-sm' : 'border-gray-200' }}">
+                <div class="bg-white rounded-xl border-2 transition-all duration-200 {{ $bankTransferMethod && $bankTransferMethod->is_active ? 'border-blue-200 shadow-sm' : 'border-gray-200' }}" data-tour="bank-transfer-section">
                     <div class="p-5">
                         <div class="flex items-start justify-between mb-4">
                             <div class="flex items-center gap-3">
@@ -99,7 +102,8 @@
                                     Configurar
                                 </button>
                                 <button @click="manageBankAccounts()" 
-                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors">
+                                        class="inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors"
+                                        data-tour="bank-accounts-button">
                                     <i data-lucide="credit-card" class="w-4 h-4"></i>
                                     Cuentas
                                 </button>
@@ -121,7 +125,7 @@
                     $isDefaultCash = $defaultMethod && $cashMethod && $defaultMethod->id === $cashMethod->id;
                 @endphp
                 
-                <div class="bg-white rounded-xl border-2 transition-all duration-200 {{ $cashMethod && $cashMethod->is_active ? 'border-blue-200 shadow-sm' : 'border-gray-200' }}">
+                <div class="bg-white rounded-xl border-2 transition-all duration-200 {{ $cashMethod && $cashMethod->is_active ? 'border-blue-200 shadow-sm' : 'border-gray-200' }}" data-tour="cash-section">
                     <div class="p-5">
                         <div class="flex items-start justify-between mb-4">
                             <div class="flex items-center gap-3">
@@ -192,7 +196,7 @@
                     $isDefaultCard = $defaultMethod && $cardMethod && $defaultMethod->id === $cardMethod->id;
                 @endphp
                 
-                <div class="bg-white rounded-xl border-2 transition-all duration-200 {{ $cardMethod && $cardMethod->is_active ? 'border-blue-200 shadow-sm' : 'border-gray-200' }}">
+                <div class="bg-white rounded-xl border-2 transition-all duration-200 {{ $cardMethod && $cardMethod->is_active ? 'border-blue-200 shadow-sm' : 'border-gray-200' }}" data-tour="card-terminal-section">
                     <div class="p-5">
                         <div class="flex items-start justify-between mb-4">
                             <div class="flex items-center gap-3">
@@ -263,7 +267,7 @@
                     $isDefaultCod = $defaultMethod && $codMethod && $defaultMethod->id === $codMethod->id;
                 @endphp
                 
-                <div class="bg-white rounded-xl border-2 transition-all duration-200 {{ $codMethod && $codMethod->is_active ? 'border-blue-200 shadow-sm' : 'border-gray-200' }}">
+                <div class="bg-white rounded-xl border-2 transition-all duration-200 {{ $codMethod && $codMethod->is_active ? 'border-blue-200 shadow-sm' : 'border-gray-200' }}" data-tour="cash-on-delivery-section">
                     <div class="p-5">
                         <div class="flex items-start justify-between mb-4">
                             <div class="flex items-center gap-3">
