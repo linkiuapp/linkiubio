@@ -83,6 +83,7 @@
                                     <input type="text"
                                            name="slug"
                                            x-model="slug"
+                                           @input="onSlugInput()"
                                            value="{{ old('slug') }}"
                                            class="flex-1 px-4 py-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none @error('slug') border-red-300 @enderror text-base"
                                            placeholder="mi-tienda"
@@ -190,9 +191,11 @@
             storeName: '{{ old('store_name') }}',
             slug: '{{ old('slug') }}',
             showSeo: false,
+            slugManuallyEdited: {{ old('slug') ? 'true' : 'false' }}, // Track si el usuario editó manualmente
             
             generateSlug() {
-                if (!this.storeName || this.slug) return; // Solo auto-generar si slug está vacío
+                // Solo auto-generar si el usuario no ha editado manualmente el slug
+                if (!this.storeName || this.slugManuallyEdited) return;
                 
                 this.slug = this.storeName
                     .toLowerCase()
@@ -202,6 +205,11 @@
                     .replace(/\s+/g, '-') // Espacios a guiones
                     .replace(/-+/g, '-') // Múltiples guiones a uno
                     .slice(0, 50); // Limitar longitud
+            },
+            
+            onSlugInput() {
+                // Marcar que el usuario editó manualmente el slug
+                this.slugManuallyEdited = true;
             }
         }));
     });
