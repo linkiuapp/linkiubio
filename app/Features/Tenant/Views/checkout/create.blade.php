@@ -1519,6 +1519,22 @@ async function submitOrder() {
             // Redirigir a página de éxito con el ID del pedido
             window.location.href = `{{ route("tenant.checkout.success", $store->slug) }}?order=${data.order.id}`;
         } else {
+            // Manejar error de stock agotado
+            if (data.error === 'stock_unavailable') {
+                const confirmed = await window.toast.modal(
+                    'warning',
+                    '¡Lo sentimos!',
+                    'Alguien más compró este producto mientras preparabas tu pedido. Tenemos más opciones esperándote.',
+                    'Ver catálogo',
+                    'Cerrar'
+                );
+                
+                if (confirmed) {
+                    window.location.href = '{{ route("tenant.catalog", $store->slug) }}';
+                }
+                return;
+            }
+            
             // Manejar errores de validación específicos
             if (data.errors) {
                 let errorMessage = 'Errores de validación:\n';

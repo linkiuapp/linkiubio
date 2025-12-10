@@ -213,6 +213,9 @@
                 <h1 class="text-lg font-semibold text-gray-800">Crear Slider</h1>
             </div>
         </div>
+        
+        {{-- Auto-iniciar tour si es primer slider --}}
+        <x-tour-trigger tour="crear_slider" :autoStart="true" :showButton="false" />
 
         <!-- Alerta informativa -->
         <div class="mb-6">
@@ -242,7 +245,7 @@
                     <h3 class="text-lg font-semibold text-gray-800 mb-2">Información Básica</h3>
                     <p class="text-sm text-gray-600 mb-6">Configura los datos principales del slider</p>
                     
-                    <div class="mb-6">
+                    <div class="mb-6" data-tour="slider-name">
                         <x-input-with-label
                             label="Nombre"
                             name="name"
@@ -257,7 +260,7 @@
                         @enderror
                     </div>
                     
-                    <div class="mb-6">
+                    <div class="mb-6" data-tour="slider-description">
                         <label for="description" class="block text-sm font-medium mb-2">Descripción</label>
                         <textarea 
                             id="description"
@@ -281,7 +284,7 @@
                 </div>
 
                 <!-- Imagen -->
-                <div class="mb-8">
+                <div class="mb-8" data-tour="slider-image">
                     <h3 class="text-lg font-semibold text-gray-800 mb-2">Imagen</h3>
                     <p class="text-sm text-gray-600 mb-6">Sube la imagen del slider (debe ser exactamente 420x200px)</p>
                     
@@ -305,7 +308,7 @@
                     <h3 class="text-lg font-semibold text-gray-800 mb-2">Enlace</h3>
                     <p class="text-sm text-gray-600 mb-6">Configura hacia dónde dirigirá el slider</p>
                     
-                    <div class="mb-6">
+                    <div class="mb-6" data-tour="slider-link-type">
                         <label class="block text-sm font-medium text-gray-700 mb-3">Tipo de enlace</label>
                         <div class="space-y-3">
                             <x-radio-basic 
@@ -335,7 +338,7 @@
                         </div>
                     </div>
                     
-                    <div class="relative">
+                    <div class="relative" data-tour="slider-url">
                         <x-input-with-icon 
                             name="url"
                             icon="link"
@@ -415,7 +418,7 @@
                     <h3 class="text-lg font-semibold text-gray-800 mb-2">Programación</h3>
                     <p class="text-sm text-gray-600 mb-6">Configura cuándo se mostrará el slider (opcional)</p>
                     
-                    <div class="mb-6">
+                    <div class="mb-6" data-tour="slider-schedule-toggle">
                         <div class="flex items-center gap-3 mb-6">
                             <input type="hidden" name="is_scheduled" value="0">
                             <x-switch-basic 
@@ -430,7 +433,7 @@
                     </div>
 
                     <div x-show="isScheduled" x-cloak style="display: none;" class="space-y-6">
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-3" data-tour="slider-permanent-toggle">
                             <input type="hidden" name="is_permanent" value="0">
                             <x-switch-basic 
                                 switch-name="is_permanent"
@@ -443,7 +446,7 @@
                         </div>
 
                         <div x-show="!isPermanent" x-cloak style="display: none;" class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
+                            <div data-tour="slider-start-date">
                                 <x-input-with-label 
                                     label="Fecha inicio"
                                     name="start_date"
@@ -451,7 +454,7 @@
                                     :value="old('start_date')"
                                 />
                             </div>
-                            <div>
+                            <div data-tour="slider-end-date">
                                 <x-input-with-label 
                                     label="Fecha fin"
                                     name="end_date"
@@ -462,7 +465,7 @@
                         </div>
 
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
+                            <div data-tour="slider-start-time">
                                 <x-input-with-label 
                                     label="Hora inicio"
                                     name="start_time"
@@ -470,7 +473,7 @@
                                     :value="old('start_time')"
                                 />
                             </div>
-                            <div>
+                            <div data-tour="slider-end-time">
                                 <x-input-with-label 
                                     label="Hora fin"
                                     name="end_time"
@@ -480,7 +483,7 @@
                             </div>
                         </div>
 
-                        <div>
+                        <div data-tour="slider-days">
                             <label class="block text-sm font-medium text-gray-700 mb-3">Días de la semana</label>
                             <div class="grid grid-cols-7 gap-2">
                                 @foreach(['monday' => 'L', 'tuesday' => 'M', 'wednesday' => 'X', 'thursday' => 'J', 'friday' => 'V', 'saturday' => 'S', 'sunday' => 'D'] as $day => $label)
@@ -503,7 +506,7 @@
                     <a href="{{ route('tenant.admin.sliders.index', $store->slug) }}">
                         <x-button-base type="outline" color="error" text="Cancelar" />
                     </a>
-                    <x-button-icon type="solid" color="dark" icon="plus" text="Crear Slider" html-type="submit" />
+                    <x-button-icon type="solid" color="dark" icon="plus" text="Crear Slider" html-type="submit" data-tour="save-button" />
                 </div>
             </form>
         </x-card-base>

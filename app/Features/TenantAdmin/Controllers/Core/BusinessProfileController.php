@@ -162,6 +162,16 @@ class BusinessProfileController extends Controller
 
         if ($validator->fails()) {
             \Log::info('Validation failed', ['errors' => $validator->errors()]);
+            
+            // Si es una petición AJAX, retornar JSON con errores
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error de validación',
+                    'errors' => $validator->errors()
+                ], 422);
+            }
+            
             return back()->withErrors($validator)->withInput();
         }
 
@@ -172,6 +182,14 @@ class BusinessProfileController extends Controller
 
         \Log::info('WhatsApp updated successfully', ['store_id' => $store->id, 'phone' => $request->owner_phone]);
 
-        return back()->with('swal_success', '✅ Número de WhatsApp configurado correctamente. Ya recibirás notificaciones de pedidos y pagos.');
+        // Si es una petición AJAX, retornar JSON
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Ya recibirás notificaciones de pedidos y pagos.'
+            ]);
+        }
+
+        return back()->with('success', '✅ Número de WhatsApp configurado correctamente. Ya recibirás notificaciones de pedidos y pagos.');
     }
 } 

@@ -248,9 +248,6 @@ class SimpleShippingController extends Controller
                 'is_active' => true,
             ]);
             
-            // Marcar paso de onboarding como completado
-            \App\Shared\Models\StoreOnboardingStep::markAsCompleted($store->id, 'shipping');
-
             return response()->json([
                 'success' => true,
                 'message' => 'Zona de envío creada correctamente',

@@ -161,10 +161,15 @@ class OrderItem extends Model
             return '';
         }
 
+        // Si existe variant_options_text, usarlo directamente (formato nuevo)
+        if (isset($this->variant_details['variant_options_text']) && !empty($this->variant_details['variant_options_text'])) {
+            return $this->variant_details['variant_options_text'];
+        }
+
         $display = [];
         foreach ($this->variant_details as $key => $value) {
-            // Saltar precio_modificador
-            if ($key === 'precio_modificador') {
+            // Saltar campos internos/de referencia
+            if (in_array($key, ['precio_modificador', 'variant_id', 'variant_options_text'])) {
                 continue;
             }
             
@@ -187,8 +192,11 @@ class OrderItem extends Model
             if (is_numeric($key)) {
                 $display[] = $value;
             } else {
-                // Formato: Key: Value
-                $display[] = ucfirst((string)$key) . ': ' . (string)$value;
+                // Para otros campos, mostrar solo el valor si es legible
+                // Evitar mostrar campos técnicos como "variant_id"
+                if (!str_contains(strtolower($key), 'id')) {
+                    $display[] = (string)$value;
+                }
             }
         }
 

@@ -260,9 +260,6 @@ class SliderController extends Controller
             $slider->image_path = $imagePath;
             $slider->save();
             
-            // Marcar paso de onboarding como completado
-            \App\Shared\Models\StoreOnboardingStep::markAsCompleted($store->id, 'slider');
-
             return redirect()->route('tenant.admin.sliders.index', $store->slug)
                            ->with('slider_created', true);
 

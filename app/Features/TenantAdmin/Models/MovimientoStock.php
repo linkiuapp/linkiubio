@@ -48,11 +48,11 @@ class MovimientoStock extends Model
     }
 
     /**
-     * Relación con stock de variante
+     * Relación con variante de producto
      */
-    public function stockVariante()
+    public function variant()
     {
-        return $this->belongsTo(StockVarianteProducto::class, 'stock_variante_id');
+        return $this->belongsTo(\App\Features\TenantAdmin\Models\ProductVariant::class, 'stock_variante_id');
     }
 
     /**

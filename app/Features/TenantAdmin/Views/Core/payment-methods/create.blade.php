@@ -8,11 +8,17 @@
     {{-- Header --}}
     <div class="flex justify-between items-center mb-6">
         <h1 class="text-lg font-bold text-black-400">Crear Método de Pago</h1>
-        <a href="{{ route('tenant.admin.payment-methods.index', ['store' => $store->slug]) }}" class="btn-outline-secondary px-4 py-2 rounded-lg flex items-center gap-2">
-            <x-solar-arrow-left-outline class="w-5 h-5" />
-            Volver
-        </a>
+        <div class="flex items-center gap-3">
+            <x-tour-trigger tour="crear_metodo_pago" />
+            <a href="{{ route('tenant.admin.payment-methods.index', ['store' => $store->slug]) }}" class="btn-outline-secondary px-4 py-2 rounded-lg flex items-center gap-2">
+                <x-solar-arrow-left-outline class="w-5 h-5" />
+                Volver
+            </a>
+        </div>
     </div>
+    
+    {{-- Auto-iniciar tour si es primer método de pago --}}
+    <x-tour-trigger tour="crear_metodo_pago" :autoStart="true" :showButton="false" />
 
     <form action="{{ route('tenant.admin.payment-methods.store', ['store' => $store->slug]) }}" method="POST" @submit.prevent="validateForm($event)">
         @csrf
@@ -32,7 +38,7 @@
                     </h3>
                     
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
+                        <div data-tour="payment-type">
                             <label class="block text-sm font-semibold text-black-300 mb-2">
                                 Tipo de Método <span class="text-error-300">*</span>
                             </label>
@@ -50,7 +56,7 @@
                             @enderror
                         </div>
 
-                        <div>
+                        <div data-tour="payment-name">
                             <label class="block text-sm font-semibold text-black-300 mb-2">
                                 Nombre <span class="text-error-300">*</span>
                             </label>
@@ -64,7 +70,7 @@
                             @enderror
                         </div>
 
-                        <div class="md:col-span-2">
+                        <div class="md:col-span-2" data-tour="payment-instructions">
                             <label class="block text-sm font-semibold text-black-300 mb-2">
                                 Instrucciones para el cliente
                             </label>
@@ -212,7 +218,7 @@
                         </div>
                     </div>
                     
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" data-tour="payment-details">
                         <div>
                             <label class="block text-sm font-semibold text-black-300 mb-2">
                                 Comprobante de pago
@@ -279,7 +285,8 @@
                         Cancelar
                     </a>
                     <button type="submit"
-                        class="btn-primary px-6 py-2 rounded-lg flex items-center gap-2">
+                        class="btn-primary px-6 py-2 rounded-lg flex items-center gap-2"
+                        data-tour="save-button">
                         <x-solar-diskette-outline class="w-5 h-5" />
                         Guardar Método
                     </button>

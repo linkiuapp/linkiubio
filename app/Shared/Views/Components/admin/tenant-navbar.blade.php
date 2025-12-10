@@ -48,6 +48,7 @@ Se adapta automáticamente al estado del sidebar (abierto/minificado/cerrado)
 
 {{-- SECTION: Navbar Container --}}
 <nav 
+    data-tour="navbar"
     x-data="{
         left: '0px',
         width: '100%',

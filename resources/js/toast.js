@@ -240,10 +240,10 @@ class ToastManager {
             modal.className = 'fixed inset-0 z-[9999] flex items-start justify-center p-2 pt-2 opacity-0 scale-95 transition-all duration-300';
             modal.innerHTML = `
                 <div class="bg-slate-900 rounded-2xl shadow-2xl max-w-md w-full p-4 transform">
-                    <div class="flex flex-col items-center text-center gap-2">
-                        <div class="flex-shrink-0 flex items-center gap-4">
-                            <img src="${imageUrl}" alt="${type}" class="w-16 h-16 md:w-20 md:h-20">
-                            <div class="flex flex-col gap-2 items-start">
+                    <div class="flex flex-col items-center gap-2">
+                        <div class="flex-shrink-0 flex items-center gap-4 w-full">
+                            <img src="${imageUrl}" alt="${type}" class="w-16 h-16 md:w-20 md:h-20 flex-shrink-0">
+                            <div class="flex flex-col gap-2 items-start text-left">
                                 <h3 class="text-base md:text-lg font-bold text-white">${title}</h3>
                                 <p class="text-sm md:text-base text-white/80">${message}</p>
                             </div>

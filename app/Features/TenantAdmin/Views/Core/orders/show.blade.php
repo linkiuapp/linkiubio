@@ -2,7 +2,7 @@
 @section('title', 'Pedido #' . $order->order_number)
 
 @section('content')
-<div class="max-w-6xl mx-auto print-container" x-data="orderDetail" x-init="init()">
+<div class="max-w-6xl mx-auto print-container">
     <!-- Componente de recibo POS (oculto, solo para generar PDF) -->
     <div id="order-receipt-pos" style="display: none; position: absolute; left: -9999px;">
         <x-order-receipt-pos :order="$order" :store="$store" />
@@ -27,7 +27,10 @@
                     default => 'secondary'
                 };
             @endphp
-            <x-badge-soft :type="$statusBadgeType" :text="$order->status_label" />
+            <div data-tour="order-status">
+                <x-badge-soft :type="$statusBadgeType" :text="$order->status_label" />
+            </div>
+            <x-tour-trigger tour="gestionar_primer_pedido" />
         </div>
         <p class="text-sm text-gray-600">
             Creado el {{ $order->created_at->format('d/m/Y \a \l\a\s H:i') }} 
@@ -41,7 +44,7 @@
         <div class="xl:col-span-2 space-y-6 print-section">
             
             <!-- Información del Cliente -->
-            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200" data-tour="customer-info">
                 <h3 class="text-sm font-medium text-gray-700 mb-4">Información del Cliente</h3>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
                     <div>
@@ -80,7 +83,7 @@
             </div>
 
             <!-- Productos del Pedido -->
-            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
+            <div class="bg-gray-50 rounded-lg p-6 border border-gray-200" data-tour="order-details">
                 <h3 class="text-sm font-medium text-gray-700 mb-4">Productos ({{ $order->items->count() }})</h3>
                 <div class="space-y-4">
                     @foreach($order->items as $item)
@@ -252,17 +255,33 @@
                     </div>
 
                     @if($order->payment_proof_path)
-                        <div>
+                        <div data-tour="payment-proof">
                             <label class="block text-xs text-gray-600 mb-1">Comprobante</label>
-                            <div class="flex items-center gap-3">
+                            <div class="flex items-center gap-3 flex-wrap">
                                 <div class="flex items-center">
                                     <i data-lucide="file-text" class="w-4 h-4 text-green-600 mr-2"></i>
                                     <a href="javascript:void(0)" 
-                                       onclick="verComprobante('{{ $order->payment_proof_url }}', '{{ $order->order_number }}')"
+                                       onclick="window.verComprobante('{{ $order->payment_proof_url }}', '{{ $order->order_number }}', {{ $order->id }}, '{{ $order->proof_validation_status ?? '' }}', {{ $order->proof_validation_score ?? 0 }})"
                                        class="text-sm text-blue-600 hover:text-blue-700 cursor-pointer">
                                         Ver comprobante
                                     </a>
                                 </div>
+                                
+                                @if($order->proof_validation_status)
+                                    @if($order->proof_validation_status === 'valid')
+                                        <span class="inline-flex items-center gap-1.5 py-0.5 px-2 rounded-full text-xs font-medium bg-green-50 text-green-700">
+                                            <i data-lucide="check-circle" class="w-3 h-3"></i> Validado IA
+                                        </span>
+                                    @elseif($order->proof_validation_status === 'suspicious')
+                                        <span class="inline-flex items-center gap-1.5 py-0.5 px-2 rounded-full text-xs font-medium bg-yellow-50 text-yellow-700">
+                                            <i data-lucide="alert-triangle" class="w-3 h-3"></i> Revisar
+                                        </span>
+                                    @elseif($order->proof_validation_status === 'fake')
+                                        <span class="inline-flex items-center gap-1.5 py-0.5 px-2 rounded-full text-xs font-medium bg-red-50 text-red-700">
+                                            <i data-lucide="x-circle" class="w-3 h-3"></i> Sospechoso
+                                        </span>
+                                    @endif
+                                @endif
                             </div>
                         </div>
                     @endif
@@ -272,29 +291,16 @@
             <!-- Cambiar Estado -->
             <div class="bg-gray-50 rounded-lg p-6 border border-gray-200">
                 <h3 class="text-sm font-medium text-gray-700 mb-4">Cambiar Estado</h3>
-                <div class="space-y-4">
-                    <div>
-                        <label class="block text-xs text-gray-700 mb-2">Nuevo Estado</label>
-                        <select x-model="newStatus" class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900">
-                            <option value="">Seleccionar estado</option>
-                            @foreach(['pending' => 'Pendiente', 'confirmed' => 'Confirmado', 'preparing' => 'Preparando', 'shipped' => 'Enviado', 'delivered' => 'Entregado', 'cancelled' => 'Cancelado'] as $status => $label)
-                                @if($status !== $order->status)
-                                    <option value="{{ $status }}">{{ $label }}</option>
-                                @endif
-                            @endforeach
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs text-gray-700 mb-2">Notas (Opcional)</label>
-                        <textarea x-model="statusNotes" rows="3" 
-                                  class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 placeholder-gray-400"
-                                  placeholder="Observaciones sobre el cambio de estado..."></textarea>
-                    </div>
-                    <button type="button" @click="showStatusModal = true" :disabled="!newStatus" 
-                            class="w-full px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors flex items-center justify-center gap-2 text-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
-                        Actualizar Estado
-                    </button>
+                <div data-tour="change-status-button">
+                    <label class="block text-xs text-gray-700 mb-2">Estado del Pedido</label>
+                    <select id="order-status-select" 
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900"
+                            onchange="handleStatusChangeShow({{ $order->id }}, this.value, this, '{{ $order->order_number }}')">
+                        <option value="">Seleccionar estado</option>
+                        @foreach(['pending' => 'Pendiente', 'confirmed' => 'Confirmado', 'preparing' => 'Preparando', 'shipped' => 'Enviado', 'delivered' => 'Entregado', 'cancelled' => 'Cancelado'] as $status => $label)
+                            <option value="{{ $status }}" {{ $order->status === $status ? 'selected' : '' }}>{{ $label }}</option>
+                        @endforeach
+                    </select>
                 </div>
             </div>
 
@@ -347,134 +353,72 @@
         </div>
     </div>
 
-    {{-- Modal de confirmación de cambio de estado --}}
-    <div x-show="showStatusModal" 
-         x-cloak
-         style="display: none;"
-         x-transition:enter="transition-opacity duration-300"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition-opacity duration-200"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         @click.away="showStatusModal = false"
-         @keydown.escape.window="showStatusModal = false"
-         class="fixed inset-0 z-[9999] overflow-y-auto">
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="showStatusModal = false"></div>
-            <div class="relative bg-white rounded-lg max-w-md w-full p-6 border border-gray-200 shadow-xl" 
-                 @click.stop
-                 x-transition:enter="transition-all ease-out duration-300"
-                 x-transition:enter-start="opacity-0 scale-95"
-                 x-transition:enter-end="opacity-100 scale-100"
-                 x-transition:leave="transition-all ease-in duration-200"
-                 x-transition:leave-start="opacity-100 scale-100"
-                 x-transition:leave-end="opacity-0 scale-95">
-                <!-- Botón X para cerrar -->
-                <button @click="showStatusModal = false" 
-                        class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-                
-                <div class="text-center">
-                    <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i data-lucide="refresh-cw" class="w-6 h-6 text-blue-600"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Confirmar cambio de estado</h3>
-                    <p class="text-gray-600 mb-2">
-                        ¿Cambiar el estado del pedido <strong>#{{ $order->order_number }}</strong> a:
-                    </p>
-                    <p class="text-sm text-blue-600 font-medium mb-6" x-text="getStatusLabel(newStatus)"></p>
-                    <div class="flex gap-3 justify-center">
-                        <button @click="showStatusModal = false" 
-                                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                            Cancelar
-                        </button>
-                        <button @click="confirmStatusUpdate()" 
-                                class="px-4 py-2 text-sm font-medium text-white bg-gray-900 rounded-lg hover:bg-gray-800 transition-colors">
-                            Confirmar
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Modal de confirmación de cancelación --}}
-    <div x-show="showCancelModal" 
-         x-cloak
-         style="display: none;"
-         x-transition:enter="transition-opacity duration-300"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition-opacity duration-200"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         @click.away="showCancelModal = false"
-         @keydown.escape.window="showCancelModal = false"
-         class="fixed inset-0 z-[9999] overflow-y-auto">
-        <div class="flex items-center justify-center min-h-screen px-4">
-            <div class="fixed inset-0 bg-black/50 backdrop-blur-sm" @click="showCancelModal = false"></div>
-            <div class="relative bg-white rounded-lg max-w-md w-full p-6 border border-gray-200 shadow-xl" 
-                 @click.stop
-                 x-transition:enter="transition-all ease-out duration-300"
-                 x-transition:enter-start="opacity-0 scale-95"
-                 x-transition:enter-end="opacity-100 scale-100"
-                 x-transition:leave="transition-all ease-in duration-200"
-                 x-transition:leave-start="opacity-100 scale-100"
-                 x-transition:leave-end="opacity-0 scale-95">
-                <!-- Botón X para cerrar -->
-                <button @click="showCancelModal = false" 
-                        class="absolute top-4 right-4 text-gray-400 hover:text-gray-600">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-                
-                <div class="text-center">
-                    <div class="w-12 h-12 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <i data-lucide="alert-triangle" class="w-6 h-6 text-red-600"></i>
-                    </div>
-                    <h3 class="text-lg font-semibold text-gray-900 mb-2">Confirmar cancelación</h3>
-                    <p class="text-gray-600 mb-6">
-                        ¿Estás seguro de que deseas cancelar el pedido <strong>#{{ $order->order_number }}</strong>?
-                        Esta acción no se puede deshacer.
-                    </p>
-                    <div class="flex gap-3 justify-center">
-                        <button @click="showCancelModal = false" 
-                                class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
-                            No, Volver
-                        </button>
-                        <button @click="confirmCancel()" 
-                                class="px-4 py-2 text-sm font-medium text-white bg-red-600 rounded-lg hover:bg-red-700 transition-colors">
-                            Sí, Cancelar
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Alerta de error -->
-    <div x-show="showErrorAlert" 
-         x-cloak
-         class="fixed bottom-4 right-4 z-50 max-w-md"
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0 translate-y-2"
-         x-transition:enter-end="opacity-100 translate-y-0"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100 translate-y-0"
-         x-transition:leave-end="opacity-0 translate-y-2">
-        <div x-show="errorMessage">
-            <x-alert-bordered 
-                type="error" 
-                title="Error">
-                <span x-text="errorMessage"></span>
-            </x-alert-bordered>
-        </div>
-    </div>
 </div>
 
 @push('styles')
 <style>
+/* Animación de escaneo para validación AI */
+@keyframes scan {
+    0% {
+        top: 0;
+    }
+    50% {
+        top: 100%;
+    }
+    100% {
+        top: 0;
+    }
+}
+
+.scan-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 100px;
+    background: linear-gradient(
+        to bottom,
+        transparent,
+        rgba(139, 92, 246, 0.8),
+        rgba(59, 130, 246, 0.7),
+        rgba(6, 182, 212, 0.6),
+        transparent
+    );
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.8),
+                0 0 40px rgba(59, 130, 246, 0.6),
+                0 0 60px rgba(6, 182, 212, 0.4);
+    animation: scan 2s linear infinite;
+    filter: blur(1px);
+}
+
+.scan-line::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background: linear-gradient(
+        to bottom,
+        rgba(139, 92, 246, 0.3),
+        transparent
+    );
+    filter: blur(10px);
+}
+
+.scan-line::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.9),
+        transparent
+    );
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+
 @media print {
     /* Ocultar elementos del layout principal */
     body > main,
@@ -788,151 +732,846 @@
         border-top: 2px solid #000 !important;
     }
 }
+
+/* Animación de escaneo para validación de comprobantes */
+@keyframes scan {
+    0% {
+        top: 0;
+        opacity: 0;
+    }
+    25% {
+        opacity: 1;
+    }
+    75% {
+        opacity: 1;
+    }
+    100% {
+        top: 100%;
+        opacity: 0;
+    }
+}
+
+.scan-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(139, 92, 246, 0.6),
+        rgba(59, 130, 246, 0.8),
+        rgba(6, 182, 212, 0.6),
+        transparent
+    );
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.8),
+                0 0 40px rgba(59, 130, 246, 0.6),
+                0 0 60px rgba(6, 182, 212, 0.4);
+    animation: scan 2s linear infinite;
+    filter: blur(1px);
+}
+
+.scan-line::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background: linear-gradient(
+        to bottom,
+        rgba(139, 92, 246, 0.3),
+        transparent
+    );
+    filter: blur(10px);
+}
+
+.scan-line::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.9),
+        transparent
+    );
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
 </style>
 @endpush
 
 @push('scripts')
 <script>
-document.addEventListener('alpine:init', () => {
-    Alpine.data('orderDetail', () => ({
-        newStatus: '',
-        statusNotes: '',
-        showStatusModal: false,
-        showCancelModal: false,
-        showErrorAlert: false,
-        errorMessage: '',
+// ===========================
+// FUNCIONES GLOBALES (deben cargarse primero)
+// ===========================
 
-        init() {
-            // Forzar cierre de modales al inicio - asegurar que estén cerrados
-            this.showCancelModal = false;
-            this.showStatusModal = false;
-            this.showErrorAlert = false;
-            this.newStatus = '';
-            this.statusNotes = '';
-            this.errorMessage = '';
-            
-            // Asegurar que los modales estén cerrados en el DOM
-            Alpine.nextTick(() => {
-                // Cerrar cualquier modal que pueda estar abierto
-                if (this.showStatusModal) this.showStatusModal = false;
-                if (this.showCancelModal) this.showCancelModal = false;
-                
-                // Inicializar iconos Lucide
-                if (typeof lucide !== 'undefined' && lucide.createIcons) {
-                    lucide.createIcons();
+// Función global para ver comprobante en modal con validación IA (COPIADO DE INDEX)
+window.verComprobante = function(imageUrl, orderNumber, orderId = null, initialStatus = null, initialScore = 0) {
+    const storeSlug = '{{ $store->slug }}';
+    const storeId = {{ $store->id }};
+    
+    // Crear backdrop
+    const backdrop = document.createElement('div');
+    backdrop.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-[9998] transition-opacity duration-300 opacity-0';
+    backdrop.style.backdropFilter = 'blur(4px)';
+    
+    // State para el modal
+    let modalState = {
+        loading: false,
+        analyzing: false,
+        validationStatus: initialStatus || '',
+        validationScore: initialScore || 0
+    };
+    
+    // Función para verificar estado de validación (POLLING)
+    async function checkValidationStatus() {
+        if (!orderId) return;
+        
+        try {
+            const response = await fetch('/' + storeSlug + '/admin/orders/' + orderId + '/validation-status', {
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
                 }
             });
-        },
-
-        getStatusLabel(status) {
-            const labels = {
-                'pending': 'Pendiente',
-                'confirmed': 'Confirmado', 
-                'preparing': 'Preparando',
-                'shipped': 'Enviado',
-                'delivered': 'Entregado',
-                'cancelled': 'Cancelado'
-            };
-            return labels[status] || status;
-        },
-
-        confirmStatusUpdate() {
-            if (!this.newStatus) return;
-
-            // Cerrar modal inmediatamente antes de hacer la petición
-            this.showStatusModal = false;
             
-            // Deshabilitar botones mientras procesa
-            const confirmBtn = event?.target || document.querySelector('[x-on\\:click*="confirmStatusUpdate"]');
-            if (confirmBtn) {
-                confirmBtn.disabled = true;
+            if (response.ok) {
+                const data = await response.json();
+                
+                // Si hay resultado, actualizar UI
+                if (data.status && data.status !== null) {
+                    console.log('✅ [Polling] Resultado encontrado:', data);
+                    
+                    // Detener polling
+                    if (window.currentValidationPolling) {
+                        clearInterval(window.currentValidationPolling);
+                        window.currentValidationPolling = null;
+                    }
+                    
+                    // Actualizar modal
+                    window.updateValidationResult(data.status, data.score || 0);
+                }
             }
-
-            fetch(`{{ route('tenant.admin.orders.update-status', [$store->slug, $order->id]) }}`, {
+        } catch (error) {
+            console.error('❌ [Polling] Error:', error);
+        }
+    }
+    
+    // Variable para evitar procesar el resultado múltiples veces
+    let resultProcessed = false;
+    
+    // Función GLOBAL para actualizar el modal con el resultado (usada por Polling y Pusher)
+    window.updateValidationResult = function(status, score) {
+        // Evitar procesar el mismo resultado múltiples veces
+        if (resultProcessed) {
+            console.log('⏭️ Resultado ya procesado, ignorando duplicado');
+            return;
+        }
+        
+        resultProcessed = true;
+        console.log('✅ Procesando resultado:', status, score);
+        
+        modalState.validationStatus = status;
+        modalState.validationScore = score;
+        modalState.loading = false;
+        modalState.analyzing = false;
+        
+        // Ocultar overlay de análisis
+        const analysingOverlay = document.getElementById('analyzing-overlay');
+        const validationBtn = document.getElementById('validation-btn');
+        
+        if (analysingOverlay) analysingOverlay.classList.add('hidden');
+        if (validationBtn) validationBtn.style.display = 'none';
+        
+        // Actualizar contenedor de estado
+        const statusContainer = document.getElementById('validation-status-container');
+        if (statusContainer) {
+            let statusHTML = '';
+            if (status === 'valid') {
+                statusHTML = '<div class="flex items-center gap-2 p-3 bg-green-50 text-green-700 rounded-lg">' +
+                    '<i data-lucide="check-circle" class="w-5 h-5"></i>' +
+                    '<div class="flex-1">' +
+                    '<span class="font-medium">Comprobante validado</span>' +
+                    '<p class="text-xs mt-1">Confianza: ' + score + '%</p>' +
+                    '</div>' +
+                    '</div>';
+            } else if (status === 'suspicious') {
+                statusHTML = '<div class="flex items-center gap-2 p-3 bg-yellow-50 text-yellow-700 rounded-lg">' +
+                    '<i data-lucide="alert-triangle" class="w-5 h-5"></i>' +
+                    '<div class="flex-1">' +
+                    '<span class="font-medium">Comprobante dudoso</span>' +
+                    '<p class="text-xs mt-1">Se recomienda revisión manual</p>' +
+                    '</div>' +
+                    '</div>';
+            } else if (status === 'fake') {
+                statusHTML = '<div class="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg">' +
+                    '<i data-lucide="x-circle" class="w-5 h-5"></i>' +
+                    '<div class="flex-1">' +
+                    '<span class="font-medium">Posible falsificación detectada</span>' +
+                    '<p class="text-xs mt-1">Verificar con el cliente</p>' +
+                    '</div>' +
+                    '</div>';
+            } else if (status === 'error') {
+                statusHTML = '<div class="flex items-center gap-2 p-3 bg-gray-50 text-gray-700 rounded-lg">' +
+                    '<i data-lucide="alert-circle" class="w-5 h-5"></i>' +
+                    '<div class="flex-1">' +
+                    '<span class="font-medium">Error en la validación</span>' +
+                    '<p class="text-xs mt-1">Intenta nuevamente más tarde</p>' +
+                    '</div>' +
+                    '</div>';
+            }
+            statusContainer.innerHTML = statusHTML;
+            
+            // Reinicializar iconos
+            if (window.createIcons && window.lucideIcons) {
+                window.createIcons({ icons: window.lucideIcons });
+            }
+        }
+        
+        // Mostrar toast en bottom-center
+        if (status === 'valid') {
+            if (window.toast && typeof window.toast.success === 'function') {
+                window.toast.success('✅ Validación completada', 'Comprobante auténtico - Confianza: ' + score + '%', 8000, 'bottom-center');
+            }
+        } else if (status === 'suspicious') {
+            if (window.toast && typeof window.toast.warning === 'function') {
+                window.toast.warning('⚠️ Validación completada', 'Comprobante dudoso - Se recomienda revisión manual', 10000, 'bottom-center');
+            }
+        } else if (status === 'fake') {
+            if (window.toast && typeof window.toast.error === 'function') {
+                window.toast.error('❌ Validación completada', 'Posible falsificación detectada - Verificar con el cliente', 10000, 'bottom-center');
+            }
+        } else if (status === 'error') {
+            if (window.toast && typeof window.toast.error === 'function') {
+                window.toast.error('❌ Error en validación', 'No se pudo validar el comprobante. Intenta nuevamente.', 8000, 'bottom-center');
+            }
+        }
+        
+        // Recargar la tabla después de 2 segundos
+        setTimeout(() => {
+            if (window.loadOrders) {
+                window.loadOrders();
+            }
+        }, 2000);
+    }
+    
+    // Función para validar comprobante (INICIA VALIDACIÓN + POLLING)
+    window.validateProofModal = async function() {
+        if (modalState.loading || modalState.validationStatus || !orderId) return;
+        
+        // Obtener banco seleccionado
+        const bankSelector = document.getElementById('bank-selector');
+        const selectedBank = bankSelector ? bankSelector.value : '';
+        
+        if (!selectedBank) {
+            if (window.toast && typeof window.toast.warning === 'function') {
+                window.toast.warning('Banco requerido', 'Por favor selecciona el banco/app de la transferencia', 5000, 'bottom-center');
+            }
+            return;
+        }
+        
+        modalState.loading = true;
+        modalState.analyzing = true;
+        
+        // Mostrar overlay de análisis
+        const analysingOverlay = document.getElementById('analyzing-overlay');
+        const validationBtn = document.getElementById('validation-btn');
+        if (analysingOverlay) analysingOverlay.classList.remove('hidden');
+        if (validationBtn) validationBtn.disabled = true;
+        
+        try {
+            const response = await fetch('/' + storeSlug + '/admin/orders/' + orderId + '/validate-proof', {
                 method: 'POST',
                 headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify({
-                    status: this.newStatus,
-                    notes: this.statusNotes
+                    bank: selectedBank
                 })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Cerrar modal inmediatamente
-                    this.showStatusModal = false;
-                    this.newStatus = '';
-                    this.statusNotes = '';
-                    
-                    // Recargar después de un breve delay para permitir animación de cierre
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 200);
-                } else {
-                    this.errorMessage = data.message || 'Error al cambiar estado';
-                    this.showErrorAlert = true;
-                    setTimeout(() => { this.showErrorAlert = false; }, 5000);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                this.errorMessage = 'Error de conexión. Por favor, intenta nuevamente.';
-                this.showErrorAlert = true;
-                setTimeout(() => { this.showErrorAlert = false; }, 5000);
             });
-        },
-
-        confirmCancel() {
-            // Cerrar modal inmediatamente
-            this.showCancelModal = false;
             
-            // Deshabilitar botones mientras procesa
-            const confirmBtn = event?.target || document.querySelector('[x-on\\:click*="confirmCancel"]');
-            if (confirmBtn) {
-                confirmBtn.disabled = true;
-            }
-
-            // Cambiar estado a cancelled en lugar de eliminar
-            fetch(`{{ route('tenant.admin.orders.update-status', [$store->slug, $order->id]) }}`, {
-                method: 'POST',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    status: 'cancelled'
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Asegurar que el modal esté cerrado
-                    this.showCancelModal = false;
-                    
-                    // Recargar después de un breve delay para permitir animación de cierre
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 200);
-                } else {
-                    this.errorMessage = data.message || 'Error al cancelar pedido';
-                    this.showErrorAlert = true;
-                    setTimeout(() => { this.showErrorAlert = false; }, 5000);
+            const data = await response.json();
+            
+            if (data.success) {
+                if (window.toast && typeof window.toast.success === 'function') {
+                    window.toast.success('¡Validación iniciada!', data.message || 'Verificando comprobante...', 5000, 'bottom-center');
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                this.errorMessage = 'Error de conexión. Por favor, intenta nuevamente.';
-                this.showErrorAlert = true;
-                setTimeout(() => { this.showErrorAlert = false; }, 5000);
-            });
+                
+                // ⚡ INICIAR POLLING - Verificar cada 2 segundos
+                console.log('🔄 [Polling] Iniciando verificación cada 2 segundos');
+                checkValidationStatus(); // Primera verificación inmediata
+                window.currentValidationPolling = setInterval(checkValidationStatus, 2000);
+                
+                // ⏱️ Timeout de 60 segundos (optimizado para comparación de plantillas)
+                setTimeout(() => {
+                    if (window.currentValidationPolling) {
+                        clearInterval(window.currentValidationPolling);
+                        window.currentValidationPolling = null;
+                        console.log('⏱️ [Polling] Timeout - detenido');
+                        
+                        // Si aún está analizando, mostrar mensaje
+                        if (modalState.analyzing) {
+                            modalState.loading = false;
+                            modalState.analyzing = false;
+                            const analysingOverlay = document.getElementById('analyzing-overlay');
+                            const validationBtn = document.getElementById('validation-btn');
+                            if (analysingOverlay) analysingOverlay.classList.add('hidden');
+                            if (validationBtn) validationBtn.disabled = false;
+                            
+                            if (window.toast && typeof window.toast.warning === 'function') {
+                                window.toast.warning('Validación tomando mucho tiempo', 'Intenta refrescar la página en unos momentos', 8000, 'bottom-center');
+                            }
+                        }
+                    }
+                }, 60000);
+            } else {
+                if (window.toast && typeof window.toast.error === 'function') {
+                    window.toast.error('Error', data.message || 'No se pudo validar el comprobante', 5000, 'bottom-center');
+                }
+                modalState.loading = false;
+                modalState.analyzing = false;
+                if (analysingOverlay) analysingOverlay.classList.add('hidden');
+                if (validationBtn) validationBtn.disabled = false;
+            }
+        } catch (error) {
+            if (window.toast && typeof window.toast.error === 'function') {
+                window.toast.error('Error de conexión', 'No se pudo conectar con el servidor', 5000, 'bottom-center');
+            }
+            modalState.loading = false;
+            modalState.analyzing = false;
+            if (analysingOverlay) analysingOverlay.classList.add('hidden');
+            if (validationBtn) validationBtn.disabled = false;
         }
-    }));
-});
+    };
+    
+    // Crear modal
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-4 opacity-0 scale-95 transition-all duration-300';
+    
+    modal.innerHTML = `
+        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+            <!-- Header -->
+            <div class="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 z-10">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-base font-semibold text-gray-900">Comprobante - Pedido #${orderNumber}</h3>
+                    <button onclick="window.cerrarModalComprobante()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                
+                ${orderId && !modalState.validationStatus ? `
+                <div>
+                    <label for="bank-selector" class="block text-xs font-medium text-gray-600 mb-1.5">
+                        <i data-lucide="building-2" class="w-3.5 h-3.5 inline mr-1"></i>
+                        Banco/App de la transferencia:
+                    </label>
+                    <select 
+                        id="bank-selector" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
+                        <option value="">Selecciona el banco/app...</option>
+                        <option value="nequi">Nequi</option>
+                        <option value="bancolombia">Bancolombia</option>
+                        <option value="daviplata">Daviplata</option>
+                        <option value="bbva">BBVA</option>
+                        <option value="davivienda">Davivienda</option>
+                        <option value="otro">Otro banco</option>
+                    </select>
+                </div>
+                ` : ''}
+            </div>
+            
+            <!-- Imagen con efecto de análisis -->
+            <div class="p-4 overflow-auto max-h-[calc(90vh-280px)] flex items-center justify-center bg-gray-50 relative">
+                <img src="${imageUrl}" alt="Comprobante" class="w-auto h-auto max-w-full max-h-[calc(90vh-320px)] rounded-lg shadow-lg" style="object-fit: contain;">
+                
+                <!-- Overlay de análisis animado -->
+                <div id="analyzing-overlay" class="hidden absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-lg transition-opacity duration-300">
+                    <div class="relative">
+                        <!-- Línea de escaneo animada -->
+                        <div class="absolute inset-0 overflow-hidden rounded-lg">
+                            <div class="scan-line"></div>
+                        </div>
+                        
+                        <!-- Texto de análisis -->
+                        <div class="relative z-10 text-center">
+                            <div class="inline-flex items-center gap-3 px-6 py-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl">
+                                <div class="relative w-14 h-14 flex items-center justify-center">
+                                    <!-- Círculo central sólido -->
+                                    <div class="absolute w-3 h-3 rounded-full bg-gradient-to-r from-purple-400 to-blue-400 z-10"></div>
+                                    <!-- Ondas pulsantes concéntricas -->
+                                    <div class="absolute w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 animate-ping"></div>
+                                    <div class="absolute w-9 h-9 rounded-full bg-gradient-to-r from-purple-500/70 to-blue-500/70 animate-ping" style="animation-delay: 0.3s; animation-duration: 1s;"></div>
+                                    <div class="absolute w-12 h-12 rounded-full bg-gradient-to-r from-purple-500/50 to-blue-500/50 animate-ping" style="animation-delay: 0.6s; animation-duration: 1.5s;"></div>
+                                    <div class="absolute w-14 h-14 rounded-full bg-gradient-to-r from-purple-500/30 to-cyan-500/30 animate-ping" style="animation-delay: 0.9s; animation-duration: 1.8s;"></div>
+                                </div>
+                                <div class="text-left">
+                                    <p class="text-gray-900 font-bold text-lg"><strong>KiuBot</strong> analizando...</p>
+                                    <p class="text-gray-600 text-sm">Verificando autenticidad</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Estado de validación -->
+            <div id="validation-status-container" class="px-4 py-3 border-t border-gray-200 min-h-[60px]">
+                ${modalState.validationStatus === 'valid' ? `
+                <div class="flex items-center gap-2 p-3 bg-green-50 text-green-700 rounded-lg">
+                    <i data-lucide="check-circle" class="w-5 h-5"></i>
+                    <div class="flex-1">
+                        <span class="font-medium">Comprobante validado</span>
+                        <p class="text-xs mt-1">Confianza: ${modalState.validationScore}%</p>
+                    </div>
+                </div>
+                ` : ''}
+                
+                ${modalState.validationStatus === 'suspicious' ? `
+                <div class="flex items-center gap-2 p-3 bg-yellow-50 text-yellow-700 rounded-lg">
+                    <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+                    <div class="flex-1">
+                        <span class="font-medium">Comprobante dudoso</span>
+                        <p class="text-xs mt-1">Se recomienda revisión manual</p>
+                    </div>
+                </div>
+                ` : ''}
+                
+                ${modalState.validationStatus === 'fake' ? `
+                <div class="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg">
+                    <i data-lucide="x-circle" class="w-5 h-5"></i>
+                    <div class="flex-1">
+                        <span class="font-medium">Posible falsificación detectada</span>
+                        <p class="text-xs mt-1">Verificar con el cliente</p>
+                    </div>
+                </div>
+                ` : ''}
+                
+                ${modalState.validationStatus === 'error' ? `
+                <div class="flex items-center gap-2 p-3 bg-gray-50 text-gray-700 rounded-lg">
+                    <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                    <div class="flex-1">
+                        <span class="font-medium">Error en la validación</span>
+                        <p class="text-xs mt-1">Intenta nuevamente más tarde</p>
+                    </div>
+                </div>
+                ` : ''}
+            </div>
+            
+            <!-- Botones de acción -->
+            <div class="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3 flex gap-2">
+                ${orderId && !modalState.validationStatus ? `
+                <button 
+                    id="validation-btn"
+                    onclick="window.validateProofModal(); return false;"
+                    class="flex-1 px-4 py-2.5 bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 hover:from-purple-700 hover:via-blue-700 hover:to-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-lg shadow-purple-500/30">
+                    <img src="{{ asset('images-ui/emoji_kiubot_linkiu.svg') }}" alt="KiuBot" class="w-5 h-5">
+                    <div class="flex flex-col items-start justify-start">
+                        <span class="text-white font-semibold text-sm">Validar con KiuBot</span>
+                        <span class="text-white font-normal text-xs"><strong>KiuBot</strong> esta en su version beta, es posible que cometamos errores.</span>
+                    </div>
+                </button>
+                ` : ''}
+                <a href="${imageUrl}" download class="inline-flex items-center justify-center px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
+                    Descargar
+                </a>
+                <button onclick="window.cerrarModalComprobante()" class="inline-flex items-center justify-center px-4 py-2.5 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors">
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(backdrop);
+    document.body.appendChild(modal);
+    
+    // Inicializar iconos
+    if (window.createIcons && window.lucideIcons) {
+        window.createIcons({ icons: window.lucideIcons });
+    }
+    
+    // Animar entrada
+    setTimeout(() => {
+        backdrop.classList.remove('opacity-0');
+        modal.classList.remove('opacity-0', 'scale-95');
+    }, 10);
+    
+    // Cerrar con ESC
+    const handleEsc = (e) => {
+        if (e.key === 'Escape') {
+            window.cerrarModalComprobante();
+        }
+    };
+    document.addEventListener('keydown', handleEsc);
+    modal.dataset.escListener = 'true';
+    
+    // Cerrar con click en backdrop
+    backdrop.addEventListener('click', window.cerrarModalComprobante);
+    
+    // NOTA: El listener de proof.validated está en el listener global de DOMContentLoaded
+    // para evitar duplicados y asegurar que funcione siempre
+};
+
+window.cerrarModalComprobante = function() {
+    const backdrop = document.querySelector('.fixed.inset-0.bg-black\\/80');
+    const modal = document.querySelector('.fixed.inset-0.z-\\[9999\\]');
+    
+    if (backdrop) {
+        backdrop.classList.add('opacity-0');
+    }
+    if (modal) {
+        modal.classList.add('opacity-0', 'scale-95');
+    }
+    
+    setTimeout(() => {
+        if (backdrop && backdrop.parentNode) backdrop.parentNode.removeChild(backdrop);
+        if (modal && modal.parentNode) modal.parentNode.removeChild(modal);
+    }, 300);
+};
+
+// ===========================
+// MODAL DE CAMBIO DE ESTADO (COPIADO DE INDEX)
+// ===========================
+
+// Función para mostrar modal de cambio de estado
+function showStatusChangeModal(orderId, newStatus, selectElement, orderNumber) {
+    const statusLabels = {
+        'pending': 'Pendiente',
+        'confirmed': 'Confirmado',
+        'preparing': 'Preparando',
+        'shipped': 'Enviado',
+        'delivered': 'Entregado',
+        'cancelled': 'Cancelado'
+    };
+
+    const originalStatus = selectElement ? selectElement.getAttribute('data-original-status') : null;
+    
+    // Crear modal si no existe
+    let modalStatus = document.getElementById('status-change-modal');
+    if (!modalStatus) {
+        modalStatus = document.createElement('div');
+        modalStatus.id = 'status-change-modal';
+        modalStatus.className = 'fixed inset-0 z-[9999] overflow-y-auto';
+        modalStatus.style.display = 'none';
+        modalStatus.innerHTML = `
+            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+                <div class="fixed inset-0 transition-opacity bg-black/50 backdrop-blur-sm" id="status-modal-backdrop"></div>
+                <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full" id="status-modal-content">
+                    <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                        <div class="sm:flex sm:items-start">
+                            <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+                                <i data-lucide="info" class="h-6 w-6 text-blue-600"></i>
+                            </div>
+                            <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
+                                <h3 class="text-lg leading-6 font-semibold text-gray-900 mb-2">
+                                    ¿Cambiar estado del pedido?
+                                </h3>
+                                <p class="text-sm text-gray-600 mb-4">
+                                    El estado cambiará a: <strong id="status-label"></strong>
+                                </p>
+                                <textarea id="status-notes-input" 
+                                          class="w-full px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-primary-500" 
+                                          placeholder="Notas adicionales (opcional)" 
+                                          rows="3"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                        <button type="button" id="status-confirm-btn"
+                                class="w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 bg-primary-500 text-base font-medium text-white hover:bg-primary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:ml-3 sm:w-auto sm:text-sm">
+                            Cambiar Estado
+                        </button>
+                        <button type="button" id="status-cancel-btn"
+                                class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm">
+                            Cancelar
+                        </button>
+                    </div>
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modalStatus);
+        
+        // Inicializar iconos
+        setTimeout(() => {
+            if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                lucide.createIcons();
+            }
+        }, 100);
+    }
+    
+    // Configurar modal
+    document.getElementById('status-label').textContent = statusLabels[newStatus];
+    document.getElementById('status-notes-input').value = '';
+    
+    // Mostrar modal
+    modalStatus.style.display = 'block';
+    
+    // Event listeners
+    const confirmBtn = document.getElementById('status-confirm-btn');
+    const cancelBtn = document.getElementById('status-cancel-btn');
+    const backdrop = document.getElementById('status-modal-backdrop');
+    
+    const closeModal = () => {
+        modalStatus.style.display = 'none';
+        if (selectElement && originalStatus) {
+            selectElement.value = originalStatus;
+        }
+    };
+    
+    const confirmChange = async () => {
+        const notes = document.getElementById('status-notes-input').value;
+        closeModal();
+        await executeStatusChange(orderId, newStatus, notes);
+    };
+    
+    // Remover listeners anteriores
+    const newConfirmBtn = confirmBtn.cloneNode(true);
+    const newCancelBtn = cancelBtn.cloneNode(true);
+    confirmBtn.parentNode.replaceChild(newConfirmBtn, confirmBtn);
+    cancelBtn.parentNode.replaceChild(newCancelBtn, cancelBtn);
+    
+    newConfirmBtn.addEventListener('click', confirmChange);
+    newCancelBtn.addEventListener('click', closeModal);
+    backdrop.addEventListener('click', closeModal);
+}
+
+async function executeStatusChange(orderId, newStatus, notes) {
+    try {
+        const response = await fetch(`{{ route('tenant.admin.orders.update-status', [$store->slug, ':id']) }}`.replace(':id', orderId), {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                status: newStatus,
+                notes: notes
+            })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            if (typeof window.showToast === 'function') {
+                window.showToast('success', '¡Estado actualizado!', 'El estado del pedido ha sido cambiado correctamente');
+            }
+            setTimeout(() => location.reload(), 1500);
+        } else {
+            if (typeof window.showToast === 'function') {
+                window.showToast('error', 'Error', data.message || 'No se pudo cambiar el estado del pedido');
+            }
+        }
+    } catch (error) {
+        if (typeof window.showToast === 'function') {
+            window.showToast('error', 'Error de conexión', 'No se pudo conectar con el servidor');
+        }
+    }
+}
+
+function handleStatusChangeShow(orderId, newStatus, selectElement, orderNumber) {
+    showStatusChangeModal(orderId, newStatus, selectElement, orderNumber);
+}
+
+// ===========================
+// FUNCIONES DE VALIDACIÓN AI
+// ===========================
+
+window.validateProofModal = async function() {
+    if (modalState.loading || modalState.validationStatus || !modalState.orderId) return;
+    
+    const storeSlug = '{{ $store->slug }}';
+    const orderId = modalState.orderId;
+    
+    const bankSelector = document.getElementById('bank-selector');
+    const selectedBank = bankSelector ? bankSelector.value : '';
+    
+    if (!selectedBank) {
+        if (window.toast && typeof window.toast.warning === 'function') {
+            window.toast.warning('Banco requerido', 'Por favor selecciona el banco/app de la transferencia', 5000, 'bottom-center');
+        }
+        return;
+    }
+    
+    modalState.loading = true;
+    modalState.analyzing = true;
+    
+    const analysingOverlay = document.getElementById('analyzing-overlay');
+    const validationBtn = document.getElementById('validation-btn');
+    if (analysingOverlay) analysingOverlay.classList.remove('hidden');
+    if (validationBtn) validationBtn.disabled = true;
+    
+    try {
+        const response = await fetch('/' + storeSlug + '/admin/orders/' + orderId + '/validate-proof', {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                bank: selectedBank
+            })
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+            if (window.toast && typeof window.toast.success === 'function') {
+                window.toast.success('Validación iniciada', 'Recibirás el resultado en unos segundos', 5000, 'bottom-center');
+            }
+            window.pollValidationResult(orderId, storeSlug);
+        } else {
+            throw new Error(data.message || 'Error al iniciar validación');
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        modalState.loading = false;
+        modalState.analyzing = false;
+        
+        if (analysingOverlay) analysingOverlay.classList.add('hidden');
+        if (validationBtn) validationBtn.disabled = false;
+        
+        if (window.toast && typeof window.toast.error === 'function') {
+            window.toast.error('Error', error.message || 'No se pudo iniciar la validación', 5000, 'bottom-center');
+        }
+    }
+};
+
+window.pollValidationResult = function(orderId, storeSlug) {
+    const maxAttempts = 30;
+    let attempts = 0;
+    let resultProcessed = false;
+    
+    const pollInterval = setInterval(async () => {
+        attempts++;
+        
+        if (attempts > maxAttempts || resultProcessed) {
+            clearInterval(pollInterval);
+            
+            if (!resultProcessed) {
+                modalState.loading = false;
+                modalState.analyzing = false;
+                
+                const analysingOverlay = document.getElementById('analyzing-overlay');
+                const validationBtn = document.getElementById('validation-btn');
+                
+                if (analysingOverlay) analysingOverlay.classList.add('hidden');
+                if (validationBtn) validationBtn.style.display = 'none';
+                
+                if (window.toast && typeof window.toast.warning === 'function') {
+                    window.toast.warning('Validación tomando mucho tiempo', 'Intenta refrescar la página en unos momentos', 8000, 'bottom-center');
+                }
+            }
+            return;
+        }
+        
+        try {
+            const response = await fetch('/' + storeSlug + '/admin/orders/' + orderId + '/validation-status', {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            });
+            
+            const data = await response.json();
+            
+            if (data.status && data.status !== 'pending' && !resultProcessed) {
+                resultProcessed = true;
+                clearInterval(pollInterval);
+                window.updateValidationResult(data.status, data.score);
+            }
+        } catch (error) {
+            console.error('Polling error:', error);
+        }
+    }, 2000);
+};
+
+window.updateValidationResult = function(status, score) {
+    modalState.loading = false;
+    modalState.analyzing = false;
+    modalState.validationStatus = status;
+    modalState.validationScore = score;
+    
+    const analysingOverlay = document.getElementById('analyzing-overlay');
+    const validationBtn = document.getElementById('validation-btn');
+    
+    if (analysingOverlay) analysingOverlay.classList.add('hidden');
+    if (validationBtn) validationBtn.style.display = 'none';
+    
+    const statusContainer = document.getElementById('validation-status-container');
+    if (statusContainer) {
+        let statusHTML = '';
+        
+        if (status === 'valid') {
+            statusHTML = '<div class="flex items-center gap-2 p-3 bg-green-50 text-green-700 rounded-lg">' +
+                '<i data-lucide="check-circle" class="w-5 h-5"></i>' +
+                '<div class="flex-1">' +
+                '<span class="font-medium">Comprobante validado</span>' +
+                '<p class="text-xs mt-1">Confianza: ' + score + '%</p>' +
+                '</div>' +
+                '</div>';
+        } else if (status === 'suspicious') {
+            statusHTML = '<div class="flex items-center gap-2 p-3 bg-yellow-50 text-yellow-700 rounded-lg">' +
+                '<i data-lucide="alert-triangle" class="w-5 h-5"></i>' +
+                '<div class="flex-1">' +
+                '<span class="font-medium">Comprobante dudoso</span>' +
+                '<p class="text-xs mt-1">Se recomienda revisión manual</p>' +
+                '</div>' +
+                '</div>';
+        } else if (status === 'fake') {
+            statusHTML = '<div class="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg">' +
+                '<i data-lucide="x-circle" class="w-5 h-5"></i>' +
+                '<div class="flex-1">' +
+                '<span class="font-medium">Posible falsificación</span>' +
+                '<p class="text-xs mt-1">Verificar con el cliente</p>' +
+                '</div>' +
+                '</div>';
+        } else if (status === 'error') {
+            statusHTML = '<div class="flex items-center gap-2 p-3 bg-gray-50 text-gray-700 rounded-lg">' +
+                '<i data-lucide="alert-circle" class="w-5 h-5"></i>' +
+                '<div class="flex-1">' +
+                '<span class="font-medium">Error en la validación</span>' +
+                '<p class="text-xs mt-1">Intenta nuevamente más tarde</p>' +
+                '</div>' +
+                '</div>';
+        }
+        statusContainer.innerHTML = statusHTML;
+        
+        if (window.createIcons && window.lucideIcons) {
+            window.createIcons({ icons: window.lucideIcons });
+        }
+    }
+    
+    if (status === 'valid') {
+        if (window.toast && typeof window.toast.success === 'function') {
+            window.toast.success('Validación completada', 'Comprobante auténtico - Confianza: ' + score + '%', 8000, 'bottom-center');
+        }
+    } else if (status === 'suspicious') {
+        if (window.toast && typeof window.toast.warning === 'function') {
+            window.toast.warning('Validación completada', 'Comprobante dudoso - Se recomienda revisión manual', 10000, 'bottom-center');
+        }
+    } else if (status === 'fake') {
+        if (window.toast && typeof window.toast.error === 'function') {
+            window.toast.error('Validación completada', 'Posible falsificación detectada - Verificar con el cliente', 10000, 'bottom-center');
+        }
+    } else if (status === 'error') {
+        if (window.toast && typeof window.toast.error === 'function') {
+            window.toast.error('Error en validación', 'No se pudo validar el comprobante. Intenta nuevamente.', 8000, 'bottom-center');
+        }
+    }
+    
+    setTimeout(() => {
+        window.location.reload();
+    }, 2000);
+};
+
+// ===========================
+// OTRAS FUNCIONES
+// ===========================
 
 function printOrder() {
     // Cargar html2pdf.js dinámicamente si no está cargado
@@ -1061,81 +1700,95 @@ function printOrder() {
     }
 }
 
-// Función para ver comprobante en modal
-function verComprobante(imageUrl, orderNumber) {
-    // Crear backdrop
-    const backdrop = document.createElement('div');
-    backdrop.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-[9998] transition-opacity duration-300 opacity-0';
-    backdrop.style.backdropFilter = 'blur(4px)';
-    
-    // Crear modal
-    const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-4 opacity-0 scale-95 transition-all duration-300';
-    modal.innerHTML = `
-        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[56vh] overflow-hidden">
-            <div class="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between z-10">
-                <h3 class="text-base font-semibold text-gray-900">Comprobante - Pedido #${orderNumber}</h3>
-                <button onclick="cerrarModalComprobante()" class="text-gray-400 hover:text-gray-600 transition-colors">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
-            </div>
-            <div class="p-4 overflow-y-auto max-h-[calc(56vh-100px)] flex items-center justify-center bg-gray-50">
-                <img src="${imageUrl}" alt="Comprobante" class="max-w-full object-contain object-center rounded-lg shadow-lg">
-            </div>
-            <div class="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3 flex gap-2 justify-end">
-                <a href="${imageUrl}" download class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
-                    Descargar
-                </a>
-                <button onclick="cerrarModalComprobante()" class="px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors">
-                    Cerrar
-                </button>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(backdrop);
-    document.body.appendChild(modal);
-    
-    // Inicializar iconos
-    if (window.createIcons && window.lucideIcons) {
-        window.createIcons({ icons: window.lucideIcons });
+// Listener global para validación de comprobantes (siempre activo)
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof Echo !== 'undefined') {
+        const storeId = {{ $store->id }};
+        const currentOrderId = {{ $order->id }};
+        
+        console.log('[Echo] Conectando al canal store.' + storeId + '.orders para proof.validated');
+        
+        Echo.channel('store.' + storeId + '.orders')
+            .listen('.proof.validated', (event) => {
+            console.log('[Echo] Evento proof.validated recibido:', event);
+            
+            // Solo procesar si es para este pedido
+            if (event.order_id === currentOrderId) {
+                // Detener polling si existe (Pusher ganó la carrera)
+                if (window.currentValidationPollingShow) {
+                    clearInterval(window.currentValidationPollingShow);
+                    window.currentValidationPollingShow = null;
+                }
+                
+                // Si el modal está abierto, actualizar con la función compartida
+                const modal = document.querySelector('.fixed.inset-0.z-\\[9999\\]');
+                if (modal && typeof window.updateValidationResultShow === 'function') {
+                    window.updateValidationResultShow(event.status, event.score);
+                }
+                
+                // Mostrar toast según resultado
+                if (event.status === 'valid') {
+                    if (window.toast && typeof window.toast.success === 'function') {
+                        window.toast.success(
+                            'Validación completada',
+                            'Comprobante auténtico - Confianza: ' + event.score + '%',
+                            8000,
+                            'bottom-center'
+                        );
+                    }
+                } else if (event.status === 'suspicious') {
+                    if (window.toast && typeof window.toast.warning === 'function') {
+                        window.toast.warning(
+                            'Validación completada',
+                            'Comprobante dudoso - Se recomienda revisión manual',
+                            10000,
+                            'bottom-center'
+                        );
+                    }
+                } else if (event.status === 'fake') {
+                    if (window.toast && typeof window.toast.error === 'function') {
+                        window.toast.error(
+                            'Validación completada',
+                            'Posible falsificación detectada - Verificar con el cliente',
+                            10000,
+                            'bottom-center'
+                        );
+                    }
+                } else if (event.status === 'error') {
+                    if (window.toast && typeof window.toast.error === 'function') {
+                        window.toast.error(
+                            'Error en validación',
+                            'No se pudo validar el comprobante. Intenta nuevamente.',
+                            8000,
+                            'bottom-center'
+                        );
+                    }
+                }
+                
+                // Si el modal está abierto, actualizar su estado
+                const modalElement = document.querySelector('.fixed.inset-0.z-\\[9999\\]');
+                if (modalElement) {
+                    const analysingOverlay = document.getElementById('analyzing-overlay');
+                    const validationBtn = document.getElementById('validation-btn');
+                    
+                    if (analysingOverlay) analysingOverlay.classList.add('hidden');
+                    if (validationBtn) validationBtn.style.display = 'none';
+                }
+                
+                // Recargar la página después de 2 segundos para actualizar la vista
+                setTimeout(() => {
+                    window.location.reload();
+                }, 2000);
+            }
+        });
     }
     
-    // Animar entrada
-    setTimeout(() => {
-        backdrop.classList.remove('opacity-0');
-        modal.classList.remove('opacity-0', 'scale-95');
-    }, 10);
-    
-    // Cerrar con ESC
-    const handleEsc = (e) => {
-        if (e.key === 'Escape') {
-            cerrarModalComprobante();
-        }
-    };
-    document.addEventListener('keydown', handleEsc);
-    modal.dataset.escListener = 'true';
-    
-    // Cerrar con click en backdrop
-    backdrop.addEventListener('click', cerrarModalComprobante);
-}
-
-function cerrarModalComprobante() {
-    const backdrop = document.querySelector('.fixed.inset-0.bg-black\\/80');
-    const modal = document.querySelector('.fixed.inset-0.z-\\[9999\\]');
-    
-    if (backdrop) {
-        backdrop.classList.add('opacity-0');
+    // Inicializar select de estado con valor original
+    const statusSelect = document.getElementById('order-status-select');
+    if (statusSelect) {
+        statusSelect.setAttribute('data-original-status', statusSelect.value);
     }
-    if (modal) {
-        modal.classList.add('opacity-0', 'scale-95');
-    }
-    
-    setTimeout(() => {
-        if (backdrop && backdrop.parentNode) backdrop.parentNode.removeChild(backdrop);
-        if (modal && modal.parentNode) modal.parentNode.removeChild(modal);
-    }, 300);
-}
+});
 </script>
 @endpush
 @endsection

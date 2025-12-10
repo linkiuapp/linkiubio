@@ -23,30 +23,15 @@
                     text="Publicar cambios"
                     html-type="button"
                     @click="openPublishModal()"
+                    data-tour="publish-button"
                 />
             </div>
         </div>
+        
+        {{-- Auto-iniciar tour si no tiene logo --}}
+        <x-tour-trigger tour="diseño_tienda" :autoStart="true" :showButton="false" />
 
-        {{-- SECTION: Feedback Alert --}}
-        <template x-if="feedback.show && feedback.type === 'success'">
-            <x-alert-bordered
-                type="success"
-                title="Cambios guardados"
-                class="mt-2"
-            >
-                <span x-text="feedback.message"></span>
-            </x-alert-bordered>
-        </template>
-
-        <template x-if="feedback.show && feedback.type === 'error'">
-            <x-alert-bordered
-                type="error"
-                title="Ocurrió un error"
-                class="mt-2"
-            >
-                <span x-text="feedback.message"></span>
-            </x-alert-bordered>
-        </template>
+        <x-toast-notification />
 
         {{-- SECTION: Main Layout --}}
         <div class="grid gap-4 xl:grid-cols-12">
@@ -55,7 +40,7 @@
                 <x-card-base title="Información del encabezado" shadow="sm">
                     <div class="grid gap-6 pt-4 xl:grid-cols-3">
                         <div class="space-y-4 xl:col-span-2">
-                            <x-input-with-label
+                            <x-input-with-label data-tour="name-store"
                                 label="Nombre de la tienda"
                                 name="store_name"
                                 placeholder="Nombre de tu tienda"
@@ -66,7 +51,7 @@
                                 @input="handleNameInput($event)"
                             />
 
-                            <x-textarea-with-label
+                            <x-textarea-with-label data-tour="description-store"
                                 label="Descripción breve"
                                 textarea-name="store_description"
                                 placeholder="Describe brevemente qué ofrece tu tienda"
@@ -80,36 +65,42 @@
                         </div>
 
                         <div class="space-y-4 xl:col-span-1">
-                            <x-color-picker-basic
-                                name="header_background_color"
-                                label="Color de fondo"
-                                :value="$design->header_background_color"
-                                helper="Formato #RRGGBB"
-                                x-model="colors.bgColor"
-                            />
-                            <x-color-picker-basic
-                                name="header_text_color"
-                                label="Color del nombre"
-                                :value="$design->header_text_color"
-                                helper="Formato #RRGGBB"
-                                x-model="colors.textColor"
-                            />
-                            <x-color-picker-basic
+                            <div data-tour="background-color">
+                                <x-color-picker-basic
+                                    name="header_background_color"
+                                    label="Color de fondo"
+                                    :value="$design->header_background_color"
+                                    helper="Formato #RRGGBB"
+                                    x-model="colors.bgColor"
+                                />
+                            </div>
+                            <div data-tour="text-color">
+                                <x-color-picker-basic
+                                    name="header_text_color"
+                                    label="Color del nombre"
+                                    :value="$design->header_text_color"
+                                    helper="Formato #RRGGBB"
+                                    x-model="colors.textColor"
+                                />
+                            </div>
+                            <div data-tour="description-color">
+                                <x-color-picker-basic
                                 name="header_description_color"
                                 label="Color de la descripción"
                                 :value="$design->header_description_color"
                                 helper="Formato #RRGGBB"
                                 x-model="colors.descriptionColor"
                             />
+                            </div>
                         </div>
                     </div>
                 </x-card-base>
             </div>
 
             {{-- REGION: Vista previa --}}
-            <div class="xl:col-span-4">
-                <x-card-base title="Vista previa" shadow="sm">
-                    <div class="mx-auto mt-4 w-[480px]">
+            <div class="xl:col-span-4" >
+                <x-card-base title="Vista previa" shadow="sm" data-tour="preview-header">
+                    <div class="mt-4 overflow-hidden">
                         <x-tenant-admin::Core.header-preview :store="$store" :design="$design" />
                     </div>
                 </x-card-base>
@@ -119,8 +110,8 @@
         <div class="grid gap-4 xl:grid-cols-2">
             {{-- ITEM: Logo --}}
             <div>
-                <x-card-base title="Logo" shadow="sm">
-                    <div class="space-y-4 pt-4">
+                <x-card-base title="Logo" shadow="sm" data-tour="logo-upload">
+                    <div class="space-y-4 pt-4" data-tour="logo-upload">
                         <div class="flex flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 text-center" x-data>
                             <template x-if="Alpine.store('design').logo">
                                 <img :src="Alpine.store('design').logo" alt="Logo actual" class="h-16 w-16 rounded-full object-contain" />
@@ -139,14 +130,23 @@
                             max-file-size="2"
                             help-text="PNG, JPG o WebP. Máx. 2MB"
                         />
+
+                        <div class="rounded-lg bg-blue-50 border border-blue-200 p-3">
+                            <div class="flex items-start gap-2">
+                                <i data-lucide="info" class="size-4 text-blue-600 mt-0.5 shrink-0"></i>
+                                <p class="text-xs text-blue-800">
+                                    <strong>Nota:</strong> Las imágenes se guardan automáticamente al subirlas.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </x-card-base>
             </div>
 
             {{-- ITEM: Favicon --}}
             <div>
-                <x-card-base title="Favicon" shadow="sm">
-                    <div class="space-y-4 pt-4">
+                <x-card-base title="Favicon" shadow="sm" data-tour="favicon-upload">
+                    <div class="space-y-4 pt-4" data-tour="favicon-upload">
                         <div class="flex flex-col items-center justify-center gap-3 rounded-xl border border-gray-200 bg-gray-50 p-4 text-center" x-data>
                             <template x-if="Alpine.store('design').favicon">
                                 <img :src="Alpine.store('design').favicon" alt="Favicon actual" class="h-16 w-16 rounded-lg object-contain" />
@@ -165,6 +165,15 @@
                             max-file-size="1"
                             help-text="PNG o ICO. Máx. 1MB"
                         />
+
+                        <div class="rounded-lg bg-blue-50 border border-blue-200 p-3">
+                            <div class="flex items-start gap-2">
+                                <i data-lucide="info" class="size-4 text-blue-600 mt-0.5 shrink-0"></i>
+                                <p class="text-xs text-blue-800">
+                                    <strong>Nota:</strong> Las imágenes se guardan automáticamente al subirlas.
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 </x-card-base>
             </div>
@@ -297,15 +306,12 @@
                     storeDescription: window.__initialDesign?.storeDescription ?? @json($store->description),
                 },
                 publishModalOpen: false,
+                hasUnsavedChanges: false,
                 loading: {
                     publish: false,
+                    update: false,
                 },
-                feedback: {
-                    show: false,
-                    type: 'success',
-                    message: '',
-                },
-                feedbackTimeout: null,
+                toastCounter: 0,
                 init() {
                     this.syncPreview();
                     if (Alpine.store('design')) {
@@ -316,8 +322,13 @@
                         Alpine.store('design').descriptionColor = this.colors.descriptionColor;
                     }
                     this.persistDesignCache();
-                    document.addEventListener('file-upload:selected', (event) => this.onFileSelected(event));
-                    document.addEventListener('file-upload:removed', (event) => this.onFileRemoved(event));
+                    
+                    // Usar funciones con nombre para poder removerlos si es necesario
+                    this.fileSelectedHandler = (event) => this.onFileSelected(event);
+                    this.fileRemovedHandler = (event) => this.onFileRemoved(event);
+                    
+                    document.addEventListener('file-upload:selected', this.fileSelectedHandler);
+                    document.addEventListener('file-upload:removed', this.fileRemovedHandler);
                     document.addEventListener('color-changed', (event) => {
                         const { name, value } = event.detail || {};
                         if (!name || !value) {
@@ -339,26 +350,31 @@
 
                     this.$watch('form.storeName', (value) => {
                         this.form.storeName = this.sanitizeName(value).slice(0, 40);
+                        this.hasUnsavedChanges = true;
                         this.pushPreviewState();
                     });
 
                     this.$watch('form.storeDescription', (value) => {
                         this.form.storeDescription = this.sanitizeDescription(value).slice(0, 50);
+                        this.hasUnsavedChanges = true;
                         this.pushPreviewState();
                     });
 
                     this.$watch('colors.bgColor', (value) => {
                         this.colors.bgColor = this.normalizeColor(value);
+                        this.hasUnsavedChanges = true;
                         this.pushPreviewState();
                     });
 
                     this.$watch('colors.textColor', (value) => {
                         this.colors.textColor = this.normalizeColor(value);
+                        this.hasUnsavedChanges = true;
                         this.pushPreviewState();
                     });
 
                     this.$watch('colors.descriptionColor', (value) => {
                         this.colors.descriptionColor = this.normalizeColor(value);
+                        this.hasUnsavedChanges = true;
                         this.pushPreviewState();
                     });
                 },
@@ -490,7 +506,16 @@
                     return null;
                 },
                 async sendUpdate(extraPayload = {}, meta = {}) {
-                    const formData = this.buildFormData(extraPayload);
+                    // Evitar llamadas duplicadas
+                    if (this.loading.update) {
+                        return;
+                    }
+                    
+                    this.loading.update = true;
+                    
+                    // Para imágenes, NO incluir colores (solo guardar la imagen)
+                    const isImageUpdate = extraPayload.logo_base64 || extraPayload.favicon_base64 || extraPayload.logo_url === '' || extraPayload.favicon_url === '';
+                    const formData = this.buildFormData(extraPayload, !isImageUpdate);
                     try {
                         const response = await fetch(`/${this.storeSlug}/admin/store-design/update`, {
                             method: 'POST',
@@ -508,29 +533,64 @@
                         const data = await response.json();
                         if (data?.design) {
                             this.applyDesign(data.design, meta);
-                            this.setFeedback('success', 'Diseño actualizado correctamente.');
+                            if (isImageUpdate) {
+                                // Para imágenes, mostrar mensaje específico
+                                const assetName = meta.asset === 'logo' ? 'Logo' : 'Favicon';
+                                if (window.toast) {
+                                    this.toastCounter++;
+                                    window.toast.success(
+                                        'Imagen guardada',
+                                        `${assetName} guardado correctamente.`,
+                                        5000,
+                                        'bottom-center'
+                                    );
+                                }
+                            } else {
+                                if (window.toast) {
+                                    this.toastCounter++;
+                                    window.toast.success(
+                                        'Diseño actualizado',
+                                        'Diseño actualizado correctamente.',
+                                        5000,
+                                        'bottom-center'
+                                    );
+                                }
+                            }
                         }
                     } catch (error) {
-                        this.setFeedback('error', error.message || 'Error al actualizar el diseño.');
+                        if (window.toast) {
+                            this.toastCounter++;
+                            window.toast.error(
+                                'Error',
+                                error.message || 'Error al actualizar el diseño.',
+                                5000,
+                                'bottom-center'
+                            );
+                        }
+                    } finally {
+                        this.loading.update = false;
                     }
                 },
-                buildFormData(extraPayload = {}) {
+                buildFormData(extraPayload = {}, includeColors = true) {
                     const formData = new FormData();
-                    formData.append('header_background_color', this.colors.bgColor);
-                    formData.append('header_text_color', this.colors.textColor);
-                    formData.append('header_description_color', this.colors.descriptionColor);
+                    // Solo incluir colores si se especifica (para imágenes no se incluyen)
+                    if (includeColors) {
+                        formData.append('header_background_color', this.colors.bgColor);
+                        formData.append('header_text_color', this.colors.textColor);
+                        formData.append('header_description_color', this.colors.descriptionColor);
+                    }
                     Object.entries(extraPayload).forEach(([key, value]) => {
                         formData.append(key, value ?? '');
                     });
                     return formData;
                 },
                 async confirmPublish() {
-                    this.feedback.show = false;
                     this.loading.publish = true;
+                    // Al publicar, SÍ incluir colores y texto
                     const formData = this.buildFormData({
                         store_name: this.form.storeName,
                         store_description: this.form.storeDescription,
-                    });
+                    }, true);
 
                     try {
                         const response = await fetch(`/${this.storeSlug}/admin/store-design/publish`, {
@@ -556,26 +616,31 @@
                             Alpine.store('design').storeName = this.form.storeName;
                             Alpine.store('design').storeDescription = this.form.storeDescription;
                         }
-                        this.setFeedback('success', data?.message || 'Diseño publicado correctamente.');
+                        this.hasUnsavedChanges = false;
+                        if (window.toast) {
+                            this.toastCounter++;
+                            window.toast.success(
+                                'Diseño publicado',
+                                data?.message || 'Diseño publicado correctamente.',
+                                5000,
+                                'bottom-center'
+                            );
+                        }
                         this.publishModalOpen = false;
                         this.persistDesignCache();
                     } catch (error) {
-                        this.setFeedback('error', error.message || 'Error al publicar el diseño.');
+                        if (window.toast) {
+                            this.toastCounter++;
+                            window.toast.error(
+                                'Error',
+                                error.message || 'Error al publicar el diseño.',
+                                5000,
+                                'bottom-center'
+                            );
+                        }
                     } finally {
                         this.loading.publish = false;
                     }
-                },
-                setFeedback(type, message) {
-                    this.feedback.type = type === 'error' ? 'error' : 'success';
-                    this.feedback.message = message;
-                    this.feedback.show = true;
-                    if (this.feedbackTimeout) {
-                        clearTimeout(this.feedbackTimeout);
-                    }
-                    this.feedbackTimeout = setTimeout(() => {
-                        this.feedback.show = false;
-                        this.feedbackTimeout = null;
-                    }, 4000);
                 },
                 applyDesign(design, meta = {}) {
                     if (!design) {

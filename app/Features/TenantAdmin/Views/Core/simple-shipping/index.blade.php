@@ -18,6 +18,7 @@
                 x-bind:disabled="saving"
                 type="button"
                 class="inline-flex items-center gap-2 px-4 py-3 bg-gray-800 text-white rounded-lg hover:bg-gray-900 focus:bg-gray-900 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
+                data-tour="save-button"
             >
                 <i data-lucide="save" class="w-4 h-4"></i>
                 <span x-text="saving ? 'Guardando...' : 'Guardar Todo'"></span>
@@ -25,12 +26,15 @@
         </div>
     </div>
     {{-- End SECTION: Header --}}
+    
+    {{-- Auto-iniciar tour si no tiene zonas --}}
+    <x-tour-trigger tour="configurar_envios" :autoStart="true" :showButton="false" />
 
     {{-- SECTION: Secciones principales en grid --}}
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         
         {{-- SECTION: Recogida en Tienda Card --}}
-        <x-card-base shadow="sm">
+        <x-card-base shadow="sm" data-tour="pickup-section">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
                     <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -85,7 +89,7 @@
         {{-- End SECTION: Recogida en Tienda Card --}}
 
         {{-- SECTION: Envío Local Card --}}
-        <x-card-base shadow="sm">
+        <x-card-base shadow="sm" data-tour="local-shipping-section">
             <div class="flex items-center justify-between mb-4">
                 <div class="flex items-center gap-3">
                     <div class="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
@@ -203,7 +207,7 @@
     </div> <!-- Fin del grid -->
 
     {{-- SECTION: Envío Nacional Card --}}
-    <x-card-base shadow="sm">
+    <x-card-base shadow="sm" data-tour="national-shipping-section">
         <div class="flex items-center justify-between mb-4">
             <div class="flex items-center gap-3">
                 <div class="w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -277,7 +281,8 @@
                     <button @click="addZone()" 
                             x-bind:disabled="zones.length >= maxZones"
                             class="px-4 py-2 rounded-lg flex items-center justify-center gap-2 border-2 border-gray-500 text-gray-500 hover:border-gray-800 hover:text-gray-800 focus:border-gray-800 focus:text-gray-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm font-medium"
-                            x-bind:class="zones.length >= maxZones ? 'opacity-50 cursor-not-allowed' : ''">
+                            x-bind:class="zones.length >= maxZones ? 'opacity-50 cursor-not-allowed' : ''"
+                            data-tour="add-zone-button">
                         <i data-lucide="plus-circle" class="w-4 h-4"></i>
                         Agregar Zona
                     </button>
@@ -325,7 +330,7 @@
                                 <div class="space-y-4">
                                     <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                                         {{-- Nombre --}}
-                                        <div>
+                                        <div data-tour="zone-name">
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Nombre de la zona</label>
                                             <input 
                                                 type="text" 
@@ -336,7 +341,7 @@
                                         </div>
                                         
                                         {{-- Costo --}}
-                                        <div>
+                                        <div data-tour="zone-price">
                                             <label class="block text-sm font-medium text-gray-700 mb-1">Costo del envío</label>
                                             <div class="relative">
                                                 <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-500">$</span>

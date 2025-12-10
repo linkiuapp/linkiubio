@@ -9,6 +9,7 @@ use App\Shared\Models\BillingSetting;
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="asset-url" content="{{ asset('') }}">
     <title>{{config('app.name', 'Linkiu.bio')}} - @yield('title', 'Super Linkiu')</title>
     
     <!-- Favicon -->
@@ -161,41 +162,7 @@ use App\Shared\Models\BillingSetting;
             {{-- End SECTION: Page Header --}}
 
             {{-- SECTION: Flash Messages --}}
-            @if(session('success'))
-                <div 
-                    class="alert alert-success mb-6" 
-                    x-data="{ show: true }" 
-                    x-show="show"
-                    x-init="setTimeout(() => show = false, 5000)"
-                >
-                    <div class="flex items-center gap-3">
-                        <x-solar-check-circle-outline class="w-5 h-5 text-success-300" />
-                        <span>{{ session('success') }}</span>
-                        <button @click="show = false" class="ml-auto">
-                            <x-solar-close-circle-outline class="w-4 h-4" />
-                        </button>
-                    </div>
-                </div>
-            @endif
-
-            @if(session('error'))
-                <div 
-                    class="alert alert-error mb-6" 
-                    x-data="{ show: true }" 
-                    x-show="show"
-                    x-init="setTimeout(() => show = false, 5000)"
-                >
-                    <div class="flex items-center gap-3">
-                        <x-solar-close-circle-outline class="w-5 h-5 text-error-300" />
-                        <span>{{ session('error') }}</span>
-                        <button @click="show = false" class="ml-auto">
-                            <x-solar-close-circle-outline class="w-4 h-4" />
-                        </button>
-                    </div>
-                </div>
-            @endif
-
-            {{-- Las alertas de validación ahora se manejan en las vistas individuales con el componente AlertBordered --}}
+            {{-- Los mensajes flash ahora se manejan con el sistema de toasts en cada vista --}}
             {{-- End SECTION: Flash Messages --}}
 
             {{-- SECTION: Content Area --}}

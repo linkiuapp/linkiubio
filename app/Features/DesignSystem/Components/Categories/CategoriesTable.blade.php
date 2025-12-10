@@ -247,36 +247,49 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (row) {
                         const statusCell = row.querySelector('td:nth-child(4)');
                         if (statusCell) {
-                            if (e.target.checked) {
+                            if (data.is_active) {
                                 statusCell.innerHTML = '<span class="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-lg text-xs font-medium bg-green-100 text-green-800">Activa</span>';
                             } else {
                                 statusCell.innerHTML = '<span class="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-lg text-xs font-medium bg-red-100 text-red-800">Inactiva</span>';
                             }
                         }
                     }
+                    
+                    // Mostrar toast de éxito
+                    if (window.toast) {
+                        const message = originalChecked 
+                            ? 'La categoría se ha activado correctamente.'
+                            : 'La categoría se ha desactivado correctamente.';
+                        window.toast.success(
+                            'Estado actualizado',
+                            message,
+                            5000,
+                            'bottom-center'
+                        );
+                    }
                 } else {
                     e.target.checked = !originalChecked;
-                    // Mostrar error con AlertBordered
-                    const categoryManagement = Alpine.$data(document.querySelector('[x-data="categoryManagement"]'));
-                    if (categoryManagement) {
-                        categoryManagement.showToggleError = true;
-                        categoryManagement.toggleErrorMessage = data.error || 'Error al cambiar el estado';
-                        setTimeout(() => {
-                            categoryManagement.showToggleError = false;
-                        }, 5000);
+                    // Mostrar error con toast
+                    if (window.toast) {
+                        window.toast.error(
+                            'Error',
+                            data.error || 'Error al cambiar el estado',
+                            5000,
+                            'bottom-center'
+                        );
                     }
                 }
             })
             .catch(error => {
                 e.target.checked = !originalChecked;
-                // Mostrar error con AlertBordered
-                const categoryManagement = Alpine.$data(document.querySelector('[x-data="categoryManagement"]'));
-                if (categoryManagement) {
-                    categoryManagement.showToggleError = true;
-                    categoryManagement.toggleErrorMessage = 'Error al cambiar el estado';
-                    setTimeout(() => {
-                        categoryManagement.showToggleError = false;
-                    }, 5000);
+                // Mostrar error con toast
+                if (window.toast) {
+                    window.toast.error(
+                        'Error',
+                        'Error al cambiar el estado',
+                        5000,
+                        'bottom-center'
+                    );
                 }
             });
         }

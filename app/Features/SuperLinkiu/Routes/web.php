@@ -49,21 +49,46 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
         Route::resource('stores', StoreController::class)->names('stores');
             
         // Business Categories
-        Route::resource('business-categories', \App\Features\SuperLinkiu\Controllers\BusinessCategoryController::class)
-            ->except(['show'])
-            ->names('business-categories');
-        Route::post('business-categories/{businessCategory}/toggle-status', 
-            [\App\Features\SuperLinkiu\Controllers\BusinessCategoryController::class, 'toggleStatus'])
-            ->name('business-categories.toggle-status');
-        Route::post('business-categories/reorder', 
-            [\App\Features\SuperLinkiu\Controllers\BusinessCategoryController::class, 'reorder'])
-            ->name('business-categories.reorder');
         Route::get('business-categories/migrate-verticals', 
             [\App\Features\SuperLinkiu\Controllers\BusinessCategoryController::class, 'migrateVerticals'])
             ->name('business-categories.migrate-verticals');
         Route::post('business-categories/apply-verticals', 
             [\App\Features\SuperLinkiu\Controllers\BusinessCategoryController::class, 'applyVerticals'])
             ->name('business-categories.apply-verticals');
+        Route::post('business-categories/{businessCategory}/toggle-status', 
+            [\App\Features\SuperLinkiu\Controllers\BusinessCategoryController::class, 'toggleStatus'])
+            ->name('business-categories.toggle-status');
+        Route::post('business-categories/reorder', 
+            [\App\Features\SuperLinkiu\Controllers\BusinessCategoryController::class, 'reorder'])
+            ->name('business-categories.reorder');
+        Route::resource('business-categories', \App\Features\SuperLinkiu\Controllers\BusinessCategoryController::class)
+            ->except(['show'])
+            ->names('business-categories');
+
+        // Pending Registrations (Wizard)
+        Route::prefix('pending-registrations')->name('pending-registrations.')->group(function () {
+            Route::get('/', [\App\Features\SuperLinkiu\Controllers\PendingRegistrationController::class, 'index'])->name('index');
+            Route::get('/{pendingRegistration}', [\App\Features\SuperLinkiu\Controllers\PendingRegistrationController::class, 'show'])->name('show');
+            Route::post('/{pendingRegistration}/approve', [\App\Features\SuperLinkiu\Controllers\PendingRegistrationController::class, 'approve'])->name('approve');
+            Route::post('/{pendingRegistration}/reject', [\App\Features\SuperLinkiu\Controllers\PendingRegistrationController::class, 'reject'])->name('reject');
+            
+            // API para polling
+            Route::get('/{registrationId}/check-status', [\App\Features\SuperLinkiu\Controllers\PendingRegistrationController::class, 'checkStatus'])->name('check-status');
+        });
+
+        // Registration Payment Settings
+        Route::prefix('registration-payment-settings')->name('registration-payment-settings.')->group(function () {
+            Route::get('/', [\App\Features\SuperLinkiu\Controllers\RegistrationPaymentSettingController::class, 'index'])->name('index');
+            Route::put('/update', [\App\Features\SuperLinkiu\Controllers\RegistrationPaymentSettingController::class, 'update'])->name('update');
+            Route::delete('/delete-qr', [\App\Features\SuperLinkiu\Controllers\RegistrationPaymentSettingController::class, 'deleteQr'])->name('delete-qr');
+        });
+
+        // Plan Change Requests
+        Route::prefix('plan-change-requests')->name('plan-change-requests.')->group(function () {
+            Route::get('/', [\App\Features\SuperLinkiu\Controllers\PlanChangeRequestController::class, 'index'])->name('index');
+            Route::post('/{planChangeRequest}/approve', [\App\Features\SuperLinkiu\Controllers\PlanChangeRequestController::class, 'approve'])->name('approve');
+            Route::post('/{planChangeRequest}/reject', [\App\Features\SuperLinkiu\Controllers\PlanChangeRequestController::class, 'reject'])->name('reject');
+        });
 
         // User Management
         Route::resource('user-management', \App\Features\SuperLinkiu\Controllers\UserManagementController::class)
@@ -166,6 +191,10 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
             ->name('announcements.toggle-active');
         Route::post('announcements/{announcement}/duplicate', [AnnouncementController::class, 'duplicate'])
             ->name('announcements.duplicate');
+        Route::post('announcements/{announcement}/send-notifications', [AnnouncementController::class, 'sendNotifications'])
+            ->name('announcements.send-notifications');
+        Route::get('announcements/{announcement}/analytics', [AnnouncementController::class, 'analytics'])
+            ->name('announcements.analytics');
 
         // Gestión de iconos de categorías
         Route::prefix('category-icons')->name('category-icons.')->group(function () {
@@ -218,6 +247,27 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
             Route::get('/', [BillingSettingController::class, 'index'])->name('index');
             Route::put('/', [BillingSettingController::class, 'update'])->name('update');
             Route::post('/remove-logo', [BillingSettingController::class, 'removeLogo'])->name('remove-logo');
+        });
+
+        // Monitoring
+        Route::prefix('monitoring')->name('monitoring.')->group(function () {
+            Route::get('/', [\App\Features\SuperLinkiu\Controllers\MonitoringController::class, 'index'])->name('index');
+            Route::get('/errors', [\App\Features\SuperLinkiu\Controllers\MonitoringController::class, 'errors'])->name('errors');
+            Route::get('/errors/{id}', [\App\Features\SuperLinkiu\Controllers\MonitoringController::class, 'showError'])->name('errors.show');
+            Route::get('/traffic', [\App\Features\SuperLinkiu\Controllers\MonitoringController::class, 'traffic'])->name('traffic');
+            Route::get('/performance', [\App\Features\SuperLinkiu\Controllers\MonitoringController::class, 'performance'])->name('performance');
+            
+            // Alertas
+            Route::prefix('alerts')->name('alerts.')->group(function () {
+                Route::get('/', [\App\Features\SuperLinkiu\Controllers\MonitoringAlertController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Features\SuperLinkiu\Controllers\MonitoringAlertController::class, 'create'])->name('create');
+                Route::post('/', [\App\Features\SuperLinkiu\Controllers\MonitoringAlertController::class, 'store'])->name('store');
+                Route::get('/{id}', [\App\Features\SuperLinkiu\Controllers\MonitoringAlertController::class, 'show'])->name('show');
+                Route::get('/{id}/edit', [\App\Features\SuperLinkiu\Controllers\MonitoringAlertController::class, 'edit'])->name('edit');
+                Route::put('/{id}', [\App\Features\SuperLinkiu\Controllers\MonitoringAlertController::class, 'update'])->name('update');
+                Route::delete('/{id}', [\App\Features\SuperLinkiu\Controllers\MonitoringAlertController::class, 'destroy'])->name('destroy');
+                Route::post('/{id}/toggle-status', [\App\Features\SuperLinkiu\Controllers\MonitoringAlertController::class, 'toggleStatus'])->name('toggle-status');
+            });
         });
 
 

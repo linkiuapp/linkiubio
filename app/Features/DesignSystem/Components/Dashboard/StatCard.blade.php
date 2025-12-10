@@ -1,4 +1,4 @@
-{{--
+{{---
 StatCard - Card de estadísticas para dashboards
 Uso: Mostrar métricas y estadísticas con icono y valor destacado
 Cuándo usar: Dashboards, paneles de control, resúmenes de datos

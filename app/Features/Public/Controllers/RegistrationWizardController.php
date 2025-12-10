@@ -1,0 +1,355 @@
+<?php
+
+namespace App\Features\Public\Controllers;
+
+use App\Http\Controllers\Controller;
+use App\Shared\Models\Plan;
+use App\Shared\Models\BusinessCategory;
+use App\Shared\Models\Subscription;
+use App\Models\PendingRegistration;
+use App\Services\WhatsAppNotificationService;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Hash;
+
+class RegistrationWizardController extends Controller
+{
+    /**
+     * Step 1: Selección de Plan
+     */
+    public function step1()
+    {
+        // Obtener planes públicos y activos ordenados
+        $plans = Plan::where('is_public', true)
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('price')
+            ->get();
+
+        return view('public::registration.step1-plans', compact('plans'));
+    }
+
+    /**
+     * Guardar Step 1 y continuar a Step 2
+     */
+    public function storeStep1(Request $request)
+    {
+        $validated = $request->validate([
+            'plan_id' => 'required|exists:plans,id',
+            'billing_period' => 'required|in:monthly,quarterly,semester,annual',
+        ]);
+
+        // Guardar en sesión
+        Session::put('wizard.plan_id', $validated['plan_id']);
+        Session::put('wizard.billing_period', $validated['billing_period']);
+
+        return redirect()->route('register.step2');
+    }
+
+    /**
+     * Guardar Step 2 y continuar a Step 3
+     */
+    public function storeStep2(Request $request)
+    {
+        $validated = $request->validate([
+            'business_category_id' => 'required|exists:business_categories,id',
+            'business_name' => 'required|string|max:255',
+            'document_type' => 'required|in:nit,cc,ce',
+            'document_number' => 'required|string|max:50',
+            'phone' => 'required|string|max:20',
+            'email' => 'required|email|max:255',
+            'city' => 'required|string|max:100',
+            'department' => 'required|string|max:100',
+            'address' => 'required|string|max:255',
+            'description' => 'nullable|string|max:500',
+        ]);
+
+        // Guardar todos los datos en sesión
+        foreach($validated as $key => $value) {
+            Session::put("wizard.{$key}", $value);
+        }
+
+        return redirect()->route('register.step3');
+    }
+
+    /**
+     * Step 2: Información del Negocio
+     */
+    public function step2()
+    {
+        if (!Session::has('wizard.plan_id')) {
+            return redirect()->route('register.step1');
+        }
+
+        $categories = BusinessCategory::where('is_active', true)
+            ->with('features')
+            ->orderBy('name')
+            ->get();
+
+        return view('public::registration.step2-business', compact('categories'));
+    }
+
+    /**
+     * Guardar Step 3 y continuar a Step 4
+     */
+    public function storeStep3(Request $request)
+    {
+        $validated = $request->validate([
+            'store_name' => 'required|string|max:255',
+            'slug' => 'required|string|max:100|regex:/^[a-z0-9-]+$/|unique:stores,slug',
+            'store_description' => 'nullable|string|max:500',
+            'meta_title' => 'nullable|string|max:255',
+            'meta_description' => 'nullable|string|max:500',
+            'meta_keywords' => 'nullable|string|max:255',
+        ]);
+
+        // Guardar todos los datos en sesión
+        foreach($validated as $key => $value) {
+            Session::put("wizard.{$key}", $value);
+        }
+
+        return redirect()->route('register.step4');
+    }
+
+    /**
+     * Step 3: Configuración de la Tienda
+     */
+    public function step3()
+    {
+        if (!Session::has('wizard.plan_id') || !Session::has('wizard.business_category_id')) {
+            return redirect()->route('register.step1');
+        }
+
+        return view('public::registration.step3-store');
+    }
+
+    /**
+     * Step 4 redirige directamente a complete (no hay storeStep4)
+     */
+
+    /**
+     * Step 4: Información del Propietario
+     */
+    public function step4()
+    {
+        if (!Session::has('wizard.plan_id') || !Session::has('wizard.business_category_id')) {
+            return redirect()->route('register.step1');
+        }
+
+        // Obtener configuración de pago
+        $paymentSetting = \App\Models\RegistrationPaymentSetting::getActive();
+        
+        // Calcular monto a pagar
+        $plan = \App\Shared\Models\Plan::findOrFail(Session::get('wizard.plan_id'));
+        $selectedPeriod = Session::get('wizard.selected_period', 'monthly');
+        
+        $amount = match($selectedPeriod) {
+            'quarterly' => $plan->quarterly_price ?? ($plan->monthly_price * 3 * 0.95),
+            'semester' => $plan->semester_price ?? ($plan->monthly_price * 6 * 0.90),
+            'annual' => $plan->annual_price ?? ($plan->monthly_price * 12 * 0.85),
+            default => $plan->monthly_price,
+        };
+
+        return view('public::registration.step4-owner', compact('paymentSetting', 'amount'));
+    }
+
+    /**
+     * Procesar registro completo
+     */
+    public function complete(Request $request)
+    {
+        // Validar Step 4
+        $validated = $request->validate([
+            'owner_name' => 'required|string|max:255',
+            'owner_email' => 'required|email|max:255|unique:users,email|unique:pending_registrations,owner_email',
+            'owner_document_type' => 'required|in:cc,ce,passport',
+            'owner_document_number' => 'required|string|max:50',
+            'password' => 'required|string|min:8|confirmed',
+            'accept_terms' => 'required|accepted',
+            'payment_proof' => 'required|image|mimes:jpeg,png,jpg,pdf|max:5120', // 5MB max
+        ]);
+
+        // Crear registro pendiente con TODOS los datos del wizard
+        $registration = PendingRegistration::create([
+            // Step 1
+            'plan_id' => Session::get('wizard.plan_id'),
+            'billing_period' => Session::get('wizard.billing_period'),
+            
+            // Step 2
+            'business_category_id' => Session::get('wizard.business_category_id'),
+            'business_name' => Session::get('wizard.business_name'),
+            'document_type' => Session::get('wizard.document_type'),
+            'document_number' => Session::get('wizard.document_number'),
+            'phone' => Session::get('wizard.phone'),
+            'email' => Session::get('wizard.email'),
+            'city' => Session::get('wizard.city'),
+            'department' => Session::get('wizard.department'),
+            'address' => Session::get('wizard.address'),
+            'description' => Session::get('wizard.description'),
+            
+            // Step 3
+            'store_name' => Session::get('wizard.store_name'),
+            'slug' => Session::get('wizard.slug'),
+            'store_description' => Session::get('wizard.store_description'),
+            'meta_title' => Session::get('wizard.meta_title'),
+            'meta_description' => Session::get('wizard.meta_description'),
+            'meta_keywords' => Session::get('wizard.meta_keywords'),
+            
+            // Step 4
+            'owner_name' => $validated['owner_name'],
+            'owner_email' => $validated['owner_email'],
+            'owner_document_type' => $validated['owner_document_type'],
+            'owner_document_number' => $validated['owner_document_number'],
+            'hashed_password' => Hash::make($validated['password']),
+            'temp_password_encrypted' => encrypt($validated['password']), // Guardar encriptada para mostrarla después
+            
+            // Estado
+            'status' => 'pending',
+        ]);
+
+        // Guardar comprobante de pago
+        if ($request->hasFile('payment_proof')) {
+            $file = $request->file('payment_proof');
+            $filename = 'proof_' . $registration->id . '_' . time() . '.' . $file->getClientOriginalExtension();
+            $path = $file->storeAs('payment-proofs/registrations', $filename, 'public');
+            $registration->update(['payment_proof' => $path]);
+        }
+
+        // Enviar WhatsApp INMEDIATAMENTE
+        $this->sendWhatsAppNotification($registration);
+
+        // Limpiar sesión del wizard
+        Session::forget('wizard.plan_id');
+        Session::forget('wizard.selected_period');
+        Session::forget('wizard.business_category_id');
+
+        // Redirigir a Step 5 (pantalla de espera)
+        return redirect()->route('register.step5', $registration->id);
+    }
+
+    /**
+     * Step 5: Pantalla de espera
+     */
+    public function step5($registrationId)
+    {
+        $registration = PendingRegistration::with(['plan', 'category'])->findOrFail($registrationId);
+        
+        // Si ya fue aprobado, redirigir a success
+        if ($registration->status === 'approved') {
+            return redirect()->route('register.success', $registrationId);
+        }
+        
+        // Si fue rechazado, redirigir a rejected
+        if ($registration->status === 'rejected') {
+            return redirect()->route('register.rejected', $registrationId);
+        }
+        
+        return view('public::registration.step5-payment', compact('registration'));
+    }
+
+    /**
+     * Vista de éxito (aprobado)
+     */
+    public function success($registrationId)
+    {
+        $registration = PendingRegistration::with(['plan', 'category', 'createdStore'])->findOrFail($registrationId);
+        
+        if ($registration->status !== 'approved' || !$registration->created_store_id) {
+            return redirect()->route('register.step5', $registrationId);
+        }
+        
+        $store = $registration->createdStore;
+        $subscription = Subscription::where('store_id', $store->id)->first();
+        
+        // Obtener contraseña temporal desencriptada del registro
+        $temporaryPassword = null;
+        if ($registration->temp_password_encrypted) {
+            try {
+                $temporaryPassword = decrypt($registration->temp_password_encrypted);
+                
+                // Limpiar la contraseña encriptada después de mostrarla (seguridad)
+                $registration->update(['temp_password_encrypted' => null]);
+            } catch (\Exception $e) {
+                \Log::error('Error desencriptando contraseña temporal:', ['error' => $e->getMessage()]);
+            }
+        }
+        
+        // Si no hay contraseña disponible (registros antiguos), usar placeholder
+        if (!$temporaryPassword) {
+            $temporaryPassword = '(Contraseña enviada por email)';
+        }
+        
+        return view('public::registration.success', compact('registration', 'store', 'subscription', 'temporaryPassword'));
+    }
+
+    /**
+     * Vista de rechazo
+     */
+    public function rejected($registrationId)
+    {
+        $registration = PendingRegistration::with(['plan', 'category'])->findOrFail($registrationId);
+        
+        if ($registration->status !== 'rejected') {
+            return redirect()->route('register.step5', $registrationId);
+        }
+        
+        return view('public::registration.rejected', compact('registration'));
+    }
+
+    /**
+     * API: Verificar estado del registro
+     */
+    public function checkStatus($registrationId)
+    {
+        $registration = PendingRegistration::find($registrationId);
+        
+        if (!$registration) {
+            return response()->json(['status' => 'not_found'], 404);
+        }
+
+        $response = [
+            'status' => $registration->status,
+            'reason' => $registration->rejected_reason,
+        ];
+
+        if ($registration->isApproved() && $registration->created_store_id) {
+            $store = $registration->createdStore;
+            $response['redirect_url'] = route('tenant.admin.dashboard', ['store' => $store->slug]);
+        }
+
+        return response()->json($response);
+    }
+
+    /**
+     * Enviar notificación WhatsApp
+     */
+    private function sendWhatsAppNotification(PendingRegistration $registration)
+    {
+        try {
+            $whatsapp = app(WhatsAppNotificationService::class);
+            
+            if (!$whatsapp->isEnabled()) {
+                \Log::warning('WhatsApp no habilitado - No se envió notificación de registro');
+                return;
+            }
+
+            // Enviar notificación de nueva registración pendiente
+            $result = $whatsapp->notifyNewRegistrationPending(
+                $registration,
+                '573233332112' // Número del super admin
+            );
+
+            if ($result) {
+                $registration->update(['whatsapp_sent_at' => now()]);
+                \Log::info('WhatsApp enviado para registro pendiente', [
+                    'registration_id' => $registration->id
+                ]);
+            }
+        } catch (\Exception $e) {
+            \Log::error('Error enviando WhatsApp de registro', [
+                'registration_id' => $registration->id,
+                'error' => $e->getMessage()
+            ]);
+        }
+    }
+}

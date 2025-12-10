@@ -8,5 +8,6 @@ return [
     App\Features\SuperLinkiu\SuperLinkiuServiceProvider::class,
     App\Features\TenantAdmin\TenantAdminServiceProvider::class,
     App\Features\Tenant\TenantServiceProvider::class,
+    App\Features\Public\PublicServiceProvider::class,
     App\Providers\AppServiceProvider::class,
 ];

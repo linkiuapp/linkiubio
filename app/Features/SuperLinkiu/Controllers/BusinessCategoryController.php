@@ -132,10 +132,23 @@ class BusinessCategoryController extends Controller
     {
         // Verificar que no tenga tiendas asociadas
         if ($businessCategory->stores()->count() > 0) {
+            if (request()->expectsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se puede eliminar una categoría con tiendas asociadas.'
+                ], 422);
+            }
             return back()->with('error', 'No se puede eliminar una categoría con tiendas asociadas.');
         }
 
         $businessCategory->delete();
+
+        if (request()->expectsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => 'Categoría eliminada exitosamente.'
+            ]);
+        }
 
         return redirect()
             ->route('superlinkiu.business-categories.index')

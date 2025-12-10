@@ -126,10 +126,15 @@ public function update(Request $request)
             'validated_data' => $validated ?? []
         ]);
         
+        // Determinar si es una actualización solo de imágenes (sin colores)
+        $isImageOnlyUpdate = ($request->has('logo_base64') || $request->has('favicon_base64') || 
+                              $request->input('logo_url') === '' || $request->input('favicon_url') === '') &&
+                              !$request->has('header_background_color');
+
         $validated = $request->validate([
-            'header_background_color' => 'required|string|regex:/^#[A-Fa-f0-9]{6}$/',
-            'header_text_color' => 'required|string|regex:/^#[A-Fa-f0-9]{6}$/',
-            'header_description_color' => 'required|string|regex:/^#[A-Fa-f0-9]{6}$/',
+            'header_background_color' => $isImageOnlyUpdate ? 'nullable' : 'required|string|regex:/^#[A-Fa-f0-9]{6}$/',
+            'header_text_color' => $isImageOnlyUpdate ? 'nullable' : 'required|string|regex:/^#[A-Fa-f0-9]{6}$/',
+            'header_description_color' => $isImageOnlyUpdate ? 'nullable' : 'required|string|regex:/^#[A-Fa-f0-9]{6}$/',
             'logo_base64' => 'nullable|string',
             'favicon_base64' => 'nullable|string',
             'logo_url' => 'nullable|string',
@@ -140,33 +145,43 @@ public function update(Request $request)
         try {
             $design = StoreDesign::where('store_id', $store->id)->firstOrFail();
 
+            $updateData = [];
+
+            // Solo incluir colores si se proporcionaron
+            if ($request->has('header_background_color')) {
+                $updateData['header_background_color'] = $validated['header_background_color'];
+            }
+            if ($request->has('header_text_color')) {
+                $updateData['header_text_color'] = $validated['header_text_color'];
+            }
+            if ($request->has('header_description_color')) {
+                $updateData['header_description_color'] = $validated['header_description_color'];
+            }
+
             // Manejar logo base64
             if ($request->has('logo_base64') && $request->logo_base64) {
                 Log::info('Processing logo base64');
                 $logoUrls = $this->handleBase64Image($request->logo_base64, 'logo', $store->id);
                 Log::info('Logo URLs generated:', $logoUrls);
-                $validated = array_merge($validated, $logoUrls);
+                $updateData = array_merge($updateData, $logoUrls);
             } elseif ($request->input('logo_url') === '') {
                 Log::info('Removing logo');
                 $this->imageService->cleanOldImages($store->id, 'logo');
-                $validated['logo_url'] = null;
-                $validated['logo_webp_url'] = null;
+                $updateData['logo_url'] = null;
+                $updateData['logo_webp_url'] = null;
             }
 
             // Manejar favicon base64
             if ($request->has('favicon_base64') && $request->favicon_base64) {
                 $faviconUrl = $this->handleBase64Image($request->favicon_base64, 'favicon', $store->id);
-                $validated = array_merge($validated, $faviconUrl);
+                $updateData = array_merge($updateData, $faviconUrl);
             } elseif ($request->input('favicon_url') === '') {
                 $this->imageService->cleanOldImages($store->id, 'favicon');
-                $validated['favicon_url'] = null;
+                $updateData['favicon_url'] = null;
             }
 
-            $design->update($validated);
+            $design->update($updateData);
             $design->refresh(); // Recargar el modelo con los datos actualizados
-            
-            // Marcar paso de onboarding como completado
-            \App\Shared\Models\StoreOnboardingStep::markAsCompleted($store->id, 'design');
             
             DB::commit();
             

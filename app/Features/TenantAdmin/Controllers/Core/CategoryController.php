@@ -23,14 +23,34 @@ class CategoryController extends Controller
         $categoryLimit = $this->getCategoryLimit($store);
         
         // Obtener categorías con relaciones
-        $categories = Category::where('store_id', $store->id)
+        $query = Category::where('store_id', $store->id)
             ->with(['icon', 'parent', 'children'])
-            ->withCount('products')
-            ->orderBy('sort_order')
+            ->withCount('products');
+        
+        // Aplicar filtros
+        if ($request->filled('status')) {
+            if ($request->status === 'active') {
+                $query->where('is_active', true);
+            } elseif ($request->status === 'inactive') {
+                $query->where('is_active', false);
+            }
+        }
+        
+        if ($request->filled('type')) {
+            if ($request->type === 'main') {
+                $query->whereNull('parent_id');
+            } elseif ($request->type === 'sub') {
+                $query->whereNotNull('parent_id');
+            }
+        }
+        
+        // Ordenar y paginar
+        $categories = $query->orderBy('sort_order')
             ->orderBy('name')
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString(); // Mantener los parámetros de filtro en la paginación
             
-        // Contar total de categorías
+        // Contar total de categorías (sin filtros)
         $totalCategories = Category::where('store_id', $store->id)->count();
 
         // Vista (tabla o cards)
@@ -43,8 +63,6 @@ class CategoryController extends Controller
             'categoryLimit',
             'viewType'
         ));
-
-        
     }
 
     /**
@@ -179,9 +197,6 @@ class CategoryController extends Controller
         $validated['is_active'] = $request->has('is_active') && $request->input('is_active') == '1';
         
         $category = Category::create($validated);
-        
-        // Marcar paso de onboarding como completado
-        \App\Shared\Models\StoreOnboardingStep::markAsCompleted($store->id, 'categories');
         
         return redirect()
             ->route('tenant.admin.categories.index', $store->slug)

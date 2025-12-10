@@ -57,7 +57,7 @@
                 Finalizar compra
             </a>
             <button id="clear-cart-btn" 
-                    class="w-full bg-brandError-100 hover:bg-brandError-300 text-brandError-400 py-2 rounded-lg caption transition-colors text-center">
+                    class="w-full bg-red-50 hover:bg-red-600 hover:text-white text-red-900 py-2 rounded-lg caption transition-colors text-center">
                 Vaciar carrito
             </button>
         </div>

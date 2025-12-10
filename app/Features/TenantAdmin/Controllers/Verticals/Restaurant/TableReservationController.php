@@ -168,6 +168,21 @@ class TableReservationController extends Controller
             $data['created_by'] = auth()->id();
             $data['status'] = $data['status'] ?? 'confirmed';
             
+            // Validar límite de reservas diarias del plan
+            $maxDailyReservations = $store->plan->max_daily_reservations ?? 0;
+            
+            if ($maxDailyReservations > 0) { // 0 = ilimitado
+                $reservationsToday = \App\Shared\Models\Reservation::where('store_id', $store->id)
+                    ->whereDate('reservation_date', $reservationDate)
+                    ->count();
+                
+                if ($reservationsToday >= $maxDailyReservations) {
+                    return back()
+                        ->withErrors(['error' => "Has alcanzado el límite de {$maxDailyReservations} reservas por día para tu plan {$store->plan->name}. Actualiza tu plan para aceptar más reservas."])
+                        ->withInput();
+                }
+            }
+            
             $reservation = $this->reservationService->createReservation($store, $data);
             
             // Enviar confirmación por WhatsApp si se solicita

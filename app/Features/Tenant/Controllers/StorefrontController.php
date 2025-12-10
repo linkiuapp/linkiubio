@@ -86,9 +86,8 @@ class StorefrontController extends Controller
                 'images', 
                 'mainImage', 
                 'categories.icon',
-                'variableAssignments.variable.activeOptions',
-                'variants',
-                'stocksVariantes'
+                'variables.options', // Variables activas del producto con sus opciones
+                'variants' // Variaciones manuales con stock y precio
             ])
             ->first();
 
@@ -97,7 +96,7 @@ class StorefrontController extends Controller
         }
 
         // Productos relacionados (misma categoría)
-        $relatedProducts = [];
+        $relatedProducts = collect([]); // Siempre usar colección para consistencia
         if ($product->categories->count() > 0) {
             $categoryIds = $product->categories->pluck('id');
             $relatedProducts = Product::where('store_id', $store->id)

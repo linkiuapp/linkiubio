@@ -142,6 +142,7 @@ class StoreService
             $planChanged = isset($data['plan_id']) && $data['plan_id'] != $store->plan_id;
             $statusChanged = isset($data['status']) && $data['status'] != $store->status;
             $verifiedChanged = isset($data['verified']) && (bool)$data['verified'] != $store->verified;
+            $categoryChanged = isset($data['business_category_id']) && $data['business_category_id'] != $store->business_category_id;
 
             $oldPlan = $store->plan;
             $oldStatus = $store->status;
@@ -171,6 +172,18 @@ class StoreService
             
             if ($verifiedChanged) {
                 $this->sendStoreVerificationChangeEmail($store, $oldVerified, $store->verified);
+            }
+
+            // 🔄 LIMPIAR CACHÉ DE FEATURES SI CAMBIÓ LA CATEGORÍA
+            if ($categoryChanged) {
+                $featureResolver = app(\App\Shared\Services\FeatureResolver::class);
+                $featureResolver->invalidateStoreCache($store);
+                
+                Log::info('🔧 STORE SERVICE: Caché de features invalidado por cambio de categoría', [
+                    'store_id' => $store->id,
+                    'old_category_id' => $data['business_category_id'] ?? 'N/A',
+                    'new_category_id' => $store->business_category_id
+                ]);
             }
 
             DB::commit();

@@ -4,6 +4,7 @@
     @section('content')
     {{-- SECTION: Main Container --}}
     <div x-data="productManagement" class="space-y-4">
+        <x-toast-notification />
         {{-- SECTION: Header Card --}}
         <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
             {{-- SECTION: Header --}}
@@ -24,6 +25,7 @@
                                     icon="plus-circle"
                                     size="md"
                                     text="Nuevo Producto"
+                                    data-tour="product-button"
                                 />
                             </a>
                         @else
@@ -36,6 +38,7 @@
                                 :disabled="true"
                             />
                         @endif
+                        <x-tour-trigger tour="gestionar_productos" :autoStart="true" :showButton="false" />
                     </div>
                 </div>
             </div>
@@ -227,7 +230,7 @@
                                         @php
                                             $stockTotal = $product->type === 'simple' 
                                                 ? ($product->cantidad_stock ?? 0) 
-                                                : $product->stocksVariantes->sum('cantidad_stock');
+                                                : $product->variants->sum('stock');
                                             $umbral = $product->umbral_alerta_stock ?? 1;
                                         @endphp
                                         <span class="font-semibold {{ $stockTotal <= 0 ? 'text-red-600' : ($stockTotal <= $umbral ? 'text-yellow-600' : 'text-green-600') }}">
@@ -252,7 +255,7 @@
                                             @endforeach
                                             @if($product->categories->count() > 2)
                                                 <span class="inline-flex items-center gap-x-1.5 py-1 px-2 rounded-lg text-xs font-medium bg-gray-100 text-gray-600">
-                                                    +{{ $product->categories->count() - 2 }}
+                                                    {{ $product->categories->count() - 2 }}
                                                 </span>
                                             @endif
                                         </div>
@@ -274,24 +277,32 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <x-switch-basic 
-                                        switch-name="product-toggle-{{ $product->id }}"
-                                        :checked="$product->is_active"
-                                        value="1"
-                                        data-product-id="{{ $product->id }}"
-                                        data-url="{{ route('tenant.admin.products.toggle-status', [$store->slug, $product->id]) }}"
-                                        class="product-toggle"
-                                    />
+                                    <label for="toggle-status-{{ $product->id }}" class="relative inline-block w-11 h-6 cursor-pointer">
+                                        <input 
+                                            type="checkbox" 
+                                            id="toggle-status-{{ $product->id }}"
+                                            class="peer sr-only product-toggle"
+                                            data-product-id="{{ $product->id }}"
+                                            data-url="{{ route('tenant.admin.products.toggle-status', [$store->slug, $product->id]) }}"
+                                            {{ $product->is_active ? 'checked' : '' }}
+                                        >
+                                        <span class="absolute inset-0 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out peer-checked:bg-blue-600"></span>
+                                        <span class="absolute top-1/2 start-0.5 -translate-y-1/2 size-5 bg-white rounded-full shadow-xs transition-transform duration-200 ease-in-out peer-checked:translate-x-full"></span>
+                                    </label>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
-                                    <x-switch-basic 
-                                        switch-name="sharing-toggle-{{ $product->id }}"
-                                        :checked="$product->allow_sharing"
-                                        value="1"
-                                        data-product-id="{{ $product->id }}"
-                                        data-url="{{ route('tenant.admin.products.toggle-sharing', [$store->slug, $product->id]) }}"
-                                        class="sharing-toggle"
-                                    />
+                                    <label for="toggle-sharing-{{ $product->id }}" class="relative inline-block w-11 h-6 cursor-pointer">
+                                        <input 
+                                            type="checkbox" 
+                                            id="toggle-sharing-{{ $product->id }}"
+                                            class="peer sr-only sharing-toggle"
+                                            data-product-id="{{ $product->id }}"
+                                            data-url="{{ route('tenant.admin.products.toggle-sharing', [$store->slug, $product->id]) }}"
+                                            {{ $product->allow_sharing ? 'checked' : '' }}
+                                        >
+                                        <span class="absolute inset-0 bg-gray-200 rounded-full transition-colors duration-200 ease-in-out peer-checked:bg-blue-600"></span>
+                                        <span class="absolute top-1/2 start-0.5 -translate-y-1/2 size-5 bg-white rounded-full shadow-xs transition-transform duration-200 ease-in-out peer-checked:translate-x-full"></span>
+                                    </label>
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm">
                                     <div class="flex items-center justify-center gap-2">
@@ -624,12 +635,22 @@
             }));
         });
 
-        // Toggle functionality con actualización silenciosa
+        // Toggle de estado de producto
         document.addEventListener('change', function(e) {
             if (e.target.classList.contains('product-toggle')) {
+                e.stopPropagation(); // Prevenir que otros listeners capturen el evento
+                
                 const productId = e.target.dataset.productId;
                 const url = e.target.dataset.url;
+                const originalChecked = e.target.checked;
                 const row = e.target.closest('tr');
+                
+                // Verificar que la URL sea para productos, no categorías
+                if (!url || !url.includes('products')) {
+                    console.error('URL incorrecta para toggle de producto:', url);
+                    e.target.checked = !originalChecked;
+                    return;
+                }
                 
                 fetch(url, {
                     method: 'POST',
@@ -641,37 +662,66 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Actualización silenciosa: actualizar badge de estado sin recargar
-                        const statusCell = row.querySelector('td:nth-child(5)');
-                        if (statusCell) {
-                            const isActive = e.target.checked;
-                            const badgeClass = isActive 
-                                ? 'inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-lg text-xs font-medium bg-green-100 text-green-800'
-                                : 'inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-lg text-xs font-medium bg-red-100 text-red-800';
-                            const badgeText = isActive ? 'Activo' : 'Inactivo';
-                            statusCell.innerHTML = `<span class="${badgeClass}">${badgeText}</span>`;
+                        // Actualizar el badge de estado en la misma fila
+                        if (row) {
+                            const statusCell = row.querySelector('td:nth-child(5)');
+                            if (statusCell) {
+                                if (data.is_active) {
+                                    statusCell.innerHTML = '<span class="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-lg text-xs font-medium bg-green-100 text-green-800">Activo</span>';
+                                } else {
+                                    statusCell.innerHTML = '<span class="inline-flex items-center gap-x-1.5 py-1.5 px-3 rounded-lg text-xs font-medium bg-red-100 text-red-800">Inactivo</span>';
+                                }
+                            }
+                        }
+                        
+                        // Mostrar toast de éxito
+                        if (window.toast) {
+                            const message = data.is_active
+                                ? 'El producto se ha activado correctamente.'
+                                : 'El producto se ha desactivado correctamente.';
+                            window.toast.success(
+                                'Estado actualizado',
+                                message,
+                                5000,
+                                'bottom-center'
+                            );
                         }
                     } else {
-                        // Revertir el toggle si hay error
-                        e.target.checked = !e.target.checked;
-                        // Mostrar error con componente del DesignSystem
-                        window.showToast('error', data.error || 'Error al cambiar el estado');
+                        e.target.checked = !originalChecked;
+                        // Mostrar error con toast
+                        if (window.toast) {
+                            window.toast.error(
+                                'Error',
+                                data.error || 'Error al cambiar el estado del producto',
+                                5000,
+                                'bottom-center'
+                            );
+                        }
                     }
                 })
                 .catch(error => {
-                    console.error('Error:', error);
-                    // Revertir el toggle si hay error
-                    e.target.checked = !e.target.checked;
-                    window.showToast('error', 'Error al cambiar el estado');
+                    console.error('Error al cambiar estado del producto:', error);
+                    e.target.checked = !originalChecked;
+                    // Mostrar error con toast
+                    if (window.toast) {
+                        window.toast.error(
+                            'Error',
+                            'Error al cambiar el estado del producto',
+                            5000,
+                            'bottom-center'
+                        );
+                    }
                 });
+                
+                return false; // Prevenir propagación adicional
             }
         });
 
-        // Toggle de compartir con actualización silenciosa
+        // Toggle de compartir
         document.addEventListener('change', function(e) {
             if (e.target.classList.contains('sharing-toggle')) {
                 const url = e.target.dataset.url;
-                const newValue = e.target.checked;
+                const originalChecked = e.target.checked;
                 
                 fetch(url, {
                     method: 'POST',
@@ -680,21 +730,46 @@
                         'Content-Type': 'application/json',
                         'Accept': 'application/json',
                     },
-                    body: JSON.stringify({ allow_sharing: newValue })
+                    body: JSON.stringify({ allow_sharing: originalChecked })
                 })
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        // Actualización silenciosa - no mostrar alerta
+                        // Mostrar toast de éxito
+                        if (window.toast) {
+                            const message = data.allow_sharing
+                                ? 'El compartir se ha activado correctamente.'
+                                : 'El compartir se ha desactivado correctamente.';
+                            window.toast.success(
+                                'Estado actualizado',
+                                message,
+                                5000,
+                                'bottom-center'
+                            );
+                        }
                     } else {
-                        e.target.checked = !newValue;
-                        window.showToast('error', data.error || 'Error al actualizar');
+                        e.target.checked = !originalChecked;
+                        if (window.toast) {
+                            window.toast.error(
+                                'Error',
+                                data.error || 'Error al actualizar',
+                                5000,
+                                'bottom-center'
+                            );
+                        }
                     }
                 })
                 .catch(error => {
                     console.error('Error:', error);
-                    e.target.checked = !newValue;
-                    window.showToast('error', 'Error al actualizar');
+                    e.target.checked = !originalChecked;
+                    if (window.toast) {
+                        window.toast.error(
+                            'Error',
+                            'Error al actualizar',
+                            5000,
+                            'bottom-center'
+                        );
+                    }
                 });
             }
         });
@@ -824,7 +899,14 @@
                                         }
                                     }, 350);
                                     
-                                    window.showToast('success', 'Producto eliminado exitosamente');
+                                    if (window.toast) {
+                                        window.toast.success(
+                                            'Actualización exitosa',
+                                            'El producto se ha eliminado correctamente.',
+                                            5000,
+                                            'bottom-center'
+                                        );
+                                    }
                                 }
                             }, 300);
                         } else {

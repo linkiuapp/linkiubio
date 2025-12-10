@@ -1,123 +1,6 @@
 <x-tenant-admin-layout :store="$store">
 @section('title', 'Pedidos')
 
-@section('content')
-<div x-data="ordersManager" 
-     x-init="init(); initNotifications(); window.ordersManagerInstance = $data" 
-     class="space-y-6">
-    
-    {{-- Header --}}
-    <div class="flex items-center justify-between">
-        <div>
-            <h1 class="text-lg font-semibold text-gray-900">Gestión de Pedidos</h1>
-            <p class="text-sm text-gray-600 mt-1">
-                Administra todos los pedidos de tu tienda (Domicilio, Recoger, Consumo Local, Habitación)
-            </p>
-        </div>
-        <div class="flex items-center gap-3">
-            <button onclick="exportOrders()" 
-                    class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors" 
-                    title="Exportar (Próximamente)">
-                <i data-lucide="download" class="w-5 h-5"></i>
-            </button>
-            <a href="{{ route('tenant.admin.orders.create', $store->slug) }}" 
-               class="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors shadow-sm">
-                <i data-lucide="plus" class="w-5 h-5"></i>
-                Nuevo Pedido
-            </a>
-        </div>
-    </div>
-
-    {{-- Estadísticas --}}
-    <x-orders-stats-widget :stats="$stats" />
-
-    {{-- Filtros --}}
-    <x-orders-filters-widget :store="$store" :currentFilters="$currentFilters" />
-
-    {{-- Tabla de pedidos --}}
-    <x-orders-table :orders="$orders" :store="$store" />
-
-    {{-- Modal de Clave Maestra --}}
-    <x-modal-master-key 
-        modalId="master-key-modal"
-        action="orders.cancel"
-        actionLabel="Cancelar pedido"
-    />
-
-    {{-- Modal de confirmación de cancelación --}}
-    <div x-show="showCancelModal" 
-         x-transition:enter="transition ease-out duration-300"
-         x-transition:enter-start="opacity-0"
-         x-transition:enter-end="opacity-100"
-         x-transition:leave="transition ease-in duration-200"
-         x-transition:leave-start="opacity-100"
-         x-transition:leave-end="opacity-0"
-         class="fixed inset-0 z-[99999] overflow-y-auto" 
-         style="display: none;">
-        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
-            <div class="fixed inset-0 transition-opacity bg-black/50 backdrop-blur-sm z-[99999]" 
-                 @click="showCancelModal = false"></div>
-            
-            <div class="relative z-[99999] inline-block align-middle bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full"
-                 x-transition:enter="transition ease-out duration-300"
-                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-                 x-transition:leave="transition ease-in duration-200"
-                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
-                
-                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-                    <div class="sm:flex sm:items-start">
-                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                            <i data-lucide="alert-triangle" class="h-6 w-6 text-red-600"></i>
-                        </div>
-                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
-                            <h3 class="text-lg leading-6 font-semibold text-gray-900">
-                                Cancelar Pedido
-                            </h3>
-                            <div class="mt-2">
-                                <p class="text-sm text-gray-600">
-                                    ¿Estás seguro de que deseas cancelar el pedido <strong x-text="cancelOrderNumber"></strong>? 
-                                    Esta acción no se puede deshacer.
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
-                    <button type="button" 
-                            @click="confirmCancelOrder()"
-                            :disabled="cancelLoading"
-                            class="w-full inline-flex justify-center items-center gap-2 rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-                            :class="cancelLoading ? 'bg-red-400' : 'bg-red-600 hover:bg-red-700'">
-                        <template x-if="cancelLoading">
-                            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                        </template>
-                        <span x-text="cancelLoading ? 'Cancelando...' : 'Sí, cancelar'"></span>
-                    </button>
-                    <button type="button" 
-                            @click="showCancelModal = false; cancelOrderId = null; cancelOrderNumber = ''; cancelLoading = false"
-                            :disabled="cancelLoading"
-                            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed">
-                        No, mantener
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    {{-- Paginación --}}
-    @if($orders->hasPages())
-        <div class="bg-white rounded-lg shadow-sm p-4">
-            {{ $orders->links() }}
-        </div>
-    @endif
-</div>
-
 @push('scripts')
 <script>
 document.addEventListener('alpine:init', () => {
@@ -404,13 +287,204 @@ document.addEventListener('alpine:init', () => {
                 window.lastOrderCount = {{ $orders->total() }};
             }
             
-            if (typeof pollingInterval === 'undefined') {
-                window.pollingInterval = setInterval(checkForNewOrders, 30000); // Cada 30 segundos
+            if (typeof pollingInterval === 'undefined' && typeof window.checkForNewOrders === 'function') {
+                window.pollingInterval = setInterval(window.checkForNewOrders, 30000); // Cada 30 segundos
             }
         }
     }));
 });
+</script>
+@endpush
 
+@section('content')
+<div x-data="ordersManager" 
+     x-init="init(); initNotifications(); window.ordersManagerInstance = $data" 
+     class="space-y-6">
+    
+    {{-- Header --}}
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-lg font-semibold text-gray-900">Gestión de Pedidos</h1>
+            <p class="text-sm text-gray-600 mt-1">
+                Administra todos los pedidos de tu tienda (Domicilio, Recoger, Consumo Local, Habitación)
+            </p>
+        </div>
+        <div class="flex items-center gap-3">
+            <button onclick="exportOrders()" 
+                    class="p-2 text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors" 
+                    title="Exportar (Próximamente)">
+                <i data-lucide="download" class="w-5 h-5"></i>
+            </button>
+            <a href="{{ route('tenant.admin.orders.create', $store->slug) }}" 
+               class="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors shadow-sm">
+                <i data-lucide="plus" class="w-5 h-5"></i>
+                Nuevo Pedido
+            </a>
+        </div>
+    </div>
+
+    {{-- Estadísticas --}}
+    <x-orders-stats-widget :stats="$stats" />
+
+    {{-- Filtros --}}
+    <x-orders-filters-widget :store="$store" :currentFilters="$currentFilters" />
+
+    {{-- Tabla de pedidos --}}
+    <x-orders-table :orders="$orders" :store="$store" />
+
+    {{-- Modal de Clave Maestra --}}
+    <x-modal-master-key 
+        modalId="master-key-modal"
+        action="orders.cancel"
+        actionLabel="Cancelar pedido"
+    />
+
+    {{-- Modal de confirmación de cancelación --}}
+    <div x-show="showCancelModal" 
+         x-transition:enter="transition ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-[99999] overflow-y-auto" 
+         style="display: none;">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:p-0">
+            <div class="fixed inset-0 transition-opacity bg-black/50 backdrop-blur-sm z-[99999]" 
+                 @click="showCancelModal = false"></div>
+            
+            <div class="relative z-[99999] inline-block align-middle bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:max-w-lg sm:w-full"
+                 x-transition:enter="transition ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="transition ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+                
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="sm:flex sm:items-start">
+                        <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                            <i data-lucide="alert-triangle" class="h-6 w-6 text-red-600"></i>
+                        </div>
+                        <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left">
+                            <h3 class="text-lg leading-6 font-semibold text-gray-900">
+                                Cancelar Pedido
+                            </h3>
+                            <div class="mt-2">
+                                <p class="text-sm text-gray-600">
+                                    ¿Estás seguro de que deseas cancelar el pedido <strong x-text="cancelOrderNumber"></strong>? 
+                                    Esta acción no se puede deshacer.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
+                    <button type="button" 
+                            @click="confirmCancelOrder()"
+                            :disabled="cancelLoading"
+                            class="w-full inline-flex justify-center items-center gap-2 rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                            :class="cancelLoading ? 'bg-red-400' : 'bg-red-600 hover:bg-red-700'">
+                        <template x-if="cancelLoading">
+                            <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                            </svg>
+                        </template>
+                        <span x-text="cancelLoading ? 'Cancelando...' : 'Sí, cancelar'"></span>
+                    </button>
+                    <button type="button" 
+                            @click="showCancelModal = false; cancelOrderId = null; cancelOrderNumber = ''; cancelLoading = false"
+                            :disabled="cancelLoading"
+                            class="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-2 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 sm:mt-0 sm:ml-3 sm:w-auto sm:text-sm disabled:opacity-50 disabled:cursor-not-allowed">
+                        No, mantener
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Paginación --}}
+    @if($orders->hasPages())
+        <div class="bg-white rounded-lg shadow-sm p-4">
+            {{ $orders->links() }}
+        </div>
+    @endif
+</div>
+
+@push('styles')
+<style>
+@keyframes scan {
+    0% {
+        top: 0;
+        opacity: 0;
+    }
+    25% {
+        opacity: 1;
+    }
+    75% {
+        opacity: 1;
+    }
+    100% {
+        top: 100%;
+        opacity: 0;
+    }
+}
+
+.scan-line {
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(139, 92, 246, 0.6),
+        rgba(59, 130, 246, 0.8),
+        rgba(6, 182, 212, 0.6),
+        transparent
+    );
+    box-shadow: 0 0 20px rgba(139, 92, 246, 0.8),
+                0 0 40px rgba(59, 130, 246, 0.6),
+                0 0 60px rgba(6, 182, 212, 0.4);
+    animation: scan 2s linear infinite;
+    filter: blur(1px);
+}
+
+.scan-line::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 30px;
+    background: linear-gradient(
+        to bottom,
+        rgba(139, 92, 246, 0.3),
+        transparent
+    );
+    filter: blur(10px);
+}
+
+.scan-line::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(255, 255, 255, 0.9),
+        transparent
+    );
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
+}
+</style>
+@endpush
+
+@push('scripts')
+<script>
 // Manejar cambio de estado con protección de clave maestra
 async function handleStatusChange(orderId, newStatus, selectElement, orderNumber) {
     // Verificar si el cambio a "delivered" está protegido
@@ -592,7 +666,7 @@ window.cancelOrderHandler = function(orderId, orderNumber) {
 };
 
 // Verificar nuevos pedidos
-async function checkForNewOrders() {
+window.checkForNewOrders = async function() {
     try {
         const response = await fetch('{{ route("tenant.admin.orders.api.count", $store->slug) }}');
         
@@ -604,8 +678,8 @@ async function checkForNewOrders() {
                 
                 if (currentCount > (window.lastOrderCount || 0)) {
                     const newOrders = currentCount - (window.lastOrderCount || 0);
-                    showNewOrderNotification(newOrders, data.latest_order);
-                    showNewOrderAlert(data.latest_order);
+                    window.showNewOrderNotification(newOrders, data.latest_order);
+                    window.showNewOrderAlert(data.latest_order);
                     
                     setTimeout(() => {
                         window.location.reload();
@@ -620,7 +694,7 @@ async function checkForNewOrders() {
     }
 }
 
-function showNewOrderNotification(count, latestOrder) {
+window.showNewOrderNotification = function(count, latestOrder) {
     if (Notification.permission !== 'granted') return;
     
     const title = count === 1 ? '🔔 ¡Nuevo pedido!' : `🔔 ¡${count} pedidos nuevos!`;
@@ -661,7 +735,7 @@ function formatPrice(price) {
     }).format(price);
 }
 
-function showNewOrderAlert(latestOrder) {
+window.showNewOrderAlert = function(latestOrder) {
     const alertDiv = document.createElement('div');
     alertDiv.className = 'fixed top-4 right-4 bg-green-500 text-white p-4 rounded-lg shadow-lg z-50 max-w-sm transform transition-all duration-300';
     alertDiv.style.transform = 'translateX(100%)';
@@ -715,6 +789,40 @@ function goToOrder(orderId) {
 window.addEventListener('beforeunload', () => {
     if (window.pollingInterval) {
         clearInterval(window.pollingInterval);
+    }
+});
+
+// Listener global para validación de comprobantes (PUSHER - opcional si funciona)
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof Echo !== 'undefined') {
+        const storeId = {{ $store->id }};
+        
+        console.log('🔵 [Pusher] Conectando al canal store.' + storeId + '.orders');
+        
+        Echo.channel('store.' + storeId + '.orders')
+            .listen('.proof.validated', (event) => {
+                console.log('⚡ [Pusher] Evento recibido (más rápido que polling):', event);
+                
+                // Detener polling si existe (Pusher ganó la carrera)
+                if (window.currentValidationPolling) {
+                    clearInterval(window.currentValidationPolling);
+                    window.currentValidationPolling = null;
+                    console.log('🏁 [Pusher] Polling detenido - Pusher llegó primero');
+                }
+                
+                // Si el modal está abierto, actualizar con la función compartida
+                const modal = document.querySelector('.fixed.inset-0.z-\\[9999\\]');
+                if (modal && typeof window.updateValidationResult === 'function') {
+                    window.updateValidationResult(event.status, event.score);
+                }
+                
+                // Recargar la tabla
+                setTimeout(() => {
+                    if (window.loadOrders) {
+                        window.loadOrders();
+                    }
+                }, 2000);
+            });
     }
 });
 
@@ -795,32 +903,378 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 });
 
-// Función global para ver comprobante en modal
-window.verComprobante = function(imageUrl, orderNumber) {
+// Función global para ver comprobante en modal con validación IA
+window.verComprobante = function(imageUrl, orderNumber, orderId = null, initialStatus = null, initialScore = 0) {
+    const storeSlug = '{{ $store->slug }}';
+    const storeId = {{ $store->id }};
+    
     // Crear backdrop
     const backdrop = document.createElement('div');
     backdrop.className = 'fixed inset-0 bg-black/80 backdrop-blur-sm z-[9998] transition-opacity duration-300 opacity-0';
     backdrop.style.backdropFilter = 'blur(4px)';
     
+    // State para el modal
+    let modalState = {
+        loading: false,
+        analyzing: false,
+        validationStatus: initialStatus || '',
+        validationScore: initialScore || 0
+    };
+    
+    // Función para verificar estado de validación (POLLING)
+    async function checkValidationStatus() {
+        if (!orderId) return;
+        
+        try {
+            const response = await fetch('/' + storeSlug + '/admin/orders/' + orderId + '/validation-status', {
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Accept': 'application/json'
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                
+                // Si hay resultado, actualizar UI
+                if (data.status && data.status !== null) {
+                    console.log('✅ [Polling] Resultado encontrado:', data);
+                    
+                    // Detener polling
+                    if (window.currentValidationPolling) {
+                        clearInterval(window.currentValidationPolling);
+                        window.currentValidationPolling = null;
+                    }
+                    
+                    // Actualizar modal
+                    window.updateValidationResult(data.status, data.score || 0);
+                }
+            }
+        } catch (error) {
+            console.error('❌ [Polling] Error:', error);
+        }
+    }
+    
+    // Variable para evitar procesar el resultado múltiples veces
+    let resultProcessed = false;
+    
+    // Función GLOBAL para actualizar el modal con el resultado (usada por Polling y Pusher)
+    window.updateValidationResult = function(status, score) {
+        // Evitar procesar el mismo resultado múltiples veces
+        if (resultProcessed) {
+            console.log('⏭️ Resultado ya procesado, ignorando duplicado');
+            return;
+        }
+        
+        resultProcessed = true;
+        console.log('✅ Procesando resultado:', status, score);
+        
+        modalState.validationStatus = status;
+        modalState.validationScore = score;
+        modalState.loading = false;
+        modalState.analyzing = false;
+        
+        // Ocultar overlay de análisis
+        const analysingOverlay = document.getElementById('analyzing-overlay');
+        const validationBtn = document.getElementById('validation-btn');
+        
+        if (analysingOverlay) analysingOverlay.classList.add('hidden');
+        if (validationBtn) validationBtn.style.display = 'none';
+        
+        // Actualizar contenedor de estado
+        const statusContainer = document.getElementById('validation-status-container');
+        if (statusContainer) {
+            let statusHTML = '';
+            if (status === 'valid') {
+                statusHTML = '<div class="flex items-center gap-2 p-3 bg-green-50 text-green-700 rounded-lg">' +
+                    '<i data-lucide="check-circle" class="w-5 h-5"></i>' +
+                    '<div class="flex-1">' +
+                    '<span class="font-medium">Comprobante validado</span>' +
+                    '<p class="text-xs mt-1">Confianza: ' + score + '%</p>' +
+                    '</div>' +
+                    '</div>';
+            } else if (status === 'suspicious') {
+                statusHTML = '<div class="flex items-center gap-2 p-3 bg-yellow-50 text-yellow-700 rounded-lg">' +
+                    '<i data-lucide="alert-triangle" class="w-5 h-5"></i>' +
+                    '<div class="flex-1">' +
+                    '<span class="font-medium">Comprobante dudoso</span>' +
+                    '<p class="text-xs mt-1">Recomendado revisar manualmente</p>' +
+                    '</div>' +
+                    '</div>';
+            } else if (status === 'fake') {
+                statusHTML = '<div class="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg">' +
+                    '<i data-lucide="x-circle" class="w-5 h-5"></i>' +
+                    '<div class="flex-1">' +
+                    '<span class="font-medium">Posible falsificación detectada</span>' +
+                    '<p class="text-xs mt-1">Verificar con el cliente</p>' +
+                    '</div>' +
+                    '</div>';
+            } else if (status === 'error') {
+                statusHTML = '<div class="flex items-center gap-2 p-3 bg-gray-50 text-gray-700 rounded-lg">' +
+                    '<i data-lucide="alert-circle" class="w-5 h-5"></i>' +
+                    '<div class="flex-1">' +
+                    '<span class="font-medium">Error en la validación</span>' +
+                    '<p class="text-xs mt-1">Intenta nuevamente más tarde</p>' +
+                    '</div>' +
+                    '</div>';
+            }
+            statusContainer.innerHTML = statusHTML;
+            
+            // Reinicializar iconos
+            if (window.createIcons && window.lucideIcons) {
+                window.createIcons({ icons: window.lucideIcons });
+            }
+        }
+        
+        // Mostrar toast en bottom-center
+        if (status === 'valid') {
+            if (window.toast && typeof window.toast.success === 'function') {
+                window.toast.success('✅ Validación completada', 'Comprobante auténtico - Confianza: ' + score + '%', 8000, 'bottom-center');
+            }
+        } else if (status === 'suspicious') {
+            if (window.toast && typeof window.toast.warning === 'function') {
+                window.toast.warning('⚠️ Validación completada', 'Comprobante dudoso - Se recomienda revisión manual', 10000, 'bottom-center');
+            }
+        } else if (status === 'fake') {
+            if (window.toast && typeof window.toast.error === 'function') {
+                window.toast.error('❌ Validación completada', 'Posible falsificación detectada - Verificar con el cliente', 10000, 'bottom-center');
+            }
+        } else if (status === 'error') {
+            if (window.toast && typeof window.toast.error === 'function') {
+                window.toast.error('❌ Error en validación', 'No se pudo validar el comprobante. Intenta nuevamente.', 8000, 'bottom-center');
+            }
+        }
+        
+        // Recargar la tabla después de 2 segundos
+        setTimeout(() => {
+            if (window.loadOrders) {
+                window.loadOrders();
+            }
+        }, 2000);
+    }
+    
+    // Función para validar comprobante (INICIA VALIDACIÓN + POLLING)
+    window.validateProofModal = async function() {
+        if (modalState.loading || modalState.validationStatus || !orderId) return;
+        
+        // Obtener banco seleccionado
+        const bankSelector = document.getElementById('bank-selector');
+        const selectedBank = bankSelector ? bankSelector.value : '';
+        
+        if (!selectedBank) {
+            if (window.toast && typeof window.toast.warning === 'function') {
+                window.toast.warning('Banco requerido', 'Por favor selecciona el banco/app de la transferencia', 5000, 'bottom-center');
+            }
+            return;
+        }
+        
+        modalState.loading = true;
+        modalState.analyzing = true;
+        
+        // Mostrar overlay de análisis
+        const analysingOverlay = document.getElementById('analyzing-overlay');
+        const validationBtn = document.getElementById('validation-btn');
+        if (analysingOverlay) analysingOverlay.classList.remove('hidden');
+        if (validationBtn) validationBtn.disabled = true;
+        
+        try {
+            const response = await fetch('/' + storeSlug + '/admin/orders/' + orderId + '/validate-proof', {
+                method: 'POST',
+                headers: {
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    bank: selectedBank
+                })
+            });
+            
+            const data = await response.json();
+            
+            if (data.success) {
+                if (window.toast && typeof window.toast.success === 'function') {
+                    window.toast.success('¡Validación iniciada!', data.message || 'Verificando comprobante...', 5000, 'bottom-center');
+                }
+                
+                // ⚡ INICIAR POLLING - Verificar cada 2 segundos
+                console.log('🔄 [Polling] Iniciando verificación cada 2 segundos');
+                checkValidationStatus(); // Primera verificación inmediata
+                window.currentValidationPolling = setInterval(checkValidationStatus, 2000);
+                
+                // ⏱️ Timeout de 60 segundos (optimizado para comparación de plantillas)
+                setTimeout(() => {
+                    if (window.currentValidationPolling) {
+                        clearInterval(window.currentValidationPolling);
+                        window.currentValidationPolling = null;
+                        console.log('⏱️ [Polling] Timeout - detenido');
+                        
+                        // Si aún está analizando, mostrar mensaje
+                        if (modalState.analyzing) {
+                            modalState.loading = false;
+                            modalState.analyzing = false;
+                            const analysingOverlay = document.getElementById('analyzing-overlay');
+                            const validationBtn = document.getElementById('validation-btn');
+                            if (analysingOverlay) analysingOverlay.classList.add('hidden');
+                            if (validationBtn) validationBtn.disabled = false;
+                            
+                            if (window.toast && typeof window.toast.warning === 'function') {
+                                window.toast.warning('Validación tomando mucho tiempo', 'Intenta refrescar la página en unos momentos', 8000, 'bottom-center');
+                            }
+                        }
+                    }
+                }, 60000);
+            } else {
+                if (window.toast && typeof window.toast.error === 'function') {
+                    window.toast.error('Error', data.message || 'No se pudo validar el comprobante', 5000, 'bottom-center');
+                }
+                modalState.loading = false;
+                modalState.analyzing = false;
+                if (analysingOverlay) analysingOverlay.classList.add('hidden');
+                if (validationBtn) validationBtn.disabled = false;
+            }
+        } catch (error) {
+            if (window.toast && typeof window.toast.error === 'function') {
+                window.toast.error('Error de conexión', 'No se pudo conectar con el servidor', 5000, 'bottom-center');
+            }
+            modalState.loading = false;
+            modalState.analyzing = false;
+            if (analysingOverlay) analysingOverlay.classList.add('hidden');
+            if (validationBtn) validationBtn.disabled = false;
+        }
+    };
+    
     // Crear modal
     const modal = document.createElement('div');
     modal.className = 'fixed inset-0 z-[9999] flex items-center justify-center p-4 opacity-0 scale-95 transition-all duration-300';
+    
     modal.innerHTML = `
-        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[56vh] overflow-hidden">
-            <div class="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between z-10">
-                <h3 class="text-base font-semibold text-gray-900">Comprobante - Pedido #${orderNumber}</h3>
-                <button onclick="window.cerrarModalComprobante()" class="text-gray-400 hover:text-gray-600 transition-colors">
-                    <i data-lucide="x" class="w-5 h-5"></i>
+        <div class="bg-white rounded-xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-hidden">
+            <!-- Header -->
+            <div class="sticky top-0 bg-white border-b border-gray-200 px-4 py-3 z-10">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-base font-semibold text-gray-900">Comprobante - Pedido #${orderNumber}</h3>
+                    <button onclick="window.cerrarModalComprobante()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+                </div>
+                
+                ${orderId && !modalState.validationStatus ? `
+                <div>
+                    <label for="bank-selector" class="block text-xs font-medium text-gray-600 mb-1.5">
+                        <i data-lucide="building-2" class="w-3.5 h-3.5 inline mr-1"></i>
+                        Banco/App de la transferencia:
+                    </label>
+                    <select 
+                        id="bank-selector" 
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-sm bg-white">
+                        <option value="">Selecciona el banco/app...</option>
+                        <option value="nequi">Nequi</option>
+                        <option value="bancolombia">Bancolombia</option>
+                        <option value="daviplata">Daviplata</option>
+                        <option value="bbva">BBVA</option>
+                        <option value="davivienda">Davivienda</option>
+                        <option value="otro">Otro banco</option>
+                    </select>
+                </div>
+                ` : ''}
+            </div>
+            
+            <!-- Imagen con efecto de análisis -->
+            <div class="p-4 overflow-auto max-h-[calc(90vh-280px)] flex items-center justify-center bg-gray-50 relative">
+                <img src="${imageUrl}" alt="Comprobante" class="w-auto h-auto max-w-full max-h-[calc(90vh-320px)] rounded-lg shadow-lg" style="object-fit: contain;">
+                
+                <!-- Overlay de análisis animado -->
+                <div id="analyzing-overlay" class="hidden absolute inset-0 flex items-center justify-center bg-black/60 backdrop-blur-sm rounded-lg transition-opacity duration-300">
+                    <div class="relative">
+                        <!-- Línea de escaneo animada -->
+                        <div class="absolute inset-0 overflow-hidden rounded-lg">
+                            <div class="scan-line"></div>
+                        </div>
+                        
+                        <!-- Texto de análisis -->
+                        <div class="relative z-10 text-center">
+                            <div class="inline-flex items-center gap-3 px-6 py-4 bg-white/10 backdrop-blur-md rounded-2xl border border-white/20 shadow-2xl">
+                                <div class="relative w-14 h-14 flex items-center justify-center">
+                                    <!-- Círculo central sólido -->
+                                    <div class="absolute w-3 h-3 rounded-full bg-gradient-to-r from-purple-400 to-blue-400 z-10"></div>
+                                    <!-- Ondas pulsantes concéntricas -->
+                                    <div class="absolute w-6 h-6 rounded-full bg-gradient-to-r from-purple-500 to-blue-500 animate-ping"></div>
+                                    <div class="absolute w-9 h-9 rounded-full bg-gradient-to-r from-purple-500/70 to-blue-500/70 animate-ping" style="animation-delay: 0.3s; animation-duration: 1s;"></div>
+                                    <div class="absolute w-12 h-12 rounded-full bg-gradient-to-r from-purple-500/50 to-blue-500/50 animate-ping" style="animation-delay: 0.6s; animation-duration: 1.5s;"></div>
+                                    <div class="absolute w-14 h-14 rounded-full bg-gradient-to-r from-purple-500/30 to-cyan-500/30 animate-ping" style="animation-delay: 0.9s; animation-duration: 1.8s;"></div>
+                                </div>
+                                <div class="text-left">
+                                    <p class="text-gray-900 font-bold text-lg"><strong>KiuBot</strong> analizando...</p>
+                                    <p class="text-gray-600 text-sm">Verificando autenticidad</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Estado de validación -->
+            <div id="validation-status-container" class="px-4 py-3 border-t border-gray-200 min-h-[60px]">
+                ${modalState.validationStatus === 'valid' ? `
+                <div class="flex items-center gap-2 p-3 bg-green-50 text-green-700 rounded-lg">
+                    <i data-lucide="check-circle" class="w-5 h-5"></i>
+                    <div class="flex-1">
+                        <span class="font-medium">Comprobante validado</span>
+                        <p class="text-xs mt-1">Confianza: ${modalState.validationScore}%</p>
+                    </div>
+                </div>
+                ` : ''}
+                
+                ${modalState.validationStatus === 'suspicious' ? `
+                <div class="flex items-center gap-2 p-3 bg-yellow-50 text-yellow-700 rounded-lg">
+                    <i data-lucide="alert-triangle" class="w-5 h-5"></i>
+                    <div class="flex-1">
+                        <span class="font-medium">Comprobante dudoso</span>
+                        <p class="text-xs mt-1">Se recomienda revisión manual</p>
+                    </div>
+                </div>
+                ` : ''}
+                
+                ${modalState.validationStatus === 'fake' ? `
+                <div class="flex items-center gap-2 p-3 bg-red-50 text-red-700 rounded-lg">
+                    <i data-lucide="x-circle" class="w-5 h-5"></i>
+                    <div class="flex-1">
+                        <span class="font-medium">Posible falsificación detectada</span>
+                        <p class="text-xs mt-1">Verificar con el cliente</p>
+                    </div>
+                </div>
+                ` : ''}
+                
+                ${modalState.validationStatus === 'error' ? `
+                <div class="flex items-center gap-2 p-3 bg-gray-50 text-gray-700 rounded-lg">
+                    <i data-lucide="alert-circle" class="w-5 h-5"></i>
+                    <div class="flex-1">
+                        <span class="font-medium">Error en la validación</span>
+                        <p class="text-xs mt-1">Intenta nuevamente más tarde</p>
+                    </div>
+                </div>
+                ` : ''}
+            </div>
+            
+            <!-- Botones de acción -->
+            <div class="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3 flex gap-2">
+                ${orderId && !modalState.validationStatus ? `
+                <button 
+                    id="validation-btn"
+                    onclick="window.validateProofModal(); return false;"
+                    class="flex-1 px-4 py-2.5 bg-gradient-to-r from-purple-600 via-blue-600 to-cyan-600 hover:from-purple-700 hover:via-blue-700 hover:to-cyan-700 disabled:opacity-50 disabled:cursor-not-allowed text-white rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-2 shadow-lg shadow-purple-500/30">
+                    <img src="{{ asset('images-ui/emoji_kiubot_linkiu.svg') }}" alt="KiuBot" class="w-5 h-5">
+                    <div class="flex flex-col items-start justify-start">
+                        <span class="text-white font-semibold text-sm">Validar con KiuBot</span>
+                        <span class="text-white font-normal text-xs"><strong>KiuBot</strong> esta en su version beta, es posible que cometamos errores.</span>
+                    </div>
                 </button>
-            </div>
-            <div class="p-4 overflow-y-auto max-h-[calc(56vh-100px)] flex items-center justify-center bg-gray-50">
-                <img src="${imageUrl}" alt="Comprobante" class="max-w-full object-contain object-center rounded-lg shadow-lg">
-            </div>
-            <div class="sticky bottom-0 bg-white border-t border-gray-200 px-4 py-3 flex gap-2 justify-end">
-                <a href="${imageUrl}" download class="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
+                ` : ''}
+                <a href="${imageUrl}" download class="inline-flex items-center justify-center px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm font-medium transition-colors">
                     Descargar
                 </a>
-                <button onclick="window.cerrarModalComprobante()" class="px-3 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors">
+                <button onclick="window.cerrarModalComprobante()" class="inline-flex items-center justify-center px-4 py-2.5 bg-gray-500 hover:bg-gray-600 text-white rounded-lg text-sm font-medium transition-colors">
                     Cerrar
                 </button>
             </div>
@@ -852,6 +1306,9 @@ window.verComprobante = function(imageUrl, orderNumber) {
     
     // Cerrar con click en backdrop
     backdrop.addEventListener('click', window.cerrarModalComprobante);
+    
+    // NOTA: El listener de proof.validated está en el listener global de DOMContentLoaded
+    // para evitar duplicados y asegurar que funcione siempre
 };
 
 window.cerrarModalComprobante = function() {

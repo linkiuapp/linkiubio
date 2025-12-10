@@ -69,3 +69,15 @@ Schedule::command('reservations:send-reminders')
     ->everyTwoHours()
     ->name('reservation-reminders')
     ->description('Send WhatsApp reminders for confirmed reservations based on store settings');
+
+// 📊 Programar verificación de alertas de monitoreo (cada 5 minutos)
+Schedule::command('monitoring:check-alerts')
+    ->everyFiveMinutes()
+    ->name('monitoring-check-alerts')
+    ->description('Check monitoring alerts and trigger notifications if needed');
+
+// 🧹 Programar limpieza de logs antiguos (diariamente)
+Schedule::command('monitoring:clean-logs --days=30')
+    ->dailyAt('02:00')
+    ->name('monitoring-clean-logs')
+    ->description('Clean old monitoring logs from database');

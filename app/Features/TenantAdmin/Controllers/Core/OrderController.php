@@ -10,6 +10,7 @@ use App\Features\TenantAdmin\Models\ProductVariant;
 use App\Features\TenantAdmin\Models\SimpleShipping;
 use App\Features\TenantAdmin\Models\SimpleShippingZone;
 use App\Services\WhatsAppNotificationService;
+use App\Features\TenantAdmin\Services\StockService;
 use Illuminate\Http\Request;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
@@ -455,6 +456,47 @@ class OrderController extends Controller
 
         try {
             DB::beginTransaction();
+            
+            // 🔒 VALIDAR STOCK ANTES DE CREAR PEDIDO
+            $stockService = app(StockService::class);
+            $stockErrors = [];
+            
+            foreach ($validated['items'] as $index => $itemData) {
+                $product = Product::find($itemData['product_id']);
+                
+                if (!$product) {
+                    $stockErrors[] = "Producto #{$index} no encontrado";
+                    continue;
+                }
+                
+                // Construir opciones seleccionadas para productos variables
+                $opcionesSeleccionadas = [];
+                if (isset($itemData['variant_id']) && $itemData['variant_id']) {
+                    $variant = ProductVariant::find($itemData['variant_id']);
+                    if ($variant) {
+                        $opcionesSeleccionadas = $variant->variant_options ?? [];
+                    }
+                }
+                
+                // Verificar disponibilidad
+                $disponibilidad = $stockService->verificarDisponibilidad(
+                    $product,
+                    $opcionesSeleccionadas,
+                    $itemData['quantity']
+                );
+                
+                if (!$disponibilidad['disponible']) {
+                    $cantidadDisponible = $disponibilidad['cantidad'] ?? 0;
+                    $stockErrors[] = "{$product->name}: " . ($disponibilidad['error'] ?? "Solo hay {$cantidadDisponible} unidades disponibles");
+                }
+            }
+            
+            if (!empty($stockErrors)) {
+                DB::rollback();
+                return back()
+                    ->withErrors(['stock' => $stockErrors])
+                    ->withInput();
+            }
 
             // Obtener configuración de envío
             $simpleShipping = SimpleShipping::where('store_id', $store->id)->first();
@@ -547,6 +589,29 @@ class OrderController extends Controller
 
             // Recalcular totales del pedido
             $order->recalculateTotals();
+            
+            // 📦 DESCONTAR STOCK de cada item
+            foreach ($validated['items'] as $itemData) {
+                $product = Product::find($itemData['product_id']);
+                
+                if ($product && $product->controlaStock() && !$product->tieneStockIlimitado()) {
+                    $opcionesSeleccionadas = [];
+                    
+                    if (isset($itemData['variant_id']) && $itemData['variant_id']) {
+                        $variant = ProductVariant::find($itemData['variant_id']);
+                        if ($variant) {
+                            $opcionesSeleccionadas = $variant->variant_options ?? [];
+                        }
+                    }
+                    
+                    $stockService->decrementarStock(
+                        $product,
+                        $opcionesSeleccionadas,
+                        $itemData['quantity'],
+                        $order->id
+                    );
+                }
+            }
 
             // Procesar comprobante de pago si se subió
             if ($request->hasFile('payment_proof')) {
@@ -811,6 +876,41 @@ class OrderController extends Controller
             $this->logStateChange($order, 'status', $oldStatus, $validated['status']);
             
             $order->update(['status' => $validated['status']]);
+            
+            // 📦 DEVOLVER STOCK SI EL PEDIDO SE CANCELA
+            if ($validated['status'] === 'cancelled' && $oldStatus !== 'cancelled') {
+                $stockService = app(StockService::class);
+                $order->load('items.product');
+                
+                foreach ($order->items as $item) {
+                    $product = $item->product;
+                    
+                    if ($product && $product->controlaStock() && !$product->tieneStockIlimitado()) {
+                        // Extraer opciones de las variantes guardadas
+                        $opcionesSeleccionadas = [];
+                        if (!empty($item->variant_details['variant_id'])) {
+                            $variant = ProductVariant::find($item->variant_details['variant_id']);
+                            if ($variant) {
+                                $opcionesSeleccionadas = $variant->variant_options ?? [];
+                            }
+                        }
+                        
+                        // Incrementar el stock
+                        $stockService->incrementarStock(
+                            $product,
+                            $opcionesSeleccionadas,
+                            $item->quantity,
+                            $order->id
+                        );
+                        
+                        \Log::info('Stock devuelto por cancelación', [
+                            'order_id' => $order->id,
+                            'product_id' => $product->id,
+                            'quantity' => $item->quantity
+                        ]);
+                    }
+                }
+            }
 
             // TODO: El historial se registra automáticamente en el boot del modelo
             // if ($validated['notes']) {
@@ -1119,5 +1219,97 @@ class OrderController extends Controller
             ]);
             abort(500, 'Error al descargar el comprobante: ' . $e->getMessage());
         }
+    }
+
+    /**
+     * Validar comprobante de pago usando IA (Google Vision API)
+     */
+    public function validateProof(Request $request, $storeSlug, Order $order): JsonResponse
+    {
+        $store = $request->route('store');
+
+        // Verificar que el pedido pertenece a la tienda
+        if ($order->store_id !== $store->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pedido no encontrado'
+            ], 404);
+        }
+
+        // Verificar que el pedido tiene comprobante
+        if (!$order->payment_proof_path) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Este pedido no tiene comprobante de pago'
+            ], 400);
+        }
+
+        // Verificar que no haya sido validado recientemente (últimos 5 minutos)
+        if ($order->proof_validated_at && $order->proof_validated_at->diffInMinutes(now()) < 5) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Este comprobante ya fue validado recientemente. Espera unos minutos para volver a validar.'
+            ], 429);
+        }
+
+        // Validar banco seleccionado
+        $validated = $request->validate([
+            'bank' => 'required|string|in:nequi,bancolombia,daviplata,bbva,davivienda,otro'
+        ]);
+
+        try {
+            // Dispatch el Job de validación con el banco seleccionado
+            \App\Jobs\ValidatePaymentProofJob::dispatch($order, $validated['bank']);
+
+            $this->logActivity(
+                'validate_payment_proof',
+                $order,
+                [
+                    'order_id' => $order->id,
+                    'order_number' => $order->order_number,
+                    'store_id' => $store->id,
+                    'description' => "Validación de comprobante iniciada para pedido #{$order->order_number}"
+                ]
+            );
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Validación iniciada. Recibirás el resultado en unos segundos...'
+            ]);
+
+        } catch (\Exception $e) {
+            \Log::error('Error al iniciar validación de comprobante:', [
+                'order_id' => $order->id,
+                'error' => $e->getMessage()
+            ]);
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Error al iniciar la validación. Intenta nuevamente.'
+            ], 500);
+        }
+    }
+
+    /**
+     * Obtener estado de validación del comprobante (para polling)
+     */
+    public function getValidationStatus(Request $request, $storeSlug, Order $order): JsonResponse
+    {
+        $store = $request->route('store');
+
+        // Verificar que el pedido pertenece a la tienda
+        if ($order->store_id !== $store->id) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Pedido no encontrado'
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'status' => $order->proof_validation_status,
+            'score' => $order->proof_validation_score,
+            'validated_at' => $order->proof_validated_at?->toISOString(),
+        ]);
     }
 } 

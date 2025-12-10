@@ -72,9 +72,6 @@ class SidebarBuilderService
     {
         $items = [];
 
-        // Onboarding (si aplica)
-        $items = array_merge($items, $this->buildOnboardingSection());
-
         // Favoritos
         $items[] = ['type' => 'section', 'title' => 'Favoritos'];
         $items = array_merge($items, $this->buildFavoritesSection());
@@ -101,40 +98,6 @@ class SidebarBuilderService
         return $items;
     }
 
-    /**
-     * Construir sección de onboarding
-     */
-    protected function buildOnboardingSection(): array
-    {
-        $items = [];
-        
-        // Solo mostrar si no está todo completo
-        $onboardingSteps = [
-            'design'     => \App\Shared\Models\StoreOnboardingStep::isCompleted($this->store->id, 'design'),
-            'slider'     => \App\Shared\Models\StoreOnboardingStep::isCompleted($this->store->id, 'slider'),
-            'locations'  => \App\Shared\Models\StoreOnboardingStep::isCompleted($this->store->id, 'locations'),
-            'payments'   => \App\Shared\Models\StoreOnboardingStep::isCompleted($this->store->id, 'payments'),
-            'shipping'   => \App\Shared\Models\StoreOnboardingStep::isCompleted($this->store->id, 'shipping'),
-            'categories' => \App\Shared\Models\StoreOnboardingStep::isCompleted($this->store->id, 'categories'),
-            'variables'  => \App\Shared\Models\StoreOnboardingStep::isCompleted($this->store->id, 'variables'),
-            'products'   => \App\Shared\Models\StoreOnboardingStep::isCompleted($this->store->id, 'products'),
-            'coupons'    => \App\Shared\Models\StoreOnboardingStep::isCompleted($this->store->id, 'coupons'),
-        ];
-
-        $allCompleted = count(array_filter($onboardingSteps)) === count($onboardingSteps);
-
-        if (!$allCompleted) {
-            $onboardingContent = view('shared::admin.tenant-sidebar-onboarding', [
-                'store'           => $this->store,
-                'onboardingSteps' => $onboardingSteps
-            ])->render();
-
-            $items[] = ['type' => 'custom', 'content' => $onboardingContent];
-            $items[] = ['type' => 'section', 'title' => ''];
-        }
-
-        return $items;
-    }
 
     /**
      * Construir todos los items del sidebar para SuperAdmin
@@ -181,18 +144,6 @@ class SidebarBuilderService
             'icon'   => 'layout-dashboard',
             'active' => request()->routeIs('superlinkiu.dashboard')
         ];
-
-        // Componentes (Solo Local) - Movido desde TenantAdmin
-        if (app()->environment('local')) {
-            $items[] = [
-                'label'      => 'Componentes',
-                'url'        => route('design-system.index'),
-                'icon'       => 'palette',
-                'active'     => request()->routeIs('design-system.*'),
-                'badge'      => 'LOCAL',
-                'badgeColor' => 'bg-yellow-500 text-white'
-            ];
-        }
 
         return $items;
     }
@@ -317,6 +268,44 @@ class SidebarBuilderService
     protected function buildSuperAdminToolsSection(): array
     {
         $items = [];
+
+        // Monitoreo del Sistema
+        $items[] = [
+            'label'  => 'Monitoreo',
+            'url'    => route('superlinkiu.monitoring.index'),
+            'icon'   => 'activity',
+            'active' => request()->routeIs('superlinkiu.monitoring.*'),
+        ];
+
+        // Registros Pendientes
+        $pendingCount = \App\Models\PendingRegistration::pending()->count();
+        $items[] = [
+            'label'  => 'Registros Pendientes',
+            'url'    => route('superlinkiu.pending-registrations.index'),
+            'icon'   => 'user-check',
+            'active' => request()->routeIs('superlinkiu.pending-registrations.*'),
+            'badge'  => $pendingCount > 0 ? $pendingCount : null,
+            'badge_color' => 'yellow',
+        ];
+
+        // Configuración de Pago (Registro)
+        $items[] = [
+            'label'  => 'Datos de Pago',
+            'url'    => route('superlinkiu.registration-payment-settings.index'),
+            'icon'   => 'qr-code',
+            'active' => request()->routeIs('superlinkiu.registration-payment-settings.*'),
+        ];
+
+        // Solicitudes de Cambio de Plan
+        $planChangeCount = \App\Shared\Models\PlanChangeRequest::pending()->count();
+        $items[] = [
+            'label'  => 'Solicitudes de Plan',
+            'url'    => route('superlinkiu.plan-change-requests.index'),
+            'icon'   => 'repeat',
+            'active' => request()->routeIs('superlinkiu.plan-change-requests.*'),
+            'badge'  => $planChangeCount > 0 ? $planChangeCount : null,
+            'badge_color' => 'yellow',
+        ];
 
         // Eliminar Pedidos
         $items[] = [
@@ -506,14 +495,16 @@ class SidebarBuilderService
             'indent'     => true
         ];
 
-        // Gestión de Envíos (si está habilitado)
-        if (featureEnabled($this->store, 'shipping')) {
+        // Gestión de Envíos (si está habilitado o es ecommerce/dropshipping)
+        $shippingEnabled = featureEnabled($this->store, 'shipping') || 
+                          featureEnabled($this->store, 'shipping') ||
+                          in_array($this->vertical, ['ecommerce', 'dropshipping', 'restaurant']);
+        
+        if ($shippingEnabled) {
             $simpleShipping = \App\Features\TenantAdmin\Models\SimpleShipping::where('store_id', $this->store->id)->first();
             $currentZones = $simpleShipping ? $simpleShipping->zones()->count() : 0;
-
-            $zoneLimits = ['explorer' => 2, 'master' => 3, 'legend' => 4];
-            $planSlug = strtolower($this->store->plan->slug ?? 'explorer');
-            $maxZones = $zoneLimits[$planSlug] ?? 2;
+            $maxZones = $this->store->plan->max_delivery_zones ?? 3;
+            
             $items[] = [
                 'label'      => 'Gestión de Envíos',
                 'url'        => route('tenant.admin.simple-shipping.index', ['store' => $this->store->slug]),
@@ -525,11 +516,15 @@ class SidebarBuilderService
         }
 
         // Métodos de Pago
+        $paymentMethodsUsed = $this->store->paymentMethods()->active()->count();
+        $paymentMethodsLimit = $this->store->plan->max_payment_methods ?? 4;
         $items[] = [
-            'label'  => 'Métodos de Pago',
-            'url'    => route('tenant.admin.payment-methods.index', ['store' => $this->store->slug]),
-            'icon'   => 'dock',
-            'active' => request()->routeIs('tenant.admin.payment-methods.*')
+            'label'      => 'Métodos de Pago',
+            'url'        => route('tenant.admin.payment-methods.index', ['store' => $this->store->slug]),
+            'icon'       => 'dock',
+            'active'     => request()->routeIs('tenant.admin.payment-methods.*'),
+            'badge'      => "{$paymentMethodsUsed}/{$paymentMethodsLimit}",
+            'badgeColor' => $this->getBadgeColor('count', $paymentMethodsUsed, $paymentMethodsLimit)
         ];
 
         // Sedes
@@ -554,8 +549,8 @@ class SidebarBuilderService
     {
         $items = [];
 
-        // Notificaciones WhatsApp (si está habilitado)
-        if (featureEnabled($this->store, 'notificaciones_whatsapp')) {
+        // Notificaciones WhatsApp (si está habilitado en el plan)
+        if ($this->store->plan && $this->store->plan->whatsapp_integration) {
             $items[] = [
                 'label'  => 'Notificaciones WhatsApp',
                 'url'    => route('tenant.admin.whatsapp-notifications.index', ['store' => $this->store->slug]),
@@ -673,14 +668,19 @@ class SidebarBuilderService
         $items = [];
 
         // Soporte y Tickets
+        $ticketsThisMonth = $this->store->tickets()->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count();
+        $ticketsLimit = $this->store->plan->max_tickets_per_month ?? 999;
         $openTicketsCount = $this->store->tickets()->whereIn('status', ['open', 'in_progress'])->count();
+        
         $items[] = [
             'label'      => 'Soporte y Tickets',
             'url'        => route('tenant.admin.tickets.index', ['store' => $this->store->slug]),
             'icon'       => 'server-crash',
             'active'     => request()->routeIs('tenant.admin.tickets.*'),
-            'badge'      => $openTicketsCount > 0 ? (string)$openTicketsCount : null,
-            'badgeColor' => $openTicketsCount > 0 ? $this->getBadgeColor('error') : null
+            'badge'      => "{$ticketsThisMonth}/{$ticketsLimit}",
+            'badgeColor' => $this->getBadgeColor('count', $ticketsThisMonth, $ticketsLimit),
+            'subBadge'   => $openTicketsCount > 0 ? (string)$openTicketsCount : null,
+            'subBadgeColor' => $openTicketsCount > 0 ? $this->getBadgeColor('error') : null
         ];
 
         // Anuncios de Linkiu
@@ -702,7 +702,19 @@ class SidebarBuilderService
      */
     public function buildFooter(): array
     {
-        $profileImage = $this->store->design?->logo_url ?? $this->store->logo_url;
+        // Usar el logo de StoreDesign (que tiene el accessor correcto para convertir path a URL)
+        // Si no existe StoreDesign o no tiene logo, retornar null para usar avatar por defecto
+        $profileImage = null;
+        
+        if ($this->store) {
+            // Asegurar que la relación design esté cargada
+            if (!$this->store->relationLoaded('design')) {
+                $this->store->load('design');
+            }
+            
+            // Obtener el logo de StoreDesign (tiene el accessor correcto)
+            $profileImage = $this->store->design?->logo_url;
+        }
         
         $footer = [
             'avatar'   => $profileImage ?: null,

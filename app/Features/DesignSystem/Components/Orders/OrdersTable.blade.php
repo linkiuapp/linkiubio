@@ -66,6 +66,8 @@ Ejemplo: <x-orders-table :orders="$orders" :store="$store" />
                            'payment_method' => $order->payment_method,
                            'payment_proof_path' => $order->payment_proof_path,
                            'payment_proof_url' => $order->payment_proof_url,
+                           'proof_validation_status' => $order->proof_validation_status,
+                           'proof_validation_score' => $order->proof_validation_score,
                            'subtotal' => (float) ($order->subtotal ?? $order->total),
                            'total' => (float) $order->total,
                            'shipping_cost' => (float) ($order->shipping_cost ?? 0),
@@ -147,9 +149,9 @@ Ejemplo: <x-orders-table :orders="$orders" :store="$store" />
                         <td class="px-6 py-4 whitespace-nowrap">
                             <div class="text-sm">
                                 <p class="text-gray-900" x-text="getPaymentMethodLabel(order.payment_method)"></p>
-                                <template x-if="order.payment_proof_url">
+                                <template x-if="order.payment_proof_path && order.payment_proof_url">
                                     <a href="javascript:void(0)" 
-                                       @click="window.verComprobante(order.payment_proof_url, order.order_number)"
+                                       @click="window.verComprobante(order.payment_proof_url, order.order_number, order.id, order.proof_validation_status || '', order.proof_validation_score || 0)"
                                        class="text-xs text-blue-600 hover:text-blue-700 flex items-center gap-1 cursor-pointer transition-colors mt-1">
                                         <i data-lucide="file-text" class="w-3 h-3"></i>
                                         Ver comprobante

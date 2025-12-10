@@ -46,6 +46,25 @@ class RoomTypeController extends Controller
     {
         $store = view()->shared('currentStore');
         
+        // Validar límite de tipos de habitación del plan
+        $maxRoomTypes = $store->plan->max_room_types ?? 0;
+        
+        if ($maxRoomTypes > 0) { // 0 = ilimitado
+            $currentRoomTypes = RoomType::where('store_id', $store->id)->count();
+            
+            if ($currentRoomTypes >= $maxRoomTypes) {
+                if ($request->expectsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Has alcanzado el límite de {$maxRoomTypes} tipos de habitación para tu plan {$store->plan->name}. Actualiza tu plan para agregar más tipos."
+                    ], 422);
+                }
+                return back()
+                    ->withErrors(['error' => "Has alcanzado el límite de {$maxRoomTypes} tipos de habitación para tu plan {$store->plan->name}."])
+                    ->withInput();
+            }
+        }
+        
         $validator = Validator::make($request->all(), [
             'name' => 'required|string|max:255',
             'description' => 'nullable|string',

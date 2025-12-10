@@ -25,6 +25,7 @@ return new class extends Migration
             $table->text('notes')->nullable();
             $table->json('metadata')->nullable(); // Para información adicional
             $table->timestamps();
+            $table->softDeletes(); // Para auditoría financiera
             
             // Índices para optimizar consultas
             $table->index(['store_id', 'status']);

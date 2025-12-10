@@ -95,9 +95,9 @@
                                     @else
                                         {{-- Stock para producto variable --}}
                                         @php
-                                            $stockTotal = $product->stocksVariantes->sum('cantidad_stock');
-                                            $stockReservado = $product->stocksVariantes->sum('cantidad_reservada');
-                                            $stockDisponible = $stockTotal - $stockReservado;
+                                            $stockTotal = $product->variants->sum('stock');
+                                            $stockReservado = 0; // Ya no se usa reserva en el nuevo sistema
+                                            $stockDisponible = $stockTotal;
                                         @endphp
                                         <div class="flex items-center justify-between">
                                             <span class="text-sm text-gray-600">Stock total:</span>
@@ -112,7 +112,7 @@
                                         </div>
                                         @endif
                                         <div class="text-xs text-gray-500 mt-2">
-                                            Stock gestionado por variantes ({{ $product->stocksVariantes->count() }} variantes)
+                                            Stock gestionado por variantes ({{ $product->variants->count() }} variantes)
                                         </div>
                                     @endif
                                 @endif
@@ -305,6 +305,95 @@
                 </x-card-base>
                 @endif
                 {{-- End SECTION: Variables Card --}}
+
+                {{-- SECTION: Variaciones del Producto Card --}}
+                @if($product->type === 'variable' && $product->variants && $product->variants->count() > 0)
+                <x-card-base title="Variaciones del Producto" shadow="sm">
+                    <div class="mt-4">
+                        <p class="text-sm text-gray-600 mb-4">
+                            Se encontraron <strong class="text-gray-900">{{ $product->variants->count() }} variaciones</strong> para este producto
+                        </p>
+                        
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-sm">
+                                <thead class="bg-gray-50 border-b border-gray-200">
+                                    <tr>
+                                        <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-700 uppercase">Combinación</th>
+                                        <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-700 uppercase">Stock</th>
+                                        <th class="px-3 py-2.5 text-left text-xs font-semibold text-gray-700 uppercase">Precio</th>
+                                        <th class="px-3 py-2.5 text-center text-xs font-semibold text-gray-700 uppercase">Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-gray-200">
+                                    @foreach($product->variants as $variant)
+                                    <tr class="hover:bg-gray-50">
+                                        <td class="px-3 py-2.5">
+                                            <div class="flex flex-wrap gap-1">
+                                                @php
+                                                $variantDisplay = [];
+                                                foreach ($variant->variant_options as $variableId => $optionId) {
+                                                    $variable = $product->variableAssignments->firstWhere('variable_id', $variableId)?->variable;
+                                                    $option = $variable?->options->find($optionId);
+                                                    if ($variable && $option) {
+                                                        $variantDisplay[] = [
+                                                            'variable' => $variable->name,
+                                                            'option' => $option->name,
+                                                            'color' => $option->color_hex ?? null
+                                                        ];
+                                                    }
+                                                }
+                                                @endphp
+                                                
+                                                @if(count($variantDisplay) > 0)
+                                                    @foreach($variantDisplay as $item)
+                                                    <span class="inline-flex items-center gap-1 px-2 py-1 bg-blue-50 border border-blue-200 rounded text-xs">
+                                                        @if($item['color'])
+                                                        <span class="w-3 h-3 rounded-full border border-gray-300" style="background-color: {{ $item['color'] }}"></span>
+                                                        @endif
+                                                        <span class="text-gray-700">{{ $item['variable'] }}:</span>
+                                                        <strong class="text-gray-900">{{ $item['option'] }}</strong>
+                                                    </span>
+                                                    @endforeach
+                                                @else
+                                                    <span class="text-xs text-gray-500 italic">Sin opciones específicas</span>
+                                                @endif
+                                            </div>
+                                            @if($variant->sku)
+                                            <code class="block mt-1 text-xs bg-gray-100 px-2 py-0.5 rounded text-gray-600">{{ $variant->sku }}</code>
+                                            @endif
+                                        </td>
+                                        <td class="px-3 py-2.5">
+                                            <span class="font-semibold {{ $variant->stock <= 0 ? 'text-red-600' : ($variant->stock <= 5 ? 'text-yellow-600' : 'text-green-600') }}">
+                                                {{ $variant->stock }} unidades
+                                            </span>
+                                        </td>
+                                        <td class="px-3 py-2.5">
+                                            <div class="space-y-0.5">
+                                                @if($variant->price_modifier != 0)
+                                                <span class="block text-xs text-gray-500">Base: ${{ number_format($product->price, 0, ',', '.') }}</span>
+                                                <span class="block text-xs font-medium {{ $variant->price_modifier > 0 ? 'text-green-600' : 'text-red-600' }}">
+                                                    {{ $variant->formatted_price_modifier }}
+                                                </span>
+                                                @endif
+                                                <span class="block font-bold text-gray-900">${{ number_format($product->price + $variant->price_modifier, 0, ',', '.') }}</span>
+                                            </div>
+                                        </td>
+                                        <td class="px-3 py-2.5 text-center">
+                                            <span class="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold
+                                                {{ $variant->is_active ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600' }}">
+                                                <i data-lucide="{{ $variant->is_active ? 'check-circle' : 'x-circle' }}" class="w-3 h-3"></i>
+                                                {{ $variant->is_active ? 'Activa' : 'Inactiva' }}
+                                            </span>
+                                        </td>
+                                    </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </x-card-base>
+                @endif
+                {{-- End SECTION: Variaciones del Producto Card --}}
             </div>
             {{-- End SECTION: Sidebar --}}
         </div>

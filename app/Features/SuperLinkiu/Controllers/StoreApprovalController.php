@@ -7,6 +7,7 @@ use App\Shared\Models\Store;
 use App\Shared\Models\BusinessCategory;
 use App\Features\SuperLinkiu\Requests\ApproveStoreRequest;
 use App\Features\SuperLinkiu\Requests\RejectStoreRequest;
+use App\Services\BillingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -286,7 +287,7 @@ class StoreApprovalController extends Controller
         try {
             // Verificar si ya tiene factura
             if ($store->invoices()->exists()) {
-                \Log::info('📋 STORE APPROVAL: Tienda ya tiene factura, no se genera nueva', [
+                \Log::info('STORE APPROVAL: Tienda ya tiene factura, no se genera nueva', [
                     'store_id' => $store->id
                 ]);
                 return $store->invoices()->latest()->first();
@@ -294,76 +295,47 @@ class StoreApprovalController extends Controller
 
             // Verificar que tenga plan
             if (!$store->plan_id || !$store->plan) {
-                \Log::warning('📋 STORE APPROVAL: Tienda sin plan, no se puede generar factura', [
+                \Log::warning('STORE APPROVAL: Tienda sin plan, no se puede generar factura', [
                     'store_id' => $store->id
                 ]);
                 return null;
             }
 
-            // Crear suscripción si no existe
+            // Crear suscripción y factura usando BillingService (centralizado)
             if (!$store->subscription) {
+                $billingService = app(BillingService::class);
                 $billingCycle = request('billing_period', 'monthly');
-                $periodStart = now();
-                $periodDays = match($billingCycle) {
-                    'monthly' => 30,
-                    'quarterly' => 90,
-                    'biannual' => 180,
-                    default => 30
-                };
-                $periodEnd = $periodStart->copy()->addDays($periodDays);
-
-                $subscription = \App\Shared\Models\Subscription::create([
-                    'store_id' => $store->id,
-                    'plan_id' => $store->plan_id,
-                    'status' => \App\Shared\Models\Subscription::STATUS_ACTIVE,
-                    'billing_cycle' => $billingCycle,
-                    'current_period_start' => $periodStart->toDateString(),
-                    'current_period_end' => $periodEnd->toDateString(),
-                    'next_billing_date' => $periodEnd->toDateString(),
-                    'next_billing_amount' => $store->plan->getPriceForPeriod($billingCycle),
-                    'metadata' => [
-                        'created_from' => 'manual_approval',
-                        'approved_by' => auth()->id()
+                
+                $billing = $billingService->createInitialBilling(
+                    store: $store,
+                    billingCycle: $billingCycle,
+                    hasTrialPeriod: null, // null = usar trial_days del plan
+                    trialDays: null,      // null = usar trial_days del plan
+                    paymentStatus: 'pending',
+                    createdBy: auth()->id(),
+                    metadata: [
+                        'source' => 'manual_store_approval',
+                        'approved_by' => auth()->user()->name
                     ]
+                );
+                
+                \Log::info('Billing creado tras aprobación manual', [
+                    'store_id' => $store->id,
+                    'subscription_id' => $billing['subscription']->id,
+                    'invoice_id' => $billing['invoice']->id,
+                    'has_trial' => $billing['subscription']->trial_end !== null,
+                    'trial_days' => $store->plan->trial_days ?? 0,
+                    'send_email' => $sendEmail ? 'Sí (después del commit)' : 'No'
                 ]);
+
+                return $billing['invoice'];
             } else {
-                $subscription = $store->subscription;
-                $billingCycle = $subscription->billing_cycle;
+                // Si ya tiene suscripción, retornar su factura más reciente
+                return $store->invoices()->latest()->first();
             }
 
-            // Generar factura
-            $issueDate = now();
-            $dueDate = $issueDate->copy()->addDays(15);
-            $amount = $store->plan->getPriceForPeriod($billingCycle);
-
-            $invoice = \App\Shared\Models\Invoice::create([
-                'store_id' => $store->id,
-                'subscription_id' => $subscription->id,
-                'plan_id' => $store->plan_id,
-                'amount' => $amount,
-                'period' => $billingCycle,
-                'status' => 'pending',
-                'issue_date' => $issueDate->toDateString(),
-                'due_date' => $dueDate->toDateString(),
-                'notes' => 'Factura generada tras aprobación manual de tienda',
-                'metadata' => [
-                    'generated_from' => 'manual_approval',
-                    'approved_by' => auth()->id()
-                ]
-            ]);
-
-            \Log::info('✅ STORE APPROVAL: Factura generada', [
-                'store_id' => $store->id,
-                'invoice_id' => $invoice->id,
-                'invoice_number' => $invoice->invoice_number,
-                'amount' => $amount,
-                'send_email' => $sendEmail ? 'Sí (después del commit)' : 'No'
-            ]);
-
-            return $invoice;
-
         } catch (\Exception $e) {
-            \Log::error('❌ STORE APPROVAL: Error generando factura', [
+            \Log::error('STORE APPROVAL: Error generando factura', [
                 'store_id' => $store->id,
                 'error' => $e->getMessage()
             ]);

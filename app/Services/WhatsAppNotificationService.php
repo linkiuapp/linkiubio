@@ -164,6 +164,22 @@ class WhatsAppNotificationService
     }
 
     /**
+     * Notificación: Nueva Registración Pendiente (Super Admin)
+     */
+    public function notifyNewRegistrationPending($registration, $adminPhone)
+    {
+        // Usar plantilla: new_registration_pending_es
+        // Variables: {{1}} = Nombre propietario, {{2}} = Email, {{3}} = Tienda, {{4}} = Plan, {{5}} = Monto
+        return $this->sendTemplateMessage($adminPhone, 'new_registration_pending_es', [
+            ['type' => 'text', 'text' => $registration->owner_name],
+            ['type' => 'text', 'text' => $registration->owner_email],
+            ['type' => 'text', 'text' => $registration->store_name],
+            ['type' => 'text', 'text' => $registration->plan->name],
+            ['type' => 'text', 'text' => $registration->getFormattedAmount()],
+        ]);
+    }
+
+    /**
      * Enviar mensaje de WhatsApp usando plantillas aprobadas
      */
     protected function sendTemplateMessage($to, $templateName, $parameters = [])
@@ -317,7 +333,7 @@ class WhatsAppNotificationService
         
         // Usar plantilla: payment_proof_received_notification_es
         // Variables: {{1}} = pedido, {{2}} = cliente
-        return $this->sendTemplateMessage($adminPhone, 'payment_proof_received_notification_es', [
+        return $this->sendTemplateMessage($adminPhone, 'admin_payment_proof_uploaded_es_v3', [
             ['type' => 'text', 'text' => $order->order_number],
             ['type' => 'text', 'text' => $order->customer_name]
         ]);
@@ -655,4 +671,3 @@ class WhatsAppNotificationService
         ]);
     }
 }
-

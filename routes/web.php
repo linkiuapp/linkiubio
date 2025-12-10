@@ -11,6 +11,29 @@ Route::get('/admin-preview/{token}', [App\Features\TenantAdmin\Controllers\Core\
 Route::post('/admin-preview/exit', [App\Features\TenantAdmin\Controllers\Core\PreviewController::class, 'exitPreview'])
     ->name('linkiu.admin-preview.exit');
 
+// Página para acceder al login de tenant admin
+Route::get('/admin-login', function () {
+    return view('public::auth.store-login');
+})->name('store.login');
+
+// Wizard de Registro Público
+Route::prefix('registre')->name('register.')->group(function () {
+    Route::get('/', [App\Features\Public\Controllers\RegistrationWizardController::class, 'step1'])->name('step1');
+    Route::post('/step1', [App\Features\Public\Controllers\RegistrationWizardController::class, 'storeStep1'])->name('step1.store');
+    Route::get('/step2', [App\Features\Public\Controllers\RegistrationWizardController::class, 'step2'])->name('step2');
+    Route::post('/step2', [App\Features\Public\Controllers\RegistrationWizardController::class, 'storeStep2'])->name('step2.store');
+    Route::get('/step3', [App\Features\Public\Controllers\RegistrationWizardController::class, 'step3'])->name('step3');
+    Route::post('/step3', [App\Features\Public\Controllers\RegistrationWizardController::class, 'storeStep3'])->name('step3.store');
+    Route::get('/step4', [App\Features\Public\Controllers\RegistrationWizardController::class, 'step4'])->name('step4');
+    Route::post('/complete', [App\Features\Public\Controllers\RegistrationWizardController::class, 'complete'])->name('complete');
+    Route::get('/step5/{registration}', [App\Features\Public\Controllers\RegistrationWizardController::class, 'step5'])->name('step5');
+    Route::get('/success/{registration}', [App\Features\Public\Controllers\RegistrationWizardController::class, 'success'])->name('success');
+    Route::get('/rejected/{registration}', [App\Features\Public\Controllers\RegistrationWizardController::class, 'rejected'])->name('rejected');
+});
+
+// API para verificar estado de registro
+Route::get('/api/check-registration-status/{registration}', [App\Features\Public\Controllers\RegistrationWizardController::class, 'checkStatus']);
+
 // Redirección de linkiu.bio a linkiu.com.co
 Route::get('/', function () {
     // Solo redirigir si es linkiu.bio

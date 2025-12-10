@@ -44,11 +44,31 @@ Route::post('/login', [AuthController::class, 'login'])
     ->middleware('throttle:5,1')
     ->name('login.submit');
 
+// Rutas de recuperación de contraseña (sin middleware auth)
+Route::prefix('password')->name('password.')->group(function () {
+    Route::get('/forgot', [\App\Features\TenantAdmin\Controllers\Core\PasswordResetController::class, 'showForgotPassword'])->name('forgot');
+    Route::post('/send-code', [\App\Features\TenantAdmin\Controllers\Core\PasswordResetController::class, 'sendCode'])
+        ->middleware('throttle:3,1')
+        ->name('send-code');
+    Route::get('/verify-code', [\App\Features\TenantAdmin\Controllers\Core\PasswordResetController::class, 'showVerifyCode'])->name('verify-code');
+    Route::post('/verify-code', [\App\Features\TenantAdmin\Controllers\Core\PasswordResetController::class, 'verifyCode'])
+        ->middleware('throttle:5,1')
+        ->name('verify-code');
+    Route::post('/resend-code', [\App\Features\TenantAdmin\Controllers\Core\PasswordResetController::class, 'resendCode'])
+        ->middleware('throttle:3,1')
+        ->name('resend-code');
+    Route::get('/reset', [\App\Features\TenantAdmin\Controllers\Core\PasswordResetController::class, 'showResetPassword'])->name('reset');
+    Route::post('/reset', [\App\Features\TenantAdmin\Controllers\Core\PasswordResetController::class, 'resetPassword'])
+        ->middleware('throttle:3,1')
+        ->name('reset');
+});
+
 
 
 // Rutas protegidas (con middleware auth + verificación de aprobación)
 Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreApprovalStatus::class])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::post('/dashboard/chat', [DashboardController::class, 'chat'])->name('dashboard.chat');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->withoutMiddleware(\App\Shared\Middleware\CheckStoreApprovalStatus::class);
     
     // Profile Routes (Usuario/Seguridad)
@@ -133,6 +153,9 @@ Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreAppro
         Route::post('/{product}/toggle-status', [ProductController::class, 'toggleStatus'])->name('toggle-status');
         Route::post('/{product}/set-main-image', [ProductController::class, 'setMainImage'])->name('set-main-image');
         Route::post('/{product}/toggle-sharing', [ProductController::class, 'toggleSharing'])->name('toggle-sharing');
+        
+        // KiuBot - Mejorar textos
+        Route::post('/improve-description', [ProductController::class, 'improveDescription'])->name('improve-description');
     });
 
     // Inventario Routes
@@ -377,6 +400,8 @@ Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreAppro
         // API para notificaciones en tiempo real
         Route::get('/api/count', [OrderController::class, 'getOrderCount'])->name('api.count');
         Route::get('/{order}/download-payment-proof', [OrderController::class, 'downloadPaymentProof'])->name('download-payment-proof');
+        Route::post('/{order}/validate-proof', [OrderController::class, 'validateProof'])->name('validate-proof');
+        Route::get('/{order}/validation-status', [OrderController::class, 'getValidationStatus'])->name('validation-status');
         
         // AJAX Routes
         Route::post('/get-shipping-cost', [OrderController::class, 'getShippingCost'])->name('get-shipping-cost');

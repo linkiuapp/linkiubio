@@ -4,11 +4,12 @@ namespace App\Shared\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
 
 class Invoice extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $fillable = [
         'invoice_number',
@@ -167,7 +168,8 @@ class Invoice extends Model
         return match($this->period) {
             'monthly' => 'Mensual',
             'quarterly' => 'Trimestral',
-            'biannual' => 'Semestral',
+            'semester' => 'Semestral',
+            'biannual' => 'Semestral', // Retrocompatibilidad
             default => 'Mensual'
         };
     }

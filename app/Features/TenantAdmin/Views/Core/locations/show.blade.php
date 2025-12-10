@@ -6,25 +6,8 @@
 <div class="max-w-6xl mx-auto space-y-5" x-data="locationShow()">
     {{-- Sistema de notificaciones flotantes --}}
     @include('tenant-admin::Core/locations/components/notifications')
-
-    {{-- Alertas de sesión --}}
-    @if(session('location_updated'))
-        <x-alert-bordered type="success" title="Cambios guardados">
-            <span>{{ session('location_updated') }}</span>
-        </x-alert-bordered>
-    @endif
-
-    @if(session('success'))
-        <x-alert-bordered type="success" title="Acción completada">
-            <span>{{ session('success') }}</span>
-        </x-alert-bordered>
-    @endif
-
-    @if(session('error'))
-        <x-alert-bordered type="error" title="No se pudo completar la acción">
-            <span>{{ session('error') }}</span>
-        </x-alert-bordered>
-    @endif
+    
+    <x-toast-notification />
 
     {{-- Header --}}
     <div class="flex items-center gap-3">
@@ -351,9 +334,41 @@ document.addEventListener('alpine:init', () => {
         showDeleteModal: false,
         deleteLocationId: null,
         deleteLocationName: '',
-        showNotification: false,
-        notificationMessage: '',
-        notificationType: 'success',
+
+        init() {
+            @if(session('location_updated'))
+            if (window.toast) {
+                window.toast.success(
+                    'Actualización exitosa',
+                    '{{ session('location_updated') }}',
+                    5000,
+                    'bottom-center'
+                );
+            }
+            @endif
+
+            @if(session('success'))
+            if (window.toast) {
+                window.toast.success(
+                    'Actualización exitosa',
+                    '{{ session('success') }}',
+                    5000,
+                    'bottom-center'
+                );
+            }
+            @endif
+
+            @if(session('error'))
+            if (window.toast) {
+                window.toast.error(
+                    'Error',
+                    '{{ session('error') }}',
+                    5000,
+                    'bottom-center'
+                );
+            }
+            @endif
+        },
 
         openDeleteModal(id, name) {
             this.deleteLocationId = id;
@@ -385,17 +400,38 @@ document.addEventListener('alpine:init', () => {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        this.showNotificationMessage(data.message, 'success');
+                        if (window.toast) {
+                            window.toast.success(
+                                'Actualización exitosa',
+                                data.message || 'La sede se ha eliminado correctamente.',
+                                5000,
+                                'bottom-center'
+                            );
+                        }
                         setTimeout(() => {
                             window.location.href = '{{ route('tenant.admin.locations.index', ['store' => $store->slug]) }}';
                         }, 1200);
                     } else {
-                        this.showNotificationMessage(data.message, 'error');
+                        if (window.toast) {
+                            window.toast.error(
+                                'Error',
+                                data.message || 'No se pudo eliminar la sede.',
+                                5000,
+                                'bottom-center'
+                            );
+                        }
                     }
                     this.closeDeleteModal();
                 })
                 .catch(() => {
-                    this.showNotificationMessage('Error al eliminar la sede.', 'error');
+                    if (window.toast) {
+                        window.toast.error(
+                            'Error',
+                            'Error al eliminar la sede.',
+                            5000,
+                            'bottom-center'
+                        );
+                    }
                     this.closeDeleteModal();
                 });
         },
@@ -414,14 +450,35 @@ document.addEventListener('alpine:init', () => {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        this.showNotificationMessage(data.message, 'success');
+                        if (window.toast) {
+                            window.toast.success(
+                                'Actualización exitosa',
+                                data.message || 'El estado de la sede se ha actualizado correctamente.',
+                                5000,
+                                'bottom-center'
+                            );
+                        }
                         setTimeout(() => window.location.reload(), 1000);
                     } else {
-                        this.showNotificationMessage(data.message, 'error');
+                        if (window.toast) {
+                            window.toast.error(
+                                'Error',
+                                data.message || 'No se pudo cambiar el estado de la sede.',
+                                5000,
+                                'bottom-center'
+                            );
+                        }
                     }
                 })
                 .catch(() => {
-                    this.showNotificationMessage('Error al cambiar el estado de la sede.', 'error');
+                    if (window.toast) {
+                        window.toast.error(
+                            'Error',
+                            'Error al cambiar el estado de la sede.',
+                            5000,
+                            'bottom-center'
+                        );
+                    }
                 });
         },
 
@@ -439,14 +496,35 @@ document.addEventListener('alpine:init', () => {
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
-                        this.showNotificationMessage(data.message, 'success');
+                        if (window.toast) {
+                            window.toast.success(
+                                'Actualización exitosa',
+                                data.message || 'La sede se ha establecido como principal correctamente.',
+                                5000,
+                                'bottom-center'
+                            );
+                        }
                         setTimeout(() => window.location.reload(), 1000);
                     } else {
-                        this.showNotificationMessage(data.message, 'error');
+                        if (window.toast) {
+                            window.toast.error(
+                                'Error',
+                                data.message || 'No se pudo establecer la sede como principal.',
+                                5000,
+                                'bottom-center'
+                            );
+                        }
                     }
                 })
                 .catch(() => {
-                    this.showNotificationMessage('Error al establecer la sede como principal.', 'error');
+                    if (window.toast) {
+                        window.toast.error(
+                            'Error',
+                            'Error al establecer la sede como principal.',
+                            5000,
+                            'bottom-center'
+                        );
+                    }
                 });
         },
 
@@ -465,15 +543,6 @@ document.addEventListener('alpine:init', () => {
             });
         },
 
-        showNotificationMessage(message, type = 'success') {
-            this.notificationMessage = message;
-            this.notificationType = type;
-            this.showNotification = true;
-
-            setTimeout(() => {
-                this.showNotification = false;
-            }, 5000);
-        },
     }));
 });
 </script>

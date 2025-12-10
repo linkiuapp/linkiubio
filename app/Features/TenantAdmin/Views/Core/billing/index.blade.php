@@ -1,921 +1,724 @@
-<x-tenant-admin-layout :store="$store">
-    @section('title', 'Plan y Facturación')
-    @section('subtitle', 'Gestiona tu suscripción, plan y facturación')
+@extends('shared::layouts.tenant-admin')
+
+@section('title', 'Plan y Facturación')
+
+@section('content')
+<div class="space-y-6" x-data="billingManager()">
     
-    @section('content')
-    <div x-data="billingManager" class="space-y-6">
-        <!-- Navegación de Tabs -->
-        <div class="bg-accent-50 rounded-lg overflow-hidden">
-            <div class="border-b border-accent-100">
-                <nav class="flex space-x-8 px-6 py-4" aria-label="Tabs">
-                    <button @click="activeTab = 'plan'" 
-                            :class="activeTab === 'plan' ? 'border-primary-200 text-primary-300 bg-primary-50' : 'border-transparent text-black-300 hover:text-black-400 hover:border-accent-200'"
-                            class="whitespace-nowrap py-2 px-4 border-b-2 font-medium text-sm rounded-t-lg transition-all duration-200">
-                        <x-solar-crown-outline class="w-4 h-4 inline mr-2" />
-                        Mi Plan Actual
-                    </button>
-                    <button @click="activeTab = 'usage'" 
-                            :class="activeTab === 'usage' ? 'border-primary-200 text-primary-300 bg-primary-50' : 'border-transparent text-black-300 hover:text-black-400 hover:border-accent-200'"
-                            class="whitespace-nowrap py-2 px-4 border-b-2 font-medium text-sm rounded-t-lg transition-all duration-200">
-                        <x-solar-chart-2-outline class="w-4 h-4 inline mr-2" />
-                        Uso y Límites
-                    </button>
-                    <button @click="activeTab = 'invoices'" 
-                            :class="activeTab === 'invoices' ? 'border-primary-200 text-primary-300 bg-primary-50' : 'border-transparent text-black-300 hover:text-black-400 hover:border-accent-200'"
-                            class="whitespace-nowrap py-2 px-4 border-b-2 font-medium text-sm rounded-t-lg transition-all duration-200">
-                        <x-solar-document-text-outline class="w-4 h-4 inline mr-2" />
-                        Historial de Facturación
-                    </button>
-                    <button @click="activeTab = 'change'" 
-                            :class="activeTab === 'change' ? 'border-primary-200 text-primary-300 bg-primary-50' : 'border-transparent text-black-300 hover:text-black-400 hover:border-accent-200'"
-                            class="whitespace-nowrap py-2 px-4 border-b-2 font-medium text-sm rounded-t-lg transition-all duration-200">
-                        <x-solar-refresh-outline class="w-4 h-4 inline mr-2" />
-                        Solicitar Cambio
-                    </button>
-                </nav>
+    {{-- Header con Trial Badge --}}
+    <div class="flex items-center justify-between">
+        <div>
+            <h1 class="text-lg font-semibold text-gray-900">Plan y Facturación</h1>
+            <p class="text-sm text-gray-600 mt-1">Gestiona tu suscripción y facturación</p>
+        </div>
+        
+        @if($isInTrial && $trialDaysRemaining > 0)
+        <div class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-3 rounded-xl shadow-lg animate-pulse">
+            <div class="flex items-center gap-3">
+                <i data-lucide="gift" class="w-6 h-6"></i>
+                <div>
+                    <p class="font-bold text-lg">Período de Prueba</p>
+                    <p class="text-sm text-green-100">{{ $trialDaysRemaining }} {{ $trialDaysRemaining === 1 ? 'día restante' : 'días restantes' }}</p>
+                </div>
             </div>
+        </div>
+        @endif
+    </div>
 
-            <!-- Contenido de Tabs -->
-            <div class="p-6">
-                <!-- =============================================== -->
-                <!-- TAB 1: MI PLAN ACTUAL -->
-                <!-- =============================================== -->
-                <div x-show="activeTab === 'plan'" x-transition class="space-y-6">
-                    <!-- Hero del Plan -->
-                    <div class="bg-gradient-to-r from-primary-50 to-secondary-50 rounded-lg p-6">
-                        <div class="flex items-center gap-6">
-                            <!-- Imagen del Plan -->
-                            <div class="flex-shrink-0">
-                                @php
-                                    $planImage = $subscription->plan->image_url;
-                                    if (!$planImage || !filter_var($planImage, FILTER_VALIDATE_URL)) {
-                                        // Determinar imagen por defecto según el nombre del plan
-                                        $planName = strtolower($subscription->plan->name ?? '');
-                                        if (str_contains($planName, 'explorer')) {
-                                            $planImage = asset('assets/images/img_plan_explorer.png');
-                                        } elseif (str_contains($planName, 'master')) {
-                                            $planImage = asset('assets/images/img_plan_master.png');
-                                        } elseif (str_contains($planName, 'legend')) {
-                                            $planImage = asset('assets/images/img_plan_legend.png');
-                                        } else {
-                                            $planImage = asset('assets/images/img_plan_explorer.png'); // Por defecto
-                                        }
-                                    }
-                                @endphp
-                                <img src="{{ $planImage }}" 
-                                     alt="Plan {{ $subscription->plan->name }}"
-                                     class="w-20 h-20 rounded-lg object-cover border-2 border-primary-100"
-                                     loading="lazy">
+    {{-- Tabs Navigation --}}
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+        <div class="border-b border-gray-200">
+            <nav class="flex space-x-2 px-4" aria-label="Tabs">
+                <button @click="activeTab = 'plan'" 
+                        :class="activeTab === 'plan' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'"
+                        class="px-6 py-4 border-b-2 font-medium text-sm transition-colors flex items-center gap-2">
+                    <i data-lucide="package" class="w-4 h-4"></i>
+                    Mi Plan
+                </button>
+                <button @click="activeTab = 'usage'" 
+                        :class="activeTab === 'usage' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'"
+                        class="px-6 py-4 border-b-2 font-medium text-sm transition-colors flex items-center gap-2">
+                    <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                    Uso y Límites
+                </button>
+                <button @click="activeTab = 'invoices'" 
+                        :class="activeTab === 'invoices' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'"
+                        class="px-6 py-4 border-b-2 font-medium text-sm transition-colors flex items-center gap-2">
+                    <i data-lucide="file-text" class="w-4 h-4"></i>
+                    Facturas
+                </button>
+                <button @click="activeTab = 'change'" 
+                        :class="activeTab === 'change' ? 'border-blue-600 text-blue-600' : 'border-transparent text-gray-600 hover:text-gray-900 hover:border-gray-300'"
+                        class="px-6 py-4 border-b-2 font-medium text-sm transition-colors flex items-center gap-2">
+                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                    Cambiar Plan
+                </button>
+            </nav>
+        </div>
+
+        {{-- Tab Content --}}
+        <div class="p-6">
+            {{-- TAB 1: MI PLAN --}}
+            <div x-show="activeTab === 'plan'" x-transition class="space-y-6">
+                
+                {{-- Card del Plan Actual --}}
+                <div class="bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 rounded-xl p-6 border border-blue-200">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-3 mb-4">
+                                <i data-lucide="crown" class="w-8 h-8 text-blue-600"></i>
+                                <div>
+                                    <h2 class="text-xl font-bold text-gray-900">Plan {{ $subscription->plan->name }}</h2>
+                                    <p class="text-sm text-gray-600">{{ $subscription->billing_cycle_label }}</p>
+                                </div>
                             </div>
-                            
-                            <!-- Info del Plan -->
-                            <div class="flex-grow">
-                                <div class="flex items-center justify-between mb-2">
-                                    <h3 class="text-xl font-bold text-black-500">
-                                        Plan {{ $subscription->plan->name }}
-                                    </h3>
-                                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium 
-                                        @if($subscription->is_active) bg-success-300 text-accent-50
-                                        @elseif($subscription->is_cancelled) bg-warning-300 text-black-500
-                                        @else bg-error-300 text-accent-50 @endif">
-                                        @if($subscription->is_active) 
-                                            <x-solar-check-circle-outline class="w-3 h-3 mr-1" />
-                                            {{ $subscription->status_label }}
+
+                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                                <div>
+                                    <p class="text-xs text-gray-600 mb-1">Precio</p>
+                                    <p class="text-base font-semibold text-gray-900">
+                                        ${{ number_format($subscription->next_billing_amount, 0, ',', '.') }}<span class="text-sm font-normal text-gray-600">/{{ $subscription->billing_cycle_label }}</span>
+                                    </p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-600 mb-1">Próximo Pago</p>
+                                    <p class="text-base font-semibold text-gray-900">
+                                        {{ $subscription->next_billing_date->locale('es')->isoFormat('D MMM YYYY') }}
+                                    </p>
+                                </div>
+                                <div>
+                                    <p class="text-xs text-gray-600 mb-1">Estado</p>
+                                    <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold
+                                        @if($subscription->is_active) bg-green-100 text-green-800
+                                        @elseif($subscription->is_cancelled) bg-yellow-100 text-yellow-800
+                                        @else bg-red-100 text-red-800 @endif">
+                                        @if($subscription->is_active)
+                                            <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                            Activa
                                         @elseif($subscription->is_cancelled)
-                                            <x-solar-clock-circle-outline class="w-3 h-3 mr-1" />
-                                            {{ $subscription->status_label }}
+                                            <i data-lucide="clock" class="w-3 h-3"></i>
+                                            Cancelada
                                         @else
-                                            <x-solar-close-circle-outline class="w-3 h-3 mr-1" />
-                                            {{ $subscription->status_label }}
+                                            <i data-lucide="x-circle" class="w-3 h-3"></i>
+                                            Suspendida
                                         @endif
                                     </span>
                                 </div>
-                                
-                                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                                    <div>
-                                        <span class="text-black-300">Precio:</span>
-                                        <p class="font-semibold text-black-500">
-                                            {{ $subscription->plan->getFormattedPriceForPeriod($subscription->billing_cycle) }}/{{ $subscription->billing_cycle_label }}
+                            </div>
+
+                            {{-- Trial Period Info --}}
+                            @if($isInTrial)
+                            <div class="mt-4 p-4 bg-white bg-opacity-80 backdrop-blur rounded-lg border-2 border-green-400">
+                                <div class="flex items-center gap-3">
+                                    <i data-lucide="sparkles" class="w-5 h-5 text-green-600"></i>
+                                    <div class="flex-1">
+                                        <p class="font-bold text-green-900">¡Estás en período de prueba!</p>
+                                        <p class="text-sm text-green-700">
+                                            Te quedan <strong>{{ $trialDaysRemaining }} {{ $trialDaysRemaining === 1 ? 'día' : 'días' }}</strong> gratis. 
+                                            Primer cobro: {{ $subscription->current_period_start->locale('es')->isoFormat('D MMM YYYY') }}
                                         </p>
                                     </div>
-                                    <div>
-                                        <span class="text-black-300">Próxima renovación:</span>
-                                        <p class="font-semibold text-black-500">
-                                            {{ $nextInvoice['date']->format('d \\d\\e F, Y') }}
+                                </div>
+                            </div>
+                            @endif
+
+                            {{-- Cargos Pendientes (por upgrades) --}}
+                            @if($subscription->pending_charges > 0)
+                            <div class="mt-4 p-4 bg-white bg-opacity-80 backdrop-blur rounded-lg border-2 border-blue-400">
+                                <div class="flex items-center gap-3">
+                                    <i data-lucide="clock" class="w-5 h-5 text-blue-600"></i>
+                                    <div class="flex-1">
+                                        <p class="font-bold text-blue-900">Cargos Pendientes</p>
+                                        <p class="text-sm text-blue-700 mb-2">
+                                            Se agregarán <strong>${{ number_format($subscription->pending_charges, 0, ',', '.') }}</strong> a tu próxima factura
                                         </p>
-                                    </div>
-                                    <div>
-                                        <span class="text-black-300">Ciclo de facturación:</span>
-                                        <p class="font-semibold text-black-500">{{ ucfirst($subscription->billing_cycle_label) }}</p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Características del Plan -->
-                    <div class="bg-accent-50 rounded-lg p-6">
-                        <h4 class="text-lg font-semibold text-black-500 mb-4">Características Incluidas</h4>
-                        @if($subscription->plan->features_list)
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-                                @foreach($subscription->plan->features_list as $feature)
-                                <div class="flex items-center gap-2">
-                                    <x-solar-check-circle-outline class="w-4 h-4 text-success-300 flex-shrink-0" />
-                                    <span class="text-black-400">{{ $feature }}</span>
-                                </div>
-                                @endforeach
-                            </div>
-                        @else
-                            <p class="text-black-300">No hay características específicas configuradas para este plan.</p>
-                        @endif
-                    </div>
-
-                    <!-- Resumen Rápido de Uso -->
-                    <div class="bg-accent-50 rounded-lg p-6">
-                        <h4 class="text-lg font-semibold text-black-500 mb-4">Resumen de Uso</h4>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                            <div class="text-center p-3 bg-accent-50 rounded-lg border border-accent-100">
-                                <div class="text-2xl font-bold text-primary-300">{{ $planUsage['products']['current'] ?? 0 }}</div>
-                                <div class="text-xs text-black-300">de {{ $planUsage['products']['limit'] ?? 0 }} productos</div>
-                            </div>
-                            <div class="text-center p-3 bg-accent-50 rounded-lg border border-accent-100">
-                                <div class="text-2xl font-bold text-primary-300">{{ $planUsage['categories']['current'] ?? 0 }}</div>
-                                <div class="text-xs text-black-300">de {{ $planUsage['categories']['limit'] ?? 0 }} categorías</div>
-                            </div>
-                            <div class="text-center p-3 bg-accent-50 rounded-lg border border-accent-100">
-                                <div class="text-2xl font-bold text-primary-300">{{ $planUsage['sliders']['current'] ?? 0 }}</div>
-                                <div class="text-xs text-black-300">de {{ $planUsage['sliders']['limit'] ?? 0 }} sliders</div>
-                            </div>
-                            <div class="text-center p-3 bg-accent-50 rounded-lg border border-accent-100">
-                                <div class="text-2xl font-bold text-primary-300">{{ $planUsage['locations']['current'] ?? 0 }}</div>
-                                <div class="text-xs text-black-300">de {{ $planUsage['locations']['limit'] ?? 0 }} sedes</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- =============================================== -->
-                <!-- TAB 2: USO Y LÍMITES -->
-                <!-- =============================================== -->
-                <div x-show="activeTab === 'usage'" x-transition class="space-y-6">
-                    <!-- Header del Tab -->
-                    <div class="flex items-center justify-between">
-                        <h4 class="text-lg font-semibold text-black-500">Uso y Límites del Plan</h4>
-                        <div class="text-sm text-black-300">
-                            Uso general: <span class="font-semibold text-primary-300">{{ $planUsage['overall_percentage'] ?? 0 }}%</span>
-                        </div>
-                    </div>
-
-                    <!-- Productos y Catálogo -->
-                    <div class="bg-accent-50 rounded-lg p-6">
-                        <h5 class="text-base font-semibold text-black-500 mb-4 flex items-center gap-2">
-                            <x-solar-box-outline class="w-5 h-5 text-primary-300" />
-                            📦 Productos y Catálogo
-                        </h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Productos -->
-                            <div class="space-y-3">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-black-500">Productos totales</span>
-                                    <span class="text-sm font-medium text-black-400">
-                                        {{ $planUsage['products']['current'] ?? 0 }}/{{ $planUsage['products']['limit'] ?? 0 }}
-                                        ({{ $planUsage['products']['percentage'] ?? 0 }}%)
-                                    </span>
-                                </div>
-                                <div class="w-full bg-accent-200 rounded-full h-3">
-                                    <div class="h-3 rounded-full transition-all duration-300 
-                                        @if(($planUsage['products']['percentage'] ?? 0) >= 90) bg-error-300
-                                        @elseif(($planUsage['products']['percentage'] ?? 0) >= 70) bg-warning-300
-                                        @else bg-primary-300 @endif" 
-                                         style="width: {{ $planUsage['products']['percentage'] ?? 0 }}%"></div>
-                                </div>
-                            </div>
-
-                            <!-- Categorías -->
-                            <div class="space-y-3">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-black-500">Categorías</span>
-                                    <span class="text-sm font-medium text-black-400">
-                                        {{ $planUsage['categories']['current'] ?? 0 }}/{{ $planUsage['categories']['limit'] ?? 0 }}
-                                        ({{ $planUsage['categories']['percentage'] ?? 0 }}%)
-                                    </span>
-                                </div>
-                                <div class="w-full bg-accent-200 rounded-full h-3">
-                                    <div class="h-3 rounded-full transition-all duration-300 
-                                        @if(($planUsage['categories']['percentage'] ?? 0) >= 90) bg-error-300
-                                        @elseif(($planUsage['categories']['percentage'] ?? 0) >= 70) bg-warning-300
-                                        @else bg-success-300 @endif" 
-                                         style="width: {{ $planUsage['categories']['percentage'] ?? 0 }}%"></div>
-                                </div>
-                            </div>
-
-                            <!-- Variables -->
-                            <div class="space-y-3">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-black-500">Variables (tallas, colores)</span>
-                                    <span class="text-sm font-medium text-black-400">
-                                        {{ $planUsage['variables']['current'] ?? 0 }}/{{ $planUsage['variables']['limit'] ?? 0 }}
-                                        ({{ $planUsage['variables']['percentage'] ?? 0 }}%)
-                                    </span>
-                                </div>
-                                <div class="w-full bg-accent-200 rounded-full h-3">
-                                    <div class="h-3 rounded-full transition-all duration-300 
-                                        @if(($planUsage['variables']['percentage'] ?? 0) >= 90) bg-error-300
-                                        @elseif(($planUsage['variables']['percentage'] ?? 0) >= 70) bg-warning-300
-                                        @else bg-info-300 @endif" 
-                                         style="width: {{ $planUsage['variables']['percentage'] ?? 0 }}%"></div>
-                                </div>
-                            </div>
-
-                            <!-- Imágenes por producto -->
-                            <div class="space-y-3">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-black-500">Imágenes por producto</span>
-                                    <span class="text-sm font-medium text-black-400">
-                                        Límite: {{ $planUsage['product_images']['limit'] ?? 0 }} img/producto
-                                    </span>
-                                </div>
-                                <div class="w-full bg-accent-200 rounded-full h-3">
-                                    <div class="h-3 rounded-full bg-success-300" style="width: 100%"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Diseño y Marketing -->
-                    <div class="bg-accent-50 rounded-lg p-6">
-                        <h5 class="text-base font-semibold text-black-500 mb-4 flex items-center gap-2">
-                            <x-solar-palette-outline class="w-5 h-5 text-secondary-300" />
-                            🎨 Diseño y Marketing
-                        </h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Sliders -->
-                            <div class="space-y-3">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-black-500">Sliders en homepage</span>
-                                    <span class="text-sm font-medium text-black-400">
-                                        {{ $planUsage['sliders']['current'] ?? 0 }}/{{ $planUsage['sliders']['limit'] ?? 0 }}
-                                        ({{ $planUsage['sliders']['percentage'] ?? 0 }}%)
-                                    </span>
-                                </div>
-                                <div class="w-full bg-accent-200 rounded-full h-3">
-                                    <div class="h-3 rounded-full transition-all duration-300 
-                                        @if(($planUsage['sliders']['percentage'] ?? 0) >= 90) bg-error-300
-                                        @elseif(($planUsage['sliders']['percentage'] ?? 0) >= 70) bg-warning-300
-                                        @else bg-secondary-300 @endif" 
-                                         style="width: {{ $planUsage['sliders']['percentage'] ?? 0 }}%"></div>
-                                </div>
-                            </div>
-
-                            <!-- Cupones -->
-                            <div class="space-y-3">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-black-500">Cupones activos</span>
-                                    <span class="text-sm font-medium text-black-400">
-                                        {{ $planUsage['active_coupons']['current'] ?? 0 }}/{{ $planUsage['active_coupons']['limit'] ?? 0 }}
-                                        ({{ $planUsage['active_coupons']['percentage'] ?? 0 }}%)
-                                    </span>
-                                </div>
-                                <div class="w-full bg-accent-200 rounded-full h-3">
-                                    <div class="h-3 rounded-full transition-all duration-300 
-                                        @if(($planUsage['active_coupons']['percentage'] ?? 0) >= 90) bg-error-300
-                                        @elseif(($planUsage['active_coupons']['percentage'] ?? 0) >= 70) bg-warning-300
-                                        @else bg-warning-300 @endif" 
-                                         style="width: {{ $planUsage['active_coupons']['percentage'] ?? 0 }}%"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Envíos y Logística -->
-                    <div class="bg-accent-50 rounded-lg p-6">
-                        <h5 class="text-base font-semibold text-black-500 mb-4 flex items-center gap-2">
-                            <x-solar-delivery-outline class="w-5 h-5 text-info-300" />
-                            🚚 Envíos y Logística
-                        </h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Sedes -->
-                            <div class="space-y-3">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-black-500">Sedes físicas</span>
-                                    <span class="text-sm font-medium text-black-400">
-                                        {{ $planUsage['locations']['current'] ?? 0 }}/{{ $planUsage['locations']['limit'] ?? 0 }}
-                                        ({{ $planUsage['locations']['percentage'] ?? 0 }}%)
-                                    </span>
-                                </div>
-                                <div class="w-full bg-accent-200 rounded-full h-3">
-                                    <div class="h-3 rounded-full transition-all duration-300 
-                                        @if(($planUsage['locations']['percentage'] ?? 0) >= 90) bg-error-300
-                                        @elseif(($planUsage['locations']['percentage'] ?? 0) >= 70) bg-warning-300
-                                        @else bg-info-300 @endif" 
-                                         style="width: {{ $planUsage['locations']['percentage'] ?? 0 }}%"></div>
-                                </div>
-                            </div>
-
-                            <!-- Zonas de envío -->
-                            <div class="space-y-3">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-black-500">Zonas de envío</span>
-                                    <span class="text-sm font-medium text-black-400">
-                                        {{ $planUsage['delivery_zones']['current'] ?? 0 }}/{{ $planUsage['delivery_zones']['limit'] ?? 0 }}
-                                        ({{ $planUsage['delivery_zones']['percentage'] ?? 0 }}%)
-                                    </span>
-                                </div>
-                                <div class="w-full bg-accent-200 rounded-full h-3">
-                                    <div class="h-3 rounded-full transition-all duration-300 
-                                        @if(($planUsage['delivery_zones']['percentage'] ?? 0) >= 90) bg-error-300
-                                        @elseif(($planUsage['delivery_zones']['percentage'] ?? 0) >= 70) bg-warning-300
-                                        @else bg-info-300 @endif" 
-                                         style="width: {{ $planUsage['delivery_zones']['percentage'] ?? 0 }}%"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Pagos -->
-                    <div class="bg-accent-50 rounded-lg p-6">
-                        <h5 class="text-base font-semibold text-black-500 mb-4 flex items-center gap-2">
-                            <x-solar-card-outline class="w-5 h-5 text-success-300" />
-                            💰 Pagos
-                        </h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <!-- Métodos de pago -->
-                            <div class="space-y-3">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-black-500">Métodos de pago activos</span>
-                                    <span class="text-sm font-medium text-black-400">
-                                        {{ $planUsage['payment_methods']['current'] ?? 0 }}/{{ $planUsage['payment_methods']['limit'] ?? 0 }}
-                                        ({{ $planUsage['payment_methods']['percentage'] ?? 0 }}%)
-                                    </span>
-                                </div>
-                                <div class="w-full bg-accent-200 rounded-full h-3">
-                                    <div class="h-3 rounded-full transition-all duration-300 
-                                        @if(($planUsage['payment_methods']['percentage'] ?? 0) >= 90) bg-error-300
-                                        @elseif(($planUsage['payment_methods']['percentage'] ?? 0) >= 70) bg-warning-300
-                                        @else bg-success-300 @endif" 
-                                         style="width: {{ $planUsage['payment_methods']['percentage'] ?? 0 }}%"></div>
-                                </div>
-                            </div>
-
-                            <!-- Cuentas bancarias -->
-                            <div class="space-y-3">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-black-500">Cuentas bancarias</span>
-                                    <span class="text-sm font-medium text-black-400">
-                                        {{ $planUsage['bank_accounts']['current'] ?? 0 }}/{{ $planUsage['bank_accounts']['limit'] ?? 0 }}
-                                        ({{ $planUsage['bank_accounts']['percentage'] ?? 0 }}%)
-                                    </span>
-                                </div>
-                                <div class="w-full bg-accent-200 rounded-full h-3">
-                                    <div class="h-3 rounded-full transition-all duration-300 
-                                        @if(($planUsage['bank_accounts']['percentage'] ?? 0) >= 90) bg-error-300
-                                        @elseif(($planUsage['bank_accounts']['percentage'] ?? 0) >= 70) bg-warning-300
-                                        @else bg-success-300 @endif" 
-                                         style="width: {{ $planUsage['bank_accounts']['percentage'] ?? 0 }}%"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Administración y Soporte -->
-                    <div class="bg-accent-50 rounded-lg p-6">
-                        <h5 class="text-base font-semibold text-black-500 mb-4 flex items-center gap-2">
-                            <x-solar-users-group-two-rounded-outline class="w-5 h-5 text-warning-300" />
-                            👥 Administración y Soporte
-                        </h5>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                            <!-- Administradores -->
-                            <div class="space-y-3">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-black-500">Administradores</span>
-                                    <span class="text-sm font-medium text-black-400">
-                                        {{ $planUsage['admins']['current'] ?? 0 }}/{{ $planUsage['admins']['limit'] ?? 0 }}
-                                        ({{ $planUsage['admins']['percentage'] ?? 0 }}%)
-                                    </span>
-                                </div>
-                                <div class="w-full bg-accent-200 rounded-full h-3">
-                                    <div class="h-3 rounded-full transition-all duration-300 
-                                        @if(($planUsage['admins']['percentage'] ?? 0) >= 90) bg-error-300
-                                        @elseif(($planUsage['admins']['percentage'] ?? 0) >= 70) bg-warning-300
-                                        @else bg-warning-300 @endif" 
-                                         style="width: {{ $planUsage['admins']['percentage'] ?? 0 }}%"></div>
-                                </div>
-                            </div>
-
-                            <!-- Tickets de soporte -->
-                            <div class="space-y-3">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-black-500">Tickets este mes</span>
-                                    <span class="text-sm font-medium text-black-400">
-                                        {{ $planUsage['tickets_this_month']['current'] ?? 0 }}/{{ $planUsage['tickets_this_month']['limit'] ?? 0 }}
-                                        ({{ $planUsage['tickets_this_month']['percentage'] ?? 0 }}%)
-                                    </span>
-                                </div>
-                                <div class="w-full bg-accent-200 rounded-full h-3">
-                                    <div class="h-3 rounded-full transition-all duration-300 
-                                        @if(($planUsage['tickets_this_month']['percentage'] ?? 0) >= 90) bg-error-300
-                                        @elseif(($planUsage['tickets_this_month']['percentage'] ?? 0) >= 70) bg-warning-300
-                                        @else bg-warning-300 @endif" 
-                                         style="width: {{ $planUsage['tickets_this_month']['percentage'] ?? 0 }}%"></div>
-                                </div>
-                            </div>
-
-                            <!-- Historial de pedidos -->
-                            <div class="space-y-3">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-black-500">Historial disponible</span>
-                                    <span class="text-sm font-medium text-black-400">
-                                        {{ $planUsage['order_history']['current'] ?? 0 }} meses
-                                    </span>
-                                </div>
-                                <div class="w-full bg-accent-200 rounded-full h-3">
-                                    <div class="h-3 rounded-full bg-primary-300" style="width: 100%"></div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 📈 ANALÍTICAS -->
-                    <div class="bg-accent-50 rounded-lg p-6">
-                        <h5 class="text-base font-semibold text-black-500 mb-4 flex items-center gap-2">
-                            <x-solar-chart-outline class="w-5 h-5 text-info-300" />
-                            📈 Analíticas
-                        </h5>
-                        <div class="grid grid-cols-1 gap-6">
-                            <!-- Retención de analytics -->
-                            <div class="space-y-3">
-                                <div class="flex justify-between items-center">
-                                    <span class="text-sm text-black-500">Días de retención de analytics</span>
-                                    <span class="text-sm font-medium text-black-400">
-                                        {{ $store->plan->analytics_retention_days ?? 30 }} días
-                                    </span>
-                                </div>
-                                <div class="w-full bg-accent-200 rounded-full h-3">
-                                    <div class="h-3 rounded-full bg-info-300" style="width: 100%"></div>
-                                </div>
-                                <p class="text-xs text-black-300">
-                                    Los datos de analíticas se conservan durante {{ $store->plan->analytics_retention_days ?? 30 }} días
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- =============================================== -->
-                <!-- TAB 3: HISTORIAL DE FACTURACIÓN -->
-                <!-- =============================================== -->
-                <div x-show="activeTab === 'invoices'" x-transition class="space-y-6">
-                    <div class="flex items-center justify-between">
-                        <h4 class="text-lg font-semibold text-black-500">Historial de Facturación</h4>
-                        <div class="text-sm text-black-300">
-                            Últimas facturas generadas
-                        </div>
-                    </div>
-
-                    <!-- Tabla de Facturas -->
-                    <div class="bg-accent-50 rounded-lg overflow-hidden">
-                        <div class="overflow-x-auto">
-                            <table class="min-w-full divide-y divide-accent-200">
-                                <thead class="bg-accent-100">
-                                    <tr>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-black-400 uppercase tracking-wider">
-                                            Factura
-                                        </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-black-400 uppercase tracking-wider">
-                                            Fecha
-                                        </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-black-400 uppercase tracking-wider">
-                                            Plan
-                                        </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-black-400 uppercase tracking-wider">
-                                            Período
-                                        </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-black-400 uppercase tracking-wider">
-                                            Monto
-                                        </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-black-400 uppercase tracking-wider">
-                                            Estado
-                                        </th>
-                                        <th class="px-6 py-3 text-left text-xs font-medium text-black-400 uppercase tracking-wider">
-                                            Acciones
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody class="bg-accent-50 divide-y divide-accent-200">
-                                    @forelse($invoices ?? [] as $invoice)
-                                    <tr class="hover:bg-accent-100 transition-colors">
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-black-500">
-                                            #{{ $invoice->invoice_number }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-black-400">
-                                            {{ $invoice->created_at->format('d/m/Y') }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-black-400">
-                                            {{ $invoice->plan->name ?? $invoice->plan_name ?? 'N/A' }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-black-400">
-                                            {{ $invoice->billing_period ?? 'Mensual' }}
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-black-500">
-                                            ${{ number_format($invoice->amount, 0, ',', '.') }} COP
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
-                                                @if($invoice->status === 'paid') bg-success-100 text-success-300
-                                                @elseif($invoice->status === 'pending') bg-warning-100 text-black-500
-                                                @else bg-error-100 text-error-300 @endif">
-                                                @if($invoice->status === 'paid')
-                                                    Pagada
-                                                @elseif($invoice->status === 'pending') 
-                                                    Pendiente
-                                                @elseif($invoice->status === 'overdue')
-                                                    Vencida
-                                                @else
-                                                    {{ ucfirst($invoice->status ?? 'Desconocido') }}
-                                                @endif
-                                            </span>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm text-black-400">
-                                            <div class="flex items-center gap-3">
-                                                <a href="{{ route('tenant.admin.invoices.download', ['store' => $store->slug, 'invoice' => $invoice]) }}" 
-                                                   class="text-primary-300 hover:text-primary-400 transition-colors" 
-                                                   title="Descargar PDF">
-                                                    <x-solar-download-minimalistic-outline class="w-4 h-4" />
-                                                </a>
-                                                <button onclick="viewInvoice({{ $invoice->id }})" 
-                                                        class="text-info-300 hover:text-info-400 transition-colors"
-                                                        title="Ver factura">
-                                                    <x-solar-eye-outline class="w-4 h-4" />
-                                                </button>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    @empty
-                                    <tr>
-                                        <td colspan="7" class="px-6 py-8 text-center text-black-300">
-                                            <div class="flex flex-col items-center">
-                                                <x-solar-document-text-outline class="w-8 h-8 text-black-200 mb-2" />
-                                                <p>No hay facturas disponibles</p>
-                                                <p class="text-xs mt-1">Las facturas aparecerán aquí cuando se generen</p>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    @endforelse
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-
-                    <!-- Información de Facturación -->
-                    <div class="bg-accent-50 rounded-lg p-6">
-                        <h5 class="text-base font-semibold text-black-500 mb-4">Información de Facturación</h5>
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                            <div>
-                                <h6 class="text-sm font-medium text-black-400 mb-2">Datos de la Empresa</h6>
-                                <div class="space-y-1 text-sm text-black-400">
-                                    <p><strong>Razón Social:</strong> {{ $store->business_name ?? $store->name }}</p>
-                                    <p><strong>NIT/CC:</strong> {{ $store->tax_id ?? 'No configurado' }}</p>
-                                    <p><strong>Dirección:</strong> {{ $store->address ?? 'No configurada' }}</p>
-                                    <p><strong>Email:</strong> {{ $store->email }}</p>
-                                </div>
-                            </div>
-                            <div>
-                                <h6 class="text-sm font-medium text-black-400 mb-2">Método de Pago</h6>
-                                <div class="space-y-1 text-sm text-black-400">
-                                    <p><strong>Tipo:</strong> {{ $subscription->payment_method ?? 'Transferencia Bancaria' }}</p>
-                                    <p><strong>Frecuencia:</strong> {{ ucfirst($subscription->billing_cycle_label) }}</p>
-                                    <p><strong>Próximo cobro:</strong> {{ $nextInvoice['date']->format('d/m/Y') }}</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- =============================================== -->
-                <!-- TAB 4: SOLICITAR CAMBIO -->
-                <!-- =============================================== -->
-                <div x-show="activeTab === 'change'" x-transition class="space-y-6">
-                    <div class="flex items-center justify-between">
-                        <h4 class="text-body-large font-bold text-black-500">Solicitar Cambio de Plan</h4>
-                        <div class="text-caption text-black-300">
-                            Cambio de plan disponible
-                        </div>
-                    </div>
-
-                    <!-- Planes Disponibles -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        @foreach($availablePlans ?? [] as $plan)
-                        <div class="bg-accent-50 rounded-lg p-6 border-2 
-                            @if($plan->id === $subscription->plan_id) border-primary-200 bg-primary-50
-                            @else border-accent-200 hover:border-primary-200 @endif 
-                            transition-all duration-200 cursor-pointer"
-                             @if($plan->id !== $subscription->plan_id) @click="selectPlanForChange({{ $plan->id }}, '{{ $plan->name }}')" @endif>
-                            
-                            
-                            <!-- Info del Plan -->
-                            <div class="text-center">
-                                <h5 class="text-body-large font-bold text-black-500 mb-2">
-                                    Plan {{ $plan->name }}
-                                    @if($plan->id === $subscription->plan_id)
-                                        <span class="text-caption font-bold px-2 py-1 rounded-full ml-2 bg-primary-100 text-accent-50">Actual</span>
-                                    @endif
-                                </h5>
-                                <div class="text-h5 font-bold text-primary-300 mb-2">
-                                    ${{ number_format($plan->price, 0, ',', '.') }}
-                                </div>
-                                <div class="text-caption font-medium text-black-300 mb-4">
-                                    por {{ $plan->duration_in_days }} días
-                                </div>
-                                
-                                <!-- Características destacadas -->
-                                <div class="text-caption font-medium text-black-400 space-y-1">
-                                    <p>{{ $plan->max_products }} productos</p>
-                                    <p>{{ $plan->max_categories }} categorías</p>
-                                    <p>{{ $plan->max_locations }} {{ Str::plural('sede', $plan->max_locations) }}</p>
-                                </div>
-                                
-                                @if($plan->id !== $subscription->plan_id)
-                                    <button @click="selectPlanForChange({{ $plan->id }}, '{{ $plan->name }}')"
-                                            class="mt-4 w-full bg-primary-200 hover:bg-primary-300 text-accent-50 px-4 py-2 rounded-lg text-caption font-bold transition-colors">
-                                        @if($plan->price > $subscription->plan->price)
-                                            Upgrade a {{ $plan->name }}
-                                        @else
-                                            Downgrade a {{ $plan->name }}
+                                        @if($subscription->pending_charges_details && count($subscription->pending_charges_details) > 0)
+                                        <div class="space-y-1">
+                                            @foreach($subscription->pending_charges_details as $detail)
+                                            <p class="text-xs text-blue-600">
+                                                • {{ $detail['description'] ?? 'Ajuste' }}: ${{ number_format($detail['amount'] ?? 0, 0, ',', '.') }}
+                                            </p>
+                                            @endforeach
+                                        </div>
                                         @endif
-                                    </button>
-                                @endif
+                                    </div>
+                                </div>
                             </div>
+                            @endif
+                        </div>
+
+                        {{-- Acciones rápidas --}}
+                        <div class="flex flex-col gap-2 ml-6">
+                            @if($subscription->is_active && !$subscription->is_cancelled)
+                            <button @click="showCancelModal = true"
+                                    class="px-4 py-2 bg-white border border-gray-300 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-50 transition-colors flex items-center gap-2">
+                                <i data-lucide="x-circle" class="w-4 h-4"></i>
+                                Cancelar Suscripción
+                            </button>
+                            @endif
+
+                            @if($subscription->is_cancelled)
+                            <button @click="showReactivateModal = true"
+                                    class="px-4 py-2 bg-green-600 text-white rounded-lg text-sm font-medium hover:bg-green-700 transition-colors flex items-center gap-2">
+                                <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
+                                Reactivar
+                            </button>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Características del Plan --}}
+                @if($subscription->plan->features_list && count($subscription->plan->features_list) > 0)
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i data-lucide="check-square" class="w-5 h-5 text-blue-600"></i>
+                        Incluye en tu Plan
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
+                        @foreach($subscription->plan->features_list as $feature)
+                        <div class="flex items-center gap-2 text-sm text-gray-700">
+                            <i data-lucide="check" class="w-4 h-4 text-green-600 flex-shrink-0"></i>
+                            <span>{{ $feature }}</span>
                         </div>
                         @endforeach
                     </div>
+                </div>
+                @endif
+            </div>
 
-                    <!-- Solicitudes Pendientes -->
-                    @if(isset($pendingRequests) && $pendingRequests->count() > 0)
-                    <div class="bg-warning-50 border border-warning-200 rounded-lg p-6">
-                        <h5 class="text-body-large font-bold text-warning-400 mb-4">
-                            <x-solar-clock-circle-outline class="w-5 h-5 inline mr-2" />
-                            Solicitudes Pendientes
-                        </h5>
-                        <div class="space-y-4">
-                            @foreach($pendingRequests as $request)
-                            <div class="bg-accent-50 rounded-lg p-4">
-                                <div class="flex justify-between items-start">
-                                    <div>
-                                        <p class="text-caption font-bold text-black-500">
-                                            {{ $request->type === 'upgrade' ? 'Upgrade' : 'Downgrade' }} a Plan {{ $request->requestedPlan->name }}
-                                        </p>
-                                        <p class="text-caption text-black-300">
-                                            Solicitado el {{ $request->requested_at->format('d/m/Y H:i') }}
-                                        </p>
-                                        @if($request->reason)
-                                        <p class="text-caption text-black-400 mt-2">
-                                            <strong>Motivo:</strong> {{ $request->reason }}
-                                        </p>
-                                        @endif
-                                    </div>
-                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-caption font-bold bg-warning-100 text-warning-400">
-                                        {{ ucfirst($request->status) }}
+            {{-- TAB 2: USO Y LÍMITES --}}
+            <div x-show="activeTab === 'usage'" x-transition class="space-y-6">
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-6 flex items-center gap-2">
+                        <i data-lucide="activity" class="w-5 h-5 text-blue-600"></i>
+                        Uso General: {{ number_format($planUsage['overall_percentage'], 1) }}%
+                    </h3>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        @php
+                        $resourceLabels = [
+                            'products' => 'Productos',
+                            'categories' => 'Categorías',
+                            'variables' => 'Variables',
+                            'product_images' => 'Imágenes por Producto',
+                            'sliders' => 'Sliders',
+                            'active_coupons' => 'Cupones Activos',
+                            'locations' => 'Ubicaciones',
+                            'delivery_zones' => 'Zonas de Envío',
+                            'payment_methods' => 'Métodos de Pago',
+                            'bank_accounts' => 'Cuentas Bancarias',
+                            'order_history_months' => 'Meses de Historial',
+                            'admins' => 'Administradores',
+                            'tickets_this_month' => 'Tickets este Mes',
+                        ];
+                        @endphp
+                        
+                        @foreach($resourceLabels as $key => $label)
+                            @if(isset($planUsage[$key]))
+                            <div class="p-4 border border-gray-200 rounded-lg hover:border-blue-300 transition-colors">
+                                <div class="flex items-center justify-between mb-2">
+                                    <span class="text-sm font-medium text-gray-700">{{ $label }}</span>
+                                    <span class="text-xs font-semibold px-2 py-1 rounded
+                                        {{ $planUsage[$key]['percentage'] >= 90 ? 'bg-red-100 text-red-800' : 
+                                           ($planUsage[$key]['percentage'] >= 70 ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800') }}">
+                                        {{ number_format($planUsage[$key]['percentage'], 0) }}%
                                     </span>
                                 </div>
+                                <div class="text-xs text-gray-600 mb-2">
+                                    {{ $planUsage[$key]['current'] }} de {{ $planUsage[$key]['limit'] === -1 ? '∞' : $planUsage[$key]['limit'] }}
+                                </div>
+                                <div class="w-full bg-gray-200 rounded-full h-2">
+                                    <div class="h-2 rounded-full transition-all
+                                        {{ $planUsage[$key]['percentage'] >= 90 ? 'bg-red-600' : 
+                                           ($planUsage[$key]['percentage'] >= 70 ? 'bg-yellow-500' : 'bg-green-500') }}"
+                                         style="width: {{ min(100, $planUsage[$key]['percentage']) }}%"></div>
+                                </div>
                             </div>
-                            @endforeach
+                            @endif
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+
+            {{-- TAB 3: FACTURAS --}}
+            <div x-show="activeTab === 'invoices'" x-transition class="space-y-6">
+                
+                {{-- Datos Bancarios para Pago --}}
+                @php
+                $paymentSetting = \App\Models\RegistrationPaymentSetting::getActive();
+                @endphp
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6">
+                    <h3 class="text-base font-bold text-gray-900 mb-4 flex items-center gap-2">
+                        <i data-lucide="landmark" class="w-5 h-5 text-blue-600"></i>
+                        Datos Bancarios para Pagos
+                    </h3>
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
+                        <div>
+                            <p class="text-gray-600 text-xs mb-1">Banco:</p>
+                            <p class="font-semibold text-gray-900">{{ $paymentSetting->bank_name }}</p>
+                            <br>
+                            <p class="text-gray-600 text-xs mb-1">Tipo de cuenta:</p>
+                            <p class="font-semibold text-gray-900">{{ $paymentSetting->account_type }}</p>
+                            <br>
+                            <p class="text-gray-600 text-xs mb-1">Número de cuenta:</p>
+                            <p class="font-semibold text-gray-900">{{ $paymentSetting->account_number }}</p>
+                            <br>
+                            <p class="text-gray-600 text-xs mb-1">Titular:</p>
+                            <p class="font-semibold text-gray-900">{{ $paymentSetting->account_holder }}</p>
+                            <br>
+                            <p class="text-gray-600 text-xs mb-1">NIT:</p>
+                            <p class="font-semibold text-gray-900">{{ $paymentSetting->nit }}</p>
                         </div>
+                        @if($paymentSetting->qr_code_image)
+                        <div class="flex items-center justify-center">
+                            <img src="{{ $paymentSetting->qr_code_url }}" 
+                                 alt="QR de Pago" 
+                                 class="w-56 h-56 object-contain border-2 border-blue-300 rounded-lg bg-white p-2">
+                        </div>
+                        @endif
+                    </div>
+                    <p class="text-xs text-blue-700 mt-3 flex items-center gap-2">
+                        <i data-lucide="info" class="w-3 h-3"></i>
+                        Transfiere a esta cuenta y envía el comprobante a: <strong class="ml-1">facturas@linkiu.email</strong>
+                    </p>
+                </div>
+
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+                    <div class="px-6 py-4 border-b border-gray-200">
+                        <h3 class="text-lg font-bold text-gray-900 flex items-center gap-2">
+                            <i data-lucide="receipt" class="w-5 h-5 text-blue-600"></i>
+                            Historial de Facturas
+                        </h3>
+                    </div>
+
+                    @if($invoices->count() > 0)
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50 border-b border-gray-200">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Factura</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Fecha</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Monto</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Estado</th>
+                                    <th class="px-6 py-3 text-right text-xs font-semibold text-gray-700 uppercase tracking-wider">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-gray-200">
+                                @foreach($invoices as $invoice)
+                                <tr class="hover:bg-gray-50 transition-colors">
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-2">
+                                            <i data-lucide="file-text" class="w-4 h-4 text-gray-400"></i>
+                                            <span class="font-semibold text-gray-900">{{ $invoice->invoice_number }}</span>
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-sm text-gray-600">
+                                        {{ $invoice->issue_date->format('d M Y') }}
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="font-semibold text-gray-900">${{ number_format($invoice->amount, 0, ',', '.') }}</span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold
+                                            @if($invoice->status === 'paid') bg-green-100 text-green-800
+                                            @elseif($invoice->status === 'pending') bg-yellow-100 text-yellow-800
+                                            @elseif($invoice->status === 'overdue') bg-red-100 text-red-800
+                                            @else bg-gray-100 text-gray-800 @endif">
+                                            @if($invoice->status === 'paid')
+                                                <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                                Pagada
+                                            @elseif($invoice->status === 'pending')
+                                                <i data-lucide="clock" class="w-3 h-3"></i>
+                                                Pendiente
+                                            @elseif($invoice->status === 'overdue')
+                                                <i data-lucide="alert-circle" class="w-3 h-3"></i>
+                                                Vencida
+                                            @else
+                                                {{ ucfirst($invoice->status) }}
+                                            @endif
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <div class="flex items-center justify-end gap-2">
+                                            <a href="{{ route('tenant.admin.invoices.show', ['store' => $store->slug, 'invoice' => $invoice->id]) }}"
+                                               class="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                               title="Ver factura">
+                                                <i data-lucide="eye" class="w-4 h-4"></i>
+                                            </a>
+                                            <a href="{{ route('tenant.admin.invoices.download', ['store' => $store->slug, 'invoice' => $invoice->id]) }}"
+                                               class="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                                               title="Descargar PDF">
+                                                <i data-lucide="download" class="w-4 h-4"></i>
+                                            </a>
+                                        </div>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                    @else
+                    <div class="px-6 py-12 text-center">
+                        <i data-lucide="inbox" class="w-12 h-12 text-gray-300 mx-auto mb-3"></i>
+                        <p class="text-gray-600">No hay facturas generadas aún</p>
                     </div>
                     @endif
+                </div>
+            </div>
 
-                    <!-- Información Important -->
-                    <div class="bg-info-50 border border-info-200 rounded-lg p-6">
-                        <h5 class="text-body-large font-bold text-info-400 mb-3">
-                            <x-solar-info-circle-outline class="w-5 h-5 inline mr-2" />
-                            Información Importante
-                        </h5>
-                        <div class="text-caption text-info-300 space-y-2">
-                            <p>• <strong>Upgrade:</strong> Los cambios se aplican inmediatamente y se cobra la diferencia prorrateada.</p>
-                            <p>• <strong>Downgrade:</strong> Los cambios se aplican al final del período actual para evitar pérdida de funcionalidades.</p>
-                            <p>• <strong>Procesamiento:</strong> Las solicitudes son revisadas por nuestro equipo dentro de 24-48 horas.</p>
-                            <p>• <strong>Políticas:</strong> Consulta nuestros términos y condiciones para más detalles sobre cambios de plan.</p>
+            {{-- TAB 4: CAMBIAR PLAN --}}
+            <div x-show="activeTab === 'change'" x-transition class="space-y-6">
+                
+                {{-- Info Alert --}}
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                    <div class="flex items-start gap-3">
+                        <i data-lucide="info" class="w-5 h-5 text-blue-600 flex-shrink-0 mt-0.5"></i>
+                        <div class="text-sm text-blue-900">
+                            <p class="font-semibold mb-1">Importante:</p>
+                            <ul class="list-disc list-inside space-y-1 text-xs">
+                                <li><strong>Mejorar plan:</strong> Se aplica de inmediato y se ajusta el cobro por los días restantes</li>
+                                <li><strong>Bajar plan:</strong> Se aplica en el próximo período de facturación</li>
+                                <li><strong>Cambiar período:</strong> Se aplica en el próximo cobro (con descuento del nuevo período)</li>
+                            </ul>
                         </div>
                     </div>
                 </div>
+
+                {{-- Selector de Período --}}
+                <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-base font-semibold text-gray-900 mb-4">Selecciona el Período de Facturación</h3>
+                    <div class="grid grid-cols-4 gap-3">
+                        @php
+                        $periods = [
+                            'monthly' => ['label' => 'Mensual', 'discount' => 0],
+                            'quarterly' => ['label' => 'Trimestral', 'discount' => 5],
+                            'semester' => ['label' => 'Semestral', 'discount' => 10],
+                            'annual' => ['label' => 'Anual', 'discount' => 15],
+                        ];
+                        @endphp
+                        
+                        @foreach($periods as $periodKey => $periodData)
+                        <label class="relative cursor-pointer">
+                            <input type="radio" 
+                                   name="billing_period" 
+                                   value="{{ $periodKey }}"
+                                   x-model="selectedPeriod"
+                                   class="peer sr-only">
+                            <div class="p-4 border-2 rounded-xl transition-all text-center
+                                        peer-checked:border-blue-600 peer-checked:bg-blue-50
+                                        hover:border-gray-400"
+                                 :class="selectedPeriod === '{{ $periodKey }}' ? 'border-blue-600 bg-blue-50' : 'border-gray-200'">
+                                <p class="font-semibold text-gray-900 mb-1">{{ $periodData['label'] }}</p>
+                                @if($periodData['discount'] > 0)
+                                <span class="inline-block px-2 py-0.5 bg-green-500 text-white text-xs font-bold rounded-full">
+                                    AHORRA {{ $periodData['discount'] }}%
+                                </span>
+                                @endif
+                            </div>
+                        </label>
+                        @endforeach
+                    </div>
+                </div>
+
+                @if($pendingRequests->count() > 0)
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-6">
+                    <h3 class="font-bold text-yellow-900 mb-3 flex items-center gap-2">
+                        <i data-lucide="clock" class="w-5 h-5"></i>
+                        Solicitud Pendiente
+                    </h3>
+                    @foreach($pendingRequests as $request)
+                    <div class="bg-white rounded-lg p-4 border border-yellow-300">
+                        <p class="text-sm text-gray-700">
+                            Cambio de <strong>{{ $request->currentPlan->name }}</strong> a <strong>{{ $request->requestedPlan->name }}</strong>
+                        </p>
+                        <p class="text-xs text-gray-500 mt-1">
+                            Solicitado el {{ $request->requested_at->format('d M Y') }}
+                        </p>
+                        @if($request->reason)
+                        <p class="text-xs text-gray-600 mt-2 italic">"{{ $request->reason }}"</p>
+                        @endif
+                    </div>
+                    @endforeach
+                </div>
+                @endif
+
+                {{-- Planes Disponibles (Estilo Price Table del Registro) --}}
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    @foreach($availablePlans as $plan)
+                    @php
+                    $isCurrent = $plan->id === $subscription->plan_id;
+                    @endphp
+                    
+                    @php
+                    $prices = [
+                        'monthly' => $plan->getPriceForPeriod('monthly'),
+                        'quarterly' => $plan->getPriceForPeriod('quarterly'),
+                        'semester' => $plan->getPriceForPeriod('semester'),
+                        'annual' => $plan->getPriceForPeriod('annual'),
+                    ];
+                    @endphp
+                    
+                    <div class="relative bg-white rounded-2xl border-2 {{ $isCurrent ? 'border-blue-500 shadow-xl' : 'border-gray-200' }} overflow-hidden transition-all hover:shadow-lg">
+                        {{-- Badge Plan Actual --}}
+                        @if($isCurrent)
+                        <div class="absolute top-4 right-4 z-10">
+                            <span class="px-3 py-1 bg-blue-600 text-white text-xs font-bold rounded-full shadow-lg">
+                                TU PLAN
+                            </span>
+                        </div>
+                        @endif
+
+                        {{-- Header --}}
+                        <div class="p-6 {{ $isCurrent ? 'bg-gradient-to-br from-blue-50 to-indigo-50' : 'bg-gray-50' }}">
+                            <h3 class="text-xl font-bold text-gray-900 mb-2">{{ $plan->name }}</h3>
+                            <div class="flex items-baseline gap-1">
+                                <span class="text-xl font-bold text-gray-900">
+                                    <span x-show="selectedPeriod === 'monthly'" x-transition>${{ number_format($prices['monthly'], 0, ',', '.') }}</span>
+                                    <span x-show="selectedPeriod === 'quarterly'" x-transition style="display: none;">${{ number_format($prices['quarterly'], 0, ',', '.') }}</span>
+                                    <span x-show="selectedPeriod === 'semester'" x-transition style="display: none;">${{ number_format($prices['semester'], 0, ',', '.') }}</span>
+                                    <span x-show="selectedPeriod === 'annual'" x-transition style="display: none;">${{ number_format($prices['annual'], 0, ',', '.') }}</span>
+                                </span>
+                                <span class="text-gray-600">
+                                    /<span x-text="selectedPeriod === 'monthly' ? 'mes' : (selectedPeriod === 'quarterly' ? 'trim' : (selectedPeriod === 'semester' ? 'sem' : 'año'))"></span>
+                                </span>
+                            </div>
+                            
+                            @if($plan->trial_days > 0)
+                            <div class="mt-3 inline-flex items-center gap-1.5 px-3 py-1 bg-green-500 text-white rounded-full text-xs font-bold">
+                                <i data-lucide="gift" class="w-3 h-3"></i>
+                                {{ $plan->trial_days }} días gratis
+                            </div>
+                            @endif
+                        </div>
+
+                        {{-- Características --}}
+                        <div class="p-6">
+                            @if($plan->features_list && count($plan->features_list) > 0)
+                            <ul class="space-y-2 mb-6">
+                                @foreach(array_slice($plan->features_list, 0, 5) as $feature)
+                                <li class="flex items-start gap-2 text-xs">
+                                    <i data-lucide="check" class="w-3 h-3 text-green-600 flex-shrink-0 mt-0.5"></i>
+                                    <span class="text-gray-700">{{ $feature }}</span>
+                                </li>
+                                @endforeach
+                            </ul>
+                            @endif
+
+                            {{-- Botón de Acción --}}
+                            @if(!$isCurrent)
+                            @php
+                            $isUpgrade = $prices['monthly'] > $subscription->plan->monthly_price;
+                            @endphp
+                            <button @click="requestPlanChange({{ $plan->id }}, '{{ $plan->name }}', {{ json_encode($prices) }})"
+                                    class="w-full px-6 py-3 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-xl {{ $isUpgrade ? 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700' : 'bg-gray-600 hover:bg-gray-700' }}">
+                                {{ $isUpgrade ? 'Mejorar a ' . $plan->name : 'Cambiar a ' . $plan->name }}
+                            </button>
+                            @else
+                            <div class="w-full px-6 py-3 bg-gray-100 text-gray-500 rounded-xl font-bold text-center cursor-not-allowed">
+                                Plan Actual
+                            </div>
+                            @endif
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Modal para solicitar cambio de plan -->
-    <div x-show="showChangePlanModal === true" 
-         x-cloak
-         x-transition
-         @click.self="showChangePlanModal = false; resetModalData()"
-         @keydown.escape.window="showChangePlanModal = false; resetModalData()"
-         class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
-         style="display: none !important;"
-         :style="showChangePlanModal ? 'display: flex !important;' : 'display: none !important;'">
-        <div class="bg-accent-50 rounded-lg p-6 w-full max-w-md mx-4" @click.stop>
-            <div class="flex items-center justify-between mb-4">
-                <h3 class="text-body-large font-bold text-black-500">
-                    Solicitar Cambio de Plan
-                </h3>
-                <button @click="showChangePlanModal = false; resetModalData()" 
-                        class="text-black-300 hover:text-black-500 transition-colors">
-                    <x-solar-close-circle-outline class="w-6 h-6" />
-                </button>
-            </div>
-            
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-sm font-medium text-black-400 mb-1">
-                        Plan seleccionado
-                    </label>
-                    <input type="text" x-model="selectedPlanName" readonly 
-                           class="w-full px-3 py-2 border border-accent-200 rounded-lg bg-accent-100">
+    {{-- Modal: Solicitar Cambio de Plan --}}
+    <div x-show="showPlanChangeModal"
+         x-transition:enter="transition-opacity duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+         @click="showPlanChangeModal = false"
+         style="display: none;"
+         x-cloak></div>
+
+    <div x-show="showPlanChangeModal"
+         x-transition:enter="transition-opacity duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="transition-opacity duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0"
+         class="fixed inset-0 z-50 overflow-x-hidden overflow-y-auto pointer-events-none"
+         style="display: none;"
+         x-cloak>
+        <div class="sm:max-w-lg sm:w-full m-3 sm:mx-auto min-h-[calc(100%-56px)] flex items-center pointer-events-none">
+            <div @click.stop
+                 class="w-full flex flex-col bg-white border border-gray-200 shadow-xl rounded-xl pointer-events-auto">
+                <div class="flex justify-between items-center py-3 px-4 border-b border-gray-200">
+                    <h3 class="font-bold text-gray-800">Solicitar Cambio de Plan</h3>
+                    <button type="button"
+                            class="size-8 inline-flex justify-center items-center gap-x-2 rounded-full border border-transparent bg-gray-100 text-gray-800 hover:bg-gray-200"
+                            @click="showPlanChangeModal = false">
+                        <i data-lucide="x" class="shrink-0 size-4"></i>
+                    </button>
                 </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-black-400 mb-1">
-                        Motivo del cambio (opcional)
-                    </label>
-                    <textarea x-model="changeReason" rows="3"
-                              class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200"
-                              placeholder="Explica por qué quieres cambiar de plan..."></textarea>
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-medium text-black-400 mb-1">
-                        Confirma tu contraseña
-                    </label>
-                    <input type="password" x-model="password" 
-                           class="w-full px-3 py-2 border border-accent-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-200">
-                </div>
-            </div>
-            
-            <div class="flex justify-end gap-3 mt-6">
-                <button type="button" @click="showChangePlanModal = false; resetModalData()" 
-                        class="px-4 py-2 bg-accent-100 hover:bg-accent-200 text-black-400 rounded-lg transition-colors">
-                    Cancelar
-                </button>
-                <button type="button" @click="submitPlanChangeRequest()" 
-                        :disabled="!selectedPlanId || !password || isLoading"
-                        class="px-4 py-2 bg-primary-200 hover:bg-primary-300 text-accent-50 rounded-lg transition-colors disabled:opacity-50">
-                    <span x-show="!isLoading">Enviar Solicitud</span>
-                    <span x-show="isLoading">Enviando...</span>
-                </button>
+
+                <form @submit.prevent="submitPlanChange" class="p-4">
+                    <div class="space-y-4">
+                        <div class="p-4 bg-blue-50 border border-blue-200 rounded-lg">
+                            <p class="text-sm text-gray-700 mb-2">
+                                Cambio solicitado a: <strong x-text="selectedPlanName"></strong>
+                            </p>
+                            <p class="text-xs text-gray-600 mb-1">
+                                Período: <strong x-text="selectedBillingPeriod === 'monthly' ? 'Mensual' : (selectedBillingPeriod === 'quarterly' ? 'Trimestral' : (selectedBillingPeriod === 'semester' ? 'Semestral' : 'Anual'))"></strong>
+                            </p>
+                            <p class="text-sm font-bold text-blue-900">
+                                Precio: $<span x-text="Math.round(selectedPlanPrice).toLocaleString('es-CO')"></span>/<span x-text="selectedBillingPeriod === 'monthly' ? 'mes' : (selectedBillingPeriod === 'quarterly' ? 'trim' : (selectedBillingPeriod === 'semester' ? 'sem' : 'año'))"></span>
+                            </p>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Razón del cambio (opcional)
+                            </label>
+                            <textarea x-model="changeReason"
+                                      rows="3"
+                                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none text-sm"
+                                      placeholder="¿Por qué quieres cambiar de plan?"></textarea>
+                        </div>
+
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Confirma tu contraseña <span class="text-red-500">*</span>
+                            </label>
+                            <input type="password"
+                                   x-model="password"
+                                   required
+                                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
+                                   placeholder="Tu contraseña">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end items-center gap-x-2 py-3 mt-4 border-t border-gray-200">
+                        <button type="button"
+                                class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg border border-gray-200 bg-white text-gray-800 hover:bg-gray-50"
+                                @click="showPlanChangeModal = false">
+                            Cancelar
+                        </button>
+                        <button type="submit"
+                                :disabled="!password"
+                                class="py-2 px-3 inline-flex items-center gap-x-2 text-sm font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:pointer-events-none">
+                            Solicitar Cambio
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
-    @endsection
 
-    @push('scripts')
-    <script>
-    document.addEventListener('alpine:init', () => {
-        Alpine.data('billingManager', () => ({
-            activeTab: 'plan',
-            
-            // Modal states
-            showChangePlanModal: false,
-            
-            // Form data
-            selectedPlanId: null,
-            selectedPlanName: '',
-            changeReason: '',
-            password: '',
-            isLoading: false,
-            
-            
-            // Select plan for change
-            selectPlanForChange(planId, planName) {
-                this.selectedPlanId = planId;
-                this.selectedPlanName = planName;
-                this.showChangePlanModal = true;
-            },
-            
-            // Submit plan change request
-            async submitPlanChangeRequest() {
-                if (!this.selectedPlanId || !this.password) return;
-                
-                this.isLoading = true;
-                
-                try {
-                    const response = await fetch('{{ route("tenant.admin.billing.request-plan-change", $store->slug) }}', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
-                            'Accept': 'application/json'
-                        },
-                        body: JSON.stringify({
-                            plan_id: this.selectedPlanId,
-                            reason: this.changeReason,
-                            password: this.password
-                        })
-                    });
+</div>
 
-                    const data = await response.json();
+<script>
+function billingManager() {
+    return {
+        activeTab: 'plan',
+        selectedPeriod: 'monthly',
+        showCancelModal: false,
+        showReactivateModal: false,
+        showPlanChangeModal: false,
+        selectedPlanId: null,
+        selectedPlanName: '',
+        selectedPlanPrice: 0,
+        selectedBillingPeriod: 'monthly',
+        changeReason: '',
+        password: '',
+        
 
-                    if (data.success) {
-                        this.showToast(data.message, 'success');
-                        this.showChangePlanModal = false;
-                        this.resetModalData();
-                        // Refresh the page to show the new request
-                        setTimeout(() => {
-                            window.location.reload();
-                        }, 1500);
-                    } else {
-                        this.showToast(data.message, 'error');
-                    }
-                } catch (error) {
-                    this.showToast('Error al enviar la solicitud', 'error');
-                } finally {
-                    this.isLoading = false;
+        requestPlanChange(planId, planName, pricesObj) {
+            this.selectedPlanId = planId;
+            this.selectedPlanName = planName;
+            // Obtener precio según el período seleccionado
+            this.selectedPlanPrice = pricesObj[this.selectedPeriod] || pricesObj['monthly'];
+            this.selectedBillingPeriod = this.selectedPeriod;
+            this.changeReason = '';
+            this.password = '';
+            this.showPlanChangeModal = true;
+            
+            this.$nextTick(() => {
+                if (window.createIcons && window.lucideIcons) {
+                    window.createIcons({ icons: window.lucideIcons });
                 }
-            },
-            
-            // Reset modal data
-            resetModalData() {
-                this.password = '';
-                this.changeReason = '';
-                this.selectedPlanId = null;
-                this.selectedPlanName = '';
-                this.isLoading = false;
-            },
-            
-            // Show toast notification
-            showToast(message, type = 'info') {
-                // Simple alert for now - can be enhanced later
-                alert(`${type.toUpperCase()}: ${message}`);
-            },
-            
-            // Debug method
-            debugModal() {
-                console.log('Modal state:', this.showChangePlanModal);
-                console.log('Selected plan:', this.selectedPlanId, this.selectedPlanName);
-            }
-        }));
-    });
-
-    // Function to view invoice in modal
-    function viewInvoice(invoiceId) {
-        const storeSlug = '{{ $store->slug }}';
-        const previewUrl = `/${storeSlug}/admin/invoices/${invoiceId}/preview`;
-        const downloadUrl = `/${storeSlug}/admin/invoices/${invoiceId}/download`;
-        
-        // Create modal overlay
-        const modal = document.createElement('div');
-        modal.className = 'fixed inset-0 z-50 overflow-y-auto';
-        modal.innerHTML = `
-            <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-                <div class="fixed inset-0 transition-opacity" onclick="closeInvoiceModal()">
-                    <div class="absolute inset-0 bg-gray-500 opacity-75"></div>
-                </div>
-                <div class="inline-block w-full max-w-4xl px-4 pt-5 pb-4 overflow-hidden text-left align-bottom transition-all transform bg-white rounded-lg shadow-xl sm:my-8 sm:align-middle sm:max-w-5xl sm:w-full sm:p-6">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-body-large font-bold text-black-500">Vista previa de factura</h3>
-                        <button onclick="closeInvoiceModal()" class="text-black-300 hover:text-black-500 transition-colors">
-                            <x-solar-close-circle-outline class="w-6 h-6" />
-                        </button>
-                    </div>
-                    <div id="invoice-content" class="max-h-96 overflow-y-auto">
-                        <div class="flex items-center justify-center p-8">
-                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-300"></div>
-                            <span class="ml-2">Cargando factura...</span>
-                        </div>
-                    </div>
-                    <div class="flex justify-end gap-3 mt-6 pt-4 border-t">
-                        <button onclick="closeInvoiceModal()" class="btn-secondary text-caption font-bold px-4 py-2 rounded-lg flex items-center gap-2">
-                            <x-solar-close-circle-outline class="w-4 h-4 mr-2" />
-                            Cerrar
-                        </button>
-                        <a href="${downloadUrl}" class="btn-primary text-caption font-bold px-4 py-2 rounded-lg flex items-center gap-2">
-                            <x-solar-download-minimalistic-outline class="w-4 h-4 mr-2" />
-                            Descargar PDF
-                        </a>
-                    </div>
-                </div>
-            </div>
-        `;
-        
-        document.body.appendChild(modal);
-        
-        // Load invoice content
-        fetch(previewUrl)
-            .then(response => response.text())
-            .then(html => {
-                document.getElementById('invoice-content').innerHTML = html;
-            })
-            .catch(error => {
-                document.getElementById('invoice-content').innerHTML = `
-                    <div class="text-center text-red-600 p-8">
-                        <p>Error al cargar la factura. Por favor, intenta nuevamente.</p>
-                    </div>
-                `;
             });
-    }
+        },
 
-    function closeInvoiceModal() {
-        const modal = document.querySelector('.fixed.inset-0.z-50');
-        if (modal) {
-            modal.remove();
+        async submitPlanChange() {
+            if (!this.password) {
+                if (window.toast) {
+                    window.toast.error('Error', 'Debes ingresar tu contraseña', 3000, 'bottom-center');
+                }
+                return;
+            }
+
+            try {
+                const response = await fetch('{{ route('tenant.admin.billing.request-plan-change', $store->slug) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        plan_id: this.selectedPlanId,
+                        billing_period: this.selectedBillingPeriod,
+                        reason: this.changeReason,
+                        password: this.password
+                    })
+                });
+
+                const data = await response.json();
+
+                if (data.success) {
+                    this.showPlanChangeModal = false;
+                    
+                    if (window.toast) {
+                        window.toast.success('Solicitud enviada', data.message, 5000, 'bottom-center');
+                    }
+                    
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    if (window.toast) {
+                        window.toast.error('Error', data.message, 5000, 'bottom-center');
+                    }
+                }
+            } catch (error) {
+                if (window.toast) {
+                    window.toast.error('Error', 'No se pudo procesar la solicitud', 5000, 'bottom-center');
+                }
+            }
         }
     }
-    </script>
-    @endpush
-</x-tenant-admin-layout>
+}
+
+// Inicializar iconos Lucide
+document.addEventListener('DOMContentLoaded', function() {
+    if (window.createIcons && window.lucideIcons) {
+        window.createIcons({ icons: window.lucideIcons });
+    }
+});
+
+// Re-inicializar cuando Alpine cambie pestañas
+document.addEventListener('alpine:initialized', () => {
+    setTimeout(() => {
+        if (window.createIcons && window.lucideIcons) {
+            window.createIcons({ icons: window.lucideIcons });
+        }
+    }, 100);
+});
+</script>
+
+<style>
+[x-cloak] { display: none !important; }
+</style>
+@endsection
+

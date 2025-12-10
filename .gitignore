@@ -26,6 +26,11 @@
 /public/storage
 /storage/*.key
 /storage/pail
+/storage/app/payment-proof-templates/*.jpg
+/storage/app/payment-proof-templates/*.jpeg
+/storage/app/payment-proof-templates/*.png
+!/storage/app/payment-proof-templates/.gitkeep
+!/storage/app/payment-proof-templates/README.txt
 /vendor
 Homestead.json
 Homestead.yaml

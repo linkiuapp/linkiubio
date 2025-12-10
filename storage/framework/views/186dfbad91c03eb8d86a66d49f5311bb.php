@@ -1,0 +1,60 @@
+<?php $__env->startSection('content'); ?>
+<div class="p-4 space-y-6">
+    <!-- Breadcrumb -->
+    <nav class="flex caption text-brandPrimary-300">
+        <a href="<?php echo e(route('tenant.home', $store->slug)); ?>" class="hover:text-brandPrimary-400 transition-colors">Inicio</a>
+        <span class="mx-2">/</span>
+        <span class="caption text-brandNeutral-400">Acerca de Nosotros</span>
+    </nav>
+
+    <!-- Header -->
+    <div class="space-y-2">
+        <h1 class="h3 text-brandNeutral-400">Acerca de Nosotros</h1>
+        <p class="caption text-brandNeutral-300">Conoce nuestra historia</p>
+    </div>
+
+    <!-- Contenido -->
+    <div class="bg-brandPrimary-50 rounded-xl p-6 border border-brandPrimary-300">
+        <h2 class="body-lg-bold text-brandNeutral-400 mb-4 flex items-center">
+            <i data-lucide="users" class="w-6 h-6 text-brandPrimary-300 mr-2"></i>
+            Nuestra Historia
+        </h2>
+        
+        <?php
+            $policies = $store->policies;
+        ?>
+        
+        <?php if(!empty($policies->about_us)): ?>
+            <div class="text-brandNeutral-300 break-words word-wrap" style="word-wrap: break-word; overflow-wrap: break-word; hyphens: auto;">
+                <?php echo nl2br(e($policies->about_us)); ?>
+
+            </div>
+        <?php else: ?>
+            <div class="bg-brandInfo-50 border border-brandInfo-300 rounded-lg p-6">
+                <div class="text-center space-y-3">
+                    <i data-lucide="book-bookmark" class="w-16 h-16 text-brandInfo-300 mx-auto"></i>
+                    <p class="caption text-brandInfo-300">
+                        Esta tienda no ha compartido su historia aún
+                    </p>
+                    <p class="caption text-brandNeutral-300">
+                        Vuelve pronto para conocer más sobre este negocio
+                    </p>
+                </div>
+            </div>
+        <?php endif; ?>
+    </div>
+
+
+    <!-- Botón de regreso -->
+    <div class="flex justify-center pt-6">
+        <a href="<?php echo e(route('tenant.home', $store->slug)); ?>" 
+           class="bg-brandSecondary-300 hover:bg-brandSecondary-400 text-brandWhite-50 px-6 py-3 rounded-lg body-lg-bold transition-colors flex items-center justify-center gap-2">
+            <i data-lucide="arrow-left" class="w-5 h-5 text-brandWhite-50"></i>
+            Volver al inicio
+        </a>
+    </div>
+</div>
+<?php $__env->stopSection(); ?>
+
+
+<?php echo $__env->make('frontend.layouts.app', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?><?php /**PATH C:\laragon\www\Liniu_Final\app\Features\Tenant/Views/pages/about-us.blade.php ENDPATH**/ ?>

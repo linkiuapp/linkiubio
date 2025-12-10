@@ -11,15 +11,24 @@ class ProductVariant extends Model
         'product_id',
         'sku',
         'price_modifier',
+        'stock',
         'is_active',
-        'variant_options'
+        'variant_options',
+        'required_options'
     ];
 
     protected $casts = [
         'is_active' => 'boolean',
         'price_modifier' => 'decimal:2',
-        'variant_options' => 'array'
+        'stock' => 'integer',
+        'variant_options' => 'array',
+        'required_options' => 'array'
     ];
+    
+    /**
+     * Atributos que se agregan automáticamente al JSON
+     */
+    protected $appends = ['variant_options_text'];
 
     /**
      * Relación con el producto
@@ -87,10 +96,13 @@ class ProductVariant extends Model
         }
 
         $options = [];
-        foreach ($this->variant_options as $variableId => $optionValue) {
-            // Aquí podrías buscar el nombre de la variable y opción en la base de datos
-            // Por simplicidad, mostramos el ID y valor
-            $options[] = "Variable {$variableId}: {$optionValue}";
+        foreach ($this->variant_options as $variableId => $optionId) {
+            // Buscar el nombre de la opción en la base de datos
+            $variableOption = \App\Features\TenantAdmin\Models\VariableOption::find($optionId);
+            
+            if ($variableOption) {
+                $options[] = $variableOption->name;
+            }
         }
 
         return implode(', ', $options);

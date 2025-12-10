@@ -20,31 +20,50 @@ class Plan extends Model
         'duration_in_days',
         'image_url',
         
-        // ✅ PRODUCTOS (Validados)
+        // PRODUCTOS Y CATÁLOGO
         'max_products',
         'max_categories',
         'max_variables',
+        'max_product_images',
         
-        // ✅ DISEÑO Y MARKETING (Validados)
-        'max_slider',  // Singular - coincide con BD
+        // DISEÑO Y MARKETING
+        'max_slider',
         'max_active_coupons',
         
-        // ✅ ENVÍOS Y LOGÍSTICA (Validados)
-        'max_sedes',  // Nombre en BD (locations)
+        // ENVÍOS Y LOGÍSTICA
+        'max_sedes',
         'max_delivery_zones',
         
-        // ✅ PAGOS (Validados)
+        // PAGOS
+        'max_payment_methods',
         'max_bank_accounts',
         
-        // ✅ ADMINISTRACIÓN (Validados)
+        // ADMINISTRACIÓN Y SOPORTE
         'max_admins',
+        'max_tickets_per_month',
+        'order_history_months',
+        'analytics_retention_days',
         'support_level',
         'support_response_time',
         
-        // ✅ ANALÍTICAS (Validados)
-        'analytics_retention_days',
+        // INVENTARIO
+        'inventory_tracking',
         
-        // ✅ CONFIGURACIÓN
+        // INTEGRACIONES
+        'whatsapp_integration',
+        'kiubot_enabled',
+        'trial_days',
+        
+        // LÍMITES VERTICAL RESTAURANT
+        'max_tables',
+        'max_daily_reservations',
+        
+        // LÍMITES VERTICAL HOTEL
+        'max_rooms',
+        'max_room_types',
+        'max_daily_hotel_reservations',
+        
+        // CONFIGURACIÓN
         'is_active',
         'is_public',
         'is_featured',
@@ -62,6 +81,10 @@ class Plan extends Model
         'is_active' => 'boolean',
         'is_public' => 'boolean',
         'is_featured' => 'boolean',
+        'inventory_tracking' => 'boolean',
+        'whatsapp_integration' => 'boolean',
+        'kiubot_enabled' => 'boolean',
+        'trial_days' => 'integer',
         'additional_features' => 'array',
         'features_list' => 'array',
     ];

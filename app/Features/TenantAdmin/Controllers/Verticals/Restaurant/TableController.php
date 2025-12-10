@@ -194,6 +194,24 @@ class TableController extends Controller
     {
         $store = view()->shared('currentStore');
         
+        // Validar límites del plan para mesas (solo para type = 'mesa')
+        if ($request->type === 'mesa') {
+            $maxTables = $store->plan->max_tables ?? 0;
+            
+            if ($maxTables > 0) { // 0 = ilimitado
+                $currentTables = Table::where('store_id', $store->id)
+                    ->where('type', 'mesa')
+                    ->count();
+                
+                if ($currentTables >= $maxTables) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Has alcanzado el límite de {$maxTables} mesas para tu plan {$store->plan->name}. Actualiza tu plan para agregar más mesas."
+                    ], 422);
+                }
+            }
+        }
+        
         $table = Table::create([
             'store_id' => $store->id,
             'tenant_id' => $store->id, // Sincronizar con store_id
@@ -247,58 +265,83 @@ class TableController extends Controller
      */
     public function destroy($id)
     {
-        $store = view()->shared('currentStore');
-        
-        $table = Table::where('store_id', $store->id)
-            ->find($id);
-        
-        if (!$table) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Mesa no encontrada'
-            ], 404);
-        }
-        
-        // Si es habitación y reservas_hotel está activo, verificar que NO venga del sistema
-        $reservasHotelEnabled = featureEnabled($store, 'reservas_hotel');
-        if ($table->type === 'habitacion' && $reservasHotelEnabled) {
-            // Verificar si esta habitación corresponde a una Room del sistema de reservas
-            $room = \App\Shared\Models\Room::where('store_id', $store->id)
-                ->where('room_number', $table->table_number)
-                ->first();
+        try {
+            $store = view()->shared('currentStore');
             
-            if ($room) {
-                // Esta habitación viene del sistema de reservas, no permitir eliminación
+            $table = Table::where('store_id', $store->id)
+                ->find($id);
+            
+            if (!$table) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'No se puede eliminar una habitación que pertenece al sistema de reservas de hotel. Elimínala desde Reservas de Hotel.'
+                    'message' => 'Mesa no encontrada'
+                ], 404);
+            }
+            
+            // Si es habitación y reservas_hotel está activo, verificar que NO venga del sistema
+            $reservasHotelEnabled = featureEnabled($store, 'reservas_hotel');
+            if ($table->type === 'habitacion' && $reservasHotelEnabled) {
+                // Verificar si esta habitación corresponde a una Room del sistema de reservas
+                $room = \App\Shared\Models\Room::where('store_id', $store->id)
+                    ->where('room_number', $table->table_number)
+                    ->first();
+                
+                if ($room) {
+                    // Esta habitación viene del sistema de reservas, no permitir eliminación
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'No se puede eliminar una habitación que pertenece al sistema de reservas de hotel. Elimínala desde Reservas de Hotel.'
+                    ], 422);
+                }
+            }
+            
+            // Verificar que no tenga pedidos activos
+            if ($table->current_order_id) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se puede eliminar una ' . ($table->type === 'habitacion' ? 'habitación' : 'mesa') . ' con pedidos activos'
                 ], 422);
             }
-        }
-        
-        // Verificar que no tenga pedidos activos
-        if ($table->current_order_id) {
+            
+            // Verificar que no tenga reservaciones activas
+            $activeReservations = $table->reservations()
+                ->whereIn('status', ['pending', 'confirmed'])
+                ->count();
+            
+            if ($activeReservations > 0) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'No se puede eliminar una ' . ($table->type === 'habitacion' ? 'habitación' : 'mesa') . ' con reservaciones activas'
+                ], 422);
+            }
+            
+            // Eliminar QR si existe
+            if ($table->qr_code) {
+                // TODO: Eliminar archivo QR si se guarda como archivo
+            }
+            
+            $type = $table->type;
+            $table->delete();
+            
+            // ✅ OPTIMIZACIÓN: Invalidar cache de status
+            \Cache::forget("dine_in_status_{$store->id}_{$type}");
+            
+            return response()->json([
+                'success' => true,
+                'message' => ucfirst($type) . ' eliminada exitosamente'
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Error al eliminar mesa/habitación', [
+                'id' => $id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            
             return response()->json([
                 'success' => false,
-                'message' => 'No se puede eliminar una ' . ($table->type === 'habitacion' ? 'habitación' : 'mesa') . ' con pedidos activos'
-            ], 422);
+                'message' => 'Error al eliminar: ' . $e->getMessage()
+            ], 500);
         }
-        
-        // Eliminar QR si existe
-        if ($table->qr_code) {
-            // TODO: Eliminar archivo QR si se guarda como archivo
-        }
-        
-        $type = $table->type;
-        $table->delete();
-        
-        // ✅ OPTIMIZACIÓN: Invalidar cache de status
-        \Cache::forget("dine_in_status_{$store->id}_{$type}");
-        
-        return response()->json([
-            'success' => true,
-            'message' => ucfirst($type) . ' eliminada exitosamente'
-        ]);
     }
 
     /**

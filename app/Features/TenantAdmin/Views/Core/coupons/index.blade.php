@@ -2,6 +2,9 @@
     @section('title', 'Cupones')
 
     @section('content')
+    {{-- Auto-iniciar tour --}}
+    <x-tour-trigger tour="gestionar_cupones" :autoStart="true" :showButton="false" />
+    
     {{-- SECTION: Estado vacío configuración --}}
     @php
         $emptyStateSvg = 'base_ui_empty_cupones.svg';
@@ -30,76 +33,59 @@
         x-init="init()"
         class="space-y-4"
     >
-        {{-- SECTION: Alertas de sesión --}}
-        @foreach ([
-            'coupon_created' => 'El cupón se ha creado correctamente.',
-            'coupon_updated' => 'El cupón se ha actualizado correctamente.',
-            'coupon_status_updated' => 'El estado del cupón se actualizó correctamente.',
-            'coupon_deleted' => 'El cupón se ha eliminado correctamente.',
-        ] as $sessionKey => $message)
-            @if(session($sessionKey))
-                <div
-                    x-data="{ show: true }"
-                    x-show="show"
-                    x-cloak
-                    x-transition:enter="transition ease-out duration-300"
-                    x-transition:enter-start="opacity-0 translate-y-2"
-                    x-transition:enter-end="opacity-100 translate-y-0"
-                    x-transition:leave="transition ease-in duration-200"
-                    x-transition:leave-start="opacity-100 translate-y-0"
-                    x-transition:leave-end="opacity-0 translate-y-2"
-                    x-init="setTimeout(() => show = false, 5000)"
-                >
-                    {{-- COMPONENT: x-alert-bordered | props:{type:success,title:Actualización exitosa,message:$message} --}}
-                    <x-alert-bordered
-                        type="success"
-                        title="Actualización exitosa"
-                        :message="$message"
-                    />
-                    {{-- End COMPONENT: x-alert-bordered --}}
-                </div>
-            @endif
-        @endforeach
+        <x-toast-notification />
 
-        {{-- SECTION: Alerta dinámica eliminación --}}
-        <div
-            x-show="showSuccessAlert"
-            x-cloak
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 translate-y-2"
-            x-transition:enter-end="opacity-100 translate-y-0"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 translate-y-0"
-            x-transition:leave-end="opacity-0 translate-y-2"
-            style="display: none;"
-        >
-            <x-alert-bordered
-                type="success"
-                title="Actualización exitosa"
-            >
-                <span x-text="successMessage"></span>
-            </x-alert-bordered>
-        </div>
+        {{-- Script para mostrar toasts de sesión una sola vez --}}
+        @if(session('coupon_created') || session('coupon_updated') || session('coupon_deleted'))
+        @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                // Usar una clave única para evitar duplicados en la misma carga de página
+                @if(session('coupon_created'))
+                if (!window.couponCreatedToastShown && window.toast) {
+                    window.couponCreatedToastShown = true;
+                    setTimeout(() => {
+                        window.toast.success(
+                            'Actualización exitosa',
+                            'El cupón se ha creado correctamente.',
+                            5000,
+                            'bottom-center'
+                        );
+                    }, 300);
+                }
+                @endif
 
-        <div
-            x-show="showErrorAlert"
-            x-cloak
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 translate-y-2"
-            x-transition:enter-end="opacity-100 translate-y-0"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 translate-y-0"
-            x-transition:leave-end="opacity-0 translate-y-2"
-            style="display: none;"
-        >
-            <x-alert-bordered
-                type="error"
-                title="Ocurrió un error"
-            >
-                <span x-text="errorMessage"></span>
-            </x-alert-bordered>
-        </div>
-        {{-- End SECTION: Alertas --}}
+                @if(session('coupon_updated'))
+                if (!window.couponUpdatedToastShown && window.toast) {
+                    window.couponUpdatedToastShown = true;
+                    setTimeout(() => {
+                        window.toast.success(
+                            'Actualización exitosa',
+                            'El cupón se ha actualizado correctamente.',
+                            5000,
+                            'bottom-center'
+                        );
+                    }, 300);
+                }
+                @endif
+
+                @if(session('coupon_deleted'))
+                if (!window.couponDeletedToastShown && window.toast) {
+                    window.couponDeletedToastShown = true;
+                    setTimeout(() => {
+                        window.toast.success(
+                            'Actualización exitosa',
+                            'El cupón se ha eliminado correctamente.',
+                            5000,
+                            'bottom-center'
+                        );
+                    }, 300);
+                }
+                @endif
+            });
+        </script>
+        @endpush
+        @endif
 
         {{-- SECTION: Content Card --}}
         <div class="bg-white rounded-lg border border-gray-200 overflow-hidden">
@@ -114,7 +100,7 @@
                     </div>
                     <div class="flex items-center gap-3">
                         @if($remainingSlots > 0)
-                            <a href="{{ route('tenant.admin.coupons.create', ['store' => $store->slug]) }}">
+                            <a href="{{ route('tenant.admin.coupons.create', ['store' => $store->slug]) }}" data-tour="coupon-button">
                                 <x-button-icon
                                     type="solid"
                                     color="info"
@@ -383,10 +369,6 @@
     <script>
         function couponManagement() {
             return {
-                successMessage: null,
-                errorMessage: null,
-                showSuccessAlert: false,
-                showErrorAlert: false,
                 couponUrl: '',
 
                 init() {
@@ -395,32 +377,27 @@
                     }
 
                     window.addEventListener('coupon-delete-success', (event) => {
-                        this.successMessage = event.detail?.message || 'El cupón se ha eliminado correctamente.';
-                        this.errorMessage = null;
-                        this.showSuccessAlert = true;
-                        this.showErrorAlert = false;
-                        this.$nextTick(() => {
-                            if (typeof window.createIcons !== 'undefined' && typeof window.lucideIcons !== 'undefined') {
-                                window.createIcons({ icons: window.lucideIcons });
-                            }
-                        });
-                        setTimeout(() => {
-                            this.showSuccessAlert = false;
-                        }, 5000);
+                        const message = event.detail?.message || 'El cupón se ha eliminado correctamente.';
+                        if (window.toast) {
+                            window.toast.success(
+                                'Actualización exitosa',
+                                message,
+                                5000,
+                                'bottom-center'
+                            );
+                        }
                     });
 
                     window.addEventListener('coupon-delete-error', (event) => {
-                        this.errorMessage = event.detail?.message || 'No pudimos eliminar el cupón.';
-                        this.showErrorAlert = true;
-                        this.showSuccessAlert = false;
-                        this.$nextTick(() => {
-                            if (typeof window.createIcons !== 'undefined' && typeof window.lucideIcons !== 'undefined') {
-                                window.createIcons({ icons: window.lucideIcons });
-                            }
-                        });
-                        setTimeout(() => {
-                            this.showErrorAlert = false;
-                        }, 5000);
+                        const message = event.detail?.message || 'No pudimos eliminar el cupón.';
+                        if (window.toast) {
+                            window.toast.error(
+                                'Error',
+                                message,
+                                5000,
+                                'bottom-center'
+                            );
+                        }
                     });
 
                     window.addEventListener('coupons-check-empty', () => {

@@ -24,6 +24,7 @@ Se adapta automáticamente al estado del sidebar (abierto/minificado/cerrado)
                 'superlinkiu.business-categories.*' => 'tag',
                 'superlinkiu.category-icons.*' => 'image',
                 'superlinkiu.profile.show' => 'user-circle',
+                'superlinkiu.monitoring.*' => 'activity',
             ];
 
             foreach ($routeIconMap as $routePattern => $icon) {

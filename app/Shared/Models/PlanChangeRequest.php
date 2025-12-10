@@ -14,10 +14,12 @@ class PlanChangeRequest extends Model
         'store_id',
         'current_plan_id',
         'requested_plan_id',
+        'requested_billing_period',
         'type',
         'status',
         'reason',
         'admin_notes',
+        'rejection_reason',
         'requested_at',
         'processed_at',
         'processed_by',
@@ -189,6 +191,22 @@ class PlanChangeRequest extends Model
     public function scopePending($query)
     {
         return $query->where('status', self::STATUS_PENDING);
+    }
+
+    /**
+     * Scope: Get approved requests
+     */
+    public function scopeApproved($query)
+    {
+        return $query->where('status', self::STATUS_APPROVED);
+    }
+
+    /**
+     * Scope: Get rejected requests
+     */
+    public function scopeRejected($query)
+    {
+        return $query->where('status', self::STATUS_REJECTED);
     }
 
     /**

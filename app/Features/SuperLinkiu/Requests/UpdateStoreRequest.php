@@ -26,6 +26,7 @@ class UpdateStoreRequest extends FormRequest
             // Información básica de la tienda
             'name' => 'required|string|max:255',
             'plan_id' => 'required|exists:plans,id',
+            'business_category_id' => 'required|exists:business_categories,id',
             'slug' => 'required|string|max:255|unique:stores,slug,' . $storeId . '|regex:/^[a-z0-9]+(?:-[a-z0-9]+)*$/',
             'email' => 'nullable|email|unique:stores,email,' . $storeId,
             'document_type' => 'nullable|string|in:nit,cedula',
@@ -53,6 +54,8 @@ class UpdateStoreRequest extends FormRequest
             'name.required' => 'El nombre de la tienda es obligatorio.',
             'plan_id.required' => 'Debe seleccionar un plan.',
             'plan_id.exists' => 'El plan seleccionado no existe.',
+            'business_category_id.required' => 'Debe seleccionar una categoría de negocio.',
+            'business_category_id.exists' => 'La categoría seleccionada no existe.',
             'slug.required' => 'La URL de la tienda es obligatoria.',
             'slug.unique' => 'Esta URL ya está en uso por otra tienda.',
             'slug.regex' => 'La URL debe contener solo letras minúsculas, números y guiones. No se permiten espacios ni caracteres especiales.',
@@ -71,6 +74,7 @@ class UpdateStoreRequest extends FormRequest
         return [
             'name' => 'nombre de la tienda',
             'plan_id' => 'plan',
+            'business_category_id' => 'categoría de negocio',
             'slug' => 'URL de la tienda',
             'email' => 'email de la tienda',
             'document_type' => 'tipo de documento',

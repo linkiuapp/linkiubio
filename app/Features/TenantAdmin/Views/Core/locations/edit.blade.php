@@ -9,30 +9,8 @@
 >
     {{-- COMPONENT: Notifications --}}
     @include('tenant-admin::Core/locations/components/notifications')
-
-    @if(session('error'))
-        <x-alert-bordered
-            type="error"
-            title="No se pudo actualizar la sede"
-            class="w-full"
-        >
-            <p class="text-sm text-gray-700">{{ session('error') }}</p>
-        </x-alert-bordered>
-    @endif
-
-    @if($errors->any())
-        <x-alert-bordered
-            type="error"
-            title="Revisa la información ingresada"
-            class="w-full"
-        >
-            <ul class="space-y-1 text-sm text-gray-700 list-disc list-inside">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </x-alert-bordered>
-    @endif
+    
+    <x-toast-notification />
 
     {{-- SECTION: Header --}}
     <div class="flex flex-col gap-4 lg:flex-row lg:items-center justify-between">
@@ -484,6 +462,29 @@ document.addEventListener('alpine:init', () => {
         init() {
             // Initialize form behavior
             this.initScheduleCheckboxes();
+
+            @if(session('error'))
+            if (window.toast) {
+                window.toast.error(
+                    'Error',
+                    '{{ session('error') }}',
+                    5000,
+                    'bottom-center'
+                );
+            }
+            @endif
+
+            @if($errors->any())
+            if (window.toast) {
+                const errors = @json($errors->all());
+                window.toast.error(
+                    'Error de validación',
+                    errors.join(', '),
+                    5000,
+                    'bottom-center'
+                );
+            }
+            @endif
         },
         
         initScheduleCheckboxes() {

@@ -157,6 +157,17 @@ class Product extends Model
     }
 
     /**
+     * Variables activas del producto (sistema manual)
+     */
+    public function variables()
+    {
+        return $this->belongsToMany(ProductVariable::class, 'product_variable', 'product_id', 'variable_id')
+            ->wherePivot('is_active', true)
+            ->withPivot('is_active', 'custom_label')
+            ->orderBy('name');
+    }
+
+    /**
      * Relación con las variables asignadas (con datos de la asignación)
      */
     public function assignedVariables()
@@ -431,14 +442,6 @@ class Product extends Model
      */
 
     /**
-     * Relación con stock de variantes
-     */
-    public function stocksVariantes()
-    {
-        return $this->hasMany(StockVarianteProducto::class, 'product_id');
-    }
-
-    /**
      * Relación con movimientos de stock
      */
     public function movimientosStock()
@@ -483,10 +486,9 @@ class Product extends Model
         }
 
         // Producto variable: sumar stock de todas las variantes activas
-        return $this->stocksVariantes()
+        return $this->variants()
             ->where('is_active', true)
-            ->get()
-            ->sum('cantidad_disponible');
+            ->sum('stock');
     }
 
     /**

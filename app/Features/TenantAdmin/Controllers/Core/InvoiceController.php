@@ -41,14 +41,14 @@ class InvoiceController extends Controller
         
         $billingSettings = BillingSetting::getInstance();
         
-        // Generar PDF
-        $pdf = Pdf::loadView('tenant-admin::Core/billing.invoice-pdf', compact('invoice', 'billingSettings'));
+        // Generar PDF con plantilla moderna
+        $pdf = Pdf::loadView('tenant-admin::Core/billing.invoice-pdf-modern', compact('invoice', 'billingSettings', 'store'));
         
         // Configurar tamaño y orientación
         $pdf->setPaper('A4', 'portrait');
         
         // Nombre del archivo
-        $filename = 'factura-' . $invoice->invoice_number . '.pdf';
+        $filename = 'Linkiu-Factura-' . $invoice->invoice_number . '.pdf';
         
         return $pdf->download($filename);
     }

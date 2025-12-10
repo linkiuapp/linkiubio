@@ -3,36 +3,17 @@
 @section('title', 'Crear Nueva Sede')
 
 @section('content')
+{{-- Auto-iniciar tour --}}
+<x-tour-trigger tour="crear_sede" :autoStart="true" :showButton="false" />
+
 <div
     class="space-y-6"
     x-data="locationForm"
 >
     {{-- COMPONENT: Notifications --}}
     @include('tenant-admin::Core/locations/components/notifications')
-
-    @if(session('error'))
-        <x-alert-bordered
-            type="error"
-            title="No se pudo crear la sede"
-            class="w-full"
-        >
-            <p class="text-sm text-gray-700">{{ session('error') }}</p>
-        </x-alert-bordered>
-    @endif
-
-    @if($errors->any())
-        <x-alert-bordered
-            type="error"
-            title="Revisa la información ingresada"
-            class="w-full"
-        >
-            <ul class="space-y-1 text-sm text-gray-700 list-disc list-inside">
-                @foreach($errors->all() as $error)
-                    <li>{{ $error }}</li>
-                @endforeach
-            </ul>
-        </x-alert-bordered>
-    @endif
+    
+    <x-toast-notification />
 
     {{-- SECTION: Header --}}
     <div class="flex flex-col gap-4 lg:flex-row lg:items-center justify-between">
@@ -60,7 +41,7 @@
         {{-- CARD: Información de la sede --}}
         <x-card-base title="Información de la sede" shadow="sm">
             <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
-                <div class="md:col-span-1">
+                <div class="md:col-span-1" data-tour="sede-name">
                     <x-input-with-label
                         label="Nombre de la sede *"
                         name="name"
@@ -74,7 +55,7 @@
                     @enderror
                 </div>
 
-                <div class="md:col-span-1">
+                <div class="md:col-span-1" data-tour="sede-manager">
                     <x-input-with-label
                         label="Encargado/Responsable"
                         name="manager_name"
@@ -87,7 +68,7 @@
                     @enderror
                 </div>
 
-                <div class="md:col-span-2">
+                <div class="md:col-span-2" data-tour="sede-description">
                     <x-textarea-with-label
                         label="Descripción"
                         textarea-name="description"
@@ -100,7 +81,7 @@
                     @enderror
                 </div>
 
-                <div class="md:col-span-1 space-y-2">
+                <div class="md:col-span-1 space-y-2" data-tour="sede-main">
                     <label class="block text-sm font-medium text-gray-800">Sede principal</label>
                     <div class="flex items-center gap-3">
                         <input type="hidden" name="is_main" value="0">
@@ -133,7 +114,7 @@
         {{-- CARD: Contacto y ubicación --}}
         <x-card-base title="Contacto y ubicación" shadow="sm">
             <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
-                <div class="md:col-span-1">
+                <div class="md:col-span-1" data-tour="sede-phone">
                     <x-input-with-label
                         label="Teléfono *"
                         name="phone"
@@ -147,7 +128,7 @@
                     @enderror
                 </div>
 
-                <div class="md:col-span-1">
+                <div class="md:col-span-1" data-tour="sede-whatsapp">
                     <x-input-with-label
                         label="WhatsApp"
                         name="whatsapp"
@@ -160,7 +141,7 @@
                     @enderror
                 </div>
 
-                <div class="md:col-span-1">
+                <div class="md:col-span-1" data-tour="sede-department">
                     <x-input-with-label
                         label="Departamento *"
                         name="department"
@@ -174,7 +155,7 @@
                     @enderror
                 </div>
 
-                <div class="md:col-span-1">
+                <div class="md:col-span-1" data-tour="sede-city">
                     <x-input-with-label
                         label="Ciudad *"
                         name="city"
@@ -188,7 +169,7 @@
                     @enderror
                 </div>
 
-                <div class="md:col-span-2">
+                <div class="md:col-span-2" data-tour="sede-address">
                     <x-input-with-label
                         label="Dirección *"
                         name="address"
@@ -202,7 +183,7 @@
                     @enderror
                 </div>
 
-                <div class="md:col-span-2">
+                <div class="md:col-span-2" data-tour="sede-whatsapp-message">
                     <x-textarea-with-label
                         label="Mensaje de WhatsApp"
                         textarea-name="whatsapp_message"
@@ -219,7 +200,7 @@
         </x-card-base>
 
         {{-- CARD: Horarios de atención --}}
-        <x-card-base title="Horarios de atención" shadow="sm">
+        <x-card-base title="Horarios de atención" shadow="sm" data-tour="sede-schedules">
             <div class="space-y-6">
                 <div class="rounded-lg border border-blue-200 bg-blue-50 p-4">
                     <label class="block text-sm font-semibold text-gray-800 mb-2">⚡ Aplicar preset rápido</label>
@@ -411,7 +392,7 @@
         </x-card-base>
 
         {{-- CARD: Redes sociales --}}
-        <x-card-base title="Redes sociales" shadow="sm">
+        <x-card-base title="Redes sociales" shadow="sm" data-tour="sede-social">
             <div class="grid grid-cols-1 gap-5 md:grid-cols-2">
                 @foreach($platforms as $platform => $label)
                     <div>
@@ -446,6 +427,7 @@
                 icon="save"
                 text="Guardar sede"
                 html-type="submit"
+                data-tour="save-sede"
             />
         </div>
     </form>
@@ -467,6 +449,29 @@ document.addEventListener('alpine:init', () => {
         init() {
             // Initialize form behavior
             this.initScheduleCheckboxes();
+
+            @if(session('error'))
+            if (window.toast) {
+                window.toast.error(
+                    'Error',
+                    '{{ session('error') }}',
+                    5000,
+                    'bottom-center'
+                );
+            }
+            @endif
+
+            @if($errors->any())
+            if (window.toast) {
+                const errors = @json($errors->all());
+                window.toast.error(
+                    'Error de validación',
+                    errors.join(', '),
+                    5000,
+                    'bottom-center'
+                );
+            }
+            @endif
         },
         
         initScheduleCheckboxes() {

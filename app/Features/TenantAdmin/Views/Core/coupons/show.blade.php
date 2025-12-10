@@ -47,10 +47,27 @@
             <h1 class="text-lg font-semibold text-gray-900">Detalles del cupón</h1>
         </div>
 
+        <x-toast-notification />
+
+        {{-- Script para mostrar toast de sesión una sola vez --}}
         @if(session('coupon_status_updated'))
-            <x-alert-bordered type="success" title="Estado actualizado" class="mt-2">
-                <span>{{ session('coupon_status_updated') }}</span>
-            </x-alert-bordered>
+        @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                if (!window.couponStatusUpdatedToastShown && window.toast) {
+                    window.couponStatusUpdatedToastShown = true;
+                    setTimeout(() => {
+                        window.toast.success(
+                            'Estado actualizado',
+                            '{{ session('coupon_status_updated') }}',
+                            5000,
+                            'bottom-center'
+                        );
+                    }, 300);
+                }
+            });
+        </script>
+        @endpush
         @endif
 
         {{-- Tarjeta principal --}}

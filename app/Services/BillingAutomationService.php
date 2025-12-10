@@ -21,6 +21,23 @@ class BillingAutomationService
             throw new \Exception("Store o Plan no encontrados para suscripción {$subscription->id}");
         }
 
+        // Validar que no exista factura duplicada para este período
+        $issueMonth = now()->format('Y-m');
+        $existingInvoice = Invoice::where('store_id', $store->id)
+            ->where('period', $subscription->billing_cycle)
+            ->whereRaw("DATE_FORMAT(issue_date, '%Y-%m') = ?", [$issueMonth])
+            ->whereIn('status', ['pending', 'paid', 'overdue'])
+            ->first();
+
+        if ($existingInvoice) {
+            \Log::warning('Intento de crear factura duplicada', [
+                'store_id' => $store->id,
+                'period' => $subscription->billing_cycle,
+                'existing_invoice' => $existingInvoice->invoice_number
+            ]);
+            throw new \Exception("Ya existe una factura para esta tienda en el período actual (Factura #{$existingInvoice->invoice_number})");
+        }
+
         // Calcular fechas
         $issueDate = now();
         $dueDate = $issueDate->copy()->addDays(15); // 15 días para pagar
@@ -114,9 +131,25 @@ class BillingAutomationService
      */
     private function shouldReactivateStore(Store $store): bool
     {
-        return $store->status === 'suspended' && 
-               isset($store->suspension_reason) && 
-               $store->suspension_reason === 'billing_overdue';
+        if ($store->status !== 'suspended' || $store->suspension_reason !== 'billing_overdue') {
+            return false;
+        }
+
+        // Validar que NO tenga otras facturas vencidas pendientes
+        $hasOtherOverdueInvoices = Invoice::where('store_id', $store->id)
+            ->whereIn('status', ['overdue', 'pending'])
+            ->where('due_date', '<', now())
+            ->exists();
+
+        if ($hasOtherOverdueInvoices) {
+            \Log::warning('No se puede reactivar tienda: tiene otras facturas vencidas', [
+                'store_id' => $store->id,
+                'store_name' => $store->name
+            ]);
+            return false;
+        }
+
+        return true;
     }
 
     /**

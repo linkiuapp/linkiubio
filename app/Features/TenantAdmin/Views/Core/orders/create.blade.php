@@ -33,6 +33,33 @@
     <form action="{{ route('tenant.admin.orders.store', $store->slug) }}" method="POST" enctype="multipart/form-data" @submit="validateForm" class="space-y-6">
         @csrf
 
+        {{-- Errores de Stock --}}
+        @if($errors->has('stock'))
+        <div class="bg-red-50 border-l-4 border-red-500 rounded-lg p-4">
+            <div class="flex items-start gap-3">
+                <div class="flex-shrink-0">
+                    <svg class="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                    </svg>
+                </div>
+                <div class="flex-1">
+                    <h3 class="text-sm font-semibold text-red-800">Stock insuficiente</h3>
+                    <ul class="mt-2 text-sm text-red-700 list-disc list-inside space-y-1">
+                        @foreach($errors->get('stock') as $stockErrors)
+                            @if(is_array($stockErrors))
+                                @foreach($stockErrors as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            @else
+                                <li>{{ $stockErrors }}</li>
+                            @endif
+                        @endforeach
+                    </ul>
+                </div>
+            </div>
+        </div>
+        @endif
+
         <!-- Información del Cliente -->
         <div class="bg-gray-50 rounded-lg p-6">
             <h3 class="text-sm font-medium text-gray-700 mb-4">Información del Cliente</h3>
@@ -299,10 +326,11 @@
             <h3 class="text-base font-semibold text-gray-900 mb-6">Productos del Pedido</h3>
             
             <!-- Formulario para agregar producto -->
-            <div class="bg-white rounded-lg p-4 mb-4 border-2 border-blue-200 w-full">
+            <div class="bg-white rounded-lg p-4 mb-4 border-2 border-blue-200 w-full space-y-4">
+                {{-- Fila 1: Producto + Cantidad + Total + Agregar --}}
                 <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-end">
                     <!-- Búsqueda de producto -->
-                    <div class="lg:col-span-4 relative">
+                    <div class="lg:col-span-3 relative">
                         <label class="block text-xs font-medium text-gray-700 mb-2">Buscar Producto *</label>
                         <input type="text"
                                x-model="newItem.productSearch"
@@ -361,19 +389,6 @@
                         </div>
                     </div>
                     
-                    <!-- Variante (si aplica) -->
-                    <div x-show="newItem.hasVariants" class="lg:col-span-3">
-                        <label class="block text-xs font-medium text-gray-700 mb-2">Variante *</label>
-                        <select x-model="newItem.selectedVariantId"
-                                @change="updateNewItemPrice()"
-                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
-                            <option value="">Seleccionar...</option>
-                            <template x-for="variant in newItem.variants" :key="variant.id">
-                                <option :value="variant.id" x-text="`${variant.variant_options_text} ${variant.price_modifier >= 0 ? '(+$' + variant.price_modifier.toLocaleString() + ')' : '(-$' + Math.abs(variant.price_modifier).toLocaleString() + ')'}`"></option>
-                            </template>
-                        </select>
-                    </div>
-                    
                     <!-- Cantidad -->
                     <div class="lg:col-span-2">
                         <label class="block text-xs font-medium text-gray-700 mb-2">Cantidad *</label>
@@ -392,15 +407,71 @@
                     </div>
                     
                     <!-- Botón Agregar -->
-                    <div class="lg:col-span-1 flex items-end">
+                    <div class="lg:col-span-3 flex items-end">
                         <button type="button"
                                 @click="addProductToOrder()"
                                 :disabled="!newItem.product_id || (newItem.hasVariants && !newItem.selectedVariantId)"
-                                class="px-8 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2 whitespace-nowrap">
+                                class="w-full px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center justify-center gap-2">
                             <i data-lucide="plus-circle" class="w-5 h-5 flex-shrink-0"></i>
-                            <span class="hidden xl:inline">Agregar</span>
+                            <span>Agregar</span>
                         </button>
                     </div>
+                </div>
+                
+                {{-- Fila 2: Variantes (solo si aplica) --}}
+                <div x-show="newItem.hasVariants" x-transition class="border-t border-gray-200 pt-4">
+                        <label class="block text-xs font-medium text-gray-700 mb-2">
+                            Variante *
+                            <span x-show="newItem.selectedVariantId" class="ml-2 text-blue-600 font-normal">
+                                (<span x-text="getSelectedVariantStock()"></span> disponibles)
+                            </span>
+                        </label>
+                        
+                        {{-- Vista de chips para variantes --}}
+                        <div class="flex flex-wrap gap-2 max-h-32 overflow-y-auto p-1">
+                            <template x-for="variant in newItem.variants" :key="variant.id">
+                                <button type="button"
+                                        @click="selectVariant(variant)"
+                                        :disabled="isVariantOutOfStock(variant)"
+                                        :class="{
+                                            'bg-blue-600 text-white border-blue-600 shadow-md': newItem.selectedVariantId == variant.id,
+                                            'bg-white text-gray-700 border-gray-300 hover:border-blue-400 hover:bg-blue-50': newItem.selectedVariantId != variant.id && !isVariantOutOfStock(variant),
+                                            'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed line-through': isVariantOutOfStock(variant)
+                                        }"
+                                        class="px-3 py-1.5 text-xs font-medium rounded-lg border-2 transition-all duration-200 flex items-center gap-1.5">
+                                    <span x-text="variant.variant_options_text"></span>
+                                    
+                                    {{-- Badge de precio --}}
+                                    <span x-show="variant.price_modifier != 0"
+                                          :class="variant.price_modifier > 0 ? 'text-green-600' : 'text-red-600'"
+                                          class="text-[10px] font-bold"
+                                          x-text="variant.price_modifier > 0 ? '+$' + variant.price_modifier.toLocaleString() : '-$' + Math.abs(variant.price_modifier).toLocaleString()">
+                                    </span>
+                                    
+                                    {{-- Indicador de stock bajo --}}
+                                    <span x-show="variant.stock > 0 && variant.stock <= 5 && !isVariantOutOfStock(variant)"
+                                          class="inline-flex items-center justify-center w-4 h-4 text-[9px] font-bold bg-orange-100 text-orange-600 rounded-full"
+                                          x-text="variant.stock"
+                                          title="Stock bajo">
+                                    </span>
+                                    
+                                    {{-- Indicador agotado --}}
+                                    <span x-show="isVariantOutOfStock(variant)"
+                                          class="text-[10px] font-bold text-red-500">
+                                        (Agotado)
+                                    </span>
+                                </button>
+                            </template>
+                        </div>
+                        
+                        {{-- Mensaje si no hay variantes disponibles --}}
+                        <div x-show="newItem.variants.length > 0 && newItem.variants.every(v => isVariantOutOfStock(v))"
+                             class="mt-2 p-2 bg-red-50 border border-red-200 rounded-lg text-xs text-red-600 flex items-center gap-2">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
+                            </svg>
+                            Todas las variantes están agotadas
+                        </div>
                 </div>
             </div>
             
@@ -629,6 +700,37 @@ document.addEventListener('alpine:init', () => {
             this.newItem.unitPrice = parseFloat(product.price);
             this.newItem.showResults = false;
             this.updateNewItemPrice();
+        },
+        
+        // Seleccionar variante (nuevo método visual)
+        selectVariant(variant) {
+            if (this.isVariantOutOfStock(variant)) return;
+            
+            this.newItem.selectedVariantId = variant.id;
+            this.updateNewItemPrice();
+        },
+        
+        // Verificar si una variante está agotada
+        isVariantOutOfStock(variant) {
+            // Solo verificar stock si el producto controla inventario
+            const product = this.newItem.selectedProduct;
+            if (!product || !product.controla_stock || product.tipo_stock !== 'limitado') {
+                return false;
+            }
+            return variant.stock <= 0;
+        },
+        
+        // Obtener stock de la variante seleccionada
+        getSelectedVariantStock() {
+            if (!this.newItem.selectedVariantId) return '';
+            const variant = this.newItem.variants.find(v => v.id == this.newItem.selectedVariantId);
+            if (!variant) return '';
+            
+            const product = this.newItem.selectedProduct;
+            if (!product || !product.controla_stock || product.tipo_stock !== 'limitado') {
+                return '∞';
+            }
+            return variant.stock || 0;
         },
 
         clearNewProduct() {
