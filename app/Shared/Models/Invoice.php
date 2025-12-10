@@ -5,6 +5,7 @@ namespace App\Shared\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 
 class Invoice extends Model
@@ -214,9 +215,28 @@ class Invoice extends Model
         $month = now()->format('m');
         
         // Buscar el último número de factura del mes actual
-        $lastInvoice = self::where('invoice_number', 'like', "INV-{$year}{$month}%")
-                          ->orderBy('invoice_number', 'desc')
-                          ->first();
+        // Usar withoutGlobalScopes() para evitar el scope de SoftDeletes si la columna no existe
+        try {
+            $lastInvoice = self::withoutGlobalScopes()
+                              ->where('invoice_number', 'like', "INV-{$year}{$month}%")
+                              ->orderBy('invoice_number', 'desc')
+                              ->first();
+        } catch (\Exception $e) {
+            // Si falla, usar DB::table directamente para evitar cualquier scope
+            $lastInvoiceNumber = DB::table('invoices')
+                ->where('invoice_number', 'like', "INV-{$year}{$month}%")
+                ->orderBy('invoice_number', 'desc')
+                ->value('invoice_number');
+            
+            if ($lastInvoiceNumber) {
+                $lastNumber = (int) substr($lastInvoiceNumber, -4);
+                $newNumber = $lastNumber + 1;
+            } else {
+                $newNumber = 1;
+            }
+            
+            return "INV-{$year}{$month}" . str_pad($newNumber, 4, '0', STR_PAD_LEFT);
+        }
 
         if ($lastInvoice) {
             // Extraer el número secuencial
