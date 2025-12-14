@@ -139,18 +139,25 @@ class RegistrationWizardController extends Controller
         // Obtener configuración de pago
         $paymentSetting = \App\Models\RegistrationPaymentSetting::getActive();
         
+        // Verificar si Epayco está activo
+        $epaycoGateway = \App\Models\PaymentGateway::where('name', 'epayco')
+            ->where('is_active', true)
+            ->first();
+        
         // Calcular monto a pagar
         $plan = \App\Shared\Models\Plan::findOrFail(Session::get('wizard.plan_id'));
-        $selectedPeriod = Session::get('wizard.selected_period', 'monthly');
+        $billingPeriod = Session::get('wizard.billing_period', 'monthly');
+        $prices = $plan->prices ?? [];
         
-        $amount = match($selectedPeriod) {
-            'quarterly' => $plan->quarterly_price ?? ($plan->monthly_price * 3 * 0.95),
-            'semester' => $plan->semester_price ?? ($plan->monthly_price * 6 * 0.90),
-            'annual' => $plan->annual_price ?? ($plan->monthly_price * 12 * 0.85),
-            default => $plan->monthly_price,
+        $amount = match($billingPeriod) {
+            'monthly' => $plan->price,
+            'quarterly' => $prices['quarterly'] ?? ($plan->price * 3),
+            'semester' => $prices['semester'] ?? ($plan->price * 6),
+            'annual' => $prices['annual'] ?? ($plan->price * 12),
+            default => $plan->price
         };
 
-        return view('public::registration.step4-owner', compact('paymentSetting', 'amount'));
+        return view('public::registration.step4-owner', compact('paymentSetting', 'amount', 'epaycoGateway'));
     }
 
     /**

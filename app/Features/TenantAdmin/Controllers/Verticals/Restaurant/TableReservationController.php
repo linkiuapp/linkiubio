@@ -518,12 +518,56 @@ class TableReservationController extends Controller
     /**
      * Eliminar mesa
      */
-    public function destroyTable(Table $table)
+    public function destroyTable(Request $request)
     {
         $store = view()->shared('currentStore');
         
-        if ($table->store_id !== $store->id) {
-            abort(404);
+        // Obtener tableId directamente de la ruta para evitar conflictos con route model binding
+        $tableId = $request->route('tableId');
+        
+        // Si no está en la ruta, intentar obtenerlo de los parámetros
+        if (!$tableId) {
+            $tableId = $request->route()->parameter('tableId');
+        }
+        
+        // Si aún no lo tenemos, puede estar en el primer parámetro (si Laravel lo confundió con store)
+        if (!$tableId || is_object($tableId)) {
+            // Obtener todos los parámetros y buscar el numérico
+            $params = $request->route()->parameters();
+            foreach ($params as $key => $value) {
+                if ($key === 'tableId' && !is_object($value)) {
+                    $tableId = $value;
+                    break;
+                }
+            }
+        }
+        
+        // Convertir tableId a entero si es string
+        $tableId = is_numeric($tableId) ? (int) $tableId : null;
+        
+        if (!$tableId || $tableId <= 0) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'ID de mesa inválido'
+                ], 400);
+            }
+            abort(400, 'ID de mesa inválido');
+        }
+        
+        // Resolver la mesa manualmente para evitar conflictos con route model binding
+        $table = Table::where('store_id', $store->id)
+            ->where('id', $tableId)
+            ->first();
+        
+        if (!$table) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Mesa no encontrada'
+                ], 404);
+            }
+            abort(404, 'Mesa no encontrada');
         }
         
         // Verificar si tiene reservaciones futuras
@@ -533,10 +577,23 @@ class TableReservationController extends Controller
             ->count();
         
         if ($futureReservations > 0) {
+            if ($request->wantsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => "No se puede eliminar la mesa porque tiene {$futureReservations} reservaciones futuras."
+                ], 422);
+            }
             return back()->withErrors(['error' => "No se puede eliminar la mesa porque tiene {$futureReservations} reservaciones futuras."]);
         }
         
         $table->delete();
+        
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'message' => '✅ Mesa eliminada correctamente.'
+            ]);
+        }
         
         return back()->with('swal_success', '✅ Mesa eliminada correctamente.');
     }

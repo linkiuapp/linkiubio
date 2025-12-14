@@ -19,10 +19,27 @@ class Cart {
     
     // Verificar que estamos en un contexto válido para el carrito
     isValidContext() {
+        const pathname = window.location.pathname;
+        
         // Verificar que tenemos los elementos necesarios del DOM
         const hasCSRFToken = document.querySelector('meta[name="csrf-token"]') !== null;
-        const isStorefront = !window.location.pathname.includes('/admin') && 
-                            !window.location.pathname.includes('/superlinkiu');
+        
+        // Excluir páginas de admin, superadmin y registro
+        const isStorefront = !pathname.includes('/admin') && 
+                            !pathname.includes('/superlinkiu') &&
+                            !pathname.includes('/registre') &&
+                            !pathname.startsWith('/registre');
+        
+        // Verificar que estamos en una ruta de tienda (debe tener un slug de tienda válido)
+        // Las rutas de tienda tienen formato: /{store-slug}/...
+        // Las rutas de registro tienen formato: /registre/...
+        const pathParts = pathname.split('/').filter(part => part);
+        const firstSegment = pathParts[0] || '';
+        
+        // Si el primer segmento es 'registre', no es una tienda
+        if (firstSegment === 'registre') {
+            return false;
+        }
         
         return hasCSRFToken && isStorefront;
     }
@@ -241,7 +258,19 @@ class Cart {
     // Sincronizar con el servidor al cargar
     async syncWithServer() {
         try {
+            // Verificar contexto antes de sincronizar
+            if (!this.isValidContext()) {
+                console.log('ℹ️ Cart: Skipping sync - invalid context');
+                return;
+            }
+            
             const response = await fetch(this.getCartGetUrl());
+            
+            // Verificar que la respuesta sea válida
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            
             const data = await response.json();
             
             if (data.success) {
@@ -285,6 +314,11 @@ class Cart {
     getCartGetUrl() {
         const pathParts = window.location.pathname.split('/').filter(part => part);
         const storeSlug = pathParts[0] || '';
+        
+        // Verificar que no estamos en una página de registro
+        if (storeSlug === 'registre' || window.location.pathname.startsWith('/registre')) {
+            throw new Error('El carrito no está disponible en páginas de registro');
+        }
         
         if (!storeSlug) {
             throw new Error('No se pudo determinar el slug de la tienda');

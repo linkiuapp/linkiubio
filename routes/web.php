@@ -29,6 +29,11 @@ Route::prefix('registre')->name('register.')->group(function () {
     Route::get('/step5/{registration}', [App\Features\Public\Controllers\RegistrationWizardController::class, 'step5'])->name('step5');
     Route::get('/success/{registration}', [App\Features\Public\Controllers\RegistrationWizardController::class, 'success'])->name('success');
     Route::get('/rejected/{registration}', [App\Features\Public\Controllers\RegistrationWizardController::class, 'rejected'])->name('rejected');
+    
+    // Rutas de pago con Epayco
+    Route::post('/payment/initiate', [App\Http\Controllers\Public\RegistrationPaymentController::class, 'initiatePayment'])->name('payment.initiate');
+    Route::get('/payment/response', [App\Http\Controllers\Public\RegistrationPaymentController::class, 'paymentResponse'])->name('payment.response');
+    Route::post('/payment/webhook', [App\Http\Controllers\Public\RegistrationPaymentController::class, 'webhook'])->name('payment.webhook');
 });
 
 // API para verificar estado de registro
