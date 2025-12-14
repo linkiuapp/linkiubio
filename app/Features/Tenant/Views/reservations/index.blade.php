@@ -18,38 +18,58 @@
         @csrf
 
         <!-- CARD 1: Fecha y Hora -->
-        <div class="bg-brandWhite-50 rounded-lg p-4 border border-brandWhite-300 mb-4">
-            <div class="flex items-center mb-4">
-                <div class="w-8 h-8 bg-brandPrimary-50 text-brandPrimary-300 rounded-full flex items-center justify-center caption-strong mr-3">1</div>
-                <h3 class="caption-strong text-brandNeutral-400">Fecha y Hora</h3>
+        <div class="bg-brandWhite-50 rounded-lg p-5 border-2 border-brandWhite-300 mb-4 transition-all duration-300" id="step-1-card">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-brandPrimary-50 text-brandPrimary-300 rounded-full flex items-center justify-center caption-strong mr-3 transition-all duration-300" id="step-1-number">
+                        <span id="step-1-number-text">1</span>
+                        <i data-lucide="check" class="hidden size-5" id="step-1-check"></i>
+                    </div>
+                    <h3 class="caption-strong text-brandNeutral-400">Fecha y Hora</h3>
+                </div>
+                <div id="step-1-status" class="hidden">
+                    <span class="text-xs text-brandSuccess-400 font-medium">✓ Completado</span>
+                </div>
             </div>
             
             <div class="space-y-4">
                 <!-- Fecha -->
                 <div>
-                    <label for="reservation_date" class="block caption text-brandNeutral-400 mb-2">Fecha de Reserva *</label>
-                    <input 
-                        type="text" 
-                        id="reservation_date" 
-                        name="reservation_date" 
-                        class="reservation-datepicker w-full px-4 py-3 border border-brandWhite-300 rounded-lg caption"
-                        placeholder="Selecciona una fecha"
-                        required
-                    >
+                    <label for="reservation_date" class="flex items-center gap-2 caption text-brandNeutral-400 mb-2">
+                        <i data-lucide="calendar" class="size-4"></i>
+                        <span>Fecha de Reserva *</span>
+                    </label>
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="reservation_date" 
+                            name="reservation_date" 
+                            class="reservation-datepicker w-full px-4 py-3 pl-11 border-2 border-brandWhite-300 rounded-lg caption focus:border-brandPrimary-300 focus:ring-2 focus:ring-brandPrimary-100 transition-all duration-200"
+                            placeholder="Selecciona una fecha"
+                            required
+                        >
+                        <i data-lucide="calendar" class="absolute left-3 top-1/2 transform -translate-y-1/2 size-5 text-brandNeutral-300 pointer-events-none"></i>
+                        <div id="date_success" class="hidden absolute right-3 top-1/2 transform -translate-y-1/2">
+                            <i data-lucide="check-circle" class="size-5 text-brandSuccess-400"></i>
+                        </div>
+                    </div>
                     <div id="date_error" class="hidden mt-1 caption text-brandError-400"></div>
                 </div>
                 
                 <!-- Horarios disponibles -->
                 <div id="time-slots-container" class="hidden">
-                    <label class="block caption text-brandNeutral-400 mb-2">Horarios Disponibles *</label>
+                    <label class="flex items-center gap-2 caption text-brandNeutral-400 mb-2">
+                        <i data-lucide="clock" class="size-4"></i>
+                        <span>Horarios Disponibles *</span>
+                    </label>
                     <div id="time-slots-grid" class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                         <!-- Los slots se cargan dinámicamente -->
                     </div>
-                    <div id="time-slots-loading" class="text-center py-4 hidden">
-                        <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-brandPrimary-300 mx-auto"></div>
-                        <p class="caption text-brandNeutral-400 mt-2">Cargando horarios...</p>
+                    <div id="time-slots-loading" class="text-center py-6 hidden">
+                        <div class="animate-spin rounded-full h-8 w-8 border-2 border-brandPrimary-300 border-t-transparent mx-auto"></div>
+                        <p class="caption text-brandNeutral-400 mt-3">Cargando horarios disponibles...</p>
                     </div>
-                    <div id="time-slots-error" class="hidden mt-2">
+                    <div id="time-slots-error" class="hidden mt-2 p-3 bg-brandError-50 border border-brandError-200 rounded-lg">
                         <p class="caption text-brandError-400"></p>
                     </div>
                     <div id="time_error" class="hidden mt-1 caption text-brandError-400"></div>
@@ -58,63 +78,102 @@
         </div>
 
         <!-- CARD 2: Información Personal -->
-        <div class="bg-brandWhite-50 rounded-lg p-4 border border-brandWhite-300 mb-4">
-            <div class="flex items-center mb-4">
-                <div class="w-8 h-8 bg-brandPrimary-50 text-brandPrimary-300 rounded-full flex items-center justify-center caption-strong mr-3">2</div>
-                <h3 class="caption-strong text-brandNeutral-400">Información Personal</h3>
+        <div class="bg-brandWhite-50 rounded-lg p-5 border-2 border-brandWhite-300 mb-4 transition-all duration-300" id="step-2-card">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-brandPrimary-50 text-brandPrimary-300 rounded-full flex items-center justify-center caption-strong mr-3 transition-all duration-300" id="step-2-number">
+                        <span id="step-2-number-text">2</span>
+                        <i data-lucide="check" class="hidden size-5" id="step-2-check"></i>
+                    </div>
+                    <h3 class="caption-strong text-brandNeutral-400">Información Personal</h3>
+                </div>
+                <div id="step-2-status" class="hidden">
+                    <span class="text-xs text-brandSuccess-400 font-medium">✓ Completado</span>
+                </div>
             </div>
             
             <div class="space-y-4">
                 <div>
-                    <label for="customer_name" class="block caption text-brandNeutral-400 mb-2">Nombre Completo *</label>
-                    <input 
-                        type="text" 
-                        id="customer_name" 
-                        name="customer_name" 
-                        class="w-full px-4 py-3 border border-brandWhite-300 rounded-lg caption"
-                        placeholder="Tu nombre completo"
-                        required
-                    >
+                    <label for="customer_name" class="flex items-center gap-2 caption text-brandNeutral-400 mb-2">
+                        <i data-lucide="user" class="size-4"></i>
+                        <span>Nombre Completo *</span>
+                    </label>
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="customer_name" 
+                            name="customer_name" 
+                            class="w-full px-4 py-3 pl-11 border-2 border-brandWhite-300 rounded-lg caption focus:border-brandPrimary-300 focus:ring-2 focus:ring-brandPrimary-100 transition-all duration-200"
+                            placeholder="Tu nombre completo"
+                            required
+                        >
+                        <i data-lucide="user" class="absolute left-3 top-1/2 transform -translate-y-1/2 size-5 text-brandNeutral-300 pointer-events-none"></i>
+                        <div id="name_success" class="hidden absolute right-3 top-1/2 transform -translate-y-1/2">
+                            <i data-lucide="check-circle" class="size-5 text-brandSuccess-400"></i>
+                        </div>
+                    </div>
                     <div id="name_error" class="hidden mt-1 caption text-brandError-400"></div>
                 </div>
                 
                 <div>
-                    <label for="customer_phone" class="block caption text-brandNeutral-400 mb-2">Teléfono WhatsApp *</label>
-                    <input 
-                        type="tel" 
-                        id="customer_phone" 
-                        name="customer_phone" 
-                        class="w-full px-4 py-3 border border-brandWhite-300 rounded-lg caption"
-                        placeholder="3001234567"
-                        required
-                    >
+                    <label for="customer_phone" class="flex items-center gap-2 caption text-brandNeutral-400 mb-2">
+                        <i data-lucide="phone" class="size-4"></i>
+                        <span>Teléfono WhatsApp *</span>
+                    </label>
+                    <div class="relative">
+                        <input 
+                            type="tel" 
+                            id="customer_phone" 
+                            name="customer_phone" 
+                            class="w-full px-4 py-3 pl-11 border-2 border-brandWhite-300 rounded-lg caption focus:border-brandPrimary-300 focus:ring-2 focus:ring-brandPrimary-100 transition-all duration-200"
+                            placeholder="3001234567"
+                            required
+                        >
+                        <i data-lucide="phone" class="absolute left-3 top-1/2 transform -translate-y-1/2 size-5 text-brandNeutral-300 pointer-events-none"></i>
+                        <div id="phone_success" class="hidden absolute right-3 top-1/2 transform -translate-y-1/2">
+                            <i data-lucide="check-circle" class="size-5 text-brandSuccess-400"></i>
+                        </div>
+                    </div>
                     <div id="phone_error" class="hidden mt-1 caption text-brandError-400"></div>
                 </div>
                 
                 <div>
-                    <label for="party_size" class="block caption text-brandNeutral-400 mb-2">Número de Personas *</label>
-                    <select 
-                        id="party_size" 
-                        name="party_size" 
-                        class="w-full px-4 py-3 border border-brandWhite-300 rounded-lg caption"
-                        required
-                    >
-                        <option value="">Selecciona número de personas</option>
-                        @for($i = 2; $i <= 10; $i++)
-                            <option value="{{ $i }}">{{ $i }} {{ $i === 1 ? 'persona' : 'personas' }}</option>
-                        @endfor
-                        <option value="11">10+ personas</option>
-                    </select>
+                    <label for="party_size" class="flex items-center gap-2 caption text-brandNeutral-400 mb-2">
+                        <i data-lucide="users" class="size-4"></i>
+                        <span>Número de Personas *</span>
+                    </label>
+                    <div class="relative">
+                        <select 
+                            id="party_size" 
+                            name="party_size" 
+                            class="w-full px-4 py-3 pl-11 border-2 border-brandWhite-300 rounded-lg caption focus:border-brandPrimary-300 focus:ring-2 focus:ring-brandPrimary-100 transition-all duration-200 appearance-none bg-white"
+                            required
+                        >
+                            <option value="">Selecciona número de personas</option>
+                            @for($i = 2; $i <= 10; $i++)
+                                <option value="{{ $i }}">{{ $i }} {{ $i === 1 ? 'persona' : 'personas' }}</option>
+                            @endfor
+                            <option value="11">10+ personas</option>
+                        </select>
+                        <i data-lucide="users" class="absolute left-3 top-1/2 transform -translate-y-1/2 size-5 text-brandNeutral-300 pointer-events-none"></i>
+                        <i data-lucide="chevron-down" class="absolute right-3 top-1/2 transform -translate-y-1/2 size-5 text-brandNeutral-300 pointer-events-none"></i>
+                        <div id="party_size_success" class="hidden absolute right-10 top-1/2 transform -translate-y-1/2">
+                            <i data-lucide="check-circle" class="size-5 text-brandSuccess-400"></i>
+                        </div>
+                    </div>
                     <div id="party_size_error" class="hidden mt-1 caption text-brandError-400"></div>
                 </div>
                 
                 <div>
-                    <label for="notes" class="block caption text-brandNeutral-400 mb-2">Notas Especiales (opcional)</label>
+                    <label for="notes" class="flex items-center gap-2 caption text-brandNeutral-400 mb-2">
+                        <i data-lucide="message-square" class="size-4"></i>
+                        <span>Notas Especiales (opcional)</span>
+                    </label>
                     <textarea 
                         id="notes" 
                         name="notes" 
                         rows="3"
-                        class="w-full px-4 py-3 border border-brandWhite-300 rounded-lg caption resize-none"
+                        class="w-full px-4 py-3 border-2 border-brandWhite-300 rounded-lg caption resize-none focus:border-brandPrimary-300 focus:ring-2 focus:ring-brandPrimary-100 transition-all duration-200"
                         placeholder="Alergias, preferencias, celebraciones especiales..."
                     ></textarea>
                 </div>
@@ -123,46 +182,73 @@
 
         <!-- CARD 3: Anticipo (si está habilitado) -->
         @if($settings->require_deposit)
-        <div class="bg-brandWhite-50 rounded-lg p-4 border border-brandWhite-300 mb-4">
-            <div class="flex items-center mb-4">
-                <div class="w-8 h-8 bg-brandPrimary-50 text-brandPrimary-300 rounded-full flex items-center justify-center caption-strong mr-3">3</div>
-                <h3 class="caption-strong text-brandNeutral-400">Anticipo</h3>
+        <div class="bg-brandWhite-50 rounded-lg p-5 border-2 border-brandWhite-300 mb-4 transition-all duration-300" id="step-3-card">
+            <div class="flex items-center justify-between mb-4">
+                <div class="flex items-center">
+                    <div class="w-10 h-10 bg-brandPrimary-50 text-brandPrimary-300 rounded-full flex items-center justify-center caption-strong mr-3 transition-all duration-300" id="step-3-number">
+                        <span id="step-3-number-text">3</span>
+                        <i data-lucide="check" class="hidden size-5" id="step-3-check"></i>
+                    </div>
+                    <h3 class="caption-strong text-brandNeutral-400">Anticipo</h3>
+                </div>
+                <div id="step-3-status" class="hidden">
+                    <span class="text-xs text-brandSuccess-400 font-medium">✓ Completado</span>
+                </div>
             </div>
             
             <div class="space-y-4">
-                <div class="bg-brandInfo-50 border border-brandInfo-300 rounded-lg p-4">
-                    <p class="caption text-brandNeutral-400 mb-2">
-                        <strong class="caption-strong">Monto del anticipo:</strong> 
-                        <span id="deposit-amount-display">$0</span> 
-                        (${{ number_format($settings->deposit_per_person, 0, ',', '.') }} por persona)
-                    </p>
-                    <p class="caption text-brandNeutral-400">
-                        Este anticipo se descontará del consumo final.
+                <div class="bg-gradient-to-r from-brandInfo-50 to-brandPrimary-50 border-2 border-brandInfo-300 rounded-lg p-4">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="dollar-sign" class="size-5 text-brandInfo-400"></i>
+                        <p class="caption text-brandNeutral-400">
+                            <strong class="caption-strong text-brandNeutral-500">Monto del anticipo:</strong> 
+                            <span id="deposit-amount-display" class="text-brandPrimary-300 font-bold">$0</span> 
+                            <span class="text-brandNeutral-300">(${{ number_format($settings->deposit_per_person, 0, ',', '.') }} por persona)</span>
+                        </p>
+                    </div>
+                    <p class="caption text-brandNeutral-400 flex items-center gap-2">
+                        <i data-lucide="info" class="size-4"></i>
+                        <span>Este anticipo se descontará del consumo final.</span>
                     </p>
                 </div>
                 
                 @if($bankAccounts->count() > 0)
                     <div>
-                        <label class="block caption text-brandNeutral-400 mb-2">Datos Bancarios</label>
+                        <label class="flex items-center gap-2 caption text-brandNeutral-400 mb-3">
+                            <i data-lucide="credit-card" class="size-4"></i>
+                            <span>Datos Bancarios</span>
+                        </label>
                         <div class="space-y-3">
                             @foreach($bankAccounts as $account)
-                                <div class="bg-brandWhite-100 border border-brandWhite-300 rounded-lg p-4">
-                                    <div class="space-y-2">
-                                        <div class="flex justify-between">
-                                            <span class="caption text-brandNeutral-400">Banco:</span>
-                                            <span class="caption-strong text-brandNeutral-400">{{ $account->bank }}</span>
+                                <div class="bg-brandWhite-100 border-2 border-brandWhite-300 rounded-lg p-4 hover:border-brandPrimary-200 transition-colors">
+                                    <div class="space-y-2.5">
+                                        <div class="flex justify-between items-center">
+                                            <span class="caption text-brandNeutral-400 flex items-center gap-2">
+                                                <i data-lucide="building-2" class="size-3.5"></i>
+                                                Banco:
+                                            </span>
+                                            <span class="caption-strong text-brandNeutral-500">{{ $account->bank }}</span>
                                         </div>
-                                        <div class="flex justify-between">
-                                            <span class="caption text-brandNeutral-400">Tipo:</span>
-                                            <span class="caption-strong text-brandNeutral-400">{{ $account->account_type }}</span>
+                                        <div class="flex justify-between items-center">
+                                            <span class="caption text-brandNeutral-400 flex items-center gap-2">
+                                                <i data-lucide="file-text" class="size-3.5"></i>
+                                                Tipo:
+                                            </span>
+                                            <span class="caption-strong text-brandNeutral-500">{{ $account->account_type }}</span>
                                         </div>
-                                        <div class="flex justify-between">
-                                            <span class="caption text-brandNeutral-400">Número:</span>
-                                            <span class="caption-strong text-brandNeutral-400 font-mono">{{ $account->account_number }}</span>
+                                        <div class="flex justify-between items-center">
+                                            <span class="caption text-brandNeutral-400 flex items-center gap-2">
+                                                <i data-lucide="hash" class="size-3.5"></i>
+                                                Número:
+                                            </span>
+                                            <span class="caption-strong text-brandNeutral-500 font-mono text-sm">{{ $account->account_number }}</span>
                                         </div>
-                                        <div class="flex justify-between">
-                                            <span class="caption text-brandNeutral-400">Titular:</span>
-                                            <span class="caption-strong text-brandNeutral-400">{{ $account->account_holder }}</span>
+                                        <div class="flex justify-between items-center">
+                                            <span class="caption text-brandNeutral-400 flex items-center gap-2">
+                                                <i data-lucide="user" class="size-3.5"></i>
+                                                Titular:
+                                            </span>
+                                            <span class="caption-strong text-brandNeutral-500">{{ $account->account_holder }}</span>
                                         </div>
                                     </div>
                                 </div>
@@ -171,8 +257,11 @@
                     </div>
                     
                     <div>
-                        <label for="payment_proof" class="block caption text-brandNeutral-400 mb-2">Comprobante de Pago *</label>
-                        <div class="border-2 border-dashed border-brandWhite-300 rounded-lg p-6 text-center hover:border-brandPrimary-300 transition-colors">
+                        <label for="payment_proof" class="flex items-center gap-2 caption text-brandNeutral-400 mb-2">
+                            <i data-lucide="upload" class="size-4"></i>
+                            <span>Comprobante de Pago *</span>
+                        </label>
+                        <div class="border-2 border-dashed border-brandWhite-300 rounded-lg p-6 text-center hover:border-brandPrimary-300 hover:bg-brandPrimary-50 transition-all duration-200 cursor-pointer group" id="payment_proof_dropzone">
                             <input 
                                 type="file" 
                                 id="payment_proof" 
@@ -181,10 +270,10 @@
                                 class="hidden"
                                 required
                             >
-                            <label for="payment_proof" class="cursor-pointer">
-                                <div class="text-4xl mb-2">📎</div>
-                                <p class="caption text-brandNeutral-400 font-medium mb-1">Subir comprobante</p>
-                                <p class="caption text-brandNeutral-300">JPG, PNG o PDF (máx. 5MB)</p>
+                            <label for="payment_proof" class="cursor-pointer block">
+                                <div class="text-5xl mb-3 group-hover:scale-110 transition-transform duration-200">📎</div>
+                                <p class="caption text-brandNeutral-400 font-medium mb-1">Haz clic para subir comprobante</p>
+                                <p class="caption text-brandNeutral-300 text-xs">JPG, PNG o PDF (máx. 5MB)</p>
                             </label>
                         </div>
                         <div id="payment_proof_preview" class="hidden mt-3"></div>
@@ -196,19 +285,26 @@
         @endif
 
         <!-- Botón de Enviar -->
-        <div class="bg-brandWhite-50 rounded-lg p-4 border border-brandWhite-300">
+        <div class="bg-brandWhite-50 rounded-lg p-5 border-2 border-brandWhite-300 sticky bottom-4 z-10 shadow-lg">
             <button 
                 type="submit" 
                 id="btn-submit-reservation"
-                class="w-full bg-brandPrimary-300 hover:bg-brandPrimary-200 text-brandWhite-100 py-3 rounded-full caption transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                class="w-full bg-gradient-to-r from-brandPrimary-300 to-brandPrimary-400 hover:from-brandPrimary-200 hover:to-brandPrimary-300 text-brandWhite-100 py-4 rounded-full caption-strong font-medium transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed disabled:from-brandNeutral-200 disabled:to-brandNeutral-300 shadow-md hover:shadow-lg transform hover:scale-[1.02] disabled:transform-none flex items-center justify-center gap-2"
                 disabled
             >
-                <span id="btn-text">Solicitar Reserva</span>
-                <span id="btn-loading" class="hidden">
-                    <span class="inline-block animate-spin rounded-full h-4 w-4 border-b-2 border-brandWhite-100 mr-2"></span>
-                    Procesando...
+                <span id="btn-text" class="flex items-center gap-2">
+                    <i data-lucide="send" class="size-4"></i>
+                    <span>Solicitar Reserva</span>
+                </span>
+                <span id="btn-loading" class="hidden flex items-center gap-2">
+                    <span class="inline-block animate-spin rounded-full h-5 w-5 border-2 border-brandWhite-100 border-t-transparent"></span>
+                    <span>Procesando...</span>
                 </span>
             </button>
+            <p class="text-center caption text-brandNeutral-300 mt-3">
+                <i data-lucide="lock" class="size-3 inline-block mr-1"></i>
+                Tus datos están protegidos
+            </p>
         </div>
     </form>
 </div>
@@ -306,6 +402,8 @@ document.addEventListener('DOMContentLoaded', async function() {
     if (paymentProofInput) {
         paymentProofInput.addEventListener('change', function(e) {
             handlePaymentProofUpload(e.target.files[0]);
+            // Validar formulario después de subir el comprobante
+            setTimeout(validateForm, 100);
         });
     }
     
@@ -410,6 +508,8 @@ document.addEventListener('DOMContentLoaded', async function() {
                         this.classList.remove('bg-brandSuccess-50', 'border-brandSuccess-400', 'text-brandSuccess-400');
                         this.classList.add('bg-brandPrimary-300', 'text-brandWhite-50', 'border-brandPrimary-300');
                         selectedTime.value = this.dataset.time;
+                        // Actualizar estado del paso 1 cuando se selecciona hora
+                        updateStepStatus(1, true);
                         validateForm();
                     });
                 }
@@ -429,6 +529,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     function handlePaymentProofUpload(file) {
         const preview = document.getElementById('payment_proof_preview');
         const errorElement = document.getElementById('payment_proof_error');
+        const dropzone = document.getElementById('payment_proof_dropzone');
         
         if (!file) {
             preview.classList.add('hidden');
@@ -441,71 +542,204 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (!allowedTypes.includes(file.type)) {
             errorElement.textContent = 'Solo se permiten archivos JPG, PNG o PDF';
             errorElement.classList.remove('hidden');
+            dropzone.classList.add('border-brandError-300', 'bg-brandError-50');
+            dropzone.classList.remove('border-brandSuccess-300', 'bg-brandSuccess-50');
             return;
         }
         
         if (file.size > maxSize) {
             errorElement.textContent = 'El archivo no puede ser mayor a 5MB';
             errorElement.classList.remove('hidden');
+            dropzone.classList.add('border-brandError-300', 'bg-brandError-50');
+            dropzone.classList.remove('border-brandSuccess-300', 'bg-brandSuccess-50');
             return;
         }
         
         errorElement.classList.add('hidden');
+        dropzone.classList.add('border-brandSuccess-300', 'bg-brandSuccess-50');
+        dropzone.classList.remove('border-brandWhite-300', 'hover:border-brandPrimary-300', 'hover:bg-brandPrimary-50');
+        
+        const fileIcon = file.type === 'application/pdf' ? 'file-text' : 'image';
         preview.innerHTML = `
-            <div class="flex items-center gap-3 p-3 bg-brandSuccess-50 border border-brandSuccess-200 rounded-lg">
-                <span class="text-2xl">📎</span>
-                <div class="flex-1">
-                    <p class="caption-strong text-brandNeutral-400">${file.name}</p>
-                    <p class="caption text-brandNeutral-300">${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+            <div class="flex items-center gap-3 p-4 bg-brandSuccess-50 border-2 border-brandSuccess-300 rounded-lg animate-fade-in">
+                <div class="w-12 h-12 bg-brandSuccess-200 rounded-lg flex items-center justify-center">
+                    <i data-lucide="${fileIcon}" class="size-6 text-brandSuccess-400"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                    <p class="caption-strong text-brandNeutral-500 truncate">${file.name}</p>
+                    <p class="caption text-brandNeutral-400">${(file.size / 1024 / 1024).toFixed(2)} MB</p>
+                </div>
+                <div class="text-brandSuccess-400">
+                    <i data-lucide="check-circle" class="size-6"></i>
                 </div>
             </div>
         `;
         preview.classList.remove('hidden');
+        
+        // Actualizar indicador del paso 3
+        updateStepStatus(3, true);
+        
+        // Inicializar iconos de Lucide
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    }
+    
+    // Función para actualizar el estado visual de cada paso
+    function updateStepStatus(stepNumber, completed) {
+        const numberEl = document.getElementById(`step-${stepNumber}-number`);
+        const numberText = document.getElementById(`step-${stepNumber}-number-text`);
+        const checkIcon = document.getElementById(`step-${stepNumber}-check`);
+        const statusEl = document.getElementById(`step-${stepNumber}-status`);
+        const cardEl = document.getElementById(`step-${stepNumber}-card`);
+        
+        if (completed) {
+            numberEl.classList.remove('bg-brandPrimary-50', 'text-brandPrimary-300');
+            numberEl.classList.add('bg-brandSuccess-400', 'text-white');
+            if (numberText) numberText.classList.add('hidden');
+            if (checkIcon) checkIcon.classList.remove('hidden');
+            if (statusEl) statusEl.classList.remove('hidden');
+            if (cardEl) cardEl.classList.add('border-brandSuccess-300');
+        } else {
+            numberEl.classList.add('bg-brandPrimary-50', 'text-brandPrimary-300');
+            numberEl.classList.remove('bg-brandSuccess-400', 'text-white');
+            if (numberText) numberText.classList.remove('hidden');
+            if (checkIcon) checkIcon.classList.add('hidden');
+            if (statusEl) statusEl.classList.add('hidden');
+            if (cardEl) cardEl.classList.remove('border-brandSuccess-300');
+        }
+        
+        // Inicializar iconos de Lucide
+        if (window.lucide) {
+            lucide.createIcons();
+        }
+    }
+    
+    // Función para mostrar éxito en campos
+    function showFieldSuccess(fieldId) {
+        const successEl = document.getElementById(`${fieldId}_success`);
+        if (successEl) {
+            successEl.classList.remove('hidden');
+        }
+    }
+    
+    function hideFieldSuccess(fieldId) {
+        const successEl = document.getElementById(`${fieldId}_success`);
+        if (successEl) {
+            successEl.classList.add('hidden');
+        }
     }
     
     function validateForm() {
         const date = dateInput.value;
         const time = selectedTime.value;
-        const name = document.getElementById('customer_name').value;
-        const phone = document.getElementById('customer_phone').value;
+        const name = document.getElementById('customer_name').value.trim();
+        const phone = document.getElementById('customer_phone').value.trim();
         const partySize = partySizeInput.value;
         
         let isValid = true;
+        let step1Complete = false;
+        let step2Complete = false;
+        let step3Complete = true; // Por defecto true si no se requiere anticipo
         
         // Validar fecha
-        if (!date) {
+        if (date) {
+            showFieldSuccess('date');
+            step1Complete = true;
+        } else {
+            hideFieldSuccess('date');
             isValid = false;
         }
         
         // Validar hora
-        if (!time) {
+        if (time) {
+            step1Complete = true;
+        } else {
             isValid = false;
         }
         
-        // Validar campos requeridos
-        if (!name || !phone || !partySize) {
+        // Actualizar estado del paso 1
+        updateStepStatus(1, step1Complete);
+        
+        // Validar campos requeridos del paso 2
+        if (name) {
+            showFieldSuccess('name');
+        } else {
+            hideFieldSuccess('name');
             isValid = false;
         }
+        
+        if (phone) {
+            showFieldSuccess('phone');
+        } else {
+            hideFieldSuccess('phone');
+            isValid = false;
+        }
+        
+        if (partySize) {
+            showFieldSuccess('party_size');
+            step2Complete = true;
+        } else {
+            hideFieldSuccess('party_size');
+            isValid = false;
+        }
+        
+        // Actualizar estado del paso 2
+        updateStepStatus(2, step2Complete);
         
         // Validar comprobante si se requiere
         @if($settings->require_deposit)
         const paymentProof = document.getElementById('payment_proof');
-        if (paymentProof && !paymentProof.files[0]) {
-            isValid = false;
+        if (paymentProof) {
+            if (paymentProof.files[0]) {
+                step3Complete = true;
+            } else {
+                step3Complete = false;
+                isValid = false;
+            }
         }
+        @endif
+        
+        // Actualizar estado del paso 3
+        @if($settings->require_deposit)
+        updateStepStatus(3, step3Complete);
         @endif
         
         submitBtn.disabled = !isValid;
         return isValid;
     }
     
-    // Validar en tiempo real
+    // Validar en tiempo real con feedback visual
     ['customer_name', 'customer_phone', 'party_size'].forEach(fieldId => {
         const field = document.getElementById(fieldId);
         if (field) {
-            field.addEventListener('input', validateForm);
+            field.addEventListener('input', function() {
+                validateForm();
+            });
+            field.addEventListener('blur', function() {
+                if (this.value.trim()) {
+                    showFieldSuccess(fieldId);
+                } else {
+                    hideFieldSuccess(fieldId);
+                }
+            });
         }
     });
+    
+    // Validar fecha cuando cambia
+    dateInput.addEventListener('change', function() {
+        if (this.value) {
+            showFieldSuccess('date');
+        } else {
+            hideFieldSuccess('date');
+        }
+        validateForm();
+    });
+    
+    // Inicializar iconos de Lucide al cargar
+    if (window.lucide) {
+        lucide.createIcons();
+    }
 });
 </script>
 @endpush

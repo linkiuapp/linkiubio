@@ -127,6 +127,9 @@ class SidebarBuilderService
         // Configuración de Tiendas
         $items = array_merge($items, $this->buildSuperAdminConfigurationSection());
 
+        // Integraciones
+        $items = array_merge($items, $this->buildSuperAdminIntegrationsSection());
+
         return $items;
     }
 
@@ -155,53 +158,74 @@ class SidebarBuilderService
     {
         $items = [];
 
-        // Gestión de tiendas
-        $items[] = [
-            'label'  => 'Gestión de tiendas',
-            'url'    => route('superlinkiu.stores.index'),
-            'icon'   => 'store',
-            'active' => request()->routeIs('superlinkiu.stores.*') && !request()->routeIs('superlinkiu.store-requests.*')
-        ];
-
-        // Solicitudes de Tiendas
+        // Administración (expandible)
         $pendingCount = \App\Shared\Models\Store::where('approval_status', 'pending_approval')->count();
-        $items[] = [
-            'label'      => 'Solicitudes de Tiendas',
-            'url'        => route('superlinkiu.store-requests.index'),
-            'icon'       => 'file-text',
-            'active'     => request()->routeIs('superlinkiu.store-requests.*'),
-            'badge'      => $pendingCount > 0 ? (string)$pendingCount : null,
-            'badgeColor' => $pendingCount > 0 ? 'bg-warning-300 text-white' : null
-        ];
-
-        // Gestión de Usuarios
-        $items[] = [
-            'label'  => 'Gestión de Usuarios',
-            'url'    => route('superlinkiu.user-management.index'),
-            'icon'   => 'users',
-            'active' => request()->routeIs('superlinkiu.user-management.*')
-        ];
-
-        // Recuperación Clave Maestra
         $pendingRecoveryCount = \App\Shared\Models\MasterKeyRecoveryRequest::where('status', 'pending')->count();
-        $items[] = [
-            'label'      => 'Recuperación Clave Maestra',
-            'url'        => route('superlinkiu.master-key-recovery.index'),
-            'icon'       => 'lock-keyhole',
-            'active'     => request()->routeIs('superlinkiu.master-key-recovery.*'),
-            'badge'      => $pendingRecoveryCount > 0 ? (string)$pendingRecoveryCount : null,
-            'badgeColor' => $pendingRecoveryCount > 0 ? 'bg-warning-300 text-white' : null
-        ];
-
-        // Reportes de Tiendas
         $pendingReportsCount = \App\Shared\Models\StoreReport::where('status', 'pending')->count();
+
         $items[] = [
-            'label'      => 'Reportes de Tiendas',
-            'url'        => route('superlinkiu.store-reports.index'),
-            'icon'       => 'alert-triangle',
-            'active'     => request()->routeIs('superlinkiu.store-reports.*'),
-            'badge'      => $pendingReportsCount > 0 ? (string)$pendingReportsCount : null,
-            'badgeColor' => $pendingReportsCount > 0 ? 'bg-error-300 text-white' : null
+            'label'  => 'Administración',
+            'icon'   => 'settings',
+            'active' => request()->routeIs('superlinkiu.stores.*') || 
+                       request()->routeIs('superlinkiu.store-requests.*') ||
+                       request()->routeIs('superlinkiu.user-management.*') ||
+                       request()->routeIs('superlinkiu.master-key-recovery.*') ||
+                       request()->routeIs('superlinkiu.store-reports.*'),
+            'children' => [
+                // Tiendas (expandible)
+                [
+                    'label'  => 'Tiendas',
+                    'icon'   => 'store',
+                    'active' => request()->routeIs('superlinkiu.stores.*') || request()->routeIs('superlinkiu.store-requests.*'),
+                    'children' => [
+                        [
+                            'label'  => 'Gestión de tiendas',
+                            'url'    => route('superlinkiu.stores.index'),
+                            'icon'   => 'store',
+                            'active' => request()->routeIs('superlinkiu.stores.*') && !request()->routeIs('superlinkiu.store-requests.*')
+                        ],
+                        [
+                            'label'      => 'Solicitudes de Tiendas',
+                            'url'        => route('superlinkiu.store-requests.index'),
+                            'icon'       => 'file-text',
+                            'active'     => request()->routeIs('superlinkiu.store-requests.*'),
+                            'badge'      => $pendingCount > 0 ? (string)$pendingCount : null,
+                            'badgeColor' => $pendingCount > 0 ? 'bg-warning-300 text-white' : null
+                        ],
+                    ],
+                ],
+                // Gestión de Usuarios
+                [
+                    'label'  => 'Gestión de Usuarios',
+                    'url'    => route('superlinkiu.user-management.index'),
+                    'icon'   => 'users',
+                    'active' => request()->routeIs('superlinkiu.user-management.*')
+                ],
+                // Reportes y Solicitudes (expandible)
+                [
+                    'label'  => 'Reportes y Solicitudes',
+                    'icon'   => 'alert-triangle',
+                    'active' => request()->routeIs('superlinkiu.master-key-recovery.*') || request()->routeIs('superlinkiu.store-reports.*'),
+                    'children' => [
+                        [
+                            'label'      => 'Reportes de Tiendas',
+                            'url'        => route('superlinkiu.store-reports.index'),
+                            'icon'       => 'alert-triangle',
+                            'active'     => request()->routeIs('superlinkiu.store-reports.*'),
+                            'badge'      => $pendingReportsCount > 0 ? (string)$pendingReportsCount : null,
+                            'badgeColor' => $pendingReportsCount > 0 ? 'bg-error-300 text-white' : null
+                        ],
+                        [
+                            'label'      => 'Recuperación Clave Maestra',
+                            'url'        => route('superlinkiu.master-key-recovery.index'),
+                            'icon'       => 'lock-keyhole',
+                            'active'     => request()->routeIs('superlinkiu.master-key-recovery.*'),
+                            'badge'      => $pendingRecoveryCount > 0 ? (string)$pendingRecoveryCount : null,
+                            'badgeColor' => $pendingRecoveryCount > 0 ? 'bg-warning-300 text-white' : null
+                        ],
+                    ],
+                ],
+            ],
         ];
 
         return $items;
@@ -214,28 +238,33 @@ class SidebarBuilderService
     {
         $items = [];
 
-        // Planes disponibles
+        // Planes y Facturación (expandible)
         $items[] = [
-            'label'  => 'Planes disponibles',
-            'url'    => route('superlinkiu.plans.index'),
-            'icon'   => 'award',
-            'active' => request()->routeIs('superlinkiu.plans.*')
-        ];
-
-        // Facturación
-        $items[] = [
-            'label'  => 'Facturación',
-            'url'    => route('superlinkiu.invoices.index'),
-            'icon'   => 'receipt',
-            'active' => request()->routeIs('superlinkiu.invoices.*')
-        ];
-
-        // Configurar Facturas
-        $items[] = [
-            'label'  => 'Configurar Facturas',
-            'url'    => route('superlinkiu.billing-settings.index'),
-            'icon'   => 'settings',
-            'active' => request()->routeIs('superlinkiu.billing-settings.*')
+            'label'  => 'Planes y Facturación',
+            'icon'   => 'credit-card',
+            'active' => request()->routeIs('superlinkiu.plans.*') ||
+                       request()->routeIs('superlinkiu.invoices.*') ||
+                       request()->routeIs('superlinkiu.billing-settings.*'),
+            'children' => [
+                [
+                    'label'  => 'Planes disponibles',
+                    'url'    => route('superlinkiu.plans.index'),
+                    'icon'   => 'award',
+                    'active' => request()->routeIs('superlinkiu.plans.*')
+                ],
+                [
+                    'label'  => 'Facturación',
+                    'url'    => route('superlinkiu.invoices.index'),
+                    'icon'   => 'receipt',
+                    'active' => request()->routeIs('superlinkiu.invoices.*')
+                ],
+                [
+                    'label'  => 'Configurar Facturas',
+                    'url'    => route('superlinkiu.billing-settings.index'),
+                    'icon'   => 'settings',
+                    'active' => request()->routeIs('superlinkiu.billing-settings.*')
+                ],
+            ],
         ];
 
         return $items;
@@ -248,15 +277,28 @@ class SidebarBuilderService
     {
         $items = [];
 
-        // Lista de tickets (desde aquí se pueden crear y filtrar)
+        // Soporte (expandible)
         $openTicketsCount = \App\Shared\Models\Ticket::whereIn('status', ['open', 'in_progress'])->count();
         $items[] = [
-            'label'      => 'Lista de tickets',
-            'url'        => route('superlinkiu.tickets.index'),
-            'icon'       => 'ticket',
-            'active'     => request()->routeIs('superlinkiu.tickets.*') && !request()->routeIs('superlinkiu.email.*'),
-            'badge'      => $openTicketsCount > 0 ? (string)$openTicketsCount : null,
-            'badgeColor' => $openTicketsCount > 0 ? 'bg-error-200 text-accent-50' : null
+            'label'  => 'Soporte',
+            'icon'   => 'headphones',
+            'active' => request()->routeIs('superlinkiu.tickets.*') || request()->routeIs('superlinkiu.email.*'),
+            'children' => [
+                [
+                    'label'      => 'Lista de tickets',
+                    'url'        => route('superlinkiu.tickets.index'),
+                    'icon'       => 'ticket',
+                    'active'     => request()->routeIs('superlinkiu.tickets.*') && !request()->routeIs('superlinkiu.email.*'),
+                    'badge'      => $openTicketsCount > 0 ? (string)$openTicketsCount : null,
+                    'badgeColor' => $openTicketsCount > 0 ? 'bg-error-200 text-accent-50' : null
+                ],
+                [
+                    'label'  => 'Configuración de Email',
+                    'url'    => route('superlinkiu.email.configuration'),
+                    'icon'   => 'mail',
+                    'active' => request()->routeIs('superlinkiu.email.*')
+                ],
+            ],
         ];
 
         return $items;
@@ -269,50 +311,54 @@ class SidebarBuilderService
     {
         $items = [];
 
-        // Monitoreo del Sistema
-        $items[] = [
-            'label'  => 'Monitoreo',
-            'url'    => route('superlinkiu.monitoring.index'),
-            'icon'   => 'activity',
-            'active' => request()->routeIs('superlinkiu.monitoring.*'),
-        ];
-
-        // Registros Pendientes
+        // Herramientas (expandible)
         $pendingCount = \App\Models\PendingRegistration::pending()->count();
-        $items[] = [
-            'label'  => 'Registros Pendientes',
-            'url'    => route('superlinkiu.pending-registrations.index'),
-            'icon'   => 'user-check',
-            'active' => request()->routeIs('superlinkiu.pending-registrations.*'),
-            'badge'  => $pendingCount > 0 ? $pendingCount : null,
-            'badge_color' => 'yellow',
-        ];
-
-        // Configuración de Pago (Registro)
-        $items[] = [
-            'label'  => 'Datos de Pago',
-            'url'    => route('superlinkiu.registration-payment-settings.index'),
-            'icon'   => 'qr-code',
-            'active' => request()->routeIs('superlinkiu.registration-payment-settings.*'),
-        ];
-
-        // Solicitudes de Cambio de Plan
         $planChangeCount = \App\Shared\Models\PlanChangeRequest::pending()->count();
-        $items[] = [
-            'label'  => 'Solicitudes de Plan',
-            'url'    => route('superlinkiu.plan-change-requests.index'),
-            'icon'   => 'repeat',
-            'active' => request()->routeIs('superlinkiu.plan-change-requests.*'),
-            'badge'  => $planChangeCount > 0 ? $planChangeCount : null,
-            'badge_color' => 'yellow',
-        ];
 
-        // Eliminar Pedidos
         $items[] = [
-            'label'  => 'Eliminar Pedidos',
-            'url'    => route('superlinkiu.tools.delete-order'),
-            'icon'   => 'trash-2',
-            'active' => request()->routeIs('superlinkiu.tools.*')
+            'label'  => 'Herramientas',
+            'icon'   => 'wrench',
+            'active' => request()->routeIs('superlinkiu.monitoring.*') ||
+                       request()->routeIs('superlinkiu.pending-registrations.*') ||
+                       request()->routeIs('superlinkiu.registration-payment-settings.*') ||
+                       request()->routeIs('superlinkiu.plan-change-requests.*') ||
+                       request()->routeIs('superlinkiu.tools.*'),
+            'children' => [
+                [
+                    'label'  => 'Monitoreo',
+                    'url'    => route('superlinkiu.monitoring.index'),
+                    'icon'   => 'activity',
+                    'active' => request()->routeIs('superlinkiu.monitoring.*'),
+                ],
+                [
+                    'label'  => 'Registros Pendientes',
+                    'url'    => route('superlinkiu.pending-registrations.index'),
+                    'icon'   => 'user-check',
+                    'active' => request()->routeIs('superlinkiu.pending-registrations.*'),
+                    'badge'  => $pendingCount > 0 ? $pendingCount : null,
+                    'badge_color' => 'yellow',
+                ],
+                [
+                    'label'  => 'Solicitudes de Plan',
+                    'url'    => route('superlinkiu.plan-change-requests.index'),
+                    'icon'   => 'repeat',
+                    'active' => request()->routeIs('superlinkiu.plan-change-requests.*'),
+                    'badge'  => $planChangeCount > 0 ? $planChangeCount : null,
+                    'badge_color' => 'yellow',
+                ],
+                [
+                    'label'  => 'Datos de Pago',
+                    'url'    => route('superlinkiu.registration-payment-settings.index'),
+                    'icon'   => 'qr-code',
+                    'active' => request()->routeIs('superlinkiu.registration-payment-settings.*'),
+                ],
+                [
+                    'label'  => 'Eliminar Pedidos',
+                    'url'    => route('superlinkiu.tools.delete-order'),
+                    'icon'   => 'trash-2',
+                    'active' => request()->routeIs('superlinkiu.tools.*')
+                ],
+            ],
         ];
 
         return $items;
@@ -323,28 +369,8 @@ class SidebarBuilderService
      */
     protected function buildSuperAdminAnnouncementsSection(): array
     {
-        $items = [];
-
-        // Anuncios de Linkiu
-        $totalAnnouncements = \App\Shared\Models\PlatformAnnouncement::where('is_active', true)->count();
-        $items[] = [
-            'label'      => 'Anuncios de Linkiu',
-            'url'        => route('superlinkiu.announcements.index'),
-            'icon'       => 'megaphone',
-            'active'     => request()->routeIs('superlinkiu.announcements.*'),
-            'badge'      => $totalAnnouncements > 0 ? (string)$totalAnnouncements : null,
-            'badgeColor' => $totalAnnouncements > 0 ? 'bg-primary-200 text-accent-50' : null
-        ];
-
-        // Configuración de Email
-        $items[] = [
-            'label'  => 'Configuración de Email',
-            'url'    => route('superlinkiu.email.configuration'),
-            'icon'   => 'mail',
-            'active' => request()->routeIs('superlinkiu.email.*')
-        ];
-
-        return $items;
+        // Esta sección se ha movido a buildSuperAdminConfigurationSection
+        return [];
     }
 
     /**
@@ -354,28 +380,77 @@ class SidebarBuilderService
     {
         $items = [];
 
-        // Categorías de Negocio
+        // Configuración (expandible)
         $totalCategories = \App\Shared\Models\BusinessCategory::count();
         $autoApproveCategories = \App\Shared\Models\BusinessCategory::where('requires_manual_approval', false)->where('is_active', true)->count();
-        $items[] = [
-            'label'      => 'Categorías de Negocio',
-            'url'        => route('superlinkiu.business-categories.index'),
-            'icon'       => 'tag',
-            'active'     => request()->routeIs('superlinkiu.business-categories.*'),
-            'badge'      => $totalCategories > 0 ? "{$autoApproveCategories}/{$totalCategories}" : null,
-            'badgeColor' => $totalCategories > 0 ? 'bg-success-300 text-white' : null
-        ];
-
-        // Iconos de Categorías
         $totalIcons = \App\Shared\Models\CategoryIcon::count();
         $activeIcons = \App\Shared\Models\CategoryIcon::where('is_active', true)->count();
+        $totalAnnouncements = \App\Shared\Models\PlatformAnnouncement::where('is_active', true)->count();
+
         $items[] = [
-            'label'      => 'Iconos de Categorías',
-            'url'        => route('superlinkiu.category-icons.index'),
-            'icon'       => 'image',
-            'active'     => request()->routeIs('superlinkiu.category-icons.*'),
-            'badge'      => $totalIcons > 0 ? "{$activeIcons}/{$totalIcons}" : null,
-            'badgeColor' => $totalIcons > 0 ? 'bg-info-300 text-accent-50' : null
+            'label'  => 'Configuración',
+            'icon'   => 'sliders-horizontal',
+            'active' => request()->routeIs('superlinkiu.business-categories.*') ||
+                       request()->routeIs('superlinkiu.category-icons.*') ||
+                       request()->routeIs('superlinkiu.announcements.*'),
+            'children' => [
+                [
+                    'label'      => 'Categorías de Negocio',
+                    'url'        => route('superlinkiu.business-categories.index'),
+                    'icon'       => 'tag',
+                    'active'     => request()->routeIs('superlinkiu.business-categories.*'),
+                    'badge'      => $totalCategories > 0 ? "{$autoApproveCategories}/{$totalCategories}" : null,
+                    'badgeColor' => $totalCategories > 0 ? 'bg-success-300 text-white' : null
+                ],
+                [
+                    'label'      => 'Iconos de Categorías',
+                    'url'        => route('superlinkiu.category-icons.index'),
+                    'icon'       => 'image',
+                    'active'     => request()->routeIs('superlinkiu.category-icons.*'),
+                    'badge'      => $totalIcons > 0 ? "{$activeIcons}/{$totalIcons}" : null,
+                    'badgeColor' => $totalIcons > 0 ? 'bg-info-300 text-accent-50' : null
+                ],
+                [
+                    'label'      => 'Anuncios de Linkiu',
+                    'url'        => route('superlinkiu.announcements.index'),
+                    'icon'       => 'megaphone',
+                    'active'     => request()->routeIs('superlinkiu.announcements.*'),
+                    'badge'      => $totalAnnouncements > 0 ? (string)$totalAnnouncements : null,
+                    'badgeColor' => $totalAnnouncements > 0 ? 'bg-primary-200 text-accent-50' : null
+                ],
+            ],
+        ];
+
+        return $items;
+    }
+
+    /**
+     * Construir sección de integraciones para SuperAdmin
+     */
+    protected function buildSuperAdminIntegrationsSection(): array
+    {
+        $items = [];
+
+        // Integraciones (expandible)
+        $items[] = [
+            'label'  => 'Integraciones',
+            'icon'   => 'plug',
+            'active' => request()->routeIs('superlinkiu.integrations.*'),
+            'children' => [
+                [
+                    'label'  => 'Pasarelas de Pagos',
+                    'icon'   => 'credit-card',
+                    'active' => request()->routeIs('superlinkiu.integrations.payment-gateways.*'),
+                    'children' => [
+                        [
+                            'label'  => 'Epayco',
+                            'url'    => route('superlinkiu.integrations.payment-gateways.epayco.index'),
+                            'icon'   => 'wallet',
+                            'active' => request()->routeIs('superlinkiu.integrations.payment-gateways.epayco.*'),
+                        ],
+                    ],
+                ],
+            ],
         ];
 
         return $items;

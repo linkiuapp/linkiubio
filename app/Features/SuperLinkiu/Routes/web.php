@@ -242,6 +242,20 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
         Route::delete('/profile/avatar', [ProfileController::class, 'deleteAvatar'])->name('profile.delete-avatar');
         Route::patch('/profile/app-settings', [ProfileController::class, 'updateAppSettings'])->name('profile.update-app-settings');
 
+        // Integraciones
+        Route::prefix('integrations')->name('integrations.')->group(function () {
+            // Pasarelas de Pagos
+            Route::prefix('payment-gateways')->name('payment-gateways.')->group(function () {
+                // Epayco
+                Route::prefix('epayco')->name('epayco.')->group(function () {
+                    Route::get('/', [\App\Http\Controllers\SuperLinkiu\Integrations\PaymentGateways\EpaycoController::class, 'index'])->name('index');
+                    Route::post('/', [\App\Http\Controllers\SuperLinkiu\Integrations\PaymentGateways\EpaycoController::class, 'store'])->name('store');
+                    Route::get('/transactions', [\App\Http\Controllers\SuperLinkiu\Integrations\PaymentGateways\EpaycoController::class, 'transactions'])->name('transactions');
+                    Route::get('/transactions/{transaction}', [\App\Http\Controllers\SuperLinkiu\Integrations\PaymentGateways\EpaycoController::class, 'showTransaction'])->name('transaction.show');
+                });
+            });
+        });
+
         // Billing Settings
         Route::prefix('billing-settings')->name('billing-settings.')->group(function () {
             Route::get('/', [BillingSettingController::class, 'index'])->name('index');

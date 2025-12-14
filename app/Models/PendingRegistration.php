@@ -36,6 +36,8 @@ class PendingRegistration extends Model
         'hashed_password',
         'temp_password_encrypted',
         'payment_proof',
+        'payment_method',
+        'payment_transaction_id',
         'status',
         'validation_result',
         'rejected_reason',
@@ -71,6 +73,11 @@ class PendingRegistration extends Model
     public function createdStore()
     {
         return $this->belongsTo(Store::class, 'created_store_id');
+    }
+
+    public function paymentTransaction()
+    {
+        return $this->belongsTo(\App\Models\PaymentGatewayTransaction::class, 'payment_transaction_id');
     }
 
     // Scopes

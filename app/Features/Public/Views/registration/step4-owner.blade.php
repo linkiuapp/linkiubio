@@ -44,7 +44,11 @@
                 <p class="text-base text-gray-600">Crea tu cuenta de administrador</p>
             </div>
 
-            <form method="POST" action="{{ route('register.complete') }}" enctype="multipart/form-data" x-data="ownerForm()">
+            <form method="POST" :action="paymentMethod === 'epayco' ? '{{ route('register.payment.initiate') }}' : '{{ route('register.complete') }}'" 
+                  enctype="multipart/form-data" 
+                  x-data="ownerForm()"
+                  @submit.prevent="handleSubmit"
+                  novalidate>
                 @csrf
                 
                 <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
@@ -167,12 +171,79 @@
                         </div>
                     </div>
 
-                    {{-- Sección: Comprobante de Pago --}}
+                    {{-- Sección: Método de Pago --}}
                     <div class="p-6 lg:p-8 border-b border-gray-200">
                         <h3 class="text-lg font-semibold text-gray-900 mb-6 flex items-center gap-2">
-                            <i data-lucide="receipt" class="w-5 h-5 text-blue-600"></i>
-                            Comprobante de Pago
+                            <i data-lucide="credit-card" class="w-5 h-5 text-blue-600"></i>
+                            Método de Pago
                         </h3>
+                        
+                        @if($epaycoGateway)
+                        {{-- Selección de Método de Pago --}}
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">
+                                Elige tu método de pago <span class="text-red-500">*</span>
+                            </label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                {{-- Opción: Transferencia Bancaria --}}
+                                <label class="relative flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all"
+                                       :class="paymentMethod === 'transfer' ? 'border-blue-600 bg-blue-50' : 'border-gray-300 hover:border-gray-400'">
+                                    <input type="radio" 
+                                           name="payment_method" 
+                                           value="transfer"
+                                           x-model="paymentMethod"
+                                           class="sr-only">
+                                    <div class="flex items-center gap-3 w-full">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
+                                                 :class="paymentMethod === 'transfer' ? 'border-blue-600' : 'border-gray-300'">
+                                                <div x-show="paymentMethod === 'transfer'" 
+                                                     class="w-3 h-3 rounded-full bg-blue-600"></div>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <i data-lucide="landmark" class="w-5 h-5 text-gray-600"></i>
+                                                <span class="font-semibold text-gray-900">Transferencia Bancaria</span>
+                                            </div>
+                                            <p class="text-xs text-gray-600">Paga mediante transferencia y sube tu comprobante</p>
+                                        </div>
+                                    </div>
+                                </label>
+
+                                {{-- Opción: Pago en Línea con Epayco --}}
+                                <label class="relative flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all"
+                                       :class="paymentMethod === 'epayco' ? 'border-green-600 bg-green-50' : 'border-gray-300 hover:border-gray-400'">
+                                    <input type="radio" 
+                                           name="payment_method" 
+                                           value="epayco"
+                                           x-model="paymentMethod"
+                                           class="sr-only">
+                                    <div class="flex items-center gap-3 w-full">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
+                                                 :class="paymentMethod === 'epayco' ? 'border-green-600' : 'border-gray-300'">
+                                                <div x-show="paymentMethod === 'epayco'" 
+                                                     class="w-3 h-3 rounded-full bg-green-600"></div>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <i data-lucide="credit-card" class="w-5 h-5 text-green-600"></i>
+                                                <span class="font-semibold text-gray-900">Pagar en Línea con Epayco</span>
+                                            </div>
+                                            <p class="text-xs text-gray-600">Paga de forma segura con tarjeta de crédito o débito</p>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                        @else
+                            <input type="hidden" name="payment_method" value="transfer" x-model="paymentMethod">
+                        @endif
+
+                        {{-- Sección: Comprobante de Pago (solo para transferencia) --}}
+                        <div x-show="paymentMethod === 'transfer'" x-transition>
                         
                         @php
                             $selectedPlan = \App\Shared\Models\Plan::find(Session::get('wizard.plan_id'));
@@ -244,7 +315,7 @@
                         {{-- Upload Comprobante --}}
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Subir Comprobante de Pago <span class="text-red-500">*</span>
+                                Subir Comprobante de Pago <span class="text-red-500" x-show="paymentMethod === 'transfer'">*</span>
                             </label>
                             <div class="border-2 border-dashed border-gray-300 rounded-xl p-6 text-center hover:border-blue-500 transition-colors">
                                 <input type="file" 
@@ -253,7 +324,8 @@
                                        accept="image/*,.pdf"
                                        class="hidden"
                                        @change="handleFileSelect($event)"
-                                       required>
+                                       :required="paymentMethod === 'transfer'"
+                                       x-bind:required="paymentMethod === 'transfer'">
                                 <label for="payment_proof" class="cursor-pointer">
                                     <i data-lucide="upload-cloud" class="w-12 h-12 text-gray-400 mx-auto mb-3"></i>
                                     <p class="text-gray-700 font-medium mb-1">Click para seleccionar archivo</p>
@@ -269,6 +341,145 @@
                             @error('payment_proof')
                                 <p class="text-xs text-red-600 mt-2">{{ $message }}</p>
                             @enderror
+                        </div>
+                        </div>
+
+                        {{-- Selección de Método Epayco (solo cuando se selecciona Epayco) --}}
+                        <div x-show="paymentMethod === 'epayco'" x-transition class="mt-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-3">
+                                Elige tu método de pago Epayco <span class="text-red-500">*</span>
+                            </label>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                                {{-- Opción: PSE (Pagos Seguros en Línea) --}}
+                                <label class="relative flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all"
+                                       :class="epaycoMethod === 'pse' ? 'border-green-600 bg-green-50' : 'border-gray-300 hover:border-gray-400'">
+                                    <input type="radio" 
+                                           name="epayco_method" 
+                                           value="pse"
+                                           x-model="epaycoMethod"
+                                           class="sr-only">
+                                    <div class="flex items-center gap-3 w-full">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
+                                                 :class="epaycoMethod === 'pse' ? 'border-green-600' : 'border-gray-300'">
+                                                <div x-show="epaycoMethod === 'pse'" 
+                                                     class="w-3 h-3 rounded-full bg-green-600"></div>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <i data-lucide="building-2" class="w-5 h-5 text-green-600"></i>
+                                                <span class="font-semibold text-gray-900">PSE</span>
+                                            </div>
+                                            <p class="text-xs text-gray-600">Pago desde tu cuenta bancaria</p>
+                                        </div>
+                                    </div>
+                                </label>
+
+                                {{-- Opción: Efecty --}}
+                                <label class="relative flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all"
+                                       :class="epaycoMethod === 'cash_efecty' ? 'border-green-600 bg-green-50' : 'border-gray-300 hover:border-gray-400'">
+                                    <input type="radio" 
+                                           name="epayco_method" 
+                                           value="cash_efecty"
+                                           x-model="epaycoMethod"
+                                           class="sr-only">
+                                    <div class="flex items-center gap-3 w-full">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
+                                                 :class="epaycoMethod === 'cash_efecty' ? 'border-green-600' : 'border-gray-300'">
+                                                <div x-show="epaycoMethod === 'cash_efecty'" 
+                                                     class="w-3 h-3 rounded-full bg-green-600"></div>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <i data-lucide="wallet" class="w-5 h-5 text-green-600"></i>
+                                                <span class="font-semibold text-gray-900">Efecty</span>
+                                            </div>
+                                            <p class="text-xs text-gray-600">Pago en efectivo en puntos Efecty</p>
+                                        </div>
+                                    </div>
+                                </label>
+
+                                {{-- Opción: Gana --}}
+                                <label class="relative flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all"
+                                       :class="epaycoMethod === 'cash_gana' ? 'border-green-600 bg-green-50' : 'border-gray-300 hover:border-gray-400'">
+                                    <input type="radio" 
+                                           name="epayco_method" 
+                                           value="cash_gana"
+                                           x-model="epaycoMethod"
+                                           class="sr-only">
+                                    <div class="flex items-center gap-3 w-full">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
+                                                 :class="epaycoMethod === 'cash_gana' ? 'border-green-600' : 'border-gray-300'">
+                                                <div x-show="epaycoMethod === 'cash_gana'" 
+                                                     class="w-3 h-3 rounded-full bg-green-600"></div>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <i data-lucide="wallet" class="w-5 h-5 text-green-600"></i>
+                                                <span class="font-semibold text-gray-900">Gana</span>
+                                            </div>
+                                            <p class="text-xs text-gray-600">Pago en efectivo en puntos Gana</p>
+                                        </div>
+                                    </div>
+                                </label>
+
+                                {{-- Opción: Baloto --}}
+                                <label class="relative flex items-center p-4 border-2 rounded-xl cursor-pointer transition-all"
+                                       :class="epaycoMethod === 'cash_baloto' ? 'border-green-600 bg-green-50' : 'border-gray-300 hover:border-gray-400'">
+                                    <input type="radio" 
+                                           name="epayco_method" 
+                                           value="cash_baloto"
+                                           x-model="epaycoMethod"
+                                           class="sr-only">
+                                    <div class="flex items-center gap-3 w-full">
+                                        <div class="flex-shrink-0">
+                                            <div class="w-5 h-5 rounded-full border-2 flex items-center justify-center"
+                                                 :class="epaycoMethod === 'cash_baloto' ? 'border-green-600' : 'border-gray-300'">
+                                                <div x-show="epaycoMethod === 'cash_baloto'" 
+                                                     class="w-3 h-3 rounded-full bg-green-600"></div>
+                                            </div>
+                                        </div>
+                                        <div class="flex-1">
+                                            <div class="flex items-center gap-2 mb-1">
+                                                <i data-lucide="wallet" class="w-5 h-5 text-green-600"></i>
+                                                <span class="font-semibold text-gray-900">Baloto</span>
+                                            </div>
+                                            <p class="text-xs text-gray-600">Pago en efectivo en puntos Baloto</p>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+
+                            {{-- Información de Pago en Línea --}}
+                            <div class="bg-gradient-to-r from-green-50 to-emerald-50 border-2 border-green-200 rounded-xl p-6">
+                                <h4 class="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                                    <i data-lucide="shield-check" class="w-5 h-5 text-green-600"></i>
+                                    Pago Seguro con Epayco
+                                </h4>
+                                <div class="space-y-3 text-sm">
+                                    <div class="flex items-center gap-2 text-gray-700">
+                                        <i data-lucide="check-circle" class="w-4 h-4 text-green-600"></i>
+                                        <span>Pago seguro y encriptado</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-gray-700">
+                                        <i data-lucide="check-circle" class="w-4 h-4 text-green-600"></i>
+                                        <span>Acepta tarjetas de crédito y débito</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 text-gray-700">
+                                        <i data-lucide="check-circle" class="w-4 h-4 text-green-600"></i>
+                                        <span>Confirmación inmediata del pago</span>
+                                    </div>
+                                    <div class="mt-4 pt-4 border-t border-green-200">
+                                        <p class="text-gray-600 mb-1">Monto a pagar:</p>
+                                        <p class="font-bold text-2xl text-green-600">${{ number_format($amount, 0, ',', '.') }}</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -299,9 +510,20 @@
                             Paso Anterior
                         </a>
                         <button type="submit" 
-                                class="px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold text-base transition-all shadow-lg hover:shadow-xl flex items-center gap-2">
-                            <i data-lucide="check-circle" class="w-5 h-5"></i>
-                            <span>Completar Registro</span>
+                                class="px-8 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-bold text-base transition-all shadow-lg hover:shadow-xl flex items-center gap-2"
+                                :disabled="submitting">
+                            <template x-if="!submitting">
+                                <span class="flex items-center gap-2">
+                                    <i data-lucide="check-circle" class="w-5 h-5"></i>
+                                    <span x-text="paymentMethod === 'epayco' ? 'Pagar con Epayco' : 'Completar Registro'"></span>
+                                </span>
+                            </template>
+                            <template x-if="submitting">
+                                <span class="flex items-center gap-2">
+                                    <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                                    <span>Procesando...</span>
+                                </span>
+                            </template>
                         </button>
                     </div>
                 </div>
@@ -315,6 +537,9 @@
             password: '',
             passwordConfirmation: '',
             fileName: '',
+            paymentMethod: '{{ old('payment_method', $epaycoGateway ? 'transfer' : 'transfer') }}',
+            epaycoMethod: '{{ old('epayco_method', 'pse') }}',
+            submitting: false,
             
             passwordsMatch() {
                 if (!this.password || !this.passwordConfirmation) return false;
@@ -328,6 +553,73 @@
                     this.$nextTick(() => {
                         if (window.createIcons) window.createIcons({ icons: window.lucideIcons });
                     });
+                }
+            },
+            
+            handleSubmit(event) {
+                event.preventDefault();
+                
+                // Validar que se haya seleccionado un método de pago
+                if (!this.paymentMethod) {
+                    alert('Por favor selecciona un método de pago');
+                    return false;
+                }
+                
+                // Si es transferencia, validar que se haya subido el comprobante
+                if (this.paymentMethod === 'transfer') {
+                    const fileInput = document.getElementById('payment_proof');
+                    if (!fileInput || !fileInput.files || fileInput.files.length === 0) {
+                        alert('Por favor sube el comprobante de pago');
+                        // Hacer click en el label para abrir el selector de archivos
+                        const label = fileInput.closest('div').querySelector('label[for="payment_proof"]');
+                        if (label) {
+                            label.click();
+                        }
+                        return false;
+                    }
+                } else {
+                    // Si es Epayco, validar que se haya seleccionado un método
+                    if (this.paymentMethod === 'epayco' && !this.epaycoMethod) {
+                        alert('Por favor selecciona un método de pago de Epayco (PSE, Efecty, Gana o Baloto)');
+                        return false;
+                    }
+                    
+                    // Remover el required del campo de comprobante para evitar errores
+                    const fileInput = document.getElementById('payment_proof');
+                    if (fileInput) {
+                        fileInput.removeAttribute('required');
+                        // Limpiar el valor si tiene algo
+                        fileInput.value = '';
+                    }
+                }
+                
+                // Validar otros campos requeridos
+                const form = event.target;
+                const requiredFields = form.querySelectorAll('[required]');
+                let isValid = true;
+                
+                requiredFields.forEach(field => {
+                    // Si el campo está oculto (dentro de un div con x-show="false"), saltarlo
+                    const isVisible = field.offsetParent !== null;
+                    if (isVisible && !field.value && field.type !== 'file') {
+                        isValid = false;
+                        field.classList.add('border-red-500');
+                    }
+                });
+                
+                if (!isValid) {
+                    alert('Por favor completa todos los campos requeridos');
+                    return false;
+                }
+                
+                // Si es Epayco, enviar el formulario al endpoint de iniciar pago
+                if (this.paymentMethod === 'epayco') {
+                    this.submitting = true;
+                    form.submit();
+                } else {
+                    // Si es transferencia, enviar normalmente
+                    this.submitting = true;
+                    form.submit();
                 }
             }
         }));

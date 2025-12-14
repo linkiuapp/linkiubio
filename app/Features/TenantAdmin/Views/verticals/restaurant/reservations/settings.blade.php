@@ -469,7 +469,9 @@ document.addEventListener('alpine:init', () => {
             }
             
             try {
-                const response = await fetch(`{{ route('tenant.admin.reservations.settings', $store->slug) }}/tables/${tableId}`, {
+                // Construir URL usando la ruta de Laravel
+                const baseUrl = `{{ route('tenant.admin.reservations.tables.destroy', [$store->slug, 'TABLE_ID']) }}`.replace('TABLE_ID', tableId);
+                const response = await fetch(baseUrl, {
                     method: 'DELETE',
                     headers: {
                         'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
@@ -478,9 +480,31 @@ document.addEventListener('alpine:init', () => {
                     }
                 });
                 
+                // Verificar si la respuesta es JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    // Si no es JSON, puede ser un error 404 HTML
+                    if (response.status === 404) {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: 'Mesa no encontrada'
+                        });
+                        return;
+                    }
+                    // Para otros errores, intentar parsear como texto
+                    const text = await response.text();
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'Error al eliminar la mesa. Por favor intenta de nuevo.'
+                    });
+                    return;
+                }
+                
                 const data = await response.json();
                 
-                if (data.success) {
+                if (response.ok && data.success) {
                     Swal.fire({
                         icon: 'success',
                         title: '¡Éxito!',

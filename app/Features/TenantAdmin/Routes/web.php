@@ -295,7 +295,7 @@ Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreAppro
         // Rutas para gestión de mesas
         Route::post('/settings/tables', [TableReservationController::class, 'storeTable'])->name('tables.store');
         Route::put('/settings/tables/{table}', [TableReservationController::class, 'updateTable'])->name('tables.update');
-        Route::delete('/settings/tables/{table}', [TableReservationController::class, 'destroyTable'])->name('tables.destroy');
+        Route::delete('/settings/tables/{tableId}', [TableReservationController::class, 'destroyTable'])->name('tables.destroy')->where('tableId', '[0-9]+');
         Route::patch('/settings/tables/{table}/toggle', [TableReservationController::class, 'toggleTable'])->name('tables.toggle');
     });
 

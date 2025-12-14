@@ -10,6 +10,7 @@
         "aws/aws-sdk-php": "^3.366",
         "barryvdh/laravel-dompdf": "^3.1",
         "codeat3/blade-solar-icons": "^1.2",
+        "epayco/epayco-php": "^1.9",
         "intervention/image": "^3.11",
         "intervention/image-laravel": "^1.5",
         "laravel/framework": "^12.0",
