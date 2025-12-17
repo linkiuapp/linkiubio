@@ -19,51 +19,43 @@
     </div>
 
     @if($categories->count() > 0)
-        <!-- Lista de categorías -->
-        <div class="space-y-3">
+        @php
+            // Calcular el color de fondo de las categorías una sola vez
+            $bgColor = $store->design && $store->design->header_background_color ? $store->design->header_background_color : '#f9fafb';
+            // Convertir hex a rgba con opacidad
+            if (strpos($bgColor, '#') === 0) {
+                $hex = str_replace('#', '', $bgColor);
+                $r = hexdec(substr($hex, 0, 2));
+                $g = hexdec(substr($hex, 2, 2));
+                $b = hexdec(substr($hex, 4, 2));
+                $categoryBgColor = "rgba($r, $g, $b, 0.1)";
+            } else {
+                $categoryBgColor = $bgColor;
+            }
+        @endphp
+        <!-- Grid de categorías -->
+        <div class="grid grid-cols-4 gap-2">
             @foreach($categories as $category)
-                <a href="{{ route('tenant.category', [$store->slug, $category->slug]) }}" 
-                   class="block bg-accent-50 rounded-xl p-4 border border-accent-200 hover:border-primary-200 hover:shadow-md transition-all duration-200">
+                <a href="{{ route('tenant.category', ['store' => $store->slug, 'categorySlug' => $category->slug]) }}" 
+                   class="flex flex-col items-center group">
                     
-                    <div class="flex items-center space-x-4">
-                        <!-- Icono de la categoría -->
-                        <div class="w-16 h-16 bg-accent-100 rounded-lg p-2 flex items-center justify-center flex-shrink-0">
-                            @if($category->icon && $category->icon->image_url)
-                                <img src="{{ $category->icon->image_url }}" 
-                                     alt="{{ $category->name }}" 
-                                     class="w-full h-full object-contain">
-                            @else
-                                <!-- Icono por defecto -->
-                                <svg class="w-6 h-6 text-black-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path>
-                                </svg>
-                            @endif
-                        </div>
-
-                        <!-- Información de la categoría -->
-                        <div class="flex-1 min-w-0">
-                            <h3 class="text-bady-large font-bold text-black-500 truncate">{{ $category->name }}</h3>
-                            
-                            @if($category->description)
-                                <p class="text-small font-regular text-black-300 mt-1 line-clamp-2">{{ $category->description }}</p>
-                            @endif
-
-                            <!-- Subcategorías info -->
-                            @if($category->children->count() > 0)
-                                <div class="flex items-center mt-2 text-small font-regular text-primary-400">
-                                    <x-solar-bag-heart-outline class="w-4 h-4 mr-1" />
-                                    <span>{{ $category->children->count() }} subcategoría{{ $category->children->count() !== 1 ? 's' : '' }}</span>
-                                </div>
-                            @endif
-                        </div>
-
-                        <!-- Flecha derecha -->
-                        <div class="flex-shrink-0">
-                            <svg class="w-5 h-5 text-black-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                            </svg>
-                        </div>
+                    <!-- Icono de la categoría con fondo colorido -->
+                    <div class="w-72px h-72px mb-2 p-2 flex items-center justify-center rounded-2xl transition-all duration-200 hover:opacity-80" 
+                         style="background-color: {{ $categoryBgColor }};">
+                         @if($category->icon && $category->icon->image_url)
+                             <img src="{{ $category->icon->image_url }}" 
+                                  alt="{{ $category->name }}" 
+                                  class="w-56px h-56px object-contain aspect-square"
+                                  style="aspect-ratio: 1 / 1;">
+                         @else
+                             <i data-lucide="image" class="w-56px h-56px text-brandNeutral-400 group-hover:text-brandPrimary-300"></i>
+                         @endif
                     </div>
+                    
+                    <!-- Nombre de la categoría -->
+                    <span class="text-xs font-normal text-slate-900 transition-colors leading-tight text-center">
+                        {{ $category->name }}
+                    </span>
                 </a>
             @endforeach
         </div>

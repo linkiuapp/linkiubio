@@ -166,6 +166,14 @@ class Store extends Model
     }
 
     /**
+     * Get the tickers for this store.
+     */
+    public function tickers()
+    {
+        return $this->hasMany(\App\Features\TenantAdmin\Models\Ticker::class);
+    }
+
+    /**
      * Get the variables for this store.
      */
     public function variables()

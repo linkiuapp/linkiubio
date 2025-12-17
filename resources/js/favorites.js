@@ -157,24 +157,24 @@ class Favorites {
             if (this.has(productId)) {
                 // Producto en favoritos - ESTADO ACTIVO
                 // Cambiar clases del botón
-                btn.className = 'p-2 w-11 h-11 flex items-center justify-center transition-transform bg-brandError-50 hover:bg-brandError-300 hover:text-brandError-50 rounded-lg hover:scale-110';
+                btn.className = 'p-1 md:p-2 flex items-center justify-center transition-transform bg-red-50 hover:bg-red-100 rounded-full hover:scale-110';
                 btn.setAttribute('data-favorite-state', 'active');
                 
                 if (icon) {
                     icon.setAttribute('data-lucide', 'heart');
                     // Cambiar clases del icono - BLANCO en estado activo
-                    icon.className = 'w-6 h-6 text-brandError-50';
+                    icon.className = 'w-3 h-3 md:w-6 md:h-6 text-red-500';
                 }
             } else {
                 // Producto NO en favoritos - ESTADO DEFAULT
                 // Cambiar clases del botón
-                btn.className = 'p-2 w-11 h-11 flex items-center justify-center transition-transform bg-brandError-50 hover:bg-brandError-300 rounded-lg hover:scale-110';
+                btn.className = 'p-1 md:p-2 flex items-center justify-center transition-transform bg-red-50 hover:bg-red-100 rounded-full hover:scale-110';
                 btn.setAttribute('data-favorite-state', 'inactive');
                 
                 if (icon) {
                     icon.setAttribute('data-lucide', 'heart');
                     // Cambiar clases del icono - ROJO en estado default
-                    icon.className = 'w-6 h-6 text-brandError-400';
+                    icon.className = 'w-3 h-3 md:w-6 md:h-6 text-red-500';
                 }
             }
         });

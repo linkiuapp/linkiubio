@@ -13,13 +13,16 @@ class Location extends Model
     protected $fillable = [
         'store_id', 'name', 'description', 'manager_name',
         'phone', 'whatsapp', 'department', 'city', 'address',
+        'latitude', 'longitude',
         'is_main', 'is_active', 'whatsapp_message'
     ];
     
     protected $casts = [
         'is_main' => 'boolean',
         'is_active' => 'boolean',
-        'whatsapp_clicks' => 'integer'
+        'whatsapp_clicks' => 'integer',
+        'latitude' => 'decimal:8',
+        'longitude' => 'decimal:8'
     ];
     
     /**

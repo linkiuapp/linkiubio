@@ -4,6 +4,7 @@ namespace App\Features\TenantAdmin\Controllers\Core;
 
 use App\Http\Controllers\Controller;
 use App\Shared\Models\Location;
+use App\Shared\Services\GeocodingService;
 use App\Features\TenantAdmin\Services\Core\LocationService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -12,10 +13,12 @@ use Illuminate\Validation\Rule;
 class LocationController extends Controller
 {
     protected $locationService;
+    protected $geocodingService;
     
-    public function __construct(LocationService $locationService)
+    public function __construct(LocationService $locationService, GeocodingService $geocodingService)
     {
         $this->locationService = $locationService;
+        $this->geocodingService = $geocodingService;
     }
     
     /**
@@ -117,6 +120,8 @@ class LocationController extends Controller
             'department' => 'required|string|max:100',
             'city' => 'required|string|max:100',
             'address' => 'required|string|min:10|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'is_main' => 'nullable|boolean',
             'is_active' => 'nullable|boolean',
             'whatsapp_message' => 'nullable|string|max:255',
@@ -290,6 +295,8 @@ class LocationController extends Controller
             'department' => 'required|string|max:100',
             'city' => 'required|string|max:100',
             'address' => 'required|string|min:10|max:255',
+            'latitude' => 'nullable|numeric|between:-90,90',
+            'longitude' => 'nullable|numeric|between:-180,180',
             'is_main' => 'nullable|boolean',
             'is_active' => 'nullable|boolean',
             'whatsapp_message' => 'nullable|string|max:255',
@@ -354,6 +361,53 @@ class LocationController extends Controller
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Error al actualizar la sede: ' . $e->getMessage())->withInput();
         }
+    }
+    
+    /**
+     * Geocode an address for preview
+     * Returns coordinates and static map URL
+     */
+    public function geocodeAddress(Request $request, $store)
+    {
+        $request->validate([
+            'address' => 'required|string|min:5',
+            'city' => 'nullable|string',
+            'department' => 'nullable|string',
+        ]);
+        
+        $address = $request->input('address');
+        $city = $request->input('city');
+        $department = $request->input('department');
+        
+        // Build full address
+        $parts = array_filter([$address, $city, $department]);
+        $fullAddress = implode(', ', $parts);
+        
+        // Geocode
+        $result = $this->geocodingService->geocodeAddress($fullAddress);
+        
+        if (!$result) {
+            return response()->json([
+                'success' => false,
+                'message' => 'No se pudo encontrar la ubicación. Verifica la dirección.'
+            ], 404);
+        }
+        
+        // Generate static map URL
+        $mapUrl = getMapboxStaticMapUrlFromCoordinates(
+            $result['longitude'],
+            $result['latitude'],
+            600,
+            256
+        );
+        
+        return response()->json([
+            'success' => true,
+            'latitude' => $result['latitude'],
+            'longitude' => $result['longitude'],
+            'formatted_address' => $result['formatted_address'] ?? $fullAddress,
+            'map_url' => $mapUrl
+        ]);
     }
     
     /**

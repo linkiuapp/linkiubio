@@ -94,13 +94,24 @@ class EnsureFeatureEnabled
         ]);
 
         // Verificar si AL MENOS uno de los features está habilitado (OR logic)
+        // Usar el helper featureEnabled que tiene lógica especial para algunos features
         $isEnabled = false;
         $enabledFeatures = [];
         foreach ($features as $feature) {
-            if ($this->featureResolver->isEnabled($store, $feature)) {
-                $isEnabled = true;
-                $enabledFeatures[] = $feature;
-                break; // Al menos uno está habilitado, eso es suficiente
+            // Usar el helper featureEnabled que tiene lógica especial (ej: favoritos para ecommerce sin reservas)
+            if (function_exists('featureEnabled')) {
+                if (featureEnabled($store, $feature)) {
+                    $isEnabled = true;
+                    $enabledFeatures[] = $feature;
+                    break; // Al menos uno está habilitado, eso es suficiente
+                }
+            } else {
+                // Fallback si el helper no está disponible
+                if ($this->featureResolver->isEnabled($store, $feature)) {
+                    $isEnabled = true;
+                    $enabledFeatures[] = $feature;
+                    break;
+                }
             }
         }
         

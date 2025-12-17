@@ -1,81 +1,72 @@
 @extends('frontend.layouts.app')
 
 @section('content')
-<div class="p-4 space-y-4">
+<div class="">
     <!-- Breadcrumb -->
-    <nav class="flex caption text-brandInfo-300">
-        <a href="{{ route('tenant.home', $store->slug) }}" class="hover:text-brandInfo-400 transition-colors">Inicio</a>
-        <span class="mx-1">/</span>
-        <a href="{{ route('tenant.catalog', $store->slug) }}" class="hover:text-brandInfo-400 transition-colors">Catálogo</a>
-        <span class="mx-1">/</span>
-        <span class="text-brandNeutral-400 caption-strong">{{ $product->name }}</span>
-    </nav>
+    <div class="p-4 pb-0 mb-8">
+        <nav class="flex text-xs md:text-sm font-medium text-slate-900">
+            <a href="{{ route('tenant.home', $store->slug) }}" class="text-blue-600 hover:text-blue-900 transition-colors">Inicio</a>
+            <span class="mx-1">/</span>
+            <a href="{{ route('tenant.catalog', $store->slug) }}" class="text-blue-600 hover:text-blue-900 transition-colors">Catálogo</a>
+            <span class="mx-1">/</span>
+            <span class="text-xs md:text-sm font-medium text-slate-900">{{ $product->name }}</span>
+        </nav>
+    </div>
 
-    <!-- Producto Principal -->
-    <div class="bg-brandWhite-100 rounded-lg p-4 space-y-4">
-        <!-- Imagen Principal -->
-        <div class="w-full aspect-square sm:h-72 bg-brandWhite-100 rounded-xl overflow-hidden mb-3" id="main-image-container">
-            @if($product->images->count() > 0)
-                <img src="{{ $product->images->first()->image_url }}" 
-                     alt="{{ $product->name }}" 
-                     id="main-image"
-                     class="w-full h-full object-cover transition-all duration-300">
-            @elseif($product->main_image_url)
-                <img src="{{ $product->main_image_url }}" 
-                     alt="{{ $product->name }}" 
-                     id="main-image"
-                     class="w-full h-full object-cover transition-all duration-300">
-            @else
-                <div class="w-full h-full flex items-center justify-center text-brandNeutral-200">
-                    <i data-lucide="gallery" class="w-16 h-16 text-brandNeutral-200"></i>
-                </div>
-            @endif
-        </div>
-
-        <!-- Galería de miniaturas (solo si hay más de 1 imagen) -->
-        @if($product->images->count() > 1)
-            <div class="space-y-2">
-                <p class="caption text-brandNeutral-400">Imágenes ({{ $product->images->count() }})</p>
-                <div class="flex gap-2 overflow-x-auto pb-2 -mx-4 px-4">
-                    @foreach($product->images as $index => $image)
-                        <div class="w-20 h-20 sm:w-16 sm:h-16 bg-brandPrimary-50 rounded-lg overflow-hidden flex-shrink-0 cursor-pointer border-2 transition-all duration-200 image-thumb {{ $index === 0 ? 'border-brandPrimary-300' : 'border-transparent hover:border-brandPrimary-200' }}" 
-                             onclick="changeMainImage('{{ $image->image_url }}', {{ $index }})">
-                            <img src="{{ $image->image_url }}" 
-                                 alt="{{ $product->name }}" 
-                                 class="w-full h-full object-cover">
-                        </div>
-                    @endforeach
-                </div>
+    <!-- Imagen Principal con miniaturas superpuestas -->
+    <div class="relative w-full aspect-square bg-white rounded-t-2xl" id="main-image-container">
+        @if($product->images->count() > 0)
+            <img src="{{ $product->images->first()->image_url }}" 
+                 alt="{{ $product->name }}" 
+                 id="main-image"
+                 class="w-full h-full object-contain transition-all duration-300 rounded-t-2xl object-center">
+        @elseif($product->main_image_url)
+            <img src="{{ $product->main_image_url }}" 
+                 alt="{{ $product->name }}" 
+                 id="main-image"
+                 class="w-full h-full object-contain transition-all duration-300 rounded-t-2xl object-center">
+        @else
+            <div class="w-full h-full flex items-center justify-center bg-gray-100">
+                <i data-lucide="gallery" class="w-16 h-16 text-gray-400"></i>
             </div>
         @endif
 
-        <!-- Información del Producto -->
-        <div class="space-y-3">
-            <!-- Título, precio y compartir -->
-            <div class="flex items-start justify-between gap-3">
-                <div class="flex-1">
-                    <h1 class="body-lg-bold text-brandNeutral-400 mb-1">{{ $product->name }}</h1>
-                    <div class="flex items-center gap-2">
-                        @if($product->tienePromocionActiva())
-                            <span class="body-sm text-brandNeutral-300 line-through">${{ number_format($product->price, 0, ',', '.') }}</span>
-                            <span class="body-lg-bold text-brandError-400">${{ number_format($product->precio_promocional, 0, ',', '.') }}</span>
-                            <span class="px-2 py-0.5 bg-brandError-400 text-brandWhite-50 text-xs font-bold rounded">-{{ $product->porcentaje_descuento }}%</span>
-                        @else
-                            <span class="body-lg-bold text-brandNeutral-400">${{ number_format($product->price, 0, ',', '.') }}</span>
-                        @endif
+        <!-- Galería de miniaturas superpuesta (solo si hay más de 1 imagen) -->
+        @if($product->images->count() > 1)
+            <div class="absolute bottom-4 left-0 right-0 flex justify-center items-center px-4">
+                <div class="bg-white rounded-lg px-3 py-2 shadow-lg">
+                    <div class="flex gap-2 items-center justify-center overflow-x-auto scrollbar-hide max-w-[calc(100vw-2rem)]">
+                        @foreach($product->images as $index => $image)
+                            <div class="w-16 h-16 bg-white rounded-lg overflow-hidden flex-shrink-0 cursor-pointer transition-all duration-200 image-thumb shadow-sm hover:shadow-md {{ $index === 0 ? 'ring-2 ring-slate-200':'ring-0' }}" 
+                                 onclick="changeMainImage('{{ $image->image_url }}', {{ $index }})">
+                                <img src="{{ $image->image_url }}" 
+                                     alt="{{ $product->name }}" 
+                                     class="w-full h-full object-contain">
+                            </div>
+                        @endforeach
                     </div>
                 </div>
-                
-                <!-- Botón Compartir (solo si está permitido) -->
-                @if($product->allow_sharing)
-                <button onclick="shareProduct()" 
-                        class="flex-shrink-0 flex items-center gap-2 bg-brandSuccess-300 hover:bg-brandSuccess-200 text-brandWhite-50 px-3 py-2 rounded-lg caption transition-colors shadow-sm">
-                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
-                    </svg>
-                    <span class="hidden sm:inline">Compartir producto</span>
-                </button>
-                @endif
+            </div>
+        @endif
+    </div>
+
+    <!-- Producto Principal -->
+    <div class="bg-white rounded-lg p-6 space-y-4">
+
+        <!-- Información del Producto -->
+        <div class="space-y-3">
+            <!-- Título y precio -->
+            <div class="space-y-2">
+                <h1 class="text-lg font-bold text-slate-900">{{ $product->name }}</h1>
+                <div class="flex items-center gap-2">
+                    @if($product->tienePromocionActiva())
+                        <span class="text-base font-bold text-slate-900 line-through">${{ number_format($product->price, 0, ',', '.') }}</span>
+                        <span class="text-base font-bold text-slate-900">${{ number_format($product->precio_promocional, 0, ',', '.') }}</span>
+                        <span class="px-2 py-0.5 bg-red-500 text-white text-xs font-bold rounded">-{{ $product->porcentaje_descuento }}%</span>
+                    @else
+                        <span class="text-base font-bold text-slate-900">${{ number_format($product->price, 0, ',', '.') }}</span>
+                    @endif
+                </div>
             </div>
 
             <!-- Categorías -->
@@ -83,8 +74,8 @@
                 <div class="flex flex-wrap gap-2">
                     @foreach($product->categories as $category)
                         <a href="{{ route('tenant.category', [$store->slug, $category->slug]) }}" 
-                           class="px-3 py-1 bg-brandSuccess-50 border border-brandSuccess-400 text-brandSuccess-400 rounded-full caption hover:bg-brandSuccess-200 transition-colors">
-                            <span class="caption text-brandSuccess-400">
+                           class="px-3 py-1 bg-green-50 border border-green-400 text-green-400 rounded-full caption hover:bg-green-200 transition-colors">
+                            <span class="text-xs font-medium text-green-900">
                                 {{ $category->name }}
                             </span>
                         </a>
@@ -95,14 +86,14 @@
             <!-- Descripción -->
             @if($product->description)
                 <div class="space-y-2">
-                    <h3 class="caption text-brandNeutral-400">Descripción</h3>
-                    <p class="caption text-brandNeutral-400 leading-relaxed">{{ $product->description }}</p>
+                    <h3 class="text-base font-medium text-slate-900">Descripción</h3>
+                    <p class="text-sm font-normal text-slate-900 leading-relaxed">{{ $product->description }}</p>
                 </div>
             @endif
 
             <!-- SKU -->
             @if($product->sku)
-                <div class="caption text-brandNeutral-400">
+                <div class="text-sm font-normal text-slate-500">
                     SKU: {{ $product->sku }}
                 </div>
             @endif
@@ -110,8 +101,8 @@
 
         <!-- Variables del Producto (si aplica) - Diseño moderno estilo Zara/Nike -->
         @if($product->type === 'variable' && $product->variables->count() > 0)
-            <div class="border-t border-brandNeutral-50 pt-4 space-y-5" id="product-variables" x-data="variableSelector()">
-                <h3 class="body-lg-bold text-brandNeutral-400">Selecciona las opciones</h3>
+            <div class="border-t border-gray-200 pt-4 space-y-5" id="product-variables" x-data="variableSelector()">
+                <h3 class="text-base font-bold text-slate-900">Selecciona las opciones</h3>
                 
                 @foreach($product->variables as $variable)
                     @php
@@ -124,14 +115,14 @@
                     @endphp
                     <div class="space-y-3" data-variable-id="{{ $variable->id }}">
                         <div class="flex items-center justify-between">
-                            <label class="caption text-brandNeutral-400 font-medium">
+                            <label class="text-sm font-medium text-slate-900">
                                 {{ $variable->name }}
                                 @if($variable->is_required_default)
-                                    <span class="text-brandError-400">*</span>
+                                    <span class="text-red-500">*</span>
                                 @endif
                             </label>
                             @if($requiresOptions)
-                            <span class="caption text-brandNeutral-300" 
+                            <span class="text-sm font-normal text-slate-500" 
                                   x-show="selectedOptions[{{ $variable->id }}]"
                                   x-text="getOptionName({{ $variable->id }})">
                             </span>
@@ -149,7 +140,7 @@
                                 @input="updateTextVariable({{ $variable->id }}, $event.target.value)"
                                 placeholder="Escribe aquí..."
                                 rows="3"
-                                class="w-full px-4 py-3 border border-brandNeutral-200 rounded-lg caption focus:border-brandPrimary-300 focus:ring-1 focus:ring-brandPrimary-300 focus:outline-none resize-none"
+                                class="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none resize-none"
                                 :required="{{ $variable->is_required_default ? 'true' : 'false' }}"
                             ></textarea>
                         @elseif($isNumericVariable)
@@ -163,11 +154,11 @@
                                 @if($variable->min_value !== null) min="{{ $variable->min_value }}" @endif
                                 @if($variable->max_value !== null) max="{{ $variable->max_value }}" @endif
                                 step="any"
-                                class="w-full px-4 py-3 border border-brandNeutral-200 rounded-lg caption focus:border-brandPrimary-300 focus:ring-1 focus:ring-brandPrimary-300 focus:outline-none"
+                                class="w-full px-4 py-3 border border-gray-200 rounded-lg text-sm focus:border-blue-500 focus:ring-blue-500 focus:outline-none"
                                 :required="{{ $variable->is_required_default ? 'true' : 'false' }}"
                             >
                             @if($variable->min_value !== null || $variable->max_value !== null)
-                                <p class="text-xs text-brandNeutral-300 mt-1">
+                                <p class="text-xs font-normal text-slate-500 mt-1">
                                     @if($variable->min_value !== null && $variable->max_value !== null)
                                         Rango: {{ number_format($variable->min_value, 0, ',', '.') }} - {{ number_format($variable->max_value, 0, ',', '.') }}
                                     @elseif($variable->min_value !== null)
@@ -182,27 +173,21 @@
                             <div class="flex flex-wrap gap-2">
                                 @foreach($variable->options as $option)
                                     <button type="button"
+                                            x-show="isOptionAvailable({{ $variable->id }}, '{{ $option->id }}')"
                                             @click="selectOption({{ $variable->id }}, '{{ $option->id }}', '{{ addslashes($option->name) }}')"
                                             :class="{
-                                                'ring-2 ring-offset-2 ring-brandPrimary-300 scale-110': selectedOptions[{{ $variable->id }}] === '{{ $option->id }}',
-                                                'opacity-40 cursor-not-allowed line-through': !isOptionAvailable({{ $variable->id }}, '{{ $option->id }}'),
-                                                'hover:scale-105': isOptionAvailable({{ $variable->id }}, '{{ $option->id }}')
+                                                'ring-2 ring-offset-2 ring-blue-500 scale-110': selectedOptions[{{ $variable->id }}] === '{{ $option->id }}',
+                                                'hover:scale-105': true
                                             }"
-                                            :disabled="!isOptionAvailable({{ $variable->id }}, '{{ $option->id }}')"
-                                            class="w-10 h-10 rounded-full transition-all duration-200 relative group"
+                                            class="w-8 h-8 rounded-full transition-all duration-200 relative group"
                                             style="background-color: {{ $option->color_hex ?? '#CCCCCC' }};"
                                             title="{{ $option->name }}">
                                         {{-- Indicador de selección --}}
                                         <span x-show="selectedOptions[{{ $variable->id }}] === '{{ $option->id }}'"
                                               class="absolute inset-0 flex items-center justify-center">
-                                            <svg class="w-5 h-5 {{ $option->color_hex && $option->color_hex !== '#FFFFFF' && $option->color_hex !== '#ffffff' ? 'text-white' : 'text-brandNeutral-400' }}" fill="currentColor" viewBox="0 0 20 20">
+                                            <svg class="w-5 h-5 {{ $option->color_hex && $option->color_hex !== '#FFFFFF' && $option->color_hex !== '#ffffff' ? 'text-white' : 'text-slate-500' }}" fill="currentColor" viewBox="0 0 20 20">
                                                 <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
                                             </svg>
-                                        </span>
-                                        {{-- Tachado para agotado --}}
-                                        <span x-show="!isOptionAvailable({{ $variable->id }}, '{{ $option->id }}')"
-                                              class="absolute inset-0 flex items-center justify-center">
-                                            <span class="w-full h-0.5 bg-brandError-300 rotate-45 absolute"></span>
                                         </span>
                                     </button>
                                 @endforeach
@@ -212,30 +197,16 @@
                             <div class="flex flex-wrap gap-2">
                                 @foreach($variable->options as $option)
                                     <button type="button"
+                                            x-show="isOptionAvailable({{ $variable->id }}, '{{ $option->id }}')"
                                             @click="selectOption({{ $variable->id }}, '{{ $option->id }}', '{{ addslashes($option->name) }}')"
                                             :class="{
-                                                'bg-green-600 text-white border-green-900 shadow-md': selectedOptions[{{ $variable->id }}] === '{{ $option->id }}',
-                                                'bg-gray-50 text-gray-900 border-gray-200 hover:border-gray-600': selectedOptions[{{ $variable->id }}] !== '{{ $option->id }}' && isOptionAvailable({{ $variable->id }}, '{{ $option->id }}'),
-                                                'bg-gray-100 text-gray-900 border-gray-100 cursor-not-allowed line-through': !isOptionAvailable({{ $variable->id }}, '{{ $option->id }}')
+                                                'bg-green-500 text-white border-green-500 shadow-md': selectedOptions[{{ $variable->id }}] === '{{ $option->id }}',
+                                                'bg-white text-slate-900 border-gray-200 hover:border-green-500': selectedOptions[{{ $variable->id }}] !== '{{ $option->id }}'
                                             }"
-                                            :disabled="!isOptionAvailable({{ $variable->id }}, '{{ $option->id }}')"
-                                            class="px-4 py-2 rounded-lg border-2 caption font-medium transition-all duration-200 min-w-[3rem] text-center">
+                                            class="px-2 py-2 border border-gray-200 rounded-lg text-sm font-medium transition-all duration-200 min-w-[2rem] text-center">
                                         {{ $option->name }}
                                     </button>
                                 @endforeach
-                            </div>
-                        @endif
-                        
-                        {{-- Stock por opción (solo si controla stock) --}}
-                        @if($product->controla_stock && $product->tipo_stock === 'limitado')
-                            <div x-show="selectedOptions[{{ $variable->id }}]" 
-                                 x-transition
-                                 class="flex items-center gap-1">
-                                <template x-if="getOptionStock({{ $variable->id }}) > 0 && getOptionStock({{ $variable->id }}) <= 5">
-                                    <span class="text-sm text-red-600 flex items-center gap-1">
-                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-triangle-alert-icon lucide-triangle-alert"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>                                        ¡Solo quedan <span x-text="getOptionStock({{ $variable->id }})"></span>!
-                                    </span>
-                                </template>
                             </div>
                         @endif
                     </div>
@@ -244,20 +215,20 @@
                 {{-- Indicador de combinación no disponible --}}
                 <div x-show="allOptionsSelected && !currentVariant" 
                      x-transition
-                     class="p-3 bg-brandError-50 border border-brandError-200 rounded-lg flex items-center gap-2">
-                    <svg class="w-5 h-5 text-brandError-400" fill="currentColor" viewBox="0 0 20 20">
+                     class="p-3 bg-red-50 border border-red-200 rounded-lg flex items-center gap-2">
+                    <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
                         <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
                     </svg>
-                    <span class="caption text-brandError-400">Esta combinación no está disponible</span>
+                    <span class="text-sm font-normal text-red-500">Esta combinación no está disponible</span>
                 </div>
                 
                 {{-- Precio dinámico --}}
                 <div x-show="currentVariant && currentVariant.price_modifier !== 0" 
                      x-transition
-                     class="p-3 bg-brandSuccess-50 border border-brandSuccess-200 rounded-lg">
+                     class="p-3 bg-green-50 border border-green-200 rounded-lg">
                     <div class="flex items-center justify-between">
-                        <span class="caption text-brandNeutral-400">Precio con esta selección:</span>
-                        <span class="body-lg-bold text-brandSuccess-400" x-text="'$' + calculateTotalPrice().toLocaleString('es-CO')"></span>
+                        <span class="text-sm font-medium text-slate-900">Precio con esta selección:</span>
+                        <span class="text-base font-bold text-green-500" x-text="'$' + calculateTotalPrice().toLocaleString('es-CO')"></span>
                     </div>
                 </div>
             </div>
@@ -265,51 +236,86 @@
 
         <!-- Indicador de Stock -->
         @if($product->controla_stock && $product->tipo_stock === 'limitado')
-            <div class="p-3 bg-brandWhite-100 rounded-lg">
-                @if($product->type === 'simple')
-                    @php
-                        $stock = $product->cantidad_stock ?? 0;
-                    @endphp
-                    @if($stock > 0)
-                        <div class="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package-icon lucide-package"><path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"/><path d="M12 22V12"/><polyline points="3.29 7 12 12 20.71 7"/><path d="m7.5 4.27 9 5.15"/></svg>
-                            <span class="caption text-brandSuccess-300 font-medium">
-                                {{ $stock }} {{ $stock == 1 ? 'unidad disponible' : 'unidades disponibles' }}
-                            </span>
-                        </div>
-                    @else
-                        <div class="flex items-center gap-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-package-x-icon lucide-package-x"><path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"/><path d="m7.5 4.27 9 5.15"/><polyline points="3.29 7 12 12 20.71 7"/><line x1="12" x2="12" y1="22" y2="12"/><path d="m17 13 5 5m-5 0 5-5"/></svg>
-                            <span class="caption text-brandError-300 font-medium">Agotado</span>
-                        </div>
-                    @endif
+            @if($product->type === 'simple')
+                @php
+                    $stock = $product->cantidad_stock ?? 0;
+                @endphp
+                @if($stock > 0 && $stock <= 5)
+                    <div class="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-600 flex-shrink-0">
+                            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path>
+                            <path d="M12 9v4"></path>
+                            <path d="M12 17h.01"></path>
+                        </svg>
+                        <span class="text-sm font-semibold text-red-600">
+                            ¡Solo quedan {{ $stock }} unidad{{ $stock > 1 ? 'es' : '' }} disponible{{ $stock > 1 ? 's' : '' }}!
+                        </span>
+                    </div>
+                @elseif($stock > 5)
+                    <div class="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-600 flex-shrink-0">
+                            <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path>
+                            <path d="M12 22V12"></path>
+                            <polyline points="3.29 7 12 12 20.71 7"></polyline>
+                            <path d="m7.5 4.27 9 5.15"></path>
+                        </svg>
+                        <span class="text-sm font-medium text-green-600">
+                            {{ $stock }} {{ $stock == 1 ? 'unidad disponible' : 'unidades disponibles' }}
+                        </span>
+                    </div>
                 @else
-                    <div id="stock-indicator" class="flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-info-icon lucide-info"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg>
-                        <span id="stock-text" class="caption text-brandPrimary-300">Selecciona las opciones para ver disponibilidad</span>
+                    <div class="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-600 flex-shrink-0">
+                            <path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"></path>
+                            <path d="m7.5 4.27 9 5.15"></path>
+                            <polyline points="3.29 7 12 12 20.71 7"></polyline>
+                            <line x1="12" x2="12" y1="22" y2="12"></line>
+                            <path d="m17 13 5 5m-5 0 5-5"></path>
+                        </svg>
+                        <span class="text-sm font-semibold text-red-600">Agotado</span>
                     </div>
                 @endif
-            </div>
+            @else
+                <div id="stock-indicator" class="flex items-center gap-2 rounded-lg px-3 py-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600 flex-shrink-0">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 16v-4"></path>
+                        <path d="M12 8h.01"></path>
+                    </svg>
+                    <span id="stock-text" class="text-sm font-medium text-blue-600">Selecciona las opciones para ver disponibilidad</span>
+                </div>
+            @endif
         @endif
 
         <!-- Botón Agregar al Carrito -->
-        <div class="pt-2">
+        <div class="pt-2 space-y-3">
             @if($product->type === 'simple')
-                <button class="w-full bg-brandPrimary-300 hover:bg-brandPrimary-400 text-brandWhite-50 py-3 rounded-lg caption transition-colors flex items-center justify-center gap-2 add-to-cart-btn"
+                <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg transition-colors flex items-center justify-center gap-2 add-to-cart-btn"
                         data-product-id="{{ $product->id }}"
                         data-product-name="{{ $product->name }}"
                         data-product-price="{{ $product->price }}"
                         data-product-image="{{ $product->main_image_url }}">
-                    <i data-lucide="shopping-cart" class="w-5 h-5 text-brandWhite-50"></i>
+                    <i data-lucide="shopping-bag" class="w-5 h-5 text-white"></i>
                     Agregar al Carrito
                 </button>
             @else
                 <button id="add-variable-product-btn" 
-                        class="w-full bg-brandPrimary-300 hover:bg-brandPrimary-400 disabled:bg-brandNeutral-50 disabled:cursor-not-allowed text-brandWhite-50 py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
+                        class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-200 disabled:cursor-not-allowed text-white py-3 rounded-lg transition-colors flex items-center justify-center gap-2"
                         onclick="addVariableProductToCart()">
-                    <i data-lucide="shopping-cart" class="w-5 h-5 text-brandWhite-50"></i>
+                    <i data-lucide="shopping-bag" class="w-5 h-5 text-white"></i>
                     Agregar al Carrito
                 </button>
+            @endif
+            
+            <!-- Botón Compartir (solo si está permitido) -->
+            @if($product->allow_sharing)
+            <button onclick="shareProduct()" 
+                    class="w-full flex items-center justify-center gap-2 bg-green-100 hover:bg-green-600 text-green-900 font-medium hover:text-white px-3 py-3 rounded-lg transition-colors shadow-sm">
+                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                </svg>
+                <span>Compartir producto</span>
+            </button>
             @endif
         </div>
     </div>
@@ -319,45 +325,95 @@
         <div class="space-y-3">
             @if($product->estaAgotado())
                 {{-- Mensaje especial si el producto está agotado --}}
-                <div class="bg-brandWarning-50 border border-brandWarning-200 rounded-lg p-4 text-center">
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-4 text-center">
                     <div class="flex items-center justify-center gap-2 mb-2">
-                        <svg class="w-5 h-5 text-brandWarning-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 text-yellow-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
                         </svg>
-                        <span class="caption-strong text-brandWarning-500">Este producto está agotado</span>
+                        <span class="text-base font-bold text-yellow-500">Este producto está agotado</span>
                     </div>
-                    <p class="caption text-brandNeutral-400">¡Pero tenemos estas alternativas que te pueden interesar!</p>
+                    <p class="text-sm font-normal text-slate-500">¡Pero tenemos estas alternativas que te pueden interesar!</p>
                 </div>
-                <h2 class="caption-strong text-brandSuccess-400">✨ Productos Similares Disponibles</h2>
+                <h2 class="text-base font-bold text-green-500">✨ Productos Similares Disponibles</h2>
             @else
-                <h2 class="caption text-brandNeutral-400">Productos Relacionados</h2>
+                <h2 class="text-base font-bold text-slate-900">Productos Relacionados</h2>
             @endif
             
             <div class="grid grid-cols-2 gap-3">
                 @foreach($relatedProducts as $relatedProduct)
-                    <a href="{{ route('tenant.product', [$store->slug, $relatedProduct->slug]) }}" 
-                       class="bg-brandWhite-100 rounded-lg p-3 border border-brandNeutral-50 hover:border-brandPrimary-200 transition-colors">
-                        <!-- Imagen -->
-                        <div class="w-full h-24 bg-brandWhite-100 rounded-lg overflow-hidden mb-2">
-                            @if($relatedProduct->main_image_url)
-                                <img src="{{ $relatedProduct->main_image_url }}" 
-                                     alt="{{ $relatedProduct->name }}" 
-                                     class="w-full h-full object-cover">
-                            @else
-                                <div class="w-full h-full flex items-center justify-center text-brandNeutral-400">
-                                    <x-solar-gallery-outline class="w-6 h-6" />
-                                </div>
-                            @endif
-                        </div>
-
-                        <!-- Info -->
-                        <div class="space-y-1">
-                            <h3 class="caption text-brandNeutral-400 line-clamp-1">{{ $relatedProduct->name }}</h3>
-                            <div class="body-lg-bold text-brandNeutral-400">
-                                ${{ number_format($relatedProduct->price, 0, ',', '.') }}
+                    @php
+                        $estaAgotado = $relatedProduct->estaAgotado();
+                        $tieneStockBajo = false;
+                        $stockDisponible = 0;
+                        if ($relatedProduct->controla_stock && $relatedProduct->tipo_stock === 'limitado' && $relatedProduct->type === 'simple') {
+                            $stockDisponible = $relatedProduct->cantidad_stock ?? 0;
+                            $tieneStockBajo = $stockDisponible > 0 && $stockDisponible <= 5;
+                        }
+                    @endphp
+                    <div class="bg-white rounded-lg p-4 border border-gray-200 hover:border-blue-300 transition-all hover:shadow-md">
+                        <a href="{{ route('tenant.product', [$store->slug, $relatedProduct->slug]) }}" class="block">
+                            <!-- Imagen del producto -->
+                            <div class="w-full aspect-square bg-gray-100 rounded-lg overflow-hidden mb-3">
+                                @if($relatedProduct->main_image_url)
+                                    <img src="{{ $relatedProduct->main_image_url }}" 
+                                         alt="{{ $relatedProduct->name }}" 
+                                         class="w-full h-full object-cover">
+                                @else
+                                    <div class="w-full h-full flex items-center justify-center bg-gray-100">
+                                        <i data-lucide="image" class="w-6 h-6 text-gray-400"></i>
+                                    </div>
+                                @endif
                             </div>
-                        </div>
-                    </a>
+
+                            <!-- Información del producto -->
+                            <div class="flex-1 min-w-0 flex flex-col md:gap-1 gap-0">
+                                <!-- Badge de Stock bajo -->
+                                @if($tieneStockBajo && $stockDisponible > 0)
+                                    <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
+                                        <span class="bg-red-50 text-red-600 rounded-full px-2 py-1 text-xs font-semibold text-red-600">
+                                            Queda {{ $stockDisponible }} unidad{{ $stockDisponible > 1 ? 'es' : '' }}
+                                        </span>
+                                    </div>
+                                @elseif($estaAgotado)
+                                    <div class="flex items-center gap-1.5 w-fit">
+                                        <span class="text-xs font-medium text-white bg-red-500 px-2 py-0.5 rounded-full">
+                                            Agotado
+                                        </span>
+                                    </div>
+                                @endif
+
+                                <!-- Título del producto -->
+                                <h3 class="text-base font-bold text-slate-900 leading-tight">{{ $relatedProduct->name }}</h3>
+                                
+                                <!-- Descripción -->
+                                @if($relatedProduct->description)
+                                    <p class="text-xs font-normal text-slate-900 leading-tight line-clamp-1">{{ $relatedProduct->description }}</p>
+                                @endif
+
+                                <!-- Precios -->
+                                <div class="flex items-center gap-2">
+                                    @if($relatedProduct->tienePromocionActiva())
+                                        <span class="text-base font-normal text-slate-900 line-through">${{ number_format($relatedProduct->price, 0, ',', '.') }}</span>
+                                        <span class="text-base font-bold text-slate-900">${{ number_format($relatedProduct->precio_promocional, 0, ',', '.') }}</span>
+                                    @else
+                                        <span class="text-base font-bold text-slate-900">${{ number_format($relatedProduct->price, 0, ',', '.') }}</span>
+                                    @endif
+                                </div>
+
+                                <!-- Botones de acción -->
+                                <div class="flex gap-2 items-center md:mt-0 mt-2">
+                                    <x-add-to-cart-button :product="$relatedProduct" :store="$store" />
+                                    @if(featureEnabled($store, 'favoritos'))
+                                        <button class="p-3 flex items-center justify-center transition-transform bg-red-50 hover:bg-red-100 rounded-full hover:scale-110" 
+                                                data-favorite-btn
+                                                data-product-id="{{ $relatedProduct->id }}">
+                                            <i data-lucide="heart" class="w-6 h-6 text-red-500 hover:text-red-600" style="fill: currentColor;"></i>
+                                        </button>
+                                    @endif
+                                </div>
+                            </div>
+                        </a>
+                    </div>
                 @endforeach
             </div>
         </div>
@@ -574,11 +630,11 @@
         // Actualizar thumbnails activos
         document.querySelectorAll('.image-thumb').forEach((thumb, i) => {
             if (i === index) {
-                thumb.classList.remove('border-transparent', 'hover:border-brandPrimary-200');
-                thumb.classList.add('border-brandPrimary-300');
+                thumb.classList.remove('border-gray-200', 'hover:border-gray-300');
+                thumb.classList.add('border-slate-400', 'ring-2', 'ring-slate-200');
             } else {
-                thumb.classList.remove('border-brandPrimary-300');
-                thumb.classList.add('border-transparent', 'hover:border-brandPrimary-200');
+                thumb.classList.remove('border-slate-400', 'ring-2', 'ring-slate-200');
+                thumb.classList.add('border-gray-200', 'hover:border-gray-300');
             }
         });
     }
@@ -673,31 +729,58 @@
 
         if (currentVariant) {
             const stock = currentVariant.stock || 0;
-            if (stock > 0) {
+            if (stock > 0 && stock <= 5) {
                 stockIndicator.innerHTML = `
-                    <i data-lucide="package-check" class="w-4 h-4 text-brandSuccess-300"></i>
-                    <span class="caption text-brandSuccess-300 font-medium">
-                        ${stock} ${stock == 1 ? 'unidad disponible' : 'unidades disponibles'}
-                    </span>
+                    <div class="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-600 flex-shrink-0">
+                            <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path>
+                            <path d="M12 9v4"></path>
+                            <path d="M12 17h.01"></path>
+                        </svg>
+                        <span class="text-sm font-semibold text-red-600">
+                            ¡Solo quedan ${stock} unidad${stock > 1 ? 'es' : ''} disponible${stock > 1 ? 's' : ''}!
+                        </span>
+                    </div>
+                `;
+            } else if (stock > 5) {
+                stockIndicator.innerHTML = `
+                    <div class="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-600 flex-shrink-0">
+                            <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path>
+                            <path d="M12 22V12"></path>
+                            <polyline points="3.29 7 12 12 20.71 7"></polyline>
+                            <path d="m7.5 4.27 9 5.15"></path>
+                        </svg>
+                        <span class="text-sm font-medium text-green-600">
+                            ${stock} ${stock == 1 ? 'unidad disponible' : 'unidades disponibles'}
+                        </span>
+                    </div>
                 `;
             } else {
                 stockIndicator.innerHTML = `
-                    <i data-lucide="package-x" class="w-4 h-4 text-brandError-300"></i>
-                    <span class="caption text-brandError-300 font-medium">Agotado</span>
+                    <div class="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-600 flex-shrink-0">
+                            <path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"></path>
+                            <path d="m7.5 4.27 9 5.15"></path>
+                            <polyline points="3.29 7 12 12 20.71 7"></polyline>
+                            <line x1="12" x2="12" y1="22" y2="12"></line>
+                            <path d="m17 13 5 5m-5 0 5-5"></path>
+                        </svg>
+                        <span class="text-sm font-semibold text-red-600">Agotado</span>
+                    </div>
                 `;
-            }
-            // Reinicializar iconos de Lucide
-            if (window.lucide) {
-                window.lucide.createIcons();
             }
         } else {
             stockIndicator.innerHTML = `
-                <i data-lucide="info" class="w-4 h-4 text-brandPrimary-300"></i>
-                <span class="caption text-brandPrimary-300 font-medium">Selecciona las opciones para ver disponibilidad</span>
+                <div class="flex items-center gap-2 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600 flex-shrink-0">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <path d="M12 16v-4"></path>
+                        <path d="M12 8h.01"></path>
+                    </svg>
+                    <span class="text-sm font-medium text-blue-600">Selecciona las opciones para ver disponibilidad</span>
+                </div>
             `;
-            if (window.lucide) {
-                window.lucide.createIcons();
-            }
         }
     }
 
@@ -801,5 +884,17 @@
         @endif
     });
 </script>
+@endpush
+
+@push('styles')
+<style>
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+</style>
 @endpush
 @endsection

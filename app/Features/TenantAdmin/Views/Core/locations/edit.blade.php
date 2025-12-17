@@ -157,6 +157,7 @@
                         :value="old('department', $location->department)"
                         :required="true"
                         container-class="w-full"
+                        x-model="departmentInput"
                     />
                     @error('department')
                         <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
@@ -171,6 +172,7 @@
                         :value="old('city', $location->city)"
                         :required="true"
                         container-class="w-full"
+                        x-model="cityInput"
                     />
                     @error('city')
                         <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
@@ -178,14 +180,64 @@
                 </div>
 
                 <div class="md:col-span-2">
-                    <x-input-with-label
-                        label="Dirección *"
-                        name="address"
-                        placeholder="Calle 123 #45-67, Centro"
-                        :value="old('address', $location->address)"
-                        :required="true"
-                        container-class="w-full"
-                    />
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex-1">
+                                <x-input-with-label
+                                    label="Dirección *"
+                                    name="address"
+                                    placeholder="Calle 123 #45-67, Centro"
+                                    :value="old('address', $location->address)"
+                                    :required="true"
+                                    container-class="w-full"
+                                    x-model="addressInput"
+                                />
+                            </div>
+                            <div class="flex items-end">
+                                <button
+                                    type="button"
+                                    @click="verifyLocation()"
+                                    x-bind:disabled="isGeocoding"
+                                    class="h-[42px] px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2 text-sm font-medium"
+                                >
+                                    <i data-lucide="map-pin" class="w-4 h-4" x-show="!isGeocoding"></i>
+                                    <span x-show="!isGeocoding">Verificar ubicación</span>
+                                    <span x-show="isGeocoding" class="flex items-center gap-2">
+                                        <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Verificando...
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Preview del mapa -->
+                        <div x-show="showMapPreview" x-cloak class="mt-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <div class="flex items-start justify-between mb-2">
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-900">Ubicación encontrada</p>
+                                    <p class="text-xs text-gray-600" x-text="formattedAddress"></p>
+                                </div>
+                                <button
+                                    type="button"
+                                    @click="clearMapPreview()"
+                                    class="text-gray-400 hover:text-gray-600"
+                                >
+                                    <i data-lucide="x" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            <div class="rounded-lg overflow-hidden border border-gray-300">
+                                <img x-bind:src="mapPreviewUrl" alt="Preview del mapa" class="w-full h-48 object-cover">
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">Las coordenadas se guardarán automáticamente al actualizar la sede.</p>
+                        </div>
+                        
+                        <!-- Campos hidden para coordenadas -->
+                        <input type="hidden" name="latitude" x-model="latitude">
+                        <input type="hidden" name="longitude" x-model="longitude">
+                    </div>
                     @error('address')
                         <p class="mt-1 text-xs text-red-500">{{ $message }}</p>
                     @enderror
@@ -459,6 +511,24 @@ document.addEventListener('alpine:init', () => {
         copyFromDay: null,
         copyToDays: [],
         
+        // Geocoding state
+        addressInput: @json(old('address', $location->address ?? '')),
+        cityInput: @json(old('city', $location->city ?? '')),
+        departmentInput: @json(old('department', $location->department ?? '')),
+        latitude: @json(old('latitude', $location->latitude)),
+        longitude: @json(old('longitude', $location->longitude)),
+        isGeocoding: false,
+        showMapPreview: @json(($location->latitude && $location->longitude) ? true : false),
+        mapPreviewUrl: @php
+            if ($location->latitude && $location->longitude && function_exists('getMapboxStaticMapUrlFromCoordinates')) {
+                $mapUrl = getMapboxStaticMapUrlFromCoordinates($location->longitude, $location->latitude, 600, 256);
+                echo $mapUrl ? json_encode($mapUrl) : "''";
+            } else {
+                echo "''";
+            }
+        @endphp,
+        formattedAddress: @json(($location->address ?? '') . ', ' . ($location->city ?? '') . ', ' . ($location->department ?? '')),
+        
         init() {
             // Initialize form behavior
             this.initScheduleCheckboxes();
@@ -674,6 +744,82 @@ document.addEventListener('alpine:init', () => {
             this.showCopyModal = false;
             
             this.showNotificationMessage(`Se copió el horario a ${this.copyToDays.length} día(s).`, 'success');
+        },
+        
+        async verifyLocation() {
+            const address = this.addressInput?.trim();
+            const city = this.cityInput?.trim();
+            const department = this.departmentInput?.trim();
+            
+            if (!address || !city || !department) {
+                if (window.toast) {
+                    window.toast.error(
+                        'Campos incompletos',
+                        'Por favor completa dirección, ciudad y departamento antes de verificar.',
+                        4000,
+                        'bottom-center'
+                    );
+                }
+                return;
+            }
+            
+            this.isGeocoding = true;
+            
+            try {
+                const response = await fetch('{{ route("tenant.admin.locations.geocode", $store->slug) }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({
+                        address: address,
+                        city: city,
+                        department: department
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    this.latitude = data.latitude;
+                    this.longitude = data.longitude;
+                    this.mapPreviewUrl = data.map_url;
+                    this.formattedAddress = data.formatted_address;
+                    this.showMapPreview = true;
+                    
+                    if (window.toast) {
+                        window.toast.success(
+                            'Ubicación verificada',
+                            'Las coordenadas se guardarán al actualizar la sede.',
+                            3000,
+                            'bottom-center'
+                        );
+                    }
+                } else {
+                    throw new Error(data.message || 'No se pudo encontrar la ubicación');
+                }
+            } catch (error) {
+                console.error('Geocoding error:', error);
+                if (window.toast) {
+                    window.toast.error(
+                        'Error',
+                        error.message || 'No se pudo verificar la ubicación. Verifica la dirección e intenta de nuevo.',
+                        5000,
+                        'bottom-center'
+                    );
+                }
+            } finally {
+                this.isGeocoding = false;
+            }
+        },
+        
+        clearMapPreview() {
+            this.showMapPreview = false;
+            this.latitude = null;
+            this.longitude = null;
+            this.mapPreviewUrl = '';
+            this.formattedAddress = '';
         }
     }));
 });

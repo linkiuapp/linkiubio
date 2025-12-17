@@ -3,15 +3,99 @@
 @section('content')
 <div class="px-4 py-6 space-y-6">
 
-    <h3 class="h3 text-brandNeutral-400">Nuestras promociones</h3>
+
+    <!-- Ticker de Promociones -->
+    @if($tickers && $tickers->count() > 0 && $tickerConfig)
+        @php
+            $scrollSpeeds = [
+                'slow' => 20,
+                'medium' => 15,
+                'fast' => 10
+            ];
+            $scrollDuration = $scrollSpeeds[$tickerConfig['scroll_speed']] ?? 15;
+        @endphp
+        <div class="ticker-wrapper" 
+             style="background-color: {{ $tickerConfig['background_color'] }}; color: {{ $tickerConfig['text_color'] }};">
+            <div class="ticker-container">
+                <div class="flex items-center gap-2 py-3 px-4 whitespace-nowrap ticker-scroll" 
+                     data-duration="{{ $scrollDuration }}">
+                    @foreach($tickers as $ticker)
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span class="text-base font-semibold">{{ $ticker->text }}</span>
+                            <span class="mx-2 text-base font-medium">•</span>
+                        </div>
+                    @endforeach
+                    {{-- Duplicar para efecto continuo --}}
+                    @foreach($tickers as $ticker)
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span class="text-base font-semibold">{{ $ticker->text }}</span>
+                            <span class="mx-2 text-base font-medium">•</span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    @endif
+
     <!-- Slider de Novedades -->
     @if($sliders->count() > 0)
         <div class="slider-container relative" x-data="sliderComponent({{ $sliders->toJson() }}, {{ $sliders->first()->transition_duration ?? 5 }})">
             <!-- Slider principal -->
             <div class="overflow-hidden rounded-lg">
-                <div class="flex gap-2 sm:gap-4 transition-transform duration-500 ease-in-out" 
-                     :style="getTransform()">
+                <div class="flex gap-2 sm:gap-4" 
+                     :style="getTransform()"
+                     @transitionend="handleTransitionEnd()">
                     
+                    @if($sliders->count() > 1)
+                        <!-- Duplicar último slide al inicio para efecto infinito -->
+                        @php $lastSlider = $sliders->last(); @endphp
+                        <div class="flex-shrink-0 relative flex justify-center w-full sm:w-auto">
+                            @if($lastSlider->url && $lastSlider->url_type !== 'none')
+                                @if($lastSlider->url_type === 'external')
+                                    <a href="{{ $lastSlider->url }}" 
+                                       target="_blank" 
+                                       rel="noopener noreferrer"
+                                       class="block relative group w-full">
+                                @else
+                                    <a href="{{ $lastSlider->url_type === 'internal' ? url($store->slug . '/' . ltrim($lastSlider->url, '/')) : '#' }}" 
+                                       class="block relative group w-full">
+                                @endif
+                            @else
+                                <div class="block relative group w-full">
+                            @endif
+                            
+                            <!-- Imagen del slider - Responsive -->
+                            <div class="w-full sm:w-[420px] h-[180px] sm:h-[200px] bg-accent-100 rounded-lg overflow-hidden relative">
+                                @if($lastSlider->image_url)
+                                    <img src="{{ $lastSlider->image_url }}" 
+                                         alt="{{ $lastSlider->name }}" 
+                                         loading="lazy"
+                                         class="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+                                         style="image-rendering: auto; -webkit-backface-visibility: hidden; backface-visibility: hidden;">
+                                @endif
+                                
+                                <!-- Overlay suave (solo si tiene enlace) -->
+                                @if($lastSlider->url && $lastSlider->url_type !== 'none')
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black-500/20 via-transparent to-transparent"></div>
+                                @endif
+                                
+                                <!-- Indicador de enlace -->
+                                @if($lastSlider->url && $lastSlider->url_type !== 'none')
+                                    <div class="absolute top-1 right-1 bg-accent-50/20 backdrop-blur-sm rounded-full p-0.5 opacity-70 group-hover:opacity-100 transition-opacity">
+                                        <i data-lucide="arrow-up-right" class="w-24px h-24px sm:w-32px sm:h-32px"></i>
+                                    </div>
+                                @endif
+                            </div>
+                            
+                            @if($lastSlider->url && $lastSlider->url_type !== 'none')
+                                </a>
+                            @else
+                                </div>
+                            @endif
+                        </div>
+                    @endif
+                    
+                    <!-- Slides originales -->
                     @foreach($sliders as $index => $slider)
                         <div class="flex-shrink-0 relative flex justify-center w-full sm:w-auto">
                             @if($slider->url && $slider->url_type !== 'none')
@@ -59,54 +143,53 @@
                         </div>
                     @endforeach
                     
-                    <!-- Duplicar slides para efecto infinito (1 slide es suficiente ya que se muestra de 1 en 1) -->
                     @if($sliders->count() > 1)
-                        @foreach($sliders->take(1) as $index => $slider)
-                            <div class="flex-shrink-0 relative flex justify-center">
-                                @if($slider->url && $slider->url_type !== 'none')
-                                    @if($slider->url_type === 'external')
-                                        <a href="{{ $slider->url }}" 
-                                           target="_blank" 
-                                           rel="noopener noreferrer"
-                                           class="block relative group">
-                                    @else
-                                        <a href="{{ $slider->url_type === 'internal' ? url($store->slug . '/' . ltrim($slider->url, '/')) : '#' }}" 
-                                           class="block relative group">
-                                    @endif
+                        <!-- Duplicar primer slide al final para efecto infinito -->
+                        @php $firstSlider = $sliders->first(); @endphp
+                        <div class="flex-shrink-0 relative flex justify-center w-full sm:w-auto">
+                            @if($firstSlider->url && $firstSlider->url_type !== 'none')
+                                @if($firstSlider->url_type === 'external')
+                                    <a href="{{ $firstSlider->url }}" 
+                                       target="_blank" 
+                                       rel="noopener noreferrer"
+                                       class="block relative group w-full">
                                 @else
-                                    <div class="block relative group">
+                                    <a href="{{ $firstSlider->url_type === 'internal' ? url($store->slug . '/' . ltrim($firstSlider->url, '/')) : '#' }}" 
+                                       class="block relative group w-full">
+                                @endif
+                            @else
+                                <div class="block relative group w-full">
+                            @endif
+                            
+                            <!-- Imagen del slider - Responsive -->
+                            <div class="w-full sm:w-[420px] h-[180px] sm:h-[200px] bg-accent-100 rounded-lg overflow-hidden relative">
+                                @if($firstSlider->image_url)
+                                    <img src="{{ $firstSlider->image_url }}" 
+                                         alt="{{ $firstSlider->name }}" 
+                                         loading="lazy"
+                                         class="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
+                                         style="image-rendering: auto; -webkit-backface-visibility: hidden; backface-visibility: hidden;">
                                 @endif
                                 
-                                <!-- Imagen del slider - Responsive -->
-                                <div class="w-full sm:w-[420px] h-[180px] sm:h-[200px] bg-accent-100 rounded-lg overflow-hidden relative">
-                                    @if($slider->image_url)
-                                        <img src="{{ $slider->image_url }}" 
-                                             alt="{{ $slider->name }}" 
-                                             loading="lazy"
-                                             class="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
-                                             style="image-rendering: auto; -webkit-backface-visibility: hidden; backface-visibility: hidden;">
-                                    @endif
-                                    
-                                    <!-- Overlay suave (solo si tiene enlace) -->
-                                    @if($slider->url && $slider->url_type !== 'none')
-                                        <div class="absolute inset-0 bg-gradient-to-t from-black-500/20 via-transparent to-transparent"></div>
-                                    @endif
-                                    
-                                    <!-- Indicador de enlace -->
-                                    @if($slider->url && $slider->url_type !== 'none')
-                                        <div class="absolute top-1 right-1 bg-accent-50/20 backdrop-blur-sm rounded-full p-0.5 opacity-70 group-hover:opacity-100 transition-opacity">
-                                            <x-solar-arrow-right-outline class="w-2 h-2 text-accent-50" />
-                                        </div>
-                                    @endif
-                                </div>
+                                <!-- Overlay suave (solo si tiene enlace) -->
+                                @if($firstSlider->url && $firstSlider->url_type !== 'none')
+                                    <div class="absolute inset-0 bg-gradient-to-t from-black-500/20 via-transparent to-transparent"></div>
+                                @endif
                                 
-                                @if($slider->url && $slider->url_type !== 'none')
-                                    </a>
-                                @else
+                                <!-- Indicador de enlace -->
+                                @if($firstSlider->url && $firstSlider->url_type !== 'none')
+                                    <div class="absolute top-1 right-1 bg-accent-50/20 backdrop-blur-sm rounded-full p-0.5 opacity-70 group-hover:opacity-100 transition-opacity">
+                                        <i data-lucide="arrow-up-right" class="w-24px h-24px sm:w-32px sm:h-32px"></i>
                                     </div>
                                 @endif
                             </div>
-                        @endforeach
+                            
+                            @if($firstSlider->url && $firstSlider->url_type !== 'none')
+                                </a>
+                            @else
+                                </div>
+                            @endif
+                        </div>
                     @endif
                 </div>
             </div>
@@ -117,7 +200,7 @@
                     @foreach($sliders as $index => $slider)
                         <button @click="goToSlide({{ $index }})"
                                 class="w-2 h-2 rounded-full transition-all duration-300"
-                                :class="currentSlide === {{ $index }} ? 'bg-primary-300 w-6' : 'bg-accent-300 hover:bg-accent-400'">
+                                :class="displaySlide === {{ $index }} ? 'bg-primary-300 w-6' : 'bg-accent-300 hover:bg-accent-400'">
                         </button>
                     @endforeach
                 </div>
@@ -126,17 +209,39 @@
     @endif
 
     <!-- Categorías -->
-    <div>
-        <h3 class="h3 text-brandNeutral-400 mb-4">Categorías</h3>
+    <div class="space-y-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-semibold text-slate-900">Categorías</h3>
+            <a href="{{ route('tenant.categories', $store->slug) }}" 
+               class="flex items-center gap-1 text-blue-700 hover:text-blue-800 transition-colors">
+                <span class="text-base font-medium">Ver más</span>
+                <i data-lucide="arrow-up-right" class="w-4 h-4 text-blue-700"></i>
+            </a>
+        </div>
         
         @if($categories->count() > 0)
+            @php
+                // Calcular el color de fondo de las categorías una sola vez
+                $bgColor = $store->design && $store->design->header_background_color ? $store->design->header_background_color : '#f9fafb';
+                // Convertir hex a rgba con opacidad
+                if (strpos($bgColor, '#') === 0) {
+                    $hex = str_replace('#', '', $bgColor);
+                    $r = hexdec(substr($hex, 0, 2));
+                    $g = hexdec(substr($hex, 2, 2));
+                    $b = hexdec(substr($hex, 4, 2));
+                    $categoryBgColor = "rgba($r, $g, $b, 0.1)";
+                } else {
+                    $categoryBgColor = $bgColor;
+                }
+            @endphp
             <div class="grid grid-cols-4 gap-2">
                 @foreach($categories as $category)
                     <a href="{{ route('tenant.category', ['store' => $store->slug, 'categorySlug' => $category->slug]) }}" 
                        class="flex flex-col items-center group">
                         
                         <!-- Icono de la categoría con fondo colorido -->
-                        <div class="w-78px h-78 mb-2 p-2 flex items-center justify-center rounded-2xl bg-gradient-to-br from-brandWhite-100 to-brandWhite-100 hover:from-brandPrimary-100 hover:to-brandWhite-100 transition-all duration-200">
+                        <div class="w-72px h-72px mb-2 p-2 flex items-center justify-center rounded-2xl transition-all duration-200 hover:opacity-80" 
+                             style="background-color: {{ $categoryBgColor }};">
                              @if($category->icon && $category->icon->image_url)
                                  <img src="{{ $category->icon->image_url }}" 
                                       alt="{{ $category->name }}" 
@@ -148,7 +253,7 @@
                         </div>
                         
                         <!-- Nombre de la categoría -->
-                        <span class="caption text-center text-brandNeutral-400 transition-colors leading-tight">
+                        <span class="text-xs font-normal text-slate-900 transition-colors leading-tight">
                             {{ $category->name }}
                         </span>
                     </a>
@@ -168,99 +273,110 @@
     </div>
 
     <!-- Top 3 más vendidos -->
-    <div>
-        <h3 class="h3 text-brandNeutral-400 mb-8">Top 3 más vendidos</h3>
+    <div class="space-y-6">
+        <h3 class="text-base font-semibold text-slate-900">Top 3 más vendidos</h3>
         
         @if($topProducts->count() > 0)
-            <div class="space-y-6">
+            @php
+                // Calcular el color de fondo de las cards una sola vez
+                $bgColor = $store->design && $store->design->header_background_color ? $store->design->header_background_color : '#f9fafb';
+                // Convertir hex a rgba con opacidad
+                if (strpos($bgColor, '#') === 0) {
+                    $hex = str_replace('#', '', $bgColor);
+                    $r = hexdec(substr($hex, 0, 2));
+                    $g = hexdec(substr($hex, 2, 2));
+                    $b = hexdec(substr($hex, 4, 2));
+                    $cardBgColor = "rgba($r, $g, $b, 0.1)";
+                } else {
+                    $cardBgColor = $bgColor;
+                }
+            @endphp
+            <div class="space-y-4">
                 @foreach($topProducts as $product)
                     @php
                         $estaAgotado = $product->controlaStock() && !$product->tieneStockIlimitado() && $product->estaAgotado();
                         $tieneStockBajo = $product->controlaStock() && !$product->tieneStockIlimitado() && $product->tieneStockBajo();
+                        $stockDisponible = $product->stock_disponible ?? 0;
                     @endphp
-                    <a href="{{ route('tenant.product', [$store->slug, $product->slug]) }}" 
-                       class="bg-brandWhite-100 hover:bg-brandPrimary-50 rounded-lg p-4 hover:shadow-sm transition-all duration-200 block relative {{ $estaAgotado ? 'opacity-60' : '' }}">
-                        
-                       <!-- Badge MÁS VENDIDO -->
-                        <div class="flex gap-1 items-center absolute -top-4 -left-2 bg-brandError-300 text-brandError-50 caption px-2 py-1 rounded-full z-10 shadow-sm">
-                            <i data-lucide="flame" class="w-4 h-4 sm:w-24px sm:h-24px"></i>
-                            MÁS VENDIDO
-                        </div>
-
-                        <!-- Badge de Stock -->
-                        @if($estaAgotado)
-                            <div class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-lg text-xs font-medium z-10">
-                                Agotado
-                            </div>
-                        @elseif($tieneStockBajo)
-                            <div class="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded-lg text-xs font-medium z-10 animate-pulse">
-                                ¡Solo {{ $product->stock_disponible }}!
-                            </div>
-                        @endif
-                        
-                        <div class="flex items-center gap-3">
+                    <div class="flex gap-2 md:gap-4 rounded-xl p-4 md:p-4 transition-all duration-200 hover:shadow-sm relative cursor-pointer" 
+                         style="background-color: {{ $cardBgColor }};">
+                        <div class="flex items-center gap-4">
                             <!-- Imagen del producto -->
-                            <div class="w-[78px] h-[78px] rounded-lg flex-shrink-0 overflow-hidden">
+                            <div class="w-[120px] h-[120px] md:w-[126px] md:h-[126px] rounded-lg flex-shrink-0 overflow-hidden">
                                 @if($product->main_image_url)
                                     <img src="{{ $product->main_image_url }}" 
                                          alt="{{ $product->name }}" 
                                          class="w-full h-full object-cover">
                                 @else
-                                    <div class="w-full h-full flex items-center justify-center text-black-200">
-                                        <x-solar-gallery-outline class="w-6 h-6" />
+                                    <div class="w-full h-full flex items-center justify-center bg-gray-100">
+                                        <i data-lucide="image" class="w-6 h-6 text-gray-400"></i>
                                     </div>
                                 @endif
                             </div>
 
                             <!-- Información del producto -->
-                            <div class="flex-1 min-w-0">
-                                <h3 class="body-lg-bold text-brandNeutral-400 line-clamp-1">{{ $product->name }}</h3>
-                                
-                                @if($product->description)
-                                    <p class="caption text-brandNeutral-400 line-clamp-1">{{ $product->description }}</p>
-                                @endif
-
-                                <!-- Precio prominente -->
-                                <div class="flex items-center gap-2 mb-1">
-                                    @if($product->tienePromocionActiva())
-                                        <span class="body-sm text-brandNeutral-300 line-through">${{ number_format($product->price, 0, ',', '.') }}</span>
-                                        <span class="body-lg-bold text-brandError-400">${{ number_format($product->precio_promocional, 0, ',', '.') }}</span>
-                                    @else
-                                        <span class="body-lg-bold text-brandNeutral-400">${{ number_format($product->price, 0, ',', '.') }}</span>
-                                    @endif
-                                </div>
-
-                                <!-- Categorías pequeñas -->
-                                @if($product->categories->count() > 0)
-                                    <div class="flex flex-wrap gap-1">
-                                        @foreach($product->categories->take(1) as $category)
-                                            <span class="px-2 py-0.5 bg-brandSuccess-50 text-brandSuccess-400 rounded-full caption">
-                                                {{ $category->name }}
+                            <div class="flex-1 min-w-0 flex flex-col md:gap-1 gap-0">
+                                <!-- Badge de Stock bajo -->
+                                @if($tieneStockBajo && $stockDisponible > 0)
+                                    <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
+                                        <div class="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center">
+                                            <span class="text-base font-bold">
+                                             🔥
                                             </span>
-                                        @endforeach
-                                        @if($product->categories->count() > 1)
-                                            <span class="bg-brandSuccess-50 px-2 py-0.5 caption items-center text-brandSuccess-400 rounded-full">+{{ $product->categories->count() - +1 }}</span>
+                                        </div>
+                                        <span class="bg-red-50 text-red-600 rounded-full px-2 py-1 text-xs font-semibold text-red-600">
+                                            Queda {{ $stockDisponible }} unidad{{ $stockDisponible > 1 ? 'es' : '' }}
+                                        </span>
+                                        @if($product->categories->count() > 0)
+                                            <div class="flex flex-wrap gap-1">
+                                                @foreach($product->categories->take(1) as $category)
+                                                    <span class="px-2 py-1 text-xs font-semibold text-green-900 bg-green-50 rounded-full">
+                                                        {{ $category->name }}
+                                                    </span>
+                                                @endforeach
+                                            </div>
                                         @endif
+                                    </div>
+                                @elseif($estaAgotado)
+                                    <div class="flex items-center gap-1.5 w-fit">
+                                        <span class="text-xs font-medium text-white bg-red-500 px-2 py-0.5 rounded-full">
+                                            Agotado
+                                        </span>
                                     </div>
                                 @endif
 
-                            </div>
+                                <!-- Título del producto -->
+                                <h3 class="text-base font-bold text-slate-900 leading-tight">{{ $product->name }}</h3>
+                                
+                                <!-- Descripción -->
+                                @if($product->description)
+                                    <p class="text-xs font-normal text-slate-900 leading-tight line-clamp-1">{{ $product->description }}</p>
+                                @endif
 
-                            <!-- Botones de acción -->
-                             <div class="flex flex-col gap-2">
-                                <x-add-to-cart-button :product="$product" :store="$store" />
-                                @if(featureEnabled($store, 'favoritos'))
-                                    <button class="p-2 w-11 h-11 flex items-center justify-center transition-transform bg-brandError-50 hover:bg-brandError-300 rounded-lg hover:scale-110" 
+                                <!-- Precios -->
+                                <div class="flex items-center gap-2">
+                                    @if($product->tienePromocionActiva())
+                                        <span class="text-base font-normal text-slate-900 line-through">${{ number_format($product->price, 0, ',', '.') }}</span>
+                                        <span class="text-base font-bold text-slate-900">${{ number_format($product->precio_promocional, 0, ',', '.') }}</span>
+                                    @else
+                                        <span class="text-base font-bold text-slate-900">${{ number_format($product->price, 0, ',', '.') }}</span>
+                                    @endif
+                                </div>
+
+                                <!-- Botones de acción -->
+                                <div class="flex gap-2 items-center md:mt-0 mt-2">
+                                    <x-add-to-cart-button :product="$product" :store="$store" />
+                                    @if(featureEnabled($store, 'favoritos'))
+                                    <button class="p-3 flex items-center justify-center transition-transform bg-red-50 hover:bg-red-100 rounded-full hover:scale-110" 
                                             data-favorite-btn
                                             data-product-id="{{ $product->id }}">
-                                        <i data-lucide="heart" class="w-6 h-6 text-brandError-400 hover:text-brandError-50" style="fill: currentColor;"></i>
+                                        <i data-lucide="heart" class="w-6 h-6 text-red-500 hover:text-red-600" style="fill: currentColor;"></i>
                                     </button>
                                 @endif
-                             </div>
-
-                            
+                                </div>
+                            </div>
                         </div>
-                    </a>
+                    </div>
                 @endforeach
             </div>
         @else
@@ -272,80 +388,110 @@
     </div>
 
     <!-- Lo más nuevo -->
-    <div>
-        <h3 class="h3 text-brandNeutral-400 mb-8">Lo más nuevo</h3>
+    <div class="space-y-6">
+        <h3 class="text-base font-semibold text-slate-900">Lo más nuevo</h3>
         
         @if($newProducts->count() > 0)
-            <div class="space-y-6">
+            @php
+                // Calcular el color de fondo de las cards una sola vez
+                $bgColor = $store->design && $store->design->header_background_color ? $store->design->header_background_color : '#f9fafb';
+                // Convertir hex a rgba con opacidad
+                if (strpos($bgColor, '#') === 0) {
+                    $hex = str_replace('#', '', $bgColor);
+                    $r = hexdec(substr($hex, 0, 2));
+                    $g = hexdec(substr($hex, 2, 2));
+                    $b = hexdec(substr($hex, 4, 2));
+                    $cardBgColor = "rgba($r, $g, $b, 0.1)";
+                } else {
+                    $cardBgColor = $bgColor;
+                }
+            @endphp
+            <div class="space-y-4">
                 @foreach($newProducts as $product)
-                    <a href="{{ route('tenant.product', [$store->slug, $product->slug]) }}" 
-                       class="bg-brandWhite-100 hover:bg-brandPrimary-50 rounded-lg p-4 hover:shadow-sm transition-all duration-200 block relative">
-                        <!-- Badge NUEVO -->
-                        <div class="flex items-center gap-1 absolute -top-2 -left-2 bg-brandSuccess-300 text-brandSuccess-50 caption px-2 py-1 rounded-full z-10 shadow-sm">
-                            <i data-lucide="star" class="w-4 h-4 sm:w-24px sm:h-24px"></i> NUEVO
-                        </div>
-                        
-                        <div class="flex items-center gap-3">
+                    @php
+                        $estaAgotado = $product->controlaStock() && !$product->tieneStockIlimitado() && $product->estaAgotado();
+                        $tieneStockBajo = $product->controlaStock() && !$product->tieneStockIlimitado() && $product->tieneStockBajo();
+                        $stockDisponible = $product->stock_disponible ?? 0;
+                    @endphp
+                    <div class="flex gap-2 md:gap-4 rounded-xl p-4 md:p-4 transition-all duration-200 hover:shadow-sm relative" 
+                         style="background-color: {{ $cardBgColor }};">
+                        <div class="flex items-center gap-4">
                             <!-- Imagen del producto -->
-                            <div class="w-[78px] h-[78px] bg-accent-100 rounded-lg flex-shrink-0 overflow-hidden">
+                            <div class="w-[120px] h-[120px] md:w-[126px] md:h-[126px] rounded-lg flex-shrink-0 overflow-hidden">
                                 @if($product->main_image_url)
                                     <img src="{{ $product->main_image_url }}" 
                                          alt="{{ $product->name }}" 
                                          class="w-full h-full object-cover">
                                 @else
-                                    <div class="w-full h-full flex items-center justify-center text-brandNeutral-400">
-                                        <i data-lucide="image" class="w-6 h-6 text-brandNeutral-400"></i>
+                                    <div class="w-full h-full flex items-center justify-center bg-gray-100">
+                                        <i data-lucide="image" class="w-6 h-6 text-gray-400"></i>
                                     </div>
                                 @endif
                             </div>
 
                             <!-- Información del producto -->
-                            <div class="flex-1 min-w-0">
-                                <h3 class="body-lg-bold text-brandNeutral-400 line-clamp-1">{{ $product->name }}</h3>
+                            <div class="flex-1 min-w-0 flex flex-col md:gap-1 gap-0">
+                                <!-- Badge de Stock bajo -->
+                                @if($tieneStockBajo && $stockDisponible > 0)
+                                    <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
+                                        <div class="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center">
+                                            <span class="text-base font-bold">
+                                            ✨
+                                            </span>
+                                        </div>
+                                        <span class="bg-red-50 text-red-600 rounded-full px-2 py-1 text-xs font-semibold text-red-600">
+                                            Queda {{ $stockDisponible }} unidad{{ $stockDisponible > 1 ? 'es' : '' }}
+                                        </span>
+                                        @if($product->categories->count() > 0)
+                                            <div class="flex flex-wrap gap-1">
+                                                @foreach($product->categories->take(1) as $category)
+                                                    <span class="px-2 py-1 text-xs font-semibold text-green-900 bg-green-50 rounded-full">
+                                                        {{ $category->name }}
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </div>
+                                @elseif($estaAgotado)
+                                    <div class="flex items-center gap-1.5 w-fit">
+                                        <span class="text-xs font-medium text-white bg-red-500 px-2 py-0.5 rounded-full">
+                                            Agotado
+                                        </span>
+                                    </div>
+                                @endif
+
+                                <!-- Título del producto -->
+                                <h3 class="text-base font-bold text-slate-900 leading-tight">{{ $product->name }}</h3>
                                 
+                                <!-- Descripción -->
                                 @if($product->description)
-                                    <p class="caption text-brandNeutral-400 line-clamp-1">{{ $product->description }}</p>
-                                @endif 
+                                    <p class="text-xs font-normal text-slate-900 leading-tight line-clamp-1">{{ $product->description }}</p>
+                                @endif
 
-
-                                <!-- Precio prominente -->
+                                <!-- Precios -->
                                 <div class="flex items-center gap-2">
                                     @if($product->tienePromocionActiva())
-                                        <span class="body-sm text-brandNeutral-300 line-through">${{ number_format($product->price, 0, ',', '.') }}</span>
-                                        <span class="body-lg-bold text-brandError-400">${{ number_format($product->precio_promocional, 0, ',', '.') }}</span>
+                                        <span class="text-base font-normal text-slate-900 line-through">${{ number_format($product->price, 0, ',', '.') }}</span>
+                                        <span class="text-base font-bold text-slate-900">${{ number_format($product->precio_promocional, 0, ',', '.') }}</span>
                                     @else
-                                        <span class="body-lg-bold text-brandNeutral-400">${{ number_format($product->price, 0, ',', '.') }}</span>
+                                        <span class="text-base font-bold text-slate-900">${{ number_format($product->price, 0, ',', '.') }}</span>
                                     @endif
                                 </div>
 
-                                <!-- Categorías pequeñas -->
-                                @if($product->categories->count() > 0)
-                                    <div class="flex flex-wrap gap-1">
-                                        @foreach($product->categories->take(1) as $category)
-                                            <span class="px-2 py-0.5 bg-brandSuccess-50 text-brandSuccess-400 rounded caption">
-                                                {{ $category->name }}
-                                            </span>
-                                        @endforeach
-                                        @if($product->categories->count() > 1)
-                                            <span class="bg-brandSuccess-50 px-2 py-0.5 caption items-center text-brandSuccess-400 rounded-full">+{{ $product->categories->count() - 2 }}</span>
-                                        @endif
-                                    </div>
-                                @endif
-                            </div>
-
-                            <!-- Botones de acción -->
-                            <div class="flex flex-col gap-2">
-                                <x-add-to-cart-button :product="$product" :store="$store" />
-                                @if(featureEnabled($store, 'favoritos'))
-                                    <button class="p-2 w-11 h-11 flex items-center justify-center transition-transform bg-brandError-50 hover:bg-brandError-300 rounded-lg hover:scale-110" 
+                                <!-- Botones de acción -->
+                                <div class="flex gap-2 items-center md:mt-0 mt-2">
+                                    <x-add-to-cart-button :product="$product" :store="$store" />
+                                    @if(featureEnabled($store, 'favoritos'))
+                                    <button class="p-3 flex items-center justify-center transition-transform bg-red-50 hover:bg-red-100 rounded-full hover:scale-110" 
                                             data-favorite-btn
                                             data-product-id="{{ $product->id }}">
-                                        <i data-lucide="heart" class="w-6 h-6 text-brandError-400 hover:text-brandError-50" style="fill: currentColor;"></i>
+                                        <i data-lucide="heart" class="w-6 h-6 text-red-500 hover:text-red-600" style="fill: currentColor;"></i>
                                     </button>
                                 @endif
-                             </div>
+                                </div>
+                            </div>
                         </div>
-                    </a>
+                    </div>
                 @endforeach
             </div>
         @else
@@ -356,18 +502,60 @@
         @endif
     </div>
 </div>
+@push('styles')
+<style>
+    .ticker-wrapper {
+        margin-bottom: 24px;
+    }
+    .ticker-container {
+        overflow: hidden;
+        width: 100%;
+    }
+    /* Asegurar que los margins se apliquen correctamente */
+    .ticker-container {
+        margin: inherit;
+    }
+    .ticker-scroll {
+        display: inline-flex;
+        white-space: nowrap;
+        will-change: transform;
+        animation: ticker-move linear infinite;
+        width: max-content;
+        box-sizing: content-box;
+    }
+    .ticker-scroll[data-duration="10"] {
+        animation-duration: 10s;
+    }
+    .ticker-scroll[data-duration="15"] {
+        animation-duration: 15s;
+    }
+    .ticker-scroll[data-duration="20"] {
+        animation-duration: 20s;
+    }
+    @keyframes ticker-move {
+        0% {
+            transform: translateX(0);
+        }
+        100% {
+            transform: translateX(-50%);
+        }
+    }
+</style>
+@endpush
 
 @push('scripts')
 <script>
 function sliderComponent(sliders, duration = 5) {
     return {
-        currentSlide: 0,
+        currentSlide: sliders.length > 1 ? 1 : 0, // Empezar en 1 porque el 0 es el duplicado del último
         sliders: sliders,
         duration: duration * 1000, // Convertir a milisegundos
         autoPlayInterval: null,
         isPlaying: true,
         maxSlide: 0,
         isMobile: false,
+        isTransitioning: true,
+        displaySlide: 0, // Índice mostrado al usuario (para indicadores)
         
         init() {
             this.checkViewport();
@@ -381,9 +569,14 @@ function sliderComponent(sliders, duration = 5) {
                 const wasMobile = this.isMobile;
                 this.checkViewport();
                 
-                // Si cambió de móvil a desktop o viceversa, resetear a slide 0
+                // Si cambió de móvil a desktop o viceversa, resetear posición
                 if (wasMobile !== this.isMobile) {
-                    this.currentSlide = 0;
+                    if (this.sliders.length > 1) {
+                        this.currentSlide = 1; // Resetear a primera posición real
+                        this.displaySlide = 0;
+                    } else {
+                        this.currentSlide = 0;
+                    }
                     // Forzar recálculo del transform
                     this.$nextTick(() => {
                         // Trigger re-render
@@ -408,43 +601,54 @@ function sliderComponent(sliders, duration = 5) {
             const gap = isMobile ? 8 : 16; // gap-2 en móvil (8px), gap-4 en desktop (16px)
             const totalWidth = slideWidth + gap;
             
-            return `transform: translateX(-${this.currentSlide * totalWidth}px)`;
+            const transition = this.isTransitioning ? 'transition: transform 0.5s ease-in-out;' : '';
+            
+            return `${transition} transform: translateX(-${this.currentSlide * totalWidth}px)`;
         },
         
         goToSlide(index) {
-            this.currentSlide = index;
+            // Ir al slide real (sumamos 1 porque el índice 0 es el duplicado)
+            this.isTransitioning = true;
+            this.currentSlide = index + 1;
+            this.displaySlide = index;
             this.resetAutoPlay();
         },
         
         nextSlide() {
-            this.currentSlide = this.currentSlide + 1;
-            
-            // Efecto infinito: si llegó al final, resetear sin transición
-            if (this.currentSlide >= this.sliders.length) {
-                setTimeout(() => {
-                    const sliderElement = document.querySelector('.slider-container .flex');
-                    if (sliderElement) {
-                        sliderElement.style.transition = 'none';
-                        this.currentSlide = 0;
-                        
-                        // Restaurar transición después de un frame
-                        setTimeout(() => {
-                            sliderElement.style.transition = 'transform 500ms ease-in-out';
-                        }, 50);
-                    }
-                }, 500);
-            }
-            
+            this.isTransitioning = true;
+            this.currentSlide++;
+            this.displaySlide = ((this.currentSlide - 1) % this.sliders.length);
             this.resetAutoPlay();
         },
         
-        prevSlide() {
-            if (this.currentSlide <= 0) {
-                // Ir al final si está en el inicio
-                this.currentSlide = this.maxSlide;
-            } else {
-                this.currentSlide = this.currentSlide - 1;
+        handleTransitionEnd() {
+            if (this.sliders.length <= 1) return;
+            
+            // Si llegamos al último duplicado (índice totalSlides + 1), saltar al inicio sin transición
+            if (this.currentSlide === this.sliders.length + 1) {
+                this.isTransitioning = false;
+                this.currentSlide = 1;
+                this.displaySlide = 0;
             }
+            // Si estamos en el duplicado del inicio (índice 0), saltar al final sin transición
+            else if (this.currentSlide === 0) {
+                this.isTransitioning = false;
+                this.currentSlide = this.sliders.length;
+                this.displaySlide = this.sliders.length - 1;
+            }
+        },
+        
+        prevSlide() {
+            if (this.sliders.length <= 1) return;
+            
+            this.isTransitioning = true;
+            this.currentSlide--;
+            
+            if (this.currentSlide < 1) {
+                this.currentSlide = this.sliders.length;
+            }
+            
+            this.displaySlide = ((this.currentSlide - 1) % this.sliders.length);
             this.resetAutoPlay();
         },
         
@@ -479,6 +683,7 @@ function sliderComponent(sliders, duration = 5) {
         }
     }
 }
+
 
 // Pausar auto-play cuando el usuario interactúa
 document.addEventListener('DOMContentLoaded', function() {
