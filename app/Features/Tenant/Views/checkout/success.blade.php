@@ -30,47 +30,59 @@
     <script>
         function bannerSlider() {
             return {
-                currentIndex: 1, // Empezar en 1 porque el primero (0) es el duplicado
-                totalSlides: 2, // Número real de slides
+                currentIndex: 0,
+                totalSlides: 2,
                 isTransitioning: true,
-                displayIndex: 0, // Índice mostrado al usuario (0 o 1)
+                displayIndex: 0,
+                interval: null,
 
                 init() {
-                    // Cambiar slide automáticamente cada 5 segundos
-                    this.interval = setInterval(() => {
-                        this.nextSlide();
-                    }, 5000);
+                    if (this.interval) {
+                        clearInterval(this.interval);
+                        this.interval = null;
+                    }
+                    
+                    this.currentIndex = 0;
+                    this.displayIndex = 0;
+                    this.isTransitioning = false;
+                    
+                    // Iniciar el auto-play después de que el DOM esté listo
+                    this.$nextTick(() => {
+                        setTimeout(() => {
+                            if (this.totalSlides > 1) {
+                                this.interval = setInterval(() => {
+                                    this.nextSlide();
+                                }, 5000);
+                            }
+                        }, 100);
+                    });
                 },
 
                 nextSlide() {
+                    if (this.isTransitioning) return;
+                    
                     this.isTransitioning = true;
-                    this.currentIndex++;
-                    this.displayIndex = ((this.currentIndex - 1) % this.totalSlides);
+                    this.currentIndex = (this.currentIndex + 1) % this.totalSlides;
+                    this.displayIndex = this.currentIndex;
                 },
 
                 goToSlide(slideIndex) {
-                    // Ir al slide real (sumamos 1 porque el índice 0 es el duplicado)
+                    if (this.isTransitioning) return;
+                    
                     this.isTransitioning = true;
-                    this.currentIndex = slideIndex + 1;
+                    this.currentIndex = slideIndex;
                     this.displayIndex = slideIndex;
-                    // Reiniciar el intervalo
-                    clearInterval(this.interval);
+                    
+                    if (this.interval) {
+                        clearInterval(this.interval);
+                    }
                     this.interval = setInterval(() => {
                         this.nextSlide();
                     }, 5000);
                 },
 
                 handleTransitionEnd() {
-                    // Si llegamos al final (último duplicado), saltar al inicio sin transición
-                    if (this.currentIndex === this.totalSlides + 1) {
-                        this.isTransitioning = false;
-                        this.currentIndex = 1;
-                    }
-                    // Si estamos en el duplicado del inicio (índice 0), saltar al final sin transición
-                    else if (this.currentIndex === 0) {
-                        this.isTransitioning = false;
-                        this.currentIndex = this.totalSlides;
-                    }
+                    this.isTransitioning = false;
                 }
             };
         }
@@ -81,25 +93,20 @@
 @section('content')
     <div class="max-w-2xl mx-auto px-4 py-6 space-y-6 relative z-0" data-order-id="{{ $order->id }}">
         <!-- Slider de banners -->
-        <div class="relative overflow-hidden rounded-lg" x-data="bannerSlider()">
+        <div class="relative overflow-hidden rounded-lg" 
+             x-data="bannerSlider()"
+             x-init="init()"
+             @pageshow.window="init()">
             <div class="flex"
                  :style="'transform: translateX(-' + currentIndex * 100 + '%); transition: ' + (isTransitioning ? 'transform 0.5s ease-in-out' : 'none') + ';'"
                  @transitionend="handleTransitionEnd()">
 
-                <!-- Duplicar último slide al inicio para efecto infinito -->
-                <a href="https://wa.me/573104594344?text=Quiero%20ser%20parte%20de%20Linkiu" target="_blank" rel="noopener" class="flex-shrink-0 w-full flex items-center justify-center relative">
-                    <img src="{{ asset('images-ui/banner_info_succces_linkiu_02.svg') }}" alt="Banner 2" class="w-full">
-                </a>
                 <!-- Slides originales -->
                 <a href="https://wa.me/573104594344?text=Quiero%20ser%20parte%20de%20Linkiu" target="_blank" rel="noopener" class="flex-shrink-0 w-full flex items-center justify-center relative">
                     <img src="{{ asset('images-ui/banner_info_succces_linkiu_01.svg') }}" alt="Banner 1" class="w-full">
                 </a>
                 <a href="https://wa.me/573104594344?text=Quiero%20ser%20parte%20de%20Linkiu" target="_blank" rel="noopener" class="flex-shrink-0 w-full flex items-center justify-center relative">
                     <img src="{{ asset('images-ui/banner_info_succces_linkiu_02.svg') }}" alt="Banner 2" class="w-full">
-                </a>
-                <!-- Duplicar primer slide al final para efecto infinito -->
-                <a href="https://wa.me/573104594344?text=Quiero%20ser%20parte%20de%20Linkiu" target="_blank" rel="noopener" class="flex-shrink-0 w-full flex items-center justify-center relative">
-                    <img src="{{ asset('images-ui/banner_info_succces_linkiu_01.svg') }}" alt="Banner 1" class="w-full">
                 </a>
             </div>
 

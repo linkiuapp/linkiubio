@@ -11,44 +11,44 @@
     <div class="max-w-6xl mx-auto">
         <!-- Header -->
         <div class="text-center mb-8">
-            <h1 class="h1 text-brandNeutral-400 mb-2">Finalizar compra</h1>
-            <p class="caption text-brandNeutral-400">Completa tu información para procesar tu pedido</p>
+            <h1 class="text-lg font-bold text-slate-900 mb-2">Finalizar compra</h1>
+            <p class="text-base text-slate-500">Completa tu información para procesar tu pedido</p>
         </div>
 
         <!-- Main Checkout Layout - Single Column -->
         <div class="mx-auto">
 
             <!-- CARD 1: DATOS PERSONALES -->
-            <div id="card-step1" class="bg-brandWhite-50 rounded-lg p-4 border border-brandWhite-300 mb-4">
+            <div id="card-step1" class="bg-white rounded-lg p-4 border border-slate-200 mb-4">
                 <div class="flex items-center mb-4">
-                    <div class="w-8 h-8 bg-brandPrimary-50 text-brandPrimary-300 rounded-full flex items-center justify-center caption-strong mr-3">1</div>
-                    <h3 class="caption-strong text-brandNeutral-400">Datos Personales</h3>
+                    <div class="w-8 h-8 bg-primary-50 text-primary-300 rounded-full flex items-center justify-center caption-strong mr-3">1</div>
+                    <h3 class="caption-strong text-slate-900">Datos Personales</h3>
                 </div>
                 
                 <div class="space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <div>
-                        <label for="customer_name" class="block caption text-brandNeutral-400 mb-2">Nombre Completo *</label>
+                        <label for="customer_name" class="block text-sm font-medium text-slate-900 mb-2">Nombre Completo *</label>
                         <input 
                             type="text" 
                             id="customer_name" 
                             name="customer_name" 
-                            class="w-full px-4 py-3 border border-brandWhite-300 rounded-lg caption"
+                            class="w-full px-4 py-2 border border-brandWhite-300 rounded-lg caption"
                             placeholder="Nombre completo"
                         >
-                        <div id="name_error" class="hidden mt-1 caption text-brandError-400"></div>
+                        <div id="name_error" class="hidden mt-1 text-sm text-red-500"></div>
                     </div>
                     
                     <div>
-                        <label for="customer_phone" class="block caption text-brandNeutral-400 mb-2">Número de Celular *</label>
+                        <label for="customer_phone" class="block text-sm font-medium text-slate-900 mb-2">Número de Celular *</label>
                         <input 
                             type="tel" 
                             id="customer_phone" 
                             name="customer_phone" 
-                            class="w-full px-4 py-3 border border-brandWhite-300 rounded-lg caption"
+                            class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm"
                             placeholder="3001234567"
                         >
-                        <div id="phone_error" class="hidden mt-1 caption text-brandError-400"></div>
+                        <div id="phone_error" class="hidden mt-1 text-sm text-red-500"></div>
                     </div>
                     </div>
                     
@@ -56,7 +56,7 @@
                         <button 
                             type="button" 
                             id="btn-continue-step1" 
-                            class="bg-brandPrimary-300 hover:bg-brandPrimary-200 text-brandWhite-100 py-3 px-6 rounded-full caption transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-6 rounded-full text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             disabled
                         >
                             Continuar al Paso 2
@@ -66,37 +66,37 @@
             </div>
 
             <!-- CARD 2: MÉTODO DE ENVÍO -->
-            <div id="card-step2" class="bg-brandWhite-50 rounded-lg p-4 border border-brandWhite-300 mb-4 hidden">
+            <div id="card-step2" class="bg-white rounded-lg p-4 border border-slate-200 mb-4 hidden">
                 <div class="flex items-center mb-4">
-                    <div class="w-8 h-8 bg-brandPrimary-50 text-brandPrimary-300 rounded-full flex items-center justify-center caption-strong mr-3">2</div>
-                    <h3 class="caption-strong text-brandNeutral-400">Método de Envío</h3>
+                    <div class="w-8 h-8 bg-primary-50 text-primary-300 rounded-full flex items-center justify-center caption-strong mr-3">2</div>
+                    <h3 class="caption-strong text-slate-900">Método de Envío</h3>
                 </div>
                 
                 <div class="space-y-4">
                     <div id="shipping-methods-container" class="space-y-3">
                         <!-- Los métodos de envío se cargan dinámicamente aquí -->
                         <div class="text-center py-4">
-                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brandPrimary-300 mx-auto"></div>
-                            <p class="caption text-brandNeutral-400 mt-2">Cargando métodos de envío...</p>
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-300 mx-auto"></div>
+                            <p class="text-sm text-slate-500 mt-2">Cargando métodos de envío...</p>
                         </div>
                     </div>
                     
                     <!-- Selector de Mesa (para Consumo en Local) -->
                     <div id="table-selector-container" class="hidden space-y-4 mb-4">
                         <div>
-                            <label for="selected_table_number" class="block caption text-brandNeutral-400 mb-2">
+                            <label for="selected_table_number" class="block text-sm font-medium text-slate-900 mb-2">
                                 Selecciona tu Mesa *
                             </label>
                             <select 
                                 id="selected_table_number" 
                                 name="selected_table_number"
-                                class="w-full px-4 py-3 border border-brandWhite-300 rounded-lg caption focus:border-brandPrimary-300 focus:ring-1 focus:ring-brandPrimary-300"
+                                class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:border-primary-300 focus:ring-1 focus:ring-primary-300"
                                 required
                             >
                                 <option value="">-- Selecciona una mesa --</option>
                                 <!-- Se cargarán dinámicamente -->
                             </select>
-                            <p class="caption text-brandNeutral-300 mt-1">
+                            <p class="text-sm text-slate-500 mt-1">
                                 Elige la mesa donde deseas consumir
                             </p>
                         </div>
@@ -105,19 +105,19 @@
                     <!-- Selector de Habitación (para Servicio a Habitación) -->
                     <div id="room-selector-container" class="hidden space-y-4 mb-4">
                         <div>
-                            <label for="selected_room_number" class="block caption text-brandNeutral-400 mb-2">
+                            <label for="selected_room_number" class="block text-sm font-medium text-slate-900 mb-2">
                                 Selecciona tu Habitación *
                             </label>
                             <select 
                                 id="selected_room_number" 
                                 name="selected_room_number"
-                                class="w-full px-4 py-3 border border-brandWhite-300 rounded-lg caption focus:border-brandPrimary-300 focus:ring-1 focus:ring-brandPrimary-300"
+                                class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm focus:border-primary-300 focus:ring-1 focus:ring-primary-300"
                                 required
                             >
                                 <option value="">-- Selecciona una habitación --</option>
                                 <!-- Se cargarán dinámicamente -->
                             </select>
-                            <p class="caption text-brandNeutral-300 mt-1">
+                            <p class="text-sm text-slate-500 mt-1">
                                 Elige la habitación a la que deseas que se envíe el servicio
                             </p>
                         </div>
@@ -126,12 +126,12 @@
                     <!-- Address Fields for Local Shipping (only address) -->
                     <div id="address-fields-local" class="hidden space-y-4">
                     <div>
-                        <label for="customer_address" class="block caption text-brandNeutral-400 mb-2">Dirección Completa *</label>
+                        <label for="customer_address" class="block text-sm font-medium text-slate-900 mb-2">Dirección Completa *</label>
                         <textarea 
                             id="customer_address" 
                             name="customer_address" 
                             rows="2"
-                            class="w-full px-4 py-3 border border-brandWhite-300 rounded-lg caption resize-none"
+                            class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm resize-none"
                             placeholder="Calle, carrera, número, apartamento, referencias..."
                         ></textarea>
                     </div>
@@ -141,11 +141,11 @@
                     <div id="address-fields-national" class="hidden space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
-                            <label for="department" class="block caption text-brandNeutral-400 mb-2">Departamento *</label>
+                            <label for="department" class="block text-sm font-medium text-slate-900 mb-2">Departamento *</label>
                             <select 
                                 id="department" 
                                 name="department" 
-                                class="w-full px-4 py-3 border border-brandWhite-300 rounded-lg caption"
+                                class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm"
                             >
                                 <option value="">Selecciona tu departamento</option>
                                 <!-- Se cargarán dinámicamente desde las zonas configuradas -->
@@ -153,11 +153,11 @@
                         </div>
                         
                         <div>
-                            <label for="city" class="block caption text-brandNeutral-400 mb-2">Ciudad *</label>
+                            <label for="city" class="block text-sm font-medium text-slate-900 mb-2">Ciudad *</label>
                             <select 
                                 id="city" 
                                 name="city" 
-                                class="w-full px-4 py-3 border border-brandWhite-300 rounded-lg caption"
+                                class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm"
                                 disabled
                             >
                                 <option value="">Primero selecciona un departamento</option>
@@ -166,12 +166,12 @@
                     </div>
                     
                     <div>
-                        <label for="customer_address_national" class="block caption text-brandNeutral-400 mb-2">Dirección Completa *</label>
+                        <label for="customer_address_national" class="block text-sm font-medium text-slate-900 mb-2">Dirección Completa *</label>
                         <textarea 
                             id="customer_address_national" 
                             name="customer_address" 
                             rows="2"
-                            class="w-full px-4 py-3 border border-brandWhite-300 rounded-lg resize-none caption"
+                            class="w-full px-4 py-2 border border-slate-200 rounded-lg text-sm resize-none"
                             placeholder="Calle, carrera, número, apartamento, referencias..."
                         ></textarea>
                     </div>
@@ -181,14 +181,14 @@
                         <button 
                             type="button" 
                             id="btn-back-step2" 
-                            class="px-4 py-2 bg-brandWhite-50 hover:bg-brandWhite-100 text-brandNeutral-400 rounded-full caption transition-colors border border-brandWhite-300 text-center"
+                            class="px-4 py-2 bg-white hover:bg-slate-50 text-slate-900 rounded-full text-sm transition-colors border border-slate-200 text-center"
                         >
                             Volver
                         </button>
                         <button 
                             type="button" 
                             id="btn-continue-step2" 
-                            class="flex-1 bg-brandPrimary-300 hover:bg-brandPrimary-200 text-brandWhite-100 py-3 rounded-full caption transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-6 rounded-full text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             disabled
                         >
                             Continuar al Paso 3
@@ -198,18 +198,18 @@
             </div>
 
             <!-- CARD 3: MÉTODO DE PAGO -->
-            <div id="card-step3" class="bg-brandWhite-50 rounded-lg p-4 border border-brandWhite-300 mb-4 hidden">
+            <div id="card-step3" class="bg-white rounded-lg p-4 border border-slate-200 mb-4 hidden">
                 <div class="flex items-center mb-4">
-                    <div class="w-8 h-8 bg-brandPrimary-50 text-brandPrimary-300 rounded-full flex items-center justify-center caption-strong mr-3">3</div>
-                    <h3 class="caption-strong text-brandNeutral-400">Método de Pago</h3>
+                    <div class="w-8 h-8 bg-primary-50 text-primary-300 rounded-full flex items-center justify-center caption-strong mr-3">3</div>
+                    <h3 class="caption-strong text-slate-900">Método de Pago</h3>
                 </div>
                 
                 <div class="space-y-4">
                     <div id="payment-methods-container" class="space-y-3">
                         <!-- Los métodos de pago se cargan dinámicamente aquí -->
                         <div class="text-center py-4">
-                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-brandPrimary-300 mx-auto"></div>
-                            <p class="caption text-brandNeutral-400 mt-2">Cargando métodos de pago...</p>
+                            <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-300 mx-auto"></div>
+                            <p class="text-sm text-slate-500 mt-2">Cargando métodos de pago...</p>
                         </div>
                     </div>
                     
@@ -217,14 +217,14 @@
                         <button 
                             type="button" 
                             id="btn-back-step3" 
-                            class="px-4 py-2 bg-brandWhite-50 hover:bg-brandWhite-100 text-brandNeutral-400 rounded-full caption transition-colors border border-brandWhite-300 text-center"
+                            class="px-4 py-2 bg-white hover:bg-slate-50 text-slate-900 rounded-full text-sm transition-colors border border-slate-200 text-center"
                         >
                             Volver
                         </button>
                         <button 
                             type="button" 
                             id="btn-submit-order" 
-                            class="flex-1 bg-brandPrimary-300 hover:bg-brandPrimary-200 text-brandWhite-100 py-3 rounded-full caption transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                            class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-6 rounded-full text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                             disabled
                         >
                             Finalizar compra
@@ -234,22 +234,22 @@
             </div>
             
             <!-- Resumen integrado al final -->
-            <div class="border-t border-accent-200 pt-6 mt-6 px-4">
-                <h3 class="caption-strong text-brandNeutral-400 mb-4">Resumen del Pedido</h3>
+            <div class="border-t border-slate-200 p-6 mt-6 bg-slate-50 rounded-lg">
+                <h3 class="text-lg font-bold text-slate-900 mb-4">Resumen del Pedido</h3>
                 
                 <!-- Products List -->
                 <div id="order-products" class="space-y-3 mb-4">
                     <div class="text-center py-4">
-                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary-300 mx-auto"></div>
-                        <p class="caption text-brandNeutral-400 mt-2">Cargando productos...</p>
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-slate-300 mx-auto"></div>
+                        <p class="text-sm text-slate-500 mt-2">Cargando productos...</p>
                     </div>
                 </div>
                 
                 <!-- Coupon Section -->
-                <div class="border-t border-accent-200 pt-4 mb-4">
+                <div class="border-t border-slate-200 pt-4 mb-4">
                     <div class="flex items-center gap-2 mb-3">
-                        <i data-lucide="ticket" class="w-5 h-5 text-brandPrimary-300"></i>
-                        <h4 class="caption text-brandNeutral-400">Cupón de Descuento</h4>
+                        <i data-lucide="ticket" class="w-5 h-5 text-slate-500"></i>
+                        <h4 class="text-sm font-medium text-slate-500">Cupón de Descuento</h4>
                     </div>
                     
                     <div class="flex gap-2">
@@ -257,60 +257,60 @@
                             type="text" 
                             id="coupon_code" 
                             name="coupon_code" 
-                            class="flex-1 px-3 py-2 border border-brandWhite-300 rounded-lg caption"
+                            class="flex-1 px-3 py-2 border border-slate-200 rounded-lg text-sm"
                             placeholder="Código de cupón"
                             maxlength="50"
                         >
                         <button 
                             type="button" 
                             id="apply-coupon-btn" 
-                            class="px-4 py-2 bg-brandPrimary-300 hover:bg-brandPrimary-200 text-brandWhite-100 rounded-full caption transition-colors text-center"
+                            class="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-full text-sm transition-colors text-center"
                         >
                             Aplicar
                         </button>
                     </div>
                     
-                    <div id="coupon_error" class="hidden mt-1 caption text-brandError-400"></div>
+                    <div id="coupon_error" class="hidden mt-1 text-sm text-red-500"></div>
                 </div>
                 
                 <!-- Sección de productos eliminada - ya está en "Resumen del Pedido" -->
 
                 <!-- Totals -->
-                <div class="border-t border-brandWhite-300 pt-4 space-y-3 mb-4">
+                <div class="border-t border-slate-200 pt-4 space-y-3 mb-4">
                     <!-- Subtotal productos -->
                     <div class="flex justify-between items-center">
-                        <span class="caption text-brandNeutral-400">Subtotal productos:</span>
-                        <span class="caption text-brandNeutral-400" id="summary-subtotal">$0</span>
+                        <span class="text-sm font-medium text-slate-500">Subtotal productos:</span>
+                        <span class="text-sm font-medium text-slate-500" id="summary-subtotal">$0</span>
                     </div>
                     
                     <!-- Envío -->
                     <div class="flex justify-between items-center">
-                        <span class="caption text-brandNeutral-400">Costo de envío:</span>
-                        <span class="caption text-brandNeutral-400" id="summary-shipping">Calculando...</span>
+                        <span class="text-sm font-medium text-slate-500">Costo de envío:</span>
+                        <span class="text-sm font-medium text-slate-500" id="summary-shipping">Calculando...</span>
                     </div>
                     
                     <!-- Descuento cupón (oculto por defecto) -->
                     <div id="coupon-discount-row" class="hidden flex justify-between items-center">
-                        <span class="caption text-brandNeutral-400">Descuento cupón:</span>
-                        <span class="caption text-brandNeutral-400" id="summary-discount">-$0</span>
+                        <span class="text-sm font-medium text-slate-500">Descuento cupón:</span>
+                        <span class="text-sm font-medium text-slate-500" id="summary-discount">-$0</span>
                     </div>
                     
                     <!-- Línea separadora -->
-                    <div class="border-t border-brandWhite-300 pt-3">
+                    <div class="border-t border-slate-200 pt-3">
                         <div class="flex justify-between items-center">
-                            <span class="caption-strong text-brandNeutral-400">Total a pagar:</span>
-                            <span class="caption-strong text-brandNeutral-400" id="summary-total">$0</span>
+                            <span class="text-sm font-bold text-slate-900">Total a pagar:</span>
+                            <span class="text-sm font-bold text-slate-900" id="summary-total">$0</span>
                         </div>
                     </div>
                     
                     <!-- Desglose productos -->
-                    <div id="product-breakdown" class="hidden border-t border-brandWhite-300 pt-3">
-                        <div class="caption text-brandNeutral-400 mb-2">
-                            <span class="caption-strong">Cantidad total de productos:</span>
+                    <div id="product-breakdown" class="hidden border-t border-slate-200 pt-3">
+                        <div class="text-sm font-medium text-slate-500 mb-2">
+                            <span class="text-sm font-bold text-slate-900">Cantidad total de productos:</span>
                             <span id="total-quantity">0</span>
                         </div>
-                        <div class="caption text-brandNeutral-400">
-                            <span class="caption-strong">Productos únicos:</span>
+                        <div class="text-sm font-medium text-slate-500">
+                            <span class="text-sm font-bold text-slate-900">Productos únicos:</span>
                             <span id="unique-products">0</span>
                         </div>
                     </div>

@@ -39,61 +39,15 @@
 
     <!-- Slider de Novedades -->
     @if($sliders->count() > 0)
-        <div class="slider-container relative" x-data="sliderComponent({{ $sliders->toJson() }}, {{ $sliders->first()->transition_duration ?? 5 }})">
+        <div class="slider-container relative" 
+             x-data="sliderComponent({{ $sliders->toJson() }}, {{ $sliders->first()->transition_duration ?? 5 }})"
+             x-init="init()"
+             @pageshow.window="init()">
             <!-- Slider principal -->
             <div class="overflow-hidden rounded-lg">
                 <div class="flex gap-2 sm:gap-4" 
-                     :style="getTransform()"
+                     x-bind:style="transformStyle"
                      @transitionend="handleTransitionEnd()">
-                    
-                    @if($sliders->count() > 1)
-                        <!-- Duplicar último slide al inicio para efecto infinito -->
-                        @php $lastSlider = $sliders->last(); @endphp
-                        <div class="flex-shrink-0 relative flex justify-center w-full sm:w-auto">
-                            @if($lastSlider->url && $lastSlider->url_type !== 'none')
-                                @if($lastSlider->url_type === 'external')
-                                    <a href="{{ $lastSlider->url }}" 
-                                       target="_blank" 
-                                       rel="noopener noreferrer"
-                                       class="block relative group w-full">
-                                @else
-                                    <a href="{{ $lastSlider->url_type === 'internal' ? url($store->slug . '/' . ltrim($lastSlider->url, '/')) : '#' }}" 
-                                       class="block relative group w-full">
-                                @endif
-                            @else
-                                <div class="block relative group w-full">
-                            @endif
-                            
-                            <!-- Imagen del slider - Responsive -->
-                            <div class="w-full sm:w-[420px] h-[180px] sm:h-[200px] bg-accent-100 rounded-lg overflow-hidden relative">
-                                @if($lastSlider->image_url)
-                                    <img src="{{ $lastSlider->image_url }}" 
-                                         alt="{{ $lastSlider->name }}" 
-                                         loading="lazy"
-                                         class="w-full h-full object-cover object-center transition-transform duration-300 group-hover:scale-105"
-                                         style="image-rendering: auto; -webkit-backface-visibility: hidden; backface-visibility: hidden;">
-                                @endif
-                                
-                                <!-- Overlay suave (solo si tiene enlace) -->
-                                @if($lastSlider->url && $lastSlider->url_type !== 'none')
-                                    <div class="absolute inset-0 bg-gradient-to-t from-black-500/20 via-transparent to-transparent"></div>
-                                @endif
-                                
-                                <!-- Indicador de enlace -->
-                                @if($lastSlider->url && $lastSlider->url_type !== 'none')
-                                    <div class="absolute top-1 right-1 bg-accent-50/20 backdrop-blur-sm rounded-full p-0.5 opacity-70 group-hover:opacity-100 transition-opacity">
-                                        <i data-lucide="arrow-up-right" class="w-24px h-24px sm:w-32px sm:h-32px"></i>
-                                    </div>
-                                @endif
-                            </div>
-                            
-                            @if($lastSlider->url && $lastSlider->url_type !== 'none')
-                                </a>
-                            @else
-                                </div>
-                            @endif
-                        </div>
-                    @endif
                     
                     <!-- Slides originales -->
                     @foreach($sliders as $index => $slider)
@@ -171,12 +125,10 @@
                                          style="image-rendering: auto; -webkit-backface-visibility: hidden; backface-visibility: hidden;">
                                 @endif
                                 
-                                <!-- Overlay suave (solo si tiene enlace) -->
                                 @if($firstSlider->url && $firstSlider->url_type !== 'none')
                                     <div class="absolute inset-0 bg-gradient-to-t from-black-500/20 via-transparent to-transparent"></div>
                                 @endif
                                 
-                                <!-- Indicador de enlace -->
                                 @if($firstSlider->url && $firstSlider->url_type !== 'none')
                                     <div class="absolute top-1 right-1 bg-accent-50/20 backdrop-blur-sm rounded-full p-0.5 opacity-70 group-hover:opacity-100 transition-opacity">
                                         <i data-lucide="arrow-up-right" class="w-24px h-24px sm:w-32px sm:h-32px"></i>
@@ -549,110 +501,96 @@
 
 @push('scripts')
 <script>
-function sliderComponent(sliders, duration = 5) {
+window.sliderComponent = function(sliders, duration = 5) {
     return {
-        currentSlide: sliders.length > 1 ? 1 : 0, // Empezar en 1 porque el 0 es el duplicado del último
+        currentSlide: 0,
         sliders: sliders,
-        duration: duration * 1000, // Convertir a milisegundos
+        duration: duration * 1000,
         autoPlayInterval: null,
         isPlaying: true,
         maxSlide: 0,
         isMobile: false,
-        isTransitioning: true,
-        displaySlide: 0, // Índice mostrado al usuario (para indicadores)
-        
+        isTransitioning: false,
+        displaySlide: 0,
+        transformStyle: '',
+
         init() {
-            this.checkViewport();
+            this.stopAutoPlay();
             
-            if (this.sliders.length > 1) {
-                this.startAutoPlay();
-            }
+            this.currentSlide = 0;
+            this.displaySlide = 0;
+            this.isTransitioning = false;
+            this.isPlaying = true;
+            this.checkViewport();
+            this.updateTransform();
+
+            this.$nextTick(() => {
+                if (this.sliders.length > 1) {
+                    this.startAutoPlay();
+                }
+            });
             
             // Escuchar cambios de tamaño de ventana
             window.addEventListener('resize', () => {
                 const wasMobile = this.isMobile;
                 this.checkViewport();
                 
-                // Si cambió de móvil a desktop o viceversa, resetear posición
                 if (wasMobile !== this.isMobile) {
-                    if (this.sliders.length > 1) {
-                        this.currentSlide = 1; // Resetear a primera posición real
-                        this.displaySlide = 0;
-                    } else {
-                        this.currentSlide = 0;
-                    }
-                    // Forzar recálculo del transform
-                    this.$nextTick(() => {
-                        // Trigger re-render
-                    });
+                    this.currentSlide = 0;
+                    this.displaySlide = 0;
+                    this.updateTransform();
                 }
             });
         },
         
+        updateTransform() {
+            this.transformStyle = this.getTransform();
+        },
+        
         checkViewport() {
-            this.isMobile = window.innerWidth < 640; // sm breakpoint de Tailwind
+            this.isMobile = window.innerWidth < 640;
         },
         
         getTransform() {
-            // Calcular ancho dinámicamente según viewport
-            const container = document.querySelector('.slider-container');
-            if (!container) return 'transform: translateX(0px)';
+            if (typeof window === 'undefined') return 'transform: translateX(0px)';
             
-            const isMobile = window.innerWidth < 640; // sm breakpoint
-            const slideWidth = isMobile 
-                ? window.innerWidth - 32 // w-full menos padding (px-4 = 16px cada lado)
-                : 420; // w-[420px] en desktop
-            const gap = isMobile ? 8 : 16; // gap-2 en móvil (8px), gap-4 en desktop (16px)
+            const isMobile = window.innerWidth < 640;
+            const slideWidth = isMobile ? window.innerWidth - 32 : 420;
+            const gap = isMobile ? 8 : 16;
             const totalWidth = slideWidth + gap;
-            
+            const translateX = this.currentSlide * totalWidth;
             const transition = this.isTransitioning ? 'transition: transform 0.5s ease-in-out;' : '';
             
-            return `${transition} transform: translateX(-${this.currentSlide * totalWidth}px)`;
+            return `${transition} transform: translateX(-${translateX}px)`;
         },
         
         goToSlide(index) {
-            // Ir al slide real (sumamos 1 porque el índice 0 es el duplicado)
             this.isTransitioning = true;
-            this.currentSlide = index + 1;
+            this.currentSlide = index;
             this.displaySlide = index;
+            this.updateTransform();
             this.resetAutoPlay();
         },
         
         nextSlide() {
             this.isTransitioning = true;
-            this.currentSlide++;
-            this.displaySlide = ((this.currentSlide - 1) % this.sliders.length);
+            this.currentSlide = (this.currentSlide + 1) % this.sliders.length;
+            this.displaySlide = this.currentSlide;
+            this.updateTransform();
             this.resetAutoPlay();
         },
         
         handleTransitionEnd() {
-            if (this.sliders.length <= 1) return;
-            
-            // Si llegamos al último duplicado (índice totalSlides + 1), saltar al inicio sin transición
-            if (this.currentSlide === this.sliders.length + 1) {
-                this.isTransitioning = false;
-                this.currentSlide = 1;
-                this.displaySlide = 0;
-            }
-            // Si estamos en el duplicado del inicio (índice 0), saltar al final sin transición
-            else if (this.currentSlide === 0) {
-                this.isTransitioning = false;
-                this.currentSlide = this.sliders.length;
-                this.displaySlide = this.sliders.length - 1;
-            }
+            this.isTransitioning = false;
         },
         
         prevSlide() {
             if (this.sliders.length <= 1) return;
             
             this.isTransitioning = true;
-            this.currentSlide--;
-            
-            if (this.currentSlide < 1) {
-                this.currentSlide = this.sliders.length;
-            }
-            
-            this.displaySlide = ((this.currentSlide - 1) % this.sliders.length);
+            this.currentSlide = (this.currentSlide - 1 + this.sliders.length) % this.sliders.length;
+            this.displaySlide = this.currentSlide;
+            this.updateTransform();
             this.resetAutoPlay();
         },
         
