@@ -275,7 +275,14 @@ export async function loadFavoritesPage(storeSlug) {
         const data = await response.json();
         
         // Renderizar productos
-        gridContainer.innerHTML = data.products.map(product => createProductCard(product, storeSlug, favorites)).join('');
+        gridContainer.innerHTML = data.products.map(product => {
+            // Convertir números a formato numérico para cálculos
+            product.price = parseFloat(product.price) || 0;
+            product.precio_promocional = parseFloat(product.precio_promocional) || 0;
+            product.precio_final = parseFloat(product.precio_final) || product.price;
+            product.stock_disponible = parseInt(product.stock_disponible) || 0;
+            return createProductCard(product, storeSlug, favorites);
+        }).join('');
 
         // Actualizar contador
         favorites.updateFavoritesPageCounter();
@@ -303,67 +310,144 @@ export async function loadFavoritesPage(storeSlug) {
 }
 
 /**
- * Crear HTML de card de producto (estilo lista horizontal)
+ * Crear HTML de card de producto (mismo diseño que catálogo)
  */
 function createProductCard(product, storeSlug, favorites) {
-    const isFavorite = favorites.has(product.id);
+    // Función helper para formatear números
+    const formatPrice = (price) => {
+        return Math.round(price).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+    };
     
-    // Botón de carrito o ver producto (según tipo)
-    const cartButton = product.type === 'variable' 
-        ? `<button type="button"
-                   onclick="event.stopPropagation(); event.preventDefault(); window.location.href='${product.url}';"
-                   class="bg-brandPrimary-300 hover:bg-brandPrimary-400 w-11 h-11 rounded-lg flex items-center justify-center transition-colors">
-               <i data-lucide="eye" class="w-16px h-16px text-brandWhite-200"></i>
-           </button>`
-        : `<button type="button" 
-                   class="add-to-cart-btn bg-brandPrimary-300 hover:bg-brandPrimary-400 w-11 h-11 rounded-lg flex items-center justify-center transition-colors" 
-                   data-product-id="${product.id}"
-                   data-product-name="${product.name}"
-                   data-product-price="${product.price}"
-                   data-product-image="${product.image_url}"
-                   onclick="event.stopPropagation(); event.preventDefault();">
-               <i data-lucide="badge-plus" class="w-16px h-16px text-brandWhite-200"></i>
-           </button>`;
+    // Badge de stock
+    let stockBadge = '';
+    if (product.tiene_stock_bajo && product.stock_disponible > 0) {
+        const unidadesText = product.stock_disponible > 1 ? 'es' : '';
+        stockBadge = `
+            <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
+                <span class="bg-red-50 text-red-600 rounded-full px-2 py-1 text-xs font-semibold text-red-600">
+                    Queda ${product.stock_disponible} unidad${unidadesText}
+                </span>
+                ${product.categories && product.categories.length > 0 ? `
+                    <div class="flex flex-wrap gap-1">
+                        <span class="px-2 py-1 text-xs font-semibold text-green-900 bg-green-50 rounded-full">
+                            ${product.categories[0].name}
+                        </span>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    } else if (product.esta_agotado) {
+        stockBadge = `
+            <div class="flex items-center gap-1.5 w-fit">
+                <span class="text-xs font-medium text-white bg-red-500 px-2 py-0.5 rounded-full">
+                    Agotado
+                </span>
+            </div>
+        `;
+    }
+    
+    // Precio con promoción
+    let precioHtml = '';
+    if (product.tiene_promocion) {
+        precioHtml = `
+            <div class="flex items-center gap-2">
+                <span class="text-base font-normal text-slate-900 line-through">$${formatPrice(product.price)}</span>
+                <span class="text-base font-bold text-slate-900">$${formatPrice(product.precio_final)}</span>
+            </div>
+        `;
+    } else {
+        precioHtml = `
+            <div class="flex items-center gap-2">
+                <span class="text-base font-bold text-slate-900">$${formatPrice(product.precio_final)}</span>
+            </div>
+        `;
+    }
+    
+    // Botón de agregar al carrito (igual estructura que el componente add-to-cart-button)
+    let cartButtonHtml = '';
+    if (product.esta_agotado) {
+        cartButtonHtml = `
+            <div class="flex-shrink-0 relative">
+                <button type="button"
+                        disabled
+                        class="bg-gray-300 text-gray-500 font-medium text-sm py-3 px-6 rounded-full transition-colors text-center cursor-not-allowed opacity-50 relative">
+                        <span class="text-sm font-medium">Producto agotado</span>
+                </button>
+            </div>
+        `;
+    } else if (product.type === 'variable') {
+        cartButtonHtml = `
+            <div class="flex-shrink-0 relative">
+                <button type="button"
+                        onclick="event.stopPropagation(); event.preventDefault(); window.location.href='${product.url}';"
+                        class="bg-slate-900 hover:bg-slate-800 text-white font-medium text-sm py-2 px-3 md:py-3 md:px-4 rounded-full transition-colors text-center">
+                        <span class="text-sm font-medium">Ver producto</span>
+                </button>
+            </div>
+        `;
+    } else {
+        cartButtonHtml = `
+            <div class="flex-shrink-0 relative">
+                <button type="button" 
+                        class="add-to-cart-btn bg-slate-900 hover:bg-slate-800 text-white font-medium text-sm py-3 px-6 rounded-full transition-colors text-center relative" 
+                        data-product-id="${product.id}"
+                        data-product-name="${product.name.replace(/'/g, "\\'")}"
+                        data-product-price="${product.precio_final}"
+                        data-product-image="${product.image_url || ''}"
+                        onclick="event.stopPropagation(); event.preventDefault();">
+                        <span class="text-sm font-medium">Agregar</span>
+                </button>
+            </div>
+        `;
+    }
+    
+    // Obtener el color de fondo de la card (igual que en catálogo)
+    const cardBgColor = window.FAVORITES_CARD_BG_COLOR || 'rgba(249, 250, 251, 0.1)';
+    const cardBgStyle = `background-color: ${cardBgColor};`;
     
     return `
-        <a href="${product.url}" 
-           class="bg-brandWhite-100 hover:bg-brandPrimary-50 rounded-lg p-4 hover:shadow-sm transition-all duration-200 block relative">
-            <div class="flex items-center gap-3">
+        <div class="flex gap-2 md:gap-4 rounded-xl p-4 md:p-4 transition-all duration-200 hover:shadow-sm relative" style="${cardBgStyle}">
+            <a href="${product.url}" class="flex items-center gap-4 flex-1 min-w-0">
                 <!-- Imagen del producto -->
-                <div class="w-[78px] h-[78px] rounded-lg flex-shrink-0 overflow-hidden">
-                    <img src="${product.image_url}" 
-                         alt="${product.name}" 
-                         class="w-full h-full object-cover"
-                         onerror="this.onerror=null; this.src='https://via.placeholder.com/78x78?text=Sin+Imagen';">
+                <div class="w-[120px] h-[120px] md:w-[126px] md:h-[126px] rounded-lg flex-shrink-0 overflow-hidden">
+                    ${product.image_url ? `
+                        <img src="${product.image_url}" 
+                             alt="${product.name}" 
+                             class="w-full h-full object-cover"
+                             onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'w-full h-full flex items-center justify-center bg-gray-100\\'><i data-lucide=\\'image\\' class=\\'w-6 h-6 text-gray-400\\'></i></div>';">
+                    ` : `
+                        <div class="w-full h-full flex items-center justify-center bg-gray-100">
+                            <i data-lucide="image" class="w-6 h-6 text-gray-400"></i>
+                        </div>
+                    `}
                 </div>
 
                 <!-- Información del producto -->
-                <div class="flex-1 min-w-0">
-                    <h3 class="body-lg-bold text-brandNeutral-400 line-clamp-1">${product.name}</h3>
+                <div class="flex-1 min-w-0 flex flex-col md:gap-1 gap-0">
+                    ${stockBadge}
                     
-                    ${product.description ? `<p class="caption text-brandNeutral-400 line-clamp-1">${product.description}</p>` : ''}
+                    <!-- Título del producto -->
+                    <h3 class="text-base font-bold text-slate-900 leading-tight">${product.name}</h3>
+                    
+                    <!-- Descripción -->
+                    ${product.description ? `<p class="text-xs font-normal text-slate-900 leading-tight line-clamp-1">${product.description}</p>` : ''}
 
-                    <!-- Precio prominente -->
-                    <div class="body-lg-bold text-brandNeutral-400 mb-1">
-                        ${product.formatted_price}
+                    <!-- Precios -->
+                    ${precioHtml}
+
+                    <!-- Botones de acción -->
+                    <div class="flex gap-2 items-center md:mt-0 mt-2">
+                        ${cartButtonHtml}
+                        <button class="p-3 flex items-center justify-center transition-transform bg-red-50 hover:bg-red-100 rounded-full hover:scale-110"
+                                onclick="event.preventDefault(); event.stopPropagation(); window.favoritesManager.remove(${product.id}); loadFavoritesPage('${storeSlug}');"
+                                data-favorite-btn
+                                data-product-id="${product.id}">
+                            <i data-lucide="heart" class="w-6 h-6 text-red-500 hover:text-red-600" style="fill: currentColor;"></i>
+                        </button>
                     </div>
                 </div>
-
-                <!-- Botones de acción -->
-                <div class="flex flex-col gap-2">
-                    <!-- Botón agregar al carrito o ver opciones -->
-                    ${cartButton}
-                    
-                    <!-- Botón quitar de favoritos -->
-                    <button class="p-2 w-11 h-11 flex items-center justify-center transition-transform bg-brandError-300 hover:bg-brandError-50 rounded-lg hover:scale-110"
-                            onclick="event.preventDefault(); event.stopPropagation(); window.favoritesManager.remove(${product.id}); this.closest('a').remove(); if(window.favoritesManager.count() === 0) { window.location.reload(); }"
-                            data-favorite-btn
-                            data-product-id="${product.id}">
-                        <i data-lucide="heart" class="w-6 h-6 text-brandError-50 hover:text-brandError-300" style="fill: currentColor;"></i>
-                    </button>
-                </div>
-            </div>
-        </a>
+            </a>
+        </div>
     `;
 }
 

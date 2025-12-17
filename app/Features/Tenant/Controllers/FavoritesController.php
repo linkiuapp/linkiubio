@@ -51,18 +51,36 @@ class FavoritesController extends Controller
             ->get();
 
         // Formatear respuesta
-        $formattedProducts = $products->map(function ($product) {
+        $formattedProducts = $products->map(function ($product) use ($store) {
+            // Calcular información de stock
+            $estaAgotado = $product->controlaStock() && !$product->tieneStockIlimitado() && $product->estaAgotado();
+            $tieneStockBajo = $product->controlaStock() && !$product->tieneStockIlimitado() && $product->tieneStockBajo();
+            $stockDisponible = $product->stock_disponible ?? 0;
+            
+            // Calcular precio con promoción
+            $precioFinal = $product->tienePromocionActiva() ? $product->precio_promocional : $product->price;
+            
             return [
                 'id' => $product->id,
                 'name' => $product->name,
                 'slug' => $product->slug,
                 'description' => $product->description,
                 'price' => $product->price,
-                'formatted_price' => '$' . number_format($product->price, 0, ',', '.'),
+                'precio_promocional' => $product->precio_promocional,
+                'tiene_promocion' => $product->tienePromocionActiva(),
+                'precio_final' => $precioFinal,
+                'formatted_price' => '$' . number_format($precioFinal, 0, ',', '.'),
                 'type' => $product->type,
                 'image_url' => $product->main_image_url,
-                'url' => route('tenant.product', [$product->store->slug, $product->slug]),
+                'url' => route('tenant.product', [$store->slug, $product->slug]),
                 'is_active' => $product->is_active,
+                'esta_agotado' => $estaAgotado,
+                'tiene_stock_bajo' => $tieneStockBajo,
+                'stock_disponible' => $stockDisponible,
+                'controla_stock' => $product->controlaStock(),
+                'categories' => $product->categories->map(function($cat) {
+                    return ['id' => $cat->id, 'name' => $cat->name];
+                })->toArray(),
             ];
         });
 

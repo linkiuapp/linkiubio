@@ -412,39 +412,141 @@ unset($__defined_vars, $__key, $__value); ?>
                                     $badge = $item['badge'] ?? null;
                                     $badgeType = $item['badgeType'] ?? 'info';
                                     $badgeColor = $item['badgeColor'] ?? null;
+                                    $children = $item['children'] ?? null;
+                                    $hasChildren = !empty($children) && is_array($children);
+                                    $uniqueItemId = 'item-' . uniqid();
                                 ?>
-                                <li>
-                                    <a
-                                        class="min-h-[40px] w-full flex items-center gap-x-3 py-2.5 px-3 text-sm font-medium text-gray-700 rounded-lg transition-all duration-200 ease-in-out hover:bg-gray-100 hover:text-gray-900 focus:outline-hidden focus:bg-gray-100 focus:text-gray-900 <?php echo e($active ? 'bg-gray-100 text-gray-900' : ''); ?> group"
-                                        :class="isMinified && isDesktop ? 'justify-center' : 'justify-start'"
-                                        href="<?php echo e($url); ?>"
-                                        x-data="{ showTooltip: false }"
-                                        @mouseenter="showTooltip = true; $nextTick(() => {
-                                            const rect = $el.getBoundingClientRect();
-                                            const tooltip = $refs.tooltip;
-                                            if (tooltip) {
-                                                tooltip.style.top = (rect.top + rect.height / 2) + 'px';
-                                                tooltip.style.left = (rect.right + 12) + 'px';
-                                                tooltip.style.transform = 'translateY(-50%)';
-                                            }
-                                        })"
-                                        @mouseleave="showTooltip = false"
-                                    >
-                                        <?php if($icon): ?>
-                                            <i data-lucide="<?php echo e($icon); ?>" class="size-5 shrink-0 transition-colors duration-200"></i>
-                                        <?php endif; ?>
-                                        <span x-show="!isMinified || !isDesktop" class="<?php echo e($badge ? 'flex-1 flex items-center justify-between gap-x-2' : ''); ?>">
-                                            <?php echo e($label); ?>
+                                <li x-data="{ isExpanded: <?php echo e($active ? 'true' : 'false'); ?> }">
+                                    <?php if($hasChildren): ?>
+                                        
+                                        <button
+                                            type="button"
+                                            @click="isExpanded = !isExpanded"
+                                            class="min-h-[40px] w-full flex items-center gap-x-3 py-2.5 px-3 text-sm font-medium text-gray-700 rounded-lg transition-all duration-200 ease-in-out hover:bg-gray-100 hover:text-gray-900 focus:outline-hidden focus:bg-gray-100 focus:text-gray-900 <?php echo e($active ? 'bg-gray-100 text-gray-900' : ''); ?> group"
+                                            :class="isMinified && isDesktop ? 'justify-center' : 'justify-start'"
+                                        >
+                                            <?php if($icon): ?>
+                                                <i data-lucide="<?php echo e($icon); ?>" class="size-5 shrink-0 transition-colors duration-200"></i>
+                                            <?php endif; ?>
+                                            <span x-show="!isMinified || !isDesktop" class="flex-1 text-left">
+                                                <?php echo e($label); ?>
 
-                                            <?php if($badge): ?>
-                                                <?php if($badgeColor): ?>
-                                                    <span class="ms-auto py-0.5 px-2 inline-flex items-center gap-x-1.5 text-xs rounded-full font-semibold <?php echo e($badgeColor); ?> transition-all duration-200">
-                                                        <?php echo e($badge); ?>
-
-                                                    </span>
+                                            </span>
+                                            <i data-lucide="chevron-down" 
+                                               class="size-4 shrink-0 transition-transform duration-200"
+                                               :class="{ 'rotate-180': isExpanded }"
+                                               x-show="!isMinified || !isDesktop"></i>
+                                        </button>
+                                        
+                                        <ul x-show="isExpanded && (!isMinified || !isDesktop)" 
+                                            x-transition:enter="transition ease-out duration-200"
+                                            x-transition:enter-start="opacity-0 max-h-0"
+                                            x-transition:enter-end="opacity-100 max-h-screen"
+                                            x-transition:leave="transition ease-in duration-150"
+                                            x-transition:leave-start="opacity-100 max-h-screen"
+                                            x-transition:leave-end="opacity-0 max-h-0"
+                                            class="ml-4 mt-1 space-y-1 border-l-2 border-gray-200 pl-2 overflow-hidden"
+                                            style="display: none;">
+                                            <?php $__currentLoopData = $children; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $child): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <?php
+                                                    $childLabel = $child['label'] ?? '';
+                                                    $childUrl = $child['url'] ?? '#';
+                                                    $childIcon = $child['icon'] ?? null;
+                                                    $childActive = $child['active'] ?? false;
+                                                    $childChildren = $child['children'] ?? null;
+                                                    $hasChildChildren = !empty($childChildren) && is_array($childChildren);
+                                                ?>
+                                                <?php if($hasChildChildren): ?>
+                                                    
+                                                    <li x-data="{ isChildExpanded: <?php echo e($childActive ? 'true' : 'false'); ?> }">
+                                                        <button
+                                                            type="button"
+                                                            @click="isChildExpanded = !isChildExpanded"
+                                                            class="min-h-[36px] w-full flex items-center gap-x-2 py-2 px-2.5 text-sm text-gray-600 rounded-lg transition-all duration-200 ease-in-out hover:bg-gray-50 hover:text-gray-900 focus:outline-hidden <?php echo e($childActive ? 'bg-gray-50 text-gray-900' : ''); ?>"
+                                                        >
+                                                            <?php if($childIcon): ?>
+                                                                <i data-lucide="<?php echo e($childIcon); ?>" class="size-4 shrink-0"></i>
+                                                            <?php endif; ?>
+                                                            <span class="flex-1 text-left"><?php echo e($childLabel); ?></span>
+                                                            <i data-lucide="chevron-down" 
+                                                               class="size-3 shrink-0 transition-transform duration-200"
+                                                               :class="{ 'rotate-180': isChildExpanded }"></i>
+                                                        </button>
+                                                        <ul x-show="isChildExpanded" 
+                                                            x-transition:enter="transition ease-out duration-200"
+                                                            x-transition:enter-start="opacity-0 max-h-0"
+                                                            x-transition:enter-end="opacity-100 max-h-screen"
+                                                            x-transition:leave="transition ease-in duration-150"
+                                                            x-transition:leave-start="opacity-100 max-h-screen"
+                                                            x-transition:leave-end="opacity-0 max-h-0"
+                                                            class="ml-4 mt-1 space-y-1 border-l-2 border-gray-200 pl-2 overflow-hidden"
+                                                            style="display: none;">
+                                                            <?php $__currentLoopData = $childChildren; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $grandChild): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                                <?php
+                                                                    $grandChildLabel = $grandChild['label'] ?? '';
+                                                                    $grandChildUrl = $grandChild['url'] ?? '#';
+                                                                    $grandChildIcon = $grandChild['icon'] ?? null;
+                                                                    $grandChildActive = $grandChild['active'] ?? false;
+                                                                ?>
+                                                                <li>
+                                                                    <a href="<?php echo e($grandChildUrl); ?>"
+                                                                       class="min-h-[32px] w-full flex items-center gap-x-2 py-1.5 px-2.5 text-sm text-gray-600 rounded-lg transition-all duration-200 ease-in-out hover:bg-gray-50 hover:text-gray-900 focus:outline-hidden <?php echo e($grandChildActive ? 'bg-gray-50 text-gray-900 font-medium' : ''); ?>">
+                                                                        <?php if($grandChildIcon): ?>
+                                                                            <i data-lucide="<?php echo e($grandChildIcon); ?>" class="size-4 shrink-0"></i>
+                                                                        <?php endif; ?>
+                                                                        <span><?php echo e($grandChildLabel); ?></span>
+                                                                    </a>
+                                                                </li>
+                                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                                        </ul>
+                                                    </li>
                                                 <?php else: ?>
-                                                    <span class="ms-auto transition-all duration-200">
-                                                        <?php if (isset($component)) { $__componentOriginal932d1bd2c37cb3241be132016b9435ec = $component; } ?>
+                                                    
+                                                    <li>
+                                                        <a href="<?php echo e($childUrl); ?>"
+                                                           class="min-h-[36px] w-full flex items-center gap-x-2 py-2 px-2.5 text-sm text-gray-600 rounded-lg transition-all duration-200 ease-in-out hover:bg-gray-50 hover:text-gray-900 focus:outline-hidden <?php echo e($childActive ? 'bg-gray-50 text-gray-900 font-medium' : ''); ?>">
+                                                            <?php if($childIcon): ?>
+                                                                <i data-lucide="<?php echo e($childIcon); ?>" class="size-4 shrink-0"></i>
+                                                            <?php endif; ?>
+                                                            <span><?php echo e($childLabel); ?></span>
+                                                        </a>
+                                                    </li>
+                                                <?php endif; ?>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        </ul>
+                                    <?php else: ?>
+                                        
+                                        <a
+                                            class="min-h-[40px] w-full flex items-center gap-x-3 py-2.5 px-3 text-sm font-medium text-gray-700 rounded-lg transition-all duration-200 ease-in-out hover:bg-gray-100 hover:text-gray-900 focus:outline-hidden focus:bg-gray-100 focus:text-gray-900 <?php echo e($active ? 'bg-gray-100 text-gray-900' : ''); ?> group"
+                                            :class="isMinified && isDesktop ? 'justify-center' : 'justify-start'"
+                                            href="<?php echo e($url); ?>"
+                                            x-data="{ showTooltip: false }"
+                                            @mouseenter="showTooltip = true; $nextTick(() => {
+                                                const rect = $el.getBoundingClientRect();
+                                                const tooltip = $refs.tooltip;
+                                                if (tooltip) {
+                                                    tooltip.style.top = (rect.top + rect.height / 2) + 'px';
+                                                    tooltip.style.left = (rect.right + 12) + 'px';
+                                                    tooltip.style.transform = 'translateY(-50%)';
+                                                }
+                                            })"
+                                            @mouseleave="showTooltip = false"
+                                        >
+                                            <?php if($icon): ?>
+                                                <i data-lucide="<?php echo e($icon); ?>" class="size-5 shrink-0 transition-colors duration-200"></i>
+                                            <?php endif; ?>
+                                            <span x-show="!isMinified || !isDesktop" class="<?php echo e($badge ? 'flex-1 flex items-center justify-between gap-x-2' : ''); ?>">
+                                                <?php echo e($label); ?>
+
+                                                <?php if($badge): ?>
+                                                    <?php if($badgeColor): ?>
+                                                        <span class="ms-auto py-0.5 px-2 inline-flex items-center gap-x-1.5 text-xs rounded-full font-semibold <?php echo e($badgeColor); ?> transition-all duration-200">
+                                                            <?php echo e($badge); ?>
+
+                                                        </span>
+                                                    <?php else: ?>
+                                                        <span class="ms-auto transition-all duration-200">
+                                                            <?php if (isset($component)) { $__componentOriginal932d1bd2c37cb3241be132016b9435ec = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal932d1bd2c37cb3241be132016b9435ec = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'design-system::Badges.BadgeSoft','data' => ['type' => ''.e($badgeType).'','text' => ''.e($badge).'']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('badge-soft'); ?>
@@ -464,30 +566,31 @@ unset($__defined_vars, $__key, $__value); ?>
 <?php $component = $__componentOriginal932d1bd2c37cb3241be132016b9435ec; ?>
 <?php unset($__componentOriginal932d1bd2c37cb3241be132016b9435ec); ?>
 <?php endif; ?>
-                                                    </span>
+                                                        </span>
+                                                    <?php endif; ?>
                                                 <?php endif; ?>
-                                            <?php endif; ?>
-                                        </span>
+                                            </span>
 
-                                        
-                                        <template x-teleport="body">
-                                            <div
-                                                x-show="isMinified && isDesktop && showTooltip"
-                                                x-ref="tooltip"
-                                                x-transition:enter="transition ease-out duration-150"
-                                                x-transition:enter-start="opacity-0 scale-95 -translate-x-2"
-                                                x-transition:enter-end="opacity-100 scale-100 translate-x-0"
-                                                x-transition:leave="transition ease-in duration-100"
-                                                x-transition:leave-start="opacity-100 scale-100 translate-x-0"
-                                                x-transition:leave-end="opacity-0 scale-95 -translate-x-2"
-                                                class="fixed z-[99999] px-3 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg whitespace-nowrap pointer-events-none shadow-xl"
-                                                style="display: none;"
-                                            >
-                                                <?php echo e($label); ?>
+                                            
+                                            <template x-teleport="body">
+                                                <div
+                                                    x-show="isMinified && isDesktop && showTooltip"
+                                                    x-ref="tooltip"
+                                                    x-transition:enter="transition ease-out duration-150"
+                                                    x-transition:enter-start="opacity-0 scale-95 -translate-x-2"
+                                                    x-transition:enter-end="opacity-100 scale-100 translate-x-0"
+                                                    x-transition:leave="transition ease-in duration-100"
+                                                    x-transition:leave-start="opacity-100 scale-100 translate-x-0"
+                                                    x-transition:leave-end="opacity-0 scale-95 -translate-x-2"
+                                                    class="fixed z-[99999] px-3 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg whitespace-nowrap pointer-events-none shadow-xl"
+                                                    style="display: none;"
+                                                >
+                                                    <?php echo e($label); ?>
 
-                                            </div>
-                                        </template>
-                                    </a>
+                                                </div>
+                                            </template>
+                                        </a>
+                                    <?php endif; ?>
                                 </li>
                             <?php endif; ?>
                         <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>

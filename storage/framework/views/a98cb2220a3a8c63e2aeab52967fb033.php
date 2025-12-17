@@ -18,58 +18,27 @@
 >
     
     <?php echo $__env->make('tenant-admin::Core/locations/components/notifications', array_diff_key(get_defined_vars(), ['__data' => 1, '__path' => 1]))->render(); ?>
-
-    <?php if(session('error')): ?>
-        <?php if (isset($component)) { $__componentOriginal4e12e3fb830c932c6bff0347987a4573 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal4e12e3fb830c932c6bff0347987a4573 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'design-system::Alerts.AlertBordered','data' => ['type' => 'error','title' => 'No se pudo actualizar la sede','class' => 'w-full']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
-<?php $component->withName('alert-bordered'); ?>
+    
+    <?php if (isset($component)) { $__componentOriginalf98a32c06d8462f5513d0fb3554f9141 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalf98a32c06d8462f5513d0fb3554f9141 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'design-system::Notifications.ToastNotification','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('toast-notification'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['type' => 'error','title' => 'No se pudo actualizar la sede','class' => 'w-full']); ?>
-            <p class="text-sm text-gray-700"><?php echo e(session('error')); ?></p>
-         <?php echo $__env->renderComponent(); ?>
+<?php $component->withAttributes([]); ?>
+<?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__attributesOriginal4e12e3fb830c932c6bff0347987a4573)): ?>
-<?php $attributes = $__attributesOriginal4e12e3fb830c932c6bff0347987a4573; ?>
-<?php unset($__attributesOriginal4e12e3fb830c932c6bff0347987a4573); ?>
+<?php if (isset($__attributesOriginalf98a32c06d8462f5513d0fb3554f9141)): ?>
+<?php $attributes = $__attributesOriginalf98a32c06d8462f5513d0fb3554f9141; ?>
+<?php unset($__attributesOriginalf98a32c06d8462f5513d0fb3554f9141); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginal4e12e3fb830c932c6bff0347987a4573)): ?>
-<?php $component = $__componentOriginal4e12e3fb830c932c6bff0347987a4573; ?>
-<?php unset($__componentOriginal4e12e3fb830c932c6bff0347987a4573); ?>
+<?php if (isset($__componentOriginalf98a32c06d8462f5513d0fb3554f9141)): ?>
+<?php $component = $__componentOriginalf98a32c06d8462f5513d0fb3554f9141; ?>
+<?php unset($__componentOriginalf98a32c06d8462f5513d0fb3554f9141); ?>
 <?php endif; ?>
-    <?php endif; ?>
-
-    <?php if($errors->any()): ?>
-        <?php if (isset($component)) { $__componentOriginal4e12e3fb830c932c6bff0347987a4573 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal4e12e3fb830c932c6bff0347987a4573 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'design-system::Alerts.AlertBordered','data' => ['type' => 'error','title' => 'Revisa la información ingresada','class' => 'w-full']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
-<?php $component->withName('alert-bordered'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
-<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['type' => 'error','title' => 'Revisa la información ingresada','class' => 'w-full']); ?>
-            <ul class="space-y-1 text-sm text-gray-700 list-disc list-inside">
-                <?php $__currentLoopData = $errors->all(); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $error): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                    <li><?php echo e($error); ?></li>
-                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-            </ul>
-         <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginal4e12e3fb830c932c6bff0347987a4573)): ?>
-<?php $attributes = $__attributesOriginal4e12e3fb830c932c6bff0347987a4573; ?>
-<?php unset($__attributesOriginal4e12e3fb830c932c6bff0347987a4573); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginal4e12e3fb830c932c6bff0347987a4573)): ?>
-<?php $component = $__componentOriginal4e12e3fb830c932c6bff0347987a4573; ?>
-<?php unset($__componentOriginal4e12e3fb830c932c6bff0347987a4573); ?>
-<?php endif; ?>
-    <?php endif; ?>
 
     
     <div class="flex flex-col gap-4 lg:flex-row lg:items-center justify-between">
@@ -377,14 +346,14 @@ unset($__errorArgs, $__bag); ?>
                 <div class="md:col-span-1">
                     <?php if (isset($component)) { $__componentOriginalc088a413751f2bc7a99da19699d0dd5c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalc088a413751f2bc7a99da19699d0dd5c = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'design-system::Inputs.InputWithLabel','data' => ['label' => 'Departamento *','name' => 'department','placeholder' => 'Cundinamarca','value' => old('department', $location->department),'required' => true,'containerClass' => 'w-full']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'design-system::Inputs.InputWithLabel','data' => ['label' => 'Departamento *','name' => 'department','placeholder' => 'Cundinamarca','value' => old('department', $location->department),'required' => true,'containerClass' => 'w-full','xModel' => 'departmentInput']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('input-with-label'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['label' => 'Departamento *','name' => 'department','placeholder' => 'Cundinamarca','value' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(old('department', $location->department)),'required' => true,'container-class' => 'w-full']); ?>
+<?php $component->withAttributes(['label' => 'Departamento *','name' => 'department','placeholder' => 'Cundinamarca','value' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(old('department', $location->department)),'required' => true,'container-class' => 'w-full','x-model' => 'departmentInput']); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalc088a413751f2bc7a99da19699d0dd5c)): ?>
@@ -410,14 +379,14 @@ unset($__errorArgs, $__bag); ?>
                 <div class="md:col-span-1">
                     <?php if (isset($component)) { $__componentOriginalc088a413751f2bc7a99da19699d0dd5c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalc088a413751f2bc7a99da19699d0dd5c = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'design-system::Inputs.InputWithLabel','data' => ['label' => 'Ciudad *','name' => 'city','placeholder' => 'Bogotá','value' => old('city', $location->city),'required' => true,'containerClass' => 'w-full']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'design-system::Inputs.InputWithLabel','data' => ['label' => 'Ciudad *','name' => 'city','placeholder' => 'Bogotá','value' => old('city', $location->city),'required' => true,'containerClass' => 'w-full','xModel' => 'cityInput']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('input-with-label'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['label' => 'Ciudad *','name' => 'city','placeholder' => 'Bogotá','value' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(old('city', $location->city)),'required' => true,'container-class' => 'w-full']); ?>
+<?php $component->withAttributes(['label' => 'Ciudad *','name' => 'city','placeholder' => 'Bogotá','value' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(old('city', $location->city)),'required' => true,'container-class' => 'w-full','x-model' => 'cityInput']); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalc088a413751f2bc7a99da19699d0dd5c)): ?>
@@ -441,16 +410,19 @@ unset($__errorArgs, $__bag); ?>
                 </div>
 
                 <div class="md:col-span-2">
-                    <?php if (isset($component)) { $__componentOriginalc088a413751f2bc7a99da19699d0dd5c = $component; } ?>
+                    <div class="space-y-2">
+                        <div class="flex items-center justify-between gap-2">
+                            <div class="flex-1">
+                                <?php if (isset($component)) { $__componentOriginalc088a413751f2bc7a99da19699d0dd5c = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginalc088a413751f2bc7a99da19699d0dd5c = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'design-system::Inputs.InputWithLabel','data' => ['label' => 'Dirección *','name' => 'address','placeholder' => 'Calle 123 #45-67, Centro','value' => old('address', $location->address),'required' => true,'containerClass' => 'w-full']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'design-system::Inputs.InputWithLabel','data' => ['label' => 'Dirección *','name' => 'address','placeholder' => 'Calle 123 #45-67, Centro','value' => old('address', $location->address),'required' => true,'containerClass' => 'w-full','xModel' => 'addressInput']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('input-with-label'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['label' => 'Dirección *','name' => 'address','placeholder' => 'Calle 123 #45-67, Centro','value' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(old('address', $location->address)),'required' => true,'container-class' => 'w-full']); ?>
+<?php $component->withAttributes(['label' => 'Dirección *','name' => 'address','placeholder' => 'Calle 123 #45-67, Centro','value' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute(old('address', $location->address)),'required' => true,'container-class' => 'w-full','x-model' => 'addressInput']); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
 <?php if (isset($__attributesOriginalc088a413751f2bc7a99da19699d0dd5c)): ?>
@@ -461,6 +433,52 @@ unset($__errorArgs, $__bag); ?>
 <?php $component = $__componentOriginalc088a413751f2bc7a99da19699d0dd5c; ?>
 <?php unset($__componentOriginalc088a413751f2bc7a99da19699d0dd5c); ?>
 <?php endif; ?>
+                            </div>
+                            <div class="flex items-end">
+                                <button
+                                    type="button"
+                                    @click="verifyLocation()"
+                                    x-bind:disabled="isGeocoding"
+                                    class="h-[42px] px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors flex items-center gap-2 text-sm font-medium"
+                                >
+                                    <i data-lucide="map-pin" class="w-4 h-4" x-show="!isGeocoding"></i>
+                                    <span x-show="!isGeocoding">Verificar ubicación</span>
+                                    <span x-show="isGeocoding" class="flex items-center gap-2">
+                                        <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                        </svg>
+                                        Verificando...
+                                    </span>
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <!-- Preview del mapa -->
+                        <div x-show="showMapPreview" x-cloak class="mt-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                            <div class="flex items-start justify-between mb-2">
+                                <div>
+                                    <p class="text-sm font-semibold text-gray-900">Ubicación encontrada</p>
+                                    <p class="text-xs text-gray-600" x-text="formattedAddress"></p>
+                                </div>
+                                <button
+                                    type="button"
+                                    @click="clearMapPreview()"
+                                    class="text-gray-400 hover:text-gray-600"
+                                >
+                                    <i data-lucide="x" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                            <div class="rounded-lg overflow-hidden border border-gray-300">
+                                <img x-bind:src="mapPreviewUrl" alt="Preview del mapa" class="w-full h-48 object-cover">
+                            </div>
+                            <p class="text-xs text-gray-500 mt-2">Las coordenadas se guardarán automáticamente al actualizar la sede.</p>
+                        </div>
+                        
+                        <!-- Campos hidden para coordenadas -->
+                        <input type="hidden" name="latitude" x-model="latitude">
+                        <input type="hidden" name="longitude" x-model="longitude">
+                    </div>
                     <?php $__errorArgs = ['address'];
 $__bag = $errors->getBag($__errorArgs[1] ?? 'default');
 if ($__bag->has($__errorArgs[0])) :
@@ -899,9 +917,50 @@ document.addEventListener('alpine:init', () => {
         copyFromDay: null,
         copyToDays: [],
         
+        // Geocoding state
+        addressInput: <?php echo json_encode(old('address', $location->address ?? ''), 512) ?>,
+        cityInput: <?php echo json_encode(old('city', $location->city ?? ''), 512) ?>,
+        departmentInput: <?php echo json_encode(old('department', $location->department ?? ''), 512) ?>,
+        latitude: <?php echo json_encode(old('latitude', $location->latitude), 512) ?>,
+        longitude: <?php echo json_encode(old('longitude', $location->longitude), 512) ?>,
+        isGeocoding: false,
+        showMapPreview: <?php echo json_encode(($location->latitude && $location->longitude) ? true : false, 15, 512) ?>,
+        mapPreviewUrl: <?php
+            if ($location->latitude && $location->longitude && function_exists('getMapboxStaticMapUrlFromCoordinates')) {
+                $mapUrl = getMapboxStaticMapUrlFromCoordinates($location->longitude, $location->latitude, 600, 256);
+                echo $mapUrl ? json_encode($mapUrl) : "''";
+            } else {
+                echo "''";
+            }
+        ?>,
+        formattedAddress: <?php echo json_encode(($location->address ?? '') . ', ' . ($location->city ?? '') . ', ' . ($location->department ?? '')) ?>,
+        
         init() {
             // Initialize form behavior
             this.initScheduleCheckboxes();
+
+            <?php if(session('error')): ?>
+            if (window.toast) {
+                window.toast.error(
+                    'Error',
+                    '<?php echo e(session('error')); ?>',
+                    5000,
+                    'bottom-center'
+                );
+            }
+            <?php endif; ?>
+
+            <?php if($errors->any()): ?>
+            if (window.toast) {
+                const errors = <?php echo json_encode($errors->all(), 15, 512) ?>;
+                window.toast.error(
+                    'Error de validación',
+                    errors.join(', '),
+                    5000,
+                    'bottom-center'
+                );
+            }
+            <?php endif; ?>
         },
         
         initScheduleCheckboxes() {
@@ -1091,6 +1150,82 @@ document.addEventListener('alpine:init', () => {
             this.showCopyModal = false;
             
             this.showNotificationMessage(`Se copió el horario a ${this.copyToDays.length} día(s).`, 'success');
+        },
+        
+        async verifyLocation() {
+            const address = this.addressInput?.trim();
+            const city = this.cityInput?.trim();
+            const department = this.departmentInput?.trim();
+            
+            if (!address || !city || !department) {
+                if (window.toast) {
+                    window.toast.error(
+                        'Campos incompletos',
+                        'Por favor completa dirección, ciudad y departamento antes de verificar.',
+                        4000,
+                        'bottom-center'
+                    );
+                }
+                return;
+            }
+            
+            this.isGeocoding = true;
+            
+            try {
+                const response = await fetch('<?php echo e(route("tenant.admin.locations.geocode", $store->slug)); ?>', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                    },
+                    body: JSON.stringify({
+                        address: address,
+                        city: city,
+                        department: department
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    this.latitude = data.latitude;
+                    this.longitude = data.longitude;
+                    this.mapPreviewUrl = data.map_url;
+                    this.formattedAddress = data.formatted_address;
+                    this.showMapPreview = true;
+                    
+                    if (window.toast) {
+                        window.toast.success(
+                            'Ubicación verificada',
+                            'Las coordenadas se guardarán al actualizar la sede.',
+                            3000,
+                            'bottom-center'
+                        );
+                    }
+                } else {
+                    throw new Error(data.message || 'No se pudo encontrar la ubicación');
+                }
+            } catch (error) {
+                console.error('Geocoding error:', error);
+                if (window.toast) {
+                    window.toast.error(
+                        'Error',
+                        error.message || 'No se pudo verificar la ubicación. Verifica la dirección e intenta de nuevo.',
+                        5000,
+                        'bottom-center'
+                    );
+                }
+            } finally {
+                this.isGeocoding = false;
+            }
+        },
+        
+        clearMapPreview() {
+            this.showMapPreview = false;
+            this.latitude = null;
+            this.longitude = null;
+            this.mapPreviewUrl = '';
+            this.formattedAddress = '';
         }
     }));
 });

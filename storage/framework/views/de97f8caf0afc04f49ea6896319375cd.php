@@ -1080,7 +1080,7 @@ window.verComprobante = function(imageUrl, orderNumber, orderId = null, initialS
                     '<i data-lucide="alert-triangle" class="w-5 h-5"></i>' +
                     '<div class="flex-1">' +
                     '<span class="font-medium">Comprobante dudoso</span>' +
-                    '<p class="text-xs mt-1">Se recomienda revisión manual</p>' +
+                    '<p class="text-xs mt-1">Recomendado revisar manualmente</p>' +
                     '</div>' +
                     '</div>';
             } else if (status === 'fake') {
