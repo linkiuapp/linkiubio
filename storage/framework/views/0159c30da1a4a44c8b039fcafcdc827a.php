@@ -17,12 +17,12 @@
             <img src="<?php echo e($product->images->first()->image_url); ?>" 
                  alt="<?php echo e($product->name); ?>" 
                  id="main-image"
-                 class="w-full h-full object-contain transition-all duration-300 rounded-t-2xl object-center">
+                 class="w-full h-full object-cover transition-all duration-300 rounded-t-2xl object-center">
         <?php elseif($product->main_image_url): ?>
             <img src="<?php echo e($product->main_image_url); ?>" 
                  alt="<?php echo e($product->name); ?>" 
                  id="main-image"
-                 class="w-full h-full object-contain transition-all duration-300 rounded-t-2xl object-center">
+                 class="w-full h-full object-cover transition-all duration-300 rounded-t-2xl object-center">
         <?php else: ?>
             <div class="w-full h-full flex items-center justify-center bg-gray-100">
                 <i data-lucide="gallery" class="w-16 h-16 text-gray-400"></i>
@@ -256,7 +256,7 @@
                             ¡Solo quedan <?php echo e($stock); ?> unidad<?php echo e($stock > 1 ? 'es' : ''); ?> disponible<?php echo e($stock > 1 ? 's' : ''); ?>!
                         </span>
                     </div>
-                <?php elseif($stock > 5): ?>
+                <?php else: ?>
                     <div class="flex items-center gap-2 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-green-600 flex-shrink-0">
                             <path d="M11 21.73a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73z"></path>
@@ -269,20 +269,9 @@
 
                         </span>
                     </div>
-                <?php else: ?>
-                    <div class="flex items-center gap-2 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
-                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-red-600 flex-shrink-0">
-                            <path d="M21 10V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l2-1.14"></path>
-                            <path d="m7.5 4.27 9 5.15"></path>
-                            <polyline points="3.29 7 12 12 20.71 7"></polyline>
-                            <line x1="12" x2="12" y1="22" y2="12"></line>
-                            <path d="m17 13 5 5m-5 0 5-5"></path>
-                        </svg>
-                        <span class="text-sm font-semibold text-red-600">Agotado</span>
-                    </div>
                 <?php endif; ?>
             <?php else: ?>
-                <div id="stock-indicator" class="flex items-center gap-2 rounded-lg px-3 py-2">
+                <div id="stock-indicator" class="flex items-center gap-2 rounded-lg">
                     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600 flex-shrink-0">
                         <circle cx="12" cy="12" r="10"></circle>
                         <path d="M12 16v-4"></path>
@@ -344,22 +333,33 @@
             <?php else: ?>
                 <h2 class="text-base font-bold text-slate-900">Productos Relacionados</h2>
             <?php endif; ?>
-            
-            <div class="grid grid-cols-2 gap-3">
+
+            <?php
+                // Calcular el color de fondo de las cards (igual que en catálogo)
+                $bgColor = $store->design && $store->design->header_background_color ? $store->design->header_background_color : '#f9fafb';
+                // Convertir hex a rgba con opacidad
+                if (strpos($bgColor, '#') === 0) {
+                    $hex = str_replace('#', '', $bgColor);
+                    $r = hexdec(substr($hex, 0, 2));
+                    $g = hexdec(substr($hex, 2, 2));
+                    $b = hexdec(substr($hex, 4, 2));
+                    $cardBgColor = "rgba($r, $g, $b, 0.1)";
+                } else {
+                    $cardBgColor = $bgColor;
+                }
+            ?>
+            <div class="space-y-4">
                 <?php $__currentLoopData = $relatedProducts; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $relatedProduct): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
                     <?php
-                        $estaAgotado = $relatedProduct->estaAgotado();
-                        $tieneStockBajo = false;
-                        $stockDisponible = 0;
-                        if ($relatedProduct->controla_stock && $relatedProduct->tipo_stock === 'limitado' && $relatedProduct->type === 'simple') {
-                            $stockDisponible = $relatedProduct->cantidad_stock ?? 0;
-                            $tieneStockBajo = $stockDisponible > 0 && $stockDisponible <= 5;
-                        }
+                        $estaAgotado = $relatedProduct->controlaStock() && !$relatedProduct->tieneStockIlimitado() && $relatedProduct->estaAgotado();
+                        $tieneStockBajo = $relatedProduct->controlaStock() && !$relatedProduct->tieneStockIlimitado() && $relatedProduct->tieneStockBajo();
+                        $stockDisponible = $relatedProduct->stock_disponible ?? 0;
                     ?>
-                    <div class="bg-white rounded-lg p-4 border border-gray-200 hover:border-blue-300 transition-all hover:shadow-md">
-                        <a href="<?php echo e(route('tenant.product', [$store->slug, $relatedProduct->slug])); ?>" class="block">
+                    <div class="flex gap-2 md:gap-4 rounded-xl p-4 md:p-4 transition-all duration-200 hover:shadow-sm relative" 
+                         style="background-color: <?php echo e($cardBgColor); ?>;">
+                        <div class="flex items-center gap-4">
                             <!-- Imagen del producto -->
-                            <div class="w-full aspect-square bg-gray-100 rounded-lg overflow-hidden mb-3">
+                            <div class="w-[120px] h-[120px] md:w-[126px] md:h-[126px] rounded-lg flex-shrink-0 overflow-hidden">
                                 <?php if($relatedProduct->main_image_url): ?>
                                     <img src="<?php echo e($relatedProduct->main_image_url); ?>" 
                                          alt="<?php echo e($relatedProduct->name); ?>" 
@@ -373,21 +373,34 @@
 
                             <!-- Información del producto -->
                             <div class="flex-1 min-w-0 flex flex-col md:gap-1 gap-0">
-                                <!-- Badge de Stock bajo -->
-                                <?php if($tieneStockBajo && $stockDisponible > 0): ?>
-                                    <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
-                                        <span class="bg-red-50 text-red-600 rounded-full px-2 py-1 text-xs font-semibold text-red-600">
-                                            Queda <?php echo e($stockDisponible); ?> unidad<?php echo e($stockDisponible > 1 ? 'es' : ''); ?>
+                                <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
+                                    <!-- Badge de Stock bajo -->
+                                    <?php if($tieneStockBajo && $stockDisponible > 0): ?>
+                                        <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
+                                            <span class="bg-red-50 text-red-600 rounded-full px-2 py-1 text-xs font-semibold text-red-600">
+                                                Queda <?php echo e($stockDisponible); ?> unidad<?php echo e($stockDisponible > 1 ? 'es' : ''); ?>
 
-                                        </span>
-                                    </div>
-                                <?php elseif($estaAgotado): ?>
-                                    <div class="flex items-center gap-1.5 w-fit">
-                                        <span class="text-xs font-medium text-white bg-red-500 px-2 py-0.5 rounded-full">
-                                            Agotado
-                                        </span>
-                                    </div>
-                                <?php endif; ?>
+                                            </span>
+                                        </div>
+                                        
+                                    <?php elseif($estaAgotado): ?>
+                                        <div class="flex items-center gap-1.5 w-fit">
+                                            <span class="text-xs font-medium text-white bg-red-500 px-2 py-0.5 rounded-full">
+                                                Agotado
+                                            </span>
+                                        </div>
+                                    <?php endif; ?>
+                                    <?php if($relatedProduct->categories->count() > 0): ?>
+                                        <div class="flex flex-wrap gap-1">
+                                            <?php $__currentLoopData = $relatedProduct->categories->take(1); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <span class="px-2 py-1 text-xs font-semibold text-green-900 bg-green-50 rounded-full">
+                                                    <?php echo e($category->name); ?>
+
+                                                </span>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
 
                                 <!-- Título del producto -->
                                 <h3 class="text-base font-bold text-slate-900 leading-tight"><?php echo e($relatedProduct->name); ?></h3>
@@ -438,7 +451,7 @@
                                     <?php endif; ?>
                                 </div>
                             </div>
-                        </a>
+                        </div>
                     </div>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
             </div>

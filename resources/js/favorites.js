@@ -324,9 +324,11 @@ function createProductCard(product, storeSlug, favorites) {
         const unidadesText = product.stock_disponible > 1 ? 'es' : '';
         stockBadge = `
             <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
-                <span class="bg-red-50 text-red-600 rounded-full px-2 py-1 text-xs font-semibold text-red-600">
-                    Queda ${product.stock_disponible} unidad${unidadesText}
-                </span>
+                <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
+                    <span class="bg-red-50 text-red-600 rounded-full px-2 py-1 text-xs font-semibold text-red-600">
+                        Queda ${product.stock_disponible} unidad${unidadesText}
+                    </span>
+                </div>
                 ${product.categories && product.categories.length > 0 ? `
                     <div class="flex flex-wrap gap-1">
                         <span class="px-2 py-1 text-xs font-semibold text-green-900 bg-green-50 rounded-full">
@@ -338,10 +340,30 @@ function createProductCard(product, storeSlug, favorites) {
         `;
     } else if (product.esta_agotado) {
         stockBadge = `
-            <div class="flex items-center gap-1.5 w-fit">
-                <span class="text-xs font-medium text-white bg-red-500 px-2 py-0.5 rounded-full">
-                    Agotado
-                </span>
+            <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
+                <div class="flex items-center gap-1.5 w-fit">
+                    <span class="text-xs font-medium text-white bg-red-500 px-2 py-0.5 rounded-full">
+                        Agotado
+                    </span>
+                </div>
+                ${product.categories && product.categories.length > 0 ? `
+                    <div class="flex flex-wrap gap-1">
+                        <span class="px-2 py-1 text-xs font-semibold text-green-900 bg-green-50 rounded-full">
+                            ${product.categories[0].name}
+                        </span>
+                    </div>
+                ` : ''}
+            </div>
+        `;
+    } else if (product.categories && product.categories.length > 0) {
+        // Si no hay badge de stock pero hay categorías, mostrar solo la categoría
+        stockBadge = `
+            <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
+                <div class="flex flex-wrap gap-1">
+                    <span class="px-2 py-1 text-xs font-semibold text-green-900 bg-green-50 rounded-full">
+                        ${product.categories[0].name}
+                    </span>
+                </div>
             </div>
         `;
     }

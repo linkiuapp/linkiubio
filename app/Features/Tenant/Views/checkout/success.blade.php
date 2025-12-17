@@ -87,18 +87,18 @@
                  @transitionend="handleTransitionEnd()">
 
                 <!-- Duplicar último slide al inicio para efecto infinito -->
-                <a href="{{ route('register.step1') }}" class="flex-shrink-0 w-full flex items-center justify-center relative">
+                <a href="https://wa.me/573104594344?text=Quiero%20ser%20parte%20de%20Linkiu" target="_blank" rel="noopener" class="flex-shrink-0 w-full flex items-center justify-center relative">
                     <img src="{{ asset('images-ui/Banner_succces_linkiu_02.svg') }}" alt="Banner 2" class="w-full">
                 </a>
                 <!-- Slides originales -->
-                <a href="{{ route('register.step1') }}" class="flex-shrink-0 w-full flex items-center justify-center relative">
+                <a href="https://wa.me/573104594344?text=Quiero%20ser%20parte%20de%20Linkiu" target="_blank" rel="noopener" class="flex-shrink-0 w-full flex items-center justify-center relative">
                     <img src="{{ asset('images-ui/Banner_succces_linkiu_01.svg') }}" alt="Banner 1" class="w-full">
                 </a>
-                <a href="{{ route('register.step1') }}" class="flex-shrink-0 w-full flex items-center justify-center relative">
+                <a href="https://wa.me/573104594344?text=Quiero%20ser%20parte%20de%20Linkiu" target="_blank" rel="noopener" class="flex-shrink-0 w-full flex items-center justify-center relative">
                     <img src="{{ asset('images-ui/Banner_succces_linkiu_02.svg') }}" alt="Banner 2" class="w-full">
                 </a>
                 <!-- Duplicar primer slide al final para efecto infinito -->
-                <a href="{{ route('register.step1') }}" class="flex-shrink-0 w-full flex items-center justify-center relative">
+                <a href="https://wa.me/573104594344?text=Quiero%20ser%20parte%20de%20Linkiu" target="_blank" rel="noopener" class="flex-shrink-0 w-full flex items-center justify-center relative">
                     <img src="{{ asset('images-ui/Banner_succces_linkiu_01.svg') }}" alt="Banner 1" class="w-full">
                 </a>
             </div>

@@ -316,34 +316,36 @@
 
                             <!-- Información del producto -->
                             <div class="flex-1 min-w-0 flex flex-col md:gap-1 gap-0">
-                                <!-- Badge de Stock bajo -->
-                                @if($tieneStockBajo && $stockDisponible > 0)
-                                    <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
-                                        <div class="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center">
-                                            <span class="text-base font-bold">
-                                             🔥
+                                <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
+                                    <div class="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center">
+                                        <span class="text-base font-bold">
+                                            🔥
+                                        </span>
+                                    </div>
+                                    <!-- Badge de Stock bajo -->
+                                    @if($tieneStockBajo && $stockDisponible > 0)
+                                        <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
+                                            <span class="bg-red-50 text-red-600 rounded-full px-2 py-1 text-xs font-semibold text-red-600">
+                                                Queda {{ $stockDisponible }} unidad{{ $stockDisponible > 1 ? 'es' : '' }}
                                             </span>
                                         </div>
-                                        <span class="bg-red-50 text-red-600 rounded-full px-2 py-1 text-xs font-semibold text-red-600">
-                                            Queda {{ $stockDisponible }} unidad{{ $stockDisponible > 1 ? 'es' : '' }}
-                                        </span>
-                                        @if($product->categories->count() > 0)
-                                            <div class="flex flex-wrap gap-1">
-                                                @foreach($product->categories->take(1) as $category)
-                                                    <span class="px-2 py-1 text-xs font-semibold text-green-900 bg-green-50 rounded-full">
-                                                        {{ $category->name }}
-                                                    </span>
-                                                @endforeach
-                                            </div>
-                                        @endif
-                                    </div>
-                                @elseif($estaAgotado)
-                                    <div class="flex items-center gap-1.5 w-fit">
-                                        <span class="text-xs font-medium text-white bg-red-500 px-2 py-0.5 rounded-full">
-                                            Agotado
-                                        </span>
-                                    </div>
-                                @endif
+                                    @elseif($estaAgotado)
+                                        <div class="flex items-center gap-1.5 w-fit">
+                                            <span class="text-xs font-medium text-white bg-red-500 px-2 py-0.5 rounded-full">
+                                                Agotado
+                                            </span>
+                                        </div>
+                                    @endif
+                                    @if($product->categories->count() > 0)
+                                        <div class="flex flex-wrap gap-1">
+                                            @foreach($product->categories->take(1) as $category)
+                                                <span class="px-2 py-1 text-xs font-semibold text-green-900 bg-green-50 rounded-full">
+                                                    {{ $category->name }}
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </div>
 
                                 <!-- Título del producto -->
                                 <h3 class="text-base font-bold text-slate-900 leading-tight">{{ $product->name }}</h3>
@@ -431,17 +433,26 @@
 
                             <!-- Información del producto -->
                             <div class="flex-1 min-w-0 flex flex-col md:gap-1 gap-0">
-                                <!-- Badge de Stock bajo -->
-                                @if($tieneStockBajo && $stockDisponible > 0)
-                                    <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
+                                <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
                                         <div class="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center">
                                             <span class="text-base font-bold">
-                                            ✨
+                                                ✨
                                             </span>
                                         </div>
-                                        <span class="bg-red-50 text-red-600 rounded-full px-2 py-1 text-xs font-semibold text-red-600">
-                                            Queda {{ $stockDisponible }} unidad{{ $stockDisponible > 1 ? 'es' : '' }}
-                                        </span>
+                                        <!-- Badge de Stock bajo -->
+                                        @if($tieneStockBajo && $stockDisponible > 0)
+                                            <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
+                                                <span class="bg-red-50 text-red-600 rounded-full px-2 py-1 text-xs font-semibold text-red-600">
+                                                    Queda {{ $stockDisponible }} unidad{{ $stockDisponible > 1 ? 'es' : '' }}
+                                                </span>
+                                            </div>
+                                        @elseif($estaAgotado)
+                                            <div class="flex items-center gap-1.5 w-fit">
+                                                <span class="text-xs font-medium text-white bg-red-500 px-2 py-0.5 rounded-full">
+                                                    Agotado
+                                                </span>
+                                            </div>
+                                        @endif
                                         @if($product->categories->count() > 0)
                                             <div class="flex flex-wrap gap-1">
                                                 @foreach($product->categories->take(1) as $category)
@@ -452,44 +463,37 @@
                                             </div>
                                         @endif
                                     </div>
-                                @elseif($estaAgotado)
-                                    <div class="flex items-center gap-1.5 w-fit">
-                                        <span class="text-xs font-medium text-white bg-red-500 px-2 py-0.5 rounded-full">
-                                            Agotado
-                                        </span>
-                                    </div>
-                                @endif
 
-                                <!-- Título del producto -->
-                                <h3 class="text-base font-bold text-slate-900 leading-tight">{{ $product->name }}</h3>
-                                
-                                <!-- Descripción -->
-                                @if($product->description)
-                                    <p class="text-xs font-normal text-slate-900 leading-tight line-clamp-1">{{ $product->description }}</p>
-                                @endif
-
-                                <!-- Precios -->
-                                <div class="flex items-center gap-2">
-                                    @if($product->tienePromocionActiva())
-                                        <span class="text-base font-normal text-slate-900 line-through">${{ number_format($product->price, 0, ',', '.') }}</span>
-                                        <span class="text-base font-bold text-slate-900">${{ number_format($product->precio_promocional, 0, ',', '.') }}</span>
-                                    @else
-                                        <span class="text-base font-bold text-slate-900">${{ number_format($product->price, 0, ',', '.') }}</span>
+                                    <!-- Título del producto -->
+                                    <h3 class="text-base font-bold text-slate-900 leading-tight">{{ $product->name }}</h3>
+                                    
+                                    <!-- Descripción -->
+                                    @if($product->description)
+                                        <p class="text-xs font-normal text-slate-900 leading-tight line-clamp-1">{{ $product->description }}</p>
                                     @endif
-                                </div>
 
-                                <!-- Botones de acción -->
-                                <div class="flex gap-2 items-center md:mt-0 mt-2">
-                                    <x-add-to-cart-button :product="$product" :store="$store" />
-                                    @if(featureEnabled($store, 'favoritos'))
-                                    <button class="p-3 flex items-center justify-center transition-transform bg-red-50 hover:bg-red-100 rounded-full hover:scale-110" 
-                                            data-favorite-btn
-                                            data-product-id="{{ $product->id }}">
-                                        <i data-lucide="heart" class="w-6 h-6 text-red-500 hover:text-red-600" style="fill: currentColor;"></i>
-                                    </button>
-                                @endif
+                                    <!-- Precios -->
+                                    <div class="flex items-center gap-2">
+                                        @if($product->tienePromocionActiva())
+                                            <span class="text-base font-normal text-slate-900 line-through">${{ number_format($product->price, 0, ',', '.') }}</span>
+                                            <span class="text-base font-bold text-slate-900">${{ number_format($product->precio_promocional, 0, ',', '.') }}</span>
+                                        @else
+                                            <span class="text-base font-bold text-slate-900">${{ number_format($product->price, 0, ',', '.') }}</span>
+                                        @endif
+                                    </div>
+
+                                    <!-- Botones de acción -->
+                                    <div class="flex gap-2 items-center md:mt-0 mt-2">
+                                        <x-add-to-cart-button :product="$product" :store="$store" />
+                                        @if(featureEnabled($store, 'favoritos'))
+                                        <button class="p-3 flex items-center justify-center transition-transform bg-red-50 hover:bg-red-100 rounded-full hover:scale-110" 
+                                                data-favorite-btn
+                                                data-product-id="{{ $product->id }}">
+                                            <i data-lucide="heart" class="w-6 h-6 text-red-500 hover:text-red-600" style="fill: currentColor;"></i>
+                                        </button>
+                                    @endif
+                                    </div>
                                 </div>
-                            </div>
                         </div>
                     </div>
                 @endforeach

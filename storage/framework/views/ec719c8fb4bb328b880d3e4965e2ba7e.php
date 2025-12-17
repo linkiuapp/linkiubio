@@ -315,36 +315,38 @@
 
                             <!-- Información del producto -->
                             <div class="flex-1 min-w-0 flex flex-col md:gap-1 gap-0">
-                                <!-- Badge de Stock bajo -->
-                                <?php if($tieneStockBajo && $stockDisponible > 0): ?>
-                                    <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
-                                        <div class="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center">
-                                            <span class="text-base font-bold">
-                                             🔥
+                                <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
+                                    <div class="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center">
+                                        <span class="text-base font-bold">
+                                            🔥
+                                        </span>
+                                    </div>
+                                    <!-- Badge de Stock bajo -->
+                                    <?php if($tieneStockBajo && $stockDisponible > 0): ?>
+                                        <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
+                                            <span class="bg-red-50 text-red-600 rounded-full px-2 py-1 text-xs font-semibold text-red-600">
+                                                Queda <?php echo e($stockDisponible); ?> unidad<?php echo e($stockDisponible > 1 ? 'es' : ''); ?>
+
                                             </span>
                                         </div>
-                                        <span class="bg-red-50 text-red-600 rounded-full px-2 py-1 text-xs font-semibold text-red-600">
-                                            Queda <?php echo e($stockDisponible); ?> unidad<?php echo e($stockDisponible > 1 ? 'es' : ''); ?>
+                                    <?php elseif($estaAgotado): ?>
+                                        <div class="flex items-center gap-1.5 w-fit">
+                                            <span class="text-xs font-medium text-white bg-red-500 px-2 py-0.5 rounded-full">
+                                                Agotado
+                                            </span>
+                                        </div>
+                                    <?php endif; ?>
+                                    <?php if($product->categories->count() > 0): ?>
+                                        <div class="flex flex-wrap gap-1">
+                                            <?php $__currentLoopData = $product->categories->take(1); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                                <span class="px-2 py-1 text-xs font-semibold text-green-900 bg-green-50 rounded-full">
+                                                    <?php echo e($category->name); ?>
 
-                                        </span>
-                                        <?php if($product->categories->count() > 0): ?>
-                                            <div class="flex flex-wrap gap-1">
-                                                <?php $__currentLoopData = $product->categories->take(1); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                    <span class="px-2 py-1 text-xs font-semibold text-green-900 bg-green-50 rounded-full">
-                                                        <?php echo e($category->name); ?>
-
-                                                    </span>
-                                                <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                            </div>
-                                        <?php endif; ?>
-                                    </div>
-                                <?php elseif($estaAgotado): ?>
-                                    <div class="flex items-center gap-1.5 w-fit">
-                                        <span class="text-xs font-medium text-white bg-red-500 px-2 py-0.5 rounded-full">
-                                            Agotado
-                                        </span>
-                                    </div>
-                                <?php endif; ?>
+                                                </span>
+                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
 
                                 <!-- Título del producto -->
                                 <h3 class="text-base font-bold text-slate-900 leading-tight"><?php echo e($product->name); ?></h3>
@@ -451,18 +453,27 @@
 
                             <!-- Información del producto -->
                             <div class="flex-1 min-w-0 flex flex-col md:gap-1 gap-0">
-                                <!-- Badge de Stock bajo -->
-                                <?php if($tieneStockBajo && $stockDisponible > 0): ?>
-                                    <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
+                                <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
                                         <div class="w-6 h-6 bg-slate-200 rounded-full flex items-center justify-center">
                                             <span class="text-base font-bold">
-                                            ✨
+                                                ✨
                                             </span>
                                         </div>
-                                        <span class="bg-red-50 text-red-600 rounded-full px-2 py-1 text-xs font-semibold text-red-600">
-                                            Queda <?php echo e($stockDisponible); ?> unidad<?php echo e($stockDisponible > 1 ? 'es' : ''); ?>
+                                        <!-- Badge de Stock bajo -->
+                                        <?php if($tieneStockBajo && $stockDisponible > 0): ?>
+                                            <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
+                                                <span class="bg-red-50 text-red-600 rounded-full px-2 py-1 text-xs font-semibold text-red-600">
+                                                    Queda <?php echo e($stockDisponible); ?> unidad<?php echo e($stockDisponible > 1 ? 'es' : ''); ?>
 
-                                        </span>
+                                                </span>
+                                            </div>
+                                        <?php elseif($estaAgotado): ?>
+                                            <div class="flex items-center gap-1.5 w-fit">
+                                                <span class="text-xs font-medium text-white bg-red-500 px-2 py-0.5 rounded-full">
+                                                    Agotado
+                                                </span>
+                                            </div>
+                                        <?php endif; ?>
                                         <?php if($product->categories->count() > 0): ?>
                                             <div class="flex flex-wrap gap-1">
                                                 <?php $__currentLoopData = $product->categories->take(1); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
@@ -474,35 +485,28 @@
                                             </div>
                                         <?php endif; ?>
                                     </div>
-                                <?php elseif($estaAgotado): ?>
-                                    <div class="flex items-center gap-1.5 w-fit">
-                                        <span class="text-xs font-medium text-white bg-red-500 px-2 py-0.5 rounded-full">
-                                            Agotado
-                                        </span>
-                                    </div>
-                                <?php endif; ?>
 
-                                <!-- Título del producto -->
-                                <h3 class="text-base font-bold text-slate-900 leading-tight"><?php echo e($product->name); ?></h3>
-                                
-                                <!-- Descripción -->
-                                <?php if($product->description): ?>
-                                    <p class="text-xs font-normal text-slate-900 leading-tight line-clamp-1"><?php echo e($product->description); ?></p>
-                                <?php endif; ?>
-
-                                <!-- Precios -->
-                                <div class="flex items-center gap-2">
-                                    <?php if($product->tienePromocionActiva()): ?>
-                                        <span class="text-base font-normal text-slate-900 line-through">$<?php echo e(number_format($product->price, 0, ',', '.')); ?></span>
-                                        <span class="text-base font-bold text-slate-900">$<?php echo e(number_format($product->precio_promocional, 0, ',', '.')); ?></span>
-                                    <?php else: ?>
-                                        <span class="text-base font-bold text-slate-900">$<?php echo e(number_format($product->price, 0, ',', '.')); ?></span>
+                                    <!-- Título del producto -->
+                                    <h3 class="text-base font-bold text-slate-900 leading-tight"><?php echo e($product->name); ?></h3>
+                                    
+                                    <!-- Descripción -->
+                                    <?php if($product->description): ?>
+                                        <p class="text-xs font-normal text-slate-900 leading-tight line-clamp-1"><?php echo e($product->description); ?></p>
                                     <?php endif; ?>
-                                </div>
 
-                                <!-- Botones de acción -->
-                                <div class="flex gap-2 items-center md:mt-0 mt-2">
-                                    <?php if (isset($component)) { $__componentOriginal0ebc6ef07b571ddf6bdd9d88111343c0 = $component; } ?>
+                                    <!-- Precios -->
+                                    <div class="flex items-center gap-2">
+                                        <?php if($product->tienePromocionActiva()): ?>
+                                            <span class="text-base font-normal text-slate-900 line-through">$<?php echo e(number_format($product->price, 0, ',', '.')); ?></span>
+                                            <span class="text-base font-bold text-slate-900">$<?php echo e(number_format($product->precio_promocional, 0, ',', '.')); ?></span>
+                                        <?php else: ?>
+                                            <span class="text-base font-bold text-slate-900">$<?php echo e(number_format($product->price, 0, ',', '.')); ?></span>
+                                        <?php endif; ?>
+                                    </div>
+
+                                    <!-- Botones de acción -->
+                                    <div class="flex gap-2 items-center md:mt-0 mt-2">
+                                        <?php if (isset($component)) { $__componentOriginal0ebc6ef07b571ddf6bdd9d88111343c0 = $component; } ?>
 <?php if (isset($attributes)) { $__attributesOriginal0ebc6ef07b571ddf6bdd9d88111343c0 = $attributes; } ?>
 <?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'components.add-to-cart-button','data' => ['product' => $product,'store' => $store]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
 <?php $component->withName('add-to-cart-button'); ?>
@@ -522,15 +526,15 @@
 <?php $component = $__componentOriginal0ebc6ef07b571ddf6bdd9d88111343c0; ?>
 <?php unset($__componentOriginal0ebc6ef07b571ddf6bdd9d88111343c0); ?>
 <?php endif; ?>
-                                    <?php if(featureEnabled($store, 'favoritos')): ?>
-                                    <button class="p-3 flex items-center justify-center transition-transform bg-red-50 hover:bg-red-100 rounded-full hover:scale-110" 
-                                            data-favorite-btn
-                                            data-product-id="<?php echo e($product->id); ?>">
-                                        <i data-lucide="heart" class="w-6 h-6 text-red-500 hover:text-red-600" style="fill: currentColor;"></i>
-                                    </button>
-                                <?php endif; ?>
+                                        <?php if(featureEnabled($store, 'favoritos')): ?>
+                                        <button class="p-3 flex items-center justify-center transition-transform bg-red-50 hover:bg-red-100 rounded-full hover:scale-110" 
+                                                data-favorite-btn
+                                                data-product-id="<?php echo e($product->id); ?>">
+                                            <i data-lucide="heart" class="w-6 h-6 text-red-500 hover:text-red-600" style="fill: currentColor;"></i>
+                                        </button>
+                                    <?php endif; ?>
+                                    </div>
                                 </div>
-                            </div>
                         </div>
                     </div>
                 <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>

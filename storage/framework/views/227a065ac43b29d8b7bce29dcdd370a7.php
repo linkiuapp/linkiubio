@@ -40,7 +40,7 @@ unset($__defined_vars, $__key, $__value); ?>
         <button type="button"
                 disabled
                 class="bg-gray-300 text-gray-500 font-medium text-sm py-3 px-6 rounded-full transition-colors text-center cursor-not-allowed opacity-50">
-                <span class="text-sm font-medium">Producto agotado</span>
+                <span class="text-sm font-medium">agotado</span>
         </button>
     <?php elseif($product->type === 'variable'): ?>
         

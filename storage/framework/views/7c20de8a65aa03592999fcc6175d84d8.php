@@ -225,31 +225,33 @@
 
                         <!-- Información del producto -->
                         <div class="flex-1 min-w-0 flex flex-col md:gap-1 gap-0">
-                            <!-- Badge de Stock bajo -->
-                            <?php if($tieneStockBajo && $stockDisponible > 0): ?>
-                                <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
-                                    <span class="bg-red-50 text-red-600 rounded-full px-2 py-1 text-xs font-semibold text-red-600">
-                                        Queda <?php echo e($stockDisponible); ?> unidad<?php echo e($stockDisponible > 1 ? 'es' : ''); ?>
+                            <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
+                                <!-- Badge de Stock bajo -->
+                                <?php if($tieneStockBajo && $stockDisponible > 0): ?>
+                                    <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
+                                        <span class="bg-red-50 text-red-600 rounded-full px-2 py-1 text-xs font-semibold text-red-600">
+                                            Queda <?php echo e($stockDisponible); ?> unidad<?php echo e($stockDisponible > 1 ? 'es' : ''); ?>
 
-                                    </span>
-                                    <?php if($product->categories->count() > 0): ?>
-                                        <div class="flex flex-wrap gap-1">
-                                            <?php $__currentLoopData = $product->categories->take(1); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-                                                <span class="px-2 py-1 text-xs font-semibold text-green-900 bg-green-50 rounded-full">
-                                                    <?php echo e($category->name); ?>
+                                        </span>
+                                    </div>
+                                <?php elseif($estaAgotado): ?>
+                                    <div class="flex items-center gap-1.5 w-fit">
+                                        <span class="text-xs font-medium text-white bg-red-500 px-2 py-0.5 rounded-full">
+                                            Agotado
+                                        </span>
+                                    </div>
+                                <?php endif; ?>
+                                <?php if($product->categories->count() > 0): ?>
+                                    <div class="flex flex-wrap gap-1">
+                                        <?php $__currentLoopData = $product->categories->take(1); $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $category): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
+                                            <span class="px-2 py-1 text-xs font-semibold text-green-900 bg-green-50 rounded-full">
+                                                <?php echo e($category->name); ?>
 
-                                                </span>
-                                            <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-                                        </div>
-                                    <?php endif; ?>
-                                </div>
-                            <?php elseif($estaAgotado): ?>
-                                <div class="flex items-center gap-1.5 w-fit">
-                                    <span class="text-xs font-medium text-white bg-red-500 px-2 py-0.5 rounded-full">
-                                        Agotado
-                                    </span>
-                                </div>
-                            <?php endif; ?>
+                                            </span>
+                                        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
 
                             <!-- Título del producto -->
                             <h3 class="text-base font-bold text-slate-900 leading-tight"><?php echo e($product->name); ?></h3>
