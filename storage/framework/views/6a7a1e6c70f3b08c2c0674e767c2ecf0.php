@@ -41,84 +41,26 @@
         x-data="locationsPage()"
         x-init="init()"
     >
-        
-        <?php $__currentLoopData = [
-            'location_created' => 'La sede se ha creado correctamente.',
-            'location_updated' => 'La sede se ha actualizado correctamente.',
-            'location_deleted' => 'La sede se ha eliminado correctamente.',
-        ]; $__env->addLoop($__currentLoopData); foreach($__currentLoopData as $sessionKey => $message): $__env->incrementLoopIndices(); $loop = $__env->getLastLoop(); ?>
-            <?php if(session($sessionKey)): ?>
-                <div
-                    x-data="{ show: true }"
-                    x-show="show"
-                    x-cloak
-                    x-transition:enter="transition ease-out duration-300"
-                    x-transition:enter-start="opacity-0 translate-y-2"
-                    x-transition:enter-end="opacity-100 translate-y-0"
-                    x-transition:leave="transition ease-in duration-200"
-                    x-transition:leave-start="opacity-100 translate-y-0"
-                    x-transition:leave-end="opacity-0 translate-y-2"
-                    x-init="setTimeout(() => show = false, 5000)"
-                >
-                    <?php if (isset($component)) { $__componentOriginal4e12e3fb830c932c6bff0347987a4573 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal4e12e3fb830c932c6bff0347987a4573 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'design-system::Alerts.AlertBordered','data' => ['type' => 'success','title' => 'Actualización exitosa','message' => $message]] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
-<?php $component->withName('alert-bordered'); ?>
+        <?php if (isset($component)) { $__componentOriginalf98a32c06d8462f5513d0fb3554f9141 = $component; } ?>
+<?php if (isset($attributes)) { $__attributesOriginalf98a32c06d8462f5513d0fb3554f9141 = $attributes; } ?>
+<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'design-system::Notifications.ToastNotification','data' => []] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
+<?php $component->withName('toast-notification'); ?>
 <?php if ($component->shouldRender()): ?>
 <?php $__env->startComponent($component->resolveView(), $component->data()); ?>
 <?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
 <?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
 <?php endif; ?>
-<?php $component->withAttributes(['type' => 'success','title' => 'Actualización exitosa','message' => \Illuminate\View\Compilers\BladeCompiler::sanitizeComponentAttribute($message)]); ?>
+<?php $component->withAttributes([]); ?>
 <?php echo $__env->renderComponent(); ?>
 <?php endif; ?>
-<?php if (isset($__attributesOriginal4e12e3fb830c932c6bff0347987a4573)): ?>
-<?php $attributes = $__attributesOriginal4e12e3fb830c932c6bff0347987a4573; ?>
-<?php unset($__attributesOriginal4e12e3fb830c932c6bff0347987a4573); ?>
+<?php if (isset($__attributesOriginalf98a32c06d8462f5513d0fb3554f9141)): ?>
+<?php $attributes = $__attributesOriginalf98a32c06d8462f5513d0fb3554f9141; ?>
+<?php unset($__attributesOriginalf98a32c06d8462f5513d0fb3554f9141); ?>
 <?php endif; ?>
-<?php if (isset($__componentOriginal4e12e3fb830c932c6bff0347987a4573)): ?>
-<?php $component = $__componentOriginal4e12e3fb830c932c6bff0347987a4573; ?>
-<?php unset($__componentOriginal4e12e3fb830c932c6bff0347987a4573); ?>
+<?php if (isset($__componentOriginalf98a32c06d8462f5513d0fb3554f9141)): ?>
+<?php $component = $__componentOriginalf98a32c06d8462f5513d0fb3554f9141; ?>
+<?php unset($__componentOriginalf98a32c06d8462f5513d0fb3554f9141); ?>
 <?php endif; ?>
-                </div>
-            <?php endif; ?>
-        <?php endforeach; $__env->popLoop(); $loop = $__env->getLastLoop(); ?>
-        
-
-        
-        <div
-            x-show="showSuccessAlert"
-            x-cloak
-            x-transition:enter="transition ease-out duration-300"
-            x-transition:enter-start="opacity-0 translate-y-2"
-            x-transition:enter-end="opacity-100 translate-y-0"
-            x-transition:leave="transition ease-in duration-200"
-            x-transition:leave-start="opacity-100 translate-y-0"
-            x-transition:leave-end="opacity-0 translate-y-2"
-        >
-            <?php if (isset($component)) { $__componentOriginal4e12e3fb830c932c6bff0347987a4573 = $component; } ?>
-<?php if (isset($attributes)) { $__attributesOriginal4e12e3fb830c932c6bff0347987a4573 = $attributes; } ?>
-<?php $component = Illuminate\View\AnonymousComponent::resolve(['view' => 'design-system::Alerts.AlertBordered','data' => ['type' => 'success','title' => 'Acción exitosa']] + (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag ? $attributes->all() : [])); ?>
-<?php $component->withName('alert-bordered'); ?>
-<?php if ($component->shouldRender()): ?>
-<?php $__env->startComponent($component->resolveView(), $component->data()); ?>
-<?php if (isset($attributes) && $attributes instanceof Illuminate\View\ComponentAttributeBag): ?>
-<?php $attributes = $attributes->except(\Illuminate\View\AnonymousComponent::ignoredParameterNames()); ?>
-<?php endif; ?>
-<?php $component->withAttributes(['type' => 'success','title' => 'Acción exitosa']); ?>
-                <span x-text="successMessage"></span>
-             <?php echo $__env->renderComponent(); ?>
-<?php endif; ?>
-<?php if (isset($__attributesOriginal4e12e3fb830c932c6bff0347987a4573)): ?>
-<?php $attributes = $__attributesOriginal4e12e3fb830c932c6bff0347987a4573; ?>
-<?php unset($__attributesOriginal4e12e3fb830c932c6bff0347987a4573); ?>
-<?php endif; ?>
-<?php if (isset($__componentOriginal4e12e3fb830c932c6bff0347987a4573)): ?>
-<?php $component = $__componentOriginal4e12e3fb830c932c6bff0347987a4573; ?>
-<?php unset($__componentOriginal4e12e3fb830c932c6bff0347987a4573); ?>
-<?php endif; ?>
-        </div>
-        
 
         <?php
             $emptyStateSvg = 'base_ui_empty_locations.svg';
@@ -442,42 +384,72 @@
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.data('locationsPage', () => ({
-                showSuccessAlert: false,
-                successMessage: '',
                 init() {
                     if (typeof window.createIcons !== 'undefined' && typeof window.lucideIcons !== 'undefined') {
                         window.createIcons({ icons: window.lucideIcons });
                     }
 
+                    <?php if(session('location_created')): ?>
+                    if (window.toast) {
+                        window.toast.success(
+                            'Actualización exitosa',
+                            'La sede se ha creado correctamente.',
+                            5000,
+                            'bottom-center'
+                        );
+                    }
+                    <?php endif; ?>
+
+                    <?php if(session('location_updated')): ?>
+                    if (window.toast) {
+                        window.toast.success(
+                            'Actualización exitosa',
+                            'La sede se ha actualizado correctamente.',
+                            5000,
+                            'bottom-center'
+                        );
+                    }
+                    <?php endif; ?>
+
+                    <?php if(session('location_deleted')): ?>
+                    if (window.toast) {
+                        window.toast.success(
+                            'Actualización exitosa',
+                            'La sede se ha eliminado correctamente.',
+                            5000,
+                            'bottom-center'
+                        );
+                    }
+                    <?php endif; ?>
+
                     const storedMessage = window.localStorage.getItem('locations-success-message');
                     if (storedMessage) {
-                        this.successMessage = storedMessage;
                         window.localStorage.removeItem('locations-success-message');
-                        this.triggerSuccessAlert();
+                        if (window.toast) {
+                            window.toast.success(
+                                'Actualización exitosa',
+                                storedMessage,
+                                5000,
+                                'bottom-center'
+                            );
+                        }
                     }
 
                     window.addEventListener('show-success-alert', (event) => {
                         const detail = event.detail || {};
-                        this.successMessage = detail.message || 'Operación realizada correctamente.';
-                        this.triggerSuccessAlert();
+                        const message = detail.message || 'Operación realizada correctamente.';
+                        if (window.toast) {
+                            window.toast.success(
+                                'Actualización exitosa',
+                                message,
+                                5000,
+                                'bottom-center'
+                            );
+                        }
                     });
 
                     this.registerToggleHandlers();
                     this.registerSetAsMainHandlers();
-                },
-                triggerSuccessAlert() {
-                    if (!this.successMessage) {
-                        this.successMessage = 'Operación realizada correctamente.';
-                    }
-                    this.showSuccessAlert = true;
-                    this.$nextTick(() => {
-                        if (typeof window.createIcons !== 'undefined' && typeof window.lucideIcons !== 'undefined') {
-                            window.createIcons({ icons: window.lucideIcons });
-                        }
-                    });
-                    setTimeout(() => {
-                        this.showSuccessAlert = false;
-                    }, 5000);
                 },
                 deleteLocation(id, name, event) {
                     const rowElement = event.target.closest('tr');
@@ -507,7 +479,14 @@
                         .then(data => {
                             if (!data.success) {
                                 checkbox.checked = !isChecked;
-                                alert(data.message || 'No se pudo actualizar el estado.');
+                                if (window.toast) {
+                                    window.toast.error(
+                                        'Error',
+                                        data.message || 'No se pudo actualizar el estado.',
+                                        5000,
+                                        'bottom-center'
+                                    );
+                                }
                                 checkbox.disabled = false;
                                 return;
                             }
@@ -515,7 +494,14 @@
                         })
                         .catch(() => {
                             checkbox.checked = !isChecked;
-                            alert('Ocurrió un error al actualizar el estado.');
+                            if (window.toast) {
+                                window.toast.error(
+                                    'Error',
+                                    'Ocurrió un error al actualizar el estado.',
+                                    5000,
+                                    'bottom-center'
+                                );
+                            }
                             checkbox.disabled = false;
                         });
                     });
@@ -541,14 +527,28 @@
                         .then(response => response.json())
                         .then(data => {
                             if (!data.success) {
-                                alert(data.message || 'No se pudo establecer la sede como principal.');
+                                if (window.toast) {
+                                    window.toast.error(
+                                        'Error',
+                                        data.message || 'No se pudo establecer la sede como principal.',
+                                        5000,
+                                        'bottom-center'
+                                    );
+                                }
                                 button.disabled = false;
                                 return;
                             }
                             this.setMainSuccess(row, button, data.message);
                         })
                         .catch(() => {
-                            alert('Ocurrió un error al establecer la sede como principal.');
+                            if (window.toast) {
+                                window.toast.error(
+                                    'Error',
+                                    'Ocurrió un error al establecer la sede como principal.',
+                                    5000,
+                                    'bottom-center'
+                                );
+                            }
                             button.disabled = false;
                         });
                     });
@@ -562,8 +562,15 @@
                     }
 
                     this.markRowAsMain(newMainRow, button);
-                    this.successMessage = message;
-                    this.triggerSuccessAlert();
+                    
+                    if (window.toast) {
+                        window.toast.success(
+                            'Actualización exitosa',
+                            message,
+                            5000,
+                            'bottom-center'
+                        );
+                    }
                 },
                 markRowAsMain(row, button) {
                     row.dataset.locationMain = 'true';

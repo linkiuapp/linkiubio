@@ -39,26 +39,26 @@ unset($__defined_vars, $__key, $__value); ?>
         
         <button type="button"
                 disabled
-                class="bg-gray-300 w-11 h-11 rounded-lg flex items-center justify-center cursor-not-allowed opacity-50">
-                <i data-lucide="x" class="w-16px h-16px text-gray-500"></i>
+                class="bg-gray-300 text-gray-500 font-medium text-sm py-3 px-6 rounded-full transition-colors text-center cursor-not-allowed opacity-50">
+                <span class="text-sm font-medium">Producto agotado</span>
         </button>
     <?php elseif($product->type === 'variable'): ?>
         
         <button type="button"
                 onclick="event.stopPropagation(); event.preventDefault(); window.location.href='<?php echo e(route('tenant.product', [$store->slug, $product->slug])); ?>';"
-                class="bg-brandPrimary-300 hover:bg-brandPrimary-400 w-11 h-11 rounded-lg flex items-center justify-center transition-colors">
-                <i data-lucide="eye" class="w-16px h-16px text-brandWhite-200"></i>
+                class="bg-slate-900 hover:bg-slate-800 text-white font-medium text-sm py-2 px-3 md:py-3 md:px-4 rounded-full transition-colors text-center">
+                <span class="text-sm font-medium">Ver producto</span>
         </button>
     <?php else: ?>
         
         <button type="button" 
-                class="add-to-cart-btn bg-brandPrimary-300 hover:bg-brandPrimary-400 w-11 h-11 rounded-lg flex items-center justify-center transition-colors" 
+                class="add-to-cart-btn bg-slate-900 hover:bg-slate-800 text-white font-medium text-sm py-3 px-6 rounded-full transition-colors text-center" 
                 data-product-id="<?php echo e($product->id); ?>"
                 data-product-name="<?php echo e($product->name); ?>"
                 data-product-price="<?php echo e($product->price); ?>"
                 data-product-image="<?php echo e($product->main_image_url); ?>"
                 onclick="event.stopPropagation(); event.preventDefault();">
-                <i data-lucide="badge-plus" class="w-16px h-16px text-brandWhite-200"></i>
+                <span class="text-sm font-medium">Agregar</span>
         </button>
     <?php endif; ?>
     
