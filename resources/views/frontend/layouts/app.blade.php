@@ -19,124 +19,235 @@
     
     <!-- Lordicon -->
     <script src="https://cdn.lordicon.com/lordicon.js"></script>
+    
+    {{-- SECTION: Additional Styles --}}
+    @stack('styles')
+    {{-- End SECTION: Additional Styles --}}
+    
+    <style>
+        body {
+            position: relative;
+            background: #ffffff;
+        }
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100%;
+            max-width: 480px;
+            height: 100vh;
+            background: linear-gradient(to bottom, @php
+                $bgColor = $store->design && $store->design->header_background_color ? $store->design->header_background_color : '#f9fafb';
+                // Convertir hex a rgba con opacidad 50%
+                if (strpos($bgColor, '#') === 0) {
+                    $hex = str_replace('#', '', $bgColor);
+                    $r = hexdec(substr($hex, 0, 2));
+                    $g = hexdec(substr($hex, 2, 2));
+                    $b = hexdec(substr($hex, 4, 2));
+                    echo "rgba($r, $g, $b, 0.4)";
+                } else {
+                    echo $bgColor;
+                }
+            @endphp, #ffffff);
+            filter: blur(180px);
+            z-index: -1;
+            pointer-events: none;
+        }
+    </style>
 </head>
-<body class="bg-brandWhite-50 md:max-w-[480px] max-w-full mx-auto overflow-x-hidden">
+<body class="md:max-w-[480px] max-w-full mx-auto overflow-x-hidden">
     {{-- Maintenance Notice --}}
     <x-maintenance-notice variant="tenant" />
 
     <!-- Header -->
-    <header class="relative overflow-hidden" style="background: {{ $store->design ? $store->design->header_background_color : '' }}">
-        <div class="px-6 py-16 text-center">
-
+    <header class="z-[9999] overflow-hidden max-w-[348px] md:max-w-[450px] mx-auto rounded-t-3xl mt-[40px]" style="background: {{ $store->design ? $store->design->header_background_color : '' }}">
+        <div class="px-2 py-8 flex items-center justify-center gap-2 md:gap-6">
             <!-- Logo -->
-            <div class="mb-2">
-                <div class="mx-auto flex items-center justify-center">
-                    @if($store->design && $store->design->logo_url)
-                        <div class="relative inline-block border-4 border-brandWhite-300 rounded-full">
-                            <img src="{{ $store->design->logo_url }}" 
-                                 alt="Logo" 
-                                 class="w-[130px] h-[130px] md:w-[150px] md:h-[150px] rounded-full object-cover border-6 border-brandWhite-300">
-                            @if($store->verified)
-                                <a href="{{ route('tenant.verified', $store->slug) }}" class="absolute bottom-2 border-2 border-brandInfo-300 left-24 bg-brandInfo-50 rounded-full p-1 shadow-lg" title="Tienda verificada">
-                                    <i data-lucide="badge-check" class="w-16px h-16px text-brandInfo-400"></i>
-                                </a>
-                            @else
-                                <a href="{{ route('tenant.verified', $store->slug) }}" class="absolute bottom-2 border-2 border-brandNeutral-300 left-24 bg-brandNeutral-50 rounded-full p-2 shadow-lg" title="Tienda no verificada">
-                                    <i data-lucide="badge-x" class="w-16px h-16px text-brandNeutral-400"></i>
-                                </a>
-                            @endif
-                        </div>
-                    @endif
-                </div>
+            <div class="flex-shrink-0">
+                @if($store->design && $store->design->logo_url)
+                    <div class="relative inline-block border-4 border-white rounded-full">
+                        <img src="{{ $store->design->logo_url }}" 
+                             alt="Logo" 
+                             class="w-[80px] h-[80px] rounded-full object-cover border-6 border-brandWhite-300">
+                    </div>
+                @endif
             </div>
 
-            <!-- Nombre de la tienda y badge de verificación -->
-            <div class="flex items-center gap-2 justify-center mb-2">
-                <h1 class="h1 capitalize" style="color: {{ $store->design ? $store->design->header_text_color : '#ffffff' }}">
-                    {{ $store->name ?? 'Linkiu Store' }}
-                </h1>
-            </div>            
+            <!-- Contenido: Nombre, Badge y Descripción -->
+            <div class="flex flex-col min-w-0">
+                <!-- Nombre de la tienda y badge de verificación -->
+                <div class="flex items-center gap-1">
+                    <h1 class="text-[24px] font-extrabold capitalize truncate" style="color: {{ $store->design ? $store->design->header_text_color : '#ffffff' }}">
+                        {{ $store->name ?? 'Nombre de la tienda' }}
+                    </h1>
+                    @if($store->verified)
+                        <a href="{{ route('tenant.verified', $store->slug) }}" 
+                           class="flex-shrink-0" 
+                           title="Tienda verificada">
+                            <svg class="w-[24px] h-[24px] text-blue-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                <path fill-rule="evenodd" d="M12 2c-.791 0-1.55.314-2.11.874l-.893.893a.985.985 0 0 1-.696.288H7.04A2.984 2.984 0 0 0 4.055 7.04v1.262a.986.986 0 0 1-.288.696l-.893.893a2.984 2.984 0 0 0 0 4.22l.893.893a.985.985 0 0 1 .288.696v1.262a2.984 2.984 0 0 0 2.984 2.984h1.262c.261 0 .512.104.696.288l.893.893a2.984 2.984 0 0 0 4.22 0l.893-.893a.985.985 0 0 1 .696-.288h1.262a2.984 2.984 0 0 0 2.984-2.984V15.7c0-.261.104-.512.288-.696l.893-.893a2.984 2.984 0 0 0 0-4.22l-.893-.893a.985.985 0 0 1-.288-.696V7.04a2.984 2.984 0 0 0-2.984-2.984h-1.262a.985.985 0 0 1-.696-.288l-.893-.893A2.984 2.984 0 0 0 12 2Zm3.683 7.73a1 1 0 1 0-1.414-1.413l-4.253 4.253-1.277-1.277a1 1 0 0 0-1.415 1.414l1.985 1.984a1 1 0 0 0 1.414 0l4.96-4.96Z" clip-rule="evenodd"/>
+                            </svg>
+                        </a>
+                    @else
+                        <a href="{{ route('tenant.verified', $store->slug) }}" 
+                           class="flex-shrink-0" 
+                           title="Tienda no verificada">
+                           <svg class="w-[24px] h-[24px] text-gray-300" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                <path fill-rule="evenodd" d="M12 2c-.791 0-1.55.314-2.11.874l-.893.893a.985.985 0 0 1-.696.288H7.04A2.984 2.984 0 0 0 4.055 7.04v1.262a.986.986 0 0 1-.288.696l-.893.893a2.984 2.984 0 0 0 0 4.22l.893.893a.985.985 0 0 1 .288.696v1.262a2.984 2.984 0 0 0 2.984 2.984h1.262c.261 0 .512.104.696.288l.893.893a2.984 2.984 0 0 0 4.22 0l.893-.893a.985.985 0 0 1 .696-.288h1.262a2.984 2.984 0 0 0 2.984-2.984V15.7c0-.261.104-.512.288-.696l.893-.893a2.984 2.984 0 0 0 0-4.22l-.893-.893a.985.985 0 0 1-.288-.696V7.04a2.984 2.984 0 0 0-2.984-2.984h-1.262a.985.985 0 0 1-.696-.288l-.893-.893A2.984 2.984 0 0 0 12 2Zm3.683 7.73a1 1 0 1 0-1.414-1.413l-4.253 4.253-1.277-1.277a1 1 0 0 0-1.415 1.414l1.985 1.984a1 1 0 0 0 1.414 0l4.96-4.96Z" clip-rule="evenodd"/>
+                            </svg>
 
-            <!-- Descripción -->
-            <p class="body-small text-center" style="color: {{ $store->design ? $store->design->header_description_color : '#e9d5ff' }}">
-                {{ $store->description ?? 'Comidas Rápidas en Sincelejo' }}
-            </p>
+                        </a>
+                    @endif
+                </div>
+
+                <!-- Descripción -->
+                <p class="text-[14px] truncate" style="color: {{ $store->design ? $store->design->header_description_color : '#e9d5ff' }}">
+                    {{ $store->description ?? 'Descripción de la tienda' }}
+                </p>
+            </div>
         </div>
     </header>
 
     <!-- Menu inferior -->
-    <nav class="max-w-full md:max-w-[480px] bg-brandWhite-100 rounded-b-3xl px-6 sm:px-10 py-4 flex">
-        <div class="flex items-center justify-center gap-1 w-full md:w-auto">
-
-            <!-- Contacto (Sedes) -->
-            <a href="{{ route('tenant.contact', $store->slug) }}" 
-               class="flex flex-col gap-1 justify-center items-center py-3 px-2 min-w-[70px] {{ request()->routeIs('tenant.contact') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
-                <i data-lucide="building-2" class="w-32px h-32px sm:w-40px sm:h-40px"></i>
-                <span class="body-small sm:body-lg">Sedes</span>
-            </a>
-
-            <!-- Catálogo -->
-            <a href="{{ route('tenant.catalog', $store->slug) }}" 
-               class="flex flex-col gap-1 justify-center items-center py-3 px-2 min-w-[70px] {{ request()->routeIs('tenant.catalog') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
-                <i data-lucide="shopping-basket" class="w-32px h-32px sm:w-40px sm:h-40px"></i>
-                <span class="body-small sm:body-lg">Catálogo</span>
-            </a>
-
-            <!-- Inicio -->
-            <a href="{{ route('tenant.home', $store->slug) }}" 
-               class="flex flex-col gap-1 jusitfy-center items-center py-3 px-2 min-w-[70px] {{ request()->routeIs('tenant.home') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
-                <i data-lucide="store" class="w-32px h-32px sm:w-40px sm:h-40px"></i>
-                <span class="body-small sm:body-lg">Inicio</span>
-            </a>
-
-            <!-- Promos -->
-            <a href="{{ route('tenant.promotions', $store->slug) }}" 
-               class="flex flex-col gap-1 justify-center items-center py-3 px-2 min-w-[70px] {{ request()->routeIs('tenant.promotions') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
-                <i data-lucide="badge-percent" class="w-32px h-32px sm:w-40px sm:h-40px"></i>
-                <span class="body-small sm:body-lg">Promos</span>
-            </a>
-
-            <!-- Reservas (cambia según categoría de negocio) -->
-            @if(featureEnabled($store, 'reservas_mesas') && featureEnabled($store, 'reservas_hotel'))
-                {{-- Si ambos están activos, mostrar prepágina de selección --}}
-                <a href="{{ route('tenant.reservations.select-type', $store->slug) }}" 
-                   class="flex flex-col gap-1 justify-center items-center py-3 px-2 min-w-[70px] {{ request()->routeIs('tenant.reservations.*') || request()->routeIs('tenant.hotel-reservations.*') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
-                    <i data-lucide="calendar-heart" class="w-32px h-32px sm:w-40px sm:h-40px"></i>
-                    <span class="body-small sm:body-lg">Reservas</span>
-                </a>
-            @elseif(featureEnabled($store, 'reservas_mesas'))
-                <a href="{{ route('tenant.reservations.index', $store->slug) }}" 
-                   class="flex flex-col gap-1 justify-center items-center py-3 px-2 min-w-[70px] {{ request()->routeIs('tenant.reservations.*') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
-                    <i data-lucide="calendar-heart" class="w-32px h-32px sm:w-40px sm:h-40px"></i>
-                    <span class="body-small sm:body-lg">Reservas</span>
-                </a>
-            @elseif(featureEnabled($store, 'reservas_hotel'))
-                <a href="{{ route('tenant.hotel-reservations.index', $store->slug) }}" 
-                   class="flex flex-col gap-1 justify-center items-center py-3 px-2 min-w-[70px] {{ request()->routeIs('tenant.hotel-reservations.*') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
-                    <i data-lucide="calendar-heart" class="w-32px h-32px sm:w-40px sm:h-40px"></i>
-                    <span class="body-small sm:body-lg">Reservas</span>
-                </a>
-            @elseif(featureEnabled($store, 'favoritos'))
-                <a href="{{ route('tenant.favorites.index', $store->slug) }}" 
-                   class="flex flex-col gap-1 justify-center items-center py-3 px-2 min-w-[70px] relative {{ request()->routeIs('tenant.favorites.*') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
-                    <i data-lucide="heart" class="w-32px h-32px sm:w-40px sm:h-40px"></i>
-                    <span class="body-small sm:body-lg">Favoritos</span>
-                    {{-- Badge contador --}}
-                    <span id="favorites-menu-badge" class="hidden absolute -top-1 -right-1 bg-brandError-400 text-brandWhite-50 text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">0</span>
-                </a>
+    <nav class="max-w-[348px] md:max-w-[450px] w-full mx-auto bg-white rounded-b-3xl px-4 py-4 flex items-center justify-around">
+        <!-- Contacto (Sedes) -->
+        <a href="{{ route('tenant.contact', $store->slug) }}" 
+           class="flex items-center justify-center p-2 {{ request()->routeIs('tenant.contact') ? 'bg-slate-900 text-white rounded-full px-3 py-2' : 'text-slate-900' }} transition-colors">
+            @if(request()->routeIs('tenant.contact'))
+                <i data-lucide="store" class="w-6 h-6 mr-2"></i>
+                <span class="text-sm font-medium">Sedes</span>
             @else
-                <!-- Fallback: coming soon si no tiene ningún feature -->
-                <a href="{{ route('tenant.coming-soon', $store->slug) }}" 
-                   class="flex flex-col gap-1 justify-center items-center py-3 px-2 min-w-[70px] {{ request()->routeIs('tenant.coming-soon') ? 'text-brandWhite-300 bg-brandPrimary-300 rounded-xl' : 'text-brandNeutral-400 hover:text-brandWhite-300 hover:bg-brandPrimary-300 hover:rounded-xl' }} transition-colors">
-                    <i data-lucide="calendar-heart" class="w-32px h-32px sm:w-40px sm:h-40px"></i>
-                    <span class="body-small sm:body-lg">Reservas</span>
-                </a>
+                <i data-lucide="store" class="w-6 h-6"></i>
             @endif
-        </div>
+        </a>
+
+        <!-- Catálogo / Menú -->
+        <a href="{{ route('tenant.catalog', $store->slug) }}" 
+           class="flex items-center justify-center p-2 {{ request()->routeIs('tenant.catalog') ? 'bg-slate-900 text-white rounded-full px-3 py-2' : 'text-slate-900' }} transition-colors">
+            @if(request()->routeIs('tenant.catalog'))
+                @if(($store->businessCategory?->vertical ?? 'ecommerce') === 'restaurant')
+                    <i data-lucide="utensils-crossed" class="w-6 h-6 mr-2"></i>
+                    <span class="text-sm font-medium">Menú</span>
+                @else
+                    <i data-lucide="shopping-bag" class="w-6 h-6 mr-2"></i>
+                    <span class="text-sm font-medium">Catálogo</span>
+                @endif
+            @else
+                @if(($store->businessCategory?->vertical ?? 'ecommerce') === 'restaurant')
+                    <i data-lucide="utensils-crossed" class="w-6 h-6"></i>
+                @else
+                    <i data-lucide="shopping-bag" class="w-6 h-6"></i>
+                @endif
+            @endif
+        </a>
+
+        <!-- Inicio -->
+        <a href="{{ route('tenant.home', $store->slug) }}" 
+           class="flex items-center justify-center p-2 {{ request()->routeIs('tenant.home') ? 'bg-slate-900 text-white rounded-full px-3 py-2' : 'text-slate-900' }} transition-colors">
+            @if(request()->routeIs('tenant.home'))
+                <i data-lucide="layout-grid" class="w-6 h-6 mr-2"></i>
+                <span class="text-sm font-medium">Inicio</span>
+            @else
+                <i data-lucide="layout-grid" class="w-6 h-6"></i>
+            @endif
+        </a>
+
+        <!-- Promos -->
+        <a href="{{ route('tenant.promotions', $store->slug) }}" 
+           class="flex items-center justify-center p-2 {{ request()->routeIs('tenant.promotions') ? 'bg-slate-900 text-white rounded-full px-3 py-2' : 'text-slate-900' }} transition-colors">
+            @if(request()->routeIs('tenant.promotions'))
+                <i data-lucide="party-popper" class="w-6 h-6 mr-2"></i>
+                <span class="text-sm font-medium">Promos</span>
+            @else
+                <i data-lucide="party-popper" class="w-6 h-6"></i>
+            @endif
+        </a>
+
+        <!-- Reservas o Favoritos (cambia según categoría de negocio) -->
+        @if(featureEnabled($store, 'reservas_mesas') && featureEnabled($store, 'reservas_hotel'))
+            <a href="{{ route('tenant.reservations.select-type', $store->slug) }}" 
+               class="flex items-center justify-center p-2 {{ request()->routeIs('tenant.reservations.*') || request()->routeIs('tenant.hotel-reservations.*') ? 'bg-slate-900 text-white rounded-full px-3 py-2' : 'text-slate-900' }} transition-colors">
+                @if(request()->routeIs('tenant.reservations.*') || request()->routeIs('tenant.hotel-reservations.*'))
+                    @if(($store->businessCategory?->vertical ?? 'ecommerce') === 'restaurant')
+                        <i data-lucide="concierge-bell" class="w-6 h-6 mr-2"></i>
+                    @else
+                        <i data-lucide="calendar-heart" class="w-6 h-6 mr-2"></i>
+                    @endif
+                    <span class="text-sm font-medium">Reservas</span>
+                @else
+                    @if(($store->businessCategory?->vertical ?? 'ecommerce') === 'restaurant')
+                        <i data-lucide="concierge-bell" class="w-6 h-6"></i>
+                    @else
+                        <i data-lucide="calendar-heart" class="w-6 h-6"></i>
+                    @endif
+                @endif
+            </a>
+        @elseif(featureEnabled($store, 'reservas_mesas'))
+            <a href="{{ route('tenant.reservations.index', $store->slug) }}" 
+               class="flex items-center justify-center p-2 {{ request()->routeIs('tenant.reservations.*') ? 'bg-slate-900 text-white rounded-full px-3 py-2' : 'text-slate-900' }} transition-colors">
+                @if(request()->routeIs('tenant.reservations.*'))
+                    @if(($store->businessCategory?->vertical ?? 'ecommerce') === 'restaurant')
+                        <i data-lucide="concierge-bell" class="w-6 h-6 mr-2"></i>
+                    @else
+                        <i data-lucide="calendar-heart" class="w-6 h-6 mr-2"></i>
+                    @endif
+                    <span class="text-sm font-medium">Reservas</span>
+                @else
+                    @if(($store->businessCategory?->vertical ?? 'ecommerce') === 'restaurant')
+                        <i data-lucide="concierge-bell" class="w-6 h-6"></i>
+                    @else
+                        <i data-lucide="calendar-heart" class="w-6 h-6"></i>
+                    @endif
+                @endif
+            </a>
+        @elseif(featureEnabled($store, 'reservas_hotel'))
+            <a href="{{ route('tenant.hotel-reservations.index', $store->slug) }}" 
+               class="flex items-center justify-center p-2 {{ request()->routeIs('tenant.hotel-reservations.*') ? 'bg-slate-900 text-white rounded-full px-3 py-2' : 'text-slate-900' }} transition-colors">
+                @if(request()->routeIs('tenant.hotel-reservations.*'))
+                    @if(($store->businessCategory?->vertical ?? 'ecommerce') === 'restaurant')
+                        <i data-lucide="concierge-bell" class="w-6 h-6 mr-2"></i>
+                    @else
+                        <i data-lucide="calendar-heart" class="w-6 h-6 mr-2"></i>
+                    @endif
+                    <span class="text-sm font-medium">Reservas</span>
+                @else
+                    @if(($store->businessCategory?->vertical ?? 'ecommerce') === 'restaurant')
+                        <i data-lucide="concierge-bell" class="w-6 h-6"></i>
+                    @else
+                        <i data-lucide="calendar-heart" class="w-6 h-6"></i>
+                    @endif
+                @endif
+            </a>
+        @elseif(featureEnabled($store, 'favoritos'))
+            <a href="{{ route('tenant.favorites.index', $store->slug) }}" 
+               class="flex items-center justify-center p-2 relative {{ request()->routeIs('tenant.favorites.*') ? 'bg-slate-900 text-white rounded-full px-3 py-2' : 'text-slate-900' }} transition-colors">
+                @if(request()->routeIs('tenant.favorites.*'))
+                    <i data-lucide="heart" class="w-6 h-6 mr-2"></i>
+                    <span class="text-sm font-medium">Favoritos</span>
+                @else
+                    <i data-lucide="heart" class="w-6 h-6"></i>
+                @endif
+                {{-- Badge contador --}}
+                <span id="favorites-menu-badge" class="hidden absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold w-5 h-5 rounded-full flex items-center justify-center">0</span>
+            </a>
+        @else
+            <!-- Fallback: coming soon si no tiene ningún feature -->
+            <a href="{{ route('tenant.coming-soon', $store->slug) }}" 
+               class="flex items-center justify-center p-2 {{ request()->routeIs('tenant.coming-soon') ? 'bg-slate-900 text-white rounded-full px-3 py-2' : 'text-slate-900' }} transition-colors">
+                @if(request()->routeIs('tenant.coming-soon'))
+                    <i data-lucide="app-window" class="w-6 h-6 mr-2"></i>
+                    <span class="text-sm font-medium">Apps</span>
+                @else
+                    <i data-lucide="app-window" class="w-6 h-6"></i>
+                @endif
+            </a>
+        @endif
     </nav>
 
     <!-- Contenido principal -->
-    <main>
+    <main class="relative z-0">
         @yield('content')
         
         <!-- Footer -->

@@ -8,6 +8,7 @@ use App\Shared\Models\Location;
 use App\Features\TenantAdmin\Models\Category;
 use App\Features\TenantAdmin\Models\Product;
 use App\Features\TenantAdmin\Models\Slider;
+use App\Features\TenantAdmin\Models\Ticker;
 use App\Features\TenantAdmin\Models\Coupon;
 use Illuminate\Http\Request;
 
@@ -35,6 +36,21 @@ class StorefrontController extends Controller
             ->ordered()
             ->get();
 
+        // Cargar tickers activos para esta tienda (solo los que tienen texto)
+        $tickers = Ticker::forStore($store->id)
+            ->active()
+            ->whereNotNull('text')
+            ->where('text', '!=', '')
+            ->ordered()
+            ->get();
+
+        // Obtener configuración global del ticker (del primer ticker)
+        $tickerConfig = $tickers->first() ? [
+            'background_color' => $tickers->first()->background_color ?? '#1e293b',
+            'text_color' => $tickers->first()->text_color ?? '#ffffff',
+            'scroll_speed' => $tickers->first()->scroll_speed ?? 'medium',
+        ] : null;
+
         // Top 3 productos más vendidos
         // TODO: Implementar lógica real cuando tengamos sistema de ventas
         // Por ahora obtenemos los 3 primeros productos activos
@@ -61,7 +77,7 @@ class StorefrontController extends Controller
             ->orderBy('name')
             ->get();
 
-        return view('tenant::storefront.home', compact('store', 'sliders', 'topProducts', 'newProducts', 'categories'));
+        return view('tenant::storefront.home', compact('store', 'sliders', 'tickers', 'tickerConfig', 'topProducts', 'newProducts', 'categories'));
     }
 
     /**
@@ -174,7 +190,22 @@ class StorefrontController extends Controller
 
         $products = $query->paginate(20);
 
-        return view('tenant::storefront.catalog', compact('store', 'products', 'categories'));
+        // Cargar tickers activos para esta tienda (solo los que tienen texto)
+        $tickers = Ticker::forStore($store->id)
+            ->active()
+            ->whereNotNull('text')
+            ->where('text', '!=', '')
+            ->ordered()
+            ->get();
+
+        // Obtener configuración global del ticker (del primer ticker)
+        $tickerConfig = $tickers->first() ? [
+            'background_color' => $tickers->first()->background_color ?? '#1e293b',
+            'text_color' => $tickers->first()->text_color ?? '#ffffff',
+            'scroll_speed' => $tickers->first()->scroll_speed ?? 'medium',
+        ] : null;
+
+        return view('tenant::storefront.catalog', compact('store', 'products', 'categories', 'tickers', 'tickerConfig'));
     }
 
     /**

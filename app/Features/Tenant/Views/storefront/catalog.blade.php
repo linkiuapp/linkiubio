@@ -35,26 +35,23 @@
     @endif
 
     <!-- Header -->
-    <div class="space-y-3">
-        <nav class="flex caption text-brandInfo-300">
-            <a href="{{ route('tenant.home', $store->slug) }}" class="hover:text-brandInfo-400 transition-colors">Inicio</a>
+    <div class="space-y-2">
+        <nav class="flex text-xs md:text-sm font-medium text-slate-900">
+            <a href="{{ route('tenant.home', $store->slug) }}" class="text-blue-600 hover:text-blue-900 transition-colors">Inicio</a>
             <span class="mx-2">/</span>
-            <span class="text-brandNeutral-400 caption">Catálogo</span>
+            <span class="text-xs md:text-sm font-medium text-slate-900">Catálogo</span>
         </nav>
         
-        <div class="space-y-1">
-            <h1 class="h3 text-brandNeutral-400">Catálogo</h1>
-            <p class="caption text-brandNeutral-400">Encuentra todos nuestros productos</p>
-        </div>
+        <p class="text-base font-medium text-slate-900">Encuentra todos nuestros productos</p>
     </div>
 
     <!-- Buscador con Auto-resultados -->
-    <div class="bg-brandWhite-100 rounded-full p-4">
+    <div class="bg-white rounded-full">
         <form method="GET" action="{{ route('tenant.catalog', $store->slug) }}">
             <!-- Input con autocomplete -->
             <div class="relative" id="search-container">
                 <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                    <i data-lucide="search" class="w-16px h-16px text-brandNeutral-400 pr-2"></i>
+                    <i data-lucide="search" class="w-16px h-16px text-slate-900 pr-2"></i>
                 </div>
                 <input type="text" 
                        name="search" 
@@ -62,7 +59,7 @@
                        value="{{ request('search') }}"
                        placeholder="Buscar productos..."
                        autocomplete="off"
-                       class="w-full pl-10 pr-3 py-2.5 bg-brandWhite-300 rounded-full text-body-lg-regular text-brandNeutral-400 placeholder-brandNeutral-400 focus:outline-none focus:ring-1 focus:ring-brandPrimary-200 focus:border-transparent transition-all">
+                       class="w-full pl-10 pr-3 py-4 bg-white rounded-full text-sm text-slate-900 placeholder-slate-900 focus:outline-none focus:ring-1 focus:ring-brandPrimary-200 focus:border-transparent transition-all">
                 
                 <!-- Botón limpiar solo si hay búsqueda -->
                 @if(request('search'))
@@ -81,18 +78,73 @@
         </form>
     </div>
 
-    <!-- Grid de Categorías -->
-    <div>
-        <h3 class="h3 text-brandNeutral-400 mb-4">Categorías</h3>
+    <!-- Ticker de Promociones -->
+    @if($tickers && $tickers->count() > 0 && $tickerConfig)
+        @php
+            $scrollSpeeds = [
+                'slow' => 20,
+                'medium' => 15,
+                'fast' => 10
+            ];
+            $scrollDuration = $scrollSpeeds[$tickerConfig['scroll_speed']] ?? 15;
+        @endphp
+        <div class="ticker-wrapper" 
+             style="background-color: {{ $tickerConfig['background_color'] }}; color: {{ $tickerConfig['text_color'] }};">
+            <div class="ticker-container">
+                <div class="flex items-center gap-2 py-3 px-4 whitespace-nowrap ticker-scroll" 
+                     data-duration="{{ $scrollDuration }}">
+                    @foreach($tickers as $ticker)
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span class="text-base font-semibold">{{ $ticker->text }}</span>
+                            <span class="mx-2 text-base font-medium">•</span>
+                        </div>
+                    @endforeach
+                    {{-- Duplicar para efecto continuo --}}
+                    @foreach($tickers as $ticker)
+                        <div class="flex items-center gap-2 shrink-0">
+                            <span class="text-base font-semibold">{{ $ticker->text }}</span>
+                            <span class="mx-2 text-base font-medium">•</span>
+                        </div>
+                    @endforeach
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- Categorías -->
+    <div class="space-y-6">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-base font-semibold text-slate-900">Categorías</h3>
+            <a href="{{ route('tenant.categories', $store->slug) }}" 
+               class="flex items-center gap-1 text-blue-700 hover:text-blue-800 transition-colors">
+                <span class="text-base font-medium">Ver más</span>
+                <i data-lucide="arrow-up-right" class="w-4 h-4 text-blue-700"></i>
+            </a>
+        </div>
         
         @if($categories->count() > 0)
+            @php
+                // Calcular el color de fondo de las categorías una sola vez
+                $bgColor = $store->design && $store->design->header_background_color ? $store->design->header_background_color : '#f9fafb';
+                // Convertir hex a rgba con opacidad
+                if (strpos($bgColor, '#') === 0) {
+                    $hex = str_replace('#', '', $bgColor);
+                    $r = hexdec(substr($hex, 0, 2));
+                    $g = hexdec(substr($hex, 2, 2));
+                    $b = hexdec(substr($hex, 4, 2));
+                    $categoryBgColor = "rgba($r, $g, $b, 0.1)";
+                } else {
+                    $categoryBgColor = $bgColor;
+                }
+            @endphp
             <div class="grid grid-cols-4 gap-2">
                 @foreach($categories as $category)
                     <a href="{{ route('tenant.category', ['store' => $store->slug, 'categorySlug' => $category->slug]) }}" 
                        class="flex flex-col items-center group">
                         
                         <!-- Icono de la categoría con fondo colorido -->
-                        <div class="w-78px h-78 mb-2 p-2 flex items-center justify-center rounded-2xl bg-gradient-to-br from-brandWhite-100 to-brandWhite-100 hover:from-brandPrimary-100 hover:to-brandWhite-100 transition-all duration-200">
+                        <div class="w-72px h-72px mb-2 p-2 flex items-center justify-center rounded-2xl transition-all duration-200 hover:opacity-80" 
+                             style="background-color: {{ $categoryBgColor }};">
                              @if($category->icon && $category->icon->image_url)
                                  <img src="{{ $category->icon->image_url }}" 
                                       alt="{{ $category->name }}" 
@@ -104,7 +156,7 @@
                         </div>
                         
                         <!-- Nombre de la categoría -->
-                        <span class="caption text-center text-brandNeutral-400 transition-colors leading-tight">
+                        <span class="text-xs font-normal text-slate-900 transition-colors leading-tight">
                             {{ $category->name }}
                         </span>
                     </a>
@@ -114,6 +166,11 @@
             <div class="flex flex-col items-center justify-center py-8">
                 <img src="https://cdn.jsdelivr.net/gh/linkiuapp/medialink@main/Assets_Fronted/img_linkiu_v1_gallery.svg" alt="img_linkiu_v1_gallery" class="h-32 w-auto" loading="lazy">
                 <p class="body-lg-bold text-center text-brandNeutral-400">No hay categorías disponibles</p>
+                <a href="{{ route('tenant.categories', $store->slug) }}" 
+                   class="gap-2 inline-flex mt-3 px-4 py-2 bg-brandPrimary-300 text-brandWhite-100 rounded-lg text-body-lg-medium hover:bg-brandPrimary-400 transition-colors">
+                    Ver todas las categorías
+                    <i data-lucide="arrow-up-right" class="w-24px h-24px sm:w-32px sm:h-32px"></i>
+                </a>
             </div>
         @endif
     </div>
@@ -129,98 +186,151 @@
 
     <!-- Grid de Productos -->
     @if($products->count() > 0)
-            <div class="space-y-6">
-                @foreach($products as $product)
-                    @php
-                        $estaAgotado = $product->controlaStock() && !$product->tieneStockIlimitado() && $product->estaAgotado();
-                        $tieneStockBajo = $product->controlaStock() && !$product->tieneStockIlimitado() && $product->tieneStockBajo();
-                    @endphp
-                    <a href="{{ route('tenant.product', [$store->slug, $product->slug]) }}" 
-                       class="bg-brandWhite-100 hover:bg-brandPrimary-50 rounded-lg p-4 hover:shadow-sm transition-all duration-200 block relative {{ $estaAgotado ? 'opacity-60' : '' }}">
+        @php
+            // Calcular el color de fondo de las cards una sola vez
+            $bgColor = $store->design && $store->design->header_background_color ? $store->design->header_background_color : '#f9fafb';
+            // Convertir hex a rgba con opacidad
+            if (strpos($bgColor, '#') === 0) {
+                $hex = str_replace('#', '', $bgColor);
+                $r = hexdec(substr($hex, 0, 2));
+                $g = hexdec(substr($hex, 2, 2));
+                $b = hexdec(substr($hex, 4, 2));
+                $cardBgColor = "rgba($r, $g, $b, 0.1)";
+            } else {
+                $cardBgColor = $bgColor;
+            }
+        @endphp
+        <div class="space-y-4">
+            @foreach($products as $product)
+                @php
+                    $estaAgotado = $product->controlaStock() && !$product->tieneStockIlimitado() && $product->estaAgotado();
+                    $tieneStockBajo = $product->controlaStock() && !$product->tieneStockIlimitado() && $product->tieneStockBajo();
+                    $stockDisponible = $product->stock_disponible ?? 0;
+                @endphp
+                <div class="flex gap-2 md:gap-4 rounded-xl p-4 md:p-4 transition-all duration-200 hover:shadow-sm relative" 
+                     style="background-color: {{ $cardBgColor }};">
+                    <div class="flex items-center gap-4">
+                        <!-- Imagen del producto -->
+                        <div class="w-[120px] h-[120px] md:w-[126px] md:h-[126px] rounded-lg flex-shrink-0 overflow-hidden">
+                            @if($product->main_image_url)
+                                <img src="{{ $product->main_image_url }}" 
+                                     alt="{{ $product->name }}" 
+                                     class="w-full h-full object-cover">
+                            @else
+                                <div class="w-full h-full flex items-center justify-center bg-gray-100">
+                                    <i data-lucide="image" class="w-6 h-6 text-gray-400"></i>
+                                </div>
+                            @endif
+                        </div>
 
-                        <!-- Badge de Stock -->
-                        @if($estaAgotado)
-                            <div class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-lg text-xs font-medium z-10">
-                                Agotado
-                            </div>
-                        @elseif($tieneStockBajo)
-                            <div class="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded-lg text-xs font-medium z-10 animate-pulse">
-                                ¡Solo {{ $product->stock_disponible }}!
-                            </div>
-                        @endif
-
-                        <div class="flex items-center gap-3">
-                            <!-- Imagen del producto -->
-                            <div class="w-[78px] h-[78px] rounded-lg flex-shrink-0 overflow-hidden">
-                                @if($product->main_image_url)
-                                    <img src="{{ $product->main_image_url }}" 
-                                         alt="{{ $product->name }}" 
-                                         class="w-full h-full object-cover">
-                                @else
-                                    <div class="w-full h-full flex items-center justify-center text-brandNeutral-400">
-                                        <i data-lucide="image" class="w-56px h-56px text-brandNeutral-400"></i>
-                                    </div>
-                                @endif
-                            </div>
-
-                            <!-- Información del producto -->
-                            <div class="flex-1 min-w-0">
-                                <h3 class="body-lg-bold text-brandNeutral-400 line-clamp-1">{{ $product->name }}</h3>
-                                
-                                @if($product->description)
-                                    <p class="caption text-brandNeutral-400 line-clamp-1">{{ $product->description }}</p>
-                                @endif
-
-                                <!-- Precio prominente -->
-                                <div class="flex items-center gap-2 mb-1">
-                                    @if($product->tienePromocionActiva())
-                                        <span class="body-sm text-brandNeutral-300 line-through">${{ number_format($product->price, 0, ',', '.') }}</span>
-                                        <span class="body-lg-bold text-brandError-400">${{ number_format($product->precio_promocional, 0, ',', '.') }}</span>
-                                    @else
-                                        <span class="body-lg-bold text-brandNeutral-400">${{ number_format($product->price, 0, ',', '.') }}</span>
+                        <!-- Información del producto -->
+                        <div class="flex-1 min-w-0 flex flex-col md:gap-1 gap-0">
+                            <!-- Badge de Stock bajo -->
+                            @if($tieneStockBajo && $stockDisponible > 0)
+                                <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
+                                    <span class="bg-red-50 text-red-600 rounded-full px-2 py-1 text-xs font-semibold text-red-600">
+                                        Queda {{ $stockDisponible }} unidad{{ $stockDisponible > 1 ? 'es' : '' }}
+                                    </span>
+                                    @if($product->categories->count() > 0)
+                                        <div class="flex flex-wrap gap-1">
+                                            @foreach($product->categories->take(1) as $category)
+                                                <span class="px-2 py-1 text-xs font-semibold text-green-900 bg-green-50 rounded-full">
+                                                    {{ $category->name }}
+                                                </span>
+                                            @endforeach
+                                        </div>
                                     @endif
                                 </div>
+                            @elseif($estaAgotado)
+                                <div class="flex items-center gap-1.5 w-fit">
+                                    <span class="text-xs font-medium text-white bg-red-500 px-2 py-0.5 rounded-full">
+                                        Agotado
+                                    </span>
+                                </div>
+                            @endif
 
-                                <!-- Categorías pequeñas -->
-                                @if($product->categories->count() > 0)
-                                    <div class="flex flex-wrap gap-1">
-                                        @foreach($product->categories->take(1) as $category)
-                                            <span class="px-2 py-0.5 bg-brandSuccess-50 text-brandSuccess-400 rounded-full caption">
-                                                {{ $category->name }}
-                                            </span>
-                                        @endforeach
-                                        @if($product->categories->count() > 1)
-                                            <span class="bg-brandSuccess-50 px-2 py-0.5 caption items-center text-brandSuccess-400 rounded-full">+{{ $product->categories->count() - +1 }}</span>
-                                        @endif
-                                    </div>
+                            <!-- Título del producto -->
+                            <h3 class="text-base font-bold text-slate-900 leading-tight">{{ $product->name }}</h3>
+                            
+                            <!-- Descripción -->
+                            @if($product->description)
+                                <p class="text-xs font-normal text-slate-900 leading-tight line-clamp-1">{{ $product->description }}</p>
+                            @endif
+
+                            <!-- Precios -->
+                            <div class="flex items-center gap-2">
+                                @if($product->tienePromocionActiva())
+                                    <span class="text-base font-normal text-slate-900 line-through">${{ number_format($product->price, 0, ',', '.') }}</span>
+                                    <span class="text-base font-bold text-slate-900">${{ number_format($product->precio_promocional, 0, ',', '.') }}</span>
+                                @else
+                                    <span class="text-base font-bold text-slate-900">${{ number_format($product->price, 0, ',', '.') }}</span>
                                 @endif
-
                             </div>
 
                             <!-- Botones de acción -->
-                             <div class="flex flex-col gap-2">
+                            <div class="flex gap-2 items-center md:mt-0 mt-2">
                                 <x-add-to-cart-button :product="$product" :store="$store" />
                                 @if(featureEnabled($store, 'favoritos'))
-                                    <button class="p-2 w-11 h-11 flex items-center justify-center transition-transform bg-brandError-50 hover:bg-brandError-300 rounded-lg hover:scale-110" 
+                                    <button class="p-3 flex items-center justify-center transition-transform bg-red-50 hover:bg-red-100 rounded-full hover:scale-110" 
                                             data-favorite-btn
                                             data-product-id="{{ $product->id }}">
-                                        <i data-lucide="heart" class="w-6 h-6 text-brandError-400 hover:text-brandError-50" style="fill: currentColor;"></i>
+                                        <i data-lucide="heart" class="w-6 h-6 text-red-500 hover:text-red-600" style="fill: currentColor;"></i>
                                     </button>
                                 @endif
-                             </div>
-
-                            
+                            </div>
                         </div>
-                    </a>
-                @endforeach
-            </div>
-        @else
+                    </div>
+                </div>
+            @endforeach
+        </div>
+    @else
         <div class="flex flex-col items-center justify-center">
             <img src="https://cdn.jsdelivr.net/gh/linkiuapp/medialink@main/Assets_Fronted/img_linkiu_v1_ghost.svg" alt="img_linkiu_v1_ghost" class="h-32 w-auto" loading="lazy">
             <p class="body-lg-bold text-center text-brandNeutral-400">No hay productos disponibles</p>
         </div>
-        @endif
+    @endif
 </div>
+
+@push('styles')
+<style>
+    .ticker-wrapper {
+        margin-bottom: 24px;
+    }
+    .ticker-container {
+        overflow: hidden;
+        width: 100%;
+    }
+    /* Asegurar que los margins se apliquen correctamente */
+    .ticker-container {
+        margin: inherit;
+    }
+    .ticker-scroll {
+        display: inline-flex;
+        white-space: nowrap;
+        will-change: transform;
+        animation: ticker-move linear infinite;
+        width: max-content;
+        box-sizing: content-box;
+    }
+    .ticker-scroll[data-duration="10"] {
+        animation-duration: 10s;
+    }
+    .ticker-scroll[data-duration="15"] {
+        animation-duration: 15s;
+    }
+    .ticker-scroll[data-duration="20"] {
+        animation-duration: 20s;
+    }
+    @keyframes ticker-move {
+        0% {
+            transform: translateX(0);
+        }
+        100% {
+            transform: translateX(-50%);
+        }
+    }
+</style>
+@endpush
 
 @push('scripts')
 <script>

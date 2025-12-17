@@ -49,27 +49,43 @@
 
     <!-- Subcategorías -->
     @if($subcategories->count() > 0)
-        <div class="space-y-3">
-            <h2 class="h3 text-brandNeutral-400">Subcategorías</h2>
+        <div class="space-y-6">
+            <h2 class="text-base font-semibold text-slate-900">Subcategorías</h2>
             
+            @php
+                // Calcular el color de fondo de las categorías una sola vez
+                $bgColor = $store->design && $store->design->header_background_color ? $store->design->header_background_color : '#f9fafb';
+                // Convertir hex a rgba con opacidad
+                if (strpos($bgColor, '#') === 0) {
+                    $hex = str_replace('#', '', $bgColor);
+                    $r = hexdec(substr($hex, 0, 2));
+                    $g = hexdec(substr($hex, 2, 2));
+                    $b = hexdec(substr($hex, 4, 2));
+                    $categoryBgColor = "rgba($r, $g, $b, 0.1)";
+                } else {
+                    $categoryBgColor = $bgColor;
+                }
+            @endphp
             <div class="grid grid-cols-4 gap-2">
                 @foreach($subcategories as $subcategory)
                     <a href="{{ route('tenant.category', [$store->slug, $subcategory->slug]) }}" 
                        class="flex flex-col items-center group">
                         
                         <!-- Icono de la subcategoría con fondo colorido -->
-                        <div class="w-20 h-20 mb-2 flex items-center justify-center rounded-2xl bg-gradient-to-br from-brandWhite-100 to-brandWhite-100 hover:from-brandPrimary-100 hover:to-brandWhite-100 transition-all duration-200 shadow-sm group-hover:shadow-md">
+                        <div class="w-72px h-72px mb-2 p-2 flex items-center justify-center rounded-2xl transition-all duration-200 hover:opacity-80" 
+                             style="background-color: {{ $categoryBgColor }};">
                              @if($subcategory->icon && $subcategory->icon->image_url)
                                  <img src="{{ $subcategory->icon->image_url }}" 
                                       alt="{{ $subcategory->name }}" 
-                                      class="w-14 h-14 object-contain">
+                                      class="w-56px h-56px object-contain aspect-square"
+                                      style="aspect-ratio: 1 / 1;">
                              @else
-                                 <i data-lucide="image" class="w-10 h-10 text-brandNeutral-300 group-hover:text-brandPrimary-300"></i>
+                                 <i data-lucide="image" class="w-56px h-56px text-brandNeutral-400 group-hover:text-brandPrimary-300"></i>
                              @endif
                         </div>
 
                         <!-- Nombre de la subcategoría -->
-                        <span class="caption text-center text-brandNeutral-400 transition-colors leading-tight">
+                        <span class="text-xs font-normal text-slate-900 transition-colors leading-tight">
                             {{ $subcategory->name }}
                         </span>
                     </a>
@@ -80,92 +96,107 @@
 
     <!-- Productos -->
     @if($products->count() > 0)
-        <div>
-            <h2 class="h3 text-brandNeutral-400 mb-3">
+        <div class="space-y-6">
+            <h2 class="text-base font-semibold text-slate-900">
                 Productos
-                <span class="caption text-brandNeutral-300">({{ $products->count() }})</span>
+                <span class="text-sm font-normal text-slate-600">({{ $products->count() }})</span>
             </h2>
             
-            <div class="space-y-3">
+            @php
+                // Calcular el color de fondo de las cards una sola vez
+                $bgColor = $store->design && $store->design->header_background_color ? $store->design->header_background_color : '#f9fafb';
+                // Convertir hex a rgba con opacidad
+                if (strpos($bgColor, '#') === 0) {
+                    $hex = str_replace('#', '', $bgColor);
+                    $r = hexdec(substr($hex, 0, 2));
+                    $g = hexdec(substr($hex, 2, 2));
+                    $b = hexdec(substr($hex, 4, 2));
+                    $cardBgColor = "rgba($r, $g, $b, 0.1)";
+                } else {
+                    $cardBgColor = $bgColor;
+                }
+            @endphp
+            <div class="space-y-4">
                 @foreach($products as $product)
                     @php
                         $estaAgotado = $product->controlaStock() && !$product->tieneStockIlimitado() && $product->estaAgotado();
                         $tieneStockBajo = $product->controlaStock() && !$product->tieneStockIlimitado() && $product->tieneStockBajo();
+                        $stockDisponible = $product->stock_disponible ?? 0;
                     @endphp
-                    <a href="{{ route('tenant.product', [$store->slug, $product->slug]) }}" 
-                       class="bg-brandWhite-100 rounded-lg p-4 hover:bg-brandPrimary-50 hover:shadow-sm transition-all duration-200 block relative {{ $estaAgotado ? 'opacity-60' : '' }}">
-                        
-                        <!-- Badge de Stock -->
-                        @if($estaAgotado)
-                            <div class="absolute top-2 right-2 bg-red-500 text-white px-2 py-1 rounded-lg text-xs font-medium z-10">
-                                Agotado
-                            </div>
-                        @elseif($tieneStockBajo)
-                            <div class="absolute top-2 right-2 bg-yellow-500 text-white px-2 py-1 rounded-lg text-xs font-medium z-10 animate-pulse">
-                                ¡Solo {{ $product->stock_disponible }}!
-                            </div>
-                        @endif
-
-                        <div class="flex items-center gap-3">
+                    <div class="flex gap-2 md:gap-4 rounded-xl p-4 md:p-4 transition-all duration-200 hover:shadow-sm relative" 
+                         style="background-color: {{ $cardBgColor }};">
+                        <div class="flex items-center gap-4">
                             <!-- Imagen del producto -->
-                            <div class="w-20 h-20 bg-brandWhite-100 rounded-lg flex-shrink-0 overflow-hidden">
+                            <div class="w-[120px] h-[120px] md:w-[126px] md:h-[126px] rounded-lg flex-shrink-0 overflow-hidden">
                                 @if($product->main_image_url)
                                     <img src="{{ $product->main_image_url }}" 
                                          alt="{{ $product->name }}" 
                                          class="w-full h-full object-cover">
                                 @else
-                                    <div class="w-full h-full flex items-center justify-center text-brandNeutral-200">
-                                        <i data-lucide="image" class="w-6 h-6 text-brandNeutral-200"></i>
+                                    <div class="w-full h-full flex items-center justify-center bg-gray-100">
+                                        <i data-lucide="image" class="w-6 h-6 text-gray-400"></i>
                                     </div>
                                 @endif
                             </div>
 
                             <!-- Información del producto -->
-                            <div class="flex-1 min-w-0">
-                                <h3 class="body-lg-bold text-brandNeutral-400 line-clamp-1">{{ $product->name }}</h3>
-                                
-                                @if($product->description)
-                                    <p class="caption text-brandNeutral-400 line-clamp-1">{{ $product->description }}</p>
+                            <div class="flex-1 min-w-0 flex flex-col md:gap-1 gap-0">
+                                <!-- Badge de Stock bajo -->
+                                @if($tieneStockBajo && $stockDisponible > 0)
+                                    <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
+                                        <span class="bg-red-50 text-red-600 rounded-full px-2 py-1 text-xs font-semibold text-red-600">
+                                            Queda {{ $stockDisponible }} unidad{{ $stockDisponible > 1 ? 'es' : '' }}
+                                        </span>
+                                        @if($product->categories->count() > 1)
+                                            <div class="flex flex-wrap gap-1">
+                                                @foreach($product->categories->where('id', '!=', $category->id)->take(1) as $cat)
+                                                    <span class="px-2 py-1 text-xs font-semibold text-green-900 bg-green-50 rounded-full">
+                                                        {{ $cat->name }}
+                                                    </span>
+                                                @endforeach
+                                            </div>
+                                        @endif
+                                    </div>
+                                @elseif($estaAgotado)
+                                    <div class="flex items-center gap-1.5 w-fit">
+                                        <span class="text-xs font-medium text-white bg-red-500 px-2 py-0.5 rounded-full">
+                                            Agotado
+                                        </span>
+                                    </div>
                                 @endif
 
-                                <!-- Precio prominente -->
+                                <!-- Título del producto -->
+                                <h3 class="text-base font-bold text-slate-900 leading-tight">{{ $product->name }}</h3>
+                                
+                                <!-- Descripción -->
+                                @if($product->description)
+                                    <p class="text-xs font-normal text-slate-900 leading-tight line-clamp-1">{{ $product->description }}</p>
+                                @endif
+
+                                <!-- Precios -->
                                 <div class="flex items-center gap-2">
                                     @if($product->tienePromocionActiva())
-                                        <span class="body-sm text-brandNeutral-300 line-through">${{ number_format($product->price, 0, ',', '.') }}</span>
-                                        <span class="body-lg-bold text-brandError-400">${{ number_format($product->precio_promocional, 0, ',', '.') }}</span>
+                                        <span class="text-base font-normal text-slate-900 line-through">${{ number_format($product->price, 0, ',', '.') }}</span>
+                                        <span class="text-base font-bold text-slate-900">${{ number_format($product->precio_promocional, 0, ',', '.') }}</span>
                                     @else
-                                        <span class="body-lg-bold text-brandNeutral-400">${{ number_format($product->price, 0, ',', '.') }}</span>
+                                        <span class="text-base font-bold text-slate-900">${{ number_format($product->price, 0, ',', '.') }}</span>
                                     @endif
                                 </div>
 
-                                <!-- Categorías pequeñas (mostrar otras categorías si tiene) -->
-                                @if($product->categories->count() > 1)
-                                    <div class="flex flex-wrap gap-1">
-                                        @foreach($product->categories->where('id', '!=', $category->id)->take(1) as $cat)
-                                            <span class="px-2 py-0.5 bg-brandSuccess-50 text-brandSuccess-400 rounded-full caption">
-                                                {{ $cat->name }}
-                                            </span>
-                                        @endforeach
-                                        @if($product->categories->where('id', '!=', $category->id)->count() > 1)
-                                            <span class="bg-brandSuccess-50 px-2 py-0.5 caption items-center text-brandSuccess-400 rounded-full">+{{ $product->categories->where('id', '!=', $category->id)->count() - 1 }}</span>
-                                        @endif
-                                    </div>
-                                @endif
-                            </div>
-
-                            <!-- Botones de acción -->
-                            <div class="flex flex-col gap-2">
-                                <x-add-to-cart-button :product="$product" :store="$store" />
-                                @if(featureEnabled($store, 'favoritos'))
-                                    <button class="p-2 w-11 h-11 flex items-center justify-center transition-transform bg-brandError-50 hover:bg-brandError-300 rounded-lg hover:scale-110" 
-                                            data-favorite-btn
-                                            data-product-id="{{ $product->id }}">
-                                        <i data-lucide="heart" class="w-6 h-6 text-brandError-400 hover:text-brandError-50" style="fill: currentColor;"></i>
-                                    </button>
-                                @endif
+                                <!-- Botones de acción -->
+                                <div class="flex gap-2 items-center md:mt-0 mt-2">
+                                    <x-add-to-cart-button :product="$product" :store="$store" />
+                                    @if(featureEnabled($store, 'favoritos'))
+                                        <button class="p-3 flex items-center justify-center transition-transform bg-red-50 hover:bg-red-100 rounded-full hover:scale-110" 
+                                                data-favorite-btn
+                                                data-product-id="{{ $product->id }}">
+                                            <i data-lucide="heart" class="w-6 h-6 text-red-500 hover:text-red-600" style="fill: currentColor;"></i>
+                                        </button>
+                                    @endif
+                                </div>
                             </div>
                         </div>
-                    </a>
+                    </div>
                 @endforeach
             </div>
         </div>

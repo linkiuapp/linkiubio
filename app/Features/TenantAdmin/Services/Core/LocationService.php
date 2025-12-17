@@ -6,12 +6,19 @@ use App\Shared\Models\Location;
 use App\Shared\Models\LocationSchedule;
 use App\Shared\Models\LocationSocialLink;
 use App\Shared\Models\Store;
+use App\Shared\Services\GeocodingService;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 
 class LocationService
 {
+    protected $geocodingService;
+    
+    public function __construct(GeocodingService $geocodingService)
+    {
+        $this->geocodingService = $geocodingService;
+    }
     /**
      * Check if a store can create more locations based on plan limits.
      */
@@ -61,6 +68,10 @@ class LocationService
         DB::beginTransaction();
         
         try {
+            // Geocode address if coordinates provided (from preview), otherwise skip
+            $latitude = $data['latitude'] ?? null;
+            $longitude = $data['longitude'] ?? null;
+            
             // Create location
             $location = Location::create([
                 'store_id' => $data['store_id'],
@@ -72,6 +83,8 @@ class LocationService
                 'department' => $data['department'],
                 'city' => $data['city'],
                 'address' => $data['address'],
+                'latitude' => $latitude,
+                'longitude' => $longitude,
                 'is_main' => $data['is_main'] ?? false,
                 'is_active' => $data['is_active'] ?? true,
                 'whatsapp_message' => $data['whatsapp_message'] ?? null
@@ -116,6 +129,21 @@ class LocationService
         DB::beginTransaction();
         
         try {
+            // Check if address changed - if so, clear geocoding cache
+            $addressChanged = $location->address !== $data['address'] || 
+                            $location->city !== $data['city'] || 
+                            $location->department !== $data['department'];
+            
+            if ($addressChanged) {
+                // Clear cache for old address
+                $oldAddress = $this->geocodingService->getFullAddress($location);
+                $this->geocodingService->clearCache($oldAddress);
+            }
+            
+            // Geocode address if coordinates provided (from preview), otherwise keep existing or null
+            $latitude = $data['latitude'] ?? ($addressChanged ? null : $location->latitude);
+            $longitude = $data['longitude'] ?? ($addressChanged ? null : $location->longitude);
+            
             // Update location
             $location->update([
                 'name' => $data['name'],
@@ -126,6 +154,8 @@ class LocationService
                 'department' => $data['department'],
                 'city' => $data['city'],
                 'address' => $data['address'],
+                'latitude' => $latitude,
+                'longitude' => $longitude,
                 'is_active' => $data['is_active'] ?? true,
                 'whatsapp_message' => $data['whatsapp_message'] ?? null
             ]);

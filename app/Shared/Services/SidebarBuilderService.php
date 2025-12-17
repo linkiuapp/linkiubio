@@ -732,6 +732,17 @@ class SidebarBuilderService
             'badgeColor' => $this->getBadgeColor('count', $slidersUsed, $slidersLimit)
         ];
 
+        // Ticker
+        $tickersUsed = $this->store->tickers()->count() ?? 0;
+        $items[] = [
+            'label'      => 'Ticker de Promociones',
+            'url'        => route('tenant.admin.ticker.index', ['store' => $this->store->slug]),
+            'icon'       => 'scroll-text',
+            'active'     => request()->routeIs('tenant.admin.ticker.*'),
+            'badge'      => $tickersUsed > 0 ? "{$tickersUsed}/8" : null,
+            'badgeColor' => $tickersUsed > 0 ? $this->getBadgeColor('count', $tickersUsed, 8) : null
+        ];
+
         return $items;
     }
 

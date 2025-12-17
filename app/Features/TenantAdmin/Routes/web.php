@@ -12,6 +12,7 @@ use App\Features\TenantAdmin\Controllers\Core\VariableController;
 use App\Features\TenantAdmin\Controllers\Core\ProductController;
 use App\Features\TenantAdmin\Controllers\Core\InventarioController;
 use App\Features\TenantAdmin\Controllers\Core\SliderController;
+use App\Features\TenantAdmin\Controllers\Core\TickerController;
 use App\Features\TenantAdmin\Controllers\Core\LocationController;
 use App\Features\TenantAdmin\Controllers\Core\SimpleShippingController;
 use App\Features\TenantAdmin\Controllers\Core\TicketController;
@@ -178,6 +179,15 @@ Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreAppro
         Route::post('/reorder', [SliderController::class, 'updateOrder'])->name('reorder');
     });
 
+    // Ticker Routes
+    Route::prefix('ticker')->name('ticker.')->group(function () {
+        Route::get('/', [TickerController::class, 'index'])->name('index');
+        Route::post('/', [TickerController::class, 'store'])->name('store');
+        Route::post('/reorder', [TickerController::class, 'updateOrder'])->name('reorder');
+        Route::post('/{ticker}/toggle-status', [TickerController::class, 'toggleStatus'])->name('toggle-status');
+        Route::delete('/{tickerId}', [TickerController::class, 'destroy'])->name('destroy')->where('tickerId', '[0-9]+');
+    });
+
     // Rutas para métodos de pago
     Route::prefix('payment-methods')->name('payment-methods.')->group(function () {
         Route::get('/', [PaymentMethodController::class, 'index'])->name('index');
@@ -224,6 +234,7 @@ Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreAppro
         Route::get('/', [LocationController::class, 'index'])->name('index');
         Route::get('/create', [LocationController::class, 'create'])->name('create');
         Route::post('/', [LocationController::class, 'store'])->name('store');
+        Route::post('/geocode', [LocationController::class, 'geocodeAddress'])->name('geocode');
         Route::get('/{location}', [LocationController::class, 'show'])->name('show');
         Route::get('/{location}/edit', [LocationController::class, 'edit'])->name('edit');
         Route::put('/{location}', [LocationController::class, 'update'])->name('update');
