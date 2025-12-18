@@ -11,22 +11,22 @@
 <body class="bg-gradient-to-br from-blue-100 to-indigo-100">
     
     <div class="min-h-screen flex items-center justify-center p-4">
-        <div class="max-w-2xl w-full bg-white rounded-3xl shadow-2xl overflow-hidden" x-data="paymentValidation()">
+        <div class="max-w-2xl w-full bg-white rounded-3xl border border-gray-200 shadow-2xl overflow-hidden" x-data="paymentValidation()">
             
             {{-- Header con Logo --}}
             <div class="bg-gradient-to-r from-blue-600 to-indigo-600 p-8 text-center">
                 <div class="w-20 h-20 bg-white rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg">
-                    <i data-lucide="check-circle" class="w-10 h-10 text-blue-600"></i>
+                    <i data-lucide="check-circle" class="w-10 h-10 text-slate-600"></i>
                 </div>
-                <h1 class="text-2xl font-bold text-gray-900 mb-2">¡Registro Casi Completo!</h1>
-                <p class="text-gray-900">Estamos validando tu comprobante de pago</p>
+                <h1 class="text-xl font-bold text-white mb-2">¡Registro Casi Completo!</h1>
+                <p class="text-white">Estamos validando tu comprobante de pago</p>
             </div>
 
             {{-- Progress Area --}}
             <div class="p-8">
                 {{-- Barra de Progreso Animada --}}
                 <div class="mb-8">
-                    <div class="flex justify-between text-sm text-gray-600 mb-2">
+                    <div class="flex justify-between text-sm text-slate-600 mb-2">
                         <span>Validando...</span>
                         <span x-text="progress + '%'">0%</span>
                     </div>
@@ -38,11 +38,11 @@
 
                 {{-- Tiempo Transcurrido --}}
                 <div class="text-center mb-8">
-                    <p class="text-sm text-gray-600 mb-1">Tiempo transcurrido</p>
-                    <div class="text-4xl font-bold text-gray-900">
+                    <p class="text-sm text-slate-600 mb-1">Tiempo transcurrido</p>
+                    <div class="text-4xl font-bold text-slate-900">
                         <span x-text="formatTime()">0:00</span>
                     </div>
-                    <p class="text-xs text-gray-500 mt-2">Validación típica: 5-15 minutos</p>
+                    <p class="text-xs text-slate-500 mt-2">Validación típica: 5-15 minutos</p>
                 </div>
 
                 {{-- Pasos de Validación --}}
@@ -54,8 +54,8 @@
                             <i data-lucide="check" class="w-5 h-5 text-white"></i>
                         </div>
                         <div class="flex-1">
-                            <p class="font-semibold text-gray-900">Comprobante recibido</p>
-                            <p class="text-sm text-gray-600">Archivo guardado correctamente</p>
+                            <p class="font-semibold text-slate-900">Comprobante recibido</p>
+                            <p class="text-sm text-slate-600">Archivo guardado correctamente</p>
                         </div>
                         <i data-lucide="check-circle" class="w-6 h-6 text-green-500" x-show="currentStep >= 1"></i>
                     </div>
@@ -67,8 +67,8 @@
                             <i :data-lucide="currentStep >= 2 ? 'zap' : 'clock'" class="w-5 h-5 text-white"></i>
                         </div>
                         <div class="flex-1">
-                            <p class="font-semibold text-gray-900">Validando información</p>
-                            <p class="text-sm text-gray-600">Analizando datos del registro</p>
+                            <p class="font-semibold text-slate-900">Validando información</p>
+                            <p class="text-sm text-slate-600">Analizando datos del registro</p>
                         </div>
                         <div x-show="currentStep === 2" class="flex gap-1">
                             <div class="w-2 h-2 bg-blue-500 rounded-full animate-bounce"></div>
@@ -85,8 +85,8 @@
                             <i :data-lucide="currentStep >= 3 ? 'sparkles' : 'clock'" class="w-5 h-5 text-white"></i>
                         </div>
                         <div class="flex-1">
-                            <p class="font-semibold text-gray-900">Revisión del equipo</p>
-                            <p class="text-sm text-gray-600">Nuestro equipo verificará tu pago</p>
+                            <p class="font-semibold text-slate-900">Revisión del equipo</p>
+                            <p class="text-sm text-slate-600">Nuestro equipo verificará tu pago</p>
                         </div>
                         <div x-show="currentStep === 3" class="flex gap-1">
                             <div class="w-2 h-2 bg-purple-500 rounded-full animate-bounce"></div>
@@ -103,8 +103,8 @@
                             <i :data-lucide="currentStep >= 4 ? 'rocket' : 'clock'" class="w-5 h-5 text-white"></i>
                         </div>
                         <div class="flex-1">
-                            <p class="font-semibold text-gray-900">Activando tu tienda</p>
-                            <p class="text-sm text-gray-600">Preparando todo para ti</p>
+                            <p class="font-semibold text-slate-900">Activando tu tienda</p>
+                            <p class="text-sm text-slate-600">Preparando todo para ti</p>
                         </div>
                         <div x-show="currentStep === 4" class="flex gap-1">
                             <div class="w-2 h-2 bg-green-500 rounded-full animate-bounce"></div>
@@ -118,10 +118,10 @@
                 {{-- Info Email --}}
                 <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-6 text-center">
                     <i data-lucide="mail" class="w-8 h-8 text-blue-600 mx-auto mb-3"></i>
-                    <p class="text-sm text-gray-700 mb-2">
+                    <p class="text-sm text-slate-600 mb-2">
                         <strong>Puedes cerrar esta ventana si quieres</strong>
                     </p>
-                    <p class="text-sm text-gray-600">
+                    <p class="text-sm text-slate-600">
                         Te enviaremos un email a <strong class="text-gray-900">{{ $registration->owner_email }}</strong> cuando tu tienda esté lista
                     </p>
                 </div>
@@ -130,8 +130,8 @@
                 <div x-show="status === 'approved'" x-cloak class="mt-6">
                     <div class="bg-green-50 border-2 border-green-500 rounded-xl p-6 text-center">
                         <i data-lucide="party-popper" class="w-12 h-12 text-green-600 mx-auto mb-3"></i>
-                        <h3 class="text-xl font-bold text-green-900 mb-2">¡Pago Aprobado!</h3>
-                        <p class="text-gray-700 mb-4">Redirigiendo a tu tienda...</p>
+                        <h3 class="text-lg font-bold text-green-900 mb-2">¡Pago Aprobado!</h3>
+                        <p class="text-slate-600 mb-4">Redirigiendo a tu tienda...</p>
                     </div>
                 </div>
 
@@ -139,7 +139,7 @@
                     <div class="bg-red-50 border-2 border-red-500 rounded-xl p-6 text-center">
                         <i data-lucide="x-circle" class="w-12 h-12 text-red-600 mx-auto mb-3"></i>
                         <h3 class="text-xl font-bold text-red-900 mb-2">Pago No Aprobado</h3>
-                        <p class="text-gray-700" x-text="rejectionReason">Hubo un problema con el comprobante</p>
+                        <p class="text-slate-600" x-text="rejectionReason">Hubo un problema con el comprobante</p>
                     </div>
                 </div>
             </div>

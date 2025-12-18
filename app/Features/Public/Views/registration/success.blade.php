@@ -18,33 +18,33 @@
         }
     </style>
 </head>
-<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
+<body class="gradient-bg min-h-screen flex items-center justify-center p-2 md:p-4">
     <div class="max-w-3xl w-full">
         {{-- Header con Logo --}}
         <div class="text-center mb-8">
             <div class="inline-block bg-white rounded-full p-4 mb-4 card-shadow">
                 <i data-lucide="check-circle" class="w-16 h-16 text-green-500"></i>
             </div>
-            <h1 class="text-4xl font-bold text-white mb-2">¡Registro Completado con Éxito!</h1>
-            <p class="text-white text-opacity-90 text-lg">Tu pago ha sido verificado y tu tienda está lista para comenzar</p>
+            <h1 class="text-xl font-bold text-white mb-1">¡Registro Completado con Éxito!</h1>
+            <p class="text-white text-opacity-90 text-base">Tu pago ha sido verificado y tu tienda está lista para comenzar</p>
         </div>
 
         {{-- Card Principal --}}
         <div class="bg-white rounded-2xl card-shadow overflow-hidden">
             {{-- Credenciales --}}
             <div class="p-6">
-                <h2 class="text-xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <h2 class="text-base font-bold text-slate-900 mb-4 flex items-center gap-2">
                     <i data-lucide="key" class="w-5 h-5 text-blue-600"></i>
                     Tus Credenciales de Acceso
                 </h2>
                 <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl p-4 border-2 border-blue-200 space-y-3">
                     <div>
-                        <label class="text-xs font-medium text-gray-600 mb-1 block">Email</label>
+                        <label class="text-xs font-medium text-slate-600 mb-1 block">Email</label>
                         <div class="flex items-center gap-2">
                             <input type="text" 
                                    value="{{ $registration->owner_email }}" 
                                    readonly
-                                   class="flex-1 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg text-gray-900 font-medium">
+                                   class="flex-1 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg text-slate-900 font-medium">
                             <button onclick="copyToClipboard('{{ $registration->owner_email }}', 'email')"
                                     class="p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
                                     title="Copiar email">
@@ -53,13 +53,13 @@
                         </div>
                     </div>
                     <div x-data="{ showPassword: false }">
-                        <label class="text-xs font-medium text-gray-600 mb-1 block">Contraseña</label>
-                        <div class="flex items-center gap-2">
+                        <label class="text-xs font-medium text-slate-600 mb-1 block">Contraseña</label>
+                        <div class="flex items-center gap-1">
                             <input :type="showPassword ? 'text' : 'password'" 
                                    value="{{ $temporaryPassword }}" 
                                    readonly
                                    id="password-field"
-                                   class="flex-1 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg text-gray-900 font-medium">
+                                   class="flex-1 px-3 py-2 text-sm bg-white border border-gray-300 rounded-lg text-slate-900 font-medium">
                             <button @click="showPassword = !showPassword"
                                     type="button"
                                     class="p-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors"
@@ -76,32 +76,32 @@
                 </div>
 
                 {{-- Info de la tienda (compacto) --}}
-                <div class="mt-4 grid grid-cols-2 gap-3 text-xs">
+                <div class="mt-4 space-y-2 text-xs">
                     <div>
-                        <span class="text-gray-600">Tienda:</span>
-                        <span class="font-semibold text-gray-900">{{ $store->name }}</span>
+                        <span class="text-slate-600">Tienda:</span>
+                        <span class="font-semibold text-slate-900">{{ $store->name }}</span>
                     </div>
                     <div>
-                        <span class="text-gray-600">Plan:</span>
-                        <span class="font-semibold text-gray-900">{{ $subscription->plan->name }} - {{ $subscription->billing_cycle_label }}</span>
+                        <span class="text-slate-600">Plan:</span>
+                        <span class="font-semibold text-slate-900">{{ $subscription->plan->name }} - {{ $subscription->billing_cycle_label }}</span>
                     </div>
                     <div class="col-span-2">
-                        <span class="text-gray-600">Válido hasta:</span>
-                        <span class="font-semibold text-gray-900">{{ $subscription->current_period_end->format('d M Y') }}</span>
+                        <span class="text-slate-600">Válido hasta:</span>
+                        <span class="font-semibold text-slate-900">{{ $subscription->current_period_end->format('d M Y') }}</span>
                     </div>
                 </div>
 
                 {{-- Alert de seguridad --}}
-                <div class="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg mt-4">
-                    <i data-lucide="shield-alert" class="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5"></i>
-                    <p class="text-xs text-amber-800">
+                <div class="flex items-start gap-2 p-3 bg-yellow-50 border border-yellow-200 rounded-lg mt-4">
+                    <i data-lucide="shield-alert" class="w-4 h-4 text-yellow-600 flex-shrink-0 mt-0.5"></i>
+                    <p class="text-xs text-yellow-800">
                         Guarda tus credenciales. Te recomendamos cambiar tu contraseña después del primer inicio de sesión.
                     </p>
                 </div>
             </div>
 
             {{-- Botones de Acción --}}
-            <div class="p-6 bg-gradient-to-r from-gray-50 to-blue-50 border-t border-gray-200">
+            <div class="p-6 bg-gradient-to-r from-slate-50 to-blue-50 border-t border-gray-200">
                 <div class="flex flex-col sm:flex-row gap-3 mb-4">
                     <a href="{{ route('tenant.admin.dashboard', $store->slug) }}"
                        class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white rounded-xl font-bold text-center transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2">
@@ -110,14 +110,14 @@
                     </a>
                     <a href="{{ url('/' . $store->slug) }}"
                        target="_blank"
-                       class="flex-1 px-6 py-3 bg-white border-2 border-gray-300 hover:border-gray-400 text-gray-800 rounded-xl font-bold text-center transition-all flex items-center justify-center gap-2">
+                       class="flex-1 px-6 py-3 bg-white border-2 border-gray-300 hover:border-gray-400 text-slate-800 rounded-xl font-bold text-center transition-all flex items-center justify-center gap-2">
                         <i data-lucide="shopping-bag" class="w-5 h-5"></i>
                         Ver mi Tienda
                     </a>
                 </div>
                 
                 {{-- Próximos pasos compactos --}}
-                <div class="text-xs text-gray-600 text-center">
+                <div class="text-xs text-slate-600 text-center">
                     <i data-lucide="rocket" class="w-4 h-4 inline mr-1"></i>
                     <span class="font-medium">Próximos pasos:</span> Personaliza diseño • Agrega productos • Configura pagos • ¡Vende!
                 </div>
@@ -126,9 +126,9 @@
 
         {{-- Footer --}}
         <div class="text-center mt-6">
-            <p class="text-white text-opacity-80 text-sm">
+            <p class="text-white text-opacity-80 text-base">
                 ¿Necesitas ayuda? 
-                <a href="https://wa.me/573104594344" class="font-bold underline hover:text-white">WhatsApp: +57 310 459 4344</a>
+                <a href="https://wa.me/573104594344" class="font-semibold text-base underline hover:text-white">WhatsApp: +57 310 459 4344</a>
             </p>
         </div>
     </div>

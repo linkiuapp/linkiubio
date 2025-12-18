@@ -5,12 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Elige tu Plan - Linkiu</title>
-    
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body class="bg-gray-50">
-    
     <div class="min-h-screen">
+
         {{-- Wizard Progress --}}
         <div class="bg-white border-b border-gray-200">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
@@ -83,40 +82,40 @@
                 
                 {{-- Selector de Período --}}
                 <div class="flex justify-center mb-12">
-                    <div class="inline-flex items-center gap-3 bg-white rounded-full p-2 shadow-lg border border-gray-200">
+                    <div class="grid grid-cols-2 md:inline-flex items-center gap-2 md:gap-3 bg-white rounded-2xl md:rounded-full p-2 shadow-lg border border-gray-200 w-full max-w-md md:w-auto md:max-w-none">
                         <label class="cursor-pointer">
                             <input type="radio" name="billing_period" value="monthly" x-model="selectedPeriod" class="hidden">
-                            <span class="block px-6 py-2 rounded-full transition-all font-medium"
+                            <span class="block px-4 py-2 md:px-6 md:py-2 rounded-full transition-all font-medium text-sm md:text-base text-center"
                                   :class="selectedPeriod === 'monthly' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'">
                                 Mensual
                             </span>
                         </label>
                         <label class="cursor-pointer relative">
                             <input type="radio" name="billing_period" value="quarterly" x-model="selectedPeriod" class="hidden">
-                            <span class="absolute -top-3 -right-3 bg-orange-500 text-white text-xs px-2 py-0.5 rounded-full font-bold z-10">
+                            <span class="absolute -top-2 -right-2 md:-top-3 md:-right-3 bg-orange-500 text-white text-xs px-1.5 py-0.5 md:px-2 md:py-0.5 rounded-full font-bold z-10">
                                 <span x-text="getAverageDiscount('quarterly')">5</span>%
                             </span>
-                            <span class="block px-6 py-2 rounded-full transition-all font-medium"
+                            <span class="block px-4 py-2 md:px-6 md:py-2 rounded-full transition-all font-medium text-sm md:text-base text-center"
                                   :class="selectedPeriod === 'quarterly' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'">
                                 Trimestral
                             </span>
                         </label>
                         <label class="cursor-pointer relative">
                             <input type="radio" name="billing_period" value="semester" x-model="selectedPeriod" class="hidden">
-                            <span class="absolute -top-3 -right-3 bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full font-bold z-10">
+                            <span class="absolute -top-2 -right-2 md:-top-3 md:-right-3 bg-yellow-500 text-white text-xs px-1.5 py-0.5 md:px-2 md:py-0.5 rounded-full font-bold z-10">
                                 <span x-text="getAverageDiscount('semester')">10</span>%
                             </span>
-                            <span class="block px-6 py-2 rounded-full transition-all font-medium"
+                            <span class="block px-4 py-2 md:px-6 md:py-2 rounded-full transition-all font-medium text-sm md:text-base text-center"
                                   :class="selectedPeriod === 'semester' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'">
                                 Semestral
                             </span>
                         </label>
                         <label class="cursor-pointer relative">
                             <input type="radio" name="billing_period" value="annual" x-model="selectedPeriod" class="hidden">
-                            <span class="absolute -top-3 -right-3 bg-green-500 text-white text-xs px-2 py-0.5 rounded-full font-bold z-10">
+                            <span class="absolute -top-2 -right-2 md:-top-3 md:-right-3 bg-green-500 text-white text-xs px-1.5 py-0.5 md:px-2 md:py-0.5 rounded-full font-bold z-10">
                                 <span x-text="getAverageDiscount('annual')">15</span>%
                             </span>
-                            <span class="block px-6 py-2 rounded-full transition-all font-medium"
+                            <span class="block px-4 py-2 md:px-6 md:py-2 rounded-full transition-all font-medium text-sm md:text-base text-center"
                                   :class="selectedPeriod === 'annual' ? 'bg-blue-600 text-white' : 'text-gray-700 hover:bg-gray-100'">
                                 Anual
                             </span>
@@ -125,127 +124,127 @@
                 </div>
 
                 {{-- Grid de Planes --}}
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-6 pt-12">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-6 pt-2 md:pt-12">
                     @foreach($plans as $index => $plan)
                         @php
-                            $colors = [
-                                ['bg' => 'bg-purple-100', 'icon' => 'bg-purple-50', 'button' => 'bg-purple-600 hover:bg-purple-700 text-white border-purple-600', 'check' => 'bg-purple-600'],
-                                ['bg' => 'bg-blue-600', 'icon' => 'bg-white', 'button' => 'bg-white hover:bg-blue-50 text-blue-600 border-white', 'check' => 'bg-white', 'text' => 'text-white'],
-                                ['bg' => 'bg-green-100', 'icon' => 'bg-green-50', 'button' => 'bg-green-600 hover:bg-green-700 text-white border-green-600', 'check' => 'bg-green-600'],
-                            ];
-                            $colorScheme = $colors[$index % 3];
                             $isFeatured = $plan->is_featured;
+                            // Mapear nombre del plan a la imagen del banner
+                            $planImages = [
+                                'Explorer' => 'banner_planes_explorer_registre.svg',
+                                'Master' => 'banner_planes_master_registre.svg',
+                                'Legend' => 'banner_planes_legend_registre.svg',
+                            ];
+                            $bannerImage = $planImages[$plan->name] ?? 'banner_planes_explorer_registre.svg';
                         @endphp
                         
                         <div class="pricing-plan-wrapper">
                             <label class="cursor-pointer block {{ $isFeatured ? 'lg:-mt-[50px] lg:scale-105 z-10' : '' }}">
                                 <input type="radio" name="plan_id" value="{{ $plan->id }}" x-model="selectedPlan" class="sr-only peer" required>
                                 
-                                <div class="relative rounded-3xl overflow-hidden border py-8 lg:py-10 px-6 lg:px-8 transition-all duration-300 
-                                            {{ $colorScheme['bg'] }} 
-                                            {{ $isFeatured ? 'border-blue-600' : 'border-gray-200' }}
-                                            peer-checked:ring-4 peer-checked:ring-blue-500 peer-checked:border-blue-600 peer-checked:shadow-2xl
-                                            hover:shadow-xl {{ isset($colorScheme['text']) ? $colorScheme['text'] : '' }}">
-                                    
-                    @if($isFeatured)
-                        <span class="absolute right-0 top-0 bg-white bg-opacity-90 text-blue-600 rounded-bl-3xl py-2 px-6 text-sm font-bold shadow-lg">
-                            POPULAR
-                        </span>
-                    @endif
+                                <div class="relative rounded-3xl overflow-hidden border bg-white border-gray-200 py-0 lg:py-0 transition-all duration-300 
+                                            peer-checked:ring-1 peer-checked:ring-blue-500 peer-checked:border-blue-600 peer-checked:shadow-2xl
+                                            hover:shadow-xl">
 
-                                    {{-- Header del Plan --}}
-                                    <div class="flex items-center gap-4 mb-6">
-                                        <span class="w-[72px] h-[72px] flex justify-center items-center rounded-2xl {{ $colorScheme['icon'] }} shadow-md">
-                                            <i data-lucide="zap" class="w-10 h-10 {{ isset($colorScheme['text']) ? 'text-blue-600' : 'text-gray-700' }}"></i>
-                                        </span>
-                                        <div>
-                                            <span class="font-medium text-base {{ isset($colorScheme['text']) ? 'text-white opacity-90' : 'text-gray-600' }}">
-                                                @if($plan->trial_days > 0)
-                                                    {{ $plan->trial_days }} días gratis
-                                                @else
-                                                    Para tu negocio
-                                                @endif
-                                            </span>
-                                            <h6 class="text-xl font-black {{ isset($colorScheme['text']) ? 'text-white' : 'text-gray-900' }}">
-                                                {{ $plan->name }}
+                                    {{-- Banner Superior con Gradiente --}}
+                                    <div class="relative h-[160px] md:h-[172px] flex items-center justify-between px-4 overflow-hidden">
+                                        <div class="relative z-10">
+                                            <h6 class="text-lg font-bold text-white mb-1">
+                                                {{ strtoupper($plan->name) }}
                                             </h6>
+                                            @if($plan->trial_days > 0)
+                                                <p class="text-sm md:text-base text-white font-medium mb-2">
+                                                    {{ $plan->trial_days }} días gratis adicional
+                                                </p>
+                                            @endif
+                                            @if($isFeatured)
+                                                <span class="absolute bg-white text-blue-600 rounded-full py-1 px-3 text-xs font-bold shadow-lg z-20">
+                                                    POPULAR
+                                                </span>
+                                            @endif
+                                        </div>
+                                        {{-- Ilustración decorativa --}}
+                                        <div class="absolute right-0 top-0 h-full w-full flex items-center justify-center">
+                                            <img src="{{ asset('images-ui/' . $bannerImage) }}" alt="Plan {{ $plan->name }}" class="h-full w-auto object-contain">
                                         </div>
                                     </div>
 
-                    {{-- Descripción --}}
-                    @if($plan->description)
-                        <p class="text-sm mb-6 {{ isset($colorScheme['text']) ? 'text-white opacity-90' : 'text-gray-600' }}">
-                            {{ Str::limit($plan->description, 150) }}
-                        </p>
-                    @endif
+                                    {{-- Contenido del Plan --}}
+                                    <div class="px-6 py-6">
 
-                    {{-- Precio Dinámico --}}
-                    <div class="mb-6">
-                        <h3 class="text-2xl font-black {{ isset($colorScheme['text']) ? 'text-white' : 'text-gray-900' }}">
-                            <span x-text="formatPrice({{ $plan->id }})">{{ $plan->getPriceFormatted() }}</span>
-                            <span class="text-lg font-medium {{ isset($colorScheme['text']) ? 'text-white opacity-75' : 'text-gray-600' }}">
-                                / <span x-text="getPeriodLabel()">mes</span>
-                            </span>
-                        </h3>
-                    </div>
+                                        {{-- Precio Dinámico --}}
+                                        <div class="mb-2">
+                                            <h3 class="text-xl font-bold text-slate-900">
+                                                <span x-text="formatPrice({{ $plan->id }})">{{ $plan->getPriceFormatted() }}</span>
+                                                <span class="text-base font-medium text-slate-600">
+                                                    <span x-text="getPeriodLabel()">Mes</span> COP
+                                                </span>
+                                            </h3>
+                                        </div>
 
-                    {{-- Botón de Selección --}}
-                    <button type="button" 
-                            @click="selectedPlan = {{ $plan->id }}; $nextTick(() => { $el.closest('form').submit(); })"
-                            class="w-full py-3 rounded-lg font-semibold transition-all mb-6 {{ $colorScheme['button'] }} shadow-md hover:shadow-lg transform hover:scale-[1.02]">
-                        <span class="inline-flex items-center justify-center gap-2">
-                            <i data-lucide="arrow-right" class="w-5 h-5"></i>
-                            Seleccionar Plan
-                        </span>
-                    </button>
+                                        {{-- Descripción --}}
+                                        @if($plan->description)
+                                            <p class="text-sm mb-4 font-normal text-slate-600">
+                                                {{ Str::limit($plan->description, 150) }}
+                                            </p>
+                                        @endif
 
-                    {{-- Características --}}
-                    <div x-data="{ showAll: false }" class="mb-8">
-                        <span class="block mb-4 font-semibold {{ isset($colorScheme['text']) ? 'text-white' : 'text-gray-900' }}">
-                            Lo que incluye:
-                        </span>
-                        <ul class="space-y-3">
-                            @php
-                                $features = $plan->features_list ?? [];
-                                $mainFeatures = array_slice($features, 0, 5);
-                                $extraFeatures = array_slice($features, 5);
-                            @endphp
-                            @foreach($mainFeatures as $feature)
-                                <li class="flex items-center gap-3">
-                                    <span class="w-6 h-6 flex justify-center items-center {{ $colorScheme['check'] }} rounded-full flex-shrink-0">
-                                        <i data-lucide="check" class="w-4 h-4 {{ isset($colorScheme['text']) ? 'text-blue-600' : 'text-white' }}"></i>
-                                    </span>
-                                    <span class="text-sm {{ isset($colorScheme['text']) ? 'text-white' : 'text-gray-700' }}">
-                                        {{ $feature }}
-                                    </span>
-                                </li>
-                            @endforeach
-                            
-                            @if(count($extraFeatures) > 0)
-                                <div x-show="showAll" x-cloak x-transition>
-                                    @foreach($extraFeatures as $feature)
-                                        <li class="flex items-center gap-3 mt-3">
-                                            <span class="w-6 h-6 flex justify-center items-center {{ $colorScheme['check'] }} rounded-full flex-shrink-0">
-                                                <i data-lucide="check" class="w-4 h-4 {{ isset($colorScheme['text']) ? 'text-blue-600' : 'text-white' }}"></i>
+                                        {{-- Botón de Selección --}}
+                                        <button type="button" 
+                                                @click="selectedPlan = {{ $plan->id }}; $nextTick(() => { $el.closest('form').submit(); })"
+                                                class="w-full py-3 rounded-lg font-semibold transition-all mb-4 bg-slate-900 hover:bg-slate-800 text-white border border-slate-800 shadow-md hover:shadow-lg transform hover:scale-[1.02]">
+                                            <span class="inline-flex items-center justify-center gap-2">
+                                                Seleccionar plan
                                             </span>
-                                            <span class="text-sm {{ isset($colorScheme['text']) ? 'text-white' : 'text-gray-700' }}">
-                                                {{ $feature }}
+                                        </button>
+
+                                        {{-- Características --}}
+                                        <div x-data="{ showAll: false }" class="mb-4">
+                                            <span class="block mb-2 font-bold text-base text-slate-900">
+                                                Lo que incluye:
                                             </span>
-                                        </li>
-                                    @endforeach
-                                </div>
-                            @endif
-                        </ul>
-                        
-                        @if(count($extraFeatures) > 0)
-                            <button type="button" 
-                                    @click="showAll = !showAll; $nextTick(() => { if (window.createIcons) window.createIcons({ icons: window.lucideIcons }); })" 
-                                    class="mt-4 text-sm font-medium {{ isset($colorScheme['text']) ? 'text-white underline' : 'text-blue-600 hover:text-blue-800' }} transition-colors">
-                                <span x-show="!showAll">+ Ver más ({{ count($extraFeatures) }})</span>
-                                <span x-show="showAll">- Ver menos</span>
-                            </button>
-                        @endif
-                    </div>
+                                            <ul class="space-y-3">
+                                                @php
+                                                    $features = $plan->features_list ?? [];
+                                                    $mainFeatures = array_slice($features, 0, 4);
+                                                    $extraFeatures = array_slice($features, 4);
+                                                @endphp
+                                                @foreach($mainFeatures as $feature)
+                                                    <li class="flex items-center gap-2">
+                                                        <span class="flex justify-center items-center flex-shrink-0">
+                                                            <i data-lucide="badge-check" class="w-4 h-4 text-slate-600"></i>
+                                                        </span>
+                                                        <span class="text-sm font-normal text-slate-600">
+                                                            {{ $feature }}
+                                                        </span>
+                                                    </li>
+                                                @endforeach
+                                                
+                                                @if(count($extraFeatures) > 0)
+                                                    <div x-show="showAll" x-cloak x-transition>
+                                                        @foreach($extraFeatures as $feature)
+                                                            <li class="flex items-center gap-3 mt-3">
+                                                                <span class="w-6 h-6 flex justify-center items-center bg-slate-900 rounded-full flex-shrink-0">
+                                                                    <i data-lucide="check" class="w-4 h-4 text-white"></i>
+                                                                </span>
+                                                                <span class="text-sm font-normal text-slate-600">
+                                                                    {{ $feature }}
+                                                                </span>
+                                                            </li>
+                                                        @endforeach
+                                                    </div>
+                                                @endif
+                                            </ul>
+                                            
+                                            @if(count($extraFeatures) > 0)
+                                                <button type="button" 
+                                                        @click="showAll = !showAll; $nextTick(() => { if (window.createIcons) window.createIcons({ icons: window.lucideIcons }); })" 
+                                                        class="mt-4 text-sm font-medium text-blue-600 hover:text-blue-800 underline transition-colors">
+                                                    <span x-show="!showAll">Mostrar más</span>
+                                                    <span x-show="showAll">Mostrar menos</span>
+                                                </button>
+                                            @endif
+                                        </div>
+                                    </div>
                                 </div>
                             </label>
                         </div>

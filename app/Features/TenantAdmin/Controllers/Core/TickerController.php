@@ -332,3 +332,4 @@ class TickerController extends Controller
     }
 }
 
+
