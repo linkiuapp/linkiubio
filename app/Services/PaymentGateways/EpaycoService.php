@@ -111,20 +111,34 @@ class EpaycoService
             if (!isset($response->success) || !$response->success) {
                 // Capturar mensaje de error de múltiples fuentes posibles
                 $errorMessage = 'Error desconocido';
+                $errorCode = null;
                 
-                if (isset($response->message) && !empty($response->message)) {
-                    $errorMessage = $response->message;
+                // Primero intentar obtener errores específicos desde data.errores (array de errores)
+                if (isset($response->data->errores) && is_array($response->data->errores) && !empty($response->data->errores)) {
+                    $error = $response->data->errores[0];
+                    $errorCode = $error->codError ?? $error['codError'] ?? null;
+                    $errorMessage = $error->errorMessage ?? $error['errorMessage'] ?? 'Error en la transacción';
+                    
+                    // Traducir o mejorar mensajes de error comunes
+                    if ($errorCode === 'E014') {
+                        $errorMessage = 'El monto mínimo para transacciones PSE no ha sido alcanzado. Por favor verifica el monto o usa otro método de pago.';
+                    } elseif ($errorCode === 'E015') {
+                        $errorMessage = 'El monto máximo para transacciones PSE ha sido excedido.';
+                    }
                 } elseif (isset($response->data->error) && !empty($response->data->error)) {
                     $errorMessage = $response->data->error;
                 } elseif (isset($response->data->message) && !empty($response->data->message)) {
                     $errorMessage = $response->data->message;
-                } elseif (isset($response->title_response) && !empty($response->title_response)) {
-                    $errorMessage = $response->title_response;
-                    if (isset($response->text_response) && !empty($response->text_response)) {
-                        $errorMessage .= ': ' . $response->text_response;
-                    }
+                } elseif (isset($response->message) && !empty($response->message)) {
+                    $errorMessage = $response->message;
                 } elseif (isset($response->text_response) && !empty($response->text_response)) {
                     $errorMessage = $response->text_response;
+                    // Si hay title_response, combinarlo
+                    if (isset($response->title_response) && !empty($response->title_response)) {
+                        $errorMessage = $response->title_response . ': ' . $errorMessage;
+                    }
+                } elseif (isset($response->title_response) && !empty($response->title_response)) {
+                    $errorMessage = $response->title_response;
                 }
                 
                 // Si aún no tenemos un mensaje claro, intentar obtener más información
@@ -143,6 +157,7 @@ class EpaycoService
                 // Log completo de la respuesta para debugging
                 Log::error('Respuesta de error de Epayco', [
                     'method' => $method,
+                    'error_code' => $errorCode,
                     'response' => $response,
                     'response_json' => json_encode($response),
                     'data' => $data,
@@ -202,6 +217,17 @@ class EpaycoService
         $amount = floatval($data['amount'] ?? 0);
         if ($amount <= 0) {
             throw new \Exception("El monto debe ser mayor a cero para pagos PSE. Monto recibido: {$amount}");
+        }
+        
+        // Epayco PSE generalmente requiere un monto mínimo de $5,000 COP
+        // Validar monto mínimo recomendado (pero permitir intentarlo si es menor)
+        $minAmount = 5000;
+        if ($amount < $minAmount) {
+            Log::warning('Intento de pago PSE con monto menor al mínimo recomendado', [
+                'amount' => $amount,
+                'min_amount' => $minAmount,
+                'reference' => $data['reference'] ?? null,
+            ]);
         }
 
         $pseData = [

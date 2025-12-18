@@ -146,7 +146,7 @@
                                             hover:shadow-xl">
 
                                     {{-- Banner Superior con Gradiente --}}
-                                    <div class="relative h-[160px] md:h-[172px] flex items-center justify-between px-4 overflow-hidden">
+                                    <div class="relative h-[158px] md:h-[172px] flex items-center justify-between px-4 overflow-hidden">
                                         <div class="relative z-10 ml-2 md:ml-0">
                                             <h6 class="text-lg font-bold text-slate-900 mb-1">
                                                 {{ strtoupper($plan->name) }}
