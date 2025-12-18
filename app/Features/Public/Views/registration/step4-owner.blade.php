@@ -402,57 +402,6 @@
                                     </div>
                                 </label>
 
-                                {{-- Opción: Click to Pay --}}
-                                <label class="relative flex items-center p-4 border border-gray-200 rounded-xl cursor-pointer transition-all"
-                                       :class="epaycoMethod === 'clicktopay' ? 'border-green-600 bg-green-50' : 'border-gray-300 hover:border-gray-400'">
-                                    <input type="radio" 
-                                           name="epayco_method" 
-                                           value="clicktopay"
-                                           x-model="epaycoMethod"
-                                           class="sr-only">
-                                    <div class="flex items-center gap-3 w-full">
-                                        <div class="flex-shrink-0">
-                                            <div class="w-5 h-5 rounded-full border border-gray-200 flex items-center justify-center"
-                                                 :class="epaycoMethod === 'clicktopay' ? 'border-green-600' : 'border-gray-300'">
-                                                <div x-show="epaycoMethod === 'clicktopay'" 
-                                                     class="w-3 h-3 rounded-full bg-green-600"></div>
-                                            </div>
-                                        </div>
-                                        <div class="flex-1">
-                                            <div class="flex items-center gap-2 mb-1">
-                                                <i data-lucide="smartphone" class="w-5 h-5 text-green-600"></i>
-                                                <span class="font-semibold text-slate-900">Click to Pay</span>
-                                            </div>
-                                            <p class="text-xs font-normal text-slate-600">Pago rápido con tarjeta guardada</p>
-                                        </div>
-                                    </div>
-                                </label>
-
-                                {{-- Opción: Daviplata --}}
-                                <label class="relative flex items-center p-4 border border-gray-200 rounded-xl cursor-pointer transition-all"
-                                       :class="epaycoMethod === 'daviplata' ? 'border-green-600 bg-green-50' : 'border-gray-300 hover:border-gray-400'">
-                                    <input type="radio" 
-                                           name="epayco_method" 
-                                           value="daviplata"
-                                           x-model="epaycoMethod"
-                                           class="sr-only">
-                                    <div class="flex items-center gap-3 w-full">
-                                        <div class="flex-shrink-0">
-                                            <div class="w-5 h-5 rounded-full border border-gray-200 flex items-center justify-center"
-                                                 :class="epaycoMethod === 'daviplata' ? 'border-green-600' : 'border-gray-300'">
-                                                <div x-show="epaycoMethod === 'daviplata'" 
-                                                     class="w-3 h-3 rounded-full bg-green-600"></div>
-                                            </div>
-                                        </div>
-                                        <div class="flex-1">
-                                            <div class="flex items-center gap-2 mb-1">
-                                                <i data-lucide="wallet" class="w-5 h-5 text-green-600"></i>
-                                                <span class="font-semibold text-slate-900">Daviplata</span>
-                                            </div>
-                                            <p class="text-xs font-normal text-slate-600">Pago desde tu cuenta Daviplata</p>
-                                        </div>
-                                    </div>
-                                </label>
                             </div>
 
                             {{-- Selector de Banco (solo cuando se selecciona PSE) --}}
@@ -640,7 +589,7 @@
                 } else {
                     // Si es Epayco, validar que se haya seleccionado un método
                     if (this.paymentMethod === 'epayco' && !this.epaycoMethod) {
-                        alert('Por favor selecciona un método de pago de Epayco (PSE, Efectivo, Click to Pay o Daviplata)');
+                        alert('Por favor selecciona un método de pago de Epayco (PSE o Efectivo)');
                         return false;
                     }
                     

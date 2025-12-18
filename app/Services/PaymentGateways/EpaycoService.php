@@ -88,18 +88,6 @@ class EpaycoService
                     $epaycoTransactionId = $response->data->ref_payco ?? $response->data->ticketId ?? null;
                     break;
 
-                case 'daviplata':
-                    $response = $this->createDaviplataPayment($data, $clientIp);
-                    $redirectUrl = $response->data->url ?? $response->data->urlbanco ?? null;
-                    $epaycoTransactionId = $response->data->ref_payco ?? $response->data->ticketId ?? null;
-                    break;
-
-                case 'clicktopay':
-                    $response = $this->createClickToPayPayment($data, $clientIp);
-                    $redirectUrl = $response->data->urlbanco ?? null;
-                    $epaycoTransactionId = $response->data->ref_payco ?? $response->data->ticketId ?? null;
-                    break;
-
                 case 'payment':
                     // Para tarjetas de crédito/débito, requiere token_card y customer_id
                     // Este método se implementará cuando tengamos el token de tarjeta
@@ -427,18 +415,30 @@ class EpaycoService
                     break;
                 
                 default:
-                    // Intentar con bank primero (PSE)
+                    // Intentar con múltiples métodos en orden
                     try {
                         $response = $this->epayco->bank->get($epaycoTransactionId);
-                    } catch (\Exception $e) {
-                        // Si falla, intentar con charge
-                        $response = $this->epayco->charge->transaction($epaycoTransactionId);
+                    } catch (\Exception $e1) {
+                        try {
+                            $response = $this->epayco->cash->transaction($epaycoTransactionId);
+                        } catch (\Exception $e2) {
+                            // Último intento con charge
+                            $response = $this->epayco->charge->transaction($epaycoTransactionId);
+                        }
                     }
                     break;
             }
 
             if (!isset($response->success) || !$response->success) {
-                throw new \Exception('Error al consultar estado en Epayco: ' . ($response->message ?? 'Error desconocido'));
+                // Intentar obtener mensaje de error de múltiples fuentes
+                $errorMessage = $response->message 
+                    ?? $response->data->x_response_reason_text 
+                    ?? $response->data->x_response_reason 
+                    ?? $response->data->errorMessage 
+                    ?? $response->text_response 
+                    ?? 'Error desconocido';
+                
+                throw new \Exception('Error al consultar estado en Epayco: ' . $errorMessage);
             }
 
             // Mapear estado (diferentes métodos pueden tener diferentes campos)
@@ -826,82 +826,6 @@ class EpaycoService
         }
         
         return array_values($uniqueBanks);
-    }
-
-    /**
-     * Crear pago con Daviplata
-     */
-    protected function createDaviplataPayment(array $data, string $clientIp)
-    {
-        $amount = floatval($data['amount'] ?? 0);
-        if ($amount <= 0) {
-            throw new \Exception("El monto debe ser mayor a cero para pagos Daviplata. Monto recibido: {$amount}");
-        }
-
-        $daviplataData = [
-            "doc_type" => $this->mapDocumentTypeToEpayco($data['document_type'] ?? 'CC'),
-            "document" => $data['document'] ?? '',
-            "name" => $data['name'],
-            "last_name" => $data['last_name'] ?? '',
-            "email" => $data['email'],
-            "ind_country" => "CO",
-            "phone" => $data['phone'] ?? '',
-            "country" => "CO",
-            "city" => $data['city'] ?? "Bogota",
-            "address" => $data['address'] ?? 'Dirección no proporcionada',
-            "ip" => $clientIp,
-            "currency" => $data['currency'] ?? "COP",
-            "description" => $data['description'] ?? 'Pago de registro Linkiu',
-            "value" => number_format($amount, 2, '.', ''),
-            "tax" => "0",
-            "tax_base" => "0",
-            "method_confirmation" => "POST",
-            "url_confirmation" => $data['confirmation_url'],
-            "url_response" => $data['response_url'],
-        ];
-
-        return $this->epayco->daviplata->create($daviplataData);
-    }
-
-    /**
-     * Crear pago con Click to Pay
-     * Click to Pay usa el checkout estándar de Epayco que permite pagos con tarjeta
-     */
-    protected function createClickToPayPayment(array $data, string $clientIp)
-    {
-        $amount = floatval($data['amount'] ?? 0);
-        if ($amount <= 0) {
-            throw new \Exception("El monto debe ser mayor a cero para Click to Pay. Monto recibido: {$amount}");
-        }
-
-        // Click to Pay usa el método checkout de Epayco que permite pagos con tarjeta
-        // Habilitar solo métodos de tarjeta (deshabilitar PSE, Cash, etc.)
-        $checkoutData = [
-            "name" => $data['description'] ?? 'Pago de registro Linkiu',
-            "description" => $data['description'] ?? 'Pago de registro Linkiu',
-            "invoice" => $data['reference'],
-            "currency" => $data['currency'] ?? "COP",
-            "amount" => number_format($amount, 2, '.', ''),
-            "tax_base" => "0",
-            "tax" => "0",
-            "country" => "CO",
-            "lang" => "ES",
-            "external" => "false",
-            "confirmation" => $data['confirmation_url'],
-            "response" => $data['response_url'],
-            // Deshabilitar otros métodos para mostrar solo tarjeta (Click to Pay)
-            "methodsDisable" => ["PSE", "CASH", "SP", "DP", "DAVIPLATA"],
-        ];
-
-        // Usar el método checkout de Epayco
-        if (method_exists($this->epayco, 'checkout') && method_exists($this->epayco->checkout, 'create')) {
-            return $this->epayco->checkout->create($checkoutData);
-        } else {
-            Log::error('Método checkout no disponible en SDK de Epayco', [
-                'reference' => $data['reference'] ?? null,
-            ]);
-            throw new \Exception('Click to Pay no está disponible. Por favor usa otro método de pago.');
-        }
     }
 
     /**

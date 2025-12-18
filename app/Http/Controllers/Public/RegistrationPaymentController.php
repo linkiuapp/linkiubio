@@ -72,7 +72,7 @@ class RegistrationPaymentController extends Controller
         $epaycoMethod = $request->input('epayco_method', 'pse');
         
         // Validar método
-        $validMethods = ['pse', 'cash', 'clicktopay', 'daviplata'];
+        $validMethods = ['pse', 'cash'];
         if (!in_array($epaycoMethod, $validMethods)) {
             return back()->withErrors(['error' => 'Método de pago no válido.']);
         }
@@ -122,10 +122,6 @@ class RegistrationPaymentController extends Controller
             if (!in_array($cashType, $validCashTypes)) {
                 return back()->withErrors(['cash_type' => 'Método de pago en efectivo no válido.']);
             }
-        } elseif ($epaycoMethod === 'clicktopay') {
-            $method = 'clicktopay';
-        } elseif ($epaycoMethod === 'daviplata') {
-            $method = 'daviplata';
         }
 
         // Crear sesión de pago con el método seleccionado
