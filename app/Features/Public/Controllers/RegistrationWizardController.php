@@ -157,7 +157,41 @@ class RegistrationWizardController extends Controller
             default => $plan->price
         };
 
-        return view('public::registration.step4-owner', compact('paymentSetting', 'amount', 'epaycoGateway'));
+        // Obtener lista de bancos PSE si Epayco está activo
+        $pseBanks = [];
+        if ($epaycoGateway) {
+            try {
+                $epaycoService = new \App\Services\PaymentGateways\EpaycoService($epaycoGateway);
+                $banksResult = $epaycoService->getPseBanks();
+                
+                if ($banksResult['success'] && isset($banksResult['banks'])) {
+                    $banks = $banksResult['banks'];
+                    
+                    // Convertir a array si es objeto
+                    if (is_object($banks)) {
+                        $banks = json_decode(json_encode($banks), true);
+                    }
+                    
+                    // Procesar bancos
+                    if (is_array($banks) && !empty($banks)) {
+                        $pseBanks = $banks;
+                    }
+                    
+                    // Log para debugging
+                    \Log::info('Bancos PSE cargados', [
+                        'total' => count($pseBanks),
+                        'sample' => !empty($pseBanks) ? ($pseBanks[0] ?? null) : null
+                    ]);
+                }
+            } catch (\Exception $e) {
+                \Log::warning('Error obteniendo bancos PSE', [
+                    'error' => $e->getMessage(),
+                    'trace' => $e->getTraceAsString()
+                ]);
+            }
+        }
+
+        return view('public::registration.step4-owner', compact('paymentSetting', 'amount', 'epaycoGateway', 'pseBanks'));
     }
 
     /**

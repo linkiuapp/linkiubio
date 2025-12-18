@@ -94,7 +94,11 @@ class RegistrationPaymentController extends Controller
 
         if ($epaycoMethod === 'pse') {
             $method = 'pse';
-            $bankCode = null; // Se usará el banco por defecto o se puede seleccionar después
+            // Obtener código de banco del formulario
+            $bankCode = $request->input('pse_bank_code');
+            if (!$bankCode) {
+                return back()->withErrors(['pse_bank_code' => 'Por favor selecciona el banco desde el cual realizarás el pago PSE.']);
+            }
         } elseif (str_starts_with($epaycoMethod, 'cash_')) {
             $method = 'cash';
             $cashType = str_replace('cash_', '', $epaycoMethod); // efecty, gana, baloto

@@ -458,23 +458,128 @@ class EpaycoService
 
     /**
      * Obtener lista de bancos disponibles para PSE
+     * Intenta primero con el SDK, luego con API REST directa como fallback
      */
     public function getPseBanks(): array
     {
         try {
-            $banks = $this->epayco->bank->pseBank($this->gateway->is_test_mode);
-            
-            if (!isset($banks->success) || !$banks->success) {
-                throw new \Exception('Error al obtener lista de bancos: ' . ($banks->message ?? 'Error desconocido'));
+            // Método 1: Intentar con SDK de Epayco
+            $banks = null;
+            try {
+                $banks = $this->epayco->bank->pseBank($this->gateway->is_test_mode);
+            } catch (\Exception $sdkException) {
+                Log::warning('Error con SDK de Epayco', [
+                    'error' => $sdkException->getMessage()
+                ]);
             }
+            
+            if (!$banks || !isset($banks->success) || !$banks->success) {
+                // Si el SDK falla, intentar con API REST directa
+                Log::info('SDK falló, intentando obtener bancos mediante API REST directa de Epayco');
+                $banks = $this->getBanksFromRestApi();
+            }
+
+            if (!$banks || !isset($banks->success) || !$banks->success) {
+                throw new \Exception('Error al obtener lista de bancos: ' . ($banks->message ?? ($banks->title_response ?? 'Error desconocido')));
+            }
+
+            // Log completo de la respuesta para debugging
+            Log::info('Respuesta completa de Epayco pseBank', [
+                'success' => $banks->success ?? null,
+                'data_type' => gettype($banks->data ?? null),
+                'data_is_object' => is_object($banks->data ?? null),
+                'data_is_array' => is_array($banks->data ?? null),
+                'total_items' => is_array($banks->data) ? count($banks->data) : (is_object($banks->data) ? count((array)$banks->data) : 0),
+                'raw_data_sample' => is_array($banks->data) ? array_slice($banks->data, 0, 3) : null,
+            ]);
+
+            // Obtener datos de bancos
+            $banksData = $banks->data ?? null;
+            
+            // Normalizar y filtrar bancos del SDK
+            $normalizedBanks = $this->normalizeBanksData($banksData);
+            
+            // Si hay muy pocos bancos después de normalizar, intentar con API REST directa
+            if (count($normalizedBanks) < 5) {
+                Log::info('Pocos bancos obtenidos del SDK después de normalizar, intentando API REST directa', [
+                    'bancos_normalizados' => count($normalizedBanks),
+                ]);
+                
+                $restBanks = $this->getBanksFromRestApi();
+                if ($restBanks && isset($restBanks->success) && $restBanks->success) {
+                    $restNormalized = $this->normalizeBanksData($restBanks->data ?? null);
+                    if (count($restNormalized) > count($normalizedBanks)) {
+                        Log::info('API REST devolvió más bancos que el SDK, usando respuesta REST', [
+                            'sdk_bancos' => count($normalizedBanks),
+                            'rest_bancos' => count($restNormalized),
+                        ]);
+                        $normalizedBanks = $restNormalized;
+                    }
+                }
+            }
+            
+            // Si aún hay muy pocos bancos (menos de 10), usar lista estática como último recurso
+            // Esto puede pasar si la API de Epayco tiene limitaciones o la cuenta tiene restricciones
+            if (count($normalizedBanks) < 10) {
+                Log::info('Usando lista estática como complemento', [
+                    'bancos_obtenidos_api' => count($normalizedBanks),
+                ]);
+                
+                // Lista estática de principales bancos colombianos para PSE (basada en códigos oficiales)
+                $staticBanks = [
+                    ['bankCode' => '1022', 'bankName' => 'BANCOLOMBIA'],
+                    ['bankCode' => '1052', 'bankName' => 'BANCO DE BOGOTÁ'],
+                    ['bankCode' => '1013', 'bankName' => 'BBVA COLOMBIA'],
+                    ['bankCode' => '1019', 'bankName' => 'BANCO COLPATRIA'],
+                    ['bankCode' => '1066', 'bankName' => 'BANCO DAVIVIENDA'],
+                    ['bankCode' => '1051', 'bankName' => 'BANCO DE OCCIDENTE'],
+                    ['bankCode' => '1062', 'bankName' => 'BANCO FALABELLA'],
+                    ['bankCode' => '1063', 'bankName' => 'BANCO PICHINCHA'],
+                    ['bankCode' => '1072', 'bankName' => 'BANCO POPULAR'],
+                    ['bankCode' => '1065', 'bankName' => 'BANCO AGRARIO'],
+                    ['bankCode' => '1006', 'bankName' => 'BANCO AV VILLAS'],
+                    ['bankCode' => '1077', 'bankName' => 'BANKA'],
+                    ['bankCode' => '1032', 'bankName' => 'BANCO UNION COLOMBIANO'],
+                    ['bankCode' => '1058', 'bankName' => 'BANCOOMEVA'],
+                    ['bankCode' => '1091', 'bankName' => 'CONFIAR'],
+                    ['bankCode' => '1012', 'bankName' => 'BANCO GNB SUDAMERIS'],
+                    ['bankCode' => '1038', 'bankName' => 'BANCO SANTANDER'],
+                ];
+                
+                // Combinar bancos obtenidos con lista estática, eliminando duplicados
+                $existingCodes = array_map(function($bank) {
+                    return (string)($bank['bankCode'] ?? $bank['bank_code'] ?? '');
+                }, $normalizedBanks);
+                
+                foreach ($staticBanks as $staticBank) {
+                    $staticCode = (string)$staticBank['bankCode'];
+                    if (!in_array($staticCode, $existingCodes)) {
+                        $normalizedBanks[] = $staticBank;
+                    }
+                }
+                
+                // Ordenar por nombre de banco
+                usort($normalizedBanks, function($a, $b) {
+                    $nameA = $a['bankName'] ?? $a['bank_name'] ?? '';
+                    $nameB = $b['bankName'] ?? $b['bank_name'] ?? '';
+                    return strcmp($nameA, $nameB);
+                });
+            }
+            
+            // Log final para debugging
+            Log::info('Bancos PSE normalizados', [
+                'total_bancos' => count($normalizedBanks),
+                'primeros_5_bancos' => array_slice($normalizedBanks, 0, 5),
+            ]);
 
             return [
                 'success' => true,
-                'banks' => $banks->data ?? [],
+                'banks' => $normalizedBanks,
             ];
         } catch (\Exception $e) {
             Log::error('Error obteniendo bancos PSE', [
                 'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString(),
             ]);
 
             return [
@@ -485,6 +590,133 @@ class EpaycoService
         }
     }
 
+
+    /**
+     * Obtener bancos mediante API REST directa de Epayco
+     */
+    protected function getBanksFromRestApi(): ?object
+    {
+        try {
+            $publicKey = $this->gateway->getCredential('public_key');
+            $testMode = $this->gateway->is_test_mode;
+            
+            // URL base según el modo (test o producción)
+            $baseUrl = $testMode 
+                ? 'https://secure.epayco.co' 
+                : 'https://secure.payco.co';
+            
+            // Intentar primero como POST
+            $url = "{$baseUrl}/restpagos/pse/bancos.json";
+            $response = Http::timeout(15)
+                ->asForm()
+                ->post($url, [
+                    'public_key' => $publicKey
+                ]);
+            
+            // Si falla POST, intentar como GET
+            if (!$response->successful()) {
+                $urlGet = "{$baseUrl}/restpagos/pse/bancos.json?public_key={$publicKey}";
+                $response = Http::timeout(15)->get($urlGet);
+            }
+            
+            if ($response->successful()) {
+                $restData = $response->json();
+                
+                if (isset($restData['success']) && $restData['success'] && isset($restData['data'])) {
+                    Log::info('Bancos obtenidos mediante API REST directa', [
+                        'total_bancos' => is_array($restData['data']) ? count($restData['data']) : 0
+                    ]);
+                    
+                    return (object)[
+                        'success' => true,
+                        'data' => $restData['data']
+                    ];
+                }
+            }
+            
+            return null;
+        } catch (\Exception $e) {
+            Log::warning('Error obteniendo bancos mediante API REST directa', [
+                'error' => $e->getMessage()
+            ]);
+            return null;
+        }
+    }
+    
+    /**
+     * Normalizar datos de bancos (objeto o array) a array indexado
+     */
+    protected function normalizeBanksData($banksData): array
+    {
+        $normalizedBanks = [];
+        
+        if (is_object($banksData)) {
+            // Si es un objeto, convertir a array asociativo primero
+            $banksArray = json_decode(json_encode($banksData), true);
+            
+            if (is_array($banksArray)) {
+                // Verificar si las claves son numéricas (array indexado) o strings (objeto asociativo)
+                $hasNumericKeys = !empty($banksArray) && array_keys($banksArray) === range(0, count($banksArray) - 1);
+                
+                if ($hasNumericKeys) {
+                    // Es un array indexado, usar directamente
+                    foreach ($banksArray as $bank) {
+                        if (is_array($bank) && !empty($bank)) {
+                            $normalizedBanks[] = $bank;
+                        }
+                    }
+                } else {
+                    // Es un objeto asociativo (claves son strings, ej: códigos de banco)
+                    // Convertir cada propiedad a elemento del array
+                    foreach ($banksArray as $key => $bank) {
+                        if (is_array($bank) && !empty($bank)) {
+                            // Asegurar que tenga bankCode si no lo tiene
+                            if (!isset($bank['bankCode']) && !isset($bank['bank_code'])) {
+                                $bank['bankCode'] = is_numeric($key) ? $key : null;
+                            }
+                            $normalizedBanks[] = $bank;
+                        } elseif (is_object($bank)) {
+                            $bankArray = json_decode(json_encode($bank), true);
+                            if (!isset($bankArray['bankCode']) && !isset($bankArray['bank_code'])) {
+                                $bankArray['bankCode'] = is_numeric($key) ? $key : null;
+                            }
+                            $normalizedBanks[] = $bankArray;
+                        }
+                    }
+                }
+            }
+        } elseif (is_array($banksData)) {
+            // Ya es un array
+            foreach ($banksData as $key => $bank) {
+                if (is_object($bank)) {
+                    $bank = json_decode(json_encode($bank), true);
+                }
+                if (is_array($bank) && !empty($bank)) {
+                    $normalizedBanks[] = $bank;
+                }
+            }
+        }
+        
+        // Filtrar bancos no válidos (ej: bankCode "0" que es texto instructivo)
+        $normalizedBanks = array_filter($normalizedBanks, function($bank) {
+            if (!is_array($bank)) {
+                return false;
+            }
+            
+            $bankCode = $bank['bankCode'] ?? $bank['bank_code'] ?? $bank['code'] ?? '';
+            $bankName = $bank['bankName'] ?? $bank['bank_name'] ?? $bank['name'] ?? '';
+            
+            // Filtrar: debe tener código y nombre, y el código no debe ser "0"
+            return !empty($bankCode) 
+                && $bankCode !== "0" 
+                && $bankCode !== 0 
+                && !empty($bankName)
+                && !preg_match('/seleccione|selecciona|select/i', $bankName); // Filtrar textos instructivos
+        });
+        
+        // Re-indexar el array después del filtro
+        return array_values($normalizedBanks);
+    }
 
     /**
      * Verificar firma del webhook (si está disponible)
