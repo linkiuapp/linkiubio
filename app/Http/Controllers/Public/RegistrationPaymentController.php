@@ -45,6 +45,17 @@ class RegistrationPaymentController extends Controller
             default => $plan->price
         };
 
+        // Validar que el monto sea mayor a cero para pagos con Epayco
+        if ($amount <= 0) {
+            Log::warning('Intento de pago con monto cero o negativo', [
+                'plan_id' => $planId,
+                'plan_name' => $plan->name,
+                'amount' => $amount,
+                'billing_period' => $billingPeriod,
+            ]);
+            return back()->withErrors(['error' => 'Los planes gratuitos no requieren pago. Por favor completa el registro sin pasarela de pago.']);
+        }
+
         // Obtener gateway de Epayco
         $epaycoGateway = PaymentGateway::where('name', 'epayco')
             ->where('is_active', true)

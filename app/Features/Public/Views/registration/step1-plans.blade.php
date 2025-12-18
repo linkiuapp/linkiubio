@@ -147,17 +147,17 @@
 
                                     {{-- Banner Superior con Gradiente --}}
                                     <div class="relative h-[160px] md:h-[172px] flex items-center justify-between px-4 overflow-hidden">
-                                        <div class="relative z-10">
-                                            <h6 class="text-lg font-bold text-white mb-1">
+                                        <div class="relative z-10 ml-2 md:ml-0">
+                                            <h6 class="text-lg font-bold text-slate-900 mb-1">
                                                 {{ strtoupper($plan->name) }}
                                             </h6>
                                             @if($plan->trial_days > 0)
-                                                <p class="text-sm md:text-base text-white font-medium mb-2">
+                                                <p class="text-sm md:text-base text-slate-900 font-medium mb-2">
                                                     {{ $plan->trial_days }} días gratis adicional
                                                 </p>
                                             @endif
                                             @if($isFeatured)
-                                                <span class="absolute bg-white text-blue-600 rounded-full py-1 px-3 text-xs font-bold shadow-lg z-20">
+                                                <span class="absolute bg-white text-slate-900 rounded-full py-1 px-3 text-xs font-bold shadow-lg z-20">
                                                     POPULAR
                                                 </span>
                                             @endif

@@ -48,6 +48,12 @@ class EpaycoService
     public function createPaymentSession(array $data, string $method = 'pse', ?string $bankCode = null, ?string $cashType = null): array
     {
         try {
+            // Validar que el monto sea mayor a cero
+            $amount = floatval($data['amount'] ?? 0);
+            if ($amount <= 0) {
+                throw new \Exception("El monto del pago debe ser mayor a cero. Monto recibido: {$amount}");
+            }
+            
             // Obtener IP del cliente
             $clientIp = request()->ip() ?? '127.0.0.1';
             
@@ -92,9 +98,57 @@ class EpaycoService
                     throw new \Exception("Método de pago no soportado: {$method}");
             }
 
+            // Log de respuesta completa para debugging
+            Log::info('Respuesta completa de Epayco', [
+                'method' => $method,
+                'success' => $response->success ?? null,
+                'response_type' => gettype($response),
+                'response' => $response,
+                'response_json' => json_encode($response),
+            ]);
+            
             // Verificar respuesta
             if (!isset($response->success) || !$response->success) {
-                $errorMessage = $response->message ?? ($response->data->error ?? 'Error desconocido');
+                // Capturar mensaje de error de múltiples fuentes posibles
+                $errorMessage = 'Error desconocido';
+                
+                if (isset($response->message) && !empty($response->message)) {
+                    $errorMessage = $response->message;
+                } elseif (isset($response->data->error) && !empty($response->data->error)) {
+                    $errorMessage = $response->data->error;
+                } elseif (isset($response->data->message) && !empty($response->data->message)) {
+                    $errorMessage = $response->data->message;
+                } elseif (isset($response->title_response) && !empty($response->title_response)) {
+                    $errorMessage = $response->title_response;
+                    if (isset($response->text_response) && !empty($response->text_response)) {
+                        $errorMessage .= ': ' . $response->text_response;
+                    }
+                } elseif (isset($response->text_response) && !empty($response->text_response)) {
+                    $errorMessage = $response->text_response;
+                }
+                
+                // Si aún no tenemos un mensaje claro, intentar obtener más información
+                if ($errorMessage === 'Error desconocido' && isset($response->data)) {
+                    // Intentar convertir data a string si es un objeto
+                    if (is_object($response->data)) {
+                        $errorData = json_encode($response->data);
+                        if (strlen($errorData) < 500) {
+                            $errorMessage = $errorData;
+                        }
+                    } elseif (is_string($response->data)) {
+                        $errorMessage = $response->data;
+                    }
+                }
+                
+                // Log completo de la respuesta para debugging
+                Log::error('Respuesta de error de Epayco', [
+                    'method' => $method,
+                    'response' => $response,
+                    'response_json' => json_encode($response),
+                    'data' => $data,
+                    'error_message' => $errorMessage,
+                ]);
+                
                 throw new \Exception("Error al crear pago {$method}: " . $errorMessage);
             }
 
@@ -139,14 +193,22 @@ class EpaycoService
      */
     protected function createPsePayment(array $data, ?string $bankCode, string $clientIp)
     {
-        // Si no se proporciona banco, usar uno por defecto común (Bancolombia)
-        $bankCode = $bankCode ?? "1022";
+        // Validar banco
+        if (empty($bankCode)) {
+            throw new \Exception('Código de banco requerido para pagos PSE');
+        }
+        
+        // Validar monto
+        $amount = floatval($data['amount'] ?? 0);
+        if ($amount <= 0) {
+            throw new \Exception("El monto debe ser mayor a cero para pagos PSE. Monto recibido: {$amount}");
+        }
 
         $pseData = [
             "bank" => $bankCode,
             "invoice" => $data['reference'],
             "description" => $data['description'] ?? 'Pago de registro Linkiu',
-            "value" => (string)$data['amount'],
+            "value" => number_format($amount, 2, '.', ''), // Asegurar formato correcto del monto
             "tax" => "0",
             "tax_base" => "0",
             "currency" => $data['currency'] ?? "COP",
