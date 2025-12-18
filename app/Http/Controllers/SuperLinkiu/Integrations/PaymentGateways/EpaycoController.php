@@ -41,8 +41,8 @@ class EpaycoController extends Controller
         $epayco->fill([
             'display_name' => $validated['display_name'],
             'description' => $validated['description'] ?? null,
-            'is_active' => $request->boolean('is_active', false),
-            'is_test_mode' => $request->boolean('is_test_mode', true),
+            'is_active' => $request->has('is_active') && $request->boolean('is_active'),
+            'is_test_mode' => $request->has('is_test_mode') && $request->boolean('is_test_mode'),
         ]);
 
         // Guardar credenciales (encriptadas usando el método del modelo)
