@@ -411,6 +411,7 @@
                                 </label>
                                 <select name="pse_bank_code" 
                                         x-model="pseBankCode"
+                                        @change="updateWalletPhoneRequired()"
                                         class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 focus:outline-none text-base"
                                         :required="epaycoMethod === 'pse'"
                                         x-bind:required="epaycoMethod === 'pse'">
@@ -460,6 +461,30 @@
                                     <option value="GA">Gana</option>
                                 </select>
                                 <p class="text-xs font-normal text-slate-600 mt-1">Selecciona la red donde realizarás el pago en efectivo</p>
+                            </div>
+
+                            {{-- Campo de Teléfono para Nequi o Daviplata (cuando se selecciona Nequi o Daviplata en PSE) --}}
+                            <div x-show="epaycoMethod === 'pse' && (pseBankCode === '1507' || pseBankCode === '1551')" x-transition class="mb-6">
+                                <label class="block text-sm font-medium text-slate-600 mb-2">
+                                    Número de teléfono asociado a tu cuenta 
+                                    <span x-text="pseBankCode === '1507' ? 'Nequi' : 'Daviplata'"></span>
+                                    <span class="text-red-500">*</span>
+                                </label>
+                                <input type="tel" 
+                                       name="wallet_phone" 
+                                       x-model="walletPhone"
+                                       placeholder="Ejemplo: 3101234567"
+                                       class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 focus:outline-none text-base"
+                                       :required="epaycoMethod === 'pse' && (pseBankCode === '1507' || pseBankCode === '1551')"
+                                       x-bind:required="epaycoMethod === 'pse' && (pseBankCode === '1507' || pseBankCode === '1551')"
+                                       pattern="[0-9]{10}"
+                                       maxlength="10">
+                                <p class="text-xs font-normal text-slate-600 mt-1">
+                                    <span class="font-semibold text-amber-600">⚠️ Importante:</span> 
+                                    Debe ser el número de teléfono con el que tienes registrada tu cuenta 
+                                    <span x-text="pseBankCode === '1507' ? 'Nequi' : 'Daviplata'"></span>. 
+                                    Si usas un número diferente, el pago fallará.
+                                </p>
                             </div>
 
                             {{-- Información de Pago en Línea --}}
@@ -548,11 +573,19 @@
             epaycoMethod: '{{ old('epayco_method', 'pse') }}',
             pseBankCode: '{{ old('pse_bank_code', '') }}',
             cashType: '{{ old('cash_type', '') }}',
+            walletPhone: '{{ old('wallet_phone', '') }}',
             submitting: false,
             
             passwordsMatch() {
                 if (!this.password || !this.passwordConfirmation) return false;
                 return this.password === this.passwordConfirmation;
+            },
+
+            updateWalletPhoneRequired() {
+                // Limpiar el campo de teléfono si cambia el banco y ya no requiere wallet
+                if (this.pseBankCode !== '1507' && this.pseBankCode !== '1551') {
+                    this.walletPhone = '';
+                }
             },
             
             handleFileSelect(event) {
@@ -602,6 +635,13 @@
                     // Si es Efectivo, validar que se haya seleccionado un método
                     if (this.paymentMethod === 'epayco' && this.epaycoMethod === 'cash' && !this.cashType) {
                         alert('Por favor selecciona el método de pago en efectivo (Punto Red, Red Servi, Efecty, etc.)');
+                        return false;
+                    }
+
+                    // Si es PSE con Nequi o Daviplata, validar número de teléfono
+                    if (this.paymentMethod === 'epayco' && this.epaycoMethod === 'pse' && (this.pseBankCode === '1507' || this.pseBankCode === '1551') && !this.walletPhone) {
+                        const walletName = this.pseBankCode === '1507' ? 'Nequi' : 'Daviplata';
+                        alert(`Por favor ingresa el número de teléfono asociado a tu cuenta ${walletName}`);
                         return false;
                     }
                     

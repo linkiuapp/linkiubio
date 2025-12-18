@@ -110,6 +110,21 @@ class RegistrationPaymentController extends Controller
             if (!$bankCode) {
                 return back()->withErrors(['pse_bank_code' => 'Por favor selecciona el banco desde el cual realizarás el pago PSE.']);
             }
+            
+            // Si es Nequi (1507) o Daviplata (1551), validar número de teléfono de billetera
+            if (in_array($bankCode, ['1507', '1551'])) {
+                $walletPhone = $request->input('wallet_phone');
+                if (!$walletPhone) {
+                    $walletName = $bankCode === '1507' ? 'Nequi' : 'Daviplata';
+                    return back()->withErrors(['wallet_phone' => "Por favor ingresa el número de teléfono asociado a tu cuenta {$walletName}."]);
+                }
+                // Validar formato (10 dígitos)
+                if (!preg_match('/^[0-9]{10}$/', $walletPhone)) {
+                    return back()->withErrors(['wallet_phone' => 'El número de teléfono debe tener 10 dígitos.']);
+                }
+                // Usar el número de la billetera en lugar del del Step 2
+                $paymentData['phone'] = $walletPhone;
+            }
         } elseif ($epaycoMethod === 'cash') {
             $method = 'cash';
             // Obtener tipo de efectivo del select
