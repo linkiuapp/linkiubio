@@ -88,6 +88,18 @@ class EpaycoService
                     $epaycoTransactionId = $response->data->ref_payco ?? $response->data->ticketId ?? null;
                     break;
 
+                case 'daviplata':
+                    $response = $this->createDaviplataPayment($data, $clientIp);
+                    $redirectUrl = $response->data->url ?? $response->data->urlbanco ?? null;
+                    $epaycoTransactionId = $response->data->ref_payco ?? $response->data->ticketId ?? null;
+                    break;
+
+                case 'clicktopay':
+                    $response = $this->createClickToPayPayment($data, $clientIp);
+                    $redirectUrl = $response->data->urlbanco ?? null;
+                    $epaycoTransactionId = $response->data->ref_payco ?? $response->data->ticketId ?? null;
+                    break;
+
                 case 'payment':
                     // Para tarjetas de crédito/débito, requiere token_card y customer_id
                     // Este método se implementará cuando tengamos el token de tarjeta
@@ -98,15 +110,6 @@ class EpaycoService
                     throw new \Exception("Método de pago no soportado: {$method}");
             }
 
-            // Log de respuesta completa para debugging
-            Log::info('Respuesta completa de Epayco', [
-                'method' => $method,
-                'success' => $response->success ?? null,
-                'response_type' => gettype($response),
-                'response' => $response,
-                'response_json' => json_encode($response),
-            ]);
-            
             // Verificar respuesta
             if (!isset($response->success) || !$response->success) {
                 // Capturar mensaje de error de múltiples fuentes posibles
@@ -220,15 +223,6 @@ class EpaycoService
         }
         
         // Epayco PSE generalmente requiere un monto mínimo de $5,000 COP
-        // Validar monto mínimo recomendado (pero permitir intentarlo si es menor)
-        $minAmount = 5000;
-        if ($amount < $minAmount) {
-            Log::warning('Intento de pago PSE con monto menor al mínimo recomendado', [
-                'amount' => $amount,
-                'min_amount' => $minAmount,
-                'reference' => $data['reference'] ?? null,
-            ]);
-        }
 
         $pseData = [
             "bank" => $bankCode,
@@ -257,12 +251,22 @@ class EpaycoService
     }
 
     /**
-     * Crear pago en efectivo (Efecty, Gana, Baloto, etc.)
+     * Crear pago en efectivo (Efecty, Gana, Baloto, Punto Red, Red Servi, SuRed)
+     * @param string $cashType Código del método: EF (Efecty), GA (Gana), BA (Baloto), PR (Punto Red), RS (Red Servi), SR (SuRed)
      */
     protected function createCashPayment(array $data, string $cashType, string $clientIp)
     {
+        // Validar código de método de efectivo
+        $validCashTypes = ['PR', 'RS', 'SR', 'BA', 'EF', 'GA'];
+        if (!in_array(strtoupper($cashType), $validCashTypes)) {
+            throw new \Exception("Código de método de efectivo no válido: {$cashType}. Debe ser uno de: " . implode(', ', $validCashTypes));
+        }
+        
+        // Normalizar a mayúsculas
+        $cashType = strtoupper($cashType);
+        
         // Calcular fecha de expiración (máximo 5 días para Efecty, 30 días para otros)
-        $maxDays = in_array($cashType, ['efecty']) ? 5 : 30;
+        $maxDays = ($cashType === 'EF') ? 5 : 30;
         $endDate = now()->addDays($maxDays)->format('Y-m-d');
 
         $cashData = [
@@ -556,14 +560,11 @@ class EpaycoService
             try {
                 $banks = $this->epayco->bank->pseBank($this->gateway->is_test_mode);
             } catch (\Exception $sdkException) {
-                Log::warning('Error con SDK de Epayco', [
-                    'error' => $sdkException->getMessage()
-                ]);
+                // Silenciosamente intentar con API REST directa
             }
             
             if (!$banks || !isset($banks->success) || !$banks->success) {
                 // Si el SDK falla, intentar con API REST directa
-                Log::info('SDK falló, intentando obtener bancos mediante API REST directa de Epayco');
                 $banks = $this->getBanksFromRestApi();
             }
 
@@ -571,15 +572,6 @@ class EpaycoService
                 throw new \Exception('Error al obtener lista de bancos: ' . ($banks->message ?? ($banks->title_response ?? 'Error desconocido')));
             }
 
-            // Log completo de la respuesta para debugging
-            Log::info('Respuesta completa de Epayco pseBank', [
-                'success' => $banks->success ?? null,
-                'data_type' => gettype($banks->data ?? null),
-                'data_is_object' => is_object($banks->data ?? null),
-                'data_is_array' => is_array($banks->data ?? null),
-                'total_items' => is_array($banks->data) ? count($banks->data) : (is_object($banks->data) ? count((array)$banks->data) : 0),
-                'raw_data_sample' => is_array($banks->data) ? array_slice($banks->data, 0, 3) : null,
-            ]);
 
             // Obtener datos de bancos
             $banksData = $banks->data ?? null;
@@ -589,30 +581,18 @@ class EpaycoService
             
             // Si hay muy pocos bancos después de normalizar, intentar con API REST directa
             if (count($normalizedBanks) < 5) {
-                Log::info('Pocos bancos obtenidos del SDK después de normalizar, intentando API REST directa', [
-                    'bancos_normalizados' => count($normalizedBanks),
-                ]);
-                
                 $restBanks = $this->getBanksFromRestApi();
                 if ($restBanks && isset($restBanks->success) && $restBanks->success) {
                     $restNormalized = $this->normalizeBanksData($restBanks->data ?? null);
-                    if (count($restNormalized) > count($normalizedBanks)) {
-                        Log::info('API REST devolvió más bancos que el SDK, usando respuesta REST', [
-                            'sdk_bancos' => count($normalizedBanks),
-                            'rest_bancos' => count($restNormalized),
-                        ]);
-                        $normalizedBanks = $restNormalized;
-                    }
+                    
+                    // Combinar y eliminar duplicados
+                    $normalizedBanks = $this->mergeBanksAndRemoveDuplicates($normalizedBanks, $restNormalized);
                 }
             }
             
             // Si aún hay muy pocos bancos (menos de 10), usar lista estática como último recurso
             // Esto puede pasar si la API de Epayco tiene limitaciones o la cuenta tiene restricciones
             if (count($normalizedBanks) < 10) {
-                Log::info('Usando lista estática como complemento', [
-                    'bancos_obtenidos_api' => count($normalizedBanks),
-                ]);
-                
                 // Lista estática de principales bancos colombianos para PSE (basada en códigos oficiales)
                 $staticBanks = [
                     ['bankCode' => '1022', 'bankName' => 'BANCOLOMBIA'],
@@ -635,16 +615,7 @@ class EpaycoService
                 ];
                 
                 // Combinar bancos obtenidos con lista estática, eliminando duplicados
-                $existingCodes = array_map(function($bank) {
-                    return (string)($bank['bankCode'] ?? $bank['bank_code'] ?? '');
-                }, $normalizedBanks);
-                
-                foreach ($staticBanks as $staticBank) {
-                    $staticCode = (string)$staticBank['bankCode'];
-                    if (!in_array($staticCode, $existingCodes)) {
-                        $normalizedBanks[] = $staticBank;
-                    }
-                }
+                $normalizedBanks = $this->mergeBanksAndRemoveDuplicates($normalizedBanks, $staticBanks);
                 
                 // Ordenar por nombre de banco
                 usort($normalizedBanks, function($a, $b) {
@@ -654,11 +625,8 @@ class EpaycoService
                 });
             }
             
-            // Log final para debugging
-            Log::info('Bancos PSE normalizados', [
-                'total_bancos' => count($normalizedBanks),
-                'primeros_5_bancos' => array_slice($normalizedBanks, 0, 5),
-            ]);
+            // Eliminar duplicados finales por código de banco (por si acaso)
+            $normalizedBanks = $this->removeDuplicateBanks($normalizedBanks);
 
             return [
                 'success' => true,
@@ -711,10 +679,6 @@ class EpaycoService
                 $restData = $response->json();
                 
                 if (isset($restData['success']) && $restData['success'] && isset($restData['data'])) {
-                    Log::info('Bancos obtenidos mediante API REST directa', [
-                        'total_bancos' => is_array($restData['data']) ? count($restData['data']) : 0
-                    ]);
-                    
                     return (object)[
                         'success' => true,
                         'data' => $restData['data']
@@ -724,9 +688,6 @@ class EpaycoService
             
             return null;
         } catch (\Exception $e) {
-            Log::warning('Error obteniendo bancos mediante API REST directa', [
-                'error' => $e->getMessage()
-            ]);
             return null;
         }
     }
@@ -807,6 +768,143 @@ class EpaycoService
     }
 
     /**
+     * Combinar dos arrays de bancos y eliminar duplicados por código de banco
+     */
+    protected function mergeBanksAndRemoveDuplicates(array $banks1, array $banks2): array
+    {
+        // Usar el primer array como base
+        $merged = $banks1;
+        
+        // Obtener códigos de bancos ya presentes
+        $existingCodes = [];
+        foreach ($merged as $bank) {
+            $code = (string)($bank['bankCode'] ?? $bank['bank_code'] ?? '');
+            if (!empty($code)) {
+                $existingCodes[strtoupper($code)] = true;
+            }
+        }
+        
+        // Agregar bancos del segundo array solo si no existen
+        foreach ($banks2 as $bank) {
+            $code = (string)($bank['bankCode'] ?? $bank['bank_code'] ?? '');
+            if (!empty($code) && !isset($existingCodes[strtoupper($code)])) {
+                $merged[] = $bank;
+                $existingCodes[strtoupper($code)] = true;
+            }
+        }
+        
+        return array_values($merged);
+    }
+
+    /**
+     * Eliminar bancos duplicados por código de banco de un array
+     */
+    protected function removeDuplicateBanks(array $banks): array
+    {
+        $uniqueBanks = [];
+        $seenCodes = [];
+        
+        foreach ($banks as $bank) {
+            $code = (string)($bank['bankCode'] ?? $bank['bank_code'] ?? '');
+            
+            // Si el código está vacío, saltarlo
+            if (empty($code)) {
+                continue;
+            }
+            
+            // Normalizar código a mayúsculas para comparación
+            $codeUpper = strtoupper($code);
+            
+            // Si ya vimos este código, saltarlo
+            if (isset($seenCodes[$codeUpper])) {
+                continue;
+            }
+            
+            // Agregar banco y marcar código como visto
+            $uniqueBanks[] = $bank;
+            $seenCodes[$codeUpper] = true;
+        }
+        
+        return array_values($uniqueBanks);
+    }
+
+    /**
+     * Crear pago con Daviplata
+     */
+    protected function createDaviplataPayment(array $data, string $clientIp)
+    {
+        $amount = floatval($data['amount'] ?? 0);
+        if ($amount <= 0) {
+            throw new \Exception("El monto debe ser mayor a cero para pagos Daviplata. Monto recibido: {$amount}");
+        }
+
+        $daviplataData = [
+            "doc_type" => $this->mapDocumentTypeToEpayco($data['document_type'] ?? 'CC'),
+            "document" => $data['document'] ?? '',
+            "name" => $data['name'],
+            "last_name" => $data['last_name'] ?? '',
+            "email" => $data['email'],
+            "ind_country" => "CO",
+            "phone" => $data['phone'] ?? '',
+            "country" => "CO",
+            "city" => $data['city'] ?? "Bogota",
+            "address" => $data['address'] ?? 'Dirección no proporcionada',
+            "ip" => $clientIp,
+            "currency" => $data['currency'] ?? "COP",
+            "description" => $data['description'] ?? 'Pago de registro Linkiu',
+            "value" => number_format($amount, 2, '.', ''),
+            "tax" => "0",
+            "tax_base" => "0",
+            "method_confirmation" => "POST",
+            "url_confirmation" => $data['confirmation_url'],
+            "url_response" => $data['response_url'],
+        ];
+
+        return $this->epayco->daviplata->create($daviplataData);
+    }
+
+    /**
+     * Crear pago con Click to Pay
+     * Click to Pay usa el checkout estándar de Epayco que permite pagos con tarjeta
+     */
+    protected function createClickToPayPayment(array $data, string $clientIp)
+    {
+        $amount = floatval($data['amount'] ?? 0);
+        if ($amount <= 0) {
+            throw new \Exception("El monto debe ser mayor a cero para Click to Pay. Monto recibido: {$amount}");
+        }
+
+        // Click to Pay usa el método checkout de Epayco que permite pagos con tarjeta
+        // Habilitar solo métodos de tarjeta (deshabilitar PSE, Cash, etc.)
+        $checkoutData = [
+            "name" => $data['description'] ?? 'Pago de registro Linkiu',
+            "description" => $data['description'] ?? 'Pago de registro Linkiu',
+            "invoice" => $data['reference'],
+            "currency" => $data['currency'] ?? "COP",
+            "amount" => number_format($amount, 2, '.', ''),
+            "tax_base" => "0",
+            "tax" => "0",
+            "country" => "CO",
+            "lang" => "ES",
+            "external" => "false",
+            "confirmation" => $data['confirmation_url'],
+            "response" => $data['response_url'],
+            // Deshabilitar otros métodos para mostrar solo tarjeta (Click to Pay)
+            "methodsDisable" => ["PSE", "CASH", "SP", "DP", "DAVIPLATA"],
+        ];
+
+        // Usar el método checkout de Epayco
+        if (method_exists($this->epayco, 'checkout') && method_exists($this->epayco->checkout, 'create')) {
+            return $this->epayco->checkout->create($checkoutData);
+        } else {
+            Log::error('Método checkout no disponible en SDK de Epayco', [
+                'reference' => $data['reference'] ?? null,
+            ]);
+            throw new \Exception('Click to Pay no está disponible. Por favor usa otro método de pago.');
+        }
+    }
+
+    /**
      * Verificar firma del webhook (si está disponible)
      * Nota: Con API REST, la verificación de firma puede no ser necesaria
      * pero se mantiene para compatibilidad con webhooks tradicionales
@@ -825,7 +923,6 @@ class EpaycoService
         if (!$signature) {
             // Si no hay firma pero hay P_KEY, podría ser un webhook de API REST
             // En ese caso, permitimos pero registramos
-            Log::info('Webhook sin firma recibido (posible API REST)', ['data' => $data]);
             return true;
         }
 

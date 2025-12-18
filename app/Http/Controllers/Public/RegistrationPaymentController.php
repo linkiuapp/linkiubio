@@ -72,7 +72,7 @@ class RegistrationPaymentController extends Controller
         $epaycoMethod = $request->input('epayco_method', 'pse');
         
         // Validar método
-        $validMethods = ['pse', 'cash_efecty', 'cash_gana', 'cash_baloto'];
+        $validMethods = ['pse', 'cash', 'clicktopay', 'daviplata'];
         if (!in_array($epaycoMethod, $validMethods)) {
             return back()->withErrors(['error' => 'Método de pago no válido.']);
         }
@@ -110,9 +110,22 @@ class RegistrationPaymentController extends Controller
             if (!$bankCode) {
                 return back()->withErrors(['pse_bank_code' => 'Por favor selecciona el banco desde el cual realizarás el pago PSE.']);
             }
-        } elseif (str_starts_with($epaycoMethod, 'cash_')) {
+        } elseif ($epaycoMethod === 'cash') {
             $method = 'cash';
-            $cashType = str_replace('cash_', '', $epaycoMethod); // efecty, gana, baloto
+            // Obtener tipo de efectivo del select
+            $cashType = $request->input('cash_type');
+            if (!$cashType) {
+                return back()->withErrors(['cash_type' => 'Por favor selecciona el método de pago en efectivo (Punto Red, Red Servi, Efecty, etc.).']);
+            }
+            // Validar que el código sea válido
+            $validCashTypes = ['PR', 'RS', 'SR', 'BA', 'EF', 'GA'];
+            if (!in_array($cashType, $validCashTypes)) {
+                return back()->withErrors(['cash_type' => 'Método de pago en efectivo no válido.']);
+            }
+        } elseif ($epaycoMethod === 'clicktopay') {
+            $method = 'clicktopay';
+        } elseif ($epaycoMethod === 'daviplata') {
+            $method = 'daviplata';
         }
 
         // Crear sesión de pago con el método seleccionado

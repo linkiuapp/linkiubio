@@ -376,80 +376,80 @@
                                     </div>
                                 </label>
 
-                                {{-- Opción: Efecty --}}
+                                {{-- Opción: Efectivo --}}
                                 <label class="relative flex items-center p-4 border border-gray-200 rounded-xl cursor-pointer transition-all"
-                                       :class="epaycoMethod === 'cash_efecty' ? 'border-green-600 bg-green-50' : 'border-gray-300 hover:border-gray-400'">
+                                       :class="epaycoMethod === 'cash' ? 'border-green-600 bg-green-50' : 'border-gray-300 hover:border-gray-400'">
                                     <input type="radio" 
                                            name="epayco_method" 
-                                           value="cash_efecty"
+                                           value="cash"
                                            x-model="epaycoMethod"
                                            class="sr-only">
                                     <div class="flex items-center gap-3 w-full">
                                         <div class="flex-shrink-0">
                                             <div class="w-5 h-5 rounded-full border border-gray-200 flex items-center justify-center"
-                                                 :class="epaycoMethod === 'cash_efecty' ? 'border-green-600' : 'border-gray-300'">
-                                                <div x-show="epaycoMethod === 'cash_efecty'" 
+                                                 :class="epaycoMethod === 'cash' ? 'border-green-600' : 'border-gray-300'">
+                                                <div x-show="epaycoMethod === 'cash'" 
                                                      class="w-3 h-3 rounded-full bg-green-600"></div>
                                             </div>
                                         </div>
                                         <div class="flex-1">
                                             <div class="flex items-center gap-2 mb-1">
                                                 <i data-lucide="wallet" class="w-5 h-5 text-green-600"></i>
-                                                <span class="font-semibold text-slate-900">Efecty</span>
+                                                <span class="font-semibold text-slate-900">Efectivo</span>
                                             </div>
-                                            <p class="text-xs font-normal text-slate-600">Pago en efectivo en puntos Efecty</p>
+                                            <p class="text-xs font-normal text-slate-600">Pago en efectivo en puntos físicos</p>
                                         </div>
                                     </div>
                                 </label>
 
-                                {{-- Opción: Gana --}}
+                                {{-- Opción: Click to Pay --}}
                                 <label class="relative flex items-center p-4 border border-gray-200 rounded-xl cursor-pointer transition-all"
-                                       :class="epaycoMethod === 'cash_gana' ? 'border-green-600 bg-green-50' : 'border-gray-300 hover:border-gray-400'">
+                                       :class="epaycoMethod === 'clicktopay' ? 'border-green-600 bg-green-50' : 'border-gray-300 hover:border-gray-400'">
                                     <input type="radio" 
                                            name="epayco_method" 
-                                           value="cash_gana"
+                                           value="clicktopay"
                                            x-model="epaycoMethod"
                                            class="sr-only">
                                     <div class="flex items-center gap-3 w-full">
                                         <div class="flex-shrink-0">
                                             <div class="w-5 h-5 rounded-full border border-gray-200 flex items-center justify-center"
-                                                 :class="epaycoMethod === 'cash_gana' ? 'border-green-600' : 'border-gray-300'">
-                                                <div x-show="epaycoMethod === 'cash_gana'" 
+                                                 :class="epaycoMethod === 'clicktopay' ? 'border-green-600' : 'border-gray-300'">
+                                                <div x-show="epaycoMethod === 'clicktopay'" 
                                                      class="w-3 h-3 rounded-full bg-green-600"></div>
                                             </div>
                                         </div>
                                         <div class="flex-1">
                                             <div class="flex items-center gap-2 mb-1">
-                                                <i data-lucide="wallet" class="w-5 h-5 text-green-600"></i>
-                                                <span class="font-semibold text-slate-900">Gana</span>
+                                                <i data-lucide="smartphone" class="w-5 h-5 text-green-600"></i>
+                                                <span class="font-semibold text-slate-900">Click to Pay</span>
                                             </div>
-                                            <p class="text-xs font-normal text-slate-600">Pago en efectivo en puntos Gana</p>
+                                            <p class="text-xs font-normal text-slate-600">Pago rápido con tarjeta guardada</p>
                                         </div>
                                     </div>
                                 </label>
 
-                                {{-- Opción: Baloto --}}
+                                {{-- Opción: Daviplata --}}
                                 <label class="relative flex items-center p-4 border border-gray-200 rounded-xl cursor-pointer transition-all"
-                                       :class="epaycoMethod === 'cash_baloto' ? 'border-green-600 bg-green-50' : 'border-gray-300 hover:border-gray-400'">
+                                       :class="epaycoMethod === 'daviplata' ? 'border-green-600 bg-green-50' : 'border-gray-300 hover:border-gray-400'">
                                     <input type="radio" 
                                            name="epayco_method" 
-                                           value="cash_baloto"
+                                           value="daviplata"
                                            x-model="epaycoMethod"
                                            class="sr-only">
                                     <div class="flex items-center gap-3 w-full">
                                         <div class="flex-shrink-0">
                                             <div class="w-5 h-5 rounded-full border border-gray-200 flex items-center justify-center"
-                                                 :class="epaycoMethod === 'cash_baloto' ? 'border-green-600' : 'border-gray-300'">
-                                                <div x-show="epaycoMethod === 'cash_baloto'" 
+                                                 :class="epaycoMethod === 'daviplata' ? 'border-green-600' : 'border-gray-300'">
+                                                <div x-show="epaycoMethod === 'daviplata'" 
                                                      class="w-3 h-3 rounded-full bg-green-600"></div>
                                             </div>
                                         </div>
                                         <div class="flex-1">
                                             <div class="flex items-center gap-2 mb-1">
                                                 <i data-lucide="wallet" class="w-5 h-5 text-green-600"></i>
-                                                <span class="font-semibold text-slate-900">Baloto</span>
+                                                <span class="font-semibold text-slate-900">Daviplata</span>
                                             </div>
-                                            <p class="text-xs font-normal text-slate-600">Pago en efectivo en puntos Baloto</p>
+                                            <p class="text-xs font-normal text-slate-600">Pago desde tu cuenta Daviplata</p>
                                         </div>
                                     </div>
                                 </label>
@@ -490,6 +490,27 @@
                                     @endif
                                 </select>
                                 <p class="text-xs font-normal text-slate-600 mt-1">Selecciona el banco desde el cual realizarás el pago</p>
+                            </div>
+
+                            {{-- Selector de Método de Efectivo (solo cuando se selecciona Efectivo) --}}
+                            <div x-show="epaycoMethod === 'cash'" x-transition class="mb-6">
+                                <label class="block text-sm font-medium text-slate-600 mb-2">
+                                    Selecciona el método de pago en efectivo <span class="text-red-500">*</span>
+                                </label>
+                                <select name="cash_type" 
+                                        x-model="cashType"
+                                        class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-green-500 focus:ring-2 focus:ring-green-200 focus:outline-none text-base"
+                                        :required="epaycoMethod === 'cash'"
+                                        x-bind:required="epaycoMethod === 'cash'">
+                                    <option value="">Selecciona el método de pago</option>
+                                    <option value="PR">Punto Red</option>
+                                    <option value="RS">Red Servi</option>
+                                    <option value="SR">SuRed</option>
+                                    <option value="BA">Baloto</option>
+                                    <option value="EF">Efecty</option>
+                                    <option value="GA">Gana</option>
+                                </select>
+                                <p class="text-xs font-normal text-slate-600 mt-1">Selecciona la red donde realizarás el pago en efectivo</p>
                             </div>
 
                             {{-- Información de Pago en Línea --}}
@@ -577,6 +598,7 @@
             paymentMethod: '{{ old('payment_method', $epaycoGateway ? 'transfer' : 'transfer') }}',
             epaycoMethod: '{{ old('epayco_method', 'pse') }}',
             pseBankCode: '{{ old('pse_bank_code', '') }}',
+            cashType: '{{ old('cash_type', '') }}',
             submitting: false,
             
             passwordsMatch() {
@@ -618,13 +640,19 @@
                 } else {
                     // Si es Epayco, validar que se haya seleccionado un método
                     if (this.paymentMethod === 'epayco' && !this.epaycoMethod) {
-                        alert('Por favor selecciona un método de pago de Epayco (PSE, Efecty, Gana o Baloto)');
+                        alert('Por favor selecciona un método de pago de Epayco (PSE, Efectivo, Click to Pay o Daviplata)');
                         return false;
                     }
                     
                     // Si es PSE, validar que se haya seleccionado un banco
                     if (this.paymentMethod === 'epayco' && this.epaycoMethod === 'pse' && !this.pseBankCode) {
                         alert('Por favor selecciona el banco desde el cual realizarás el pago PSE');
+                        return false;
+                    }
+
+                    // Si es Efectivo, validar que se haya seleccionado un método
+                    if (this.paymentMethod === 'epayco' && this.epaycoMethod === 'cash' && !this.cashType) {
+                        alert('Por favor selecciona el método de pago en efectivo (Punto Red, Red Servi, Efecty, etc.)');
                         return false;
                     }
                     
