@@ -103,8 +103,8 @@
         <div class="flex items-center justify-between">
             <div>
                 <h3 class="text-lg font-bold text-blue-900 mb-2">📊 Ventas Totales Netas</h3>
-                <p class="text-3xl font-bold text-blue-900">{{ number_format($stats['net_sales']) }}</p>
-                <p class="text-sm text-blue-700 mt-1">Ventas sin domicilios</p>
+                <p class="text-3xl font-bold text-blue-900">${{ number_format($stats['net_sales'], 0, ',', '.') }}</p>
+                <p class="text-sm text-blue-700 mt-1">Ingresos sin domicilios</p>
             </div>
             <div class="w-16 h-16 bg-blue-200 rounded-full flex items-center justify-center">
                 <i data-lucide="trending-up" class="w-8 h-8 text-blue-700"></i>

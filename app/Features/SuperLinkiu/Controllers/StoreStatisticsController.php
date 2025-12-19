@@ -167,23 +167,17 @@ class StoreStatisticsController extends Controller
             ->whereBetween('created_at', [$dateFrom, $dateTo])
             ->sum('total');
 
-        // Ingresos por domicilios (order_type = 'delivery' o delivery_type = 'domicilio')
+        // Ingresos por domicilios (solo order_type = 'delivery')
         $deliveryRevenue = Order::where('store_id', $storeId)
             ->where('status', 'delivered')
-            ->where(function($query) {
-                $query->where('order_type', 'delivery')
-                      ->orWhere('delivery_type', 'domicilio');
-            })
+            ->where('order_type', 'delivery')
             ->whereBetween('created_at', [$dateFrom, $dateTo])
             ->sum('total');
 
         // Cantidad de pedidos por domicilio
         $deliveryOrders = Order::where('store_id', $storeId)
             ->where('status', 'delivered')
-            ->where(function($query) {
-                $query->where('order_type', 'delivery')
-                      ->orWhere('delivery_type', 'domicilio');
-            })
+            ->where('order_type', 'delivery')
             ->whereBetween('created_at', [$dateFrom, $dateTo])
             ->count();
 
@@ -200,8 +194,8 @@ class StoreStatisticsController extends Controller
             ? round($deliveryRevenue / $deliveryOrders, 2) 
             : 0;
 
-        // Ventas totales netas (ventas sin domicilios)
-        $netSales = $totalSales - $deliveryOrders;
+        // Ventas totales netas (ingresos sin domicilios) - EN DINERO, NO CANTIDAD
+        $netSales = $totalRevenue - $deliveryRevenue;
 
         return [
             'products_created' => $productsCreated,
@@ -244,26 +238,20 @@ class StoreStatisticsController extends Controller
             ->whereBetween('created_at', [$dateFrom, $dateTo])
             ->sum('total');
 
-        // Ingresos por domicilios
+        // Ingresos por domicilios (solo order_type = 'delivery')
         $totalDeliveryRevenue = Order::where('status', 'delivered')
-            ->where(function($query) {
-                $query->where('order_type', 'delivery')
-                      ->orWhere('delivery_type', 'domicilio');
-            })
+            ->where('order_type', 'delivery')
             ->whereBetween('created_at', [$dateFrom, $dateTo])
             ->sum('total');
 
         // Pedidos por domicilio
         $totalDeliveryOrders = Order::where('status', 'delivered')
-            ->where(function($query) {
-                $query->where('order_type', 'delivery')
-                      ->orWhere('delivery_type', 'domicilio');
-            })
+            ->where('order_type', 'delivery')
             ->whereBetween('created_at', [$dateFrom, $dateTo])
             ->count();
 
-        // Ventas totales netas (ventas sin domicilios)
-        $netSales = $totalSales - $totalDeliveryOrders;
+        // Ventas totales netas (ingresos sin domicilios) - EN DINERO, NO CANTIDAD
+        $netSales = $totalRevenue - $totalDeliveryRevenue;
 
         return [
             'total_products_created' => $totalProductsCreated,

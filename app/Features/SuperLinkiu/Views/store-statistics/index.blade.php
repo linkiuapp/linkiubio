@@ -193,9 +193,9 @@
                                     📊 Ventas Totales Netas
                                 </p>
                                 <p class="text-lg font-bold text-blue-900">
-                                    {{ number_format($stats['net_sales'] ?? 0) }}
+                                    ${{ number_format($stats['net_sales'] ?? 0, 0, ',', '.') }}
                                 </p>
-                                <p class="text-xs text-blue-700 mt-1">Ventas sin domicilios</p>
+                                <p class="text-xs text-blue-700 mt-1">Ingresos sin domicilios</p>
                             </div>
                             <div class="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center">
                                 <i data-lucide="trending-up" class="w-6 h-6 text-blue-700"></i>
