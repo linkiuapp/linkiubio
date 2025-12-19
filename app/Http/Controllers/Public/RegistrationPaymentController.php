@@ -7,9 +7,15 @@ use App\Models\PaymentGateway;
 use App\Models\PaymentGatewayTransaction;
 use App\Models\PendingRegistration;
 use App\Services\PaymentGateways\EpaycoService;
+use App\Services\BillingService;
+use App\Shared\Models\Store;
+use App\Shared\Models\User;
+use App\Shared\Models\BusinessCategory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 
 class RegistrationPaymentController extends Controller
 {
@@ -160,6 +166,7 @@ class RegistrationPaymentController extends Controller
             'name' => $ownerName,
             'document' => $ownerDocument,
             'document_type' => $ownerDocumentType,
+            'password' => $request->input('password'), // Guardar contraseña para crear usuario después
         ]);
 
         // Redirigir directamente a Epayco (PSE devuelve URL de redirección)
@@ -229,20 +236,31 @@ class RegistrationPaymentController extends Controller
             }
         }
 
-        // Si el pago fue aprobado, crear el registro pendiente
+        // Si el pago fue aprobado, crear tienda inmediatamente
         if ($transaction->isApproved()) {
-            return $this->createRegistrationFromPayment($transaction);
+            return $this->createStoreFromEpaycoPayment($transaction);
         }
 
-        // Si está pendiente, mostrar mensaje
+        // Si está pendiente, crear registro pendiente y mostrar mensaje
         if ($transaction->isPending()) {
-            return redirect()->route('register.step4')
+            $registration = $this->createRegistrationFromPayment($transaction, false);
+            return redirect()->route('register.step5', $registration->id)
                 ->with('info', 'Tu pago está siendo procesado. Te notificaremos cuando sea confirmado.');
         }
 
-        // Si fue rechazado
-        return redirect()->route('register.step4')
-            ->withErrors(['error' => 'El pago fue rechazado. Por favor intenta de nuevo o usa transferencia bancaria.']);
+        // Si fue rechazado, redirigir a página de rechazo
+        // Primero crear un registro rechazado para mostrar en la vista
+        try {
+            $registration = $this->createRejectedRegistration($transaction);
+            return redirect()->route('register.rejected', $registration->id);
+        } catch (\Exception $e) {
+            Log::error('Error creando registro rechazado', [
+                'error' => $e->getMessage(),
+                'transaction_id' => $transaction->id
+            ]);
+            return redirect()->route('register.step4')
+                ->withErrors(['error' => 'El pago fue rechazado. Por favor intenta de nuevo o usa transferencia bancaria.']);
+        }
     }
 
     /**
@@ -287,9 +305,16 @@ class RegistrationPaymentController extends Controller
 
             $transaction = $result['transaction'];
 
-            // Si el pago fue aprobado, crear el registro pendiente
+            // Si el pago fue aprobado, crear tienda inmediatamente (desde webhook)
             if ($transaction->isApproved()) {
-                $this->createRegistrationFromPayment($transaction);
+                try {
+                    $this->createStoreFromEpaycoPayment($transaction);
+                } catch (\Exception $e) {
+                    Log::error('Error creando tienda desde webhook Epayco', [
+                        'transaction_id' => $transaction->id,
+                        'error' => $e->getMessage()
+                    ]);
+                }
             }
 
             return response()->json(['success' => true]);
@@ -305,9 +330,270 @@ class RegistrationPaymentController extends Controller
     }
 
     /**
-     * Crear registro pendiente desde pago aprobado
+     * Crear tienda inmediatamente desde pago Epayco aprobado
      */
-    protected function createRegistrationFromPayment(PaymentGatewayTransaction $transaction)
+    protected function createStoreFromEpaycoPayment(PaymentGatewayTransaction $transaction)
+    {
+        // Verificar que no exista ya un registro para esta transacción
+        $existingRegistration = PendingRegistration::where('payment_transaction_id', $transaction->id)->first();
+        if ($existingRegistration) {
+            // Si ya existe y está aprobado, redirigir a success
+            if ($existingRegistration->status === 'approved' && $existingRegistration->created_store_id) {
+                return redirect()->route('register.success', $existingRegistration->id);
+            }
+            // Si existe pero no está aprobado, redirigir a step5
+            return redirect()->route('register.step5', $existingRegistration->id);
+        }
+
+        // Obtener datos de la sesión
+        $planId = Session::get('payment.plan_id') ?? Session::get('wizard.plan_id');
+        $billingPeriod = Session::get('payment.billing_period') ?? Session::get('wizard.billing_period');
+        $ownerData = Session::get('payment.owner_data', []);
+
+        if (!$planId || !$billingPeriod || empty($ownerData) || !isset($ownerData['password'])) {
+            Log::error('Datos incompletos para crear tienda desde pago Epayco', [
+                'transaction_id' => $transaction->id,
+                'session_data' => Session::all()
+            ]);
+            return redirect()->route('register.step4')
+                ->withErrors(['error' => 'Datos incompletos. Por favor contacta soporte.']);
+        }
+
+        try {
+            DB::beginTransaction();
+
+            // Verificar si el slug ya existe y generar uno único
+            $slug = Session::get('wizard.slug');
+            $counter = 1;
+            while (Store::where('slug', $slug)->exists()) {
+                $slug = Session::get('wizard.slug') . '-' . $counter;
+                $counter++;
+            }
+
+            // Verificar si la categoría requiere aprobación manual
+            $category = BusinessCategory::find(Session::get('wizard.business_category_id'));
+            
+            // 1. Crear tienda
+            $store = Store::create([
+                'name' => Session::get('wizard.store_name'),
+                'slug' => $slug,
+                'plan_id' => $planId,
+                'business_category_id' => Session::get('wizard.business_category_id'),
+                'email' => Session::get('wizard.email'),
+                'phone' => Session::get('wizard.phone'),
+                'city' => Session::get('wizard.city'),
+                'department' => Session::get('wizard.department'),
+                'country' => 'Colombia',
+                'address' => Session::get('wizard.address'),
+                'description' => Session::get('wizard.store_description'),
+                'document_type' => Session::get('wizard.document_type'),
+                'document_number' => Session::get('wizard.document_number'),
+                'meta_title' => Session::get('wizard.meta_title'),
+                'meta_description' => Session::get('wizard.meta_description'),
+                'meta_keywords' => Session::get('wizard.meta_keywords'),
+                'status' => 'active',
+                'approval_status' => $category && !$category->requires_manual_approval ? 'approved' : 'pending_approval',
+                'approved_at' => $category && !$category->requires_manual_approval ? now() : null,
+                'approved_by' => $category && !$category->requires_manual_approval ? null : null, // Auto-aprobado, no hay admin
+                'created_by' => null, // Registro público
+            ]);
+
+            // 2. Verificar si el email del usuario ya existe
+            if (User::where('email', $ownerData['email'])->exists()) {
+                throw new \Exception('El correo electrónico ya está registrado en el sistema.');
+            }
+
+            // 3. Crear usuario administrador asociado a la tienda
+            $user = User::create([
+                'name' => $ownerData['name'],
+                'email' => $ownerData['email'],
+                'password' => Hash::make($ownerData['password']),
+                'role' => 'store_admin',
+                'store_id' => $store->id,
+            ]);
+
+            // 4. Crear suscripción y factura usando BillingService (centralizado)
+            // IMPORTANTE: paymentStatus = 'paid' porque el pago ya fue aprobado por Epayco
+            $billingService = app(BillingService::class);
+            $billing = $billingService->createInitialBilling(
+                store: $store,
+                billingCycle: $billingPeriod,
+                hasTrialPeriod: null, // null = usar trial_days del plan automáticamente
+                trialDays: null,      // null = usar trial_days del plan automáticamente
+                paymentStatus: 'paid', // ✅ Pago aprobado por Epayco, factura marcada como pagada
+                createdBy: null, // Registro público
+                metadata: [
+                    'registration_source' => 'epayco_payment',
+                    'payment_transaction_id' => $transaction->id,
+                    'payment_method' => 'epayco',
+                    'source' => 'public_registration_wizard'
+                ]
+            );
+
+            // 5. Crear PendingRegistration con status 'approved' para trazabilidad
+            $registration = PendingRegistration::create([
+                // Step 1
+                'plan_id' => $planId,
+                'billing_period' => $billingPeriod,
+                
+                // Step 2
+                'business_category_id' => Session::get('wizard.business_category_id'),
+                'business_name' => Session::get('wizard.business_name'),
+                'document_type' => Session::get('wizard.document_type'),
+                'document_number' => Session::get('wizard.document_number'),
+                'phone' => Session::get('wizard.phone'),
+                'email' => Session::get('wizard.email'),
+                'city' => Session::get('wizard.city'),
+                'department' => Session::get('wizard.department'),
+                'address' => Session::get('wizard.address'),
+                'description' => Session::get('wizard.description'),
+                
+                // Step 3
+                'store_name' => Session::get('wizard.store_name'),
+                'slug' => $slug,
+                'store_description' => Session::get('wizard.store_description'),
+                'meta_title' => Session::get('wizard.meta_title'),
+                'meta_description' => Session::get('wizard.meta_description'),
+                'meta_keywords' => Session::get('wizard.meta_keywords'),
+                
+                // Step 4
+                'owner_name' => $ownerData['name'],
+                'owner_email' => $ownerData['email'],
+                'owner_document_type' => $ownerData['document_type'] ?? 'cc',
+                'owner_document_number' => $ownerData['document'],
+                'hashed_password' => Hash::make($ownerData['password']),
+                'temp_password_encrypted' => encrypt($ownerData['password']), // Para mostrarla en success
+                
+                // Pago
+                'payment_method' => 'epayco',
+                'payment_transaction_id' => $transaction->id,
+                'payment_proof' => null,
+                
+                // Estado - APROBADO porque el pago fue aprobado
+                'status' => 'approved',
+                'processed_at' => now(),
+                'created_store_id' => $store->id,
+            ]);
+
+            DB::commit();
+
+            // Limpiar sesión
+            Session::forget('payment.reference');
+            Session::forget('payment.plan_id');
+            Session::forget('payment.billing_period');
+            Session::forget('payment.owner_data');
+            Session::forget('wizard.plan_id');
+            Session::forget('wizard.billing_period');
+            Session::forget('wizard.business_category_id');
+            Session::forget('wizard.store_name');
+            Session::forget('wizard.slug');
+            Session::forget('wizard.store_description');
+            Session::forget('wizard.meta_title');
+            Session::forget('wizard.meta_description');
+            Session::forget('wizard.meta_keywords');
+            Session::forget('wizard.business_name');
+            Session::forget('wizard.document_type');
+            Session::forget('wizard.document_number');
+            Session::forget('wizard.phone');
+            Session::forget('wizard.email');
+            Session::forget('wizard.city');
+            Session::forget('wizard.department');
+            Session::forget('wizard.address');
+            Session::forget('wizard.description');
+
+            Log::info('Tienda creada exitosamente desde pago Epayco aprobado', [
+                'store_id' => $store->id,
+                'registration_id' => $registration->id,
+                'transaction_id' => $transaction->id
+            ]);
+
+            // Redirigir directamente a success
+            return redirect()->route('register.success', $registration->id);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            
+            Log::error('Error creando tienda desde pago Epayco', [
+                'transaction_id' => $transaction->id,
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return redirect()->route('register.step4')
+                ->withErrors(['error' => 'Error al crear la tienda: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Crear registro rechazado para mostrar en rejected.blade.php
+     */
+    protected function createRejectedRegistration(PaymentGatewayTransaction $transaction)
+    {
+        // Verificar que no exista ya un registro para esta transacción
+        $existingRegistration = PendingRegistration::where('payment_transaction_id', $transaction->id)->first();
+        if ($existingRegistration) {
+            return $existingRegistration;
+        }
+
+        // Obtener datos de la sesión
+        $planId = Session::get('payment.plan_id') ?? Session::get('wizard.plan_id');
+        $billingPeriod = Session::get('payment.billing_period') ?? Session::get('wizard.billing_period');
+        $ownerData = Session::get('payment.owner_data', []);
+
+        if (!$planId || !$billingPeriod || empty($ownerData)) {
+            throw new \Exception('Datos incompletos para crear registro rechazado');
+        }
+
+        // Crear registro rechazado
+        $registration = PendingRegistration::create([
+            // Step 1
+            'plan_id' => $planId,
+            'billing_period' => $billingPeriod,
+            
+            // Step 2
+            'business_category_id' => Session::get('wizard.business_category_id'),
+            'business_name' => Session::get('wizard.business_name'),
+            'document_type' => Session::get('wizard.document_type'),
+            'document_number' => Session::get('wizard.document_number'),
+            'phone' => Session::get('wizard.phone'),
+            'email' => Session::get('wizard.email'),
+            'city' => Session::get('wizard.city'),
+            'department' => Session::get('wizard.department'),
+            'address' => Session::get('wizard.address'),
+            'description' => Session::get('wizard.description'),
+            
+            // Step 3
+            'store_name' => Session::get('wizard.store_name'),
+            'slug' => Session::get('wizard.slug'),
+            'store_description' => Session::get('wizard.store_description'),
+            'meta_title' => Session::get('wizard.meta_title'),
+            'meta_description' => Session::get('wizard.meta_description'),
+            'meta_keywords' => Session::get('wizard.meta_keywords'),
+            
+            // Step 4
+            'owner_name' => $ownerData['name'] ?? '',
+            'owner_email' => $ownerData['email'] ?? '',
+            'owner_document_type' => $ownerData['document_type'] ?? 'cc',
+            'owner_document_number' => $ownerData['document'] ?? '',
+            
+            // Pago
+            'payment_method' => 'epayco',
+            'payment_transaction_id' => $transaction->id,
+            'payment_proof' => null,
+            
+            // Estado
+            'status' => 'rejected',
+            'rejected_reason' => 'Pago rechazado por la pasarela de pagos Epayco.',
+            'processed_at' => now(),
+        ]);
+
+        return $registration;
+    }
+
+    /**
+     * Crear registro pendiente desde pago (para pagos pendientes o transferencias)
+     */
+    protected function createRegistrationFromPayment(PaymentGatewayTransaction $transaction, bool $sendWhatsApp = true)
     {
         // Verificar que no exista ya un registro para esta transacción
         $existingRegistration = PendingRegistration::where('payment_transaction_id', $transaction->id)->first();
@@ -379,21 +665,23 @@ class RegistrationPaymentController extends Controller
         Session::forget('wizard.billing_period');
         Session::forget('wizard.business_category_id');
 
-        // Enviar notificación WhatsApp
-        try {
-            $whatsapp = app(\App\Services\WhatsAppNotificationService::class);
-            if ($whatsapp->isEnabled()) {
-                $whatsapp->notifyNewRegistrationPending($registration, '573233332112');
-                $registration->update(['whatsapp_sent_at' => now()]);
+        // Enviar notificación WhatsApp solo si se solicita
+        if ($sendWhatsApp) {
+            try {
+                $whatsapp = app(\App\Services\WhatsAppNotificationService::class);
+                if ($whatsapp->isEnabled()) {
+                    $whatsapp->notifyNewRegistrationPending($registration, '573233332112');
+                    $registration->update(['whatsapp_sent_at' => now()]);
+                }
+            } catch (\Exception $e) {
+                Log::error('Error enviando WhatsApp de registro', [
+                    'registration_id' => $registration->id,
+                    'error' => $e->getMessage()
+                ]);
             }
-        } catch (\Exception $e) {
-            Log::error('Error enviando WhatsApp de registro', [
-                'registration_id' => $registration->id,
-                'error' => $e->getMessage()
-            ]);
         }
 
-        return redirect()->route('register.step5', $registration->id);
+        return $registration;
     }
 
     /**

@@ -284,6 +284,98 @@ class EpaycoService
     }
 
     /**
+     * Crear pago con Nequi
+     */
+    protected function createNequiPayment(array $data, string $clientIp)
+    {
+        $amount = floatval($data['amount'] ?? 0);
+        if ($amount <= 0) {
+            throw new \Exception("El monto debe ser mayor a cero para pagos Nequi. Monto recibido: {$amount}");
+        }
+
+        // Formatear teléfono con código de país (57 + número)
+        $phone = $data['phone'] ?? '';
+        if (!empty($phone)) {
+            // Remover caracteres no numéricos
+            $phone = preg_replace('/[^0-9]/', '', $phone);
+            // Si no empieza con 57, agregarlo
+            if (substr($phone, 0, 2) !== '57') {
+                $phone = '57' . $phone;
+            }
+        }
+
+        $nequiData = [
+            "doc_type" => $this->mapDocumentTypeToEpayco($data['document_type'] ?? 'CC'),
+            "document" => $data['document'] ?? '',
+            "name" => $data['name'],
+            "last_name" => $data['last_name'] ?? '',
+            "email" => $data['email'],
+            "ind_country" => "CO",
+            "phone" => $phone,
+            "country" => "CO",
+            "city" => $data['city'] ?? "Bogota",
+            "address" => $data['address'] ?? 'Dirección no proporcionada',
+            "ip" => $clientIp,
+            "currency" => $data['currency'] ?? "COP",
+            "description" => $data['description'] ?? 'Pago de registro Linkiu',
+            "value" => number_format($amount, 2, '.', ''),
+            "tax" => "0",
+            "tax_base" => "0",
+            "method_confirmation" => "POST",
+            "url_confirmation" => $data['confirmation_url'],
+            "url_response" => $data['response_url'],
+        ];
+
+        return $this->epayco->nequi->create($nequiData);
+    }
+
+    /**
+     * Crear pago con Daviplata
+     */
+    protected function createDaviplataPayment(array $data, string $clientIp)
+    {
+        $amount = floatval($data['amount'] ?? 0);
+        if ($amount <= 0) {
+            throw new \Exception("El monto debe ser mayor a cero para pagos Daviplata. Monto recibido: {$amount}");
+        }
+
+        // Formatear teléfono con código de país (57 + número)
+        $phone = $data['phone'] ?? '';
+        if (!empty($phone)) {
+            // Remover caracteres no numéricos
+            $phone = preg_replace('/[^0-9]/', '', $phone);
+            // Si no empieza con 57, agregarlo
+            if (substr($phone, 0, 2) !== '57') {
+                $phone = '57' . $phone;
+            }
+        }
+
+        $daviplataData = [
+            "doc_type" => $this->mapDocumentTypeToEpayco($data['document_type'] ?? 'CC'),
+            "document" => $data['document'] ?? '',
+            "name" => $data['name'],
+            "last_name" => $data['last_name'] ?? '',
+            "email" => $data['email'],
+            "ind_country" => "CO",
+            "phone" => $phone,
+            "country" => "CO",
+            "city" => $data['city'] ?? "Bogota",
+            "address" => $data['address'] ?? 'Dirección no proporcionada',
+            "ip" => $clientIp,
+            "currency" => $data['currency'] ?? "COP",
+            "description" => $data['description'] ?? 'Pago de registro Linkiu',
+            "value" => number_format($amount, 2, '.', ''),
+            "tax" => "0",
+            "tax_base" => "0",
+            "method_confirmation" => "POST",
+            "url_confirmation" => $data['confirmation_url'],
+            "url_response" => $data['response_url'],
+        ];
+
+        return $this->epayco->daviplata->create($daviplataData);
+    }
+
+    /**
      * Crear pago con tarjeta de crédito/débito
      * Requiere token_card y customer_id (se obtienen después de tokenizar la tarjeta)
      */

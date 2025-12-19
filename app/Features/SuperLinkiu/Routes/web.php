@@ -239,6 +239,12 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
             Route::delete('/{report}', [StoreReportController::class, 'destroy'])->name('destroy');
         });
 
+        // Store Statistics (Estadísticas de Tiendas)
+        Route::prefix('store-statistics')->name('store-statistics.')->group(function () {
+            Route::get('/', [\App\Features\SuperLinkiu\Controllers\StoreStatisticsController::class, 'index'])->name('index');
+            Route::get('/{store}', [\App\Features\SuperLinkiu\Controllers\StoreStatisticsController::class, 'show'])->name('show');
+        });
+
         Route::delete('/profile/avatar', [ProfileController::class, 'deleteAvatar'])->name('profile.delete-avatar');
         Route::patch('/profile/app-settings', [ProfileController::class, 'updateAppSettings'])->name('profile.update-app-settings');
 

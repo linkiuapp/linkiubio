@@ -223,8 +223,8 @@
                                                     <div x-show="showAll" x-cloak x-transition>
                                                         @foreach($extraFeatures as $feature)
                                                             <li class="flex items-center gap-3 mt-3">
-                                                                <span class="w-6 h-6 flex justify-center items-center bg-slate-900 rounded-full flex-shrink-0">
-                                                                    <i data-lucide="check" class="w-4 h-4 text-white"></i>
+                                                                <span class="flex justify-center items-center flex-shrink-0">
+                                                                    <i data-lucide="badge-check" class="w-4 h-4 text-slate-600"></i>
                                                                 </span>
                                                                 <span class="text-sm font-normal text-slate-600">
                                                                     {{ $feature }}

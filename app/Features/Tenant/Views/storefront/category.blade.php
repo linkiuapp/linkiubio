@@ -127,17 +127,18 @@
                          style="background-color: {{ $cardBgColor }};">
                         <div class="flex items-center gap-4">
                             <!-- Imagen del producto -->
-                            <div class="w-[120px] h-[120px] md:w-[126px] md:h-[126px] rounded-lg flex-shrink-0 overflow-hidden">
+                            <a href="{{ route('tenant.product', ['store' => $store->slug, 'productSlug' => $product->slug]) }}" 
+                               class="w-[120px] h-[120px] md:w-[126px] md:h-[126px] rounded-lg flex-shrink-0 overflow-hidden cursor-pointer">
                                 @if($product->main_image_url)
                                     <img src="{{ $product->main_image_url }}" 
                                          alt="{{ $product->name }}" 
-                                         class="w-full h-full object-cover">
+                                         class="w-full h-full object-cover hover:opacity-90 transition-opacity">
                                 @else
                                     <div class="w-full h-full flex items-center justify-center bg-gray-100">
                                         <i data-lucide="image" class="w-6 h-6 text-gray-400"></i>
                                     </div>
                                 @endif
-                            </div>
+                            </a>
 
                             <!-- Información del producto -->
                             <div class="flex-1 min-w-0 flex flex-col md:gap-1 gap-0">
@@ -168,7 +169,10 @@
                                 </div>
 
                                 <!-- Título del producto -->
-                                <h3 class="text-base font-bold text-slate-900 leading-tight">{{ $product->name }}</h3>
+                                <a href="{{ route('tenant.product', ['store' => $store->slug, 'productSlug' => $product->slug]) }}" 
+                                   class="text-base font-bold text-slate-900 leading-tight hover:text-blue-600 transition-colors cursor-pointer">
+                                    {{ $product->name }}
+                                </a>
                                 
                                 <!-- Descripción -->
                                 @if($product->description)

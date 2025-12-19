@@ -168,6 +168,7 @@ class SidebarBuilderService
             'icon'   => 'settings',
             'active' => request()->routeIs('superlinkiu.stores.*') || 
                        request()->routeIs('superlinkiu.store-requests.*') ||
+                       request()->routeIs('superlinkiu.store-statistics.*') ||
                        request()->routeIs('superlinkiu.user-management.*') ||
                        request()->routeIs('superlinkiu.master-key-recovery.*') ||
                        request()->routeIs('superlinkiu.store-reports.*'),
@@ -176,13 +177,19 @@ class SidebarBuilderService
                 [
                     'label'  => 'Tiendas',
                     'icon'   => 'store',
-                    'active' => request()->routeIs('superlinkiu.stores.*') || request()->routeIs('superlinkiu.store-requests.*'),
+                    'active' => request()->routeIs('superlinkiu.stores.*') || request()->routeIs('superlinkiu.store-requests.*') || request()->routeIs('superlinkiu.store-statistics.*'),
                     'children' => [
                         [
                             'label'  => 'Gestión de tiendas',
                             'url'    => route('superlinkiu.stores.index'),
                             'icon'   => 'store',
-                            'active' => request()->routeIs('superlinkiu.stores.*') && !request()->routeIs('superlinkiu.store-requests.*')
+                            'active' => request()->routeIs('superlinkiu.stores.*') && !request()->routeIs('superlinkiu.store-requests.*') && !request()->routeIs('superlinkiu.store-statistics.*')
+                        ],
+                        [
+                            'label'  => 'Estadísticas de Tiendas',
+                            'url'    => route('superlinkiu.store-statistics.index'),
+                            'icon'   => 'bar-chart-2',
+                            'active' => request()->routeIs('superlinkiu.store-statistics.*')
                         ],
                         [
                             'label'      => 'Solicitudes de Tiendas',
