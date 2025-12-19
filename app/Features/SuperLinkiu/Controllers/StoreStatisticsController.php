@@ -167,12 +167,12 @@ class StoreStatisticsController extends Controller
             ->whereBetween('created_at', [$dateFrom, $dateTo])
             ->sum('total');
 
-        // Ingresos por domicilios (solo order_type = 'delivery')
+        // Ingresos por domicilios (solo el costo de envío, no el total de la orden)
         $deliveryRevenue = Order::where('store_id', $storeId)
             ->where('status', 'delivered')
             ->where('order_type', 'delivery')
             ->whereBetween('created_at', [$dateFrom, $dateTo])
-            ->sum('total');
+            ->sum('shipping_cost');
 
         // Cantidad de pedidos por domicilio
         $deliveryOrders = Order::where('store_id', $storeId)
@@ -238,11 +238,11 @@ class StoreStatisticsController extends Controller
             ->whereBetween('created_at', [$dateFrom, $dateTo])
             ->sum('total');
 
-        // Ingresos por domicilios (solo order_type = 'delivery')
+        // Ingresos por domicilios (solo el costo de envío, no el total de la orden)
         $totalDeliveryRevenue = Order::where('status', 'delivered')
             ->where('order_type', 'delivery')
             ->whereBetween('created_at', [$dateFrom, $dateTo])
-            ->sum('total');
+            ->sum('shipping_cost');
 
         // Pedidos por domicilio
         $totalDeliveryOrders = Order::where('status', 'delivered')
