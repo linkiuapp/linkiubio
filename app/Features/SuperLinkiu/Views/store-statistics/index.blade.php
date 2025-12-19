@@ -166,14 +166,6 @@
                         </div>
 
                         <div class="bg-gray-50 rounded-lg p-4">
-                            <p class="text-xs font-medium text-gray-600 mb-1">Productos Vendidos</p>
-                            <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['products_sold'] ?? 0) }}</p>
-                            @if(isset($stats['conversion_rate']) && $stats['conversion_rate'] > 0)
-                                <p class="text-xs text-gray-500 mt-1">{{ $stats['conversion_rate'] }}% conversión</p>
-                            @endif
-                        </div>
-
-                        <div class="bg-gray-50 rounded-lg p-4">
                             <p class="text-xs font-medium text-gray-600 mb-1">Ventas Totales</p>
                             <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_sales'] ?? 0) }}</p>
                             @if(isset($stats['average_ticket']) && $stats['average_ticket'] > 0)
@@ -186,21 +178,27 @@
                             <p class="text-2xl font-bold text-gray-900">${{ number_format($stats['delivery_revenue'] ?? 0, 0, ',', '.') }}</p>
                             <p class="text-xs text-gray-500 mt-1">{{ number_format($stats['delivery_orders'] ?? 0) }} pedidos</p>
                         </div>
+
+                        <div class="bg-gray-50 rounded-lg p-4">
+                            <p class="text-xs font-medium text-gray-600 mb-1">Ingresos Totales</p>
+                            <p class="text-2xl font-bold text-gray-900">${{ number_format($stats['total_revenue'] ?? 0, 0, ',', '.') }}</p>
+                        </div>
                     </div>
 
-                    {{-- Ingresos Totales --}}
-                    <div class="mt-4 bg-purple-50 rounded-lg p-4 border border-purple-200">
+                    {{-- Ventas Totales Netas --}}
+                    <div class="mt-4 bg-blue-50 rounded-lg p-4 border border-blue-200">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-sm font-medium text-purple-900 mb-1">
-                                    💰 Ingresos Totales
+                                <p class="text-sm font-medium text-blue-900 mb-1">
+                                    📊 Ventas Totales Netas
                                 </p>
-                                <p class="text-lg font-bold text-purple-900">
-                                    ${{ number_format($stats['total_revenue'] ?? 0, 0, ',', '.') }}
+                                <p class="text-lg font-bold text-blue-900">
+                                    {{ number_format($stats['net_sales'] ?? 0) }}
                                 </p>
+                                <p class="text-xs text-blue-700 mt-1">Ventas sin domicilios</p>
                             </div>
-                            <div class="w-12 h-12 bg-purple-200 rounded-full flex items-center justify-center">
-                                <i data-lucide="dollar-sign" class="w-6 h-6 text-purple-700"></i>
+                            <div class="w-12 h-12 bg-blue-200 rounded-full flex items-center justify-center">
+                                <i data-lucide="trending-up" class="w-6 h-6 text-blue-700"></i>
                             </div>
                         </div>
                     </div>

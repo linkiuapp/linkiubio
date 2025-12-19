@@ -200,10 +200,14 @@ class StoreStatisticsController extends Controller
             ? round($deliveryRevenue / $deliveryOrders, 2) 
             : 0;
 
+        // Ventas totales netas (ventas sin domicilios)
+        $netSales = $totalSales - $deliveryOrders;
+
         return [
             'products_created' => $productsCreated,
             'products_sold' => $productsSold,
             'total_sales' => $totalSales,
+            'net_sales' => $netSales,
             'total_revenue' => $totalRevenue,
             'delivery_revenue' => $deliveryRevenue,
             'delivery_orders' => $deliveryOrders,
@@ -258,10 +262,14 @@ class StoreStatisticsController extends Controller
             ->whereBetween('created_at', [$dateFrom, $dateTo])
             ->count();
 
+        // Ventas totales netas (ventas sin domicilios)
+        $netSales = $totalSales - $totalDeliveryOrders;
+
         return [
             'total_products_created' => $totalProductsCreated,
             'total_products_sold' => $totalProductsSold,
             'total_sales' => $totalSales,
+            'net_sales' => $netSales,
             'total_revenue' => $totalRevenue,
             'total_delivery_revenue' => $totalDeliveryRevenue,
             'total_delivery_orders' => $totalDeliveryOrders,

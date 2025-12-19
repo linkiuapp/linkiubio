@@ -62,19 +62,6 @@
         <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
             <div class="flex items-center justify-between">
                 <div>
-                    <p class="text-sm font-medium text-gray-600 mb-1">Productos Vendidos</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['products_sold']) }}</p>
-                    <p class="text-xs text-gray-500 mt-1">{{ $stats['conversion_rate'] }}% conversión</p>
-                </div>
-                <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
-                    <i data-lucide="check-circle" class="w-6 h-6 text-green-600"></i>
-                </div>
-            </div>
-        </div>
-
-        <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
-            <div class="flex items-center justify-between">
-                <div>
                     <p class="text-sm font-medium text-gray-600 mb-1">Ventas Totales</p>
                     <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total_sales']) }}</p>
                     <p class="text-xs text-gray-500 mt-1">Ticket: ${{ number_format($stats['average_ticket'], 0, ',', '.') }}</p>
@@ -97,17 +84,30 @@
                 </div>
             </div>
         </div>
+
+        <div class="bg-white rounded-xl p-6 border border-gray-200 shadow-sm">
+            <div class="flex items-center justify-between">
+                <div>
+                    <p class="text-sm font-medium text-gray-600 mb-1">Ingresos Totales</p>
+                    <p class="text-2xl font-bold text-gray-900">${{ number_format($stats['total_revenue'], 0, ',', '.') }}</p>
+                </div>
+                <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                    <i data-lucide="dollar-sign" class="w-6 h-6 text-purple-600"></i>
+                </div>
+            </div>
+        </div>
     </div>
 
-    {{-- Ingresos Totales --}}
-    <div class="bg-purple-50 rounded-xl p-6 border border-purple-200 shadow-sm mb-6">
+    {{-- Ventas Totales Netas --}}
+    <div class="bg-blue-50 rounded-xl p-6 border border-blue-200 shadow-sm mb-6">
         <div class="flex items-center justify-between">
             <div>
-                <h3 class="text-lg font-bold text-purple-900 mb-2">💰 Ingresos Totales</h3>
-                <p class="text-xl font-bold text-purple-900">${{ number_format($stats['total_revenue'], 0, ',', '.') }}</p>
+                <h3 class="text-lg font-bold text-blue-900 mb-2">📊 Ventas Totales Netas</h3>
+                <p class="text-3xl font-bold text-blue-900">{{ number_format($stats['net_sales']) }}</p>
+                <p class="text-sm text-blue-700 mt-1">Ventas sin domicilios</p>
             </div>
-            <div class="w-16 h-16 bg-purple-200 rounded-full flex items-center justify-center">
-                <i data-lucide="dollar-sign" class="w-8 h-8 text-purple-700"></i>
+            <div class="w-16 h-16 bg-blue-200 rounded-full flex items-center justify-center">
+                <i data-lucide="trending-up" class="w-8 h-8 text-blue-700"></i>
             </div>
         </div>
     </div>

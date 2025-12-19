@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 
 class RegistrationPaymentController extends Controller
 {
@@ -231,8 +232,18 @@ class RegistrationPaymentController extends Controller
             } catch (\Exception $e) {
                 Log::error('Error verificando pago en paymentResponse', [
                     'error' => $e->getMessage(),
-                    'reference' => $reference
+                    'reference' => $reference,
+                    'trace' => $e->getTraceAsString()
                 ]);
+                
+                // Si la verificación falla, marcar como pendiente y continuar
+                // para que el usuario pueda ver el estado en step5
+                if (!$transaction->status || $transaction->status === 'pending') {
+                    $transaction->update([
+                        'status' => 'pending',
+                        'error_message' => $e->getMessage(),
+                    ]);
+                }
             }
         }
 
@@ -541,7 +552,23 @@ class RegistrationPaymentController extends Controller
         $ownerData = Session::get('payment.owner_data', []);
 
         if (!$planId || !$billingPeriod || empty($ownerData)) {
+            Log::error('Datos incompletos para crear registro rechazado', [
+                'plan_id' => $planId,
+                'billing_period' => $billingPeriod,
+                'owner_data_keys' => array_keys($ownerData),
+                'transaction_id' => $transaction->id
+            ]);
             throw new \Exception('Datos incompletos para crear registro rechazado');
+        }
+
+        // Validar que el password esté presente
+        if (empty($ownerData['password'])) {
+            Log::warning('Password no encontrado en sesión para registro rechazado', [
+                'transaction_id' => $transaction->id,
+                'owner_email' => $ownerData['email'] ?? 'N/A'
+            ]);
+            // Generar password temporal si no está disponible
+            $ownerData['password'] = Str::random(16);
         }
 
         // Crear registro rechazado
@@ -575,6 +602,8 @@ class RegistrationPaymentController extends Controller
             'owner_email' => $ownerData['email'] ?? '',
             'owner_document_type' => $ownerData['document_type'] ?? 'cc',
             'owner_document_number' => $ownerData['document'] ?? '',
+            'hashed_password' => Hash::make($ownerData['password']),
+            'temp_password_encrypted' => encrypt($ownerData['password']),
             
             // Pago
             'payment_method' => 'epayco',
@@ -615,6 +644,16 @@ class RegistrationPaymentController extends Controller
                 ->withErrors(['error' => 'Datos incompletos. Por favor contacta soporte.']);
         }
 
+        // Validar que el password esté presente
+        if (empty($ownerData['password'])) {
+            Log::warning('Password no encontrado en sesión para registro pendiente', [
+                'transaction_id' => $transaction->id,
+                'owner_email' => $ownerData['email'] ?? 'N/A'
+            ]);
+            // Generar password temporal si no está disponible
+            $ownerData['password'] = Str::random(16);
+        }
+
         // Crear registro pendiente
         $registration = PendingRegistration::create([
             // Step 1
@@ -646,6 +685,8 @@ class RegistrationPaymentController extends Controller
             'owner_email' => $ownerData['email'] ?? '',
             'owner_document_type' => $ownerData['document_type'] ?? 'cc',
             'owner_document_number' => $ownerData['document'] ?? '',
+            'hashed_password' => Hash::make($ownerData['password']),
+            'temp_password_encrypted' => encrypt($ownerData['password']),
             
             // Pago
             'payment_method' => 'epayco',
