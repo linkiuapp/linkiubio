@@ -66,7 +66,7 @@ class PaymentGatewayTransaction extends Model
     /**
      * Marcar como rechazada
      */
-    public function markAsRejected(string $errorMessage = null): void
+    public function markAsRejected(?string $errorMessage = null): void
     {
         $this->update([
             'status' => 'rejected',

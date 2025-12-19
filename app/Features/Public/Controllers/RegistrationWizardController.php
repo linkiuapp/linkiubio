@@ -15,11 +15,11 @@ use Illuminate\Support\Facades\Hash;
 class RegistrationWizardController extends Controller
 {
     /**
-     * Step 1: Selección de Plan
+     * Step 1: Selecci?n de Plan
      */
     public function step1()
     {
-        // Obtener planes públicos y activos ordenados
+        // Obtener planes p?blicos y activos ordenados
         $plans = Plan::where('is_public', true)
             ->where('is_active', true)
             ->orderBy('sort_order')
@@ -39,7 +39,7 @@ class RegistrationWizardController extends Controller
             'billing_period' => 'required|in:monthly,quarterly,semester,annual',
         ]);
 
-        // Guardar en sesión
+        // Guardar en sesi?n
         Session::put('wizard.plan_id', $validated['plan_id']);
         Session::put('wizard.billing_period', $validated['billing_period']);
 
@@ -64,7 +64,39 @@ class RegistrationWizardController extends Controller
             'description' => 'nullable|string|max:500',
         ]);
 
-        // Guardar todos los datos en sesión
+        // Validar email de contacto del negocio
+        $email = $validated['email'];
+        // Verificar si ya existe en stores
+        $existingStoreEmail = \App\Shared\Models\Store::where('email', $email)->first();
+        if ($existingStoreEmail) {
+            return back()->withInput()->withErrors(['email' => 'Este correo electrónico ya está registrado por otra tienda.']);
+        }
+
+        // Verificar si ya existe en pending_registrations con status approved o pending
+        $existingPendingEmail = PendingRegistration::where('email', $email)
+            ->whereIn('status', ['approved', 'pending'])
+            ->first();
+        if ($existingPendingEmail) {
+            if ($existingPendingEmail->status === 'approved') {
+                return back()->withInput()->withErrors(['email' => 'Este correo electrónico ya tiene un registro aprobado.']);
+            } else {
+                return back()->withInput()->withErrors(['email' => 'Ya existe un registro pendiente con este correo. Por favor espera a que sea procesado o contacta soporte.']);
+            }
+        }
+
+        // Validar nombre del negocio (business_name) contra pending_registrations
+        // Nota: La tabla stores no tiene columna business_name, solo name (nombre de tienda)
+        $businessName = $validated['business_name'];
+        
+        // Verificar en pending_registrations
+        $existingPendingBusinessName = PendingRegistration::whereRaw('LOWER(business_name) = LOWER(?)', [$businessName])
+            ->whereIn('status', ['approved', 'pending'])
+            ->first();
+        if ($existingPendingBusinessName) {
+            return back()->withInput()->withErrors(['business_name' => 'Ya existe un registro pendiente o aprobado con este nombre de negocio. Por favor verifica o elige otro nombre.']);
+        }
+
+        // Guardar todos los datos en sesi?n
         foreach($validated as $key => $value) {
             Session::put("wizard.{$key}", $value);
         }
@@ -73,7 +105,7 @@ class RegistrationWizardController extends Controller
     }
 
     /**
-     * Step 2: Información del Negocio
+     * Step 2: Informaci?n del Negocio
      */
     public function step2()
     {
@@ -96,14 +128,44 @@ class RegistrationWizardController extends Controller
     {
         $validated = $request->validate([
             'store_name' => 'required|string|max:255',
-            'slug' => 'required|string|max:100|regex:/^[a-z0-9-]+$/|unique:stores,slug',
+            'slug' => 'required|string|max:100|regex:/^[a-z0-9-]+$/',
             'store_description' => 'nullable|string|max:500',
             'meta_title' => 'nullable|string|max:255',
             'meta_description' => 'nullable|string|max:500',
             'meta_keywords' => 'nullable|string|max:255',
         ]);
 
-        // Guardar todos los datos en sesión
+        // Validar slug contra stores
+        $slug = $validated['slug'];
+        $existingStore = \App\Shared\Models\Store::where('slug', $slug)->first();
+        if ($existingStore) {
+            return back()->withInput()->withErrors(['slug' => 'Esta URL ya está en uso por otra tienda. Por favor elige otra.']);
+        }
+
+        // Validar slug contra pending_registrations con status approved o pending
+        $existingPendingSlug = PendingRegistration::where('slug', $slug)
+            ->whereIn('status', ['approved', 'pending'])
+            ->first();
+        if ($existingPendingSlug) {
+            return back()->withInput()->withErrors(['slug' => 'Esta URL ya está en uso en un registro pendiente o aprobado. Por favor elige otra.']);
+        }
+
+        // Validar nombre de tienda contra stores (case-insensitive)
+        $storeName = $validated['store_name'];
+        $existingStoreName = \App\Shared\Models\Store::whereRaw('LOWER(name) = LOWER(?)', [$storeName])->first();
+        if ($existingStoreName) {
+            return back()->withInput()->withErrors(['store_name' => 'Ya existe una tienda con este nombre. Por favor elige otro nombre.']);
+        }
+
+        // Validar nombre contra pending_registrations
+        $existingPendingName = PendingRegistration::whereRaw('LOWER(store_name) = LOWER(?)', [$storeName])
+            ->whereIn('status', ['approved', 'pending'])
+            ->first();
+        if ($existingPendingName) {
+            return back()->withInput()->withErrors(['store_name' => 'Ya existe un registro pendiente o aprobado con este nombre. Por favor elige otro nombre.']);
+        }
+
+        // Guardar todos los datos en sesi?n
         foreach($validated as $key => $value) {
             Session::put("wizard.{$key}", $value);
         }
@@ -112,7 +174,7 @@ class RegistrationWizardController extends Controller
     }
 
     /**
-     * Step 3: Configuración de la Tienda
+     * Step 3: Configuraci?n de la Tienda
      */
     public function step3()
     {
@@ -128,7 +190,7 @@ class RegistrationWizardController extends Controller
      */
 
     /**
-     * Step 4: Información del Propietario
+     * Step 4: Informaci?n del Propietario
      */
     public function step4()
     {
@@ -136,10 +198,10 @@ class RegistrationWizardController extends Controller
             return redirect()->route('register.step1');
         }
 
-        // Obtener configuración de pago
+        // Obtener configuraci?n de pago
         $paymentSetting = \App\Models\RegistrationPaymentSetting::getActive();
         
-        // Verificar si Epayco está activo
+        // Verificar si Epayco est? activo
         $epaycoGateway = \App\Models\PaymentGateway::where('name', 'epayco')
             ->where('is_active', true)
             ->first();
@@ -157,7 +219,7 @@ class RegistrationWizardController extends Controller
             default => $plan->price
         };
 
-        // Obtener lista de bancos PSE si Epayco está activo
+        // Obtener lista de bancos PSE si Epayco est? activo
         $pseBanks = [];
         if ($epaycoGateway) {
             try {
@@ -242,7 +304,7 @@ class RegistrationWizardController extends Controller
             'owner_document_type' => $validated['owner_document_type'],
             'owner_document_number' => $validated['owner_document_number'],
             'hashed_password' => Hash::make($validated['password']),
-            'temp_password_encrypted' => encrypt($validated['password']), // Guardar encriptada para mostrarla después
+            'temp_password_encrypted' => encrypt($validated['password']), // Guardar encriptada para mostrarla despu?s
             
             // Estado
             'status' => 'pending',
@@ -259,7 +321,7 @@ class RegistrationWizardController extends Controller
         // Enviar WhatsApp INMEDIATAMENTE
         $this->sendWhatsAppNotification($registration);
 
-        // Limpiar sesión del wizard
+        // Limpiar sesi?n del wizard
         Session::forget('wizard.plan_id');
         Session::forget('wizard.selected_period');
         Session::forget('wizard.business_category_id');
@@ -289,7 +351,7 @@ class RegistrationWizardController extends Controller
     }
 
     /**
-     * Vista de éxito (aprobado)
+     * Vista de ?xito (aprobado)
      */
     public function success($registrationId)
     {
@@ -302,22 +364,22 @@ class RegistrationWizardController extends Controller
         $store = $registration->createdStore;
         $subscription = Subscription::where('store_id', $store->id)->first();
         
-        // Obtener contraseña temporal desencriptada del registro
+        // Obtener contrase?a temporal desencriptada del registro
         $temporaryPassword = null;
         if ($registration->temp_password_encrypted) {
             try {
                 $temporaryPassword = decrypt($registration->temp_password_encrypted);
                 
-                // Limpiar la contraseña encriptada después de mostrarla (seguridad)
+                // Limpiar la contrase?a encriptada despu?s de mostrarla (seguridad)
                 $registration->update(['temp_password_encrypted' => null]);
             } catch (\Exception $e) {
-                \Log::error('Error desencriptando contraseña temporal:', ['error' => $e->getMessage()]);
+                \Log::error('Error desencriptando contrase?a temporal:', ['error' => $e->getMessage()]);
             }
         }
         
-        // Si no hay contraseña disponible (registros antiguos), usar placeholder
+        // Si no hay contrase?a disponible (registros antiguos), usar placeholder
         if (!$temporaryPassword) {
-            $temporaryPassword = '(Contraseña enviada por email)';
+            $temporaryPassword = '(Contrase?a enviada por email)';
         }
         
         return view('public::registration.success', compact('registration', 'store', 'subscription', 'temporaryPassword'));
@@ -362,7 +424,7 @@ class RegistrationWizardController extends Controller
     }
 
     /**
-     * Enviar notificación WhatsApp
+     * Enviar notificaci?n WhatsApp
      */
     private function sendWhatsAppNotification(PendingRegistration $registration)
     {
@@ -370,14 +432,14 @@ class RegistrationWizardController extends Controller
             $whatsapp = app(WhatsAppNotificationService::class);
             
             if (!$whatsapp->isEnabled()) {
-                \Log::warning('WhatsApp no habilitado - No se envió notificación de registro');
+                \Log::warning('WhatsApp no habilitado - No se envi? notificaci?n de registro');
                 return;
             }
 
-            // Enviar notificación de nueva registración pendiente
+            // Enviar notificaci?n de nueva registraci?n pendiente
             $result = $whatsapp->notifyNewRegistrationPending(
                 $registration,
-                '573233332112' // Número del super admin
+                '573233332112' // N?mero del super admin
             );
 
             if ($result) {

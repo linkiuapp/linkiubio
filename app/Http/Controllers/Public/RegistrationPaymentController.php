@@ -37,6 +37,63 @@ class RegistrationPaymentController extends Controller
             return back()->withErrors(['error' => 'Datos incompletos. Por favor completa todos los pasos del registro.']);
         }
 
+        // Obtener datos de la sesión para validaciones
+        $storeName = Session::get('wizard.store_name');
+        $slug = Session::get('wizard.slug');
+
+        // Validar correo del propietario
+        // 1. Verificar si ya existe como usuario (admin de otra tienda)
+        $existingUser = User::where('email', $ownerEmail)->first();
+        if ($existingUser) {
+            return back()->withInput()->withErrors(['owner_email' => 'Este correo electrónico ya está registrado como administrador de una tienda.']);
+        }
+
+        // 2. Verificar si ya existe en pending_registrations con status approved o pending
+        $existingPendingRegistration = PendingRegistration::where('owner_email', $ownerEmail)
+            ->whereIn('status', ['approved', 'pending'])
+            ->first();
+        if ($existingPendingRegistration) {
+            if ($existingPendingRegistration->status === 'approved') {
+                return back()->withInput()->withErrors(['owner_email' => 'Este correo electrónico ya tiene un registro aprobado. Si ya tienes una tienda, inicia sesión.']);
+            } else {
+                return back()->withInput()->withErrors(['owner_email' => 'Ya tienes un registro pendiente con este correo. Por favor espera a que sea procesado o contacta soporte.']);
+            }
+        }
+
+        // Validar slug de la tienda
+        if ($slug) {
+            // 1. Verificar si ya existe en stores
+            $existingStore = Store::where('slug', $slug)->first();
+            if ($existingStore) {
+                return back()->withInput()->withErrors(['slug' => 'Esta URL ya está en uso por otra tienda. Por favor elige otra.']);
+            }
+
+            // 2. Verificar si ya existe en pending_registrations con status approved o pending
+            $existingPendingSlug = PendingRegistration::where('slug', $slug)
+                ->whereIn('status', ['approved', 'pending'])
+                ->first();
+            if ($existingPendingSlug) {
+                return back()->withInput()->withErrors(['slug' => 'Esta URL ya está en uso en un registro pendiente o aprobado. Por favor elige otra.']);
+            }
+        }
+
+        // Validar nombre de tienda (opcional pero recomendado)
+        if ($storeName) {
+            // Verificar si ya existe una tienda con el mismo nombre (case-insensitive)
+            $existingStoreName = Store::whereRaw('LOWER(name) = LOWER(?)', [$storeName])->first();
+            if ($existingStoreName) {
+                return back()->withInput()->withErrors(['store_name' => 'Ya existe una tienda con este nombre. Por favor elige otro nombre.']);
+            }
+
+            // Verificar en pending_registrations
+            $existingPendingName = PendingRegistration::whereRaw('LOWER(store_name) = LOWER(?)', [$storeName])
+                ->whereIn('status', ['approved', 'pending'])
+                ->first();
+            if ($existingPendingName) {
+                return back()->withInput()->withErrors(['store_name' => 'Ya existe un registro pendiente o aprobado con este nombre. Por favor elige otro nombre.']);
+            }
+        }
+
         // Obtener plan y calcular monto
         $plan = \App\Shared\Models\Plan::find($planId);
         if (!$plan) {
@@ -546,6 +603,27 @@ class RegistrationPaymentController extends Controller
             return $existingRegistration;
         }
 
+        // Obtener owner_email de la sesión
+        $ownerData = Session::get('payment.owner_data', []);
+        $ownerEmail = $ownerData['email'] ?? null;
+
+        // Si hay email, verificar si ya existe un registro con ese email
+        if ($ownerEmail) {
+            $existingByEmail = PendingRegistration::where('owner_email', $ownerEmail)
+                ->whereIn('status', ['pending', 'approved'])
+                ->first();
+            if ($existingByEmail) {
+                // Actualizar el registro existente en lugar de crear uno nuevo
+                $existingByEmail->update([
+                    'payment_transaction_id' => $transaction->id,
+                    'status' => 'rejected',
+                    'rejected_reason' => 'Pago rechazado por la pasarela de pagos Epayco.',
+                    'processed_at' => now(),
+                ]);
+                return $existingByEmail;
+            }
+        }
+
         // Obtener datos de la sesión
         $planId = Session::get('payment.plan_id') ?? Session::get('wizard.plan_id');
         $billingPeriod = Session::get('payment.billing_period') ?? Session::get('wizard.billing_period');
@@ -628,6 +706,26 @@ class RegistrationPaymentController extends Controller
         $existingRegistration = PendingRegistration::where('payment_transaction_id', $transaction->id)->first();
         if ($existingRegistration) {
             return redirect()->route('register.step5', $existingRegistration->id);
+        }
+
+        // Obtener owner_email de la sesión
+        $ownerData = Session::get('payment.owner_data', []);
+        $ownerEmail = $ownerData['email'] ?? null;
+
+        // Si hay email, verificar si ya existe un registro con ese email
+        if ($ownerEmail) {
+            $existingByEmail = PendingRegistration::where('owner_email', $ownerEmail)
+                ->whereIn('status', ['pending', 'approved'])
+                ->first();
+            if ($existingByEmail) {
+                // Actualizar el registro existente en lugar de crear uno nuevo
+                $existingByEmail->update([
+                    'payment_transaction_id' => $transaction->id,
+                    'status' => 'pending',
+                    'processed_at' => null,
+                ]);
+                return $existingByEmail;
+            }
         }
 
         // Obtener datos de la sesión
