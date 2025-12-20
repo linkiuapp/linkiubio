@@ -268,38 +268,141 @@ class RegistrationPaymentController extends Controller
                 ->withErrors(['error' => 'Error al verificar el pago.']);
         }
 
-        // Actualizar transacción con datos de respuesta si vienen
+        // Guardar todos los datos de respuesta de Epayco para debugging
+        $allRequestData = $request->all();
+        Log::info('Epayco paymentResponse recibido', [
+            'reference' => $reference,
+            'transaction_id' => $transaction->id,
+            'request_params' => $allRequestData,
+        ]);
+
+        // Intentar determinar el estado desde los parámetros que Epayco envía
+        $epaycoStatus = null;
+        $statusFromParams = null;
+        
+        // Verificar código de respuesta (más confiable)
         if ($request->has('x_cod_response') || $request->has('cod_response')) {
             $epaycoStatus = $request->input('x_cod_response') ?? $request->input('cod_response');
-            $status = $this->mapEpaycoStatus($epaycoStatus);
+            $statusFromParams = $this->mapEpaycoStatus($epaycoStatus);
+        }
+        // Si no hay código, verificar estado de transacción o texto de respuesta
+        elseif ($request->has('x_transaction_state')) {
+            $state = strtoupper($request->input('x_transaction_state'));
+            $statusFromParams = match($state) {
+                'APPROVED', 'ACEPTADA', 'ACEPTADO' => 'approved',
+                'REJECTED', 'RECHAZADA', 'RECHAZADO' => 'rejected',
+                'PENDING', 'PENDIENTE' => 'pending',
+                'CANCELLED', 'CANCELADA', 'CANCELADO' => 'cancelled',
+                default => null,
+            };
+        }
+        // Verificar texto de respuesta
+        elseif ($request->has('x_response')) {
+            $responseText = strtoupper($request->input('x_response'));
+            $statusFromParams = match(true) {
+                str_contains($responseText, 'ACEPTADA') || str_contains($responseText, 'APPROVED') => 'approved',
+                str_contains($responseText, 'RECHAZADA') || str_contains($responseText, 'REJECTED') => 'rejected',
+                str_contains($responseText, 'PENDIENTE') || str_contains($responseText, 'PENDING') => 'pending',
+                str_contains($responseText, 'CANCELADA') || str_contains($responseText, 'CANCELLED') => 'cancelled',
+                default => null,
+            };
+        }
+
+        // Si tenemos un estado de los parámetros, usarlo directamente
+        if ($statusFromParams) {
+            Log::info('Estado determinado desde parámetros de Epayco', [
+                'reference' => $reference,
+                'epayco_status' => $epaycoStatus,
+                'mapped_status' => $statusFromParams,
+            ]);
             
             $transaction->update([
-                'status' => $status,
-                'response_data' => array_merge($transaction->response_data ?? [], $request->all()),
+                'status' => $statusFromParams,
+                'response_data' => array_merge($transaction->response_data ?? [], $allRequestData),
                 'processed_at' => now(),
             ]);
         } else {
-            // Si no viene el estado, consultar usando el SDK
-            try {
-                $epaycoService = new EpaycoService($epaycoGateway);
-                $verification = $epaycoService->verifyPayment($reference);
-                
-                // Recargar transacción actualizada
-                $transaction->refresh();
-            } catch (\Exception $e) {
-                Log::error('Error verificando pago en paymentResponse', [
-                    'error' => $e->getMessage(),
+            // Si no tenemos parámetros, primero verificar el estado actual en BD
+            // (puede que el webhook ya haya procesado el pago)
+            $transaction->refresh();
+            
+            Log::info('Sin parámetros en request, verificando estado actual de transacción', [
+                'reference' => $reference,
+                'current_status' => $transaction->status,
+                'processed_at' => $transaction->processed_at,
+            ]);
+            
+            // Si la transacción ya está aprobada o rechazada (probablemente por webhook), usarla
+            if ($transaction->isApproved() || $transaction->isRejected()) {
+                Log::info('Transacción ya procesada (probablemente por webhook)', [
                     'reference' => $reference,
-                    'trace' => $e->getTraceAsString()
+                    'status' => $transaction->status,
+                    'processed_at' => $transaction->processed_at,
                 ]);
                 
-                // Si la verificación falla, marcar como pendiente y continuar
-                // para que el usuario pueda ver el estado en step5
-                if (!$transaction->status || $transaction->status === 'pending') {
-                    $transaction->update([
-                        'status' => 'pending',
-                        'error_message' => $e->getMessage(),
+                // Actualizar response_data con los datos recibidos (aunque estén vacíos)
+                $transaction->update([
+                    'response_data' => array_merge($transaction->response_data ?? [], $allRequestData),
+                ]);
+            } else {
+                // Verificar si ya existe un registro aprobado para esta transacción
+                // (puede que el webhook ya procesó el pago y creó la tienda)
+                $existingRegistration = PendingRegistration::where('payment_transaction_id', $transaction->id)->first();
+                
+                if ($existingRegistration && $existingRegistration->status === 'approved' && $existingRegistration->created_store_id) {
+                    Log::info('Registro ya aprobado encontrado (probablemente por webhook)', [
+                        'reference' => $reference,
+                        'registration_id' => $existingRegistration->id,
+                        'store_id' => $existingRegistration->created_store_id,
                     ]);
+                    
+                    // Actualizar transacción a aprobada si no lo está
+                    if (!$transaction->isApproved()) {
+                        $transaction->update([
+                            'status' => 'approved',
+                            'processed_at' => $transaction->processed_at ?? now(),
+                        ]);
+                    }
+                    
+                    // Actualizar response_data con los datos recibidos
+                    $transaction->update([
+                        'response_data' => array_merge($transaction->response_data ?? [], $allRequestData),
+                    ]);
+                } else {
+                    // Si no está procesada, intentar consultar usando el SDK
+                    try {
+                        $epaycoService = new EpaycoService($epaycoGateway);
+                        $verification = $epaycoService->verifyPayment($reference);
+                        
+                        // Recargar transacción actualizada
+                        $transaction->refresh();
+                        
+                        Log::info('Estado determinado desde verifyPayment()', [
+                            'reference' => $reference,
+                            'transaction_status' => $transaction->status,
+                        ]);
+                    } catch (\Exception $e) {
+                        Log::error('Error verificando pago en paymentResponse', [
+                            'error' => $e->getMessage(),
+                            'reference' => $reference,
+                            'current_status' => $transaction->status,
+                            'request_params' => $allRequestData,
+                            'trace' => $e->getTraceAsString()
+                        ]);
+                        
+                        // Si la verificación falla y no tenemos estado previo, marcar como pendiente
+                        // pero guardar todos los datos para análisis posterior
+                        $transaction->update([
+                            'response_data' => array_merge($transaction->response_data ?? [], $allRequestData),
+                            'error_message' => $e->getMessage(),
+                        ]);
+                        
+                        if (!$transaction->status || $transaction->status === 'pending') {
+                            $transaction->update([
+                                'status' => 'pending',
+                            ]);
+                        }
+                    }
                 }
             }
         }

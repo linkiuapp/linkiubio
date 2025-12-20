@@ -53,6 +53,14 @@ class PaymentGatewayTransaction extends Model
     }
 
     /**
+     * Verificar si está rechazada
+     */
+    public function isRejected(): bool
+    {
+        return $this->status === 'rejected';
+    }
+
+    /**
      * Marcar como aprobada
      */
     public function markAsApproved(): void
