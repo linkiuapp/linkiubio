@@ -261,6 +261,19 @@ class RegistrationPaymentController extends Controller
                 ->withErrors(['error' => 'Transacción no encontrada. Por favor contacta soporte.']);
         }
 
+        // Si tenemos ref_payco en la request, actualizar transaction_id si es diferente
+        // Esto asegura que tengamos el ID correcto de Epayco para verificar el pago
+        if ($refPayco && $transaction->transaction_id !== $refPayco) {
+            $transaction->update([
+                'transaction_id' => $refPayco,
+            ]);
+            Log::info('transaction_id actualizado desde ref_payco en paymentResponse', [
+                'reference' => $reference,
+                'ref_payco' => $refPayco,
+                'old_transaction_id' => $transaction->transaction_id,
+            ]);
+        }
+
         // Verificar estado del pago
         $epaycoGateway = PaymentGateway::find($transaction->payment_gateway_id);
         if (!$epaycoGateway) {

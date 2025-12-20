@@ -483,7 +483,27 @@ class EpaycoService
             }
 
             // Usar el transaction_id de Epayco si está disponible
+            // Si el transaction_id es nuestra referencia interna, intentar obtener ref_payco de response_data
             $epaycoTransactionId = $transaction->transaction_id ?? $reference;
+            
+            // Si transaction_id parece ser nuestra referencia (empieza con REG-), 
+            // intentar obtener ref_payco de response_data
+            if ($epaycoTransactionId && str_starts_with($epaycoTransactionId, 'REG-')) {
+                $responseData = $transaction->response_data ?? [];
+                if (isset($responseData['data']['ref_payco'])) {
+                    $epaycoTransactionId = $responseData['data']['ref_payco'];
+                    Log::info('Usando ref_payco de response_data para verifyPayment', [
+                        'reference' => $reference,
+                        'ref_payco' => $epaycoTransactionId,
+                    ]);
+                } elseif (isset($responseData['ref_payco'])) {
+                    $epaycoTransactionId = $responseData['ref_payco'];
+                    Log::info('Usando ref_payco directo de response_data para verifyPayment', [
+                        'reference' => $reference,
+                        'ref_payco' => $epaycoTransactionId,
+                    ]);
+                }
+            }
             
             // Determinar método de pago desde request_data
             $requestData = $transaction->request_data ?? [];
