@@ -490,17 +490,32 @@ class EpaycoService
             // intentar obtener ref_payco de response_data
             if ($epaycoTransactionId && str_starts_with($epaycoTransactionId, 'REG-')) {
                 $responseData = $transaction->response_data ?? [];
+                
+                // Buscar ref_payco en diferentes estructuras de response_data
                 if (isset($responseData['data']['ref_payco'])) {
                     $epaycoTransactionId = $responseData['data']['ref_payco'];
-                    Log::info('Usando ref_payco de response_data para verifyPayment', [
+                    Log::info('Usando ref_payco de response_data.data.ref_payco para verifyPayment', [
                         'reference' => $reference,
                         'ref_payco' => $epaycoTransactionId,
+                    ]);
+                } elseif (isset($responseData['data']['ticketId'])) {
+                    $epaycoTransactionId = $responseData['data']['ticketId'];
+                    Log::info('Usando ticketId de response_data.data.ticketId para verifyPayment', [
+                        'reference' => $reference,
+                        'ticketId' => $epaycoTransactionId,
                     ]);
                 } elseif (isset($responseData['ref_payco'])) {
                     $epaycoTransactionId = $responseData['ref_payco'];
                     Log::info('Usando ref_payco directo de response_data para verifyPayment', [
                         'reference' => $reference,
                         'ref_payco' => $epaycoTransactionId,
+                    ]);
+                } else {
+                    // Si no encontramos ref_payco, log de advertencia
+                    Log::warning('No se encontró ref_payco en response_data, usando referencia interna', [
+                        'reference' => $reference,
+                        'transaction_id' => $epaycoTransactionId,
+                        'response_data_keys' => array_keys($responseData),
                     ]);
                 }
             }

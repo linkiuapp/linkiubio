@@ -383,15 +383,53 @@ class RegistrationPaymentController extends Controller
                     ]);
                 } else {
                     // Si no está procesada, intentar consultar usando el SDK
+                    // Primero intentar obtener ref_payco desde response_data si está disponible
+                    $refPaycoToUse = $transaction->transaction_id;
+                    $responseData = $transaction->response_data ?? [];
+                    
+                    // Si transaction_id es nuestra referencia interna, buscar ref_payco en response_data
+                    if ($refPaycoToUse && str_starts_with($refPaycoToUse, 'REG-')) {
+                        if (isset($responseData['data']['ref_payco'])) {
+                            $refPaycoToUse = $responseData['data']['ref_payco'];
+                            Log::info('Ref_payco extraído de response_data.data.ref_payco', [
+                                'reference' => $reference,
+                                'ref_payco' => $refPaycoToUse,
+                            ]);
+                        } elseif (isset($responseData['data']['ticketId'])) {
+                            $refPaycoToUse = $responseData['data']['ticketId'];
+                            Log::info('ticketId extraído de response_data.data.ticketId', [
+                                'reference' => $reference,
+                                'ticketId' => $refPaycoToUse,
+                            ]);
+                        } elseif (isset($responseData['ref_payco'])) {
+                            $refPaycoToUse = $responseData['ref_payco'];
+                            Log::info('Ref_payco extraído de response_data.ref_payco', [
+                                'reference' => $reference,
+                                'ref_payco' => $refPaycoToUse,
+                            ]);
+                        }
+                        
+                        // Si encontramos un ref_payco válido, actualizar transaction_id
+                        if ($refPaycoToUse !== $transaction->transaction_id && !str_starts_with($refPaycoToUse, 'REG-')) {
+                            $transaction->update(['transaction_id' => $refPaycoToUse]);
+                            Log::info('transaction_id actualizado desde response_data', [
+                                'old_transaction_id' => $transaction->transaction_id,
+                                'new_transaction_id' => $refPaycoToUse,
+                            ]);
+                        }
+                    }
+                    
                     try {
                         $epaycoService = new EpaycoService($epaycoGateway);
-                        $verification = $epaycoService->verifyPayment($reference);
+                        // Usar ref_payco si está disponible, sino usar reference
+                        $verification = $epaycoService->verifyPayment($refPaycoToUse);
                         
                         // Recargar transacción actualizada
                         $transaction->refresh();
                         
                         Log::info('Estado determinado desde verifyPayment()', [
                             'reference' => $reference,
+                            'ref_payco_used' => $refPaycoToUse,
                             'transaction_status' => $transaction->status,
                         ]);
                     } catch (\Exception $e) {
