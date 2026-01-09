@@ -38,6 +38,13 @@ class LogTrafficMiddleware
         $responseTime = round(($endTime - $startTime) * 1000); // ms
         $memoryUsage = round(($endMemory - $startMemory) / 1024 / 1024, 2); // MB
         
+        // Obtener store_id de forma segura (puede ser objeto, string o null)
+        $storeParam = $request->route('store');
+        $storeId = null;
+        if ($storeParam) {
+            $storeId = is_object($storeParam) ? $storeParam->id : (is_numeric($storeParam) ? (int) $storeParam : null);
+        }
+        
         $logData = [
             'method' => $request->method(),
             'route' => $request->route()?->getName() ?? $request->path(),
@@ -47,7 +54,7 @@ class LogTrafficMiddleware
             'response_time_ms' => $responseTime,
             'memory_usage_mb' => $memoryUsage,
             'user_id' => auth()->id(),
-            'store_id' => $request->route('store')?->id,
+            'store_id' => $storeId,
             'request_data' => $this->sanitizeRequest($request),
             'logged_at' => now(),
         ];
