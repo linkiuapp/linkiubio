@@ -124,14 +124,19 @@ class PendingRegistration extends Model
 
     public function getAmount(): float
     {
+        if (!$this->plan) {
+            return 0;
+        }
+        
         $prices = $this->plan->prices ?? [];
+        $basePrice = $this->plan->price ?? 0;
         
         return match($this->billing_period) {
-            'monthly' => $this->plan->price,
-            'quarterly' => $prices['quarterly'] ?? ($this->plan->price * 3),
-            'semester' => $prices['semester'] ?? ($this->plan->price * 6),
-            'annual' => $prices['annual'] ?? ($this->plan->price * 12),
-            default => $this->plan->price
+            'monthly' => $basePrice,
+            'quarterly' => $prices['quarterly'] ?? ($basePrice * 3),
+            'semester' => $prices['semester'] ?? ($basePrice * 6),
+            'annual' => $prices['annual'] ?? ($basePrice * 12),
+            default => $basePrice
         };
     }
 
