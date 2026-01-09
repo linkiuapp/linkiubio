@@ -86,7 +86,7 @@
                         <i data-lucide="briefcase" class="w-5 h-5 text-gray-400 flex-shrink-0 mt-0.5"></i>
                         <div class="flex-1">
                             <p class="text-sm font-semibold text-gray-900">{{ $registration->business_name }}</p>
-                            <p class="text-xs text-gray-600">{{ $registration->category->name }}</p>
+                            <p class="text-xs text-gray-600">{{ $registration->category?->name ?? 'Sin categoría' }}</p>
                         </div>
                     </div>
 
@@ -95,7 +95,7 @@
                         <div class="flex items-center gap-2">
                             <i data-lucide="crown" class="w-5 h-5 text-blue-600"></i>
                             <div>
-                                <p class="text-sm font-semibold text-gray-900">{{ $registration->plan->name }}</p>
+                                <p class="text-sm font-semibold text-gray-900">{{ $registration->plan?->name ?? 'Plan eliminado' }}</p>
                                 <p class="text-xs text-gray-600">{{ $registration->getBillingPeriodLabel() }}</p>
                             </div>
                         </div>
