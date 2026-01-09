@@ -71,8 +71,6 @@ class OTPSmsService
             
             // Payload para WhatsApp usando plantilla
             // Formato según documentación oficial de Infobip
-            // El endpoint /whatsapp/1/message/template requiere formato con messages array
-            // La plantilla incluye botones, por lo que debemos incluir los parámetros de botones también
             $payload = [
                 'messages' => [
                     [
@@ -82,16 +80,16 @@ class OTPSmsService
                             'templateName' => $this->templateName,
                             'templateData' => [
                                 'body' => [
-                                    'placeholders' => [$code] // El código OTP como primer parámetro
+                                    'placeholders' => [$code]
                                 ],
                                 'buttons' => [
                                     [
                                         'type' => 'URL',
-                                        'parameter' => $code // El código OTP también va en el botón
+                                        'parameter' => $code
                                     ]
                                 ]
                             ],
-                            'language' => $this->templateLanguage
+                            'language' => 'es_CO'
                         ]
                     ]
                 ]
