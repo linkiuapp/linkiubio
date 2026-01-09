@@ -258,3 +258,15 @@ Route::middleware(['web', \App\Http\Middleware\DebugAuthMiddleware::class])->gro
     Route::post('/system-debug/test-notification', [App\Http\Controllers\SystemDebugController::class, 'testNotification']);
     Route::get('/system-debug/logout', [App\Http\Controllers\SystemDebugController::class, 'logout']);
 });
+
+// ==========================================
+// SubscriptionDev - Vista pública de pago
+// ==========================================
+Route::prefix('pago')->name('public.subscription.')->group(function () {
+    Route::get('/{token}', [App\Features\Public\Controllers\SubscriptionPaymentController::class, 'show'])
+        ->name('show');
+    Route::post('/{token}', [App\Features\Public\Controllers\SubscriptionPaymentController::class, 'processPayment'])
+        ->name('process');
+    Route::get('/factura/{paymentToken}/resultado', [App\Features\Public\Controllers\SubscriptionPaymentController::class, 'paymentResponse'])
+        ->name('payment.response');
+});

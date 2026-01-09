@@ -85,10 +85,18 @@
                         <span class="text-slate-600">Plan:</span>
                         <span class="font-semibold text-slate-900">{{ $subscription->plan->name }} - {{ $subscription->billing_cycle_label }}</span>
                     </div>
+                    @if($subscription->trial_end && $subscription->trial_end->isFuture())
+                    <div class="col-span-2">
+                        <span class="text-slate-600">Período de prueba hasta:</span>
+                        <span class="font-semibold text-slate-950">{{ $subscription->trial_end->locale('es')->isoFormat('D MMM YYYY') }}</span>
+                        <span class="text-slate-500">({{ (int) now()->diffInDays($subscription->trial_end) }} días)</span>
+                    </div>
+                    @else
                     <div class="col-span-2">
                         <span class="text-slate-600">Válido hasta:</span>
-                        <span class="font-semibold text-slate-900">{{ $subscription->current_period_end->format('d M Y') }}</span>
+                        <span class="font-semibold text-slate-900">{{ $subscription->current_period_end->locale('es')->isoFormat('D MMM YYYY') }}</span>
                     </div>
+                    @endif
                 </div>
 
                 {{-- Alert de seguridad --}}

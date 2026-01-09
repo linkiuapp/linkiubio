@@ -83,7 +83,12 @@ class PendingRegistration extends Model
     // Scopes
     public function scopePending($query)
     {
-        return $query->where('status', 'pending');
+        return $query->whereIn('status', ['pending', 'trial_pending']);
+    }
+
+    public function scopeTrialPending($query)
+    {
+        return $query->where('status', 'trial_pending');
     }
 
     public function scopeApproved($query)
@@ -99,7 +104,12 @@ class PendingRegistration extends Model
     // Métodos
     public function isPending(): bool
     {
-        return $this->status === 'pending';
+        return in_array($this->status, ['pending', 'trial_pending']);
+    }
+
+    public function isTrialPending(): bool
+    {
+        return $this->status === 'trial_pending';
     }
 
     public function isApproved(): bool

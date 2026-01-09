@@ -246,8 +246,9 @@
             <div class="space-y-4">
                 @foreach($topProducts as $product)
                     @php
-                        $estaAgotado = $product->controlaStock() && !$product->tieneStockIlimitado() && $product->estaAgotado();
-                        $tieneStockBajo = $product->controlaStock() && !$product->tieneStockIlimitado() && $product->tieneStockBajo();
+                        $esBajoPedido = $product->isMadeToOrder();
+                        $estaAgotado = !$esBajoPedido && $product->controlaStock() && !$product->tieneStockIlimitado() && $product->estaAgotado();
+                        $tieneStockBajo = !$esBajoPedido && $product->controlaStock() && !$product->tieneStockIlimitado() && $product->tieneStockBajo();
                         $stockDisponible = $product->stock_disponible ?? 0;
                     @endphp
                     <div class="flex gap-2 md:gap-4 rounded-xl p-4 md:p-4 transition-all duration-200 hover:shadow-sm relative cursor-pointer" 
@@ -275,7 +276,7 @@
                                             🔥
                                         </span>
                                     </div>
-                                    <!-- Badge de Stock bajo -->
+                                    <!-- Badge de Stock bajo / Agotado / Bajo pedido -->
                                     @if($tieneStockBajo && $stockDisponible > 0)
                                         <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
                                             <span class="bg-red-50 text-red-600 rounded-full px-2 py-1 text-xs font-semibold text-red-600">
@@ -286,6 +287,12 @@
                                         <div class="flex items-center gap-1.5 w-fit">
                                             <span class="text-xs font-medium text-white bg-red-500 px-2 py-0.5 rounded-full">
                                                 Agotado
+                                            </span>
+                                        </div>
+                                    @elseif($esBajoPedido)
+                                        <div class="flex items-center gap-1.5 w-fit">
+                                            <span class="text-xs font-medium text-white bg-amber-500 px-2 py-0.5 rounded-full">
+                                                Bajo pedido
                                             </span>
                                         </div>
                                     @endif
@@ -367,8 +374,9 @@
             <div class="space-y-4">
                 @foreach($newProducts as $product)
                     @php
-                        $estaAgotado = $product->controlaStock() && !$product->tieneStockIlimitado() && $product->estaAgotado();
-                        $tieneStockBajo = $product->controlaStock() && !$product->tieneStockIlimitado() && $product->tieneStockBajo();
+                        $esBajoPedido = $product->isMadeToOrder();
+                        $estaAgotado = !$esBajoPedido && $product->controlaStock() && !$product->tieneStockIlimitado() && $product->estaAgotado();
+                        $tieneStockBajo = !$esBajoPedido && $product->controlaStock() && !$product->tieneStockIlimitado() && $product->tieneStockBajo();
                         $stockDisponible = $product->stock_disponible ?? 0;
                     @endphp
                     <div class="flex gap-2 md:gap-4 rounded-xl p-4 md:p-4 transition-all duration-200 hover:shadow-sm relative" 
@@ -396,7 +404,7 @@
                                                 ✨
                                             </span>
                                         </div>
-                                        <!-- Badge de Stock bajo -->
+                                        <!-- Badge de Stock bajo / Agotado / Bajo pedido -->
                                         @if($tieneStockBajo && $stockDisponible > 0)
                                             <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
                                                 <span class="bg-red-50 text-red-600 rounded-full px-2 py-1 text-xs font-semibold text-red-600">
@@ -407,6 +415,12 @@
                                             <div class="flex items-center gap-1.5 w-fit">
                                                 <span class="text-xs font-medium text-white bg-red-500 px-2 py-0.5 rounded-full">
                                                     Agotado
+                                                </span>
+                                            </div>
+                                        @elseif($esBajoPedido)
+                                            <div class="flex items-center gap-1.5 w-fit">
+                                                <span class="text-xs font-medium text-white bg-amber-500 px-2 py-0.5 rounded-full">
+                                                    Bajo pedido
                                                 </span>
                                             </div>
                                         @endif

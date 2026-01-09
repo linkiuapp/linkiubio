@@ -145,6 +145,7 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
         });
             
         // Gestión de planes
+        Route::get('plans/dashboard', [\App\Features\SuperLinkiu\Controllers\PlanDashboardController::class, 'index'])->name('plans.dashboard');
         Route::resource('plans', PlanController::class)->names('plans');
         
         // Gestión de facturas
@@ -469,6 +470,136 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
     Route::get('/components/email/compose', function () {
         return view('superlinkiu::components.email.compose');
     })->name('components.email.compose');
+
+        // ==========================================
+        // LinkiuDev - Gestión de Proyectos Dev
+        // ==========================================
+        Route::prefix('linkiudev')->name('linkiudev.')->group(function () {
+            
+            // Dashboard de LinkiuDev
+            Route::get('/', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\DashboardController::class, 'index'])
+                ->name('dashboard');
+            
+            // Clientes
+            Route::prefix('clients')->name('clients.')->group(function () {
+                Route::get('/', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\ClientController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\ClientController::class, 'create'])->name('create');
+                Route::post('/', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\ClientController::class, 'store'])->name('store');
+                Route::get('/{client}', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\ClientController::class, 'show'])->name('show');
+                Route::get('/{client}/edit', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\ClientController::class, 'edit'])->name('edit');
+                Route::put('/{client}', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\ClientController::class, 'update'])->name('update');
+                Route::delete('/{client}', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\ClientController::class, 'destroy'])->name('destroy');
+                Route::post('/{client}/toggle-active', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\ClientController::class, 'toggleActive'])->name('toggle-active');
+            });
+            
+            // Proyectos
+            Route::prefix('projects')->name('projects.')->group(function () {
+                Route::get('/', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\ProjectController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\ProjectController::class, 'create'])->name('create');
+                Route::post('/', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\ProjectController::class, 'store'])->name('store');
+                Route::get('/{project}', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\ProjectController::class, 'show'])->name('show');
+                Route::get('/{project}/edit', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\ProjectController::class, 'edit'])->name('edit');
+                Route::put('/{project}', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\ProjectController::class, 'update'])->name('update');
+                Route::delete('/{project}', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\ProjectController::class, 'destroy'])->name('destroy');
+                Route::post('/{project}/update-status', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\ProjectController::class, 'updateStatus'])->name('update-status');
+                Route::post('/{project}/notify-client', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\ProjectController::class, 'notifyClient'])->name('notify-client');
+            });
+            
+            // Tareas
+            Route::prefix('tasks')->name('tasks.')->group(function () {
+                Route::get('/', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\TaskController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\TaskController::class, 'create'])->name('create');
+                Route::post('/', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\TaskController::class, 'store'])->name('store');
+                Route::get('/{task}', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\TaskController::class, 'show'])->name('show');
+                Route::get('/{task}/edit', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\TaskController::class, 'edit'])->name('edit');
+                Route::put('/{task}', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\TaskController::class, 'update'])->name('update');
+                Route::delete('/{task}', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\TaskController::class, 'destroy'])->name('destroy');
+                Route::post('/{task}/update-status', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\TaskController::class, 'updateStatus'])->name('update-status');
+                Route::post('/{task}/schedule', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\TaskController::class, 'schedule'])->name('schedule');
+                Route::post('/reorder', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\TaskController::class, 'reorder'])->name('reorder');
+                
+                // Subtareas
+                Route::post('/{task}/subtasks', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\TaskController::class, 'storeSubtask'])->name('subtasks.store');
+                Route::put('/subtasks/{subtask}', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\TaskController::class, 'updateSubtask'])->name('subtasks.update');
+                Route::delete('/subtasks/{subtask}', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\TaskController::class, 'destroySubtask'])->name('subtasks.destroy');
+                Route::post('/subtasks/{subtask}/toggle', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\TaskController::class, 'toggleSubtask'])->name('subtasks.toggle');
+            });
+            
+            // Agenda
+            Route::prefix('agenda')->name('agenda.')->group(function () {
+                Route::get('/', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\AgendaController::class, 'index'])->name('index');
+                Route::get('/calendar-data', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\AgendaController::class, 'calendarData'])->name('calendar-data');
+                Route::post('/entries', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\AgendaController::class, 'store'])->name('entries.store');
+                Route::put('/entries/{entry}', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\AgendaController::class, 'update'])->name('entries.update');
+                Route::delete('/entries/{entry}', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\AgendaController::class, 'destroy'])->name('entries.destroy');
+                Route::get('/today', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\AgendaController::class, 'today'])->name('today');
+            });
+            
+            // Configuración de notificaciones
+            Route::prefix('settings')->name('settings.')->group(function () {
+                Route::get('/', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\SettingsController::class, 'index'])->name('index');
+                Route::put('/', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\SettingsController::class, 'update'])->name('update');
+                Route::post('/test-notification', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\SettingsController::class, 'testNotification'])->name('test-notification');
+                Route::get('/debug', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\SettingsController::class, 'debug'])->name('debug');
+            });
+            
+            // Logs de notificaciones
+            Route::get('/notification-logs', [\App\Features\SuperLinkiu\Controllers\LinkiuDev\SettingsController::class, 'notificationLogs'])
+                ->name('notification-logs');
+        });
+
+        // ==========================================
+        // SubscriptionDev - Gestión de Suscripciones
+        // ==========================================
+        Route::prefix('subscriptiondev')->name('subscriptiondev.')->group(function () {
+            
+            // Dashboard
+            Route::get('/', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubDashboardController::class, 'index'])
+                ->name('dashboard');
+            
+            // Clientes
+            Route::prefix('clients')->name('clients.')->group(function () {
+                Route::get('/', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubClientController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubClientController::class, 'create'])->name('create');
+                Route::post('/', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubClientController::class, 'store'])->name('store');
+                Route::get('/{client}', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubClientController::class, 'show'])->name('show');
+                Route::get('/{client}/edit', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubClientController::class, 'edit'])->name('edit');
+                Route::put('/{client}', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubClientController::class, 'update'])->name('update');
+                Route::delete('/{client}', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubClientController::class, 'destroy'])->name('destroy');
+            });
+            
+            // Tipos de servicio
+            Route::prefix('service-types')->name('service-types.')->group(function () {
+                Route::get('/', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubServiceTypeController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubServiceTypeController::class, 'create'])->name('create');
+                Route::post('/', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubServiceTypeController::class, 'store'])->name('store');
+                Route::get('/{serviceType}/edit', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubServiceTypeController::class, 'edit'])->name('edit');
+                Route::put('/{serviceType}', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubServiceTypeController::class, 'update'])->name('update');
+                Route::delete('/{serviceType}', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubServiceTypeController::class, 'destroy'])->name('destroy');
+            });
+            
+            // Suscripciones
+            Route::prefix('subscriptions')->name('subscriptions.')->group(function () {
+                Route::get('/', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubSubscriptionController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubSubscriptionController::class, 'create'])->name('create');
+                Route::post('/', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubSubscriptionController::class, 'store'])->name('store');
+                Route::get('/{subscription}', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubSubscriptionController::class, 'show'])->name('show');
+                Route::get('/{subscription}/edit', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubSubscriptionController::class, 'edit'])->name('edit');
+                Route::put('/{subscription}', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubSubscriptionController::class, 'update'])->name('update');
+                Route::delete('/{subscription}', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubSubscriptionController::class, 'destroy'])->name('destroy');
+                Route::post('/{subscription}/send-reminder', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubSubscriptionController::class, 'sendReminder'])->name('send-reminder');
+                Route::post('/{subscription}/generate-payment', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubSubscriptionController::class, 'generatePayment'])->name('generate-payment');
+                Route::post('/{subscription}/renew', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubSubscriptionController::class, 'renew'])->name('renew');
+            });
+            
+            // Pagos
+            Route::prefix('payments')->name('payments.')->group(function () {
+                Route::get('/', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubPaymentController::class, 'index'])->name('index');
+                Route::get('/{payment}', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubPaymentController::class, 'show'])->name('show');
+                Route::post('/{payment}/mark-paid', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubPaymentController::class, 'markAsPaid'])->name('mark-paid');
+                Route::post('/{payment}/cancel', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubPaymentController::class, 'cancel'])->name('cancel');
+            });
+        });
 
         // Logout (dentro del middleware auth)
         Route::post('/logout', [AuthController::class, 'logout'])->name('logout');

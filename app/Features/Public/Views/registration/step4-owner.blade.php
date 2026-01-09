@@ -172,6 +172,53 @@
                     </div>
 
                     {{-- Sección: Método de Pago --}}
+                    {{-- Sección: Período de Prueba Gratuito (cuando skip_payment_on_trial es true) --}}
+                    @if($skipPayment ?? false)
+                    <div class="p-6 lg:p-8 border-b border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50">
+                        <div class="flex items-start gap-4">
+                            <div class="flex-shrink-0">
+                                <div class="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center">
+                                    <i data-lucide="gift" class="w-6 h-6 text-white"></i>
+                                </div>
+                            </div>
+                            <div class="flex-1">
+                                <h3 class="text-lg font-bold text-green-800 mb-2">
+                                    🎉 ¡Período de Prueba Gratuito!
+                                </h3>
+                                <p class="text-green-700 mb-3">
+                                    Has seleccionado el plan <strong>{{ $plan->name }}</strong> que incluye 
+                                    <strong>{{ $plan->trial_days }} días de prueba gratis</strong>.
+                                </p>
+                                <div class="bg-white rounded-lg p-4 border border-green-200">
+                                    <ul class="space-y-2 text-sm text-green-700">
+                                        <li class="flex items-center gap-2">
+                                            <i data-lucide="check-circle" class="w-4 h-4 text-green-600"></i>
+                                            No necesitas pagar ahora
+                                        </li>
+                                        <li class="flex items-center gap-2">
+                                            <i data-lucide="check-circle" class="w-4 h-4 text-green-600"></i>
+                                            Acceso completo a todas las funciones del plan
+                                        </li>
+                                        <li class="flex items-center gap-2">
+                                            <i data-lucide="check-circle" class="w-4 h-4 text-green-600"></i>
+                                            Tu tienda se activará de inmediato
+                                        </li>
+                                        <li class="flex items-center gap-2">
+                                            <i data-lucide="bell" class="w-4 h-4 text-green-600"></i>
+                                            Te notificaremos antes de que termine tu prueba
+                                        </li>
+                                    </ul>
+                                </div>
+                                <p class="text-xs text-green-600 mt-3">
+                                    Después de los {{ $plan->trial_days }} días, podrás elegir continuar con el plan 
+                                    pagando ${{ number_format($plan->price, 0, ',', '.') }} COP/mes o cancelar sin compromiso.
+                                </p>
+                            </div>
+                        </div>
+                        <input type="hidden" name="payment_method" value="trial">
+                    </div>
+                    @else
+                    {{-- Sección: Método de Pago (cuando se requiere pago) --}}
                     <div class="p-6 lg:p-8 border-b border-gray-200">
                         <h3 class="text-base md:text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
                             <i data-lucide="credit-card" class="w-5 h-5 text-blue-600"></i>
@@ -514,6 +561,7 @@
                             </div>
                         </div>
                     </div>
+                    @endif
 
                     {{-- Sección: Términos y Condiciones --}}
                     <div class="p-6 lg:p-8 bg-blue-50">
@@ -569,7 +617,7 @@
             password: '',
             passwordConfirmation: '',
             fileName: '',
-            paymentMethod: '{{ old('payment_method', $epaycoGateway ? 'transfer' : 'transfer') }}',
+            paymentMethod: '{{ old('payment_method', ($skipPayment ?? false) ? 'trial' : ($epaycoGateway ? 'transfer' : 'transfer')) }}',
             epaycoMethod: '{{ old('epayco_method', 'pse') }}',
             pseBankCode: '{{ old('pse_bank_code', '') }}',
             cashType: '{{ old('cash_type', '') }}',
@@ -605,6 +653,14 @@
                 if (!this.paymentMethod) {
                     alert('Por favor selecciona un método de pago');
                     return false;
+                }
+                
+                // Si es trial (período de prueba sin pago), continuar directamente
+                if (this.paymentMethod === 'trial') {
+                    this.submitting = true;
+                    this.$el.action = '{{ route('register.complete') }}';
+                    this.$el.submit();
+                    return;
                 }
                 
                 // Si es transferencia, validar que se haya subido el comprobante

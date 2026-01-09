@@ -203,8 +203,9 @@
         <div class="space-y-4">
             @foreach($products as $product)
                 @php
-                    $estaAgotado = $product->controlaStock() && !$product->tieneStockIlimitado() && $product->estaAgotado();
-                    $tieneStockBajo = $product->controlaStock() && !$product->tieneStockIlimitado() && $product->tieneStockBajo();
+                    $esBajoPedido = $product->isMadeToOrder();
+                    $estaAgotado = !$esBajoPedido && $product->controlaStock() && !$product->tieneStockIlimitado() && $product->estaAgotado();
+                    $tieneStockBajo = !$esBajoPedido && $product->controlaStock() && !$product->tieneStockIlimitado() && $product->tieneStockBajo();
                     $stockDisponible = $product->stock_disponible ?? 0;
                 @endphp
                 <div class="flex gap-2 md:gap-4 rounded-xl p-4 md:p-4 transition-all duration-200 hover:shadow-sm relative" 
@@ -238,6 +239,12 @@
                                     <div class="flex items-center gap-1.5 w-fit">
                                         <span class="text-xs font-medium text-white bg-red-500 px-2 py-0.5 rounded-full">
                                             Agotado
+                                        </span>
+                                    </div>
+                                @elseif($esBajoPedido)
+                                    <div class="flex items-center gap-1.5 w-fit">
+                                        <span class="text-xs font-medium text-white bg-amber-500 px-2 py-0.5 rounded-full">
+                                            Bajo pedido
                                         </span>
                                     </div>
                                 @endif

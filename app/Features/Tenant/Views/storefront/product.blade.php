@@ -234,8 +234,42 @@
             </div>
         @endif
 
+        <!-- Indicador de Producto Bajo Pedido -->
+        @if($product->isMadeToOrder())
+            <div class="bg-amber-50 border border-amber-200 rounded-lg p-4">
+                <div class="flex items-start gap-3">
+                    <div class="flex-shrink-0 w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-600">
+                            <path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path>
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <p class="text-sm font-semibold text-amber-800">Producto bajo pedido</p>
+                        <p class="text-xs text-amber-700 mt-1">
+                            Este producto es bajo pedido
+                            @if($product->preparation_days)
+                                y estará listo en aproximadamente <span class="font-semibold">{{ $product->getPreparationDaysLabel() }}</span>
+                            @endif
+                        </p>
+                        @if($product->requiresDeposit())
+                            <div class="mt-2 flex items-center gap-2">
+                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-amber-200 text-amber-800">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mr-1">
+                                        <circle cx="12" cy="12" r="10"></circle>
+                                        <path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"></path>
+                                        <path d="M12 18V6"></path>
+                                    </svg>
+                                    {{ $product->deposit_description }}
+                                </span>
+                            </div>
+                        @endif
+                    </div>
+                </div>
+            </div>
+        @endif
+
         <!-- Indicador de Stock -->
-        @if($product->controla_stock && $product->tipo_stock === 'limitado')
+        @if(!$product->isMadeToOrder() && $product->controla_stock && $product->tipo_stock === 'limitado')
             @if($product->type === 'simple')
                 @php
                     $stock = $product->cantidad_stock ?? 0;
@@ -345,8 +379,9 @@
             <div class="space-y-4">
                 @foreach($relatedProducts as $relatedProduct)
                     @php
-                        $estaAgotado = $relatedProduct->controlaStock() && !$relatedProduct->tieneStockIlimitado() && $relatedProduct->estaAgotado();
-                        $tieneStockBajo = $relatedProduct->controlaStock() && !$relatedProduct->tieneStockIlimitado() && $relatedProduct->tieneStockBajo();
+                        $esBajoPedido = $relatedProduct->isMadeToOrder();
+                        $estaAgotado = !$esBajoPedido && $relatedProduct->controlaStock() && !$relatedProduct->tieneStockIlimitado() && $relatedProduct->estaAgotado();
+                        $tieneStockBajo = !$esBajoPedido && $relatedProduct->controlaStock() && !$relatedProduct->tieneStockIlimitado() && $relatedProduct->tieneStockBajo();
                         $stockDisponible = $relatedProduct->stock_disponible ?? 0;
                     @endphp
                     <div class="flex gap-2 md:gap-4 rounded-xl p-4 md:p-4 transition-all duration-200 hover:shadow-sm relative" 
@@ -369,7 +404,7 @@
                             <!-- Información del producto -->
                             <div class="flex-1 min-w-0 flex flex-col md:gap-1 gap-0">
                                 <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
-                                    <!-- Badge de Stock bajo -->
+                                    <!-- Badge de Stock bajo / Agotado / Bajo pedido -->
                                     @if($tieneStockBajo && $stockDisponible > 0)
                                         <div class="flex items-center gap-1.5 w-fit md:mb-0 mb-1">
                                             <span class="bg-red-50 text-red-600 rounded-full px-2 py-1 text-xs font-semibold text-red-600">
@@ -381,6 +416,12 @@
                                         <div class="flex items-center gap-1.5 w-fit">
                                             <span class="text-xs font-medium text-white bg-red-500 px-2 py-0.5 rounded-full">
                                                 Agotado
+                                            </span>
+                                        </div>
+                                    @elseif($esBajoPedido)
+                                        <div class="flex items-center gap-1.5 w-fit">
+                                            <span class="text-xs font-medium text-white bg-amber-500 px-2 py-0.5 rounded-full">
+                                                Bajo pedido
                                             </span>
                                         </div>
                                     @endif

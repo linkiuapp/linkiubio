@@ -34,7 +34,8 @@ class PendingRegistrationController extends Controller
 
         // Stats
         $stats = [
-            'pending' => PendingRegistration::pending()->count(),
+            'pending' => PendingRegistration::where('status', 'pending')->count(),
+            'trial_pending' => PendingRegistration::trialPending()->count(),
             'approved' => PendingRegistration::approved()->count(),
             'rejected' => PendingRegistration::rejected()->count(),
         ];
@@ -218,7 +219,8 @@ class PendingRegistrationController extends Controller
             'status' => $registration->status,
             'approved' => $registration->status === 'approved',
             'rejected' => $registration->status === 'rejected',
-            'pending' => $registration->status === 'pending',
+            'pending' => in_array($registration->status, ['pending', 'trial_pending']),
+            'trial_pending' => $registration->status === 'trial_pending',
         ]);
     }
 }

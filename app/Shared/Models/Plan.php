@@ -53,6 +53,7 @@ class Plan extends Model
         'whatsapp_integration',
         'kiubot_enabled',
         'trial_days',
+        'skip_payment_on_trial',
         
         // LÍMITES VERTICAL RESTAURANT
         'max_tables',
@@ -85,6 +86,7 @@ class Plan extends Model
         'whatsapp_integration' => 'boolean',
         'kiubot_enabled' => 'boolean',
         'trial_days' => 'integer',
+        'skip_payment_on_trial' => 'boolean',
         'additional_features' => 'array',
         'features_list' => 'array',
     ];

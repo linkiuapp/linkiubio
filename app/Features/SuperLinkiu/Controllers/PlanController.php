@@ -81,7 +81,10 @@ class PlanController extends Controller
             // INTEGRACIONES
             'whatsapp_integration' => 'boolean',
             'kiubot_enabled' => 'boolean',
+            
+            // PERÍODO DE PRUEBA
             'trial_days' => 'nullable|integer|min:0|max:90',
+            'skip_payment_on_trial' => 'boolean',
             
             // LÍMITES VERTICAL RESTAURANT
             'max_tables' => 'nullable|integer|min:0',
@@ -101,7 +104,6 @@ class PlanController extends Controller
             'is_public' => 'boolean',
             'is_featured' => 'boolean',
             'sort_order' => 'nullable|integer',
-            'trial_days' => 'nullable|integer|min:0',
             
             // CARACTERÍSTICAS
             'features_list' => 'nullable|array',
@@ -116,6 +118,7 @@ class PlanController extends Controller
         $validated['inventory_tracking'] = $request->boolean('inventory_tracking', true);
         $validated['whatsapp_integration'] = $request->boolean('whatsapp_integration', false);
         $validated['kiubot_enabled'] = $request->boolean('kiubot_enabled', false);
+        $validated['skip_payment_on_trial'] = $request->boolean('skip_payment_on_trial', false);
         $validated['version'] = '1.0';
         
         // Asegurar valores por defecto si vienen vacíos
@@ -164,7 +167,55 @@ class PlanController extends Controller
     public function show(Plan $plan)
     {
         $plan->loadCount('stores');
-        return view('superlinkiu::plans.show', compact('plan'));
+        
+        // Calcular ingresos del plan
+        $planRevenue = $this->calculatePlanRevenue($plan);
+        
+        return view('superlinkiu::plans.show', compact('plan', 'planRevenue'));
+    }
+    
+    /**
+     * Calcular ingresos de un plan
+     */
+    private function calculatePlanRevenue(Plan $plan): array
+    {
+        // MRR del plan
+        $mrr = \App\Shared\Models\Subscription::whereHas('store', function($q) use ($plan) {
+                $q->where('plan_id', $plan->id)->where('status', 'active');
+            })
+            ->where('status', 'active')
+            ->sum('next_billing_amount');
+        
+        // Ingresos históricos (facturas pagadas)
+        $historicRevenue = \App\Shared\Models\Invoice::whereHas('store', function($q) use ($plan) {
+                $q->where('plan_id', $plan->id);
+            })
+            ->where('status', 'paid')
+            ->sum('amount');
+        
+        // Ingresos últimos 30 días
+        $last30Days = \App\Shared\Models\Invoice::whereHas('store', function($q) use ($plan) {
+                $q->where('plan_id', $plan->id);
+            })
+            ->where('status', 'paid')
+            ->where('paid_date', '>=', now()->subDays(30))
+            ->sum('amount');
+        
+        // Tiendas en trial
+        $storesInTrial = \App\Shared\Models\Subscription::whereHas('store', function($q) use ($plan) {
+                $q->where('plan_id', $plan->id)->where('status', 'active');
+            })
+            ->whereNotNull('trial_end')
+            ->where('trial_end', '>=', now())
+            ->count();
+        
+        return [
+            'mrr' => $mrr,
+            'arr' => $mrr * 12,
+            'historic_revenue' => $historicRevenue,
+            'last_30_days' => $last30Days,
+            'stores_in_trial' => $storesInTrial,
+        ];
     }
 
     /**
@@ -224,7 +275,10 @@ class PlanController extends Controller
             // INTEGRACIONES
             'whatsapp_integration' => 'boolean',
             'kiubot_enabled' => 'boolean',
+            
+            // PERÍODO DE PRUEBA
             'trial_days' => 'nullable|integer|min:0|max:90',
+            'skip_payment_on_trial' => 'boolean',
             
             // LÍMITES VERTICAL RESTAURANT
             'max_tables' => 'nullable|integer|min:0',
@@ -244,7 +298,6 @@ class PlanController extends Controller
             'is_public' => 'boolean',
             'is_featured' => 'boolean',
             'sort_order' => 'nullable|integer',
-            'trial_days' => 'nullable|integer|min:0',
             
             // CARACTERÍSTICAS
             'features_list' => 'nullable|array',
@@ -259,6 +312,7 @@ class PlanController extends Controller
         $validated['inventory_tracking'] = $request->boolean('inventory_tracking', true);
         $validated['whatsapp_integration'] = $request->boolean('whatsapp_integration', false);
         $validated['kiubot_enabled'] = $request->boolean('kiubot_enabled', false);
+        $validated['skip_payment_on_trial'] = $request->boolean('skip_payment_on_trial', false);
         
         // Asegurar valores por defecto si vienen vacíos
         $validated['sort_order'] = $validated['sort_order'] ?? $plan->sort_order ?? 0;

@@ -39,33 +39,32 @@
         {{-- Content Area --}}
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div class="text-center mb-8">
-                <h2 class="text-2xl font-bold text-gray-900 mb-3">Elige el Plan Perfecto</h2>
+                <h1 class="text-2xl font-black text-gray-900 mb-3">30 días gratis para probar Linkiu</h1>
+                <h2 class="text-lg font-bold text-gray-900 mb-3">Elige el Plan Perfecto</h2>
                 <p class="text-base font-normal text-gray-600">Sin contratos. Sin sorpresas. Cancela cuando quieras.</p>
             </div>
 
             {{-- Banner Promocional --}}
-            <div class="max-w-4xl mx-auto mb-12">
+            <!--<div class="max-w-4xl mx-auto mb-12">
                 <div class="relative bg-gradient-to-r from-blue-600 via-purple-600 to-indigo-600 rounded-2xl p-6 lg:p-8 shadow-2xl overflow-hidden">
                     <div class="absolute inset-0 bg-black opacity-10"></div>
                     <div class="relative z-10">
                         <div class="flex flex-col md:flex-row items-center justify-between gap-4">
                             <div class="flex-1 text-center md:text-left">
                                 <div class="flex items-center justify-center md:justify-start gap-2 mb-2">
-                                    <h3 class="text-lg lg:text-xl font-black text-white">
-                                        Acceso Inmediato + 15 Días Gratis
+                                    <h3 class="text-lg lg:text-xl font-semibold text-white">
+                                        Pruebalo por 30 días
                                     </h3>
                                 </div>
                                 <p class="text-blue-100 text-sm lg:text-base leading-relaxed">
-                                    Completa tu pago hoy, activa tu registro y obtén acceso inmediato.<br>
-                                    <span class="font-semibold text-white">El tiempo de tu plan comenzará a correr el día 16.</span>
+                                    No necesitas tarjeta de crédito.
                                 </p>
                             </div>
                             <div class="flex-shrink-0">
                                 <div class="bg-white bg-opacity-20 backdrop-blur-sm rounded-xl px-6 py-4 border border-white border-opacity-30">
                                     <div class="text-center">
-                                        <div class="text-3xl font-black text-white">15</div>
+                                        <div class="text-3xl font-black text-white">30</div>
                                         <div class="text-sm text-blue-100 font-medium">Días Gratis</div>
-                                        <div class="text-xs text-blue-100 font-normal">Acceso Inmediato</div>
                                     </div>
                                 </div>
                             </div>
@@ -75,7 +74,7 @@
                     <div class="absolute top-0 right-0 w-64 h-64 bg-white opacity-5 rounded-full -mr-32 -mt-32"></div>
                     <div class="absolute bottom-0 left-0 w-48 h-48 bg-white opacity-5 rounded-full -ml-24 -mb-24"></div>
                 </div>
-            </div>
+            </div>-->
 
             <form method="POST" action="{{ route('register.step1.store') }}" x-data="planSelection()">
                 @csrf
@@ -148,12 +147,12 @@
                                     {{-- Banner Superior con Gradiente --}}
                                     <div class="relative h-[158px] md:h-[172px] flex items-center justify-between px-4 overflow-hidden">
                                         <div class="relative z-10 ml-2 md:ml-0">
-                                            <h6 class="text-lg font-bold text-slate-900 mb-1">
+                                            <h6 class="text-lg font-black text-slate-900 mb-1">
                                                 {{ strtoupper($plan->name) }}
                                             </h6>
                                             @if($plan->trial_days > 0)
                                                 <p class="text-sm md:text-base text-slate-900 font-medium mb-2">
-                                                    {{ $plan->trial_days }} días gratis adicional
+                                                    {{ $plan->trial_days }} días gratis
                                                 </p>
                                             @endif
                                             @if($isFeatured)
@@ -174,9 +173,9 @@
                                         {{-- Precio Dinámico --}}
                                         <div class="mb-2">
                                             <h3 class="text-xl font-bold text-slate-900">
-                                                <span x-text="formatPrice({{ $plan->id }})">{{ $plan->getPriceFormatted() }}</span>
-                                                <span class="text-base font-medium text-slate-600">
-                                                    <span x-text="getPeriodLabel()">Mes</span> COP
+                                                <span class="font-black" x-text="formatPrice({{ $plan->id }})">{{ $plan->getPriceFormatted() }}</span>
+                                                <span class="text-base font-semibold text-slate-600">
+                                                    <span x-text="getPeriodLabel()">Mes</span>
                                                 </span>
                                             </h3>
                                         </div>

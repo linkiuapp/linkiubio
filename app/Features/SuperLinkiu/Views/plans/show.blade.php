@@ -392,6 +392,40 @@
                 </div>
             </div>
 
+            {{-- Ingresos del Plan --}}
+            <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-lg shadow-sm border border-green-200">
+                <div class="px-6 py-3 border-b border-green-200">
+                    <h2 class="text-sm font-semibold text-green-800 flex items-center gap-2">
+                        <i data-lucide="dollar-sign" class="w-4 h-4 text-green-600"></i>
+                        Ingresos del Plan
+                    </h2>
+                </div>
+                <div class="p-4 space-y-3">
+                    <div class="bg-white rounded-lg p-3 border border-green-100">
+                        <p class="text-xs text-gray-600">MRR (Mensual Recurrente)</p>
+                        <p class="text-xl font-bold text-green-600">${{ number_format($planRevenue['mrr'] ?? 0, 0, ',', '.') }}</p>
+                    </div>
+                    <div class="flex items-center justify-between py-1.5 border-b border-green-100">
+                        <span class="text-xs text-gray-600">ARR Proyectado</span>
+                        <span class="text-sm font-semibold text-gray-900">${{ number_format($planRevenue['arr'] ?? 0, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex items-center justify-between py-1.5 border-b border-green-100">
+                        <span class="text-xs text-gray-600">Ingresos Históricos</span>
+                        <span class="text-sm font-semibold text-gray-900">${{ number_format($planRevenue['historic_revenue'] ?? 0, 0, ',', '.') }}</span>
+                    </div>
+                    <div class="flex items-center justify-between py-1.5 border-b border-green-100">
+                        <span class="text-xs text-gray-600">Últimos 30 días</span>
+                        <span class="text-sm font-semibold text-gray-900">${{ number_format($planRevenue['last_30_days'] ?? 0, 0, ',', '.') }}</span>
+                    </div>
+                    @if(($planRevenue['stores_in_trial'] ?? 0) > 0)
+                    <div class="flex items-center justify-between py-1.5">
+                        <span class="text-xs text-gray-600">En período de prueba</span>
+                        <span class="px-2 py-0.5 bg-blue-100 text-blue-700 text-xs font-semibold rounded-full">{{ $planRevenue['stores_in_trial'] }} tiendas</span>
+                    </div>
+                    @endif
+                </div>
+            </div>
+
             {{-- Estadísticas --}}
             <div class="bg-white rounded-lg shadow-sm border border-gray-200">
                 <div class="px-6 py-3 border-b border-gray-200">

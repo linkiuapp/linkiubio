@@ -10,10 +10,16 @@
             <h1 class="text-lg font-semibold text-gray-800">Gestión de Planes</h1>
             <p class="text-sm text-gray-600 mt-1">Administra los planes de suscripción disponibles</p>
         </div>
-        <a href="{{ route('superlinkiu.plans.create') }}" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
-            <i data-lucide="plus" class="w-4 h-4"></i>
-            Nuevo Plan
-        </a>
+        <div class="flex items-center gap-2">
+            <a href="{{ route('superlinkiu.plans.dashboard') }}" class="px-4 py-2.5 bg-purple-100 hover:bg-purple-200 text-purple-700 rounded-lg font-medium transition-colors flex items-center gap-2">
+                <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+                Dashboard
+            </a>
+            <a href="{{ route('superlinkiu.plans.create') }}" class="px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                Nuevo Plan
+            </a>
+        </div>
     </div>
 
     {{-- Planes Grid --}}

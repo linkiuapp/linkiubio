@@ -1124,6 +1124,17 @@ class OrderController extends Controller
             
             $totalPrice = $basePrice + $priceModifier;
             
+            // 🛠️ PRODUCTO BAJO PEDIDO: Si requiere anticipo, usar precio del anticipo
+            $isMadeToOrder = $product->isMadeToOrder();
+            $requiresDeposit = $product->requiresDeposit();
+            $depositAmount = 0;
+            $fullPrice = $totalPrice;
+            
+            if ($isMadeToOrder && $requiresDeposit) {
+                $depositAmount = $product->calculateDeposit($totalPrice);
+                $totalPrice = $depositAmount; // El precio en carrito es el anticipo
+            }
+            
             // Si el producto ya existe, sumar cantidad
             if (isset($cart[$cartKey])) {
                 $cart[$cartKey]['quantity'] += $validated['quantity'];
@@ -1133,11 +1144,17 @@ class OrderController extends Controller
                 'product_id' => $validated['product_id'],
                     'store_id' => $store->id, // Identificador de tienda para filtrar
                     'product_name' => $product->name,
-                    'product_price' => $totalPrice, // Precio total incluyendo modificadores
+                    'product_price' => $totalPrice, // Precio total o anticipo si aplica
                 'quantity' => $validated['quantity'],
                     'variants' => $validated['variants'] ?? [],
                     'image_url' => $product->main_image_url ?? null,
-                    'added_at' => now()->toISOString()
+                    'added_at' => now()->toISOString(),
+                    // 🛠️ Info adicional para productos bajo pedido
+                    'is_made_to_order' => $isMadeToOrder,
+                    'requires_deposit' => $requiresDeposit,
+                    'deposit_amount' => $depositAmount,
+                    'full_price' => $fullPrice, // Precio completo para referencia
+                    'preparation_days' => $isMadeToOrder ? $product->preparation_days : null,
             ];
         }
 

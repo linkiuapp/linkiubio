@@ -21,7 +21,7 @@
     <!-- SweetAlert2 -->
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     
-    <style>
+    <!--<style>
         #particles-js {
             position: fixed !important;
             width: 100vw !important;
@@ -52,17 +52,17 @@
             z-index: 2;
             background: transparent;
         }
-    </style>
+    </style>-->
 </head>
 <body class="antialiased">
     <!-- Contenedor de partículas para nieve -->
-    <div id="particles-js"></div>
+    <!--<div id="particles-js"></div>-->
     
     <div class="min-h-screen flex" style="position: relative; z-index: 2;">
         <!-- Lado izquierdo: Background atractivo -->
         <div class="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-slate-200">
             <div class="absolute inset-0">
-                <img src="{{ asset('images-ui/banner_navidad_logens.webp') }}" 
+                <img src="{{ asset('images-ui/Banners_login_tenantAdmin.svg') }}" 
                      alt="Banner de información" 
                      class="w-full h-full object-contain items-center justify-center">
             </div>
@@ -73,7 +73,7 @@
             <div class="w-full max-w-md">
                 <!-- Logo móvil -->
                 <div class="mb-8 text-start">
-                    <img src="{{ asset('images-ui/base_ui_login_logo.svg') }}" 
+                    <img src="{{ asset('images-ui/logo_linkiu_new_full.svg') }}" 
                     alt="Logo de Linkiu" 
                     class="h-12 w-auto mb-4">
                 </div>

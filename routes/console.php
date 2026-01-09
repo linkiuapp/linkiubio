@@ -44,6 +44,12 @@ Schedule::command('stores:suspend-overdue')
     ->name('suspend-overdue-stores')
     ->description('Suspend stores with invoices overdue for more than 7 days');
 
+// 🧪 Programar procesamiento de vencimientos de trials (diariamente a las 7am)
+Schedule::command('trial:process-expirations --notify')
+    ->dailyAt('07:00')
+    ->name('trial-process-expirations')
+    ->description('Process trial period expirations: generate invoices, send warnings, and suspend if needed');
+
 // ✅ Programar verificación de solicitudes de tiendas pendientes (cada hora)
 Schedule::command('stores:check-pending-requests')
     ->hourly()
@@ -81,3 +87,21 @@ Schedule::command('monitoring:clean-logs --days=30')
     ->dailyAt('02:00')
     ->name('monitoring-clean-logs')
     ->description('Clean old monitoring logs from database');
+
+// 📋 LinkiuDev - Resumen diario de agenda (cada minuto, el comando verifica la hora)
+Schedule::command('linkiudev:send-daily-summary')
+    ->everyMinute()
+    ->name('linkiudev-daily-summary')
+    ->description('Send daily agenda summary via WhatsApp at configured time');
+
+// ⏰ LinkiuDev - Recordatorios de tareas (cada 5 minutos)
+Schedule::command('linkiudev:send-task-reminders')
+    ->everyFiveMinutes()
+    ->name('linkiudev-task-reminders')
+    ->description('Send task and event reminders via WhatsApp');
+
+// 💳 SubscriptionDev - Recordatorios de pago de suscripciones (diariamente a las 9am)
+Schedule::command('subscriptiondev:send-reminders')
+    ->dailyAt('09:00')
+    ->name('subscriptiondev-payment-reminders')
+    ->description('Send subscription payment reminders via WhatsApp');

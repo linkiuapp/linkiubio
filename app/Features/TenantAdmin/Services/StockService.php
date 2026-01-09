@@ -15,10 +15,20 @@ class StockService
      * @param Product $producto
      * @param array $opcionesSeleccionadas ['variable_id' => 'option_id']
      * @param int $cantidad
-     * @return array ['disponible' => bool, 'cantidad' => int, 'error' => string|null]
+     * @return array ['disponible' => bool, 'cantidad' => int, 'error' => string|null, 'is_made_to_order' => bool]
      */
     public function verificarDisponibilidad(Product $producto, array $opcionesSeleccionadas = [], int $cantidad = 1): array
     {
+        // 🛠️ Producto bajo pedido: siempre disponible (no depende de stock)
+        if ($producto->isMadeToOrder()) {
+            return [
+                'disponible' => true, 
+                'cantidad' => PHP_INT_MAX,
+                'is_made_to_order' => true,
+                'preparation_days' => $producto->preparation_days,
+            ];
+        }
+
         // Sin control de stock
         if (!$producto->controlaStock()) {
             return ['disponible' => true, 'cantidad' => PHP_INT_MAX];
@@ -74,6 +84,11 @@ class StockService
      */
     public function reservar(Product $producto, array $opcionesSeleccionadas, int $cantidad): bool
     {
+        // 🛠️ Producto bajo pedido: siempre se puede reservar
+        if ($producto->isMadeToOrder()) {
+            return true;
+        }
+
         if (!$producto->controlaStock() || $producto->tieneStockIlimitado()) {
             return true;
         }
@@ -119,6 +134,11 @@ class StockService
      */
     public function decrementarStock(Product $producto, array $opcionesSeleccionadas, int $cantidad, ?int $ordenId = null): bool
     {
+        // 🛠️ Producto bajo pedido: no tiene stock que decrementar
+        if ($producto->isMadeToOrder()) {
+            return true;
+        }
+
         if (!$producto->controlaStock() || $producto->tieneStockIlimitado()) {
             return true;
         }

@@ -353,4 +353,174 @@ class BillingNotificationService
             ]
         };
     }
+
+    /**
+     * Send trial expiration warning (days before trial ends)
+     */
+    public function sendTrialExpirationWarning(Store $store, $subscription, int $daysBefore): void
+    {
+        $storeAdminEmail = $this->getStoreAdminEmail($store);
+        
+        if (!$storeAdminEmail) {
+            return;
+        }
+
+        SendEmailJob::dispatch(
+            'template',
+            $storeAdminEmail,
+            [
+                'template_key' => 'trial_expiration_warning',
+                'variables' => [
+                    'store_name' => $store->name,
+                    'plan_name' => $subscription->plan->name ?? 'Tu plan',
+                    'days_remaining' => $daysBefore,
+                    'trial_end_date' => $subscription->trial_end->format('d/m/Y'),
+                    'amount_to_pay' => '$' . number_format($subscription->plan->getPriceForPeriod($subscription->billing_cycle), 0, ',', '.'),
+                    'billing_cycle' => $this->getBillingCycleLabel($subscription->billing_cycle),
+                    'action_required' => $daysBefore <= 1 
+                        ? '¡Tu período de prueba termina mañana! Realiza el pago para continuar usando tu tienda.'
+                        : "Quedan {$daysBefore} días de tu período de prueba. Prepárate para continuar con tu plan.",
+                    'dashboard_url' => $this->getDashboardUrl($store),
+                    'checkout_url' => route('tenant.admin.billing.checkout', $store->slug),
+                    'support_email' => config('app.support_email', 'soporte@linkiu.bio'),
+                ]
+            ]
+        );
+
+        \Log::info('Aviso de vencimiento de trial enviado', [
+            'store_id' => $store->id,
+            'store_name' => $store->name,
+            'days_before' => $daysBefore,
+            'trial_end' => $subscription->trial_end,
+        ]);
+    }
+
+    /**
+     * Send invoice notification when trial ends
+     */
+    public function sendTrialEndedInvoice(Store $store, Invoice $invoice): void
+    {
+        $storeAdminEmail = $this->getStoreAdminEmail($store);
+        
+        if (!$storeAdminEmail) {
+            return;
+        }
+
+        SendEmailJob::dispatch(
+            'template',
+            $storeAdminEmail,
+            [
+                'template_key' => 'trial_ended_invoice',
+                'variables' => [
+                    'store_name' => $store->name,
+                    'plan_name' => $invoice->plan->name ?? 'Tu plan',
+                    'invoice_number' => $invoice->invoice_number,
+                    'amount' => $invoice->getFormattedAmount(),
+                    'due_date' => $invoice->due_date->format('d/m/Y'),
+                    'days_to_pay' => $invoice->due_date->diffInDays(now()),
+                    'grace_period_message' => 'Tienes un período de gracia de 3 días para realizar el pago sin interrupción del servicio.',
+                    'dashboard_url' => $this->getDashboardUrl($store),
+                    'checkout_url' => route('tenant.admin.billing.checkout', $store->slug),
+                    'support_email' => config('app.support_email', 'soporte@linkiu.bio'),
+                ]
+            ]
+        );
+
+        \Log::info('Factura de fin de trial enviada', [
+            'store_id' => $store->id,
+            'invoice_id' => $invoice->id,
+            'amount' => $invoice->amount,
+        ]);
+    }
+
+    /**
+     * Send grace period warning
+     */
+    public function sendGracePeriodWarning(Store $store, $subscription, int $daysLeft): void
+    {
+        $storeAdminEmail = $this->getStoreAdminEmail($store);
+        
+        if (!$storeAdminEmail) {
+            return;
+        }
+
+        SendEmailJob::dispatch(
+            'template',
+            $storeAdminEmail,
+            [
+                'template_key' => 'grace_period_warning',
+                'variables' => [
+                    'store_name' => $store->name,
+                    'plan_name' => $subscription->plan->name ?? 'Tu plan',
+                    'days_left' => $daysLeft,
+                    'grace_end_date' => $subscription->grace_period_end->format('d/m/Y'),
+                    'urgency_message' => $daysLeft <= 1 
+                        ? '🚨 URGENTE: Tu período de gracia termina mañana. Realiza el pago hoy para evitar la suspensión.'
+                        : "Quedan {$daysLeft} días de período de gracia. Paga ahora para evitar interrupciones.",
+                    'suspension_warning' => 'Si no pagas antes del fin del período de gracia, tu tienda será suspendida automáticamente.',
+                    'dashboard_url' => $this->getDashboardUrl($store),
+                    'checkout_url' => route('tenant.admin.billing.checkout', $store->slug),
+                    'support_email' => config('app.support_email', 'soporte@linkiu.bio'),
+                ]
+            ]
+        );
+
+        \Log::info('Aviso de período de gracia enviado', [
+            'store_id' => $store->id,
+            'days_left' => $daysLeft,
+            'grace_period_end' => $subscription->grace_period_end,
+        ]);
+    }
+
+    /**
+     * Send trial suspension notification
+     */
+    public function sendTrialSuspensionNotification(Store $store, $subscription): void
+    {
+        $storeAdminEmail = $this->getStoreAdminEmail($store);
+        
+        if (!$storeAdminEmail) {
+            return;
+        }
+
+        SendEmailJob::dispatch(
+            'template',
+            $storeAdminEmail,
+            [
+                'template_key' => 'trial_suspension',
+                'variables' => [
+                    'store_name' => $store->name,
+                    'plan_name' => $subscription->plan->name ?? 'Tu plan',
+                    'suspension_date' => now()->format('d/m/Y H:i'),
+                    'suspension_reason' => 'Tu período de prueba finalizó y no se registró ningún pago.',
+                    'reactivation_instructions' => 'Para reactivar tu tienda, realiza el pago de tu suscripción.',
+                    'data_preservation' => 'Todos tus datos (productos, categorías, configuraciones) están seguros y serán preservados.',
+                    'amount_to_pay' => '$' . number_format($subscription->plan->getPriceForPeriod($subscription->billing_cycle), 0, ',', '.'),
+                    'checkout_url' => route('tenant.admin.billing.checkout', $store->slug),
+                    'support_email' => config('app.support_email', 'soporte@linkiu.bio'),
+                    'support_phone' => config('app.support_phone', '+57 310 459 4344'),
+                ]
+            ]
+        );
+
+        \Log::warning('Notificación de suspensión por trial vencido enviada', [
+            'store_id' => $store->id,
+            'store_name' => $store->name,
+            'suspended_at' => now(),
+        ]);
+    }
+
+    /**
+     * Get billing cycle label in Spanish
+     */
+    private function getBillingCycleLabel(string $cycle): string
+    {
+        return match($cycle) {
+            'monthly' => 'Mensual',
+            'quarterly' => 'Trimestral',
+            'semester' => 'Semestral',
+            'annual' => 'Anual',
+            default => $cycle
+        };
+    }
 }

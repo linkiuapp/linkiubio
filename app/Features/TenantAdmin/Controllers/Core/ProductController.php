@@ -145,6 +145,12 @@ class ProductController extends Controller
             'tipo_stock' => 'nullable|in:ilimitado,limitado',
             'cantidad_stock' => 'nullable|integer|min:0',
             'umbral_alerta_stock' => 'nullable|integer|min:1|max:1000',
+            // Campos de bajo pedido
+            'is_made_to_order' => 'boolean',
+            'preparation_days' => 'nullable|integer|min:1|max:365',
+            'requires_deposit' => 'boolean',
+            'deposit_type' => 'nullable|in:percentage,fixed',
+            'deposit_value' => 'nullable|numeric|min:0',
         ], [
             'name.required' => 'El nombre del producto es obligatorio',
             'name.max' => 'El nombre no puede exceder 255 caracteres',
@@ -152,7 +158,19 @@ class ProductController extends Controller
             'price.numeric' => 'El precio debe ser un número válido',
             'price.min' => 'El precio no puede ser negativo',
             'sku.max' => 'El SKU no puede exceder 100 caracteres',
+            'preparation_days.min' => 'Los días de preparación deben ser al menos 1',
+            'preparation_days.max' => 'Los días de preparación no pueden exceder 365',
+            'deposit_value.min' => 'El valor del anticipo no puede ser negativo',
         ]);
+
+        // Validar que el anticipo fijo no sea mayor al precio del producto
+        if ($request->boolean('requires_deposit') && 
+            $request->input('deposit_type') === 'fixed' && 
+            $request->input('deposit_value') >= $request->input('price')) {
+            return back()->withErrors([
+                'deposit_value' => 'El anticipo fijo debe ser menor al precio del producto ($' . number_format($request->input('price'), 0, ',', '.') . ')'
+            ])->withInput();
+        }
 
         // Crear producto
         $product = Product::create([
@@ -173,6 +191,12 @@ class ProductController extends Controller
             'promocion_activa' => $request->boolean('promocion_activa', false),
             'promocion_fecha_inicio' => $request->input('promocion_fecha_inicio'),
             'promocion_fecha_fin' => $request->input('promocion_fecha_fin'),
+            // Campos de bajo pedido
+            'is_made_to_order' => $request->boolean('is_made_to_order', false),
+            'preparation_days' => $request->boolean('is_made_to_order') ? $request->input('preparation_days') : null,
+            'requires_deposit' => $request->boolean('is_made_to_order') ? $request->boolean('requires_deposit', false) : false,
+            'deposit_type' => $request->boolean('requires_deposit') ? $request->input('deposit_type') : null,
+            'deposit_value' => $request->boolean('requires_deposit') ? $request->input('deposit_value') : null,
         ]);
 
         // Procesar imágenes si se subieron
@@ -274,7 +298,22 @@ class ProductController extends Controller
             'tipo_stock' => 'nullable|in:ilimitado,limitado',
             'cantidad_stock' => 'nullable|integer|min:0',
             'umbral_alerta_stock' => 'nullable|integer|min:1|max:1000',
+            // Campos de bajo pedido
+            'is_made_to_order' => 'boolean',
+            'preparation_days' => 'nullable|integer|min:1|max:365',
+            'requires_deposit' => 'boolean',
+            'deposit_type' => 'nullable|in:percentage,fixed',
+            'deposit_value' => 'nullable|numeric|min:0',
         ]);
+
+        // Validar que el anticipo fijo no sea mayor al precio del producto
+        if ($request->boolean('requires_deposit') && 
+            $request->input('deposit_type') === 'fixed' && 
+            $request->input('deposit_value') >= $request->input('price')) {
+            return back()->withErrors([
+                'deposit_value' => 'El anticipo fijo debe ser menor al precio del producto ($' . number_format($request->input('price'), 0, ',', '.') . ')'
+            ])->withInput();
+        }
 
         // Obtener el tipo del request antes de actualizar
         $newType = $request->input('type', $product->type);
@@ -298,6 +337,12 @@ class ProductController extends Controller
             'promocion_activa' => $request->boolean('promocion_activa', false),
             'promocion_fecha_inicio' => $request->input('promocion_fecha_inicio'),
             'promocion_fecha_fin' => $request->input('promocion_fecha_fin'),
+            // Campos de bajo pedido
+            'is_made_to_order' => $request->boolean('is_made_to_order', false),
+            'preparation_days' => $request->boolean('is_made_to_order') ? $request->input('preparation_days') : null,
+            'requires_deposit' => $request->boolean('is_made_to_order') ? $request->boolean('requires_deposit', false) : false,
+            'deposit_type' => $request->boolean('requires_deposit') ? $request->input('deposit_type') : null,
+            'deposit_value' => $request->boolean('requires_deposit') ? $request->input('deposit_value') : null,
         ]);
 
         // Si cambió de variable a simple, eliminar todas las asignaciones de variables

@@ -368,6 +368,163 @@
             </x-card-base>
             {{-- End SECTION: Gestión de Inventario --}}
 
+            {{-- SECTION: Producto Bajo Pedido --}}
+            <x-card-base title="Producto Bajo Pedido" shadow="sm">
+                <div x-data="{ 
+                    isMadeToOrder: {{ $product->is_made_to_order ? 'true' : 'false' }}, 
+                    requiresDeposit: {{ $product->requires_deposit ? 'true' : 'false' }},
+                    depositType: '{{ $product->deposit_type ?? 'percentage' }}',
+                    depositValue: {{ $product->deposit_value ?? 0 }},
+                    getProductPrice() {
+                        const priceInput = document.querySelector('input[name=\'price\']');
+                        return priceInput ? parseFloat(priceInput.value) || 0 : 0;
+                    },
+                    isDepositInvalid() {
+                        if (!this.requiresDeposit || this.depositType !== 'fixed') return false;
+                        return this.depositValue >= this.getProductPrice() && this.getProductPrice() > 0;
+                    }
+                }" data-tour="product-made-to-order">
+                    {{-- Toggle: Producto bajo pedido --}}
+                    <div class="flex items-start gap-3 p-4 bg-amber-50 rounded-lg border border-amber-200">
+                        <input 
+                            type="checkbox" 
+                            name="is_made_to_order" 
+                            id="is_made_to_order"
+                            x-model="isMadeToOrder"
+                            value="1"
+                            class="w-5 h-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500 mt-0.5"
+                        >
+                        <div class="flex-1">
+                            <label for="is_made_to_order" class="block text-sm font-medium text-gray-800 cursor-pointer">
+                                Este producto se fabrica/prepara bajo pedido
+                            </label>
+                            <p class="text-xs text-gray-600 mt-1">
+                                Activa esto para productos que no tienes en stock pero puedes producir cuando el cliente los solicite
+                            </p>
+                        </div>
+                    </div>
+
+                    {{-- Configuración de bajo pedido (solo si está activo) --}}
+                    <div x-show="isMadeToOrder" x-transition class="mt-4 space-y-4 p-4 border border-amber-200 rounded-lg bg-amber-50/30">
+                        {{-- Días de preparación --}}
+                        <div>
+                            <label for="preparation_days" class="block text-sm font-medium text-gray-800 mb-2">
+                                Días de preparación
+                            </label>
+                            <div class="flex items-center gap-3">
+                                <input 
+                                    type="number" 
+                                    name="preparation_days" 
+                                    id="preparation_days"
+                                    min="1"
+                                    max="365"
+                                    value="{{ $product->preparation_days }}"
+                                    placeholder="5"
+                                    class="w-24 rounded-lg border-gray-300 shadow-sm focus:border-amber-500 focus:ring-amber-500 text-sm"
+                                >
+                                <span class="text-sm text-gray-600">días para tener listo el producto</span>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">Este tiempo se sumará al tiempo de envío estimado</p>
+                        </div>
+
+                        {{-- Toggle: Requiere anticipo --}}
+                        <div class="pt-4 border-t border-amber-200">
+                            <div class="flex items-start gap-3">
+                                <input 
+                                    type="checkbox" 
+                                    name="requires_deposit" 
+                                    id="requires_deposit"
+                                    x-model="requiresDeposit"
+                                    value="1"
+                                    class="w-5 h-5 rounded border-gray-300 text-amber-600 focus:ring-amber-500 mt-0.5"
+                                >
+                                <div class="flex-1">
+                                    <label for="requires_deposit" class="block text-sm font-medium text-gray-800 cursor-pointer">
+                                        Requiere anticipo para iniciar producción
+                                    </label>
+                                    <p class="text-xs text-gray-600 mt-1">
+                                        El cliente deberá pagar un adelanto al hacer el pedido
+                                    </p>
+                                </div>
+                            </div>
+
+                            {{-- Configuración del anticipo --}}
+                            <div x-show="requiresDeposit" x-transition class="mt-4 ml-8 space-y-4">
+                                {{-- Tipo de anticipo --}}
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-800 mb-2">Tipo de anticipo</label>
+                                    <div class="flex gap-4">
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input 
+                                                type="radio" 
+                                                name="deposit_type" 
+                                                value="percentage"
+                                                x-model="depositType"
+                                                class="w-4 h-4 text-amber-600 focus:ring-amber-500"
+                                            >
+                                            <span class="text-sm text-gray-700">Porcentaje del precio</span>
+                                        </label>
+                                        <label class="flex items-center gap-2 cursor-pointer">
+                                            <input 
+                                                type="radio" 
+                                                name="deposit_type" 
+                                                value="fixed"
+                                                x-model="depositType"
+                                                class="w-4 h-4 text-amber-600 focus:ring-amber-500"
+                                            >
+                                            <span class="text-sm text-gray-700">Monto fijo</span>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {{-- Valor del anticipo --}}
+                                <div>
+                                    <label for="deposit_value" class="block text-sm font-medium text-gray-800 mb-2">
+                                        <span x-show="depositType === 'percentage'">Porcentaje de anticipo (%)</span>
+                                        <span x-show="depositType === 'fixed'">Monto de anticipo ($)</span>
+                                    </label>
+                                    <div class="flex items-center gap-2">
+                                        <span x-show="depositType === 'fixed'" class="text-gray-500">$</span>
+                                        <input 
+                                            type="number" 
+                                            name="deposit_value" 
+                                            id="deposit_value"
+                                            min="0"
+                                            :max="depositType === 'percentage' ? 100 : 999999999"
+                                            step="0.01"
+                                            x-model="depositValue"
+                                            placeholder="50"
+                                            :class="isDepositInvalid() ? 'border-red-500 ring-red-500' : 'border-gray-300'"
+                                            class="w-32 rounded-lg shadow-sm focus:border-amber-500 focus:ring-amber-500 text-sm"
+                                        >
+                                        <span x-show="depositType === 'percentage'" class="text-gray-500">%</span>
+                                    </div>
+                                    <p class="text-xs text-gray-500 mt-1" x-show="!isDepositInvalid()">
+                                        <span x-show="depositType === 'percentage'">Ej: 50% = el cliente paga la mitad al ordenar</span>
+                                        <span x-show="depositType === 'fixed'">Ej: $50.000 = el cliente paga este monto al ordenar</span>
+                                    </p>
+                                    {{-- Mensaje de error --}}
+                                    <p x-show="isDepositInvalid()" class="text-xs text-red-600 mt-1 font-medium">
+                                        El anticipo debe ser menor al precio del producto
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {{-- Aviso informativo --}}
+                        <div class="mt-4 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                            <div class="flex gap-2">
+                                <i data-lucide="info" class="w-4 h-4 text-blue-600 flex-shrink-0 mt-0.5"></i>
+                                <p class="text-xs text-blue-700">
+                                    Los productos bajo pedido no requieren stock. Estarán siempre disponibles para ordenar y se mostrarán con una etiqueta especial en tu tienda.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </x-card-base>
+            {{-- End SECTION: Producto Bajo Pedido --}}
+
             {{-- SECTION: Imágenes Actuales Card --}}
             @if($product->images && $product->images->count() > 0)
             <x-card-base title="Imágenes Actuales" shadow="sm">

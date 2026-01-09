@@ -253,7 +253,13 @@ class RegistrationWizardController extends Controller
             }
         }
 
-        return view('public::registration.step4-owner', compact('paymentSetting', 'amount', 'epaycoGateway', 'pseBanks'));
+        // Verificar si el plan permite saltar el pago (trial sin pago)
+        $skipPayment = false;
+        if ($plan->trial_days > 0 && $plan->skip_payment_on_trial) {
+            $skipPayment = true;
+        }
+
+        return view('public::registration.step4-owner', compact('paymentSetting', 'amount', 'epaycoGateway', 'pseBanks', 'plan', 'skipPayment'));
     }
 
     /**
@@ -261,16 +267,29 @@ class RegistrationWizardController extends Controller
      */
     public function complete(Request $request)
     {
-        // Validar Step 4
-        $validated = $request->validate([
+        // Verificar si el plan permite saltar el pago
+        $plan = Plan::findOrFail(Session::get('wizard.plan_id'));
+        $skipPayment = $plan->trial_days > 0 && $plan->skip_payment_on_trial;
+        
+        // Reglas de validación base
+        $rules = [
             'owner_name' => 'required|string|max:255',
             'owner_email' => 'required|email|max:255|unique:users,email|unique:pending_registrations,owner_email',
             'owner_document_type' => 'required|in:cc,ce,passport',
             'owner_document_number' => 'required|string|max:50',
             'password' => 'required|string|min:8|confirmed',
             'accept_terms' => 'required|accepted',
-            'payment_proof' => 'required|image|mimes:jpeg,png,jpg,pdf|max:5120', // 5MB max
-        ]);
+        ];
+        
+        // Agregar payment_proof solo si no se puede saltar el pago
+        if (!$skipPayment) {
+            $rules['payment_proof'] = 'required|image|mimes:jpeg,png,jpg,pdf|max:5120'; // 5MB max
+        } else {
+            $rules['payment_proof'] = 'nullable|image|mimes:jpeg,png,jpg,pdf|max:5120';
+        }
+        
+        // Validar Step 4
+        $validated = $request->validate($rules);
 
         // Crear registro pendiente con TODOS los datos del wizard
         $registration = PendingRegistration::create([
@@ -304,10 +323,10 @@ class RegistrationWizardController extends Controller
             'owner_document_type' => $validated['owner_document_type'],
             'owner_document_number' => $validated['owner_document_number'],
             'hashed_password' => Hash::make($validated['password']),
-            'temp_password_encrypted' => encrypt($validated['password']), // Guardar encriptada para mostrarla despu?s
+            'temp_password_encrypted' => encrypt($validated['password']), // Guardar encriptada para mostrarla después
             
-            // Estado
-            'status' => 'pending',
+            // Estado - Si es trial sin pago, se marca como listo para aprobar
+            'status' => $skipPayment ? 'trial_pending' : 'pending',
         ]);
 
         // Guardar comprobante de pago

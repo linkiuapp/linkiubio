@@ -71,3 +71,4 @@ class Ticker extends Model
 
 
 
+

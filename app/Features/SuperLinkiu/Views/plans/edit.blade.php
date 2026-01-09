@@ -240,10 +240,27 @@
                         <p class="mt-1 text-xs text-gray-600">0 = sin período de prueba</p>
                     </div>
 
-                    {{-- Hidden fields --}}
-                    <input type="hidden" name="currency" value="COP">
-                    <input type="hidden" name="duration_in_days" value="30">
+                    {{-- Skip Payment on Trial --}}
+                    <div class="flex items-start pt-6">
+                        <div class="flex items-center h-5">
+                            <input 
+                                type="checkbox" 
+                                id="skip_payment_on_trial" 
+                                name="skip_payment_on_trial" 
+                                value="1"
+                                {{ old('skip_payment_on_trial', $plan->skip_payment_on_trial) ? 'checked' : '' }}
+                                class="w-5 h-5 text-green-600 border-gray-300 rounded focus:ring-2 focus:ring-green-500">
+                        </div>
+                        <div class="ml-3">
+                            <label for="skip_payment_on_trial" class="text-sm font-medium text-gray-800">No requiere pago inicial</label>
+                            <p class="text-xs text-gray-600">Si el plan tiene días de prueba, el usuario puede registrarse sin pagar ni subir comprobante</p>
+                        </div>
+                    </div>
                 </div>
+
+                {{-- Hidden fields --}}
+                <input type="hidden" name="currency" value="COP">
+                <input type="hidden" name="duration_in_days" value="30">
             </div>
         </div>
 

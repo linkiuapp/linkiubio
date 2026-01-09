@@ -4,7 +4,6 @@
 <div class="px-4 py-6 space-y-6">
     <!-- Header del carrito -->
     <div class="flex flex-col items-center justify-center">
-        <img src="https://cdn.jsdelivr.net/gh/linkiuapp/medialink@main/Assets_Fronted/img_linkiu_v1_cart.svg" alt="img_linkiu_v1_cart" class="h-32 w-auto" loading="lazy">
         <h1 class="h3 text-brandNeutral-400 mt-4">Mi Carrito</h1>
         <p class="caption text-brandNeutral-400">Revisa tus productos antes de continuar</p>
     </div>
@@ -264,7 +263,18 @@ document.addEventListener('DOMContentLoaded', function() {
     async function removeItem(itemKey) {
         // ⚡ ELIMINACIÓN INSTANTÁNEA EN UI
         const itemElement = document.querySelector(`[data-item-key="${itemKey}"]`);
+        
         if (itemElement) {
+            // Calcular el precio del item que se va a eliminar para actualizar total inmediatamente
+            const itemPriceText = itemElement.querySelector('.item-price')?.textContent || '$0';
+            const itemQuantityText = itemElement.querySelector('.item-quantity')?.textContent || '1';
+            const itemPrice = parseFloat(itemPriceText.replace(/[^0-9.-]+/g, '')) || 0;
+            const itemQuantity = parseInt(itemQuantityText) || 1;
+            const itemTotal = itemPrice * itemQuantity;
+            
+            // ⚡ ACTUALIZAR TOTAL INMEDIATAMENTE
+            updateTotalInstantly(-itemTotal);
+            
             // Animar eliminación instantánea
             itemElement.style.transform = 'translateX(-100%)';
             itemElement.style.opacity = '0';
@@ -291,25 +301,51 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const data = await response.json();
             if (data.success) {
-                // Recargar carrito para actualizar totales correctos
-                setTimeout(() => {
-                    loadCart();
-                }, 400);
+                // El servidor confirmó, actualizamos con los datos reales por si hay diferencia
+                if (data.total !== undefined) {
+                    const subtotalEl = document.getElementById('cart-subtotal');
+                    const totalEl = document.getElementById('cart-total');
+                    if (subtotalEl) subtotalEl.textContent = data.formatted_total || '$0';
+                    if (totalEl) totalEl.textContent = data.formatted_total || '$0';
+                }
                 // El carrito flotante se actualiza automáticamente vía cart.js
             } else {
                 // Si falla, mostrar error y recargar carrito para restaurar estado
                 showError(data.message || 'Error al eliminar producto');
-                setTimeout(() => {
-                    loadCart();
-                }, 500);
+                loadCart();
             }
         } catch (error) {
             console.error('Error removing item:', error);
             showError('Error de conexión');
             // Si falla, recargar carrito para restaurar estado
+            loadCart();
+        }
+    }
+    
+    // ⚡ Función para actualizar el total instantáneamente sin esperar al servidor
+    function updateTotalInstantly(amountChange) {
+        const subtotalEl = document.getElementById('cart-subtotal');
+        const totalEl = document.getElementById('cart-total');
+        
+        if (subtotalEl && totalEl) {
+            // Obtener total actual
+            const currentTotalText = totalEl.textContent || '$0';
+            const currentTotal = parseFloat(currentTotalText.replace(/[^0-9.-]+/g, '')) || 0;
+            
+            // Calcular nuevo total
+            const newTotal = Math.max(0, currentTotal + amountChange);
+            const formattedTotal = '$' + formatPrice(newTotal);
+            
+            // Actualizar UI
+            subtotalEl.textContent = formattedTotal;
+            totalEl.textContent = formattedTotal;
+            
+            // Efecto visual de actualización
+            totalEl.style.transition = 'transform 0.2s ease';
+            totalEl.style.transform = 'scale(1.1)';
             setTimeout(() => {
-                loadCart();
-            }, 500);
+                totalEl.style.transform = 'scale(1)';
+            }, 200);
         }
     }
     

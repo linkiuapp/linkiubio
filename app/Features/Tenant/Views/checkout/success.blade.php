@@ -89,7 +89,7 @@
     </script>
 @endpush
 
-{{-- ===================  CONTENT (HTML)  =================== --}}
+{{-- ==================  CONTENT (HTML) ================== --}}
 @section('content')
     <div class="max-w-2xl mx-auto px-4 py-6 space-y-6 relative z-0" data-order-id="{{ $order->id }}">
         <!-- Slider de banners -->
@@ -102,10 +102,10 @@
                  @transitionend="handleTransitionEnd()">
 
                 <!-- Slides originales -->
-                <a href="https://wa.me/573104594344?text=Quiero%20ser%20parte%20de%20Linkiu" target="_blank" rel="noopener" class="flex-shrink-0 w-full flex items-center justify-center relative">
+                <a href="{{ route('register.step1') }}" target="_blank" rel="noopener" class="flex-shrink-0 w-full flex items-center justify-center relative">
                     <img src="{{ asset('images-ui/banner_info_succces_linkiu_01.svg') }}" alt="Banner 1" class="w-full">
                 </a>
-                <a href="https://wa.me/573104594344?text=Quiero%20ser%20parte%20de%20Linkiu" target="_blank" rel="noopener" class="flex-shrink-0 w-full flex items-center justify-center relative">
+                <a href="{{ route('register.step1') }}" target="_blank" rel="noopener" class="flex-shrink-0 w-full flex items-center justify-center relative">
                     <img src="{{ asset('images-ui/banner_info_succces_linkiu_02.svg') }}" alt="Banner 2" class="w-full">
                 </a>
             </div>

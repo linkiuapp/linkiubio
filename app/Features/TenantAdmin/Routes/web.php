@@ -66,8 +66,13 @@ Route::prefix('password')->name('password.')->group(function () {
 
 
 
-// Rutas protegidas (con middleware auth + verificación de aprobación)
-Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreApprovalStatus::class])->group(function () {
+// Ruta de tienda suspendida (accesible incluso suspendida)
+Route::middleware(['auth', 'store.admin'])->group(function () {
+    Route::get('/suspended', [BillingController::class, 'suspended'])->name('suspended');
+});
+
+// Rutas protegidas (con middleware auth + verificación de aprobación + suspensión)
+Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreApprovalStatus::class, \App\Shared\Middleware\CheckStoreSuspensionStatus::class])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::post('/dashboard/chat', [DashboardController::class, 'chat'])->name('dashboard.chat');
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout')->withoutMiddleware(\App\Shared\Middleware\CheckStoreApprovalStatus::class);
@@ -418,9 +423,17 @@ Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreAppro
         Route::post('/get-shipping-cost', [OrderController::class, 'getShippingCost'])->name('get-shipping-cost');
     });
 
-    // Billing Routes (Plan y Facturación)
-    Route::prefix('billing')->name('billing.')->group(function () {
+    // Billing Routes (Plan y Facturación) - Accesible incluso con tienda suspendida
+    Route::prefix('billing')->name('billing.')->withoutMiddleware([\App\Shared\Middleware\CheckStoreSuspensionStatus::class])->group(function () {
         Route::get('/', [BillingController::class, 'index'])->name('index');
+        
+        // Checkout de renovación
+        Route::get('/checkout', [BillingController::class, 'checkout'])->name('checkout');
+        Route::post('/process-payment', [BillingController::class, 'processPayment'])->name('process-payment');
+        Route::post('/initiate-epayco', [BillingController::class, 'initiateEpaycoPayment'])->name('initiate-epayco');
+        Route::get('/payment-success', [BillingController::class, 'paymentSuccess'])->name('payment-success');
+        Route::get('/payment-pending', [BillingController::class, 'paymentPending'])->name('payment-pending');
+        Route::get('/payment-failed', [BillingController::class, 'paymentFailed'])->name('payment-failed');
         
         // Plan management
         Route::post('/change-plan', [BillingController::class, 'changePlan'])->name('change-plan');

@@ -95,7 +95,252 @@ class SidebarBuilderService
         $items[] = ['type' => 'section', 'title' => 'Anuncios y soporte'];
         $items = array_merge($items, $this->buildSupportSection());
 
+        // Banner de suscripción al final (si aplica)
+        $subscriptionBanner = $this->buildSubscriptionBanner();
+        if ($subscriptionBanner) {
+            $items[] = ['type' => 'separator'];
+            $items[] = $subscriptionBanner;
+        }
+
         return $items;
+    }
+
+    /**
+     * Construir banner de suscripción si está por vencer, en período de prueba, grace_period o suspendida
+     */
+    protected function buildSubscriptionBanner(): ?array
+    {
+        if (!$this->store) {
+            return null;
+        }
+
+        $subscription = $this->store->subscription;
+        if (!$subscription) {
+            return null;
+        }
+
+        $now = now();
+        $status = $subscription->status;
+        $planName = $subscription->plan->name ?? 'Plan';
+        $billingUrl = route('tenant.admin.billing.index', $this->store->slug);
+        $checkoutUrl = route('tenant.admin.billing.checkout', $this->store->slug);
+
+        // Caso especial: Tienda suspendida
+        if ($this->store->status === 'suspended' || $status === 'suspended') {
+            return $this->buildSuspendedBanner($checkoutUrl, $billingUrl);
+        }
+
+        // Caso especial: En período de gracia
+        if ($status === 'grace_period' && $subscription->grace_period_end) {
+            return $this->buildGracePeriodBanner($subscription, $checkoutUrl, $billingUrl);
+        }
+
+        // Calcular fechas y días restantes
+        $isInTrial = $subscription->trial_end && $now->lte($subscription->trial_end);
+        $endDate = $isInTrial ? $subscription->trial_end : $subscription->current_period_end;
+        $startDate = $isInTrial ? $subscription->trial_start : $subscription->current_period_start;
+        
+        if (!$endDate) {
+            return null;
+        }
+
+        // Calcular días restantes correctamente
+        $daysRemaining = (int) $now->diffInDays($endDate, false);
+        
+        // Calcular progreso para la barra (% consumido del período)
+        $totalDays = $startDate ? (int) $startDate->diffInDays($endDate) : 30;
+        $daysUsed = $totalDays - max(0, $daysRemaining);
+        $progressPercent = $totalDays > 0 ? round(min(100, max(0, ($daysUsed / $totalDays) * 100))) : 0;
+        
+        // Fecha formateada en español
+        $endDateFormatted = $endDate->locale('es')->isoFormat('D MMM YYYY');
+        
+        // Solo mostrar banner si quedan 15 días o menos, o si está en trial
+        if ($daysRemaining > 15 && !$isInTrial) {
+            return null;
+        }
+
+        // Determinar estilo según urgencia
+        if ($daysRemaining <= 0) {
+            $bgColor = 'bg-red-50';
+            $borderColor = 'border-red-200';
+            $progressBg = 'bg-red-100';
+            $progressBar = 'bg-red-500';
+            $iconBg = 'bg-red-100';
+            $iconColor = 'text-red-600';
+            $titleColor = 'text-red-800';
+            $subtitleColor = 'text-red-600';
+            $icon = 'alert-triangle';
+            $title = $isInTrial ? '¡Prueba finalizada!' : '¡Suscripción vencida!';
+            $subtitle = 'Renueva para continuar';
+        } elseif ($daysRemaining <= 3) {
+            $bgColor = 'bg-red-50';
+            $borderColor = 'border-red-200';
+            $progressBg = 'bg-red-100';
+            $progressBar = 'bg-red-500';
+            $iconBg = 'bg-red-100';
+            $iconColor = 'text-red-600';
+            $titleColor = 'text-red-800';
+            $subtitleColor = 'text-red-600';
+            $icon = 'alert-circle';
+            $title = $isInTrial ? 'Prueba por terminar' : '¡Atención!';
+            $subtitle = "{$daysRemaining} día" . ($daysRemaining > 1 ? 's' : '') . " restante" . ($daysRemaining > 1 ? 's' : '');
+        } elseif ($daysRemaining <= 7) {
+            $bgColor = 'bg-amber-50';
+            $borderColor = 'border-amber-200';
+            $progressBg = 'bg-amber-100';
+            $progressBar = 'bg-amber-500';
+            $iconBg = 'bg-amber-100';
+            $iconColor = 'text-amber-600';
+            $titleColor = 'text-amber-800';
+            $subtitleColor = 'text-amber-600';
+            $icon = 'clock';
+            $title = $isInTrial ? 'Período de prueba' : 'Tu suscripción';
+            $subtitle = "{$daysRemaining} días restantes";
+        } else {
+            $bgColor = 'bg-blue-50';
+            $borderColor = 'border-blue-200';
+            $progressBg = 'bg-blue-100';
+            $progressBar = 'bg-blue-500';
+            $iconBg = 'bg-blue-100';
+            $iconColor = 'text-blue-600';
+            $titleColor = 'text-blue-800';
+            $subtitleColor = 'text-blue-600';
+            $icon = 'sparkles';
+            $title = $isInTrial ? 'Período de prueba' : $planName;
+            $subtitle = "{$daysRemaining} días restantes";
+        }
+
+        $html = <<<HTML
+<div class="mx-2 mb-3 mt-3">
+    <div class="rounded-xl {$bgColor} border {$borderColor} p-4 shadow-sm">
+        <!-- Header -->
+        <div class="flex items-center gap-3 mb-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-lg {$iconBg}">
+                <i data-lucide="{$icon}" class="h-5 w-5 {$iconColor}"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold {$titleColor}">{$title}</p>
+                <p class="text-xs {$subtitleColor}">{$subtitle}</p>
+            </div>
+        </div>
+        
+        <!-- Barra de progreso -->
+        <div class="mb-4">
+            <div class="flex items-center justify-between text-xs text-gray-500 mb-1.5">
+                <span>{$progressPercent}% del período</span>
+                <span class="font-medium">{$endDateFormatted}</span>
+            </div>
+            <div class="h-2.5 w-full overflow-hidden rounded-full {$progressBg}">
+                <div class="h-full {$progressBar} rounded-full transition-all duration-500" style="width: {$progressPercent}%"></div>
+            </div>
+        </div>
+        
+        <!-- Botones -->
+        <div class="flex gap-2">
+            <a href="{$checkoutUrl}" class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white hover:bg-blue-700 transition-colors">
+                <i data-lucide="credit-card" class="h-3.5 w-3.5"></i>
+                Pagar ahora
+            </a>
+            <a href="{$billingUrl}" class="inline-flex items-center justify-center gap-1 rounded-lg border border-gray-300 bg-white px-3 py-2 text-xs font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+                Ver plan
+            </a>
+        </div>
+    </div>
+</div>
+HTML;
+
+        return [
+            'type' => 'custom',
+            'content' => $html,
+        ];
+    }
+
+    /**
+     * Banner para tienda suspendida
+     */
+    protected function buildSuspendedBanner(string $checkoutUrl, string $billingUrl): array
+    {
+        $html = <<<HTML
+<div class="mx-2 mb-3 mt-3">
+    <div class="rounded-xl bg-red-100 border-2 border-red-300 p-4 shadow-md">
+        <!-- Header -->
+        <div class="flex items-center gap-3 mb-3">
+            <div class="flex h-12 w-12 items-center justify-center rounded-lg bg-red-200">
+                <i data-lucide="alert-octagon" class="h-6 w-6 text-red-700"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-red-800">Tienda Suspendida</p>
+                <p class="text-xs text-red-600">Regulariza tu pago para reactivar</p>
+            </div>
+        </div>
+        
+        <!-- Mensaje -->
+        <p class="text-xs text-red-700 mb-4 leading-relaxed">
+            Tu tienda no está visible para tus clientes. Paga ahora para reactivarla inmediatamente.
+        </p>
+        
+        <!-- Botón principal -->
+        <a href="{$checkoutUrl}" class="w-full inline-flex items-center justify-center gap-2 rounded-lg bg-red-600 px-4 py-2.5 text-sm font-bold text-white hover:bg-red-700 transition-colors shadow-lg">
+            <i data-lucide="credit-card" class="h-4 w-4"></i>
+            Pagar y Reactivar Ahora
+        </a>
+    </div>
+</div>
+HTML;
+
+        return [
+            'type' => 'custom',
+            'content' => $html,
+        ];
+    }
+
+    /**
+     * Banner para período de gracia
+     */
+    protected function buildGracePeriodBanner($subscription, string $checkoutUrl, string $billingUrl): array
+    {
+        $graceEnd = $subscription->grace_period_end;
+        $daysLeft = max(0, (int) now()->diffInDays($graceEnd, false));
+        $graceEndFormatted = $graceEnd->locale('es')->isoFormat('D MMM YYYY');
+
+        $html = <<<HTML
+<div class="mx-2 mb-3 mt-3">
+    <div class="rounded-xl bg-orange-50 border-2 border-orange-300 p-4 shadow-sm">
+        <!-- Header -->
+        <div class="flex items-center gap-3 mb-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-orange-100">
+                <i data-lucide="hourglass" class="h-5 w-5 text-orange-600"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-orange-800">Período de Gracia</p>
+                <p class="text-xs text-orange-600">{$daysLeft} día(s) para pagar</p>
+            </div>
+        </div>
+        
+        <!-- Mensaje -->
+        <p class="text-xs text-orange-700 mb-3 leading-relaxed">
+            Tu período de prueba terminó. Tienes hasta el <strong>{$graceEndFormatted}</strong> para pagar y evitar la suspensión.
+        </p>
+        
+        <!-- Botones -->
+        <div class="flex gap-2">
+            <a href="{$checkoutUrl}" class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-orange-600 px-3 py-2 text-xs font-semibold text-white hover:bg-orange-700 transition-colors">
+                <i data-lucide="credit-card" class="h-3.5 w-3.5"></i>
+                Pagar ahora
+            </a>
+            <a href="{$billingUrl}" class="inline-flex items-center justify-center gap-1 rounded-lg border border-orange-300 bg-white px-3 py-2 text-xs font-medium text-orange-700 hover:bg-orange-50 transition-colors">
+                Ver detalles
+            </a>
+        </div>
+    </div>
+</div>
+HTML;
+
+        return [
+            'type' => 'custom',
+            'content' => $html,
+        ];
     }
 
 
@@ -129,6 +374,138 @@ class SidebarBuilderService
 
         // Integraciones
         $items = array_merge($items, $this->buildSuperAdminIntegrationsSection());
+
+        // LinkiuDev - Gestión de Proyectos y Suscripciones Dev
+        $items = array_merge($items, $this->buildLinkiuDevSection());
+
+        return $items;
+    }
+
+    /**
+     * Construir sección LinkiuDev para SuperAdmin (con Projects y Suscripciones)
+     */
+    protected function buildLinkiuDevSection(): array
+    {
+        $items = [];
+
+        // Contar proyectos activos y tareas de hoy
+        $activeProjects = 0;
+        $totalToday = 0;
+        $activeSubs = 0;
+        $pendingPayments = 0;
+        
+        try {
+            $activeProjects = \App\Features\SuperLinkiu\Models\DevProject::active()->count();
+            $todayTasks = \App\Features\SuperLinkiu\Models\DevTask::scheduledToday()->active()->count();
+            $todayEvents = \App\Features\SuperLinkiu\Models\DevAgendaEntry::today()->count();
+            $totalToday = $todayTasks + $todayEvents;
+            
+            $activeSubs = \App\Features\SuperLinkiu\Models\SubSubscription::active()->count();
+            $pendingPayments = \App\Features\SuperLinkiu\Models\SubSubscription::pendingPayment()->count();
+            $expiredSubs = \App\Features\SuperLinkiu\Models\SubSubscription::expired()->count();
+            $pendingPayments += $expiredSubs;
+        } catch (\Exception $e) {
+            // Si hay error en las consultas, usar valores por defecto
+        }
+
+        // Sección principal LinkiuDev
+        $items[] = [
+            'label'  => 'LinkiuDev',
+            'icon'   => 'code-2',
+            'active' => request()->routeIs('superlinkiu.linkiudev.*') || request()->routeIs('superlinkiu.subscriptiondev.*'),
+            'children' => [
+                // === Projects Linkiu ===
+                [
+                    'label'  => 'Projects Linkiu',
+                    'icon'   => 'folder-kanban',
+                    'active' => request()->routeIs('superlinkiu.linkiudev.*'),
+                    'children' => [
+                        [
+                            'label'  => 'Dashboard',
+                            'url'    => '/superlinkiu/linkiudev',
+                            'icon'   => 'layout-dashboard',
+                            'active' => request()->routeIs('superlinkiu.linkiudev.dashboard'),
+                        ],
+                        [
+                            'label'  => 'Clientes',
+                            'url'    => '/superlinkiu/linkiudev/clients',
+                            'icon'   => 'users',
+                            'active' => request()->routeIs('superlinkiu.linkiudev.clients.*'),
+                        ],
+                        [
+                            'label'      => 'Proyectos',
+                            'url'        => '/superlinkiu/linkiudev/projects',
+                            'icon'       => 'folder-git-2',
+                            'active'     => request()->routeIs('superlinkiu.linkiudev.projects.*'),
+                            'badge'      => $activeProjects > 0 ? (string)$activeProjects : null,
+                            'badgeColor' => $activeProjects > 0 ? 'bg-blue-500 text-white' : null,
+                        ],
+                        [
+                            'label'  => 'Tareas',
+                            'url'    => '/superlinkiu/linkiudev/tasks',
+                            'icon'   => 'list-checks',
+                            'active' => request()->routeIs('superlinkiu.linkiudev.tasks.*'),
+                        ],
+                        [
+                            'label'      => 'Mi Agenda',
+                            'url'        => '/superlinkiu/linkiudev/agenda',
+                            'icon'       => 'calendar-days',
+                            'active'     => request()->routeIs('superlinkiu.linkiudev.agenda.*'),
+                            'badge'      => $totalToday > 0 ? (string)$totalToday : null,
+                            'badgeColor' => $totalToday > 0 ? 'bg-green-500 text-white' : null,
+                        ],
+                        [
+                            'label'  => 'Configuración',
+                            'url'    => '/superlinkiu/linkiudev/settings',
+                            'icon'   => 'settings',
+                            'active' => request()->routeIs('superlinkiu.linkiudev.settings.*'),
+                        ],
+                    ],
+                ],
+                // === Suscripciones ===
+                [
+                    'label'  => 'Suscripciones',
+                    'icon'   => 'credit-card',
+                    'active' => request()->routeIs('superlinkiu.subscriptiondev.*'),
+                    'children' => [
+                        [
+                            'label'  => 'Dashboard',
+                            'url'    => '/superlinkiu/subscriptiondev',
+                            'icon'   => 'layout-dashboard',
+                            'active' => request()->routeIs('superlinkiu.subscriptiondev.dashboard'),
+                        ],
+                        [
+                            'label'  => 'Clientes',
+                            'url'    => '/superlinkiu/subscriptiondev/clients',
+                            'icon'   => 'users',
+                            'active' => request()->routeIs('superlinkiu.subscriptiondev.clients.*'),
+                        ],
+                        [
+                            'label'  => 'Tipos de Servicio',
+                            'url'    => '/superlinkiu/subscriptiondev/service-types',
+                            'icon'   => 'tags',
+                            'active' => request()->routeIs('superlinkiu.subscriptiondev.service-types.*'),
+                        ],
+                        [
+                            'label'      => 'Suscripciones',
+                            'url'        => '/superlinkiu/subscriptiondev/subscriptions',
+                            'icon'       => 'file-text',
+                            'active'     => request()->routeIs('superlinkiu.subscriptiondev.subscriptions.*'),
+                            'badge'      => $activeSubs > 0 ? (string)$activeSubs : null,
+                            'badgeColor' => $activeSubs > 0 ? 'bg-green-500 text-white' : null,
+                        ],
+                        [
+                            'label'      => 'Pagos',
+                            'url'        => '/superlinkiu/subscriptiondev/payments',
+                            'icon'       => 'wallet',
+                            'active'     => request()->routeIs('superlinkiu.subscriptiondev.payments.*'),
+                            'badge'      => $pendingPayments > 0 ? (string)$pendingPayments : null,
+                            'badgeColor' => $pendingPayments > 0 ? 'bg-yellow-500 text-white' : null,
+                        ],
+                    ],
+                ],
+            ],
+        ];
 
         return $items;
     }

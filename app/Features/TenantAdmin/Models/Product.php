@@ -34,6 +34,12 @@ class Product extends Model
         'promocion_activa',
         'promocion_fecha_inicio',
         'promocion_fecha_fin',
+        // Campos de producto bajo pedido
+        'is_made_to_order',
+        'preparation_days',
+        'requires_deposit',
+        'deposit_type',
+        'deposit_value',
     ];
 
     protected $casts = [
@@ -50,6 +56,11 @@ class Product extends Model
         'promocion_activa' => 'boolean',
         'promocion_fecha_inicio' => 'date',
         'promocion_fecha_fin' => 'date',
+        // Casts de bajo pedido
+        'is_made_to_order' => 'boolean',
+        'preparation_days' => 'integer',
+        'requires_deposit' => 'boolean',
+        'deposit_value' => 'decimal:2',
     ];
 
     /**
@@ -518,5 +529,141 @@ class Product extends Model
 
         $disponible = $this->stock_disponible;
         return $disponible > 0 && $disponible <= $this->umbral_alerta_stock;
+    }
+
+    /**
+     * ========================================
+     * MÉTODOS DE PRODUCTO BAJO PEDIDO
+     * ========================================
+     */
+
+    /**
+     * ¿Es producto bajo pedido?
+     */
+    public function isMadeToOrder(): bool
+    {
+        return $this->is_made_to_order === true;
+    }
+
+    /**
+     * Scope para productos bajo pedido
+     */
+    public function scopeMadeToOrder($query)
+    {
+        return $query->where('is_made_to_order', true);
+    }
+
+    /**
+     * Obtener días de preparación
+     */
+    public function getPreparationDaysLabel(): string
+    {
+        if (!$this->is_made_to_order || !$this->preparation_days) {
+            return '';
+        }
+
+        $days = $this->preparation_days;
+        return $days === 1 ? '1 día' : "{$days} días";
+    }
+
+    /**
+     * ¿Requiere anticipo/depósito?
+     */
+    public function requiresDeposit(): bool
+    {
+        return $this->is_made_to_order && $this->requires_deposit === true;
+    }
+
+    /**
+     * Calcular monto del anticipo para un precio dado
+     */
+    public function calculateDeposit(float $price): float
+    {
+        if (!$this->requiresDeposit()) {
+            return 0;
+        }
+
+        if ($this->deposit_type === 'percentage') {
+            return round(($price * $this->deposit_value) / 100, 2);
+        }
+
+        // Tipo fijo
+        return min($this->deposit_value, $price); // No puede ser mayor al precio
+    }
+
+    /**
+     * Obtener monto del anticipo basado en el precio del producto
+     */
+    public function getDepositAmountAttribute(): float
+    {
+        return $this->calculateDeposit($this->precio_final);
+    }
+
+    /**
+     * Obtener monto del anticipo formateado
+     */
+    public function getFormattedDepositAmountAttribute(): string
+    {
+        return '$' . number_format($this->deposit_amount, 0, ',', '.');
+    }
+
+    /**
+     * Obtener descripción del anticipo
+     */
+    public function getDepositDescriptionAttribute(): string
+    {
+        if (!$this->requiresDeposit()) {
+            return '';
+        }
+
+        if ($this->deposit_type === 'percentage') {
+            return "Anticipo del {$this->deposit_value}%";
+        }
+
+        return "Anticipo de " . $this->formatted_deposit_amount;
+    }
+
+    /**
+     * Calcular monto restante después del anticipo
+     */
+    public function calculateRemainingAmount(float $price): float
+    {
+        return $price - $this->calculateDeposit($price);
+    }
+
+    /**
+     * ¿Producto disponible para compra?
+     * Los productos bajo pedido siempre están disponibles (no dependen de stock)
+     */
+    public function isAvailable(int $quantity = 1): bool
+    {
+        // Si es bajo pedido, siempre disponible
+        if ($this->isMadeToOrder()) {
+            return $this->is_active;
+        }
+
+        // Producto normal, verificar stock
+        return $this->is_active && $this->tieneStock($quantity);
+    }
+
+    /**
+     * Obtener información completa de bajo pedido para mostrar en frontend
+     */
+    public function getMadeToOrderInfoAttribute(): ?array
+    {
+        if (!$this->isMadeToOrder()) {
+            return null;
+        }
+
+        return [
+            'is_made_to_order' => true,
+            'preparation_days' => $this->preparation_days,
+            'preparation_label' => $this->getPreparationDaysLabel(),
+            'requires_deposit' => $this->requiresDeposit(),
+            'deposit_type' => $this->deposit_type,
+            'deposit_value' => $this->deposit_value,
+            'deposit_amount' => $this->deposit_amount,
+            'deposit_description' => $this->deposit_description,
+        ];
     }
 }
