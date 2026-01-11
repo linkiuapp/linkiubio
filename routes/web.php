@@ -39,48 +39,86 @@ Route::prefix('registre')->name('register.')->group(function () {
 // API para verificar estado de registro
 Route::get('/api/check-registration-status/{registration}', [App\Features\Public\Controllers\RegistrationWizardController::class, 'checkStatus']);
 
-// Redirección de linkiu.bio a linkiu.com.co
+// Landing Page Principal
 Route::get('/', function () {
-    // Solo redirigir si es linkiu.bio
-    if (request()->getHost() === 'linkiu.bio') {
-        return redirect('https://linkiu.com.co', 301);
+    // Obtener tiendas activas con logos para el carrusel
+    try {
+        $stores = \App\Shared\Models\Store::where('status', 'active')
+            ->where('approval_status', 'approved')
+            ->with('design')
+            ->get();
+        
+        $featuredStores = $stores->filter(function($store) {
+            // Verificar si tiene design
+            if (!$store->design) {
+                return false;
+            }
+            
+            // Verificar logo_url - puede estar en los attributes o usar el accessor
+            $logoUrl = $store->design->logo_url ?? null;
+            
+            // Si el accessor devuelve null, verificar directamente en attributes
+            if (empty($logoUrl)) {
+                $rawLogoUrl = $store->design->getAttributes()['logo_url'] ?? null;
+                if (empty($rawLogoUrl)) {
+                    return false;
+                }
+                // Si hay raw logo_url, el accessor debería funcionar
+                $logoUrl = $store->design->logo_url;
+            }
+            
+            return !empty($logoUrl);
+        })
+        ->take(12) // Limitar a 12 tiendas para el carrusel
+        ->values() // Re-indexar
+        ->map(function($store) {
+            return [
+                'slug' => $store->slug,
+                'name' => $store->name,
+                'logo_url' => $store->design->logo_url,
+                'url' => route('tenant.home', $store->slug),
+            ];
+        });
+    } catch (\Exception $e) {
+        // Si hay error, usar colección vacía
+        \Log::error('Error obteniendo tiendas destacadas para landing', [
+            'error' => $e->getMessage(),
+            'trace' => $e->getTraceAsString()
+        ]);
+        $featuredStores = collect([]);
     }
     
-    return view('welcome');
-});
+    return view('landing.index', compact('featuredStores'));
+})->name('landing');
 
-// Redirección para otras rutas principales
-Route::get('/home', function () {
-    if (request()->getHost() === 'linkiu.bio') {
-        return redirect('https://linkiu.com.co/home', 301);
-    }
-    
-    return view('welcome');
-});
+// Página de Planes Pública
+Route::get('/planes', [App\Features\Public\Controllers\PlansController::class, 'index'])->name('plans.index');
+Route::post('/planes/select', [App\Features\Public\Controllers\PlansController::class, 'selectPlan'])->name('plans.select');
 
-Route::get('/about', function () {
-    if (request()->getHost() === 'linkiu.bio') {
-        return redirect('https://linkiu.com.co/about', 301);
-    }
-    
-    return view('welcome');
-});
+// Página de Funciones Pública
+Route::get('/funciones', [App\Features\Public\Controllers\FunctionsController::class, 'index'])->name('functions.index');
 
-Route::get('/contact', function () {
-    if (request()->getHost() === 'linkiu.bio') {
-        return redirect('https://linkiu.com.co/contact', 301);
-    }
-    
-    return view('welcome');
-});
+// Página de Ecommerce Pública
+Route::get('/ecommerce', [App\Features\Public\Controllers\EcommerceController::class, 'index'])->name('ecommerce.index');
+Route::get('/restaurante', [App\Features\Public\Controllers\RestaurantController::class, 'index'])->name('restaurant.index');
 
-Route::get('/services', function () {
-    if (request()->getHost() === 'linkiu.bio') {
-        return redirect('https://linkiu.com.co/services', 301);
-    }
-    
-    return view('welcome');
-});
+// Página de Preguntas Frecuentes Pública
+Route::get('/preguntas-frecuentes', [App\Features\Public\Controllers\FAQController::class, 'index'])->name('faq.index');
+
+// Página de Contacto Pública
+Route::get('/contacto', [App\Features\Public\Controllers\ContactController::class, 'index'])->name('contact.index');
+
+// Página de Nosotros Pública
+Route::get('/nosotros', [App\Features\Public\Controllers\AboutController::class, 'index'])->name('about.index');
+
+// Página de Nuevas Actualizaciones Pública
+Route::get('/nuevas-actualizaciones', [App\Features\Public\Controllers\ReleaseNotesController::class, 'index'])->name('release-notes.index');
+
+// Página de Equipo Pública
+Route::get('/equipo', [App\Features\Public\Controllers\TeamController::class, 'index'])->name('team.index');
+
+// Página de Partners Pública
+Route::get('/partners', [App\Features\Public\Controllers\PartnersController::class, 'index'])->name('partners.index');
 
 // Ruta para autenticación de WebSocket (requerida aunque usemos canales públicos)
 Broadcast::routes(['middleware' => ['auth']]);
