@@ -86,6 +86,12 @@
     <script src="https://unpkg.com/lucide@latest"></script>
     
     <style>
+        /* Prevenir scroll horizontal en toda la página */
+        html, body {
+            overflow-x: hidden;
+            max-width: 100vw;
+        }
+        
         .font-satoshi { font-family: 'Satoshi', sans-serif; }
         .font-inter { font-family: 'Inter', sans-serif; }
         
@@ -228,7 +234,7 @@
     <x-public-navbar />
 
     <!-- Hero Section -->
-    <section class="hero-gradient min-h-screen flex items-center relative overflow-visible py-24 lg:py-32">
+    <section class="hero-gradient min-h-screen flex items-center relative overflow-hidden py-24 lg:py-32">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-8 relative z-10">
             <div class="flex flex-col items-center">
                 <!-- Texto Centrado -->
@@ -260,7 +266,7 @@
                 </div>
                 
                 <!-- Mockup con cards flotantes - Centrado -->
-                <div class="relative max-w-4xl lg:max-w-7xl w-full mt-2 lg:mt-8">
+                <div class="relative max-w-4xl lg:max-w-7xl w-full mt-2 lg:mt-8 mx-auto">
                     <div class="rounded-3xl">
                         <!-- Browser mockup -->
                         <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
