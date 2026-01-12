@@ -104,7 +104,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Título -->
             <div class="text-center mb-12">
-                <h1 class="font-satoshi text-xl sm:text-2xl lg:text-5xl font-black text-gray-900 mb-4">
+                <h1 class="font-satoshi text-4xl sm:text-2xl lg:text-5xl font-black text-gray-900 mb-4">
                 30 días gratis para probar Linkiu.
                 </h1>
                 <p class="text-lg sm:text-xl text-gray-600 font-inter max-w-2xl mx-auto">
@@ -158,7 +158,7 @@
                 </div>
 
                 <!-- Grid de Planes -->
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-6 pt-24">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-6 pt-4 lg:pt-24">
                     @foreach($plans as $index => $plan)
                         @php
                             $isFeatured = $plan->is_featured;
@@ -252,7 +252,7 @@
             </div>
 
             <!-- Todas las Funcionalidades -->
-            <div id="funcionalidades" class="mt-32 scroll-mt-24">
+            <div id="funcionalidades" class="mt-12 lg:mt-32 scroll-mt-24">
                 <div class="text-center mb-16">
                     <h2 class="font-satoshi text-3xl sm:text-4xl font-black text-gray-900 mb-4">
                         Todas las Funcionalidades

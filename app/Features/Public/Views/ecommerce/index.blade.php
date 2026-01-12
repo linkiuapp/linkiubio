@@ -189,15 +189,15 @@
                 <div class="text-center lg:text-left">
                     <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-6 border border-white/10">
                         <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                        <span class="text-white/80 text-sm font-inter">Ideal para tiendas de ropa, tecnología y más</span>
+                        <span class="text-white/80 text-sm lg:text-base font-inter">Ideal para tiendas de ropa, tecnología y más</span>
                     </div>
                     
-                    <h1 class="font-satoshi text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight mb-6">
+                    <h1 class="font-satoshi text-5xl sm:text-5xl lg:text-6xl font-black text-white leading-tight mb-6">
                         Tu vitrina digital<br>
-                        <span class="text-accent-300">abierta 24/7</span>
+                        <span class="text-accent-300 mb-0 lg:mb-2">abierta 24/7</span>
                     </h1>
                     
-                    <p class="text-lg sm:text-xl text-gray-300 mb-8 max-w-xl mx-auto lg:mx-0 font-inter">
+                    <p class="text-base lg:text-lg text-gray-300 mb-6 lg:mb-8 max-w-xl mx-auto lg:mx-0 font-inter">
                         Recibe pedidos mientras duermes. Con Linkiu tienes tu tienda online completa con carrito, pagos y envíos <span class="text-accent-300 font-semibold">en minutos</span>.
                     </p>
                     
@@ -345,7 +345,7 @@
     <x-featured-stores-carousel :stores="$featuredStores ?? collect([])" />
 
     <!-- Sección: Para quién es ideal -->
-    <section class="py-20 bg-white">
+    <section class="py-12 lg:py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="font-satoshi text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 mb-4">
@@ -499,7 +499,7 @@
     </section>
 
     <!-- Sección: Características principales con wireframes -->
-    <section class="py-20 bg-gray-50">
+    <section class="py-12 lg:py-20 bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="font-satoshi text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 mb-4">
@@ -708,7 +708,7 @@
             </div>
             
             <!-- Característica 3: Envíos -->
-            <div class="grid lg:grid-cols-2 gap-12 items-center">
+            <div class="grid lg:grid-cols-2 gap-12 items-center mb-20 lg:mb-0">
                 <div>
                     <div class="inline-flex items-center gap-2 bg-green-100 px-4 py-2 rounded-full mb-4">
                         <i data-lucide="truck" class="w-5 h-5 text-green-600"></i>

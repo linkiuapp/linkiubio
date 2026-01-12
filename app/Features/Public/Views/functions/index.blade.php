@@ -669,7 +669,7 @@
                     </p>
                 </div>
                 
-                <div class="bg-white rounded-2xl p-8 md:p-12 border border-gray-200">
+                <div class="bg-white rounded-2xl p-4 lg:p-8 border border-gray-200">
                     <div class="grid lg:grid-cols-2 gap-12 items-center">
                         <div>
                             <div class="inline-flex items-center gap-2 bg-green-100 px-4 py-2 rounded-full mb-4">
@@ -729,7 +729,7 @@
                         
                         <!-- Badge de verificación visual -->
                         <div class="flex items-center justify-center">
-                            <div class="bg-white rounded-2xl shadow-xl p-8 border-2 border-green-200 max-w-md w-full">
+                            <div class="bg-white rounded-2xl shadow-xl p-4 lg:p-8 border-2 border-green-200 max-w-md w-full">
                                 <div class="text-center mb-6">
                                     <div class="inline-flex items-center gap-3 bg-green-50 border-2 border-green-300 rounded-full px-8 py-4 mb-6">
                                         <i data-lucide="shield-check" class="w-8 h-8 text-green-600"></i>

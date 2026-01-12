@@ -189,7 +189,7 @@
                 <div class="text-center lg:text-left">
                     <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-6 border border-white/10">
                         <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                        <span class="text-white/80 text-sm font-inter">Ideal para restaurantes, cafeterías, pizzerías y más</span>
+                        <span class="text-white/80 text-sm lg:text-base font-inter">Ideal para restaurantes, cafeterías, pizzerías y más</span>
                     </div>
                     
                     <h1 class="font-satoshi text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight mb-6">
@@ -345,7 +345,7 @@
     <x-featured-stores-carousel :stores="$featuredStores ?? collect([])" />
 
     <!-- Sección: Para quién es ideal -->
-    <section class="py-20 bg-white">
+    <section class="py-12 lg:py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="font-satoshi text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 mb-4">
@@ -708,7 +708,7 @@
             </div>
             
             <!-- Característica 3: Reservas de Mesas -->
-            <div class="grid lg:grid-cols-2 gap-12 items-center">
+            <div class="grid lg:grid-cols-2 gap-12 items-center mb-20 lg:mb-0">
                 <div>
                     <div class="inline-flex items-center gap-2 bg-blue-100 px-4 py-2 rounded-full mb-4">
                         <i data-lucide="calendar" class="w-5 h-5 text-blue-600"></i>

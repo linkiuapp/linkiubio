@@ -100,7 +100,7 @@
     <x-public-navbar />
 
     <!-- Hero Section -->
-    <section class="pt-40 pb-20 bg-gradient-to-br from-gray-50 to-white">
+    <section class="pt-40 pb-4 lg:pb-20 bg-gradient-to-br from-gray-50 to-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
                 <h1 class="font-satoshi text-4xl sm:text-5xl lg:text-6xl font-black text-gray-900 mb-4">
@@ -123,7 +123,7 @@
                         <h2 class="font-satoshi text-3xl sm:text-4xl font-black text-gray-900 mb-6">
                             Quiénes Somos
                         </h2>
-                        <div class="space-y-4 text-gray-600 font-inter leading-relaxed text-justify">
+                        <div class="space-y-4 px-2 lg:px-0 text-gray-600 font-inter leading-relaxed text-justify">
                             <p>
                                 Linkiu es una plataforma innovadora diseñada para ayudar a negocios de todos los tamaños a crear y gestionar su presencia en línea. Nuestro objetivo es democratizar el comercio electrónico y hacer que cualquier persona pueda iniciar su tienda online sin necesidad de conocimientos técnicos complejos.
                             </p>
@@ -135,7 +135,7 @@
                             </p>
                         </div>
                     </div>
-                    <div class="bg-gradient-to-br from-brand-200/10 to-accent-300/10 rounded-3xl p-12 text-center">
+                    <div class="bg-gradient-to-br from-brand-200/10 to-accent-300/10 rounded-3xl p-2 lg:p-12 text-center">
                         <div class="bg-white rounded-2xl p-8 shadow-lg">
                             <!-- Wireframe de tienda online -->
                             <div class="mb-6">

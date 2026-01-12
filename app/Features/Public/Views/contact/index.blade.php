@@ -100,7 +100,7 @@
     <x-public-navbar />
 
     <!-- Hero Section -->
-    <section class="pt-40 pb-16 bg-gradient-to-br from-gray-50 to-white">
+    <section class="pt-40 pb-4 lg:pb-16 bg-gradient-to-br from-gray-50 to-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
                 <h1 class="font-satoshi text-4xl sm:text-5xl lg:text-6xl font-black text-gray-900 mb-4">
@@ -173,7 +173,7 @@
                 </div>
 
                 <!-- Formulario de Contacto -->
-                <div class="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
+                <div class="bg-white rounded-2xl border border-gray-200 p-4 lg:p-8 shadow-sm">
                     <h2 class="font-satoshi text-2xl font-black text-gray-900 mb-6">Envíanos un Mensaje</h2>
                     
                     @if(session('success'))

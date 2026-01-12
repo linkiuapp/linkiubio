@@ -100,7 +100,7 @@
     <x-public-navbar />
 
     <!-- Hero Section con Iconos Flotantes -->
-    <section class="pt-40 pb-20 bg-gradient-to-br from-gray-50 to-white relative overflow-visible">
+    <section class="pt-40 pb-4 lg:pb-20 bg-gradient-to-br from-gray-50 to-white relative overflow-visible">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 relative">
             <!-- Iconos flotantes -->
             <div class="absolute top-0 left-0 right-0 pointer-events-none" style="z-index: 0;">
@@ -109,11 +109,11 @@
                 </div>
             </div>
             
-            <div class="relative text-center mb-12 mt-12" style="z-index: 1;">
-                <h1 class="font-satoshi text-lg sm:text-2xl lg:text-3xl font-black text-gray-900 mb-4">
+            <div class="relative text-center mb-4 lg:mb-12 -mt-12 lg:mt-12" style="z-index: 1;">
+                <h1 class="font-satoshi text-4xl sm:text-2xl lg:text-3xl font-black text-gray-900 mb-4">
                     Nuevas Actualizaciones
                 </h1>
-                <p class="text-base sm:text-base text-gray-600 font-inter max-w-3xl mx-auto">
+                <p class="text-base sm:text-base lg:text-lg text-gray-600 font-inter max-w-3xl mx-auto mt-16 lg:mt-0">
                     Lista de actualizaciones y correcciones que realizamos para ti. <br> Las notas de lanzamiento se presentan según la versión más reciente.
                 </p>
             </div>

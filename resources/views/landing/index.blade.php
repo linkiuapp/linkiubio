@@ -228,31 +228,31 @@
     <x-public-navbar />
 
     <!-- Hero Section -->
-    <section class="hero-gradient min-h-screen flex items-center relative overflow-visible py-32">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+    <section class="hero-gradient min-h-screen flex items-center relative overflow-visible py-24 lg:py-32">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-8 relative z-10">
             <div class="flex flex-col items-center">
                 <!-- Texto Centrado -->
-                <div class="text-center max-w-4xl mb-8 hidden lg:block">
-                    <div class="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full mb-6 border border-white/10">
+                <div class="text-center max-w-4xl lg:mb-8 w-full px-4 mt-8 lg:mt-0">
+                    <div class="inline-flex items-center gap-2 bg-white/10 px-3 lg:px-4 py-1.5 lg:py-2 rounded-full mb-4 lg:mb-6 border border-white/10">
                         <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                        <span class="text-white/80 text-sm font-inter">+100 negocios ya venden con Linkiu</span>
+                        <span class="text-white/80 text-sm lg:text-base font-inter">+100 negocios ya venden con Linkiu</span>
                     </div>
                     
-                    <h1 class="font-satoshi text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight mb-6">
+                    <h1 class="font-satoshi text-5xl sm:text-5xl lg:text-6xl font-black text-white leading-tight mb-4 lg:mb-6">
                         Tu negocio online<br>
-                        <span class="text-accent-300">en minutos</span>
+                        <span class="text-accent-300 mb-0 lg:mb-2">en minutos</span>
                     </h1>
                     
-                    <p class="text-base sm:text-lg text-white mb-8 max-w-2xl mx-auto font-inter">
+                    <p class="text-sm sm:text-base lg:text-lg text-white mb-6 lg:mb-8 max-w-2xl mx-auto font-inter">
                         Olvídate de enviar fotos por WhatsApp, PDFs pesados o páginas lentas. 
                         Con Linkiu tienes tu tienda <span class="text-accent-300 font-semibold">lista para vender hoy</span>.
                     </p>
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-                        <button onclick="fbq('track', 'Lead'); window.location.href='{{ route('register.step1') }}';" class="bg-accent-300 hover:bg-accent-400 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
+                    <div class="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center mb-8 lg:mb-12 w-full sm:w-auto mx-auto">
+                        <button onclick="fbq('track', 'Lead'); window.location.href='{{ route('register.step1') }}';" class="bg-accent-300 hover:bg-accent-400 text-white px-6 lg:px-8 py-3 lg:py-4 rounded-xl font-bold text-base lg:text-lg transition-all hover:scale-105 flex items-center justify-center gap-2 w-full sm:w-auto">
                             <span>Prueba gratis</span>
                             <i data-lucide="arrow-right" class="w-5 h-5"></i>
                         </button>
-                        <button @click="calendlyOpen = true" class="bg-white/10 hover:bg-white/20 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-colors flex items-center justify-center gap-2 border border-white/20 backdrop-blur-none">
+                        <button @click="calendlyOpen = true" class="bg-white/10 hover:bg-white/20 text-white px-6 lg:px-8 py-3 lg:py-4 rounded-xl font-semibold text-base lg:text-lg transition-colors flex items-center justify-center gap-2 border border-white/20 backdrop-blur-none w-full sm:w-auto">
                             <i data-lucide="calendar" class="w-5 h-5"></i>
                             <span>Agendar reunión</span>
                         </button>
@@ -260,7 +260,7 @@
                 </div>
                 
                 <!-- Mockup con cards flotantes - Centrado -->
-                <div class="relative max-w-4xl lg:max-w-7xl w-full mt-8">
+                <div class="relative max-w-4xl lg:max-w-7xl w-full mt-2 lg:mt-8">
                     <div class="rounded-3xl">
                         <!-- Browser mockup -->
                         <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
@@ -381,7 +381,7 @@
     <x-featured-stores-carousel :stores="$featuredStores ?? collect([])" />
 
     <!-- Dolores Section -->
-    <section class="py-20 bg-white">
+    <section class="py-8 lg:py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="font-satoshi text-3xl sm:text-4xl font-black text-gray-900 mb-4">
@@ -450,7 +450,7 @@
     </section>
 
     <!-- Funciones Section - Bento Grid Mejorado -->
-    <section id="funciones" class="py-20 bg-gray-50">
+    <section id="funciones" class="py-16 lg:py-20 bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <span class="inline-block bg-brand-200/10 text-brand-200 px-4 py-1 rounded-full text-sm font-semibold mb-4">
@@ -596,7 +596,7 @@
     </section>
 
     <!-- Verticales Section -->
-    <section class="py-20 bg-white">
+    <section class="py-12 lg:py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <span class="inline-block bg-brand-200/10 text-brand-200 px-4 py-1 rounded-full text-sm font-semibold mb-4">
@@ -728,7 +728,7 @@
     </section>
 
     <!-- Cómo Funciona Section - Con wireframes y mejor gradient -->
-    <section id="como-funciona" class="py-20 steps-gradient relative overflow-visible">
+    <section id="como-funciona" class="py-12 lg:py-20 steps-gradient relative overflow-visible">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center mb-16">
                 <span class="inline-block bg-white/10 text-white px-4 py-1 rounded-full text-sm font-semibold mb-4 border border-white/20">
@@ -834,9 +834,9 @@
     </section>
 
     <!-- Sección: Verificación de Tiendas -->
-    <section class="py-20 bg-gray-50">
+    <section class="py-12 lg:py-20 bg-gray-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-white rounded-3xl p-8 md:p-12 border border-gray-200 shadow-lg">
+            <div class="bg-white rounded-3xl p-4 lg:p-8 md:p-12 border border-gray-200 shadow-lg">
                 <div class="grid md:grid-cols-2 gap-12 items-center">
                     <div>
                         <div class="inline-flex items-center gap-2 bg-green-100 px-4 py-2 rounded-full mb-4">
@@ -901,7 +901,7 @@
                         </p>
                     </div>
                     <div class="relative">
-                        <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-8 border border-green-100">
+                        <div class="bg-gradient-to-br from-green-50 to-emerald-50 rounded-2xl p-2 lg:p-8 border border-green-100">
                             <div class="flex items-center justify-center mb-6">
                                 <div class="w-24 h-24 bg-green-500 rounded-full flex items-center justify-center shadow-xl">
                                     <i data-lucide="shield-check" class="w-12 h-12 text-white"></i>
@@ -962,7 +962,7 @@
     </section>
 
     <!-- CTA Final -->
-    <section class="py-20 bg-white">
+    <section class="py-12 lg:py-20 bg-white">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
             <h2 class="font-satoshi text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 mb-6">
                 ¿Listo para <span class="text-accent-300">vender online</span>?

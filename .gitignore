@@ -31,7 +31,6 @@
 /storage/app/payment-proof-templates/*.png
 !/storage/app/payment-proof-templates/.gitkeep
 !/storage/app/payment-proof-templates/README.txt
-/storage/framework/views/
 /vendor
 Homestead.json
 Homestead.yaml

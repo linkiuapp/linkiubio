@@ -235,13 +235,13 @@
                     {{-- Sección: Período de Prueba Gratuito (cuando skip_payment_on_trial es true) --}}
                     @if($skipPayment ?? false)
                     <div class="p-6 lg:p-8 border-b border-gray-200 bg-gradient-to-r from-green-50 to-emerald-50">
-                        <div class="flex items-start gap-4">
-                            <div class="flex-shrink-0">
+                        <div class="flex flex-col lg:flex-row items-start gap-4">
+                            <div class="flex-shrink-0 order-1 lg:order-none">
                                 <div class="w-12 h-12 rounded-full bg-green-500 flex items-center justify-center">
                                     <i data-lucide="gift" class="w-6 h-6 text-white"></i>
                                 </div>
                             </div>
-                            <div class="flex-1">
+                            <div class="flex-1 order-2 lg:order-none">
                                 <h3 class="text-lg font-bold text-green-800 mb-2">
                                     🎉 ¡Período de Prueba Gratuito!
                                 </h3>

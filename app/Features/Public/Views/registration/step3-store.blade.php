@@ -39,7 +39,7 @@
                 <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
                     
                     {{-- Sección: Identidad de la Tienda --}}
-                    <div class="p-6 lg:p-8 border-b border-gray-200">
+                    <div class="p-3 lg:p-8 border-b border-gray-200">
                         <div class="flex items-center gap-3 mb-6">
                             <div class="w-12 h-12 bg-accent-300/10 rounded-xl flex items-center justify-center">
                                 <i data-lucide="store" class="w-6 h-6 text-accent-300"></i>
@@ -126,62 +126,63 @@
                                     <div class="bg-white rounded-lg border-2 border-gray-200 overflow-hidden shadow-lg"
                                          :class="fieldErrors.slug ? 'border-red-300' : (slug && !fieldErrors.slug && slugAvailable === true ? 'border-green-300' : (slug && !fieldErrors.slug && slugAvailable === false ? 'border-red-300' : 'border-gray-200'))">
                                         {{-- Barra superior del navegador --}}
-                                        <div class="bg-gray-50 px-4 py-3 flex items-center gap-3 border-b border-gray-200">
+                                        <div class="bg-gray-50 px-3 sm:px-4 py-2 sm:py-3 flex items-center gap-2 sm:gap-3 border-b border-gray-200">
                                             {{-- Botones del navegador (macOS style) --}}
-                                            <div class="flex gap-2">
-                                                <div class="w-3 h-3 bg-red-500 rounded-full"></div>
-                                                <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
-                                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                            <div class="flex gap-1.5 sm:gap-2 flex-shrink-0">
+                                                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-red-500 rounded-full"></div>
+                                                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-yellow-500 rounded-full"></div>
+                                                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 bg-green-500 rounded-full"></div>
                                             </div>
                                             {{-- Barra de direcciones editable --}}
-                                            <div class="flex-1 relative">
-                                                <div class="flex items-center gap-2 bg-white rounded-md px-4 py-2 border border-gray-300 shadow-sm focus-within:border-blue-300 transition-colors"
+                                            <div class="flex-1 relative min-w-0">
+                                                <div class="flex items-center gap-1 sm:gap-2 bg-white rounded-md px-2 sm:px-3 lg:px-4 py-1.5 sm:py-2 border border-gray-300 shadow-sm focus-within:border-blue-300 transition-colors"
                                                      :class="fieldErrors.slug ? 'border-red-300' : (slug && !fieldErrors.slug && slugAvailable === true ? 'border-green-300' : (slug && !fieldErrors.slug && slugAvailable === false ? 'border-red-300' : 'border-gray-300'))">
-                                                    <i data-lucide="lock" class="w-4 h-4 text-gray-600 flex-shrink-0"></i>
-                                                    <span class="text-sm text-gray-600 font-mono">https://linkiu.bio/</span>
+                                                    <i data-lucide="lock" class="w-3 h-3 sm:w-4 sm:h-4 text-gray-600 flex-shrink-0"></i>
+                                                    <span class="text-sm sm:text-sm text-gray-600 font-mono whitespace-nowrap hidden sm:inline">https://linkiu.bio/</span>
+                                                    <span class="text-sm sm:text-sm text-gray-600 font-mono whitespace-nowrap sm:hidden">linkiu.bio/</span>
                                                     <input type="text"
                                                            name="slug"
                                                            x-model="slug"
                                                            @input="onSlugInput(); debouncedSave(); validateSlug()"
                                                            @blur="saveToLocalStorage()"
                                                            value="{{ old('slug') }}"
-                                                           class="flex-1 pl-0 text-base text-gray-800 font-mono font-semibold bg-transparent border-0 outline-none focus:outline-none"
+                                                           class="flex-1 min-w-0 pl-0 text-sm sm:text-sm lg:text-base text-gray-800 font-mono font-semibold bg-transparent border-0 outline-none focus:outline-none"
                                                            placeholder="tu-tienda"
                                                            pattern="[a-z0-9-]+"
                                                            required>
                                                     
                                                     {{-- Icono de validación dentro de la barra de direcciones --}}
-                                                    <div class="flex-shrink-0 ml-2">
+                                                    <div class="flex-shrink-0 ml-1 sm:ml-2">
                                                         {{-- Spinner: Validando --}}
                                                         <div x-show="validatingSlug && slug" x-cloak>
-                                                            <i data-lucide="loader-2" class="w-4 h-4 text-blue-500 animate-spin"></i>
+                                                            <i data-lucide="loader-2" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-500 animate-spin"></i>
                                                         </div>
                                                         
                                                         {{-- Check: Disponible --}}
                                                         <div x-show="slug && !validatingSlug && slugAvailable === true && !fieldErrors.slug" x-cloak>
-                                                            <i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i>
+                                                            <i data-lucide="check-circle" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-green-500"></i>
                                                         </div>
                                                         
                                                         {{-- X: En uso --}}
                                                         <div x-show="slug && !validatingSlug && slugAvailable === false && !fieldErrors.slug" x-cloak>
-                                                            <i data-lucide="x-circle" class="w-4 h-4 text-red-500"></i>
+                                                            <i data-lucide="x-circle" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500"></i>
                                                         </div>
                                                         
                                                         {{-- Error de formato --}}
                                                         <div x-show="fieldErrors.slug && !validatingSlug" x-cloak>
-                                                            <i data-lucide="alert-circle" class="w-4 h-4 text-red-500"></i>
+                                                            <i data-lucide="alert-circle" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-red-500"></i>
                                                         </div>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                         {{-- Contenido del preview --}}
-                                        <div class="p-6 bg-white">
-                                            <div class="flex items-center gap-4 mb-4">
-                                                <div class="w-16 h-16 bg-gray-200 rounded-xl flex-shrink-0"></div>
-                                                <div class="flex-1">
-                                                    <div class="h-5 bg-gray-300 rounded w-3/4 mb-2"></div>
-                                                    <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+                                        <div class="p-3 sm:p-4 lg:p-6 bg-white">
+                                            <div class="flex items-center gap-2 sm:gap-3 lg:gap-4 mb-3 sm:mb-4">
+                                                <div class="w-12 h-12 sm:w-14 sm:h-14 lg:w-16 lg:h-16 bg-gray-200 rounded-xl flex-shrink-0"></div>
+                                                <div class="flex-1 min-w-0">
+                                                    <div class="h-4 sm:h-5 bg-gray-300 rounded w-3/4 mb-1.5 sm:mb-2"></div>
+                                                    <div class="h-3 sm:h-4 bg-gray-200 rounded w-1/2"></div>
                                                 </div>
                                             </div>
                                         </div>
