@@ -6,176 +6,231 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Configuración de Tienda - Linkiu</title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images-ui/favico_linkiu.svg') }}">
+    
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Calendly Script -->
+    <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50" x-data="storeConfig()">
     
     <div class="min-h-screen">
         {{-- Wizard Progress --}}
-        <div class="bg-white border-b border-gray-200">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white font-semibold">
-                            3
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-900">Paso 3 de 4</p>
-                            <p class="text-xs text-gray-600">Configuración de Tienda</p>
-                        </div>
-                    </div>
-                    <a href="{{ route('register.step2') }}" class="text-sm text-gray-600 hover:text-gray-900 font-medium">
-                        ← Volver
-                    </a>
-                </div>
-                <div class="flex gap-2">
-                    <div class="flex-1 h-2 bg-blue-600 rounded-full"></div>
-                    <div class="flex-1 h-2 bg-blue-600 rounded-full"></div>
-                    <div class="flex-1 h-2 bg-blue-600 rounded-full"></div>
-                    <div class="flex-1 h-2 bg-gray-200 rounded-full"></div>
-                </div>
-            </div>
-        </div>
+        <x-registration-wizard-navbar 
+            :currentStep="3"
+            :totalSteps="4"
+            :showBackButton="true"
+            :backRoute="route('register.step2')"
+        />
 
         {{-- Content Area --}}
         <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div class="text-center mb-8">
-                <h2 class="text-xl font-bold text-slate-900 mb-3">Configura tu Tienda Online</h2>
+                <h2 class="text-2xl font-bold text-slate-900 mb-3">Configura tu Tienda Online</h2>
                 <p class="text-base font-normal text-slate-600">Personaliza la identidad de tu tienda</p>
             </div>
 
-            <form method="POST" action="{{ route('register.step3.store') }}" enctype="multipart/form-data" x-data="storeConfig()">
+            <form method="POST" action="{{ route('register.step3.store') }}" enctype="multipart/form-data">
                 @csrf
                 
                 <div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-hidden">
                     
                     {{-- Sección: Identidad de la Tienda --}}
                     <div class="p-6 lg:p-8 border-b border-gray-200">
-                        <h3 class="text-base md:text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-                            <i data-lucide="store" class="w-5 h-5 text-blue-600"></i>
-                            Identidad de tu Tienda
-                        </h3>
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-12 h-12 bg-accent-300/10 rounded-xl flex items-center justify-center">
+                                <i data-lucide="store" class="w-6 h-6 text-accent-300"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900">Identidad de tu Tienda</h3>
+                                <p class="text-sm text-slate-600">Define el nombre y la URL de tu tienda</p>
+                            </div>
+                        </div>
                         
                         <div class="space-y-6">
                             <div>
-                                <label class="block text-sm font-medium text-slate-600 mb-2">
+                                <label class="block text-sm font-semibold text-slate-900 mb-2">
                                     Nombre de la Tienda <span class="text-red-500">*</span>
                                 </label>
-                                <input type="text"
-                                       name="store_name"
-                                       x-model="storeName"
-                                       @input="generateSlug()"
-                                       value="{{ old('store_name') }}"
-                                       class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none @error('store_name') border-red-300 @enderror text-base"
-                                       placeholder="Mi Tienda Online"
-                                       required>
+                                <div class="relative">
+                                    <input type="text"
+                                           name="store_name"
+                                           x-model="storeName"
+                                           @input="generateSlug(); debouncedSave(); validateStoreName()"
+                                           @blur="saveToLocalStorage()"
+                                           value="{{ old('store_name') }}"
+                                           class="w-full px-4 py-3 pr-12 border rounded-lg focus-none transition-colors @error('store_name') border-red-300 @enderror"
+                                           :class="fieldErrors.store_name ? 'border-red-300' : (storeName && !fieldErrors.store_name && storeNameAvailable === true ? 'border-green-300' : (storeName && !fieldErrors.store_name && storeNameAvailable === false ? 'border-red-300' : 'border-gray-200'))"
+                                           placeholder="Ej: Mi Tienda Online"
+                                           required>
+                                    
+                                    {{-- Icono de validación dentro del input --}}
+                                    <div class="absolute right-3 top-1/2 -translate-y-1/2">
+                                        {{-- Spinner: Validando --}}
+                                        <div x-show="validatingStoreName && storeName" x-cloak>
+                                            <i data-lucide="loader-2" class="w-5 h-5 text-blue-500 animate-spin"></i>
+                                        </div>
+                                        
+                                        {{-- Check: Disponible --}}
+                                        <div x-show="storeName && !validatingStoreName && storeNameAvailable === true && !fieldErrors.store_name" x-cloak>
+                                            <i data-lucide="check-circle" class="w-5 h-5 text-green-500"></i>
+                                        </div>
+                                        
+                                        {{-- X: En uso --}}
+                                        <div x-show="storeName && !validatingStoreName && storeNameAvailable === false && !fieldErrors.store_name" x-cloak>
+                                            <i data-lucide="x-circle" class="w-5 h-5 text-red-500"></i>
+                                        </div>
+                                        
+                                        {{-- Error de formato --}}
+                                        <div x-show="fieldErrors.store_name && !validatingStoreName" x-cloak>
+                                            <i data-lucide="alert-circle" class="w-5 h-5 text-red-500"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                {{-- Mensajes de validación debajo del input --}}
+                                {{-- Error de formato --}}
+                                <div x-show="fieldErrors.store_name && !validatingStoreName" x-cloak class="mt-2 flex items-center gap-2 text-sm text-red-600">
+                                    <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                                    <span x-text="fieldErrors.store_name"></span>
+                                </div>
+                                
+                                {{-- Nombre en uso (no disponible) --}}
+                                <div x-show="storeName && !validatingStoreName && storeNameAvailable === false && !fieldErrors.store_name" x-cloak class="mt-2 flex items-center gap-2 text-sm text-red-600">
+                                    <i data-lucide="x-circle" class="w-4 h-4"></i>
+                                    <span>Este nombre ya está en uso</span>
+                                </div>
+                                
+                                {{-- Nombre disponible --}}
+                                <div x-show="storeName && !validatingStoreName && storeNameAvailable === true && !fieldErrors.store_name" x-cloak class="mt-2 flex items-center gap-2 text-sm text-green-600">
+                                    <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                    <span>Nombre disponible</span>
+                                </div>
                                 @error('store_name')
-                                    <p class="text-xs font-normal text-red-600 mt-1">{{ $message }}</p>
+                                    <p class="text-sm text-red-600 mt-2 flex items-center gap-2">
+                                        <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                                        {{ $message }}
+                                    </p>
                                 @enderror
                             </div>
 
                             <div>
-                                <label class="block text-sm font-medium text-slate-600 mb-2">
+                                <label class="block text-sm font-semibold text-slate-900 mb-2">
                                     URL de tu Tienda <span class="text-red-500">*</span>
                                 </label>
-                                <div class="grid grid-cols-1 md:flex gap-2 items-center justify-start md:justify-end">
-                                    <span class="text-slate-600 font-medium">linkiu.bio/</span>
-                                    <input type="text"
-                                           name="slug"
-                                           x-model="slug"
-                                           @input="onSlugInput()"
-                                           value="{{ old('slug') }}"
-                                           class="flex-1 px-4 py-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none @error('slug') border-red-300 @enderror text-base"
-                                           placeholder="mi-tienda"
-                                           pattern="[a-z0-9-]+"
-                                           required>
+                                
+                                {{-- Preview del navegador con input editable --}}
+                                <div class="mb-4">
+                                    <div class="bg-white rounded-lg border-2 border-gray-200 overflow-hidden shadow-lg"
+                                         :class="fieldErrors.slug ? 'border-red-300' : (slug && !fieldErrors.slug && slugAvailable === true ? 'border-green-300' : (slug && !fieldErrors.slug && slugAvailable === false ? 'border-red-300' : 'border-gray-200'))">
+                                        {{-- Barra superior del navegador --}}
+                                        <div class="bg-gray-50 px-4 py-3 flex items-center gap-3 border-b border-gray-200">
+                                            {{-- Botones del navegador (macOS style) --}}
+                                            <div class="flex gap-2">
+                                                <div class="w-3 h-3 bg-red-500 rounded-full"></div>
+                                                <div class="w-3 h-3 bg-yellow-500 rounded-full"></div>
+                                                <div class="w-3 h-3 bg-green-500 rounded-full"></div>
+                                            </div>
+                                            {{-- Barra de direcciones editable --}}
+                                            <div class="flex-1 relative">
+                                                <div class="flex items-center gap-2 bg-white rounded-md px-4 py-2 border border-gray-300 shadow-sm focus-within:border-blue-300 transition-colors"
+                                                     :class="fieldErrors.slug ? 'border-red-300' : (slug && !fieldErrors.slug && slugAvailable === true ? 'border-green-300' : (slug && !fieldErrors.slug && slugAvailable === false ? 'border-red-300' : 'border-gray-300'))">
+                                                    <i data-lucide="lock" class="w-4 h-4 text-gray-600 flex-shrink-0"></i>
+                                                    <span class="text-sm text-gray-600 font-mono">https://linkiu.bio/</span>
+                                                    <input type="text"
+                                                           name="slug"
+                                                           x-model="slug"
+                                                           @input="onSlugInput(); debouncedSave(); validateSlug()"
+                                                           @blur="saveToLocalStorage()"
+                                                           value="{{ old('slug') }}"
+                                                           class="flex-1 pl-0 text-base text-gray-800 font-mono font-semibold bg-transparent border-0 outline-none focus:outline-none"
+                                                           placeholder="tu-tienda"
+                                                           pattern="[a-z0-9-]+"
+                                                           required>
+                                                    
+                                                    {{-- Icono de validación dentro de la barra de direcciones --}}
+                                                    <div class="flex-shrink-0 ml-2">
+                                                        {{-- Spinner: Validando --}}
+                                                        <div x-show="validatingSlug && slug" x-cloak>
+                                                            <i data-lucide="loader-2" class="w-4 h-4 text-blue-500 animate-spin"></i>
+                                                        </div>
+                                                        
+                                                        {{-- Check: Disponible --}}
+                                                        <div x-show="slug && !validatingSlug && slugAvailable === true && !fieldErrors.slug" x-cloak>
+                                                            <i data-lucide="check-circle" class="w-4 h-4 text-green-500"></i>
+                                                        </div>
+                                                        
+                                                        {{-- X: En uso --}}
+                                                        <div x-show="slug && !validatingSlug && slugAvailable === false && !fieldErrors.slug" x-cloak>
+                                                            <i data-lucide="x-circle" class="w-4 h-4 text-red-500"></i>
+                                                        </div>
+                                                        
+                                                        {{-- Error de formato --}}
+                                                        <div x-show="fieldErrors.slug && !validatingSlug" x-cloak>
+                                                            <i data-lucide="alert-circle" class="w-4 h-4 text-red-500"></i>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        {{-- Contenido del preview --}}
+                                        <div class="p-6 bg-white">
+                                            <div class="flex items-center gap-4 mb-4">
+                                                <div class="w-16 h-16 bg-gray-200 rounded-xl flex-shrink-0"></div>
+                                                <div class="flex-1">
+                                                    <div class="h-5 bg-gray-300 rounded w-3/4 mb-2"></div>
+                                                    <div class="h-4 bg-gray-200 rounded w-1/2"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <p class="text-xs font-normal text-slate-600 mt-2">
+                                
+                                <p class="text-xs text-slate-600 mt-2 flex items-center gap-2">
+                                    <i data-lucide="info" class="w-4 h-4"></i>
                                     Solo letras minúsculas, números y guiones. Sin espacios ni caracteres especiales.
                                 </p>
+                                
+                                {{-- Mensajes de validación debajo del wireframe --}}
+                                {{-- Error de formato --}}
+                                <div x-show="fieldErrors.slug && !validatingSlug" x-cloak class="mt-2 flex items-center gap-2 text-sm text-red-600">
+                                    <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                                    <span x-text="fieldErrors.slug"></span>
+                                </div>
+                                
+                                {{-- Slug en uso (no disponible) --}}
+                                <div x-show="slug && !validatingSlug && slugAvailable === false && !fieldErrors.slug" x-cloak class="mt-2 flex items-center gap-2 text-sm text-red-600">
+                                    <i data-lucide="x-circle" class="w-4 h-4"></i>
+                                    <span>Esta URL ya está en uso</span>
+                                </div>
+                                
+                                {{-- Slug disponible --}}
+                                <div x-show="slug && !validatingSlug && slugAvailable === true && !fieldErrors.slug" x-cloak class="mt-2 flex items-center gap-2 text-sm text-green-600">
+                                    <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                    <span>URL disponible</span>
+                                </div>
+                                
                                 @error('slug')
-                                    <p class="text-xs font-normal text-red-600 mt-1">{{ $message }}</p>
+                                    <p class="text-sm text-red-600 mt-2 flex items-center gap-2">
+                                        <i data-lucide="alert-circle" class="w-4 h-4"></i>
+                                        {{ $message }}
+                                    </p>
                                 @enderror
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-slate-600 mb-2">
-                                    Descripción de la Tienda
-                                </label>
-                                <textarea name="store_description"
-                                          rows="3"
-                                          class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none @error('store_description') border-red-300 @enderror"
-                                          placeholder="Describe tu tienda, productos o servicios...">{{ old('store_description') }}</textarea>
-                                @error('store_description')
-                                    <p class="text-xs font-normal text-red-600 mt-1">{{ $message }}</p>
-                                @enderror
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Sección: SEO (Opcional) --}}
-                    <div class="p-6 lg:p-8 bg-slate-50">
-                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start justify-start mb-6">
-                            <h3 class="text-base md:text-lg font-bold text-slate-900 flex items-start justify-start md:justify-start gap-2">
-                                <i data-lucide="search" class="w-5 h-5 text-blue-600"></i>
-                                Optimización SEO
-                                <span class="text-xs font-normal text-slate-600">(Opcional)</span>
-                            </h3>
-                            <button type="button" 
-                                    @click="showSeo = !showSeo"
-                                    class="text-sm text-blue-600 hover:text-blue-800 font-medium flex items-start justify-start md:justify-end">
-                                <span x-show="!showSeo">+ Configurar SEO</span>
-                                <span x-show="showSeo">- Ocultar SEO</span>
-                            </button>
-                        </div>
-                        
-                        <div x-show="showSeo" x-collapse class="space-y-4">
-                            <div>
-                                <label class="block text-sm font-medium text-slate-600 mb-2">
-                                    Meta Título
-                                </label>
-                                <input type="text"
-                                       name="meta_title"
-                                       value="{{ old('meta_title') }}"
-                                       class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
-                                       placeholder="Mi Tienda - Los mejores productos">
-                                <p class="text-xs font-normal text-slate-600 mt-1">Aparecerá en los resultados de búsqueda de Google</p>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-slate-600 mb-2">
-                                    Meta Descripción
-                                </label>
-                                <textarea name="meta_description"
-                                          rows="2"
-                                          class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
-                                          placeholder="Breve descripción para motores de búsqueda...">{{ old('meta_description') }}</textarea>
-                                <p class="text-xs font-normal text-slate-600 mt-1">Máximo 160 caracteres recomendados</p>
-                            </div>
-
-                            <div>
-                                <label class="block text-sm font-medium text-slate-600 mb-2">
-                                    Palabras Clave
-                                </label>
-                                <input type="text"
-                                       name="meta_keywords"
-                                       value="{{ old('meta_keywords') }}"
-                                       class="w-full px-4 py-2.5 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none"
-                                       placeholder="tienda, online, productos, envíos">
-                                <p class="text-xs font-normal text-slate-600 mt-1">Separa las palabras con comas</p>
                             </div>
                         </div>
                     </div>
 
                     {{-- Botones de Navegación --}}
-                    <div class="p-6 lg:p-8 bg-slate-50 grid grid-cols-1 md:grid-cols-2 gap-4 items-center justify-center border-t border-gray-200">
+                    <div class="p-6 lg:p-8 bg-slate-50 grid grid-cols-1 md:grid-cols-2 gap-4">
                         <a href="{{ route('register.step2') }}" 
                            class="px-6 py-2.5 bg-white border border-gray-200 text-slate-600 rounded-lg font-medium hover:bg-gray-50 transition-colors flex items-center justify-center gap-2">
                             <i data-lucide="arrow-left" class="w-4 h-4"></i>
                             Paso Anterior
                         </a>
                         <button type="submit" 
-                                class="px-8 py-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-lg font-semibold transition-colors flex items-center justify-center gap-2">
+                                class="px-8 py-2.5 bg-accent-300 hover:bg-accent-400 text-white rounded-lg font-semibold transition-colors flex items-center justify-center gap-2">
                             <span>Continuar al Paso 4</span>
                             <i data-lucide="arrow-right" class="w-4 h-4"></i>
                         </button>
@@ -185,13 +240,116 @@
         </main>
     </div>
 
+    <!-- Calendly Modal -->
+    <div 
+        x-show="calendlyOpen" 
+        x-cloak
+        x-transition
+        @click.self="calendlyOpen = false"
+        @keydown.escape.window="calendlyOpen = false"
+        class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+    >
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+            <!-- Close Button -->
+            <button 
+                @click="calendlyOpen = false"
+                class="absolute top-4 right-4 z-10 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-colors"
+            >
+                <i data-lucide="x" class="w-5 h-5 text-gray-600"></i>
+            </button>
+            
+            <!-- Calendly Widget -->
+            <div class="calendly-inline-widget" data-url="https://calendly.com/linkiucloud/30min?hide_event_type_details=1&hide_gdpr_banner=1&text_color=050506&primary_color=ea0038" style="min-width:320px;height:700px;"></div>
+        </div>
+    </div>
+
     <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('storeConfig', () => ({
+            calendlyOpen: false,
             storeName: '{{ old('store_name') }}',
             slug: '{{ old('slug') }}',
-            showSeo: false,
-            slugManuallyEdited: {{ old('slug') ? 'true' : 'false' }}, // Track si el usuario editó manualmente
+            storeDescription: '{{ old('store_description') }}',
+            slugManuallyEdited: {{ old('slug') ? 'true' : 'false' }},
+            slugAvailable: null,
+            validatingSlug: false,
+            storeNameAvailable: null,
+            validatingStoreName: false,
+            fieldErrors: {},
+            saveTimeout: null,
+            slugValidationTimeout: null,
+            storeNameValidationTimeout: null,
+
+            init() {
+                // Cargar datos guardados
+                this.loadFromLocalStorage();
+                
+                // Restaurar valores de old() si existen
+                @if(old('store_name'))
+                    this.storeName = '{{ old('store_name') }}';
+                @endif
+                @if(old('slug'))
+                    this.slug = '{{ old('slug') }}';
+                @endif
+                @if(old('store_description'))
+                    this.storeDescription = '{{ old('store_description') }}';
+                @endif
+
+                // Inicializar iconos
+                this.$nextTick(() => {
+                    if (typeof lucide !== 'undefined') {
+                        lucide.createIcons();
+                    }
+                });
+            },
+
+            saveToLocalStorage() {
+                try {
+                    const data = {
+                        step: 3,
+                        formData: {
+                            store_name: this.storeName,
+                            slug: this.slug,
+                            store_description: this.storeDescription
+                        },
+                        timestamp: new Date().toISOString()
+                    };
+                    localStorage.setItem('registration_step3', JSON.stringify(data));
+                } catch (error) {
+                    console.error('Error guardando datos:', error);
+                }
+            },
+
+            loadFromLocalStorage() {
+                try {
+                    const saved = localStorage.getItem('registration_step3');
+                    if (saved) {
+                        const data = JSON.parse(saved);
+                        if (data.formData) {
+                            if (!this.storeName && data.formData.store_name) {
+                                this.storeName = data.formData.store_name;
+                            }
+                            if (!this.slug && data.formData.slug) {
+                                this.slug = data.formData.slug;
+                            }
+                            if (!this.storeDescription && data.formData.store_description) {
+                                this.storeDescription = data.formData.store_description;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error cargando datos:', error);
+                }
+            },
+
+            debouncedSave() {
+                if (this.saveTimeout) {
+                    clearTimeout(this.saveTimeout);
+                }
+                this.saveTimeout = setTimeout(() => {
+                    this.saveToLocalStorage();
+                }, 1500);
+            },
             
             generateSlug() {
                 // Solo auto-generar si el usuario no ha editado manualmente el slug
@@ -205,19 +363,179 @@
                     .replace(/\s+/g, '-') // Espacios a guiones
                     .replace(/-+/g, '-') // Múltiples guiones a uno
                     .slice(0, 50); // Limitar longitud
+                
+                // Validar slug después de generarlo
+                if (this.slug) {
+                    this.validateSlug();
+                }
             },
             
             onSlugInput() {
                 // Marcar que el usuario editó manualmente el slug
                 this.slugManuallyEdited = true;
+            },
+
+            async validateSlug() {
+                if (!this.slug) {
+                    this.fieldErrors.slug = '';
+                    this.slugAvailable = null;
+                    this.validatingSlug = false;
+                    return;
+                }
+
+                // Validar formato primero
+                if (!/^[a-z0-9-]+$/.test(this.slug)) {
+                    this.fieldErrors.slug = 'Solo se permiten letras minúsculas, números y guiones';
+                    this.slugAvailable = null;
+                    this.validatingSlug = false;
+                    return;
+                }
+
+                if (this.slug.startsWith('-') || this.slug.endsWith('-')) {
+                    this.fieldErrors.slug = 'La URL no puede comenzar o terminar con guión';
+                    this.slugAvailable = null;
+                    this.validatingSlug = false;
+                    return;
+                }
+
+                // Limpiar timeout anterior
+                if (this.slugValidationTimeout) {
+                    clearTimeout(this.slugValidationTimeout);
+                }
+
+                // Limpiar estados anteriores
+                this.fieldErrors.slug = '';
+                this.slugAvailable = null;
+
+                // Esperar 500ms después de que el usuario deje de escribir
+                this.slugValidationTimeout = setTimeout(async () => {
+                    this.validatingSlug = true;
+                    
+                    try {
+                        const response = await fetch('{{ route('api.validate-registration-slug') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            },
+                            body: JSON.stringify({
+                                slug: this.slug
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (!data.available) {
+                            // URL no disponible
+                            this.slugAvailable = false;
+                            this.fieldErrors.slug = '';
+                        } else {
+                            // URL disponible
+                            this.slugAvailable = true;
+                            this.fieldErrors.slug = '';
+                        }
+                    } catch (error) {
+                        console.error('Error validando slug:', error);
+                        this.slugAvailable = false;
+                        this.fieldErrors.slug = 'Error al verificar la disponibilidad';
+                    } finally {
+                        this.validatingSlug = false;
+                    }
+                }, 500);
+            },
+
+            async validateStoreName() {
+                if (!this.storeName) {
+                    this.fieldErrors.store_name = '';
+                    this.storeNameAvailable = null;
+                    this.validatingStoreName = false;
+                    return;
+                }
+
+                // Validar formato primero
+                if (this.storeName.trim().length < 3) {
+                    this.fieldErrors.store_name = 'El nombre debe tener al menos 3 caracteres';
+                    this.storeNameAvailable = null;
+                    this.validatingStoreName = false;
+                    return;
+                }
+
+                // Limpiar timeout anterior
+                if (this.storeNameValidationTimeout) {
+                    clearTimeout(this.storeNameValidationTimeout);
+                }
+
+                // Limpiar estados anteriores
+                this.fieldErrors.store_name = '';
+                this.storeNameAvailable = null;
+
+                // Esperar 500ms después de que el usuario deje de escribir
+                this.storeNameValidationTimeout = setTimeout(async () => {
+                    this.validatingStoreName = true;
+                    
+                    try {
+                        const response = await fetch('{{ route('api.validate-registration-store-name') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            },
+                            body: JSON.stringify({
+                                store_name: this.storeName
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (!data.available) {
+                            // Nombre no disponible
+                            this.storeNameAvailable = false;
+                            this.fieldErrors.store_name = data.message;
+                        } else {
+                            // Nombre disponible
+                            this.storeNameAvailable = true;
+                            this.fieldErrors.store_name = '';
+                        }
+                    } catch (error) {
+                        console.error('Error validando nombre de tienda:', error);
+                        this.storeNameAvailable = false;
+                        this.fieldErrors.store_name = 'Error al verificar la disponibilidad';
+                    } finally {
+                        this.validatingStoreName = false;
+                    }
+                }, 500);
+            },
+
+            validateField(fieldName) {
+                this.fieldErrors[fieldName] = '';
+                
+                switch(fieldName) {
+                    case 'store_name':
+                        if (!this.storeName || this.storeName.length < 3) {
+                            this.fieldErrors.store_name = 'El nombre debe tener al menos 3 caracteres';
+                        }
+                        break;
+                }
+            },
+
+            destroy() {
+                if (this.saveTimeout) {
+                    clearTimeout(this.saveTimeout);
+                }
+                if (this.slugValidationTimeout) {
+                    clearTimeout(this.slugValidationTimeout);
+                }
+                if (this.storeNameValidationTimeout) {
+                    clearTimeout(this.storeNameValidationTimeout);
+                }
             }
         }));
     });
 
     // Inicializar iconos Lucide
     document.addEventListener('DOMContentLoaded', function() {
-        if (window.createIcons && window.lucideIcons) {
-            window.createIcons({ icons: window.lucideIcons });
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
         }
     });
     </script>
@@ -227,4 +545,3 @@
     </style>
 </body>
 </html>
-

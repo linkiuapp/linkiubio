@@ -175,7 +175,21 @@
                 <!-- Formulario de Contacto -->
                 <div class="bg-white rounded-2xl border border-gray-200 p-8 shadow-sm">
                     <h2 class="font-satoshi text-2xl font-black text-gray-900 mb-6">Envíanos un Mensaje</h2>
-                    <form action="mailto:soporte@linkiu.bio" method="post" enctype="text/plain" class="space-y-6">
+                    
+                    @if(session('success'))
+                        <div class="mb-6 p-4 bg-green-50 border border-green-200 rounded-xl">
+                            <p class="text-green-700 font-inter">{{ session('success') }}</p>
+                        </div>
+                    @endif
+                    
+                    @if(session('error'))
+                        <div class="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+                            <p class="text-red-700 font-inter">{{ session('error') }}</p>
+                        </div>
+                    @endif
+                    
+                    <form action="{{ route('contact.send') }}" method="POST" class="space-y-6">
+                        @csrf
                         <!-- Nombre -->
                         <div>
                             <label for="name" class="block text-sm font-semibold text-gray-900 mb-2">

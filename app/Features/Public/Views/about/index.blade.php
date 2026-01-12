@@ -123,7 +123,7 @@
                         <h2 class="font-satoshi text-3xl sm:text-4xl font-black text-gray-900 mb-6">
                             Quiénes Somos
                         </h2>
-                        <div class="space-y-4 text-gray-600 font-inter leading-relaxed">
+                        <div class="space-y-4 text-gray-600 font-inter leading-relaxed text-justify">
                             <p>
                                 Linkiu es una plataforma innovadora diseñada para ayudar a negocios de todos los tamaños a crear y gestionar su presencia en línea. Nuestro objetivo es democratizar el comercio electrónico y hacer que cualquier persona pueda iniciar su tienda online sin necesidad de conocimientos técnicos complejos.
                             </p>
@@ -137,7 +137,41 @@
                     </div>
                     <div class="bg-gradient-to-br from-brand-200/10 to-accent-300/10 rounded-3xl p-12 text-center">
                         <div class="bg-white rounded-2xl p-8 shadow-lg">
-                            <i data-lucide="store" class="w-20 h-20 text-accent-300 mx-auto mb-6"></i>
+                            <!-- Wireframe de tienda online -->
+                            <div class="mb-6">
+                                <div class="bg-gray-50 rounded-xl p-4 border border-gray-200">
+                                    <!-- Browser mockup -->
+                                    <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                                        <div class="bg-gray-100 px-3 py-2 flex items-center gap-2">
+                                            <div class="flex gap-1">
+                                                <div class="w-2 h-2 bg-accent-300 rounded-full"></div>
+                                                <div class="w-2 h-2 bg-yellow-400 rounded-full"></div>
+                                                <div class="w-2 h-2 bg-green-400 rounded-full"></div>
+                                            </div>
+                                            <div class="flex-1 bg-white rounded px-2 py-1 text-[10px] text-gray-500 text-center">
+                                                linkiu.bio/tutienda
+                                            </div>
+                                        </div>
+                                        <div class="p-3 space-y-2">
+                                            <!-- Header wireframe -->
+                                            <div class="h-8 bg-gradient-to-r from-brand-200/20 to-accent-300/20 rounded"></div>
+                                            <!-- Product grid wireframe -->
+                                            <div class="grid grid-cols-2 gap-2">
+                                                <div class="space-y-1">
+                                                    <div class="h-16 bg-gray-200 rounded"></div>
+                                                    <div class="h-2 bg-gray-300 rounded w-3/4"></div>
+                                                    <div class="h-2 bg-accent-300/30 rounded w-1/2"></div>
+                                                </div>
+                                                <div class="space-y-1">
+                                                    <div class="h-16 bg-gray-200 rounded"></div>
+                                                    <div class="h-2 bg-gray-300 rounded w-3/4"></div>
+                                                    <div class="h-2 bg-accent-300/30 rounded w-1/2"></div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             <h3 class="font-satoshi text-2xl font-black text-gray-900 mb-4">Tu Tienda Online</h3>
                             <p class="text-gray-600 font-inter">
                                 Crea, gestiona y haz crecer tu negocio en línea con todas las herramientas que necesitas en un solo lugar.

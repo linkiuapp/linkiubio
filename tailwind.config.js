@@ -326,15 +326,15 @@ module.exports = {
         },
 
 
-        // Paleta Accent (Blanco nuevo)
+        // Paleta Accent (Rojo - Color principal de marca)
         accent: {
-          50: '#fdfdff',
-          75: '#f6f5fd',
-          100: '#f2f1fd',
-          200: '#eceafc',
-          300: '#e8e6fb',
-          400: '#a2a1b0',
-          500: '#8e8c99',
+          50: '#fdf2f4',
+          75: '#fce4e8',
+          100: '#fad5db',
+          200: '#f5aab7',
+          300: '#EA0038',
+          400: '#9E0024',
+          500: '#7a001c',
         },
 
         // Paleta Gray (Alias que combina white/black según reglas de diseño)

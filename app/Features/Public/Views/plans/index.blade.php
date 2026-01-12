@@ -104,11 +104,11 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <!-- Título -->
             <div class="text-center mb-12">
-                <h1 class="font-satoshi text-4xl sm:text-5xl lg:text-6xl font-black text-gray-900 mb-4">
-                    Elige el Plan Perfecto
+                <h1 class="font-satoshi text-xl sm:text-2xl lg:text-5xl font-black text-gray-900 mb-4">
+                30 días gratis para probar Linkiu.
                 </h1>
                 <p class="text-lg sm:text-xl text-gray-600 font-inter max-w-2xl mx-auto">
-                    30 días gratis para probar Linkiu. Sin contratos. Sin sorpresas. Cancela cuando quieras.
+                    Elige el Plan Perfecto <br> Sin contratos. Sin sorpresas. Cancela cuando quieras.
                 </p>
             </div>
 

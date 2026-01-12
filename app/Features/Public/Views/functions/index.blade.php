@@ -778,13 +778,13 @@
                     Todas estas funciones están incluidas en nuestros planes. Elige el que mejor se adapte a tu negocio.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="{{ route('plans.index') }}" class="bg-accent-300 hover:bg-accent-400 text-white px-8 py-4 rounded-xl font-bold text-lg transition-colors inline-flex items-center justify-center gap-2">
-                        <span>Ver Planes</span>
-                        <i data-lucide="arrow-right" class="w-5 h-5"></i>
-                    </a>
-                    <a href="{{ route('register.step1') }}" class="bg-white hover:bg-gray-50 text-gray-900 px-8 py-4 rounded-xl font-semibold text-lg transition-colors border-2 border-gray-200 inline-flex items-center justify-center gap-2">
+                    <a href="{{ route('register.step1') }}" class="bg-accent-300 hover:bg-accent-400 text-white px-8 py-4 rounded-xl font-bold text-lg transition-colors inline-flex items-center justify-center gap-2">
                         <span>Prueba Gratis</span>
                         <i data-lucide="sparkles" class="w-5 h-5"></i>
+                    </a>
+                    <a href="{{ route('plans.index') }}" class="bg-white hover:bg-gray-50 text-gray-900 px-8 py-4 rounded-xl font-semibold text-lg transition-colors border-2 border-gray-200 inline-flex items-center justify-center gap-2">
+                        <span>Ver Planes</span>
+                        <i data-lucide="arrow-right" class="w-5 h-5"></i>
                     </a>
                     <button @click="calendlyOpen = true" class="bg-white hover:bg-gray-50 text-gray-900 px-8 py-4 rounded-xl font-semibold text-lg transition-colors border-2 border-gray-200 inline-flex items-center justify-center gap-2">
                         <i data-lucide="calendar" class="w-5 h-5"></i>

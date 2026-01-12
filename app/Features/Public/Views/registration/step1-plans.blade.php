@@ -5,36 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Elige tu Plan - Linkiu</title>
+    
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images-ui/favico_linkiu.svg') }}">
+    
     @vite(['resources/css/app.css', 'resources/js/app.js'])
+    <!-- Calendly Script -->
+    <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50" x-data="{ calendlyOpen: false }">
     <div class="min-h-screen">
 
         {{-- Wizard Progress --}}
-        <div class="bg-white border-b border-gray-200">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white font-semibold">
-                            1
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-900">Paso 1 de 4</p>
-                            <p class="text-xs text-gray-600">Elige tu Plan</p>
-                        </div>
-                    </div>
-                    <a href="{{ route('store.login') }}" class="text-sm text-blue-600 hover:text-blue-800 font-medium">
-                        ¿Ya tienes cuenta? Inicia sesión →
-                    </a>
-                </div>
-                <div class="flex gap-2">
-                    <div class="flex-1 h-2 bg-blue-600 rounded-full"></div>
-                    <div class="flex-1 h-2 bg-gray-200 rounded-full"></div>
-                    <div class="flex-1 h-2 bg-gray-200 rounded-full"></div>
-                    <div class="flex-1 h-2 bg-gray-200 rounded-full"></div>
-                </div>
-            </div>
-        </div>
+        <x-registration-wizard-navbar 
+            :currentStep="1"
+            :totalSteps="4"
+            :showBackButton="false"
+        />
 
         {{-- Content Area --}}
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -404,6 +391,41 @@
             window.createIcons({ icons: window.lucideIcons });
         }
     });
+    </script>
+    
+    <!-- Calendly Modal -->
+    <div 
+        x-show="calendlyOpen" 
+        x-cloak
+        x-transition
+        @click.self="calendlyOpen = false"
+        @keydown.escape.window="calendlyOpen = false"
+        class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm"
+    >
+        <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-4xl max-h-[90vh] overflow-hidden">
+            <!-- Close Button -->
+            <button 
+                @click="calendlyOpen = false"
+                class="absolute top-4 right-4 z-10 w-10 h-10 bg-white/90 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-colors"
+            >
+                <i data-lucide="x" class="w-5 h-5 text-gray-600"></i>
+            </button>
+            
+            <!-- Calendly Widget -->
+            <div class="calendly-inline-widget" data-url="https://calendly.com/linkiucloud/30min?hide_event_type_details=1&hide_gdpr_banner=1&text_color=050506&primary_color=ea0038" style="min-width:320px;height:700px;"></div>
+        </div>
+    </div>
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Initialize Lucide Icons -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
     </script>
     
     <style>

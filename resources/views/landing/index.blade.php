@@ -89,22 +89,10 @@
         .font-satoshi { font-family: 'Satoshi', sans-serif; }
         .font-inter { font-family: 'Inter', sans-serif; }
         
-        .gradient-text {
-            background: linear-gradient(135deg, #0007F7 0%, #000684 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        .gradient-text-red {
-            background: linear-gradient(135deg, #EA0038 0%, #9E0024 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
         
         /* Hero gradient mejorado - muy sutil */
         .hero-gradient {
-            background: #050506;
+            background: #030712;
             position: relative;
         }
         .hero-gradient::before {
@@ -114,16 +102,13 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background: 
-                radial-gradient(circle at 50% 0%, rgba(0, 7, 247, 0.06) 0%, transparent 80%),
-                radial-gradient(circle at 100% 50%, rgba(234, 0, 56, 0.04) 0%, transparent 80%),
-                radial-gradient(circle at 0% 100%, rgba(0, 6, 132, 0.05) 0%, transparent 80%);
-            pointer-events: none;
+            z-index: 0;
+            background: #030712;
         }
         
-        /* Steps gradient mejorado */
+        /* Steps gradient - mismo que hero */
         .steps-gradient {
-            background: #050506;
+            background: #030712;
             position: relative;
         }
         .steps-gradient::before {
@@ -133,10 +118,11 @@
             left: 0;
             right: 0;
             bottom: 0;
+            z-index: 0;
             background: 
-                radial-gradient(ellipse 100% 80% at 20% 0%, rgba(0, 7, 247, 0.2) 0%, transparent 80%),
-                radial-gradient(ellipse 80% 60% at 80% 100%, rgba(234, 0, 56, 0.15) 0%, transparent 80%),
-                radial-gradient(ellipse 60% 40% at 50% 50%, rgba(0, 6, 132, 0.1) 0%, transparent 80%);
+                radial-gradient(circle at 50% 0%, rgba(0, 7, 247, 0.06) 0%, transparent 80%),
+                radial-gradient(circle at 100% 50%, rgba(234, 0, 56, 0.04) 0%, transparent 80%),
+                radial-gradient(circle at 0% 100%, rgba(0, 6, 132, 0.05) 0%, transparent 80%);
             pointer-events: none;
         }
         
@@ -242,12 +228,12 @@
     <x-public-navbar />
 
     <!-- Hero Section -->
-    <section class="hero-gradient min-h-screen flex items-center relative overflow-hidden pt-16">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 relative z-10">
-            <div class="grid lg:grid-cols-2 gap-12 items-center">
-                <!-- Texto -->
-                <div class="text-center lg:text-left">
-                    <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-6 border border-white/10">
+    <section class="hero-gradient min-h-screen flex items-center relative overflow-visible py-32">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative z-10">
+            <div class="flex flex-col items-center">
+                <!-- Texto Centrado -->
+                <div class="text-center max-w-4xl mb-8 hidden lg:block">
+                    <div class="inline-flex items-center gap-2 bg-white/10 px-4 py-2 rounded-full mb-6 border border-white/10">
                         <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
                         <span class="text-white/80 text-sm font-inter">+100 negocios ya venden con Linkiu</span>
                     </div>
@@ -257,41 +243,24 @@
                         <span class="text-accent-300">en minutos</span>
                     </h1>
                     
-                    <p class="text-lg sm:text-xl text-gray-300 mb-8 max-w-xl mx-auto lg:mx-0 font-inter">
+                    <p class="text-base sm:text-lg text-white mb-8 max-w-2xl mx-auto font-inter">
                         Olvídate de enviar fotos por WhatsApp, PDFs pesados o páginas lentas. 
                         Con Linkiu tienes tu tienda <span class="text-accent-300 font-semibold">lista para vender hoy</span>.
                     </p>
-                    
-                    <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                        <a href="{{ route('register.step1') }}" class="bg-accent-300 hover:bg-accent-400 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
+                    <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+                        <button onclick="fbq('track', 'Lead'); window.location.href='{{ route('register.step1') }}';" class="bg-accent-300 hover:bg-accent-400 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
                             <span>Prueba gratis</span>
                             <i data-lucide="arrow-right" class="w-5 h-5"></i>
-                        </a>
-                        <button @click="calendlyOpen = true" class="bg-white/10 hover:bg-white/20 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-colors flex items-center justify-center gap-2 border border-white/20">
+                        </button>
+                        <button @click="calendlyOpen = true" class="bg-white/10 hover:bg-white/20 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-colors flex items-center justify-center gap-2 border border-white/20 backdrop-blur-none">
                             <i data-lucide="calendar" class="w-5 h-5"></i>
                             <span>Agendar reunión</span>
                         </button>
                     </div>
-                    
-                    <!-- Trust badges -->
-                    <div class="flex flex-wrap items-center gap-6 mt-10 justify-center lg:justify-start">
-                        <div class="flex items-center gap-2 text-gray-400">
-                            <i data-lucide="check-circle" class="w-5 h-5 text-white"></i>
-                            <span class="text-sm">Sin tarjeta</span>
-                        </div>
-                        <div class="flex items-center gap-2 text-gray-400">
-                            <i data-lucide="check-circle" class="w-5 h-5 text-white"></i>
-                            <span class="text-sm">15 días gratis</span>
-                        </div>
-                        <div class="flex items-center gap-2 text-gray-400">
-                            <i data-lucide="check-circle" class="w-5 h-5 text-white"></i>
-                            <span class="text-sm">Cancela cuando quieras</span>
-                        </div>
-                    </div>
                 </div>
                 
-                <!-- Mockup con cards flotantes -->
-                <div class="relative">
+                <!-- Mockup con cards flotantes - Centrado -->
+                <div class="relative max-w-4xl lg:max-w-7xl w-full mt-8">
                     <div class="rounded-3xl">
                         <!-- Browser mockup -->
                         <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
@@ -759,7 +728,7 @@
     </section>
 
     <!-- Cómo Funciona Section - Con wireframes y mejor gradient -->
-    <section id="como-funciona" class="py-20 steps-gradient relative overflow-hidden">
+    <section id="como-funciona" class="py-20 steps-gradient relative overflow-visible">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
             <div class="text-center mb-16">
                 <span class="inline-block bg-white/10 text-white px-4 py-1 rounded-full text-sm font-semibold mb-4 border border-white/20">
@@ -772,7 +741,7 @@
             
             <div class="grid md:grid-cols-3 gap-8">
                 <!-- Paso 1 -->
-                <div class="bg-white/5 backdrop-blur-sm rounded-3xl p-6 border border-white/10">
+                <div class="bg-white/5 rounded-3xl p-6 border border-white/10">
                     <div class="bg-white rounded-2xl p-4 mb-6 shadow-xl">
                         <!-- Wireframe registro -->
                         <div class="space-y-3">
@@ -820,7 +789,7 @@
                 </div>
                 
                 <!-- Paso 3 -->
-                <div class="bg-white/5 backdrop-blur-sm rounded-3xl p-6 border border-white/10">
+                <div class="bg-white/5 rounded-3xl p-6 border border-white/10">
                     <div class="bg-white rounded-2xl p-4 mb-6 shadow-xl">
                         <!-- Wireframe tienda funcionando -->
                         <div class="space-y-3">

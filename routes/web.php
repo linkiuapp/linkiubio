@@ -39,6 +39,15 @@ Route::prefix('registre')->name('register.')->group(function () {
 // API para verificar estado de registro
 Route::get('/api/check-registration-status/{registration}', [App\Features\Public\Controllers\RegistrationWizardController::class, 'checkStatus']);
 
+// API para validar email en tiempo real durante registro
+Route::post('/api/validate-registration-email', [App\Features\Public\Controllers\RegistrationWizardController::class, 'validateEmail'])->name('api.validate-registration-email');
+
+// API para validar slug en tiempo real durante registro
+Route::post('/api/validate-registration-slug', [App\Features\Public\Controllers\RegistrationWizardController::class, 'validateSlug'])->name('api.validate-registration-slug');
+
+// API para validar nombre de tienda en tiempo real durante registro
+Route::post('/api/validate-registration-store-name', [App\Features\Public\Controllers\RegistrationWizardController::class, 'validateStoreName'])->name('api.validate-registration-store-name');
+
 // Landing Page Principal
 Route::get('/', function () {
     // Obtener tiendas activas con logos para el carrusel
@@ -107,6 +116,7 @@ Route::get('/preguntas-frecuentes', [App\Features\Public\Controllers\FAQControll
 
 // Página de Contacto Pública
 Route::get('/contacto', [App\Features\Public\Controllers\ContactController::class, 'index'])->name('contact.index');
+Route::post('/contacto', [App\Features\Public\Controllers\ContactController::class, 'send'])->name('contact.send');
 
 // Página de Nosotros Pública
 Route::get('/nosotros', [App\Features\Public\Controllers\AboutController::class, 'index'])->name('about.index');

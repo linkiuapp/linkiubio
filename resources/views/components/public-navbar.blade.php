@@ -1,22 +1,22 @@
 <!-- Navbar -->
-<nav class="fixed top-0 left-0 right-0 z-50 bg-white/90 backdrop-blur-2xl border-b border-gray-100">
+<nav class="fixed top-0 left-0 right-0 z-50 bg-slate-950 border-b border-gray-800">
     <div class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
         <div class="flex justify-between items-center h-16">
             <!-- Logo -->
             <a href="/" class="flex items-center">
-                <img src="/images-ui/logo_linkiu_landing_black.svg" alt="Linkiu" class="h-7">
+                <img src="/images-ui/logo_linkiu_landing_white.svg" alt="Linkiu" class="h-8">
             </a>
             
             <!-- Desktop Menu -->
             <div class="hidden lg:flex items-center gap-1">
                 <!-- Inicio -->
-                <a href="/" class="px-4 py-2 {{ request()->is('/') ? 'text-gray-900 bg-gray-100' : 'text-gray-600 hover:text-gray-900' }} font-medium transition-colors rounded-lg hover:bg-gray-50">
+                <a href="/" class="px-4 py-2 {{ request()->is('/') ? 'text-white bg-gray-800' : 'text-gray-300 hover:text-white' }} font-medium transition-colors rounded-lg hover:bg-gray-800">
                     Inicio
                 </a>
                 
                 <!-- Productos MEGAMENU -->
                 <div class="megamenu-trigger relative">
-                    <button class="px-4 py-2 {{ request()->routeIs('ecommerce.index') || request()->routeIs('restaurant.index') ? 'text-gray-900 bg-gray-100' : 'text-gray-600 hover:text-gray-900' }} font-medium transition-colors rounded-lg hover:bg-gray-50 flex items-center gap-1">
+                    <button class="px-4 py-2 {{ request()->routeIs('ecommerce.index') || request()->routeIs('restaurant.index') ? 'text-white bg-gray-800' : 'text-gray-300 hover:text-white' }} font-medium transition-colors rounded-lg hover:bg-gray-800 flex items-center gap-1">
                         Productos
                         <i data-lucide="chevron-down" class="w-4 h-4"></i>
                     </button>
@@ -82,12 +82,17 @@
                                 <div class="bg-gray-50 rounded-xl p-4 border border-gray-200 opacity-70">
                                     <div class="flex items-start gap-4">
                                         <div class="w-20 h-20 bg-white rounded-lg shadow-sm p-2 flex-shrink-0">
-                                            <div class="w-full h-full bg-gray-100 rounded flex items-center justify-center">
-                                                <i data-lucide="truck" class="w-6 h-6 text-gray-300"></i>
+                                            <div class="w-full h-full bg-gray-50 rounded flex flex-col gap-1 p-1">
+                                                <div class="h-2 bg-purple-500/30 rounded w-3/4"></div>
+                                                <div class="flex-1 grid grid-cols-2 gap-1">
+                                                    <div class="bg-purple-500/20 rounded"></div>
+                                                    <div class="bg-purple-500/20 rounded"></div>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="flex-1">
                                             <div class="flex items-center gap-2 mb-1">
+                                                <i data-lucide="truck" class="w-5 h-5 text-purple-500"></i>
                                                 <span class="font-satoshi font-bold text-gray-900">Dropshipping</span>
                                                 <span class="px-2 py-0.5 bg-brand-200/10 text-brand-200 text-[10px] font-bold rounded-full">PRONTO</span>
                                             </div>
@@ -100,12 +105,20 @@
                                 <div class="bg-gray-50 rounded-xl p-4 border border-gray-200 opacity-70">
                                     <div class="flex items-start gap-4">
                                         <div class="w-20 h-20 bg-white rounded-lg shadow-sm p-2 flex-shrink-0">
-                                            <div class="w-full h-full bg-gray-100 rounded flex items-center justify-center">
-                                                <i data-lucide="briefcase" class="w-6 h-6 text-gray-300"></i>
+                                            <div class="w-full h-full bg-gray-50 rounded flex flex-col gap-1 p-1">
+                                                <div class="flex items-center gap-1">
+                                                    <div class="w-3 h-3 bg-indigo-500/30 rounded"></div>
+                                                    <div class="h-2 bg-gray-200 rounded flex-1"></div>
+                                                </div>
+                                                <div class="flex-1 space-y-1">
+                                                    <div class="h-3 bg-indigo-500/20 rounded"></div>
+                                                    <div class="h-3 bg-indigo-500/20 rounded w-4/5"></div>
+                                                </div>
                                             </div>
                                         </div>
                                         <div class="flex-1">
                                             <div class="flex items-center gap-2 mb-1">
+                                                <i data-lucide="briefcase" class="w-5 h-5 text-indigo-500"></i>
                                                 <span class="font-satoshi font-bold text-gray-900">Servicios</span>
                                                 <span class="px-2 py-0.5 bg-brand-200/10 text-brand-200 text-[10px] font-bold rounded-full">PRONTO</span>
                                             </div>
@@ -114,31 +127,13 @@
                                     </div>
                                 </div>
                             </div>
-                            
-                            <!-- Hotelería banner -->
-                            <div class="mt-4 pt-4 border-t border-gray-100">
-                                <div class="bg-gradient-to-r from-gray-800 to-gray-900 rounded-xl p-4 flex items-center justify-between">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center">
-                                            <i data-lucide="building-2" class="w-5 h-5 text-white"></i>
-                                        </div>
-                                        <div>
-                                            <p class="text-white font-semibold text-sm">Hotelería</p>
-                                            <p class="text-gray-400 text-xs">Reservas de habitaciones, room service y más</p>
-                                        </div>
-                                    </div>
-                                    <span class="px-3 py-1 bg-white/10 text-white text-xs font-semibold rounded-full border border-white/20">
-                                        Próximamente
-                                    </span>
-                                </div>
-                            </div>
                         </div>
                     </div>
                 </div>
                 
                 <!-- Funciones MEGAMENU -->
                 <div class="megamenu-trigger relative">
-                    <button class="px-4 py-2 {{ request()->routeIs('functions.index') ? 'text-gray-900 bg-gray-100' : 'text-gray-600 hover:text-gray-900' }} font-medium transition-colors rounded-lg hover:bg-gray-50 flex items-center gap-1">
+                    <button class="px-4 py-2 {{ request()->routeIs('functions.index') ? 'text-white bg-gray-800' : 'text-gray-300 hover:text-white' }} font-medium transition-colors rounded-lg hover:bg-gray-800 flex items-center gap-1">
                         Funciones
                         <i data-lucide="chevron-down" class="w-4 h-4"></i>
                     </button>
@@ -348,13 +343,13 @@
                 </div>
                 
                 <!-- Planes -->
-                <a href="{{ route('plans.index') }}" class="px-4 py-2 {{ request()->routeIs('plans.index') ? 'text-gray-900 bg-gray-100' : 'text-gray-600 hover:text-gray-900' }} font-medium transition-colors rounded-lg hover:bg-gray-50">
+                <a href="{{ route('plans.index') }}" class="px-4 py-2 {{ request()->routeIs('plans.index') ? 'text-white bg-gray-800' : 'text-gray-300 hover:text-white' }} font-medium transition-colors rounded-lg hover:bg-gray-800">
                     Planes
                 </a>
-                
+
                 <!-- Recursos MEGAMENU -->
                 <div class="megamenu-trigger relative">
-                    <button class="px-4 py-2 {{ request()->routeIs('faq.index') || request()->routeIs('contact.index') || request()->routeIs('about.index') || request()->routeIs('team.index') || request()->routeIs('partners.index') || request()->routeIs('release-notes.index') ? 'text-gray-900 bg-gray-100' : 'text-gray-600 hover:text-gray-900' }} font-medium transition-colors rounded-lg hover:bg-gray-50 flex items-center gap-1">
+                    <button class="px-4 py-2 {{ request()->routeIs('faq.index') || request()->routeIs('contact.index') || request()->routeIs('about.index') || request()->routeIs('team.index') || request()->routeIs('partners.index') || request()->routeIs('release-notes.index') ? 'text-white bg-gray-800' : 'text-gray-300 hover:text-white' }} font-medium transition-colors rounded-lg hover:bg-gray-800 flex items-center gap-1">
                         Recursos
                         <i data-lucide="chevron-down" class="w-4 h-4"></i>
                     </button>
@@ -461,7 +456,7 @@
             
             <!-- CTA Buttons -->
             <div class="hidden lg:flex items-center gap-3">
-                <button @click="calendlyOpen = true" class="px-5 py-2.5 border-2 border-gray-300 text-gray-700 hover:border-gray-400 hover:text-gray-900 font-semibold rounded-lg transition-colors">
+                <button @click="calendlyOpen = true" class="px-5 py-2.5 border-2 border-gray-600 text-gray-300 hover:border-gray-500 hover:text-white font-semibold rounded-lg transition-colors">
                     Agendar reunión
                 </button>
                 <a href="{{ route('register.step1') }}" class="bg-accent-300 hover:bg-accent-400 text-white px-5 py-2.5 rounded-lg font-semibold transition-colors">
@@ -470,73 +465,72 @@
             </div>
             
             <!-- Mobile Menu Button -->
-            <button @click="mobileMenu = !mobileMenu" class="lg:hidden p-2">
+            <button @click="mobileMenu = !mobileMenu" class="lg:hidden p-2 text-gray-300 hover:text-white">
                 <i data-lucide="menu" class="w-6 h-6"></i>
             </button>
         </div>
     </div>
     
     <!-- Mobile Menu -->
-    <div x-show="mobileMenu" x-cloak class="lg:hidden bg-white border-t border-gray-100 py-4 px-4">
+    <div x-show="mobileMenu" x-cloak class="lg:hidden bg-gray-900 border-t border-gray-800 py-4 px-4">
         <div class="flex flex-col gap-2">
-            <a href="/" class="px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium">Inicio</a>
+            <a href="/" class="px-4 py-3 text-gray-300 hover:bg-gray-800 rounded-lg font-medium">Inicio</a>
             
             <!-- Productos Mobile -->
-            <button @click="productosOpen = !productosOpen" class="px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium flex items-center justify-between w-full">
+            <button @click="productosOpen = !productosOpen" class="px-4 py-3 text-gray-300 hover:bg-gray-800 rounded-lg font-medium flex items-center justify-between w-full">
                 <span>Productos</span>
                 <i data-lucide="chevron-down" class="w-4 h-4" :class="productosOpen && 'rotate-180'"></i>
             </button>
             <div x-show="productosOpen" class="pl-4 space-y-1">
-                <a href="{{ route('ecommerce.index') }}" class="block px-4 py-2 text-gray-600 hover:text-gray-900">Ecommerce</a>
-                <a href="{{ route('restaurant.index') }}" class="block px-4 py-2 text-gray-600 hover:text-gray-900">Restaurante</a>
-                <a href="#" class="block px-4 py-2 text-gray-400">Dropshipping (Próximamente)</a>
-                <a href="#" class="block px-4 py-2 text-gray-400">Servicios (Próximamente)</a>
-                <a href="#" class="block px-4 py-2 text-gray-400">Hotelería (Próximamente)</a>
+                <a href="{{ route('ecommerce.index') }}" class="block px-4 py-2 text-gray-400 hover:text-white">Ecommerce</a>
+                <a href="{{ route('restaurant.index') }}" class="block px-4 py-2 text-gray-400 hover:text-white">Restaurante</a>
+                <a href="#" class="block px-4 py-2 text-gray-500">Dropshipping (Próximamente)</a>
+                <a href="#" class="block px-4 py-2 text-gray-500">Servicios (Próximamente)</a>
             </div>
             
             <!-- Funciones Mobile -->
-            <a href="{{ route('functions.index') }}" class="px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium flex items-center justify-between w-full">
+            <a href="{{ route('functions.index') }}" class="px-4 py-3 text-gray-300 hover:bg-gray-800 rounded-lg font-medium flex items-center justify-between w-full">
                 <span>Funciones</span>
                 <i data-lucide="arrow-right" class="w-4 h-4"></i>
             </a>
             
-            <a href="{{ route('plans.index') }}" class="px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium">Planes</a>
+            <a href="{{ route('plans.index') }}" class="px-4 py-3 text-gray-300 hover:bg-gray-800 rounded-lg font-medium">Planes</a>
             
             <!-- Ayuda Mobile -->
-            <button @click="ayudaOpen = !ayudaOpen" class="px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium flex items-center justify-between w-full">
+            <button @click="ayudaOpen = !ayudaOpen" class="px-4 py-3 text-gray-300 hover:bg-gray-800 rounded-lg font-medium flex items-center justify-between w-full">
                 <span>Ayuda</span>
                 <i data-lucide="chevron-down" class="w-4 h-4" :class="ayudaOpen && 'rotate-180'"></i>
             </button>
             <div x-show="ayudaOpen" class="pl-4 space-y-1">
-                <a href="{{ route('faq.index') }}" class="block px-4 py-2 {{ request()->routeIs('faq.index') ? 'text-gray-900 bg-gray-100' : 'text-gray-600 hover:text-gray-900' }} rounded-lg transition-colors">Preguntas Frecuentes</a>
-                <a href="#" class="block px-4 py-2 text-gray-600 hover:text-gray-900 rounded-lg transition-colors">Tutoriales</a>
-                <a href="{{ route('contact.index') }}" class="block px-4 py-2 {{ request()->routeIs('contact.index') ? 'text-gray-900 bg-gray-100' : 'text-gray-600 hover:text-gray-900' }} rounded-lg transition-colors">Contacto</a>
+                <a href="{{ route('faq.index') }}" class="block px-4 py-2 {{ request()->routeIs('faq.index') ? 'text-white bg-gray-800' : 'text-gray-400 hover:text-white' }} rounded-lg transition-colors">Preguntas Frecuentes</a>
+                <a href="#" class="block px-4 py-2 text-gray-400 hover:text-white rounded-lg transition-colors">Tutoriales</a>
+                <a href="{{ route('contact.index') }}" class="block px-4 py-2 {{ request()->routeIs('contact.index') ? 'text-white bg-gray-800' : 'text-gray-400 hover:text-white' }} rounded-lg transition-colors">Contacto</a>
             </div>
             
             <!-- Empresa Mobile -->
-            <button @click="empresaOpen = !empresaOpen" class="px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium flex items-center justify-between w-full">
+            <button @click="empresaOpen = !empresaOpen" class="px-4 py-3 text-gray-300 hover:bg-gray-800 rounded-lg font-medium flex items-center justify-between w-full">
                 <span>Empresa</span>
                 <i data-lucide="chevron-down" class="w-4 h-4" :class="empresaOpen && 'rotate-180'"></i>
             </button>
             <div x-show="empresaOpen" class="pl-4 space-y-1">
-                <a href="{{ route('about.index') }}" class="block px-4 py-2 {{ request()->routeIs('about.index') ? 'text-gray-900 bg-gray-100' : 'text-gray-600 hover:text-gray-900' }} rounded-lg transition-colors">Nosotros</a>
-                <a href="{{ route('team.index') }}" class="block px-4 py-2 {{ request()->routeIs('team.index') ? 'text-gray-900 bg-gray-100' : 'text-gray-600 hover:text-gray-900' }} rounded-lg transition-colors">Equipo</a>
-                <a href="{{ route('partners.index') }}" class="block px-4 py-2 {{ request()->routeIs('partners.index') ? 'text-gray-900 bg-gray-100' : 'text-gray-600 hover:text-gray-900' }} rounded-lg transition-colors">Partners</a>
+                <a href="{{ route('about.index') }}" class="block px-4 py-2 {{ request()->routeIs('about.index') ? 'text-white bg-gray-800' : 'text-gray-400 hover:text-white' }} rounded-lg transition-colors">Nosotros</a>
+                <a href="{{ route('team.index') }}" class="block px-4 py-2 {{ request()->routeIs('team.index') ? 'text-white bg-gray-800' : 'text-gray-400 hover:text-white' }} rounded-lg transition-colors">Equipo</a>
+                <a href="{{ route('partners.index') }}" class="block px-4 py-2 {{ request()->routeIs('partners.index') ? 'text-white bg-gray-800' : 'text-gray-400 hover:text-white' }} rounded-lg transition-colors">Partners</a>
             </div>
             
             <!-- Recursos Mobile -->
-            <button @click="recursosOpen = !recursosOpen" class="px-4 py-3 text-gray-700 hover:bg-gray-50 rounded-lg font-medium flex items-center justify-between w-full">
+            <button @click="recursosOpen = !recursosOpen" class="px-4 py-3 text-gray-300 hover:bg-gray-800 rounded-lg font-medium flex items-center justify-between w-full">
                 <span>Recursos</span>
                 <i data-lucide="chevron-down" class="w-4 h-4" :class="recursosOpen && 'rotate-180'"></i>
             </button>
             <div x-show="recursosOpen" class="pl-4 space-y-1">
-                <a href="{{ route('store.login') }}" class="block px-4 py-2 text-gray-600 hover:text-gray-900">Entrar a mi tienda</a>
-                <a href="#" class="block px-4 py-2 text-gray-600 hover:text-gray-900">Blog</a>
-                <a href="#" class="block px-4 py-2 text-gray-600 hover:text-gray-900">Nuevas Actualizaciones</a>
+                <a href="{{ route('store.login') }}" class="block px-4 py-2 text-gray-400 hover:text-white">Entrar a mi tienda</a>
+                <a href="#" class="block px-4 py-2 text-gray-400 hover:text-white">Blog</a>
+                <a href="{{ route('release-notes.index') }}" class="block px-4 py-2 text-gray-400 hover:text-white">Nuevas Actualizaciones</a>
             </div>
             
-            <hr class="border-gray-200 my-2">
-            <button @click="calendlyOpen = true" class="w-full px-4 py-3 border-2 border-gray-300 text-gray-700 hover:border-gray-400 hover:text-gray-900 font-semibold rounded-lg transition-colors text-left">
+            <hr class="border-gray-700 my-2">
+            <button @click="calendlyOpen = true" class="w-full px-4 py-3 border-2 border-gray-600 text-gray-300 hover:border-gray-500 hover:text-white font-semibold rounded-lg transition-colors text-left">
                 Agendar reunión
             </button>
             <a href="{{ route('register.step1') }}" class="bg-accent-300 hover:bg-accent-400 text-white px-5 py-3 rounded-lg font-semibold text-center block">

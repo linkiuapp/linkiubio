@@ -6,36 +6,19 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>Información del Propietario - Linkiu</title>
     
+    {{-- Favicon --}}
+    <link rel="icon" type="image/svg+xml" href="{{ asset('images-ui/favico_linkiu.svg') }}">
+    
+    {{-- Calendly Script --}}
+    <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
+    
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50" x-data="ownerForm()">
     
     <div class="min-h-screen">
-        {{-- Wizard Progress --}}
-        <div class="bg-white border-b border-gray-200">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                <div class="flex items-center justify-between mb-4">
-                    <div class="flex items-center gap-3">
-                        <div class="flex items-center justify-center w-10 h-10 rounded-full bg-blue-600 text-white font-semibold">
-                            4
-                        </div>
-                        <div>
-                            <p class="text-sm font-medium text-gray-900">Paso 4 de 4</p>
-                            <p class="text-xs text-gray-600">Información del Propietario</p>
-                        </div>
-                    </div>
-                    <a href="{{ route('register.step3') }}" class="text-sm text-gray-600 hover:text-gray-900 font-medium">
-                        ← Volver
-                    </a>
-                </div>
-                <div class="flex gap-2">
-                    <div class="flex-1 h-2 bg-blue-600 rounded-full"></div>
-                    <div class="flex-1 h-2 bg-blue-600 rounded-full"></div>
-                    <div class="flex-1 h-2 bg-blue-600 rounded-full"></div>
-                    <div class="flex-1 h-2 bg-blue-600 rounded-full"></div>
-                </div>
-            </div>
-        </div>
+        {{-- Nuevo Navbar de Registro --}}
+        <x-registration-wizard-navbar :currentStep="4" :totalSteps="4" :showBackButton="true" :backRoute="route('register.step3')"/>
 
         {{-- Content Area --}}
         <main class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -46,7 +29,6 @@
 
             <form method="POST" :action="paymentMethod === 'epayco' ? '{{ route('register.payment.initiate') }}' : '{{ route('register.complete') }}'" 
                   enctype="multipart/form-data" 
-                  x-data="ownerForm()"
                   @submit.prevent="handleSubmit"
                   novalidate>
                 @csrf
@@ -55,10 +37,15 @@
                     
                     {{-- Sección: Datos Personales --}}
                     <div class="p-6 lg:p-8 border-b border-gray-200">
-                        <h3 class="text-base md:text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-                            <i data-lucide="user" class="w-5 h-5 text-blue-600"></i>
-                            Datos Personales
-                        </h3>
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-12 h-12 bg-accent-300/10 rounded-xl flex items-center justify-center">
+                                <i data-lucide="user" class="w-6 h-6 text-accent-300"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900">Datos Personales</h3>
+                                <p class="text-sm text-slate-600">Información del propietario de la tienda</p>
+                            </div>
+                        </div>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -67,8 +54,11 @@
                                 </label>
                                 <input type="text"
                                        name="owner_name"
+                                       x-model="ownerName"
+                                       @input="debouncedSave()"
+                                       @blur="saveToLocalStorage()"
                                        value="{{ old('owner_name') }}"
-                                       class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none @error('owner_name') border-red-300 @enderror text-base"
+                                       class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-accent-300 focus:ring-2 focus:ring-accent-300/20 focus:outline-none @error('owner_name') border-red-300 @enderror text-base transition-colors"
                                        placeholder="Juan Pérez"
                                        required>
                                 @error('owner_name')
@@ -80,13 +70,48 @@
                                 <label class="block text-sm font-medium text-slate-600 mb-2">
                                     Correo Electrónico <span class="text-red-500">*</span>
                                 </label>
-                                <input type="email"
-                                       name="owner_email"
-                                       value="{{ old('owner_email') }}"
-                                       class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none @error('owner_email') border-red-300 @enderror text-base"
-                                       placeholder="tu@email.com"
-                                       required>
+                                <div class="relative">
+                                    <input type="email"
+                                           name="owner_email"
+                                           x-model="ownerEmail"
+                                           @input="debouncedSave(); validateOwnerEmail()"
+                                           @blur="saveToLocalStorage()"
+                                           value="{{ old('owner_email') }}"
+                                           class="w-full px-4 py-3 pr-12 border border-gray-200 rounded-lg focus:border-accent-300 focus:ring-2 focus:ring-accent-300/20 focus:outline-none @error('owner_email') border-red-300 @enderror text-base transition-colors"
+                                           :class="ownerEmail && !validatingOwnerEmail && ownerEmailAvailable === true ? 'border-green-300' : (ownerEmail && !validatingOwnerEmail && ownerEmailAvailable === false ? 'border-red-300' : '')"
+                                           placeholder="tu@email.com"
+                                           required>
+                                    
+                                    {{-- Icono de validación dentro del input --}}
+                                    <div class="absolute right-3 top-1/2 -translate-y-1/2">
+                                        {{-- Spinner: Validando --}}
+                                        <div x-show="validatingOwnerEmail && ownerEmail" x-cloak>
+                                            <i data-lucide="loader-2" class="w-5 h-5 text-blue-500 animate-spin"></i>
+                                        </div>
+                                        
+                                        {{-- Check: Disponible --}}
+                                        <div x-show="ownerEmail && !validatingOwnerEmail && ownerEmailAvailable === true" x-cloak>
+                                            <i data-lucide="check-circle" class="w-5 h-5 text-green-500"></i>
+                                        </div>
+                                        
+                                        {{-- X: En uso --}}
+                                        <div x-show="ownerEmail && !validatingOwnerEmail && ownerEmailAvailable === false" x-cloak>
+                                            <i data-lucide="x-circle" class="w-5 h-5 text-red-500"></i>
+                                        </div>
+                                    </div>
+                                </div>
                                 <p class="text-xs font-normal text-slate-600 mt-1">Usarás este correo para iniciar sesión</p>
+                                
+                                {{-- Mensajes de validación --}}
+                                <div x-show="ownerEmail && !validatingOwnerEmail && ownerEmailAvailable === false" x-cloak class="mt-2 flex items-center gap-2 text-sm text-red-600">
+                                    <i data-lucide="x-circle" class="w-4 h-4"></i>
+                                    <span>Este correo ya está en uso</span>
+                                </div>
+                                
+                                <div x-show="ownerEmail && !validatingOwnerEmail && ownerEmailAvailable === true" x-cloak class="mt-2 flex items-center gap-2 text-sm text-green-600">
+                                    <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                    <span>Correo disponible</span>
+                                </div>
                                 @error('owner_email')
                                     <p class="text-xs font-normal text-red-600 mt-1">{{ $message }}</p>
                                 @enderror
@@ -97,7 +122,9 @@
                                     Tipo de Documento <span class="text-red-500">*</span>
                                 </label>
                                 <select name="owner_document_type"
-                                        class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none @error('owner_document_type') border-red-300 @enderror text-base"
+                                        x-model="ownerDocumentType"
+                                        @change="saveToLocalStorage()"
+                                        class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-accent-300 focus:ring-2 focus:ring-accent-300/20 focus:outline-none @error('owner_document_type') border-red-300 @enderror text-base transition-colors"
                                         required>
                                     <option value="">Seleccionar tipo</option>
                                     <option value="cc" {{ old('owner_document_type') == 'cc' ? 'selected' : '' }}>Cédula de Ciudadanía</option>
@@ -115,8 +142,11 @@
                                 </label>
                                 <input type="text"
                                        name="owner_document_number"
+                                       x-model="ownerDocumentNumber"
+                                       @input="debouncedSave()"
+                                       @blur="saveToLocalStorage()"
                                        value="{{ old('owner_document_number') }}"
-                                       class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none @error('owner_document_number') border-red-300 @enderror text-base"
+                                       class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-accent-300 focus:ring-2 focus:ring-accent-300/20 focus:outline-none @error('owner_document_number') border-red-300 @enderror text-base transition-colors"
                                        placeholder="1234567890"
                                        required>
                                 @error('owner_document_number')
@@ -128,10 +158,15 @@
 
                     {{-- Sección: Credenciales de Acceso --}}
                     <div class="p-6 lg:p-8 border-b border-gray-200">
-                        <h3 class="text-base md:text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-                            <i data-lucide="key" class="w-5 h-5 text-blue-600"></i>
-                            Credenciales de Acceso
-                        </h3>
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-12 h-12 bg-accent-300/10 rounded-xl flex items-center justify-center">
+                                <i data-lucide="key" class="w-6 h-6 text-accent-300"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900">Credenciales de Acceso</h3>
+                                <p class="text-sm text-slate-600">Crea tu contraseña para acceder a tu tienda</p>
+                            </div>
+                        </div>
                         
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div>
@@ -141,7 +176,10 @@
                                 <input type="password"
                                        name="password"
                                        x-model="password"
-                                       class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none @error('password') border-red-300 @enderror text-base"
+                                       @input="debouncedSave()"
+                                       @blur="saveToLocalStorage()"
+                                       class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-accent-300 focus:ring-2 focus:ring-accent-300/20 focus:outline-none @error('password') border-red-300 @enderror text-base transition-colors"
+                                       :class="password && password.length >= 8 ? 'border-green-300' : ''"
                                        placeholder="••••••••"
                                        minlength="8"
                                        required>
@@ -155,16 +193,38 @@
                                 <label class="block text-sm font-medium text-slate-600 mb-2">
                                     Confirmar Contraseña <span class="text-red-500">*</span>
                                 </label>
-                                <input type="password"
-                                       name="password_confirmation"
-                                       x-model="passwordConfirmation"
-                                       class="w-full px-4 py-3 border border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 focus:outline-none text-base"
-                                       placeholder="••••••••"
-                                       minlength="8"
-                                       required>
-                                <p class="text-xs font-normal" :class="passwordsMatch() ? 'text-green-600' : 'text-slate-600'">
+                                <div class="relative">
+                                    <input type="password"
+                                           name="password_confirmation"
+                                           x-model="passwordConfirmation"
+                                           @input="debouncedSave()"
+                                           @blur="saveToLocalStorage()"
+                                           class="w-full px-4 py-3 pr-12 border border-gray-200 rounded-lg focus:border-accent-300 focus:ring-2 focus:ring-accent-300/20 focus:outline-none text-base transition-colors"
+                                           :class="passwordConfirmation && passwordsMatch() ? 'border-green-300' : (passwordConfirmation && !passwordsMatch() ? 'border-red-300' : '')"
+                                           placeholder="••••••••"
+                                           minlength="8"
+                                           required>
+                                    
+                                    {{-- Icono de validación --}}
+                                    <div class="absolute right-3 top-1/2 -translate-y-1/2">
+                                        <div x-show="passwordConfirmation && passwordsMatch()" x-cloak>
+                                            <i data-lucide="check-circle" class="w-5 h-5 text-green-500"></i>
+                                        </div>
+                                        <div x-show="passwordConfirmation && !passwordsMatch()" x-cloak>
+                                            <i data-lucide="x-circle" class="w-5 h-5 text-red-500"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                                <p class="text-xs font-normal mt-1" :class="passwordsMatch() ? 'text-green-600' : 'text-slate-600'">
                                     <template x-if="password && passwordConfirmation">
-                                        <span x-show="passwordsMatch()">✓ Las contraseñas coinciden</span>
+                                        <span x-show="passwordsMatch()" class="flex items-center gap-1">
+                                            <i data-lucide="check-circle" class="w-3 h-3"></i>
+                                            Las contraseñas coinciden
+                                        </span>
+                                        <span x-show="!passwordsMatch()" class="flex items-center gap-1 text-red-600">
+                                            <i data-lucide="alert-circle" class="w-3 h-3"></i>
+                                            Las contraseñas no coinciden
+                                        </span>
                                     </template>
                                 </p>
                             </div>
@@ -220,10 +280,15 @@
                     @else
                     {{-- Sección: Método de Pago (cuando se requiere pago) --}}
                     <div class="p-6 lg:p-8 border-b border-gray-200">
-                        <h3 class="text-base md:text-lg font-bold text-slate-900 mb-6 flex items-center gap-2">
-                            <i data-lucide="credit-card" class="w-5 h-5 text-blue-600"></i>
-                            Método de Pago
-                        </h3>
+                        <div class="flex items-center gap-3 mb-6">
+                            <div class="w-12 h-12 bg-accent-300/10 rounded-xl flex items-center justify-center">
+                                <i data-lucide="credit-card" class="w-6 h-6 text-accent-300"></i>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-bold text-slate-900">Método de Pago</h3>
+                                <p class="text-sm text-slate-600">Elige cómo deseas realizar el pago</p>
+                            </div>
+                        </div>
                         
                         @if($epaycoGateway)
                         {{-- Selección de Método de Pago --}}
@@ -590,7 +655,7 @@
                             Paso Anterior
                         </a>
                         <button type="submit" 
-                                class="px-8 py-2.5 bg-slate-900 hover:bg-slate-900 text-white rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
+                                class="px-8 py-2.5 bg-accent-300 hover:bg-accent-400 text-white rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
                                 :disabled="submitting">
                             <template x-if="!submitting">
                                 <span class="flex items-center gap-2">
@@ -611,9 +676,54 @@
         </main>
     </div>
 
+    {{-- Calendly Modal --}}
+    <div x-show="calendlyOpen" 
+         x-cloak
+         class="fixed inset-0 z-50 overflow-y-auto"
+         @click.self="calendlyOpen = false"
+         @keydown.escape.window="calendlyOpen = false"
+         x-transition:enter="ease-out duration-300"
+         x-transition:enter-start="opacity-0"
+         x-transition:enter-end="opacity-100"
+         x-transition:leave="ease-in duration-200"
+         x-transition:leave-start="opacity-100"
+         x-transition:leave-end="opacity-0">
+        <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
+            <div class="fixed inset-0 transition-opacity bg-gray-500 bg-opacity-75" @click="calendlyOpen = false"></div>
+            
+            <span class="hidden sm:inline-block sm:align-middle sm:h-screen"></span>
+            
+            <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full"
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95">
+                <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-medium text-gray-900">Agendar Reunión</h3>
+                        <button @click="calendlyOpen = false" class="text-gray-400 hover:text-gray-500">
+                            <i data-lucide="x" class="w-6 h-6"></i>
+                        </button>
+                    </div>
+                    <div class="calendly-inline-widget" data-url="https://calendly.com/linkiu/reunion" style="min-width:320px;height:700px;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {{-- Alpine.js --}}
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+
     <script>
     document.addEventListener('alpine:init', () => {
         Alpine.data('ownerForm', () => ({
+            calendlyOpen: false,
+            ownerName: '{{ old('owner_name') }}',
+            ownerEmail: '{{ old('owner_email') }}',
+            ownerDocumentType: '{{ old('owner_document_type', '') }}',
+            ownerDocumentNumber: '{{ old('owner_document_number') }}',
             password: '',
             passwordConfirmation: '',
             fileName: '',
@@ -623,10 +733,175 @@
             cashType: '{{ old('cash_type', '') }}',
             walletPhone: '{{ old('wallet_phone', '') }}',
             submitting: false,
+            saveTimeout: null,
+            ownerEmailAvailable: null,
+            validatingOwnerEmail: false,
+            ownerEmailValidationTimeout: null,
+
+            init() {
+                // Cargar datos guardados
+                this.loadFromLocalStorage();
+                
+                // Restaurar valores de old() si existen
+                @if(old('owner_name'))
+                    this.ownerName = '{{ old('owner_name') }}';
+                @endif
+                @if(old('owner_email'))
+                    this.ownerEmail = '{{ old('owner_email') }}';
+                @endif
+                @if(old('owner_document_type'))
+                    this.ownerDocumentType = '{{ old('owner_document_type') }}';
+                @endif
+                @if(old('owner_document_number'))
+                    this.ownerDocumentNumber = '{{ old('owner_document_number') }}';
+                @endif
+
+                // Inicializar iconos
+                this.$nextTick(() => {
+                    if (typeof lucide !== 'undefined') {
+                        lucide.createIcons();
+                    }
+                });
+            },
+
+            saveToLocalStorage() {
+                try {
+                    const data = {
+                        step: 4,
+                        formData: {
+                            owner_name: this.ownerName,
+                            owner_email: this.ownerEmail,
+                            owner_document_type: this.ownerDocumentType,
+                            owner_document_number: this.ownerDocumentNumber,
+                            payment_method: this.paymentMethod,
+                            epayco_method: this.epaycoMethod,
+                            pse_bank_code: this.pseBankCode,
+                            cash_type: this.cashType,
+                            wallet_phone: this.walletPhone
+                        },
+                        timestamp: new Date().toISOString()
+                    };
+                    localStorage.setItem('registration_step4', JSON.stringify(data));
+                } catch (error) {
+                    console.error('Error guardando datos:', error);
+                }
+            },
+
+            loadFromLocalStorage() {
+                try {
+                    const saved = localStorage.getItem('registration_step4');
+                    if (saved) {
+                        const data = JSON.parse(saved);
+                        if (data.formData) {
+                            if (!this.ownerName && data.formData.owner_name) {
+                                this.ownerName = data.formData.owner_name;
+                            }
+                            if (!this.ownerEmail && data.formData.owner_email) {
+                                this.ownerEmail = data.formData.owner_email;
+                            }
+                            if (!this.ownerDocumentType && data.formData.owner_document_type) {
+                                this.ownerDocumentType = data.formData.owner_document_type;
+                            }
+                            if (!this.ownerDocumentNumber && data.formData.owner_document_number) {
+                                this.ownerDocumentNumber = data.formData.owner_document_number;
+                            }
+                            if (data.formData.payment_method) {
+                                this.paymentMethod = data.formData.payment_method;
+                            }
+                            if (data.formData.epayco_method) {
+                                this.epaycoMethod = data.formData.epayco_method;
+                            }
+                            if (data.formData.pse_bank_code) {
+                                this.pseBankCode = data.formData.pse_bank_code;
+                            }
+                            if (data.formData.cash_type) {
+                                this.cashType = data.formData.cash_type;
+                            }
+                            if (data.formData.wallet_phone) {
+                                this.walletPhone = data.formData.wallet_phone;
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error cargando datos:', error);
+                }
+            },
+
+            debouncedSave() {
+                if (this.saveTimeout) {
+                    clearTimeout(this.saveTimeout);
+                }
+                this.saveTimeout = setTimeout(() => {
+                    this.saveToLocalStorage();
+                }, 1500);
+            },
             
             passwordsMatch() {
                 if (!this.password || !this.passwordConfirmation) return false;
                 return this.password === this.passwordConfirmation;
+            },
+
+            async validateOwnerEmail() {
+                if (!this.ownerEmail) {
+                    this.ownerEmailAvailable = null;
+                    this.validatingOwnerEmail = false;
+                    return;
+                }
+
+                // Validar formato de email
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                if (!emailRegex.test(this.ownerEmail)) {
+                    this.ownerEmailAvailable = null;
+                    this.validatingOwnerEmail = false;
+                    return;
+                }
+
+                // Limpiar timeout anterior
+                if (this.ownerEmailValidationTimeout) {
+                    clearTimeout(this.ownerEmailValidationTimeout);
+                }
+
+                this.ownerEmailAvailable = null;
+
+                // Esperar 500ms después de que el usuario deje de escribir
+                this.ownerEmailValidationTimeout = setTimeout(async () => {
+                    this.validatingOwnerEmail = true;
+                    
+                    try {
+                        const response = await fetch('{{ route('api.validate-registration-email') }}', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+                            },
+                            body: JSON.stringify({
+                                email: this.ownerEmail
+                            })
+                        });
+
+                        const data = await response.json();
+
+                        if (!data.available) {
+                            this.ownerEmailAvailable = false;
+                        } else {
+                            this.ownerEmailAvailable = true;
+                        }
+                    } catch (error) {
+                        console.error('Error validando email:', error);
+                        this.ownerEmailAvailable = false;
+                    } finally {
+                        this.validatingOwnerEmail = false;
+                    }
+                }, 500);
+            },
+
+            destroy() {
+                if (this.saveTimeout) {
+                    clearTimeout(this.saveTimeout);
+                }
+                if (this.ownerEmailValidationTimeout) {
+                    clearTimeout(this.ownerEmailValidationTimeout);
+                }
             },
 
             updateWalletPhoneRequired() {
@@ -744,8 +1019,8 @@
 
     // Inicializar iconos Lucide
     document.addEventListener('DOMContentLoaded', function() {
-        if (window.createIcons && window.lucideIcons) {
-            window.createIcons({ icons: window.lucideIcons });
+        if (typeof lucide !== 'undefined') {
+            lucide.createIcons();
         }
     });
     </script>

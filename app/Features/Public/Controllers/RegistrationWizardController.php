@@ -122,6 +122,140 @@ class RegistrationWizardController extends Controller
     }
 
     /**
+     * Validar email en tiempo real
+     */
+    public function validateEmail(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $email = $request->input('email');
+
+        // Verificar si ya existe en stores
+        $existingStoreEmail = \App\Shared\Models\Store::where('email', $email)->first();
+        if ($existingStoreEmail) {
+            return response()->json([
+                'available' => false,
+                'message' => 'Este correo electrónico ya está registrado por otra tienda.'
+            ]);
+        }
+
+        // Verificar si ya existe en pending_registrations con status approved o pending
+        $existingPendingEmail = PendingRegistration::where('email', $email)
+            ->whereIn('status', ['approved', 'pending'])
+            ->first();
+        if ($existingPendingEmail) {
+            if ($existingPendingEmail->status === 'approved') {
+                return response()->json([
+                    'available' => false,
+                    'message' => 'Este correo electrónico ya tiene un registro aprobado.'
+                ]);
+            } else {
+                return response()->json([
+                    'available' => false,
+                    'message' => 'Ya existe un registro pendiente con este correo. Por favor espera a que sea procesado o contacta soporte.'
+                ]);
+            }
+        }
+
+        return response()->json([
+            'available' => true,
+            'message' => 'Email disponible'
+        ]);
+    }
+
+    /**
+     * Validar slug en tiempo real
+     */
+    public function validateSlug(Request $request)
+    {
+        $request->validate([
+            'slug' => 'required|string|max:100|regex:/^[a-z0-9-]+$/',
+        ]);
+
+        $slug = $request->input('slug');
+
+        // Validar que no empiece o termine con guión
+        if (str_starts_with($slug, '-') || str_ends_with($slug, '-')) {
+            return response()->json([
+                'available' => false,
+                'message' => 'La URL no puede comenzar o terminar con guión'
+            ]);
+        }
+
+        // Validar slug contra stores
+        $existingStore = \App\Shared\Models\Store::where('slug', $slug)->first();
+        if ($existingStore) {
+            return response()->json([
+                'available' => false,
+                'message' => 'Esta URL ya está en uso por otra tienda. Por favor elige otra.'
+            ]);
+        }
+
+        // Validar slug contra pending_registrations con status approved o pending
+        $existingPendingSlug = PendingRegistration::where('slug', $slug)
+            ->whereIn('status', ['approved', 'pending'])
+            ->first();
+        if ($existingPendingSlug) {
+            return response()->json([
+                'available' => false,
+                'message' => 'Esta URL ya está en uso. Por favor elige otra.'
+            ]);
+        }
+
+        return response()->json([
+            'available' => true,
+            'message' => 'URL disponible'
+        ]);
+    }
+
+    /**
+     * Validar nombre de tienda en tiempo real
+     */
+    public function validateStoreName(Request $request)
+    {
+        $request->validate([
+            'store_name' => 'required|string|max:255',
+        ]);
+
+        $storeName = $request->input('store_name');
+
+        // Validar longitud mínima
+        if (strlen(trim($storeName)) < 3) {
+            return response()->json([
+                'available' => false,
+                'message' => 'El nombre debe tener al menos 3 caracteres'
+            ]);
+        }
+
+        // Validar nombre de tienda contra stores (case-insensitive)
+        $existingStoreName = \App\Shared\Models\Store::whereRaw('LOWER(name) = LOWER(?)', [$storeName])->first();
+        if ($existingStoreName) {
+            return response()->json([
+                'available' => false,
+                'message' => 'Ya existe una tienda con este nombre. Por favor elige otro nombre.'
+            ]);
+        }
+
+        // Validar nombre contra pending_registrations
+        $existingPendingName = PendingRegistration::whereRaw('LOWER(store_name) = LOWER(?)', [$storeName])
+            ->whereIn('status', ['approved', 'pending'])
+            ->first();
+        if ($existingPendingName) {
+            return response()->json([
+                'available' => false,
+                'message' => 'Ya existe un registro pendiente o aprobado con este nombre. Por favor elige otro nombre.'
+            ]);
+        }
+
+        return response()->json([
+            'available' => true,
+            'message' => 'Nombre disponible'
+        ]);
+    }
+
+    /**
      * Guardar Step 3 y continuar a Step 4
      */
     public function storeStep3(Request $request)
@@ -130,9 +264,6 @@ class RegistrationWizardController extends Controller
             'store_name' => 'required|string|max:255',
             'slug' => 'required|string|max:100|regex:/^[a-z0-9-]+$/',
             'store_description' => 'nullable|string|max:500',
-            'meta_title' => 'nullable|string|max:255',
-            'meta_description' => 'nullable|string|max:500',
-            'meta_keywords' => 'nullable|string|max:255',
         ]);
 
         // Validar slug contra stores
@@ -165,9 +296,11 @@ class RegistrationWizardController extends Controller
             return back()->withInput()->withErrors(['store_name' => 'Ya existe un registro pendiente o aprobado con este nombre. Por favor elige otro nombre.']);
         }
 
-        // Guardar todos los datos en sesi?n
-        foreach($validated as $key => $value) {
-            Session::put("wizard.{$key}", $value);
+        // Guardar todos los datos en sesión (sin campos de SEO)
+        Session::put('wizard.store_name', $validated['store_name']);
+        Session::put('wizard.slug', $validated['slug']);
+        if (isset($validated['store_description'])) {
+            Session::put('wizard.store_description', $validated['store_description']);
         }
 
         return redirect()->route('register.step4');
@@ -340,10 +473,28 @@ class RegistrationWizardController extends Controller
         // Enviar WhatsApp INMEDIATAMENTE
         $this->sendWhatsAppNotification($registration);
 
-        // Limpiar sesi?n del wizard
-        Session::forget('wizard.plan_id');
-        Session::forget('wizard.selected_period');
-        Session::forget('wizard.business_category_id');
+        // Limpiar toda la sesi?n del wizard (todos los pasos)
+        $wizardKeys = [
+            'wizard.plan_id',
+            'wizard.billing_period',
+            'wizard.business_category_id',
+            'wizard.business_name',
+            'wizard.document_type',
+            'wizard.document_number',
+            'wizard.phone',
+            'wizard.email',
+            'wizard.city',
+            'wizard.department',
+            'wizard.address',
+            'wizard.description',
+            'wizard.store_name',
+            'wizard.slug',
+            'wizard.store_description',
+        ];
+        
+        foreach ($wizardKeys as $key) {
+            Session::forget($key);
+        }
 
         // Redirigir a Step 5 (pantalla de espera)
         return redirect()->route('register.step5', $registration->id);
