@@ -189,26 +189,27 @@
                 <div class="text-center lg:text-left">
                     <div class="inline-flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-full mb-6 border border-white/10">
                         <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                        <span class="text-white/80 text-sm lg:text-base font-inter">Ideal para restaurantes, cafeterías, pizzerías y más</span>
+                        <span class="text-white/80 text-sm lg:text-base font-inter">Perfecto para restaurantes, cafeterías, pizzerías y más</span>
                     </div>
                     
-                    <h1 class="font-satoshi text-4xl sm:text-5xl lg:text-6xl font-black text-white leading-tight mb-6">
-                        Tu restaurante digital<br>
-                        <span class="text-accent-300">siempre abierto</span>
+                    <h1 class="font-satoshi text-4xl sm:text-5xl lg:text-6xl font-black text-white mb-6">
+                    Tu restaurante digital siempre abierto<br>
+                        <span class="text-accent-300">sin interrupciones</span>
                     </h1>
                     
                     <p class="text-lg sm:text-xl text-gray-300 mb-8 max-w-xl mx-auto lg:mx-0 font-inter">
-                        Menú digital, reservas de mesas y pedidos online. Con Linkiu tienes tu restaurante digital completo con pedidos, pagos y reservas <span class="text-accent-300 font-semibold">en minutos</span>.
+                        Deja de perder reservas por no contestar el teléfono. Con Linkiu tus clientes reservan mesa y piden desde su celular. 
+                        <span class="text-accent-300 font-semibold">Menú digital, QR por mesa y reservas online en 15 minutos</span>.
                     </p>
                     
                     <div class="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
-                        <a href="{{ route('register.step1') }}" class="bg-accent-300 hover:bg-accent-400 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
-                            <span>Prueba gratis</span>
+                        <a href="{{ route('register.step1') }}" onclick="fbq('track', 'Lead');" class="bg-accent-300 hover:bg-accent-400 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 flex items-center justify-center gap-2">
+                            <span>Crear mi restaurante gratis</span>
                             <i data-lucide="arrow-right" class="w-5 h-5"></i>
                         </a>
                         <a href="{{ route('plans.index') }}" class="bg-white/10 hover:bg-white/20 text-white px-8 py-4 rounded-xl font-semibold text-lg transition-colors flex items-center justify-center gap-2 border border-white/20">
                             <i data-lucide="eye" class="w-5 h-5"></i>
-                            <span>Ver planes</span>
+                            <span>Ver precios</span>
                         </a>
                     </div>
                     
@@ -216,15 +217,15 @@
                     <div class="flex flex-wrap items-center gap-6 mt-10 justify-center lg:justify-start">
                         <div class="flex items-center gap-2 text-gray-400">
                             <i data-lucide="check-circle" class="w-5 h-5 text-white"></i>
-                            <span class="text-sm">Menú ilimitado</span>
+                            <span class="text-sm">Platos ilimitados</span>
                         </div>
                         <div class="flex items-center gap-2 text-gray-400">
                             <i data-lucide="check-circle" class="w-5 h-5 text-white"></i>
-                            <span class="text-sm">Sin comisiones ocultas</span>
+                            <span class="text-sm">Sin comisiones por venta</span>
                         </div>
                         <div class="flex items-center gap-2 text-gray-400">
                             <i data-lucide="check-circle" class="w-5 h-5 text-white"></i>
-                            <span class="text-sm">15 días gratis</span>
+                            <span class="text-sm">{{ $maxTrialDays ?? 15 }} días gratis sin tarjeta</span>
                         </div>
                     </div>
                 </div>
@@ -1072,7 +1073,7 @@
                 Crea tu restaurante digital en minutos. Sin conocimientos técnicos. Sin complicaciones.
             </p>
             <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                <a href="{{ route('register.step1') }}" class="bg-accent-300 hover:bg-accent-400 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 inline-flex items-center justify-center gap-2">
+                <a href="{{ route('register.step1') }}" onclick="fbq('track', 'Lead');" class="bg-accent-300 hover:bg-accent-400 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 inline-flex items-center justify-center gap-2">
                     <span>Prueba gratis</span>
                     <i data-lucide="arrow-right" class="w-5 h-5"></i>
                 </a>

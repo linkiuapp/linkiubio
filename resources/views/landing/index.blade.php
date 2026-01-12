@@ -234,151 +234,52 @@
     <x-public-navbar />
 
     <!-- Hero Section -->
-    <section class="hero-gradient min-h-screen flex items-center relative overflow-hidden py-24 lg:py-32">
+    <section class="hero-gradient min-h-screen flex items-center relative overflow-hidden pb-72 lg:pb-96 pt-32">
+        <!-- Video de fondo con mix-blend-lighten -->
+        <video 
+            autoplay 
+            loop 
+            muted 
+            playsinline
+            class="absolute bottom-0 left-1/2 transform -translate-x-1/2 max-w-[600px] lg:max-w-[1300px] h-auto object-bottom mix-blend-lighten z-0"
+            style="max-height: 70vh"
+        >
+            <source src="{{ asset('images-ui/bgherolinkiu2.mp4') }}" type="video/mp4">
+        </video>
+        
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 lg:py-8 relative z-10">
             <div class="flex flex-col items-center">
                 <!-- Texto Centrado -->
                 <div class="text-center max-w-4xl lg:mb-8 w-full px-4 mt-8 lg:mt-0">
                     <div class="inline-flex items-center gap-2 bg-white/10 px-3 lg:px-4 py-1.5 lg:py-2 rounded-full mb-4 lg:mb-6 border border-white/10">
                         <span class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></span>
-                        <span class="text-white/80 text-sm lg:text-base font-inter">+100 negocios ya venden con Linkiu</span>
+                        <span class="text-white/80 text-sm lg:text-base font-inter">Más de 100 emprendedores ya venden con Linkiu</span>
                     </div>
                     
-                    <h1 class="font-satoshi text-5xl sm:text-5xl lg:text-6xl font-black text-white leading-tight mb-4 lg:mb-6">
-                        Tu negocio online<br>
-                        <span class="text-accent-300 mb-0 lg:mb-2">en minutos</span>
+                    <h1 class="font-satoshi text-5xl sm:text-5xl lg:text-6xl font-black text-white mb-4 lg:mb-6">
+                        Tu tienda online lista<br>
+                        <span class="text-accent-300 mb-0 lg:mb-2">en 15 minutos. Sin código.</span>
                     </h1>
                     
                     <p class="text-sm sm:text-base lg:text-lg text-white mb-6 lg:mb-8 max-w-2xl mx-auto font-inter">
-                        Olvídate de enviar fotos por WhatsApp, PDFs pesados o páginas lentas. 
-                        Con Linkiu tienes tu tienda <span class="text-accent-300 font-semibold">lista para vender hoy</span>.
+                        Deja de perder ventas por enviar fotos por WhatsApp. Crea tu tienda profesional, 
+                        recibe pagos en línea y automatiza tus envíos. 
+                        <span class="text-accent-300 font-semibold">Prueba gratis {{ $maxTrialDays }} días sin tarjeta</span>.
                     </p>
                     <div class="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center mb-8 lg:mb-12 w-full sm:w-auto mx-auto">
                         <button onclick="fbq('track', 'Lead'); window.location.href='{{ route('register.step1') }}';" class="bg-accent-300 hover:bg-accent-400 text-white px-6 lg:px-8 py-3 lg:py-4 rounded-xl font-bold text-base lg:text-lg transition-all hover:scale-105 flex items-center justify-center gap-2 w-full sm:w-auto">
-                            <span>Prueba gratis</span>
+                            <span>Crear mi tienda gratis</span>
                             <i data-lucide="arrow-right" class="w-5 h-5"></i>
                         </button>
                         <button @click="calendlyOpen = true" class="bg-white/10 hover:bg-white/20 text-white px-6 lg:px-8 py-3 lg:py-4 rounded-xl font-semibold text-base lg:text-lg transition-colors flex items-center justify-center gap-2 border border-white/20 backdrop-blur-none w-full sm:w-auto">
                             <i data-lucide="calendar" class="w-5 h-5"></i>
-                            <span>Agendar reunión</span>
+                            <span>Ver demo en vivo</span>
                         </button>
                     </div>
                 </div>
+
                 
-                <!-- Mockup con cards flotantes - Centrado -->
-                <div class="relative max-w-4xl lg:max-w-7xl w-full mt-2 lg:mt-8 mx-auto">
-                    <div class="rounded-3xl">
-                        <!-- Browser mockup -->
-                        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
-                            <div class="bg-gray-100 px-4 py-3 flex items-center gap-2">
-                                <div class="flex gap-1.5">
-                                    <div class="w-3 h-3 bg-accent-300 rounded-full"></div>
-                                    <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
-                                    <div class="w-3 h-3 bg-green-400 rounded-full"></div>
-                                </div>
-                                <div class="flex-1 bg-white rounded-lg px-3 py-1.5 text-xs text-gray-500 text-center font-medium">
-                                    linkiu.bio/tutienda
-                                </div>
-                            </div>
-                            <div class="p-6 space-y-4">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-14 h-14 bg-brand-200/10 rounded-xl flex items-center justify-center">
-                                        <i data-lucide="store" class="w-7 h-7 text-brand-200"></i>
-                                    </div>
-                                    <div>
-                                        <div class="h-4 bg-gray-800 rounded w-36 mb-2"></div>
-                                        <div class="h-3 bg-gray-200 rounded w-28"></div>
-                                    </div>
-                                </div>
-                                <div class="grid grid-cols-2 gap-3">
-                                    <div class="bg-gray-50 rounded-xl p-3">
-                                        <div class="w-full h-24 bg-gradient-to-br from-gray-200 to-gray-100 rounded-lg mb-2"></div>
-                                        <div class="h-3 bg-gray-300 rounded w-3/4 mb-1"></div>
-                                        <div class="h-4 bg-accent-300/20 rounded w-1/2"></div>
-                                    </div>
-                                    <div class="bg-gray-50 rounded-xl p-3">
-                                        <div class="w-full h-24 bg-gradient-to-br from-gray-200 to-gray-100 rounded-lg mb-2"></div>
-                                        <div class="h-3 bg-gray-300 rounded w-3/4 mb-1"></div>
-                                        <div class="h-4 bg-accent-300/20 rounded w-1/2"></div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Floating Cards -->
-                    <div class="absolute -top-4 -right-4 bg-white rounded-xl shadow-xl p-3 float-animation border border-gray-100">
-                        <div class="flex items-center gap-2">
-                            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
-                                <i data-lucide="check" class="w-5 h-5 text-green-600"></i>
-                            </div>
-                            <div>
-                                <span class="text-sm font-bold text-gray-900 block">¡Nuevo pedido!</span>
-                                <span class="text-xs text-gray-500">Hace 2 min</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="absolute -bottom-8 -left-6 bg-white rounded-xl shadow-xl p-3 float-animation-delay border border-gray-100">
-                        <div class="flex items-center gap-2">
-                            <div class="w-10 h-10 bg-brand-200/10 rounded-full flex items-center justify-center">
-                                <i data-lucide="credit-card" class="w-5 h-5 text-brand-200"></i>
-                            </div>
-                            <div>
-                                <span class="text-sm font-bold text-gray-900 block">Pago recibido</span>
-                                <span class="text-xs text-green-600 font-semibold">$85.000</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="absolute top-1/2 -left-8 bg-white rounded-xl shadow-xl p-3 float-animation-delay-2 border border-gray-100">
-                        <div class="flex items-center gap-2">
-                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
-                                <i data-lucide="trending-up" class="w-5 h-5 text-purple-600"></i>
-                            </div>
-                            <div>
-                                <span class="text-sm font-bold text-gray-900 block">Ventas del día</span>
-                                <span class="text-xs text-purple-600 font-semibold">+23%</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="absolute bottom-1/3 -right-24 bg-white rounded-xl shadow-xl p-3 float-animation border border-gray-100">
-                        <div class="flex items-center gap-2">
-                            <div class="w-10 h-10 bg-accent-300/10 rounded-full flex items-center justify-center">
-                                <i data-lucide="message-circle" class="w-5 h-5 text-accent-300"></i>
-                            </div>
-                            <div>
-                                <span class="text-sm font-bold text-gray-900 block">WhatsApp</span>
-                                <span class="text-xs text-gray-500">Notificación enviada</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="absolute -bottom-6 -right-8 bg-white rounded-xl shadow-xl p-3 float-animation-delay border border-gray-100 hidden xl:block">
-                        <div class="flex items-center gap-2">
-                            <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
-                                <i data-lucide="package" class="w-5 h-5 text-orange-600"></i>
-                            </div>
-                            <div>
-                                <span class="text-sm font-bold text-gray-900 block">Inventario</span>
-                                <span class="text-xs text-gray-500">5 productos bajos</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="absolute -top-16 left-1/4 bg-white rounded-xl shadow-xl p-3 float-animation-delay-2 border border-gray-100 hidden xl:block">
-                        <div class="flex items-center gap-2">
-                            <div class="w-10 h-10 bg-cyan-100 rounded-full flex items-center justify-center">
-                                <i data-lucide="users" class="w-5 h-5 text-cyan-600"></i>
-                            </div>
-                            <div>
-                                <span class="text-sm font-bold text-gray-900 block">Visitantes</span>
-                                <span class="text-xs text-cyan-600 font-semibold">124 hoy</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                
             </div>
         </div>
     </section>
@@ -391,10 +292,10 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-16">
                 <h2 class="font-satoshi text-3xl sm:text-4xl font-black text-gray-900 mb-4">
-                    ¿Te suena familiar?
+                    ¿Estás perdiendo ventas por esto?
                 </h2>
                 <p class="text-lg text-gray-600 max-w-2xl mx-auto font-inter">
-                    Sabemos lo difícil que es vender online cuando no tienes las herramientas adecuadas
+                    Estos son los problemas que más frustran a los emprendedores que venden online
                 </p>
             </div>
             
@@ -404,8 +305,8 @@
                     <div class="w-12 h-12 bg-accent-300/10 rounded-xl flex items-center justify-center mb-4">
                         <i data-lucide="message-circle" class="w-6 h-6 text-accent-300"></i>
                     </div>
-                    <h3 class="font-satoshi font-bold text-gray-900 mb-2">Envío fotos por WhatsApp</h3>
-                    <p class="text-gray-600 text-sm font-inter">Y tus clientes se pierden entre tantas imágenes sin poder elegir bien.</p>
+                    <h3 class="font-satoshi font-bold text-gray-900 mb-2">Pierdes clientes en WhatsApp</h3>
+                    <p class="text-gray-600 text-sm font-inter">Envías 20 fotos y tu cliente se confunde. No puede comparar precios ni agregar al carrito.</p>
                 </div>
                 
                 <!-- Dolor 2 -->
@@ -413,8 +314,8 @@
                     <div class="w-12 h-12 bg-accent-300/10 rounded-xl flex items-center justify-center mb-4">
                         <i data-lucide="file-text" class="w-6 h-6 text-accent-300"></i>
                     </div>
-                    <h3 class="font-satoshi font-bold text-gray-900 mb-2">PDFs que nadie abre</h3>
-                    <p class="text-gray-600 text-sm font-inter">Catálogos pesados que tardan en cargar y se ven mal en el celular.</p>
+                    <h3 class="font-satoshi font-bold text-gray-900 mb-2">Tu catálogo PDF no funciona</h3>
+                    <p class="text-gray-600 text-sm font-inter">Nadie lo descarga. Tarda mucho en abrir y se ve terrible en el celular. Pierdes ventas.</p>
                 </div>
                 
                 <!-- Dolor 3 -->
@@ -422,8 +323,8 @@
                     <div class="w-12 h-12 bg-accent-300/10 rounded-xl flex items-center justify-center mb-4">
                         <i data-lucide="wallet" class="w-6 h-6 text-accent-300"></i>
                     </div>
-                    <h3 class="font-satoshi font-bold text-gray-900 mb-2">No tengo para una web</h3>
-                    <p class="text-gray-600 text-sm font-inter">Las páginas web son caras y necesitas a alguien que la mantenga.</p>
+                    <h3 class="font-satoshi font-bold text-gray-900 mb-2">Una web cuesta miles de pesos</h3>
+                    <p class="text-gray-600 text-sm font-inter">Necesitas pagar a un diseñador, un programador y mantenerla cada mes. Es muy caro.</p>
                 </div>
                 
                 <!-- Dolor 4 -->
@@ -431,8 +332,8 @@
                     <div class="w-12 h-12 bg-accent-300/10 rounded-xl flex items-center justify-center mb-4">
                         <i data-lucide="brain" class="w-6 h-6 text-accent-300"></i>
                     </div>
-                    <h3 class="font-satoshi font-bold text-gray-900 mb-2">No sé de tecnología</h3>
-                    <p class="text-gray-600 text-sm font-inter">Las plataformas son complicadas y no tienes tiempo para aprender.</p>
+                    <h3 class="font-satoshi font-bold text-gray-900 mb-2">Las plataformas son complicadas</h3>
+                    <p class="text-gray-600 text-sm font-inter">Tienes que aprender a usarlas, configurar mil cosas y no tienes tiempo para eso.</p>
                 </div>
             </div>
             
@@ -441,13 +342,13 @@
                 <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2"></div>
                 <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full translate-y-1/2 -translate-x-1/2"></div>
                 <div class="relative z-10">
-                    <h3 class="font-satoshi text-2xl sm:text-3xl font-black mb-4">Con Linkiu todo cambia</h3>
+                    <h3 class="font-satoshi text-2xl sm:text-3xl font-black mb-4">Linkiu resuelve todo esto en minutos</h3>
                     <p class="text-lg text-blue-100 mb-6 max-w-2xl mx-auto font-inter">
-                        Un solo link con todo tu catálogo, fácil de usar y que carga en segundos. 
-                        Sin conocimientos técnicos, sin gastos grandes.
+                        Tu tienda profesional lista en 15 minutos. Sin código, sin complicaciones, sin gastos grandes. 
+                        <span class="font-semibold">Empieza gratis y paga solo cuando vendas</span>.
                     </p>
-                    <a href="{{ route('register.step1') }}" class="inline-flex items-center gap-2 bg-white text-brand-400 px-6 py-3 rounded-xl font-bold hover:bg-blue-50 transition-colors">
-                        <span>Empezar ahora</span>
+                    <a href="{{ route('register.step1') }}" onclick="fbq('track', 'Lead');" class="inline-flex items-center gap-2 bg-white text-brand-400 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition-all hover:scale-105">
+                        <span>Crear mi tienda gratis</span>
                         <i data-lucide="arrow-right" class="w-5 h-5"></i>
                     </a>
                 </div>
@@ -601,6 +502,141 @@
         </div>
     </section>
 
+    <!-- Dashboard Preview Section -->
+    <section class="py-16 lg:py-24 bg-white">
+        <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12 lg:mb-16">
+                <span class="inline-block bg-brand-200/10 text-brand-200 px-4 py-1 rounded-full text-sm font-semibold mb-4">
+                    Todo en un solo lugar
+                </span>
+                <h2 class="font-satoshi text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 mb-4">
+                    Controla tus ventas sin complicarte
+                </h2>
+                <p class="text-lg text-gray-600 max-w-3xl mx-auto font-inter">
+                    Ve todos tus pedidos, pagos recibidos y ventas del día en tiempo real. 
+                    <span class="font-semibold text-gray-900">Sin abrir 5 apps diferentes</span>. 
+                    Todo desde tu panel de Linkiu.
+                </p>
+            </div>
+            
+            <!-- Mockup con cards flotantes - Centrado -->
+            <div class="relative max-w-2xl lg:max-w-7xl w-full mt-2 lg:mt-8 mx-auto">
+                    <div class="rounded-3xl">
+                        <!-- Browser mockup -->
+                        <div class="bg-white rounded-2xl shadow-2xl overflow-hidden">
+                            <div class="bg-gray-100 px-4 py-3 flex items-center gap-2">
+                                <div class="flex gap-1.5">
+                                    <div class="w-3 h-3 bg-accent-300 rounded-full"></div>
+                                    <div class="w-3 h-3 bg-yellow-400 rounded-full"></div>
+                                    <div class="w-3 h-3 bg-green-400 rounded-full"></div>
+                                </div>
+                                <div class="flex-1 bg-white rounded-lg px-3 py-1.5 text-xs text-gray-500 text-center font-medium">
+                                    linkiu.bio/tutienda
+                                </div>
+                            </div>
+                            <div class="p-6 space-y-4">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-14 h-14 bg-brand-200/10 rounded-xl flex items-center justify-center">
+                                        <i data-lucide="store" class="w-7 h-7 text-brand-200"></i>
+                                    </div>
+                                    <div>
+                                        <div class="h-4 bg-gray-800 rounded w-36 mb-2"></div>
+                                        <div class="h-3 bg-gray-200 rounded w-28"></div>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
+                                    <div class="bg-gray-50 rounded-xl p-3">
+                                        <div class="w-full h-24 bg-gradient-to-br from-gray-200 to-gray-100 rounded-lg mb-2"></div>
+                                        <div class="h-3 bg-gray-300 rounded w-3/4 mb-1"></div>
+                                        <div class="h-4 bg-accent-300/20 rounded w-1/2"></div>
+                                    </div>
+                                    <div class="bg-gray-50 rounded-xl p-3">
+                                        <div class="w-full h-24 bg-gradient-to-br from-gray-200 to-gray-100 rounded-lg mb-2"></div>
+                                        <div class="h-3 bg-gray-300 rounded w-3/4 mb-1"></div>
+                                        <div class="h-4 bg-accent-300/20 rounded w-1/2"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Floating Cards -->
+                    <div class="absolute -top-4 -right-4 bg-white rounded-xl shadow-xl p-3 float-animation border border-gray-100">
+                        <div class="flex items-center gap-2">
+                            <div class="w-10 h-10 bg-green-100 rounded-full flex items-center justify-center">
+                                <i data-lucide="check" class="w-5 h-5 text-green-600"></i>
+                            </div>
+                            <div>
+                                <span class="text-sm font-bold text-gray-900 block">¡Nuevo pedido!</span>
+                                <span class="text-xs text-gray-500">Hace 2 min</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="absolute -bottom-8 -left-6 bg-white rounded-xl shadow-xl p-3 float-animation-delay border border-gray-100">
+                        <div class="flex items-center gap-2">
+                            <div class="w-10 h-10 bg-brand-200/10 rounded-full flex items-center justify-center">
+                                <i data-lucide="credit-card" class="w-5 h-5 text-brand-200"></i>
+                            </div>
+                            <div>
+                                <span class="text-sm font-bold text-gray-900 block">Pago recibido</span>
+                                <span class="text-xs text-green-600 font-semibold">$85.000</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="absolute top-1/2 -left-8 bg-white rounded-xl shadow-xl p-3 float-animation-delay-2 border border-gray-100">
+                        <div class="flex items-center gap-2">
+                            <div class="w-10 h-10 bg-purple-100 rounded-full flex items-center justify-center">
+                                <i data-lucide="trending-up" class="w-5 h-5 text-purple-600"></i>
+                            </div>
+                            <div>
+                                <span class="text-sm font-bold text-gray-900 block">Ventas del día</span>
+                                <span class="text-xs text-purple-600 font-semibold">+23%</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="absolute bottom-1/3 -right-24 bg-white rounded-xl shadow-xl p-3 float-animation border border-gray-100">
+                        <div class="flex items-center gap-2">
+                            <div class="w-10 h-10 bg-accent-300/10 rounded-full flex items-center justify-center">
+                                <i data-lucide="message-circle" class="w-5 h-5 text-accent-300"></i>
+                            </div>
+                            <div>
+                                <span class="text-sm font-bold text-gray-900 block">WhatsApp</span>
+                                <span class="text-xs text-gray-500">Notificación enviada</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="absolute -bottom-6 -right-8 bg-white rounded-xl shadow-xl p-3 float-animation-delay border border-gray-100 hidden xl:block">
+                        <div class="flex items-center gap-2">
+                            <div class="w-10 h-10 bg-orange-100 rounded-full flex items-center justify-center">
+                                <i data-lucide="package" class="w-5 h-5 text-orange-600"></i>
+                            </div>
+                            <div>
+                                <span class="text-sm font-bold text-gray-900 block">Inventario</span>
+                                <span class="text-xs text-gray-500">5 productos bajos</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="absolute -top-16 left-1/4 bg-white rounded-xl shadow-xl p-3 float-animation-delay-2 border border-gray-100 hidden xl:block">
+                        <div class="flex items-center gap-2">
+                            <div class="w-10 h-10 bg-cyan-100 rounded-full flex items-center justify-center">
+                                <i data-lucide="users" class="w-5 h-5 text-cyan-600"></i>
+                            </div>
+                            <div>
+                                <span class="text-sm font-bold text-gray-900 block">Visitantes</span>
+                                <span class="text-xs text-cyan-600 font-semibold">124 hoy</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- Verticales Section -->
     <section class="py-12 lg:py-20 bg-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -685,7 +721,8 @@
                             </div>
                         </div>
                         <p class="text-blue-100 font-inter">
-                            Tu vitrina digital abierta 24/7, recibiendo pedidos mientras duermes.
+                            Vende mientras duermes. Tu tienda online abierta 24/7 recibiendo pedidos y pagos automáticos. 
+                            <span class="font-semibold">Sin estar pendiente del celular</span>.
                         </p>
                     </div>
                     <div class="p-8">
@@ -696,7 +733,7 @@
                                 </div>
                                 <div>
                                     <h4 class="font-satoshi font-bold text-gray-900">Inventario</h4>
-                                    <p class="text-sm text-gray-600 font-inter">Stock en tiempo real</p>
+                                    <p class="text-sm text-gray-600 font-inter">Sabe cuánto tienes en stock</p>
                                 </div>
                             </div>
                             <div class="flex items-start gap-3">
@@ -705,7 +742,7 @@
                                 </div>
                                 <div>
                                     <h4 class="font-satoshi font-bold text-gray-900">Cupones</h4>
-                                    <p class="text-sm text-gray-600 font-inter">Descuentos que impulsan ventas</p>
+                                    <p class="text-sm text-gray-600 font-inter">Aumenta ventas con descuentos</p>
                                 </div>
                             </div>
                             <div class="flex items-start gap-3">
@@ -714,7 +751,7 @@
                                 </div>
                                 <div>
                                     <h4 class="font-satoshi font-bold text-gray-900">Variantes</h4>
-                                    <p class="text-sm text-gray-600 font-inter">Tallas, colores, opciones</p>
+                                    <p class="text-sm text-gray-600 font-inter">Tallas, colores, todo en un producto</p>
                                 </div>
                             </div>
                             <div class="flex items-start gap-3">
@@ -723,7 +760,7 @@
                                 </div>
                                 <div>
                                     <h4 class="font-satoshi font-bold text-gray-900">Bajo pedido</h4>
-                                    <p class="text-sm text-gray-600 font-inter">Vende sin tener stock</p>
+                                    <p class="text-sm text-gray-600 font-inter">Vende sin tener inventario</p>
                                 </div>
                             </div>
                         </div>
@@ -740,7 +777,7 @@
                 <span class="inline-block bg-white/10 text-white px-4 py-1 rounded-full text-sm font-semibold mb-4 border border-white/20">
                     Súper fácil
                 </span>
-                <h2 class="font-satoshi text-3xl sm:text-4xl font-black text-white mb-4">
+                <h2 class="font-satoshi text-5xl sm:text-4xl font-black text-white mb-4">
                     3 pasos para empezar a vender
                 </h2>
             </div>
@@ -762,7 +799,7 @@
                     </div>
                     <div class="text-center">
                         <div class="inline-flex items-center justify-center w-10 h-10 bg-accent-300 rounded-full text-white font-bold mb-3">1</div>
-                        <h3 class="font-satoshi text-xl font-bold text-white mb-2">Regístrate</h3>
+                        <h3 class="font-satoshi text-3xl font-bold text-white mb-2">Regístrate</h3>
                         <p class="text-gray-400 font-inter">Datos básicos y elige tu plan. Solo 2 minutos.</p>
                     </div>
                 </div>
@@ -789,7 +826,7 @@
                     </div>
                     <div class="text-center">
                         <div class="inline-flex items-center justify-center w-10 h-10 bg-accent-300 rounded-full text-white font-bold mb-3">2</div>
-                        <h3 class="font-satoshi text-xl font-bold text-white mb-2">Personaliza</h3>
+                        <h3 class="font-satoshi text-3xl font-bold text-white mb-2">Personaliza</h3>
                         <p class="text-gray-400 font-inter">Logo, colores y productos. En 10 minutos listo.</p>
                     </div>
                 </div>
@@ -823,14 +860,14 @@
                     </div>
                     <div class="text-center">
                         <div class="inline-flex items-center justify-center w-10 h-10 bg-accent-300 rounded-full text-white font-bold mb-3">3</div>
-                        <h3 class="font-satoshi text-xl font-bold text-white mb-2">¡Vende!</h3>
+                        <h3 class="font-satoshi text-3xl font-bold text-white mb-2">¡Vende!</h3>
                         <p class="text-gray-400 font-inter">Comparte tu link y empieza a recibir pedidos.</p>
                     </div>
                 </div>
             </div>
             
             <div class="text-center mt-12">
-                <a href="{{ route('register.step1') }}" class="inline-flex items-center gap-2 bg-accent-300 hover:bg-accent-400 text-white px-8 py-4 rounded-xl font-bold text-lg transition-colors">
+                <a href="{{ route('register.step1') }}" onclick="fbq('track', 'Lead');" class="inline-flex items-center gap-2 bg-accent-300 hover:bg-accent-400 text-white px-8 py-4 rounded-xl font-bold text-lg transition-colors">
                     <span>Crear mi tienda gratis</span>
                     <i data-lucide="arrow-right" class="w-5 h-5"></i>
                 </a>
@@ -967,6 +1004,135 @@
         </div>
     </section>
 
+    <!-- FAQ Section -->
+    <section class="py-16 lg:py-24 bg-gray-50">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center mb-12">
+                <span class="inline-block bg-brand-200/10 text-brand-200 px-4 py-1 rounded-full text-sm font-semibold mb-4">
+                    Preguntas Frecuentes
+                </span>
+                <h2 class="font-satoshi text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 mb-4">
+                    Resolvemos tus dudas
+                </h2>
+                <p class="text-lg text-gray-600 max-w-2xl mx-auto font-inter">
+                    Todo lo que necesitas saber sobre Linkiu antes de empezar
+                </p>
+            </div>
+
+            <div class="space-y-4" x-data="{ openIndex: null }">
+                <!-- FAQ 1 -->
+                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                    <button @click="openIndex = openIndex === 0 ? null : 0" class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors">
+                        <span class="font-satoshi font-bold text-gray-900 text-lg">¿Cuánto cuesta Linkiu?</span>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-gray-500 transition-transform" :class="openIndex === 0 ? 'rotate-180' : ''"></i>
+                    </button>
+                    <div x-show="openIndex === 0" x-collapse class="px-6 pb-4">
+                        <p class="text-gray-600 font-inter">Linkiu tiene un planes accesibles para cualquier negocio. Todos los planes incluyen {{ $maxTrialDays ?? 15 }} días gratis para probar sin tarjeta de crédito. No hay comisiones por venta. <a href="{{ route('plans.index') }}" class="text-brand-200 font-semibold hover:underline">Ver todos los planes</a>.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 2 -->
+                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                    <button @click="openIndex = openIndex === 1 ? null : 1" class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors">
+                        <span class="font-satoshi font-bold text-gray-900 text-lg">¿Necesito saber programar o tener conocimientos técnicos?</span>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-gray-500 transition-transform" :class="openIndex === 1 ? 'rotate-180' : ''"></i>
+                    </button>
+                    <div x-show="openIndex === 1" x-collapse class="px-6 pb-4">
+                        <p class="text-gray-600 font-inter">No, para nada. Linkiu está diseñado para emprendedores, no para programadores. Puedes crear tu tienda completa en 15 minutos sin escribir una línea de código. Todo es visual y muy fácil de usar.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 3 -->
+                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                    <button @click="openIndex = openIndex === 2 ? null : 2" class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors">
+                        <span class="font-satoshi font-bold text-gray-900 text-lg">¿Puedo probar antes de pagar?</span>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-gray-500 transition-transform" :class="openIndex === 2 ? 'rotate-180' : ''"></i>
+                    </button>
+                    <div x-show="openIndex === 2" x-collapse class="px-6 pb-4">
+                        <p class="text-gray-600 font-inter">Sí, todos los planes incluyen {{ $maxTrialDays ?? 15 }} días gratis para probar todas las funcionalidades. No necesitas tarjeta de crédito para empezar. Si no te convence, puedes cancelar sin pagar nada.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 4 -->
+                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                    <button @click="openIndex = openIndex === 3 ? null : 3" class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors">
+                        <span class="font-satoshi font-bold text-gray-900 text-lg">¿Cuánto tiempo tardo en tener mi tienda lista?</span>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-gray-500 transition-transform" :class="openIndex === 3 ? 'rotate-180' : ''"></i>
+                    </button>
+                    <div x-show="openIndex === 3" x-collapse class="px-6 pb-4">
+                        <p class="text-gray-600 font-inter">En 15 minutos puedes tener tu tienda básica funcionando. Solo necesitas agregar tus productos, configurar pagos y envíos. La mayoría de nuestros usuarios tienen su tienda lista y vendiendo el mismo día.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 5 -->
+                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                    <button @click="openIndex = openIndex === 4 ? null : 4" class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors">
+                        <span class="font-satoshi font-bold text-gray-900 text-lg">¿Linkiu cobra comisiones por mis ventas?</span>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-gray-500 transition-transform" :class="openIndex === 4 ? 'rotate-180' : ''"></i>
+                    </button>
+                    <div x-show="openIndex === 4" x-collapse class="px-6 pb-4">
+                        <p class="text-gray-600 font-inter">No, Linkiu no cobra comisiones por venta. Solo pagas tu plan mensual fijo. El 100% de tus ventas es tuyo. Los costos de procesamiento de pagos dependen de los métodos que configures y son gestionados directamente por los proveedores de esos servicios.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 6 -->
+                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                    <button @click="openIndex = openIndex === 5 ? null : 5" class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors">
+                        <span class="font-satoshi font-bold text-gray-900 text-lg">¿Puedo cancelar cuando quiera?</span>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-gray-500 transition-transform" :class="openIndex === 5 ? 'rotate-180' : ''"></i>
+                    </button>
+                    <div x-show="openIndex === 5" x-collapse class="px-6 pb-4">
+                        <p class="text-gray-600 font-inter">Sí, puedes cancelar tu plan en cualquier momento sin penalizaciones ni preguntas. No hay contratos de permanencia. Si cancelas, tu tienda seguirá activa hasta el final del período que pagaste.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 7 -->
+                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                    <button @click="openIndex = openIndex === 6 ? null : 6" class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors">
+                        <span class="font-satoshi font-bold text-gray-900 text-lg">¿Funciona para mi tipo de negocio?</span>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-gray-500 transition-transform" :class="openIndex === 6 ? 'rotate-180' : ''"></i>
+                    </button>
+                    <div x-show="openIndex === 6" x-collapse class="px-6 pb-4">
+                        <p class="text-gray-600 font-inter">Linkiu funciona para cualquier negocio que venda productos o servicios: tiendas de ropa, restaurantes, cafeterías, tecnología, accesorios, artesanías, servicios profesionales y más. Tenemos funciones específicas para restaurantes (QR, reservas) y ecommerce.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 8 -->
+                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                    <button @click="openIndex = openIndex === 7 ? null : 7" class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors">
+                        <span class="font-satoshi font-bold text-gray-900 text-lg">¿Cómo recibo los pagos de mis clientes?</span>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-gray-500 transition-transform" :class="openIndex === 7 ? 'rotate-180' : ''"></i>
+                    </button>
+                    <div x-show="openIndex === 7" x-collapse class="px-6 pb-4">
+                        <p class="text-gray-600 font-inter">Tú eliges qué métodos de pago habilitar en tu tienda: Nequi, tarjetas de crédito/débito, transferencias bancarias, efectivo contra entrega, etc. Los pagos llegan directamente a las cuentas que configures. Puedes activar o desactivar métodos de pago desde tu panel de administración.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 9 -->
+                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                    <button @click="openIndex = openIndex === 8 ? null : 8" class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors">
+                        <span class="font-satoshi font-bold text-gray-900 text-lg">¿Qué pasa si tengo problemas o necesito ayuda?</span>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-gray-500 transition-transform" :class="openIndex === 8 ? 'rotate-180' : ''"></i>
+                    </button>
+                    <div x-show="openIndex === 8" x-collapse class="px-6 pb-4">
+                        <p class="text-gray-600 font-inter">Tienes soporte por email y WhatsApp. Los planes pagos incluyen soporte prioritario con respuesta en menos de 48 horas. También tenemos guías paso a paso y videos tutoriales para ayudarte a configurar todo.</p>
+                    </div>
+                </div>
+
+                <!-- FAQ 10 -->
+                <div class="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                    <button @click="openIndex = openIndex === 9 ? null : 9" class="w-full px-6 py-4 text-left flex items-center justify-between hover:bg-gray-50 transition-colors">
+                        <span class="font-satoshi font-bold text-gray-900 text-lg">¿Mis datos y los de mis clientes están seguros?</span>
+                        <i data-lucide="chevron-down" class="w-5 h-5 text-gray-500 transition-transform" :class="openIndex === 9 ? 'rotate-180' : ''"></i>
+                    </button>
+                    <div x-show="openIndex === 9" x-collapse class="px-6 pb-4">
+                        <p class="text-gray-600 font-inter">Sí, tomamos la seguridad muy en serio. Todos los datos están encriptados y protegidos. Los pagos se procesan de forma segura a través de los métodos que configures. Cumplimos con las normativas de protección de datos y nunca compartimos tu información.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- CTA Final -->
     <section class="py-12 lg:py-20 bg-white">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -976,7 +1142,7 @@
             <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto font-inter">
                 Tu competencia ya está vendiendo online. No te quedes atrás.
             </p>
-            <a href="{{ route('register.step1') }}" class="inline-flex items-center gap-2 bg-accent-300 hover:bg-accent-400 text-white px-8 py-4 rounded-xl font-bold text-lg transition-colors">
+            <a href="{{ route('register.step1') }}" onclick="fbq('track', 'Lead');" class="inline-flex items-center gap-2 bg-accent-300 hover:bg-accent-400 text-white px-8 py-4 rounded-xl font-bold text-lg transition-colors">
                 <span>Empezar ahora</span>
                 <i data-lucide="arrow-right" class="w-5 h-5"></i>
             </a>

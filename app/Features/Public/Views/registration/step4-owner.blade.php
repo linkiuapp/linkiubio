@@ -637,8 +637,8 @@
                                    class="mt-1 w-5 h-5 text-blue-600 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                                    required>
                             <div class="text-sm text-slate-600">
-                                Acepto los <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">Términos y Condiciones</a> 
-                                y la <a href="#" class="text-blue-600 hover:text-blue-800 font-medium">Política de Privacidad</a> de Linkiu
+                                Acepto los <a href="{{ route('legal.terms') }}" target="_blank" class="text-blue-600 hover:text-blue-800 font-medium underline">Términos y Condiciones</a> 
+                                y la <a href="{{ route('legal.privacy') }}" target="_blank" class="text-blue-600 hover:text-blue-800 font-medium underline">Política de Privacidad</a> de Linkiu
                                 <span class="text-red-500">*</span>
                             </div>
                         </label>
@@ -655,6 +655,7 @@
                             Paso Anterior
                         </a>
                         <button type="submit" 
+                                onclick="fbq('track', 'Lead');"
                                 class="px-8 py-2.5 bg-accent-300 hover:bg-accent-400 text-white rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
                                 :disabled="submitting">
                             <template x-if="!submitting">

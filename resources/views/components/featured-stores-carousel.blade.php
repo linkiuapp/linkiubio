@@ -4,8 +4,11 @@
 
 @if($stores->count() > 0)
 <section class="py-16 bg-gray-50">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 items-center justify-center">
-        <h2 class="text-center text-lg md:text-3xl text-slate-900 font-black tracking-tight mb-12">Tiendas que confían en Linkiu</h2>
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-12">
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl text-slate-900 font-black tracking-tight mb-4">Más de 100 emprendedores ya venden con Linkiu</h2>
+            <p class="text-lg text-gray-600 max-w-2xl mx-auto font-inter">Únete a los negocios que confían en Linkiu para hacer crecer sus ventas online</p>
+        </div>
         
         <!-- Carrusel de logos -->
         <div class="relative overflow-hidden">
@@ -15,7 +18,7 @@
             
             <!-- Carrusel infinito -->
             <div class="stores-carousel flex items-center justify-center">
-                <div class="stores-carousel-track">
+                <div class="stores-carousel-track flex items-center justify-center">
                     <!-- Primera pasada -->
                     @foreach($stores as $store)
                     <a href="{{ $store['url'] }}" target="_blank" class="stores-carousel-item group flex items-center justify-center" title="{{ $store['name'] }}">

@@ -778,7 +778,7 @@
                     Todas estas funciones están incluidas en nuestros planes. Elige el que mejor se adapte a tu negocio.
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="{{ route('register.step1') }}" class="bg-accent-300 hover:bg-accent-400 text-white px-8 py-4 rounded-xl font-bold text-lg transition-colors inline-flex items-center justify-center gap-2">
+                    <a href="{{ route('register.step1') }}" onclick="fbq('track', 'Lead');" class="bg-accent-300 hover:bg-accent-400 text-white px-8 py-4 rounded-xl font-bold text-lg transition-colors inline-flex items-center justify-center gap-2">
                         <span>Prueba Gratis</span>
                         <i data-lucide="sparkles" class="w-5 h-5"></i>
                     </a>

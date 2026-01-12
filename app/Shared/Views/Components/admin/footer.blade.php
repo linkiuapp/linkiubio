@@ -9,24 +9,24 @@
            - © {{ date('Y') }} <strong>Linkiu.bio</strong>. Todos los derechos reservados | Desarrollado por <strong>Linkiu Devs ♥️</strong>
         </p>
         <div class="flex flex-wrap items-center gap-3 text-xs">
-            <a href="#" target="_blank" class="text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1">
+            <a href="{{ route('about.index') }}" target="_blank" class="text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1">
                 <span>Acerca de <strong>Linkiu</strong></span>
                 <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
             </a>
-            <a href="#" target="_blank" class="text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1">
+            <a href="{{ route('legal.terms') }}" target="_blank" class="text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1">
                 <span>Términos y condiciones</span>
                 <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
             </a>
-            <a href="#" target="_blank" class="text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1">
+            <a href="{{ route('legal.privacy') }}" target="_blank" class="text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1">
                 <span>Política de privacidad</span>
                 <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
             </a>
-            <a href="#" target="_blank" class="text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1">
+            <a href="{{ route('legal.cookies') }}" target="_blank" class="text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1">
                 <span>Política de cookies</span>
                 <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
             </a>
-            <a href="#" target="_blank" class="text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1">
-                <span>Políticas de envío</span>
+            <a href="{{ route('legal.refunds') }}" target="_blank" class="text-gray-600 hover:text-blue-600 transition-colors flex items-center gap-1">
+                <span>Política de reembolsos</span>
                 <i data-lucide="arrow-up-right" class="w-3 h-3"></i>
             </a>
         </div>

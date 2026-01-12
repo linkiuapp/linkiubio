@@ -23,7 +23,12 @@ class PlansController extends Controller
             ->orderBy('price')
             ->get();
 
-        return view('public::plans.index', compact('plans'));
+        // Obtener el máximo de días de prueba de los planes activos
+        $maxTrialDays = Plan::where('is_active', true)
+            ->where('is_public', true)
+            ->max('trial_days') ?? 15; // Default a 15 si no hay planes
+
+        return view('public::plans.index', compact('plans', 'maxTrialDays'));
     }
 
     /**

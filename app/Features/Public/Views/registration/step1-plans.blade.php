@@ -26,7 +26,7 @@
         {{-- Content Area --}}
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div class="text-center mb-8">
-                <h1 class="text-2xl font-black text-gray-900 mb-3">30 días gratis para probar Linkiu</h1>
+                <h1 class="text-2xl font-black text-gray-900 mb-3">{{ $maxTrialDays ?? 15 }} días gratis para probar Linkiu</h1>
                 <h2 class="text-lg font-bold text-gray-900 mb-3">Elige el Plan Perfecto</h2>
                 <p class="text-base font-normal text-gray-600">Sin contratos. Sin sorpresas. Cancela cuando quieras.</p>
             </div>
@@ -176,7 +176,7 @@
 
                                         {{-- Botón de Selección --}}
                                         <button type="button" 
-                                                @click="selectedPlan = {{ $plan->id }}; $nextTick(() => { $el.closest('form').submit(); })"
+                                                @click="fbq('track', 'Lead'); selectedPlan = {{ $plan->id }}; $nextTick(() => { $el.closest('form').submit(); })"
                                                 class="w-full py-3 rounded-lg font-semibold transition-all mb-4 bg-slate-900 hover:bg-slate-800 text-white border border-slate-800 shadow-md hover:shadow-lg transform hover:scale-[1.02]">
                                             <span class="inline-flex items-center justify-center gap-2">
                                                 Seleccionar plan

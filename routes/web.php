@@ -97,7 +97,12 @@ Route::get('/', function () {
         $featuredStores = collect([]);
     }
     
-    return view('landing.index', compact('featuredStores'));
+    // Obtener el máximo de días de prueba de los planes activos
+    $maxTrialDays = \App\Shared\Models\Plan::where('is_active', true)
+        ->where('is_public', true)
+        ->max('trial_days') ?? 15; // Default a 15 si no hay planes
+    
+    return view('landing.index', compact('featuredStores', 'maxTrialDays'));
 })->name('landing');
 
 // Página de Planes Pública
@@ -129,6 +134,13 @@ Route::get('/equipo', [App\Features\Public\Controllers\TeamController::class, 'i
 
 // Página de Partners Pública
 Route::get('/partners', [App\Features\Public\Controllers\PartnersController::class, 'index'])->name('partners.index');
+
+// Páginas Legales
+Route::get('/terminos-y-condiciones', [App\Features\Public\Controllers\LegalController::class, 'terms'])->name('legal.terms');
+Route::get('/politica-de-privacidad', [App\Features\Public\Controllers\LegalController::class, 'privacy'])->name('legal.privacy');
+Route::get('/politica-de-cookies', [App\Features\Public\Controllers\LegalController::class, 'cookies'])->name('legal.cookies');
+Route::get('/politica-de-reembolsos', [App\Features\Public\Controllers\LegalController::class, 'refunds'])->name('legal.refunds');
+Route::get('/aviso-legal', [App\Features\Public\Controllers\LegalController::class, 'legalNotice'])->name('legal.notice');
 
 // Ruta para autenticación de WebSocket (requerida aunque usemos canales públicos)
 Broadcast::routes(['middleware' => ['auth']]);

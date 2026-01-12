@@ -51,6 +51,11 @@ class RestaurantController extends Controller
             $featuredStores = collect([]);
         }
         
-        return view('public::restaurant.index', compact('featuredStores'));
+        // Obtener el máximo de días de prueba de los planes activos
+        $maxTrialDays = \App\Shared\Models\Plan::where('is_active', true)
+            ->where('is_public', true)
+            ->max('trial_days') ?? 15; // Default a 15 si no hay planes
+        
+        return view('public::restaurant.index', compact('featuredStores', 'maxTrialDays'));
     }
 }

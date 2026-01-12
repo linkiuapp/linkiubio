@@ -324,7 +324,7 @@
                         <span>Ver Planes</span>
                         <i data-lucide="arrow-right" class="w-5 h-5"></i>
                     </a>
-                    <a href="{{ route('register.step1') }}" class="bg-white hover:bg-gray-50 text-gray-900 px-8 py-4 rounded-xl font-semibold text-lg transition-colors border-2 border-gray-200 inline-flex items-center justify-center gap-2">
+                    <a href="{{ route('register.step1') }}" onclick="fbq('track', 'Lead');" class="bg-white hover:bg-gray-50 text-gray-900 px-8 py-4 rounded-xl font-semibold text-lg transition-colors border-2 border-gray-200 inline-flex items-center justify-center gap-2">
                         <span>Prueba Gratis</span>
                         <i data-lucide="sparkles" class="w-5 h-5"></i>
                     </a>

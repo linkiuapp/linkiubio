@@ -80,8 +80,11 @@
             <div>
                 <h4 class="text-white font-satoshi font-bold mb-4">Legal</h4>
                 <ul class="space-y-3 font-inter text-sm">
-                    <li><a href="#" class="hover:text-white transition-colors">Términos y condiciones</a></li>
-                    <li><a href="#" class="hover:text-white transition-colors">Política de privacidad</a></li>
+                    <li><a href="{{ route('legal.terms') }}" class="hover:text-white transition-colors">Términos y condiciones</a></li>
+                    <li><a href="{{ route('legal.privacy') }}" class="hover:text-white transition-colors">Política de privacidad</a></li>
+                    <li><a href="{{ route('legal.cookies') }}" class="hover:text-white transition-colors">Política de cookies</a></li>
+                    <li><a href="{{ route('legal.refunds') }}" class="hover:text-white transition-colors">Política de reembolsos</a></li>
+                    <li><a href="{{ route('legal.notice') }}" class="hover:text-white transition-colors">Aviso legal</a></li>
                 </ul>
             </div>
         </div>
