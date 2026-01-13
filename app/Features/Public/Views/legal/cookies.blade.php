@@ -77,7 +77,7 @@
         [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="font-inter antialiased bg-white text-gray-900">
+<body class="font-inter antialiased bg-white text-gray-900" x-data="{ mobileMenu: false, productosOpen: false, funcionesOpen: false, recursosOpen: false, ayudaOpen: false, empresaOpen: false, calendlyOpen: false }">
     <x-public-navbar />
 
     <!-- Content -->
