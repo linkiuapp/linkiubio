@@ -9,6 +9,24 @@
     <!-- Favicon -->
     <link rel="icon" type="image/svg+xml" href="{{ asset('images-ui/favico_linkiu.svg') }}">
     
+    <!-- Meta Pixel Code -->
+    <script>
+    !function(f,b,e,v,n,t,s)
+    {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+    n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+    if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+    n.queue=[];t=b.createElement(e);t.async=!0;
+    t.src=v;s=b.getElementsByTagName(e)[0];
+    s.parentNode.insertBefore(t,s)}(window, document,'script',
+    'https://connect.facebook.net/en_US/fbevents.js');
+    fbq('init', '1195832799421409');
+    fbq('track', 'PageView');
+    </script>
+    <noscript><img height="1" width="1" style="display:none"
+    src="https://www.facebook.com/tr?id=1195832799421409&ev=PageView&noscript=1"
+    /></noscript>
+    <!-- End Meta Pixel Code -->
+    
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <!-- Calendly Script -->
     <script type="text/javascript" src="https://assets.calendly.com/assets/external/widget.js" async></script>
@@ -176,7 +194,7 @@
 
                                         {{-- Botón de Selección --}}
                                         <button type="button" 
-                                                @click="fbq('track', 'Lead'); selectedPlan = {{ $plan->id }}; $nextTick(() => { $el.closest('form').submit(); })"
+                                                @click="if (typeof fbq !== 'undefined') { fbq('track', 'Lead'); } selectedPlan = {{ $plan->id }}; $nextTick(() => { $el.closest('form').submit(); })"
                                                 class="w-full py-3 rounded-lg font-semibold transition-all mb-4 bg-slate-900 hover:bg-slate-800 text-white border border-slate-800 shadow-md hover:shadow-lg transform hover:scale-[1.02]">
                                             <span class="inline-flex items-center justify-center gap-2">
                                                 Seleccionar plan

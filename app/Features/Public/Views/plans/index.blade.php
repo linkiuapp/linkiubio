@@ -220,7 +220,7 @@
 
                                         <!-- Botón de Selección -->
                                         <button type="button" 
-                                                @click="fbq('track', 'Lead'); const periodInput = document.getElementById('billingPeriod{{ $plan->id }}'); const period = selectedPeriod || 'monthly'; if(periodInput) periodInput.value = period; document.getElementById('planForm{{ $plan->id }}').submit();"
+                                                @click="if (typeof fbq !== 'undefined') { fbq('track', 'Lead'); } const periodInput = document.getElementById('billingPeriod{{ $plan->id }}'); const period = selectedPeriod || 'monthly'; if(periodInput) periodInput.value = period; document.getElementById('planForm{{ $plan->id }}').submit();"
                                                 class="w-full py-3 rounded-lg font-semibold transition-all mb-4 bg-slate-900 hover:bg-slate-800 text-white border border-slate-800 shadow-md hover:shadow-lg transform hover:scale-[1.02] mt-auto">
                                             Elegir plan
                                         </button>
