@@ -16,7 +16,7 @@ class IconRequestController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
-        return view('superlinkiu::Tools.icon-requests', compact('requests'));
+        return view('superlinkiu::tools.icon-requests', compact('requests'));
     }
 
     public function approve(IconRequest $request)
@@ -55,7 +55,7 @@ class IconRequestController extends Controller
             ->orderBy('created_at', 'desc')
             ->paginate(20);
 
-        return view('superlinkiu::Tools.error-reports', compact('reports'));
+        return view('superlinkiu::tools.error-reports', compact('reports'));
     }
 
     public function updateErrorStatus(ErrorReport $report, Request $request)
