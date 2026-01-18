@@ -14,7 +14,7 @@ class ValidatePaymentProofJob implements ShouldQueue
     use Queueable;
 
     public $tries = 3;
-    public $timeout = 60;
+    public $timeout = 180; // 3 minutos para AWS Rekognition
 
     /**
      * Create a new job instance.
