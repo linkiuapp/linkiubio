@@ -5,6 +5,7 @@ namespace App\Events;
 use App\Shared\Models\Order;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
+use Illuminate\Broadcasting\InteractsWithBroadcasting;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -12,7 +13,7 @@ use Illuminate\Queue\SerializesModels;
 
 class NewOrderCreated implements ShouldBroadcast, ShouldQueue
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable, InteractsWithSockets, InteractsWithBroadcasting, SerializesModels;
 
     public $order;
     public $storeId;
@@ -20,7 +21,7 @@ class NewOrderCreated implements ShouldBroadcast, ShouldQueue
     /**
      * The number of times the job may be attempted.
      */
-    public $tries = 3;
+    public $tries = 1; // Reducido a 1 para evitar acumulación
     
     /**
      * The number of seconds before the job should be processed.
@@ -28,15 +29,31 @@ class NewOrderCreated implements ShouldBroadcast, ShouldQueue
     public $delay = 0;
     
     /**
+     * The queue the job should be dispatched to.
+     */
+    public $queue = 'notifications';
+    
+    /**
      * Determine if the event should broadcast.
-     * Si Pusher falla, no debe romper la creación del pedido
+     * Prioriza Ably para notificaciones de pedidos (mayor confiabilidad)
+     * Si Ably no está configurado, usa Pusher como fallback
      */
     public function shouldBroadcast(): bool
     {
         try {
-            // Solo broadcast si Pusher está configurado correctamente
-            return config('broadcasting.default') === 'pusher' 
-                && !empty(config('broadcasting.connections.pusher.key'));
+            // Prioridad 1: Usar Ably si está configurado (para notificaciones de pedidos)
+            if (!empty(config('broadcasting.connections.ably.key')) || 
+                !empty(config('broadcasting.connections.ably-realtime.key'))) {
+                return true;
+            }
+            
+            // Prioridad 2: Fallback a Pusher si está configurado
+            if (config('broadcasting.default') === 'pusher' 
+                && !empty(config('broadcasting.connections.pusher.key'))) {
+                return true;
+            }
+            
+            return false;
         } catch (\Exception $e) {
             \Log::warning('Broadcasting check failed for NewOrderCreated: ' . $e->getMessage());
             return false;
@@ -50,6 +67,14 @@ class NewOrderCreated implements ShouldBroadcast, ShouldQueue
     {
         $this->order = $order;
         $this->storeId = $order->store_id;
+        
+        // Usar Ably para notificaciones de pedidos (mayor confiabilidad)
+        // Si Ably está configurado, usarlo; si no, usar la conexión por defecto
+        if (!empty(config('broadcasting.connections.ably-realtime.key')) || 
+            !empty(config('broadcasting.connections.ably.key'))) {
+            $this->broadcastVia('ably-realtime');
+        }
+        // Si no está configurado Ably, usará la conexión por defecto (Pusher)
     }
 
     /**
@@ -74,6 +99,9 @@ class NewOrderCreated implements ShouldBroadcast, ShouldQueue
      */
     public function broadcastWith(): array
     {
+        // Generar URL absoluta usando APP_URL para evitar problemas con localhost
+        $orderUrl = url(route('tenant.admin.orders.show', [$this->order->store->slug, $this->order->id], false));
+        
         return [
             'order_id' => $this->order->id,
             'order_number' => $this->order->order_number,
@@ -83,7 +111,7 @@ class NewOrderCreated implements ShouldBroadcast, ShouldQueue
             'payment_method' => $this->order->payment_method,
             'delivery_type' => $this->order->delivery_type,
             'created_at' => $this->order->created_at->format('H:i'),
-            'url' => route('tenant.admin.orders.show', [$this->order->store->slug, $this->order->id])
+            'url' => $orderUrl
         ];
     }
 }

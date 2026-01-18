@@ -16,6 +16,16 @@ class OrderStatusChanged implements ShouldBroadcast
     public $order;
     public $oldStatus;
     public $newStatus;
+    
+    /**
+     * The number of times the job may be attempted.
+     */
+    public $tries = 1;
+    
+    /**
+     * The queue the job should be dispatched to.
+     */
+    public $queue = 'notifications';
 
     /**
      * Create a new event instance.
