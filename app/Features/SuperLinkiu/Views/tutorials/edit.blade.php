@@ -423,10 +423,20 @@
                 method: 'POST',
                 body: formData,
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json'
                 }
             })
-            .then(response => response.json())
+            .then(async response => {
+                const contentType = response.headers.get('content-type');
+                if (contentType && contentType.includes('application/json')) {
+                    return response.json();
+                } else {
+                    // Si no es JSON, leer como texto para ver el error
+                    const text = await response.text();
+                    throw new Error('El servidor devolvió una respuesta no válida. ' + text.substring(0, 200));
+                }
+            })
             .then(data => {
                 document.body.removeChild(loading);
                 if (data.success && data.url) {

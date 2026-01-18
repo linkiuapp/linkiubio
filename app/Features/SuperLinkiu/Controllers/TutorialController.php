@@ -247,11 +247,11 @@ class TutorialController extends Controller
      */
     public function uploadImage(Request $request)
     {
-        $request->validate([
-            'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
-        ]);
-
         try {
+            $validated = $request->validate([
+                'image' => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:2048',
+            ]);
+
             $path = $request->file('image')->store('tutorials/content', 'public');
             $url = Storage::disk('public')->url($path);
 
@@ -260,6 +260,12 @@ class TutorialController extends Controller
                 'url' => $url,
                 'path' => $path,
             ]);
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Error de validación: ' . $e->getMessage(),
+                'errors' => $e->errors(),
+            ], 422);
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
