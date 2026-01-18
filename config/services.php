@@ -42,4 +42,8 @@ return [
         'temperature' => env('OPENAI_TEMPERATURE', 0.7),
     ],
 
+    'replicate' => [
+        'api_token' => env('REPLICATE_API_TOKEN'),
+    ],
+
 ];

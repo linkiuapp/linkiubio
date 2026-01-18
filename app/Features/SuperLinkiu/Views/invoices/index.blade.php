@@ -253,9 +253,8 @@
         </div>
         @endif
     </div>
-</div>
 
-{{-- Modal Marcar como Pagada --}}
+    {{-- Modal Marcar como Pagada --}}
     <div x-show="showMarkAsPaidModal" 
          x-cloak
          x-on:keydown.escape.window="closeMarkAsPaidModal()"
@@ -335,18 +334,18 @@
     </div>
 
     {{-- Modal de Eliminación --}}
-    <div x-show="open" 
-         x-cloak
+    <div x-data="deleteModalData()"
          x-on:delete-invoice.window="openModal($event.detail.id, $event.detail.number)"
-         x-on:keydown.escape.window="closeModal()"
-         x-data="deleteModalData"
-         class="fixed inset-0 z-50 overflow-y-auto"
-         aria-labelledby="modal-title" 
-         role="dialog" 
-         aria-modal="true">
+         x-on:keydown.escape.window="closeModal()">
+        <div x-show="open" 
+             x-cloak
+             class="fixed inset-0 z-50 overflow-y-auto"
+             aria-labelledby="modal-title" 
+             role="dialog" 
+             aria-modal="true">
         
-        {{-- Backdrop --}}
-        <div x-show="open"
+            {{-- Backdrop --}}
+            <div x-show="open"
              x-transition:enter="ease-out duration-300"
              x-transition:enter-start="opacity-0"
              x-transition:enter-end="opacity-100"
@@ -407,7 +406,10 @@
                 </div>
             </div>
         </div>
+        </div>
+        </div>
     </div>
+</div>
 
 {{-- Toast de éxito --}}
 @if(session('success'))

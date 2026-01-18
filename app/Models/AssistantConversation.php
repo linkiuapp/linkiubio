@@ -35,7 +35,7 @@ class AssistantConversation extends Model
      */
     public function messages(): HasMany
     {
-        return $this->hasMany(AssistantMessage::class)->orderBy('created_at', 'asc');
+        return $this->hasMany(AssistantMessage::class, 'conversation_id')->orderBy('created_at', 'asc');
     }
 
     /**

@@ -23,11 +23,19 @@ class ProcessBillingSuspensionsCommand extends Command
 
     protected $notificationService;
 
-    // Configuración de suspensiones
-    private const FIRST_WARNING_DAYS = 7;   // Primer aviso
-    private const SECOND_WARNING_DAYS = 15; // Segundo aviso
-    private const FINAL_WARNING_DAYS = 22;  // Último aviso
-    private const SUSPENSION_DAYS = 30;     // Suspensión automática
+    // Configuración de avisos PREVENTIVOS (antes de vencer)
+    private const PREVENTIVE_WARNING_15_DAYS = 15; // Recordatorio temprano
+    private const PREVENTIVE_WARNING_7_DAYS = 7;   // Recordatorio medio
+    private const PREVENTIVE_WARNING_5_DAYS = 5;   // Recordatorio urgente
+    
+    // Configuración de avisos CORRECTIVOS (después de vencer)
+    private const OVERDUE_WARNING_1_DAY = 1;       // Aviso inmediato
+    
+    // Configuración de suspensiones por período (días después de vencer)
+    private const SUSPENSION_DAYS_MONTHLY = 3;     // Mensual: 3 días
+    private const SUSPENSION_DAYS_QUARTERLY = 5;   // Trimestral: 5 días
+    private const SUSPENSION_DAYS_SEMESTER = 10;   // Semestral: 10 días
+    private const SUSPENSION_DAYS_ANNUAL = 15;     // Anual: 15 días
 
     public function __construct(BillingNotificationService $notificationService)
     {
@@ -53,18 +61,22 @@ class ProcessBillingSuspensionsCommand extends Command
             $this->warn("⚠️  Usando {$forceDays} días como umbral de suspensión (en lugar de " . self::SUSPENSION_DAYS . ")");
         }
 
-        // 1. Procesar avisos escalonados
-        $warningCounts = $this->processWarnings($isDryRun);
+        // 1. Procesar avisos PREVENTIVOS (antes de vencer)
+        $preventiveCounts = $this->processPreventiveWarnings($isDryRun);
 
-        // 2. Procesar suspensiones automáticas
+        // 2. Procesar avisos CORRECTIVOS (después de vencer)
+        $correctiveCounts = $this->processCorrectiveWarnings($isDryRun);
+
+        // 3. Procesar suspensiones automáticas (dinámicas según período)
         $suspensionCount = $this->processAutomaticSuspensions($isDryRun, $forceDays);
 
         // Mostrar resumen
         $this->info("\n📊 RESUMEN:");
-        $this->info("📧 Primeros avisos enviados (7 días): {$warningCounts['first']}");
-        $this->info("⚠️  Segundos avisos enviados (15 días): {$warningCounts['second']}");
-        $this->info("🔥 Últimos avisos enviados (22 días): {$warningCounts['final']}");
-        $this->info("🚫 Tiendas suspendidas (30 días): {$suspensionCount}");
+        $this->info("📧 Avisos preventivos (15 días antes): {$preventiveCounts['15_days']}");
+        $this->info("📧 Avisos preventivos (7 días antes): {$preventiveCounts['7_days']}");
+        $this->info("⚠️  Avisos preventivos (5 días antes): {$preventiveCounts['5_days']}");
+        $this->info("🚨 Avisos correctivos (1 día después): {$correctiveCounts['1_day']}");
+        $this->info("🚫 Tiendas suspendidas (según período): {$suspensionCount}");
 
         if ($isDryRun) {
             $this->warn("⚠️  Esto fue una simulación - no se realizaron cambios");
@@ -74,28 +86,103 @@ class ProcessBillingSuspensionsCommand extends Command
     }
 
     /**
-     * Process escalating warnings for overdue invoices
+     * Process preventive warnings (before due date)
      */
-    private function processWarnings(bool $isDryRun): array
+    private function processPreventiveWarnings(bool $isDryRun): array
     {
-        $counts = ['first' => 0, 'second' => 0, 'final' => 0];
+        $counts = ['15_days' => 0, '7_days' => 0, '5_days' => 0];
 
-        // Primer aviso (7 días vencidas)
-        $counts['first'] = $this->sendWarnings(self::FIRST_WARNING_DAYS, 'first_warning', $isDryRun);
+        // Recordatorio temprano (15 días antes)
+        $counts['15_days'] = $this->sendPreventiveWarnings(self::PREVENTIVE_WARNING_15_DAYS, 'preventive_15_days', $isDryRun);
         
-        // Segundo aviso (15 días vencidas)
-        $counts['second'] = $this->sendWarnings(self::SECOND_WARNING_DAYS, 'second_warning', $isDryRun);
+        // Recordatorio medio (7 días antes)
+        $counts['7_days'] = $this->sendPreventiveWarnings(self::PREVENTIVE_WARNING_7_DAYS, 'preventive_7_days', $isDryRun);
         
-        // Último aviso (22 días vencidas)
-        $counts['final'] = $this->sendWarnings(self::FINAL_WARNING_DAYS, 'final_warning', $isDryRun);
+        // Recordatorio urgente (5 días antes)
+        $counts['5_days'] = $this->sendPreventiveWarnings(self::PREVENTIVE_WARNING_5_DAYS, 'preventive_5_days', $isDryRun);
 
         return $counts;
     }
 
     /**
-     * Send warnings for specific days overdue
+     * Process corrective warnings (after due date)
      */
-    private function sendWarnings(int $daysOverdue, string $warningType, bool $isDryRun): int
+    private function processCorrectiveWarnings(bool $isDryRun): array
+    {
+        $counts = ['1_day' => 0];
+
+        // Aviso inmediato (1 día después de vencer)
+        $counts['1_day'] = $this->sendCorrectiveWarnings(self::OVERDUE_WARNING_1_DAY, 'overdue_1_day', $isDryRun);
+
+        return $counts;
+    }
+
+    /**
+     * Send preventive warnings (before due date)
+     */
+    private function sendPreventiveWarnings(int $daysBefore, string $warningType, bool $isDryRun): int
+    {
+        $targetDate = now()->addDays($daysBefore)->toDateString();
+        
+        $upcomingInvoices = Invoice::where('status', 'pending')
+            ->where('due_date', $targetDate)
+            ->with(['store', 'plan', 'store.subscription'])
+            ->get();
+
+        if ($upcomingInvoices->isEmpty()) {
+            return 0;
+        }
+
+        $warningLabel = match($warningType) {
+            'preventive_15_days' => 'recordatorio temprano',
+            'preventive_7_days' => 'recordatorio medio',
+            'preventive_5_days' => 'recordatorio urgente',
+            default => $warningType
+        };
+
+        $this->info("📧 Enviando {$warningLabel} a {$upcomingInvoices->count()} tiendas ({$daysBefore} días antes):");
+
+        $sent = 0;
+        foreach ($upcomingInvoices as $invoice) {
+            // Verificar que la tienda esté activa
+            if ($invoice->store->status !== 'active') {
+                continue;
+            }
+
+            $this->line("  📬 {$warningLabel} → {$invoice->store->name} (#{$invoice->invoice_number})");
+            
+            if (!$isDryRun) {
+                try {
+                    $this->notificationService->sendPreventiveWarning($invoice, $warningType, $daysBefore);
+                    $sent++;
+
+                    // Log para auditoría
+                    \Log::info('Aviso preventivo de factura enviado', [
+                        'invoice_id' => $invoice->id,
+                        'store_id' => $invoice->store_id,
+                        'warning_type' => $warningType,
+                        'days_before' => $daysBefore
+                    ]);
+                } catch (\Exception $e) {
+                    $this->error("    ❌ Error enviando aviso: " . $e->getMessage());
+                    \Log::error('Error enviando aviso preventivo de factura', [
+                        'invoice_id' => $invoice->id,
+                        'warning_type' => $warningType,
+                        'error' => $e->getMessage()
+                    ]);
+                }
+            } else {
+                $sent++;
+            }
+        }
+
+        return $sent;
+    }
+
+    /**
+     * Send corrective warnings (after due date)
+     */
+    private function sendCorrectiveWarnings(int $daysOverdue, string $warningType, bool $isDryRun): int
     {
         $targetDate = now()->subDays($daysOverdue)->toDateString();
         
@@ -109,13 +196,11 @@ class ProcessBillingSuspensionsCommand extends Command
         }
 
         $warningLabel = match($warningType) {
-            'first_warning' => 'primer aviso',
-            'second_warning' => 'segundo aviso',
-            'final_warning' => 'último aviso',
+            'overdue_1_day' => 'aviso de vencimiento inmediato',
             default => $warningType
         };
 
-        $this->info("📧 Enviando {$warningLabel} a {$overdueInvoices->count()} tiendas ({$daysOverdue} días vencidas):");
+        $this->info("🚨 Enviando {$warningLabel} a {$overdueInvoices->count()} tiendas ({$daysOverdue} días vencidas):");
 
         $sent = 0;
         foreach ($overdueInvoices as $invoice) {
@@ -132,7 +217,7 @@ class ProcessBillingSuspensionsCommand extends Command
                     $sent++;
 
                     // Log para auditoría
-                    \Log::info('Aviso de factura vencida enviado', [
+                    \Log::info('Aviso correctivo de factura vencida enviado', [
                         'invoice_id' => $invoice->id,
                         'store_id' => $invoice->store_id,
                         'warning_type' => $warningType,
@@ -140,7 +225,7 @@ class ProcessBillingSuspensionsCommand extends Command
                     ]);
                 } catch (\Exception $e) {
                     $this->error("    ❌ Error enviando aviso: " . $e->getMessage());
-                    \Log::error('Error enviando aviso de factura vencida', [
+                    \Log::error('Error enviando aviso correctivo de factura vencida', [
                         'invoice_id' => $invoice->id,
                         'warning_type' => $warningType,
                         'error' => $e->getMessage()
@@ -155,17 +240,31 @@ class ProcessBillingSuspensionsCommand extends Command
     }
 
     /**
-     * Process automatic suspensions for severely overdue invoices
+     * Process automatic suspensions for overdue invoices (dynamic based on billing period)
      */
     private function processAutomaticSuspensions(bool $isDryRun, ?int $forceDays = null): int
     {
-        $suspensionDays = $forceDays ?? self::SUSPENSION_DAYS;
-        $suspensionDate = now()->subDays($suspensionDays)->toDateString();
-        
-        $severlyOverdue = Invoice::where('status', 'overdue')
-            ->where('due_date', '<=', $suspensionDate)
-            ->with(['store', 'store.subscription'])
+        // Obtener todas las facturas vencidas
+        $overdueInvoices = Invoice::where('status', 'overdue')
+            ->with(['store', 'store.subscription', 'plan'])
             ->get();
+
+        if ($overdueInvoices->isEmpty()) {
+            $this->line("🚫 No hay facturas vencidas para evaluar suspensión");
+            return 0;
+        }
+
+        // Filtrar facturas que cumplen los días de suspensión según su período
+        $severlyOverdue = $overdueInvoices->filter(function ($invoice) use ($forceDays) {
+            if ($forceDays) {
+                // Si se fuerza un número de días, usarlo para todas
+                return $invoice->due_date->diffInDays(now()) >= $forceDays;
+            }
+            
+            // Calcular días de suspensión según el período de facturación
+            $suspensionDays = $this->getSuspensionDaysForPeriod($invoice->period);
+            return $invoice->due_date->diffInDays(now()) >= $suspensionDays;
+        });
 
         // Filtrar solo tiendas que aún estén activas
         $suspendableStores = $severlyOverdue->filter(function ($invoice) {
@@ -177,14 +276,16 @@ class ProcessBillingSuspensionsCommand extends Command
             return 0;
         }
 
-        $this->info("🚫 Suspendiendo {$suspendableStores->count()} tiendas por facturas con +{$suspensionDays} días vencidas:");
+        $this->info("🚫 Suspendiendo {$suspendableStores->count()} tiendas por facturas vencidas:");
 
         $suspended = 0;
         foreach ($suspendableStores as $invoice) {
             $store = $invoice->store;
             $daysOverdue = $invoice->due_date->diffInDays(now());
+            $suspensionDays = $forceDays ?? $this->getSuspensionDaysForPeriod($invoice->period);
+            $periodLabel = $this->getPeriodLabel($invoice->period);
             
-            $this->line("  🚫 Suspendiendo: {$store->name} (#{$invoice->invoice_number} - {$daysOverdue} días vencida)");
+            $this->line("  🚫 Suspendiendo: {$store->name} (#{$invoice->invoice_number} - {$daysOverdue} días vencida, período: {$periodLabel}, prórroga: {$suspensionDays} días)");
             
             if (!$isDryRun) {
                 try {
@@ -247,6 +348,34 @@ class ProcessBillingSuspensionsCommand extends Command
         ]);
 
         $this->line("    ✅ Tienda {$store->name} suspendida exitosamente");
+    }
+
+    /**
+     * Get suspension days based on billing period
+     */
+    private function getSuspensionDaysForPeriod(?string $period): int
+    {
+        return match($period) {
+            'monthly' => self::SUSPENSION_DAYS_MONTHLY,        // Mensual: 3 días
+            'quarterly' => self::SUSPENSION_DAYS_QUARTERLY,    // Trimestral: 5 días
+            'semester', 'biannual' => self::SUSPENSION_DAYS_SEMESTER, // Semestral: 10 días
+            'annual', 'yearly' => self::SUSPENSION_DAYS_ANNUAL, // Anual: 15 días
+            default => self::SUSPENSION_DAYS_MONTHLY           // Por defecto: mensual (3 días)
+        };
+    }
+
+    /**
+     * Get period label for display
+     */
+    private function getPeriodLabel(?string $period): string
+    {
+        return match($period) {
+            'monthly' => 'Mensual',
+            'quarterly' => 'Trimestral',
+            'semester', 'biannual' => 'Semestral',
+            'annual', 'yearly' => 'Anual',
+            default => 'Mensual'
+        };
     }
 }
 

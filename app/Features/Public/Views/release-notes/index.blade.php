@@ -123,80 +123,90 @@
     <!-- Contenido Principal -->
     <main class="pb-16 bg-white">
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-            <!-- Timeline de Versiones -->
-            <div class="relative">
-                <!-- Línea vertical de la timeline -->
-                <div class="absolute left-2 top-0 bottom-0 w-0.5 bg-gradient-to-b from-blue-300 via-blue-200 to-blue-100"></div>
-                
-                <!-- Versiones -->
-                <div class="space-y-6">
-                    @foreach($versions as $index => $version)
-                        <div class="relative flex gap-4">
-                            <!-- Punto en la timeline -->
-                            <div class="relative flex-shrink-0 z-10">
+            <!-- Cards de Versiones (Estilo Accordion) -->
+            <div class="space-y-4" x-data="{ openIndex: null }">
+                @foreach($versions as $index => $version)
+                    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all hover:border-gray-300">
+                        <!-- Header de la versión (siempre visible) -->
+                        <button
+                            @click="openIndex = openIndex === {{ $index }} ? null : {{ $index }}"
+                            class="w-full text-left p-6 flex items-center justify-between hover:bg-gray-50 transition-colors"
+                        >
+                            <div class="flex items-center gap-3">
+                                <h2 class="font-satoshi text-xl font-bold text-gray-900">
+                                    v {{ $version['version'] }}
+                                </h2>
                                 @if($version['is_current'])
-                                    <!-- Punto versión actual -->
-                                    <div class="w-5 h-5 bg-gradient-to-br from-accent-300 to-accent-400 rounded-full border-3 border-white shadow-lg flex items-center justify-center">
-                                        <div class="w-2 h-2 bg-white rounded-full"></div>
-                                    </div>
-                                @else
-                                    <!-- Punto versión anterior -->
-                                    <div class="w-5 h-5 bg-white border-3 border-blue-400 rounded-full shadow-md flex items-center justify-center">
-                                        <div class="w-3 h-3 bg-blue-400 rounded-full"></div>
-                                    </div>
+                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-accent-300 text-white shadow-sm">
+                                        Actual
+                                    </span>
                                 @endif
+                                <span class="font-semibold text-gray-600 font-inter text-sm">
+                                    {{ $version['date'] }}
+                                </span>
                             </div>
-                            
-                            <!-- Contenido de la versión -->
-                            <div class="flex-1 pb-6">
-                                <!-- Card de la versión -->
-                                <div class="bg-white rounded-lg border {{ $version['is_current'] ? 'border-accent-300 shadow-md' : 'border-gray-200 shadow-sm' }} hover:shadow-md transition-all overflow-hidden">
-                                    <!-- Header de la versión -->
-                                    <div class="bg-gradient-to-r {{ $version['is_current'] ? 'from-accent-300/10 to-accent-300/5' : 'from-gray-50 to-white' }} px-4 py-3 border-b border-gray-100">
-                                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
-                                            <div class="flex items-center gap-2">
-                                                <h2 class="font-satoshi text-xl font-black text-gray-900">
-                                                    v {{ $version['version'] }}
-                                                </h2>
-                                                @if($version['is_current'])
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-accent-300 text-white shadow-sm">
-                                                        Actual
-                                                    </span>
-                                                @endif
-                                            </div>
-                                            <span class="font-semibold text-gray-600 font-inter text-xs">
-                                                {{ $version['date'] }}
+                            <i 
+                                data-lucide="chevron-down" 
+                                class="w-5 h-5 text-gray-400 transition-transform duration-200"
+                                :class="{ 'rotate-180': openIndex === {{ $index }} }"
+                            ></i>
+                        </button>
+                        
+                        <!-- Contenido expandible -->
+                        <div 
+                            x-show="openIndex === {{ $index }}"
+                            x-transition:enter="transition ease-out duration-200"
+                            x-transition:enter-start="opacity-0 max-h-0"
+                            x-transition:enter-end="opacity-100 max-h-[2000px]"
+                            x-transition:leave="transition ease-in duration-150"
+                            x-transition:leave-start="opacity-100 max-h-[2000px]"
+                            x-transition:leave-end="opacity-0 max-h-0"
+                            x-cloak
+                            class="border-t border-gray-100"
+                        >
+                            <div class="p-6 space-y-2.5">
+                                @foreach($version['items'] as $item)
+                                    <div class="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
+                                        <!-- Etiqueta Fix o New -->
+                                        @if($item['type'] === 'fix')
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 whitespace-nowrap flex-shrink-0 mt-0.5">
+                                                Fix
                                             </span>
+                                        @elseif($item['type'] === 'new')
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-green-50 text-green-700 border border-green-200 whitespace-nowrap flex-shrink-0 mt-0.5">
+                                                New
+                                            </span>
+                                        @elseif($item['type'] === 'improvement')
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-purple-50 text-purple-700 border border-purple-200 whitespace-nowrap flex-shrink-0 mt-0.5">
+                                                Mejora
+                                            </span>
+                                        @elseif($item['type'] === 'deprecated')
+                                            <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-orange-50 text-orange-700 border border-orange-200 whitespace-nowrap flex-shrink-0 mt-0.5">
+                                                Deprecado
+                                            </span>
+                                        @endif
+                                        
+                                        <!-- Descripción -->
+                                        <div class="flex-1 min-w-0">
+                                            <p class="text-gray-700 font-inter leading-relaxed text-sm break-words">
+                                                {{ $item['description'] }}
+                                            </p>
+                                            @if(!empty($item['link']))
+                                                <a href="{{ $item['link'] }}" 
+                                                   target="_blank" 
+                                                   rel="noopener noreferrer"
+                                                   class="inline-flex items-center gap-1.5 mt-2 text-sm text-blue-600 hover:text-blue-700 font-medium transition-colors">
+                                                    <i data-lucide="external-link" class="w-4 h-4"></i>
+                                                    Ver tutorial
+                                                </a>
+                                            @endif
                                         </div>
                                     </div>
-                                    
-                                    <!-- Items de la versión -->
-                                    <div class="p-4 space-y-2.5">
-                                        @foreach($version['items'] as $item)
-                                            <div class="flex items-start gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                                                <!-- Etiqueta Fix o New -->
-                                                @if($item['type'] === 'fix')
-                                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 whitespace-nowrap flex-shrink-0 mt-0.5">
-                                                        Fix
-                                                    </span>
-                                                @elseif($item['type'] === 'new')
-                                                    <span class="inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold bg-green-50 text-green-700 border border-green-200 whitespace-nowrap flex-shrink-0 mt-0.5">
-                                                        New
-                                                    </span>
-                                                @endif
-                                                
-                                                <!-- Descripción -->
-                                                <p class="text-gray-700 font-inter leading-relaxed flex-1 text-sm">
-                                                    {{ $item['description'] }}
-                                                </p>
-                                            </div>
-                                        @endforeach
-                                    </div>
-                                </div>
+                                @endforeach
                             </div>
                         </div>
-                    @endforeach
-                </div>
+                    </div>
+                @endforeach
             </div>
         </div>
     </main>
@@ -234,6 +244,23 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             lucide.createIcons();
+            
+            // Reinicializar iconos cuando se expande/colapsa
+            document.addEventListener('alpine:init', () => {
+                Alpine.effect(() => {
+                    // Observar cambios en el DOM para reinicializar iconos
+                    const observer = new MutationObserver(() => {
+                        if (typeof lucide !== 'undefined') {
+                            lucide.createIcons();
+                        }
+                    });
+                    
+                    observer.observe(document.body, {
+                        childList: true,
+                        subtree: true
+                    });
+                });
+            });
         });
     </script>
     <style>

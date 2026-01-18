@@ -40,7 +40,8 @@ class BillingAutomationService
 
         // Calcular fechas
         $issueDate = now();
-        $dueDate = $issueDate->copy()->addDays(15); // 15 días para pagar
+        // El due_date debe coincidir con el final del período actual de la suscripción
+        $dueDate = $subscription->current_period_end;
 
         // Obtener precio según el período de facturación
         $amount = $plan->getPriceForPeriod($subscription->billing_cycle);
@@ -96,6 +97,17 @@ class BillingAutomationService
         ];
 
         try {
+            // Asegurar que las relaciones estén cargadas
+            if (!$invoice->relationLoaded('store')) {
+                $invoice->load('store');
+            }
+            if (!$invoice->relationLoaded('subscription')) {
+                $invoice->load('subscription');
+            }
+            if ($invoice->store && !$invoice->store->relationLoaded('subscription')) {
+                $invoice->store->load('subscription');
+            }
+
             // 1. Actualizar suscripción asociada
             if ($invoice->subscription) {
                 $this->updateSubscriptionAfterPayment($invoice->subscription, $invoice);
@@ -103,7 +115,9 @@ class BillingAutomationService
             }
 
             // 2. Reactivar tienda si estaba suspendida por falta de pago
-            if ($this->shouldReactivateStore($invoice->store)) {
+            // Recargar store antes de verificar (por si cambió en otro lugar)
+            $invoice->store->refresh();
+            if ($this->shouldReactivateStore($invoice->store, $invoice->id)) {
                 $this->reactivateStore($invoice->store);
                 $results['store_reactivated'] = true;
             }
@@ -128,26 +142,64 @@ class BillingAutomationService
 
     /**
      * Check if store should be reactivated after payment
+     * 
+     * @param Store $store
+     * @param int|null $currentInvoiceId ID de la factura que se está pagando (para excluirla de la verificación)
+     * @return bool
      */
-    private function shouldReactivateStore(Store $store): bool
+    private function shouldReactivateStore(Store $store, ?int $currentInvoiceId = null): bool
     {
-        if ($store->status !== 'suspended' || $store->suspension_reason !== 'billing_overdue') {
-            return false;
-        }
-
-        // Validar que NO tenga otras facturas vencidas pendientes
-        $hasOtherOverdueInvoices = Invoice::where('store_id', $store->id)
-            ->whereIn('status', ['overdue', 'pending'])
-            ->where('due_date', '<', now())
-            ->exists();
-
-        if ($hasOtherOverdueInvoices) {
-            \Log::warning('No se puede reactivar tienda: tiene otras facturas vencidas', [
+        // Solo reactivar si la tienda está suspendida
+        if ($store->status !== 'suspended') {
+            \Log::debug('No se reactiva tienda: no está suspendida', [
                 'store_id' => $store->id,
-                'store_name' => $store->name
+                'store_status' => $store->status
             ]);
             return false;
         }
+
+        // Si la razón de suspensión es relacionada con facturación o suscripción, considerar reactivación
+        $billingRelatedReasons = ['billing_overdue', 'subscription_suspended', 'trial_expired_no_payment'];
+        $isBillingRelated = empty($store->suspension_reason) || in_array($store->suspension_reason, $billingRelatedReasons);
+
+        // Si no es relacionado con facturación y hay una razón específica, no reactivar automáticamente
+        if (!$isBillingRelated && !empty($store->suspension_reason)) {
+            \Log::info('No se reactiva tienda: suspensión manual o por otra razón', [
+                'store_id' => $store->id,
+                'store_name' => $store->name,
+                'suspension_reason' => $store->suspension_reason
+            ]);
+            return false;
+        }
+
+        // Validar que NO tenga otras facturas vencidas pendientes (excluyendo la actual)
+        $query = Invoice::where('store_id', $store->id)
+            ->whereIn('status', ['overdue', 'pending'])
+            ->where('due_date', '<', now());
+        
+        // Excluir la factura actual que se está pagando
+        if ($currentInvoiceId) {
+            $query->where('id', '!=', $currentInvoiceId);
+        }
+        
+        $otherOverdueCount = $query->count();
+
+        if ($otherOverdueCount > 0) {
+            \Log::warning('No se puede reactivar tienda: tiene otras facturas vencidas', [
+                'store_id' => $store->id,
+                'store_name' => $store->name,
+                'other_overdue_count' => $otherOverdueCount,
+                'excluded_invoice_id' => $currentInvoiceId
+            ]);
+            return false;
+        }
+
+        \Log::info('✅ Tienda puede ser reactivada', [
+            'store_id' => $store->id,
+            'store_name' => $store->name,
+            'suspension_reason' => $store->suspension_reason,
+            'excluded_invoice_id' => $currentInvoiceId
+        ]);
 
         return true;
     }

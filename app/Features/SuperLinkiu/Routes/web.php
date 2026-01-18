@@ -147,6 +147,15 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
         // Gestión de planes
         Route::get('plans/dashboard', [\App\Features\SuperLinkiu\Controllers\PlanDashboardController::class, 'index'])->name('plans.dashboard');
         Route::resource('plans', PlanController::class)->names('plans');
+
+        // Gestión de Tutoriales
+        Route::resource('tutorials', \App\Features\SuperLinkiu\Controllers\TutorialController::class)->names('tutorials');
+        Route::post('tutorials/upload-image', [\App\Features\SuperLinkiu\Controllers\TutorialController::class, 'uploadImage'])->name('tutorials.upload-image');
+        Route::resource('tutorial-categories', \App\Features\SuperLinkiu\Controllers\TutorialCategoryController::class)->names('tutorial-categories');
+        Route::resource('tutorial-tags', \App\Features\SuperLinkiu\Controllers\TutorialTagController::class)->names('tutorial-tags');
+        
+        // Gestión de Release Notes (Nuevas Actualizaciones)
+        Route::resource('release-notes', \App\Features\SuperLinkiu\Controllers\ReleaseNoteController::class)->names('release-notes');
         
         // Gestión de facturas
         Route::resource('invoices', InvoiceController::class)->names('invoices');
@@ -160,6 +169,15 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
             ->name('invoices.update-overdue');
         Route::get('invoices/stats', [InvoiceController::class, 'getStats'])
             ->name('invoices.stats');
+
+        // Solicitudes de Pago (Payment Requests)
+        Route::prefix('payment-requests')->name('payment-requests.')->group(function () {
+            Route::get('/', [\App\Features\SuperLinkiu\Controllers\PaymentRequestController::class, 'index'])->name('index');
+            Route::get('/{invoice}', [\App\Features\SuperLinkiu\Controllers\PaymentRequestController::class, 'show'])->name('show');
+            Route::post('/{invoice}/approve', [\App\Features\SuperLinkiu\Controllers\PaymentRequestController::class, 'approve'])->name('approve');
+            Route::post('/{invoice}/reject', [\App\Features\SuperLinkiu\Controllers\PaymentRequestController::class, 'reject'])->name('reject');
+            Route::get('/{invoice}/download-proof', [\App\Features\SuperLinkiu\Controllers\PaymentRequestController::class, 'downloadProof'])->name('download-proof');
+        });
 
         // Gestión de tickets
         // IMPORTANTE: attachment debe estar ANTES del resource para evitar conflictos
@@ -180,6 +198,16 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
             Route::post('/search-order', [OrderToolsController::class, 'searchOrder'])->name('search-order');
             Route::post('/delete-order', [OrderToolsController::class, 'deleteOrder'])->name('delete-order.execute');
             Route::get('/deletion-logs', [OrderToolsController::class, 'deletionLogs'])->name('deletion-logs');
+            
+            // Solicitudes de íconos
+            Route::get('/icon-requests', [\App\Features\SuperLinkiu\Controllers\IconRequestController::class, 'iconRequests'])->name('icon-requests');
+            Route::post('/icon-requests/{request}/approve', [\App\Features\SuperLinkiu\Controllers\IconRequestController::class, 'approve'])->name('icon-requests.approve');
+            Route::post('/icon-requests/{request}/reject', [\App\Features\SuperLinkiu\Controllers\IconRequestController::class, 'reject'])->name('icon-requests.reject');
+            
+            // Reportes de errores
+            Route::get('/error-reports', [\App\Features\SuperLinkiu\Controllers\IconRequestController::class, 'errorReports'])->name('error-reports');
+            Route::post('/error-reports/{report}/update-status', [\App\Features\SuperLinkiu\Controllers\IconRequestController::class, 'updateErrorStatus'])->name('error-reports.update-status');
+            Route::delete('/error-reports/{report}', [\App\Features\SuperLinkiu\Controllers\IconRequestController::class, 'deleteErrorReport'])->name('error-reports.delete');
         });
         Route::post('tickets/{ticket}/assign', [TicketController::class, 'assign'])
             ->name('tickets.assign');
@@ -215,6 +243,24 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
                 ->name('toggle-active');
             Route::post('/update-order', [\App\Features\SuperLinkiu\Controllers\CategoryIconController::class, 'updateOrder'])
                 ->name('update-order');
+        });
+
+        // Gestión de imágenes UI
+        Route::prefix('ui-images')->name('ui-images.')->group(function () {
+            Route::get('/', [\App\Features\SuperLinkiu\Controllers\UiImageController::class, 'index'])
+                ->name('index');
+            Route::get('/create', [\App\Features\SuperLinkiu\Controllers\UiImageController::class, 'create'])
+                ->name('create');
+            Route::post('/', [\App\Features\SuperLinkiu\Controllers\UiImageController::class, 'store'])
+                ->name('store');
+            Route::get('/{uiImage}/edit', [\App\Features\SuperLinkiu\Controllers\UiImageController::class, 'edit'])
+                ->name('edit');
+            Route::put('/{uiImage}', [\App\Features\SuperLinkiu\Controllers\UiImageController::class, 'update'])
+                ->name('update');
+            Route::delete('/{uiImage}', [\App\Features\SuperLinkiu\Controllers\UiImageController::class, 'destroy'])
+                ->name('destroy');
+            Route::post('/{uiImage}/toggle-active', [\App\Features\SuperLinkiu\Controllers\UiImageController::class, 'toggleActive'])
+                ->name('toggle-active');
         });
             
         // Rutas del perfil
@@ -271,25 +317,7 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
         });
 
         // Monitoring
-        Route::prefix('monitoring')->name('monitoring.')->group(function () {
-            Route::get('/', [\App\Features\SuperLinkiu\Controllers\MonitoringController::class, 'index'])->name('index');
-            Route::get('/errors', [\App\Features\SuperLinkiu\Controllers\MonitoringController::class, 'errors'])->name('errors');
-            Route::get('/errors/{id}', [\App\Features\SuperLinkiu\Controllers\MonitoringController::class, 'showError'])->name('errors.show');
-            Route::get('/traffic', [\App\Features\SuperLinkiu\Controllers\MonitoringController::class, 'traffic'])->name('traffic');
-            Route::get('/performance', [\App\Features\SuperLinkiu\Controllers\MonitoringController::class, 'performance'])->name('performance');
-            
-            // Alertas
-            Route::prefix('alerts')->name('alerts.')->group(function () {
-                Route::get('/', [\App\Features\SuperLinkiu\Controllers\MonitoringAlertController::class, 'index'])->name('index');
-                Route::get('/create', [\App\Features\SuperLinkiu\Controllers\MonitoringAlertController::class, 'create'])->name('create');
-                Route::post('/', [\App\Features\SuperLinkiu\Controllers\MonitoringAlertController::class, 'store'])->name('store');
-                Route::get('/{id}', [\App\Features\SuperLinkiu\Controllers\MonitoringAlertController::class, 'show'])->name('show');
-                Route::get('/{id}/edit', [\App\Features\SuperLinkiu\Controllers\MonitoringAlertController::class, 'edit'])->name('edit');
-                Route::put('/{id}', [\App\Features\SuperLinkiu\Controllers\MonitoringAlertController::class, 'update'])->name('update');
-                Route::delete('/{id}', [\App\Features\SuperLinkiu\Controllers\MonitoringAlertController::class, 'destroy'])->name('destroy');
-                Route::post('/{id}/toggle-status', [\App\Features\SuperLinkiu\Controllers\MonitoringAlertController::class, 'toggleStatus'])->name('toggle-status');
-            });
-        });
+        // Sistema de monitoreo removido - ahora usando Sentry
 
 
 

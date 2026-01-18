@@ -7,6 +7,7 @@ use App\Models\AssistantMessage;
 use App\Models\KiuBotResponseCache;
 use App\Shared\Models\Store;
 use App\Shared\Models\User;
+use App\Services\ChatSecurityService;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 
@@ -19,6 +20,16 @@ use Illuminate\Support\Str;
 class KiuBotAssistantService extends KiuBotService
 {
     protected ?StoreInsightsService $insightsService = null;
+    protected ChatSecurityService $securityService;
+
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        parent::__construct();
+        $this->securityService = new ChatSecurityService();
+    }
 
     /**
      * Establecer el servicio de insights
@@ -382,6 +393,24 @@ class KiuBotAssistantService extends KiuBotService
     public function processMessage(string $message, Store $store, User $user, ?string $sessionId = null): array
     {
         try {
+            // 🔒 SEGURIDAD: Validar mensaje antes de procesarlo
+            $securityCheck = $this->securityService->validateMessage($message, $store, $user);
+            
+            if (!$securityCheck['valid']) {
+                return [
+                    'success' => false,
+                    'message' => $securityCheck['message'],
+                    'actions' => [],
+                    'tokens_used' => 0,
+                    'session_id' => $sessionId ?? Str::uuid()->toString(),
+                    'security_blocked' => true,
+                    'block_reason' => $securityCheck['reason'] ?? 'unknown',
+                ];
+            }
+            
+            // Usar mensaje sanitizado
+            $message = $securityCheck['sanitized_message'];
+            
             // Generar o obtener session_id
             if (!$sessionId) {
                 $sessionId = Str::uuid()->toString();
@@ -416,11 +445,11 @@ class KiuBotAssistantService extends KiuBotService
 
                     // Generar respuesta
                     if ($knowledgeMatch && $intent === 'educational') {
-                        $response = $this->generateEducationalResponse($message, $knowledgeMatch, $context, $store);
+                        $response = $this->generateEducationalResponse($message, $knowledgeMatch, $context, $store, $conversation);
                     } elseif ($intent === 'suggestion') {
-                        $response = $this->generateSuggestionResponse($message, $store);
+                        $response = $this->generateSuggestionResponse($message, $store, $conversation);
                     } else {
-                        $response = $this->generateGeneralResponse($message, $context, $store);
+                        $response = $this->generateGeneralResponse($message, $context, $store, $conversation);
                     }
 
                     // ✅ CACHE: Guardar respuestas educativas y sugerencias para futuro uso
@@ -437,6 +466,26 @@ class KiuBotAssistantService extends KiuBotService
                 'message' => $message,
             ]);
 
+            // 🔒 SEGURIDAD: Validar respuesta antes de enviarla
+            $responseValidation = $this->securityService->validateResponse($response['message'], $store);
+            
+            if (!$responseValidation['valid']) {
+                Log::warning('ChatSecurity: Response blocked', [
+                    'store_id' => $store->id,
+                    'user_id' => $user->id,
+                    'message' => $message,
+                ]);
+                
+                return [
+                    'success' => false,
+                    'message' => $responseValidation['message'],
+                    'actions' => [],
+                    'tokens_used' => 0,
+                    'session_id' => $sessionId,
+                    'security_blocked' => true,
+                ];
+            }
+            
             $assistantMessage = AssistantMessage::create([
                 'conversation_id' => $conversation->id,
                 'role' => 'assistant',
@@ -575,18 +624,9 @@ class KiuBotAssistantService extends KiuBotService
             $message .= "Hora pico de pedidos: {$peakHour['formatted']}\n";
         }
         
-        $actions = [];
-        if ($topProduct) {
-            $actions[] = [
-                'type' => 'link',
-                'label' => 'Destacar producto estrella',
-                'url' => route('tenant.admin.sliders.create', ['store' => $store->slug]),
-            ];
-        }
-        
         return [
             'message' => trim($message),
-            'actions' => $actions,
+            'actions' => [],
             'tokens_used' => 0,
         ];
     }
@@ -618,13 +658,7 @@ class KiuBotAssistantService extends KiuBotService
         
         return [
             'message' => trim($message),
-            'actions' => [
-                [
-                    'type' => 'link',
-                    'label' => 'Ver inventario',
-                    'url' => route('tenant.admin.inventario.index', ['store' => $store->slug]),
-                ],
-            ],
+            'actions' => [],
             'tokens_used' => 0,
         ];
     }
@@ -648,13 +682,7 @@ class KiuBotAssistantService extends KiuBotService
         
         return [
             'message' => trim($message),
-            'actions' => [
-                [
-                    'type' => 'link',
-                    'label' => 'Crear cupón',
-                    'url' => route('tenant.admin.coupons.create', ['store' => $store->slug]),
-                ],
-            ],
+            'actions' => [],
             'tokens_used' => 0,
         ];
     }
@@ -728,13 +756,7 @@ class KiuBotAssistantService extends KiuBotService
         
         return [
             'message' => trim($message),
-            'actions' => [
-                [
-                    'type' => 'link',
-                    'label' => 'Ver productos',
-                    'url' => route('tenant.admin.products.index', ['store' => $store->slug]),
-                ],
-            ],
+            'actions' => [],
             'tokens_used' => 0,
         ];
     }
@@ -792,7 +814,7 @@ class KiuBotAssistantService extends KiuBotService
     /**
      * Generar respuesta de sugerencias
      */
-    protected function generateSuggestionResponse(string $message, Store $store): array
+    protected function generateSuggestionResponse(string $message, Store $store, ?AssistantConversation $conversation = null): array
     {
         $insights = $this->getStoreInsights($store);
         $vertical = $store->vertical ?? 'ecommerce';
@@ -847,23 +869,17 @@ class KiuBotAssistantService extends KiuBotService
         }
         
         // 4. Sugerencia general
+        // Calcular monto sugerido (basado en ticket promedio o un valor por defecto)
+        $avgTicket = $performance['avg_ticket'] ?? 50000;
+        $minPurchase = ceil($avgTicket * 1.5 / 10000) * 10000; // Redondear a múltiplo de 10,000
+        $minPurchaseFormatted = number_format($minPurchase, 0, ',', '.');
+        
         $message .= "4. Compra mínima con regalo\n";
-        $message .= "   - Envío gratis en compras mayores a $X\n";
+        $message .= "   - Envío gratis en compras mayores a \${$minPurchaseFormatted}\n";
         
         return [
             'message' => trim($message),
-            'actions' => [
-                [
-                    'type' => 'link',
-                    'label' => 'Crear cupón',
-                    'url' => route('tenant.admin.coupons.create', ['store' => $store->slug]),
-                ],
-                [
-                    'type' => 'link',
-                    'label' => 'Crear slider',
-                    'url' => route('tenant.admin.sliders.create', ['store' => $store->slug]),
-                ],
-            ],
+            'actions' => [],
             'tokens_used' => 0,
         ];
     }
@@ -877,7 +893,6 @@ class KiuBotAssistantService extends KiuBotService
         $catalog = $insights['catalog'] ?? [];
         
         $message = "Cosas que puedes hacer ahora:\n\n";
-        $actions = [];
         $count = 1;
         
         // Alertas prioritarias
@@ -886,14 +901,6 @@ class KiuBotAssistantService extends KiuBotService
                 $message .= "{$count}. {$alert['title']}\n";
                 $message .= "   {$alert['message']}\n\n";
                 $count++;
-                
-                if (isset($alert['action']['route'])) {
-                    $actions[] = [
-                        'type' => 'link',
-                        'label' => $alert['action']['label'],
-                        'url' => route($alert['action']['route'], ['store' => $store->slug]),
-                    ];
-                }
             }
         }
         
@@ -906,7 +913,7 @@ class KiuBotAssistantService extends KiuBotService
         
         return [
             'message' => trim($message),
-            'actions' => array_slice($actions, 0, 3),
+            'actions' => [],
             'tokens_used' => 0,
         ];
     }
@@ -994,7 +1001,7 @@ class KiuBotAssistantService extends KiuBotService
     /**
      * Generar respuesta educativa
      */
-    protected function generateEducationalResponse(string $message, array $knowledge, array $context, Store $store): array
+    protected function generateEducationalResponse(string $message, array $knowledge, array $context, Store $store, ?AssistantConversation $conversation = null): array
     {
         // Intentar cargar documentación específica desde archivo .md (FUENTE ÚNICA DE VERDAD)
         $docContent = $this->loadDocumentation($knowledge['key'] ?? null);
@@ -1017,33 +1024,22 @@ class KiuBotAssistantService extends KiuBotService
                 }
             }
             
-            $userPrompt .= "\nIMPORTANTE: Responde de manera CONCISA y PRECISA. ";
-            $userPrompt .= "NO uses asteriscos (**) ni formato markdown. ";
-            $userPrompt .= "Usa texto plano con saltos de línea. ";
-            $userPrompt .= "Formatea los pasos numerados así: 1. Paso uno\n2. Paso dos\n3. Paso tres\n";
-            $userPrompt .= "Máximo 150 palabras. ";
-            $userPrompt .= "Sé directo y específico sobre los pasos exactos.";
+            $userPrompt .= "\nIMPORTANTE: Proporciona una respuesta clara y completa. ";
+            $userPrompt .= "Usa texto plano con saltos de línea para mayor claridad. ";
+            $userPrompt .= "Si necesitas explicar pasos, hazlo de forma numerada y ordenada. ";
+            $userPrompt .= "Sé específico sobre dónde encontrar cada opción en el menú. ";
+            $userPrompt .= "Puedes extenderte si la pregunta lo requiere - da toda la información necesaria.";
 
-            $openAIResponse = $this->callOpenAI($systemPrompt, $userPrompt);
+            $openAIResponse = $this->callOpenAI($systemPrompt, $userPrompt, $conversation);
             $response = [
                 'message' => $this->cleanMarkdown($openAIResponse['message']),
                 'tokens_used' => $openAIResponse['tokens_used'] ?? 0,
             ];
         }
 
-        // Extraer acciones (enlaces) desde la base de conocimiento
-        $actions = [];
-        if (isset($knowledge['route'])) {
-            $actions[] = [
-                'type' => 'link',
-                'label' => $knowledge['title'],
-                'url' => route($knowledge['route'], ['store' => $store->slug]),
-            ];
-        }
-
         return [
             'message' => $response['message'],
-            'actions' => $actions,
+            'actions' => [],
             'tokens_used' => $response['tokens_used'] ?? 0,
         ];
     }
@@ -1238,16 +1234,18 @@ class KiuBotAssistantService extends KiuBotService
     /**
      * Generar respuesta general
      */
-    protected function generateGeneralResponse(string $message, array $context, Store $store): array
+    protected function generateGeneralResponse(string $message, array $context, Store $store, ?AssistantConversation $conversation = null): array
     {
         $systemPrompt = $this->buildSystemPrompt($context, $store);
         
         $userPrompt = "El usuario pregunta: \"{$message}\"\n\n";
-        $userPrompt .= "Responde de manera útil y amigable. Si la pregunta es sobre cómo hacer algo en Linkiu, ";
-        $userPrompt .= "proporciona pasos claros. Si es una pregunta general, responde de manera concisa. ";
-        $userPrompt .= "NO uses asteriscos (**) ni formato markdown. Usa texto plano. Máximo 150 palabras.";
+        $userPrompt .= "Responde de manera útil, amigable y personalizada. ";
+        $userPrompt .= "Si la pregunta es sobre cómo hacer algo en Linkiu, proporciona pasos claros y específicos. ";
+        $userPrompt .= "Si es sobre la tienda del usuario, usa los datos que tienes disponibles. ";
+        $userPrompt .= "Si detectas oportunidades de mejora, menciόnalas de forma constructiva. ";
+        $userPrompt .= "Usa texto plano con saltos de línea. Sé tan detallado como sea necesario para ayudar realmente.";
 
-        $response = $this->callOpenAI($systemPrompt, $userPrompt);
+        $response = $this->callOpenAI($systemPrompt, $userPrompt, $conversation);
 
         // Limpiar markdown
         $cleanMessage = $this->cleanMarkdown($response['message']);
@@ -1260,7 +1258,7 @@ class KiuBotAssistantService extends KiuBotService
     }
 
     /**
-     * Construir prompt del sistema
+     * Construir prompt del sistema con contexto enriquecido
      */
     protected function buildSystemPrompt(array $context, Store $store): string
     {
@@ -1272,50 +1270,202 @@ class KiuBotAssistantService extends KiuBotService
             default => 'ecommerce',
         };
 
-        return "Eres KiuBot, un asistente virtual experto en Linkiu, una plataforma para crear tiendas online.
+        $stats = $context['stats'] ?? [];
+        $totalProducts = $stats['total_products'] ?? 0;
+        $totalOrders = $stats['total_orders'] ?? 0;
+        $recentOrders = $stats['recent_orders'] ?? 0;
+        $pendingOrders = $stats['pending_orders'] ?? 0;
+        $lowStockProducts = $stats['low_stock_products'] ?? 0;
+        $outOfStockProducts = $stats['out_of_stock_products'] ?? 0;
+        
+        $recentActivity = $context['recent_activity'] ?? [];
+        $lastOrder = $recentActivity['last_order'] ?? null;
+        $topProduct = $recentActivity['top_product'] ?? null;
+        
+        $insights = $context['insights'] ?? [];
+        $alerts = $context['alerts'] ?? [];
+        
+        // Construir sección de estado actual
+        $statusInfo = "";
+        if (!empty($alerts)) {
+            $statusInfo .= "\n\n🚨 ALERTAS IMPORTANTES:\n";
+            foreach ($alerts as $alert) {
+                $statusInfo .= "- {$alert}\n";
+            }
+        }
+        if (!empty($insights)) {
+            $statusInfo .= "\n\n💡 OBSERVACIONES:\n";
+            foreach ($insights as $insight) {
+                $statusInfo .= "- {$insight}\n";
+            }
+        }
+        
+        $activityInfo = "";
+        if ($lastOrder) {
+            $activityInfo .= "\n- Último pedido: #{$lastOrder['number']} por \${$lastOrder['total']} ({$lastOrder['date']})";
+        }
+        if ($topProduct) {
+            $activityInfo .= "\n- Producto más vendido: {$topProduct['name']} ({$topProduct['sales']} ventas)";
+        }
 
-Tu objetivo es ayudar a los administradores de tiendas a:
-1. Aprender a usar todas las funcionalidades de la plataforma
-2. Entender cómo funciona cada sección del menú lateral
-3. Resolver dudas sobre el uso de la plataforma
+        return "Eres KiuBot, un asistente virtual amigable y experto en Linkiu, una plataforma para crear tiendas online.
 
-Contexto de la tienda:
+PERSONALIDAD:
+- Sé cercano, empático y entusiasta 😊
+- Usa emojis cuando sea apropiado para hacer la conversación más amigable
+- Celebra los logros del usuario 🎉
+- Si detectas problemas u oportunidades, menciónalos de forma constructiva
+- Habla de forma natural, como un asesor experto que conoce el negocio
+
+CONTEXTO DE LA TIENDA:
 - Nombre: {$store->name}
 - Tipo de negocio: {$verticalName}
-- Plan: {$context['store']['plan']}
+- Plan actual: {$context['store']['plan']}
+- Productos en catálogo: {$totalProducts}
+- Total de pedidos históricos: {$totalOrders}
+- Pedidos últimos 7 días: {$recentOrders}
+- Pedidos pendientes de procesar: {$pendingOrders}
+- Productos con stock bajo: {$lowStockProducts}
+- Productos sin stock: {$outOfStockProducts}{$activityInfo}{$statusInfo}
 
-REGLAS IMPORTANTES:
+TU MISIÓN:
+1. Ayudar a usar todas las funcionalidades de Linkiu
+2. Responder dudas sobre la plataforma
+3. Dar sugerencias personalizadas basadas en los datos reales de la tienda
+4. Guiar paso a paso cuando sea necesario
+
+REGLAS DE COMUNICACIÓN:
 - Responde SIEMPRE en español de Colombia
-- NO uses asteriscos (**) ni formato markdown
-- Usa texto plano con saltos de línea
-- Sé CONCISO: máximo 150 palabras
-- Proporciona pasos EXACTOS y PRECISOS
-- Menciona dónde encontrar la opción en el menú lateral
+- Sé claro y específico en tus instrucciones
+- Proporciona pasos EXACTOS cuando expliques cómo hacer algo
+- Menciona dónde encontrar las opciones en el menú lateral
+- Usa texto plano con saltos de línea para mayor claridad
+- Puedes usar formato básico si ayuda (listas numeradas, viñetas)
+- Da respuestas completas y útiles - no te limites si la pregunta requiere más detalle
 - Si hay documentación específica, úsala como referencia exacta
 
-Funcionalidades disponibles en el menú lateral:
-- Dashboard: Panel principal con estadísticas
-- Pedidos: Gestión de pedidos y ventas
-- Categorías: Organización de productos
-- Variables: Tallas, colores, etc. para productos
-- Productos: Gestión de catálogo
-- Inventario: Control de stock
-- Gestión de Envíos: Zonas y costos de entrega
-- Métodos de Pago: Configuración de pagos
-- Sedes: Ubicaciones físicas
-- Diseño de la Tienda: Personalización visual
-- Cupones: Descuentos y promociones
-- Slider: Carrusel de imágenes
-- Soporte y Tickets: Ayuda del equipo
-- Anuncios: Novedades de Linkiu";
+FUNCIONALIDADES DISPONIBLES:
+📊 Dashboard - Panel principal con estadísticas y métricas
+📦 Pedidos - Gestión completa de ventas y pedidos
+🏷️ Categorías - Organización de productos por categorías
+🎨 Variables - Tallas, colores, sabores (variantes de productos)
+🛍️ Productos - Gestión del catálogo completo
+📋 Inventario - Control de stock y alertas de reabastecimiento
+🚚 Gestión de Envíos - Zonas de entrega y costos
+💳 Métodos de Pago - Configuración de medios de pago
+📍 Sedes - Ubicaciones físicas del negocio
+🎨 Diseño de la Tienda - Personalización visual y branding
+🎁 Cupones - Descuentos y promociones
+🖼️ Slider - Carrusel de imágenes en la página principal
+💬 Soporte y Tickets - Ayuda del equipo de Linkiu
+📢 Anuncios - Novedades y actualizaciones de la plataforma
+
+INSTRUCCIONES ESPECIALES:
+- Si el usuario pregunta algo específico de su tienda, usa los datos que tienes disponibles
+- Si hay ALERTAS activas y la pregunta está relacionada, menciόnalas de forma útil
+- Si notas oportunidades de mejora, sugiérelas de forma constructiva
+- Sé proactivo: si ves que falta algo importante, menciónalo
+- Si hay productos con problemas de stock y preguntan sobre inventario, señálalo
+- Si hay pedidos pendientes y preguntan sobre pedidos, recuérdales procesarlos";
     }
 
     /**
-     * Construir contexto de la tienda
+     * Construir contexto de la tienda con datos en tiempo real
      */
     protected function buildStoreContext(Store $store): array
     {
         $store->load('plan');
+        
+        // Stats básicas
+        $totalProducts = $store->products()->count();
+        $totalOrders = $store->orders()->count();
+        $totalCategories = $store->categories()->count();
+        
+        // Pedidos recientes (últimos 7 días)
+        $recentOrders = $store->orders()
+            ->where('created_at', '>=', now()->subDays(7))
+            ->count();
+        
+        // Pedidos pendientes
+        $pendingOrders = $store->orders()
+            ->where('status', 'pending')
+            ->count();
+        
+        // Productos con bajo stock (menos de 5 unidades)
+        // Solo contar productos que controlan stock y tienen tipo limitado
+        $lowStockProducts = $store->products()
+            ->where('controla_stock', true)
+            ->where('tipo_stock', 'limitado')
+            ->where('cantidad_stock', '>', 0)
+            ->where('cantidad_stock', '<', 5)
+            ->count();
+        
+        // Productos sin stock
+        $outOfStockProducts = $store->products()
+            ->where('controla_stock', true)
+            ->where('tipo_stock', 'limitado')
+            ->where('cantidad_stock', '<=', 0)
+            ->count();
+        
+        // Último pedido
+        $lastOrder = $store->orders()
+            ->latest()
+            ->first();
+        
+        // Producto más vendido (calculado desde order_items)
+        $topProduct = null;
+        if ($totalOrders > 0) {
+            try {
+                $topProductData = \DB::table('order_items')
+                    ->join('orders', 'order_items.order_id', '=', 'orders.id')
+                    ->where('orders.store_id', $store->id)
+                    ->select('order_items.product_id', 'order_items.product_name', \DB::raw('SUM(order_items.quantity) as total_sold'))
+                    ->groupBy('order_items.product_id', 'order_items.product_name')
+                    ->orderBy('total_sold', 'desc')
+                    ->first();
+                
+                if ($topProductData) {
+                    $topProduct = (object)[
+                        'name' => $topProductData->product_name,
+                        'order_items_count' => $topProductData->total_sold,
+                    ];
+                }
+            } catch (\Exception $e) {
+                // Si falla, simplemente no mostramos el producto top
+                $topProduct = null;
+            }
+        }
+        
+        // Análisis y alertas
+        $insights = [];
+        $alerts = [];
+        
+        // Alertas de stock
+        if ($lowStockProducts > 0) {
+            $alerts[] = "⚠️ {$lowStockProducts} producto(s) con stock bajo (menos de 5 unidades)";
+        }
+        if ($outOfStockProducts > 0) {
+            $alerts[] = "🚨 {$outOfStockProducts} producto(s) sin stock disponible";
+        }
+        
+        // Alertas de pedidos
+        if ($pendingOrders > 0) {
+            $alerts[] = "📦 {$pendingOrders} pedido(s) pendiente(s) de procesar";
+        }
+        
+        // Insights positivos
+        if ($recentOrders > 0) {
+            $insights[] = "✅ Has recibido {$recentOrders} pedido(s) en los últimos 7 días";
+        }
+        if ($totalProducts > 0 && $totalOrders === 0) {
+            $insights[] = "💡 Tienes productos en tu catálogo, pero aún no has recibido pedidos. ¿Necesitas ayuda con marketing o configuración?";
+        }
+        if ($totalProducts === 0) {
+            $insights[] = "🚀 Tu tienda está lista, pero no tienes productos aún. ¿Te ayudo a agregar tu primer producto?";
+        }
+        if ($totalProducts > 0 && $totalCategories === 0) {
+            $insights[] = "🏷️ Considera crear categorías para organizar mejor tus productos";
+        }
         
         return [
             'store' => [
@@ -1324,33 +1474,71 @@ Funcionalidades disponibles en el menú lateral:
                 'plan' => $store->plan->name ?? 'N/A',
             ],
             'stats' => [
-                'total_products' => $store->products()->count(),
-                'total_categories' => $store->categories()->count(),
-                'total_orders' => $store->orders()->count(),
+                'total_products' => $totalProducts,
+                'total_categories' => $totalCategories,
+                'total_orders' => $totalOrders,
+                'recent_orders' => $recentOrders,
+                'pending_orders' => $pendingOrders,
+                'low_stock_products' => $lowStockProducts,
+                'out_of_stock_products' => $outOfStockProducts,
             ],
+            'recent_activity' => [
+                'last_order' => $lastOrder ? [
+                    'number' => $lastOrder->order_number,
+                    'total' => number_format($lastOrder->total, 0),
+                    'date' => $lastOrder->created_at->diffForHumans(),
+                ] : null,
+                'top_product' => $topProduct ? [
+                    'name' => $topProduct->name,
+                    'sales' => $topProduct->order_items_count ?? 0,
+                ] : null,
+            ],
+            'insights' => $insights,
+            'alerts' => $alerts,
         ];
     }
 
     /**
-     * Llamar a OpenAI
+     * Llamar a OpenAI con historial de conversación
      */
-    protected function callOpenAI(string $systemPrompt, string $userPrompt): array
+    protected function callOpenAI(string $systemPrompt, string $userPrompt, ?AssistantConversation $conversation = null): array
     {
         try {
+            // Construir mensajes con historial
+            $messages = [
+                [
+                    'role' => 'system',
+                    'content' => $systemPrompt
+                ]
+            ];
+            
+            // Agregar historial de conversación (últimos 10 mensajes para contexto)
+            if ($conversation) {
+                $history = $conversation->messages()
+                    ->orderBy('created_at', 'desc')
+                    ->limit(10)
+                    ->get()
+                    ->reverse();
+                
+                foreach ($history as $msg) {
+                    $messages[] = [
+                        'role' => $msg->role,
+                        'content' => $msg->message
+                    ];
+                }
+            }
+            
+            // Agregar mensaje actual del usuario
+            $messages[] = [
+                'role' => 'user',
+                'content' => $userPrompt
+            ];
+            
             $response = $this->client->chat()->create([
                 'model' => $this->model,
-                'messages' => [
-                    [
-                        'role' => 'system',
-                        'content' => $systemPrompt
-                    ],
-                    [
-                        'role' => 'user',
-                        'content' => $userPrompt
-                    ]
-                ],
-                'max_tokens' => 300,
-                'temperature' => 0.5,
+                'messages' => $messages,
+                'max_tokens' => 800,
+                'temperature' => 0.7,
             ]);
 
             $message = is_object($response) 

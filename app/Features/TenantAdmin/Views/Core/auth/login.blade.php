@@ -62,7 +62,10 @@
         <!-- Lado izquierdo: Background atractivo -->
         <div class="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-slate-200">
             <div class="absolute inset-0">
-                <img src="{{ asset('images-ui/Banners_login_tenantAdmin.svg') }}" 
+                @php
+                    $loginBanner = ui_image_single('tenant_admin', 'login_banner', asset('images-ui/Banners_login_tenantAdmin.svg'));
+                @endphp
+                <img src="{{ $loginBanner }}" 
                      alt="Banner de información" 
                      class="w-full h-full object-contain items-center justify-center">
             </div>
@@ -73,7 +76,10 @@
             <div class="w-full max-w-md">
                 <!-- Logo móvil -->
                 <div class="mb-8 text-start">
-                    <img src="{{ asset('images-ui/logo_linkiu_new_full.svg') }}" 
+                    @php
+                        $loginLogo = ui_image_single('tenant_admin', 'login_logo', asset('images-ui/logo_linkiu_new_full.svg'));
+                    @endphp
+                    <img src="{{ $loginLogo }}" 
                     alt="Logo de Linkiu" 
                     class="h-12 w-auto mb-4">
                 </div>

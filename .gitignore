@@ -43,3 +43,9 @@ docs/local/requerimientos-local.md
 
 # — Opción alternativa: ignorar toda la carpeta
 # docs/local/
+
+# Tutoriales base (no se suben al repo)
+tutorials-base/
+
+# Documentos temporales y notas de trabajo
+doc not/

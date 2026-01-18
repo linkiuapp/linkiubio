@@ -263,7 +263,7 @@ class StoreInsightsService
             ->where('orders.store_id', $this->store->id)
             ->where('orders.status', 'delivered')
             ->where('orders.created_at', '>=', $startOfMonth)
-            ->select('products.id', 'products.name', \DB::raw('SUM(order_items.quantity) as total_sold'), \DB::raw('SUM(order_items.subtotal) as total_revenue'))
+            ->select('products.id', 'products.name', \DB::raw('SUM(order_items.quantity) as total_sold'), \DB::raw('SUM(order_items.item_total) as total_revenue'))
             ->groupBy('products.id', 'products.name')
             ->orderByDesc('total_sold')
             ->first();
@@ -733,10 +733,10 @@ class StoreInsightsService
     {
         $coupons = Coupon::where('store_id', $this->store->id)
             ->where('is_active', true)
-            ->whereNotNull('valid_until')
-            ->where('valid_until', '<=', Carbon::now()->addDays(7))
-            ->where('valid_until', '>', Carbon::now())
-            ->get(['id', 'code', 'valid_until', 'times_used']);
+            ->whereNotNull('end_date')
+            ->where('end_date', '<=', Carbon::now()->addDays(7))
+            ->where('end_date', '>', Carbon::now())
+            ->get(['id', 'code', 'end_date', 'current_uses']);
 
         return [
             'count' => $coupons->count(),

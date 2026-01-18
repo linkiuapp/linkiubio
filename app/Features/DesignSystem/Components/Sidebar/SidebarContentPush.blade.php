@@ -397,8 +397,19 @@ Con dropdown mejorado (z-index alto) y tooltips en modo minified
                                             @if($icon)
                                                 <i data-lucide="{{ $icon }}" class="size-5 shrink-0 transition-colors duration-200"></i>
                                             @endif
-                                            <span x-show="!isMinified || !isDesktop" class="flex-1 text-left">
+                                            <span x-show="!isMinified || !isDesktop" class="{{ ($badge !== null && $badge !== '') ? 'flex-1 flex items-center justify-between gap-x-2' : 'flex-1 text-left' }}">
                                                 {{ $label }}
+                                                @if($badge !== null && $badge !== '')
+                                                    @if($badgeColor)
+                                                        <span class="ms-auto py-0.5 px-2 inline-flex items-center gap-x-1.5 text-xs rounded-full font-semibold {{ $badgeColor }} transition-all duration-200">
+                                                            {{ $badge }}
+                                                        </span>
+                                                    @else
+                                                        <span class="ms-auto py-0.5 px-2 inline-flex items-center gap-x-1.5 text-xs rounded-full font-semibold bg-gray-400 text-white transition-all duration-200">
+                                                            {{ $badge }}
+                                                        </span>
+                                                    @endif
+                                                @endif
                                             </span>
                                             <i data-lucide="chevron-down" 
                                                class="size-4 shrink-0 transition-transform duration-200"
@@ -421,6 +432,8 @@ Con dropdown mejorado (z-index alto) y tooltips en modo minified
                                                     $childUrl = $child['url'] ?? '#';
                                                     $childIcon = $child['icon'] ?? null;
                                                     $childActive = $child['active'] ?? false;
+                                                    $childBadge = $child['badge'] ?? null;
+                                                    $childBadgeColor = $child['badgeColor'] ?? null;
                                                     $childChildren = $child['children'] ?? null;
                                                     $hasChildChildren = !empty($childChildren) && is_array($childChildren);
                                                 @endphp
@@ -476,7 +489,18 @@ Con dropdown mejorado (z-index alto) y tooltips en modo minified
                                                             @if($childIcon)
                                                                 <i data-lucide="{{ $childIcon }}" class="size-4 shrink-0"></i>
                                                             @endif
-                                                            <span>{{ $childLabel }}</span>
+                                                            <span class="{{ ($childBadge !== null && $childBadge !== '') ? 'flex-1 flex items-center justify-between gap-x-2' : '' }}">{{ $childLabel }}</span>
+                                                            @if($childBadge !== null && $childBadge !== '')
+                                                                @if($childBadgeColor)
+                                                                    <span class="ms-auto py-0.5 px-2 inline-flex items-center gap-x-1.5 text-xs rounded-full font-semibold {{ $childBadgeColor }} transition-all duration-200">
+                                                                        {{ $childBadge }}
+                                                                    </span>
+                                                                @else
+                                                                    <span class="ms-auto py-0.5 px-2 inline-flex items-center gap-x-1.5 text-xs rounded-full font-semibold bg-gray-400 text-white transition-all duration-200">
+                                                                        {{ $childBadge }}
+                                                                    </span>
+                                                                @endif
+                                                            @endif
                                                         </a>
                                                     </li>
                                                 @endif
@@ -503,9 +527,9 @@ Con dropdown mejorado (z-index alto) y tooltips en modo minified
                                             @if($icon)
                                                 <i data-lucide="{{ $icon }}" class="size-5 shrink-0 transition-colors duration-200"></i>
                                             @endif
-                                            <span x-show="!isMinified || !isDesktop" class="{{ $badge ? 'flex-1 flex items-center justify-between gap-x-2' : '' }}">
+                                            <span x-show="!isMinified || !isDesktop" class="{{ ($badge !== null && $badge !== '') ? 'flex-1 flex items-center justify-between gap-x-2' : '' }}">
                                                 {{ $label }}
-                                                @if($badge)
+                                                @if($badge !== null && $badge !== '')
                                                     @if($badgeColor)
                                                         <span class="ms-auto py-0.5 px-2 inline-flex items-center gap-x-1.5 text-xs rounded-full font-semibold {{ $badgeColor }} transition-all duration-200">
                                                             {{ $badge }}

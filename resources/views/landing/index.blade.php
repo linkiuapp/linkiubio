@@ -267,7 +267,7 @@
                         <span class="text-accent-300 font-semibold">Prueba gratis {{ $maxTrialDays }} días sin tarjeta</span>.
                     </p>
                     <div class="flex flex-col sm:flex-row gap-3 lg:gap-4 justify-center mb-8 lg:mb-12 w-full sm:w-auto mx-auto">
-                        <button onclick="fbq('track', 'Lead'); window.location.href='{{ route('register.step1') }}';" class="bg-accent-300 hover:bg-accent-400 text-white px-6 lg:px-8 py-3 lg:py-4 rounded-xl font-bold text-base lg:text-lg transition-all hover:scale-105 flex items-center justify-center gap-2 w-full sm:w-auto">
+                        <button onclick="if(typeof fbq !== 'undefined') { fbq('track', 'Lead', {value: 0, currency: 'COP'}); } window.location.href='{{ route('register.step1') }}';" class="bg-accent-300 hover:bg-accent-400 text-white px-6 lg:px-8 py-3 lg:py-4 rounded-xl font-bold text-base lg:text-lg transition-all hover:scale-105 flex items-center justify-center gap-2 w-full sm:w-auto">
                             <span>Crear mi tienda gratis</span>
                             <i data-lucide="arrow-right" class="w-5 h-5"></i>
                         </button>
@@ -347,7 +347,7 @@
                         Tu tienda profesional lista en 15 minutos. Sin código, sin complicaciones, sin gastos grandes. 
                         <span class="font-semibold">Empieza gratis y paga solo cuando vendas</span>.
                     </p>
-                    <a href="{{ route('register.step1') }}" onclick="fbq('track', 'Lead');" class="inline-flex items-center gap-2 bg-white text-brand-400 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition-all hover:scale-105">
+                    <a href="{{ route('register.step1') }}" onclick="if(typeof fbq !== 'undefined') { fbq('track', 'Lead', {value: 0, currency: 'COP'}); }" class="inline-flex items-center gap-2 bg-white text-brand-400 px-8 py-4 rounded-xl font-bold text-lg hover:bg-blue-50 transition-all hover:scale-105">
                         <span>Crear mi tienda gratis</span>
                         <i data-lucide="arrow-right" class="w-5 h-5"></i>
                     </a>
@@ -867,7 +867,7 @@
             </div>
             
             <div class="text-center mt-12">
-                <a href="{{ route('register.step1') }}" onclick="fbq('track', 'Lead');" class="inline-flex items-center gap-2 bg-accent-300 hover:bg-accent-400 text-white px-8 py-4 rounded-xl font-bold text-lg transition-colors">
+                <a href="{{ route('register.step1') }}" onclick="if(typeof fbq !== 'undefined') { fbq('track', 'Lead', {value: 0, currency: 'COP'}); }" class="inline-flex items-center gap-2 bg-accent-300 hover:bg-accent-400 text-white px-8 py-4 rounded-xl font-bold text-lg transition-colors">
                     <span>Crear mi tienda gratis</span>
                     <i data-lucide="arrow-right" class="w-5 h-5"></i>
                 </a>
@@ -1142,7 +1142,7 @@
             <p class="text-xl text-gray-600 mb-8 max-w-2xl mx-auto font-inter">
                 Tu competencia ya está vendiendo online. No te quedes atrás.
             </p>
-            <a href="{{ route('register.step1') }}" onclick="fbq('track', 'Lead');" class="inline-flex items-center gap-2 bg-accent-300 hover:bg-accent-400 text-white px-8 py-4 rounded-xl font-bold text-lg transition-colors">
+            <a href="{{ route('register.step1') }}" onclick="if(typeof fbq !== 'undefined') { fbq('track', 'Lead', {value: 0, currency: 'COP'}); }" class="inline-flex items-center gap-2 bg-accent-300 hover:bg-accent-400 text-white px-8 py-4 rounded-xl font-bold text-lg transition-colors">
                 <span>Empezar ahora</span>
                 <i data-lucide="arrow-right" class="w-5 h-5"></i>
             </a>

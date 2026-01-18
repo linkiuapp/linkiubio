@@ -673,7 +673,7 @@
                             Paso Anterior
                         </a>
                         <button type="submit" 
-                                onclick="if (typeof fbq !== 'undefined') { fbq('track', 'Lead'); }"
+                                onclick="if (typeof fbq !== 'undefined') { fbq('track', 'CompleteRegistration', {value: 0, currency: 'COP', status: 'completed'}); }"
                                 class="px-8 py-2.5 bg-accent-300 hover:bg-accent-400 text-white rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
                                 :disabled="submitting">
                             <template x-if="!submitting">

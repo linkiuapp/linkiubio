@@ -381,21 +381,7 @@
                             >
                                 <p class="text-sm whitespace-pre-wrap" x-html="formatMessage(message.message)"></p>
                                 
-                                {{-- Acciones (enlaces como chips) --}}
-                                <template x-if="message.actions && message.actions.length > 0">
-                                    <div class="mt-3 flex flex-wrap gap-2">
-                                        <template x-for="(action, actionIndex) in message.actions" :key="actionIndex">
-                                            <a 
-                                                :href="action.url" 
-                                                class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 text-xs font-medium rounded-full transition-colors border border-indigo-200"
-                                            >
-                                                
-                                                <span x-text="action.label"></span>
-                                                <i data-lucide="chevron-right" class="w-3 h-3"></i>
-                                            </a>
-                                        </template>
-                                    </div>
-                                </template>
+                                {{-- Acciones deshabilitadas para UX más limpia --}}
                             </div>
                             <div class="chat-header text-xs mb-1" :class="message.role === 'user' ? 'text-gray-500' : 'text-gray-500'">
                                 <span x-text="message.role === 'user' ? 'Tú' : 'KiuBot'"></span>
@@ -424,9 +410,8 @@
                 </div>
             </div>
 
-            {{-- Preguntas frecuentes (botones) --}}
-            <div class="mb-4">
-                {{-- Sección: Aprende a usar --}}
+            {{-- Botones de sugerencias removidos para UX más limpia --}}
+            <div class="mb-4" style="display: none;">
                 <p class="text-xs text-gray-500 mb-2 font-medium">Aprende a usar</p>
                 <div class="grid grid-cols-2 md:grid-cols-3 gap-2 mb-3">
                     <button 

@@ -50,7 +50,7 @@
                 <h4 class="text-white font-satoshi font-bold mb-4">Ayuda</h4>
                     <ul class="space-y-3 font-inter text-sm">
                         <li><a href="{{ route('faq.index') }}" class="hover:text-white transition-colors">Preguntas Frecuentes</a></li>
-                        <li><a href="#" class="hover:text-white transition-colors">Tutoriales</a></li>
+                        <li><a href="{{ route('tutorials.index') }}" class="hover:text-white transition-colors">Tutoriales</a></li>
                         <li><a href="{{ route('contact.index') }}" class="hover:text-white transition-colors">Contacto</a></li>
                     </ul>
             </div>

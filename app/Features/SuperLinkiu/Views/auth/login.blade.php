@@ -62,7 +62,10 @@
         <!-- Lado izquierdo: Background atractivo -->
         <div class="hidden lg:flex lg:w-1/2 relative overflow-hidden bg-slate-200">
             <div class="absolute inset-0">
-                <img src="{{ asset('images-ui/banner_navidad_logens.webp') }}" 
+                @php
+                    $loginBanner = ui_image_single('super_admin', 'login_banner', asset('images-ui/banner_navidad_logens.webp'));
+                @endphp
+                <img src="{{ $loginBanner }}" 
                      alt="Banner de información" 
                      class="w-full h-full object-contain items-center justify-center">
             </div>
@@ -73,7 +76,10 @@
             <div class="w-full max-w-md">
                 <!-- Logo móvil -->
                 <div class="mb-8 text-start">
-                    <img src="{{ asset('images-ui/base_ui_login_logo.svg') }}" 
+                    @php
+                        $loginLogo = ui_image_single('super_admin', 'login_logo', asset('images-ui/base_ui_login_logo.svg'));
+                    @endphp
+                    <img src="{{ $loginLogo }}" 
                     alt="Logo de Linkiu" 
                     class="h-12 w-auto mb-4">
                 </div>

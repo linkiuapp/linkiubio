@@ -107,11 +107,9 @@ class BillingService
             ]);
 
             // 2. CREAR PRIMERA FACTURA
-            // Si hay trial, la factura se emite pero con vencimiento después del trial
+            // El due_date debe coincidir con el final del período de facturación
             $issueDate = $now;
-            $dueDate = $hasTrialPeriod && $trialEnd 
-                ? $trialEnd->copy()->addDays(15) // 15 días después del trial
-                : $issueDate->copy()->addDays(15); // 15 días desde hoy
+            $dueDate = $periodEnd; // Vence al final del período de la suscripción
 
             // Si tiene trial y la factura no está pagada, ajustar notas
             $notes = $this->generateInvoiceNotes($hasTrialPeriod, $trialDays, $paymentStatus, $metadata);

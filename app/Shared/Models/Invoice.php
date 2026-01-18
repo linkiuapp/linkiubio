@@ -192,7 +192,7 @@ class Invoice extends Model
             'pending' => 'warning',
             'paid' => 'success',
             'overdue' => 'error',
-            'cancelled' => 'black',
+            'cancelled' => 'error', // Rojo más intenso para canceladas
             default => 'warning'
         };
     }
@@ -203,7 +203,7 @@ class Invoice extends Model
             'pending' => 'bg-warning-300 text-black-500',
             'paid' => 'bg-success-300 text-accent-50',
             'overdue' => 'bg-error-300 text-accent-50',
-            'cancelled' => 'bg-black-300 text-accent-50',
+            'cancelled' => 'bg-error-400 text-accent-50', // Rojo más intenso para canceladas
             default => 'bg-warning-300 text-black-500'
         };
     }

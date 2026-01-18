@@ -135,6 +135,10 @@ Route::get('/equipo', [App\Features\Public\Controllers\TeamController::class, 'i
 // Página de Partners Pública
 Route::get('/partners', [App\Features\Public\Controllers\PartnersController::class, 'index'])->name('partners.index');
 
+// Página de Tutoriales Pública
+Route::get('/tutoriales', [App\Features\Public\Controllers\TutorialController::class, 'index'])->name('tutorials.index');
+Route::get('/tutoriales/{slug}', [App\Features\Public\Controllers\TutorialController::class, 'show'])->name('tutorials.show');
+
 // Páginas Legales
 Route::get('/terminos-y-condiciones', [App\Features\Public\Controllers\LegalController::class, 'terms'])->name('legal.terms');
 Route::get('/politica-de-privacidad', [App\Features\Public\Controllers\LegalController::class, 'privacy'])->name('legal.privacy');
@@ -142,8 +146,8 @@ Route::get('/politica-de-cookies', [App\Features\Public\Controllers\LegalControl
 Route::get('/politica-de-reembolsos', [App\Features\Public\Controllers\LegalController::class, 'refunds'])->name('legal.refunds');
 Route::get('/aviso-legal', [App\Features\Public\Controllers\LegalController::class, 'legalNotice'])->name('legal.notice');
 
-// Ruta para autenticación de WebSocket (requerida aunque usemos canales públicos)
-Broadcast::routes(['middleware' => ['auth']]);
+// Ruta para autenticación de WebSocket (requerida para canales privados)
+Broadcast::routes(['middleware' => ['web', 'auth']]);
 
 // API de notificaciones con autenticación por sesión web
 Route::middleware(['web', 'auth'])->group(function () {
@@ -206,6 +210,73 @@ Route::middleware(['web', 'auth'])->group(function () {
         ]);
     });
 });
+
+// ==========================================
+// RUTAS DE PRUEBA PARA ABLY (TEMPORALES - ELIMINAR EN PRODUCCIÓN)
+// ==========================================
+Route::prefix('test-ably')->name('test.ably.')->group(function () {
+    // Verificar configuración de Ably
+    Route::get('/config', function () {
+        $ablyKey = config('broadcasting.connections.ably.key');
+        $ablyOrdersKey = config('broadcasting.connections.ably-orders.key');
+        $defaultDriver = config('broadcasting.default');
+        
+        return response()->json([
+            'success' => true,
+            'config' => [
+                'default_driver' => $defaultDriver,
+                'ably_key_configured' => !empty($ablyKey),
+                'ably_key_length' => $ablyKey ? strlen($ablyKey) : 0,
+                'ably_key_preview' => $ablyKey ? substr($ablyKey, 0, 10) . '...' : null,
+                'ably_orders_key_configured' => !empty($ablyOrdersKey),
+                'ably_orders_key_length' => $ablyOrdersKey ? strlen($ablyOrdersKey) : 0,
+                'ably_orders_key_preview' => $ablyOrdersKey ? substr($ablyOrdersKey, 0, 10) . '...' : null,
+            ],
+            'message' => !empty($ablyKey) || !empty($ablyOrdersKey) 
+                ? '✅ Ably está configurado correctamente' 
+                : '⚠️ Ably no está configurado. Verifica ABLY_KEY en .env'
+        ]);
+    });
+
+    // Probar conexión con Ably enviando un evento de prueba
+    Route::post('/test-broadcast', function (\Illuminate\Http\Request $request) {
+        try {
+            $storeId = $request->input('store_id', 1); // Store ID por defecto para prueba
+            
+            // Usar la clase de evento real en lugar de clase anónima
+            $testEvent = new \App\Events\TestOrderNotification($storeId);
+            
+            // Enviar el evento (sin cola para pruebas más rápidas)
+            broadcast($testEvent)->toOthers();
+            
+            return response()->json([
+                'success' => true,
+                'message' => '✅ Evento de prueba enviado a Ably',
+                'store_id' => $storeId,
+                'channel' => 'store.' . $storeId . '.orders',
+                'event' => 'new.order',
+                'note' => 'Abre la consola del navegador en la página de admin para ver la notificación'
+            ]);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => '❌ Error al enviar evento de prueba',
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ], 500);
+        }
+    });
+
+    // Página HTML simple para probar la conexión frontend
+    Route::get('/test-page', function () {
+        // Obtener VITE_ABLY_KEY del .env para pasarlo a la vista
+        $ablyKey = env('VITE_ABLY_KEY', env('ABLY_KEY'));
+        return view('test-ably', ['ablyKey' => $ablyKey]);
+    });
+});
+
+// ==========================================
 
 // Ruta para servir imágenes de tickets (tanto local como public)
 Route::get('/storage/tickets/{store}/{ticket}/{filename}', function ($store, $ticket, $filename) {

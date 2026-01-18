@@ -6,32 +6,16 @@ use App\Shared\Models\Order;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\InteractsWithBroadcasting;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
-use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class NewOrderCreated implements ShouldBroadcast, ShouldQueue
+class NewOrderCreated implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, InteractsWithBroadcasting, SerializesModels;
 
     public $order;
     public $storeId;
-    
-    /**
-     * The number of times the job may be attempted.
-     */
-    public $tries = 1; // Reducido a 1 para evitar acumulación
-    
-    /**
-     * The number of seconds before the job should be processed.
-     */
-    public $delay = 0;
-    
-    /**
-     * The queue the job should be dispatched to.
-     */
-    public $queue = 'notifications';
     
     /**
      * Determine if the event should broadcast.
@@ -68,13 +52,8 @@ class NewOrderCreated implements ShouldBroadcast, ShouldQueue
         $this->order = $order;
         $this->storeId = $order->store_id;
         
-        // Usar Ably para notificaciones de pedidos (mayor confiabilidad)
-        // Si Ably está configurado, usarlo; si no, usar la conexión por defecto
-        if (!empty(config('broadcasting.connections.ably-realtime.key')) || 
-            !empty(config('broadcasting.connections.ably.key'))) {
-            $this->broadcastVia('ably-realtime');
-        }
-        // Si no está configurado Ably, usará la conexión por defecto (Pusher)
+        // Siempre usar Ably para notificaciones de pedidos
+        $this->broadcastVia('ably-realtime');
     }
 
     /**

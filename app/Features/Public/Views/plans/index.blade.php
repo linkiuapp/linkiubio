@@ -220,7 +220,7 @@
 
                                         <!-- Botón de Selección -->
                                         <button type="button" 
-                                                @click="if (typeof fbq !== 'undefined') { fbq('track', 'Lead'); } const periodInput = document.getElementById('billingPeriod{{ $plan->id }}'); const period = selectedPeriod || 'monthly'; if(periodInput) periodInput.value = period; document.getElementById('planForm{{ $plan->id }}').submit();"
+                                                @click="if (typeof fbq !== 'undefined') { fbq('track', 'Lead', {value: {{ $plan->monthly_price ?? 70000 }}, currency: 'COP', content_name: '{{ $plan->name }}'}); } const periodInput = document.getElementById('billingPeriod{{ $plan->id }}'); const period = selectedPeriod || 'monthly'; if(periodInput) periodInput.value = period; document.getElementById('planForm{{ $plan->id }}').submit();"
                                                 class="w-full py-3 rounded-lg font-semibold transition-all mb-4 bg-slate-900 hover:bg-slate-800 text-white border border-slate-800 shadow-md hover:shadow-lg transform hover:scale-[1.02] mt-auto">
                                             Elegir plan
                                         </button>
@@ -612,7 +612,7 @@
                     Crea tu tienda en minutos y comienza a vender hoy mismo
                 </p>
                 <div class="flex flex-col sm:flex-row gap-4 justify-center">
-                    <a href="{{ route('register.step1') }}" onclick="fbq('track', 'Lead');" class="bg-accent-300 hover:bg-accent-400 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 inline-flex items-center justify-center gap-2">
+                    <a href="{{ route('register.step1') }}" onclick="if(typeof fbq !== 'undefined') { fbq('track', 'Lead', {value: 0, currency: 'COP'}); }" class="bg-accent-300 hover:bg-accent-400 text-white px-8 py-4 rounded-xl font-bold text-lg transition-all hover:scale-105 inline-flex items-center justify-center gap-2">
                         <span>Empezar ahora</span>
                         <i data-lucide="arrow-right" class="w-5 h-5"></i>
                     </a>

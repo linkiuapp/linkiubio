@@ -169,6 +169,48 @@ class BillingNotificationService
     }
 
     /**
+     * Send preventive warning (before due date)
+     */
+    public function sendPreventiveWarning(Invoice $invoice, string $warningType, int $daysBefore): void
+    {
+        $storeAdminEmail = $this->getStoreAdminEmail($invoice->store);
+        
+        if (!$storeAdminEmail) {
+            return;
+        }
+
+        $warningMessages = $this->getPreventiveWarningMessages($warningType, $daysBefore);
+
+        SendEmailJob::dispatch(
+            'template',
+            $storeAdminEmail,
+            [
+                'template_key' => 'invoice_due_reminder',
+                'variables' => array_merge([
+                    'store_name' => $invoice->store->name,
+                    'invoice_number' => $invoice->invoice_number,
+                    'amount' => $invoice->getFormattedAmount(),
+                    'due_date' => $invoice->due_date->format('d/m/Y'),
+                    'days_before' => $daysBefore,
+                    'days_remaining' => $daysBefore,
+                    'plan_name' => $invoice->plan->name,
+                    'period' => $invoice->getPeriodLabel(),
+                    'support_email' => config('app.support_email', 'soporte@linkiu.bio'),
+                    'dashboard_url' => $this->getDashboardUrl($invoice->store)
+                ], $warningMessages)
+            ]
+        );
+
+        \Log::info('Aviso preventivo de factura enviado', [
+            'invoice_id' => $invoice->id,
+            'store_id' => $invoice->store_id,
+            'recipient' => $storeAdminEmail,
+            'warning_type' => $warningType,
+            'days_before' => $daysBefore
+        ]);
+    }
+
+    /**
      * Send billing warning (escalating warnings before suspension)
      */
     public function sendBillingWarning(Invoice $invoice, string $warningType, int $daysOverdue): void
@@ -330,11 +372,44 @@ class BillingNotificationService
     }
 
     /**
-     * Get warning messages based on warning type
+     * Get preventive warning messages (before due date)
+     */
+    private function getPreventiveWarningMessages(string $warningType, int $daysBefore): array
+    {
+        return match($warningType) {
+            'preventive_15_days' => [
+                'urgency_message' => 'Recordatorio: Tu factura vence en ' . $daysBefore . ' días.',
+                'suspension_warning' => 'Asegúrate de realizar el pago antes de la fecha de vencimiento para evitar la suspensión de tu tienda.',
+                'reminder_type' => 'Recordatorio temprano',
+            ],
+            'preventive_7_days' => [
+                'urgency_message' => 'Recordatorio: Tu factura vence en ' . $daysBefore . ' días.',
+                'suspension_warning' => 'Recuerda realizar el pago antes de la fecha de vencimiento para mantener tu tienda activa.',
+                'reminder_type' => 'Recordatorio medio',
+            ],
+            'preventive_5_days' => [
+                'urgency_message' => '⚠️ URGENTE: Tu factura vence en ' . $daysBefore . ' días.',
+                'suspension_warning' => 'IMPORTANTE: Realiza el pago antes del vencimiento para evitar la suspensión automática de tu tienda.',
+                'reminder_type' => 'Recordatorio urgente',
+            ],
+            default => [
+                'urgency_message' => 'Tu factura vence en ' . $daysBefore . ' días.',
+                'suspension_warning' => 'Realiza el pago antes de la fecha de vencimiento.',
+                'reminder_type' => 'Recordatorio',
+            ]
+        };
+    }
+
+    /**
+     * Get warning messages based on warning type (corrective warnings after due date)
      */
     private function getWarningMessages(string $warningType, int $daysOverdue): array
     {
         return match($warningType) {
+            'overdue_1_day' => [
+                'urgency_message' => '🚨 Tu factura está vencida desde hace ' . $daysOverdue . ' día.',
+                'suspension_warning' => 'URGENTE: Tu tienda será suspendida automáticamente si no realizas el pago pronto.',
+            ],
             'first_warning' => [
                 'urgency_message' => 'Primera notificación: Tu factura lleva ' . $daysOverdue . ' días vencida.',
                 'suspension_warning' => 'Si no realizas el pago en los próximos días, tu tienda podría ser suspendida.',

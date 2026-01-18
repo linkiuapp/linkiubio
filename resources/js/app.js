@@ -58,46 +58,137 @@ if (window.location.pathname.includes('/admin') === false &&
 
 console.log('🟢 Pusher imported successfully');
 
-// Configurar Pusher DIRECTAMENTE (sin Laravel Echo para evitar auth automática)
-console.log('🚀 Initializing Pusher...');
-console.log('📊 VITE_PUSHER_APP_CLUSTER:', import.meta.env.VITE_PUSHER_APP_CLUSTER);
-
-try {
-    window.Pusher = Pusher
-    console.log('🟢 Pusher class assigned to window');
-    
-    window.pusher = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY, {
-        cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER ?? 'mt1',
-        forceTLS: true,
-        enabledTransports: ['ws', 'wss'],
-        disableStats: true,
-        maxReconnectionAttempts: 3
-    })
-    
-    console.log('✅ Pusher initialized successfully:', window.pusher);
-    
-    // Crear objeto Echo-like para compatibilidad
-    window.Echo = {
-        channel: function(channelName) {
-            console.log('📡 Subscribing to channel:', channelName);
-            const channel = window.pusher.subscribe(channelName)
-            return {
-                listen: function(eventName, callback) {
-                    // Remover el punto inicial si existe (.ticket.response.added -> ticket.response.added)
-                    const cleanEventName = eventName.startsWith('.') ? eventName.substring(1) : eventName
-                    console.log('👂 Listening for event:', cleanEventName);
-                    channel.bind(cleanEventName, callback)
-                    return this
-                }
+// Función helper para inicializar Echo con Pusher
+function initializePusherEcho() {
+    try {
+        window.Pusher = Pusher;
+        console.log('🟢 Pusher class assigned to window');
+        
+        window.pusher = new Pusher(import.meta.env.VITE_PUSHER_APP_KEY, {
+            cluster: import.meta.env.VITE_PUSHER_APP_CLUSTER ?? 'mt1',
+            forceTLS: true,
+            enabledTransports: ['ws', 'wss'],
+            disableStats: true,
+            maxReconnectionAttempts: 3
+        });
+        
+        console.log('✅ Pusher initialized successfully:', window.pusher);
+        
+        // Crear objeto Echo-like para compatibilidad
+        window.Echo = {
+            channel: function(channelName) {
+                console.log('📡 Subscribing to public channel:', channelName);
+                const channel = window.pusher.subscribe(channelName);
+                return {
+                    listen: function(eventName, callback) {
+                        // Remover el punto inicial si existe (.ticket.response.added -> ticket.response.added)
+                        const cleanEventName = eventName.startsWith('.') ? eventName.substring(1) : eventName;
+                        console.log('👂 Listening for event:', cleanEventName);
+                        channel.bind(cleanEventName, callback);
+                        return this;
+                    }
+                };
+            },
+            private: function(channelName) {
+                console.log('📡 Subscribing to private channel:', channelName);
+                // Pusher requiere el prefijo 'private-' para canales privados
+                const privateChannelName = channelName.startsWith('private-') ? channelName : `private-${channelName}`;
+                const channel = window.pusher.subscribe(privateChannelName);
+                return {
+                    listen: function(eventName, callback) {
+                        // Remover el punto inicial si existe
+                        const cleanEventName = eventName.startsWith('.') ? eventName.substring(1) : eventName;
+                        console.log('👂 Listening for private event:', cleanEventName, 'on', privateChannelName);
+                        channel.bind(cleanEventName, callback);
+                        return this;
+                    }
+                };
             }
-        }
+        };
+        
+        console.log('✅ Echo-like object created with Pusher:', window.Echo);
+    } catch (error) {
+        console.error('❌ Error initializing Pusher:', error);
     }
-    
-    console.log('✅ Echo-like object created:', window.Echo);
-    
-} catch (error) {
-    console.error('❌ Error initializing Pusher:', error);
 }
+
+// Intentar usar Ably en modo Pusher-compatible primero, luego fallback a Pusher normal
+console.log('🚀 Initializing broadcasting...');
+
+// Inicializar de forma asíncrona
+(async function() {
+    try {
+        // Prioridad 1: Intentar usar Ably en modo Pusher-compatible
+        const ablyKey = import.meta.env.VITE_ABLY_KEY;
+        
+        if (ablyKey) {
+            console.log('🔵 Ably key found, attempting to use Ably (Pusher-compatible mode)...');
+            try {
+                window.Pusher = Pusher; // Necesario para el modo compatible
+                
+                // Extraer la parte pública de la clave (antes del ':')
+                const ablyPublicKey = ablyKey.split(':')[0];
+                
+                // Crear instancia de Pusher apuntando a Ably (modo compatible)
+                window.pusher = new Pusher(ablyPublicKey, {
+                    wsHost: 'realtime-pusher.ably.io',
+                    wsPort: 443,
+                    wssPort: 443,
+                    forceTLS: true,
+                    enabledTransports: ['ws', 'wss'],
+                    disableStats: true,
+                    cluster: 'us-east-1-a',
+                });
+                
+                console.log('✅ Pusher initialized with Ably (compatible mode)');
+                
+                // Crear objeto Echo-like para compatibilidad
+                window.Echo = {
+                    channel: function(channelName) {
+                        console.log('📡 Subscribing to public channel:', channelName);
+                        const channel = window.pusher.subscribe(channelName);
+                        return {
+                            listen: function(eventName, callback) {
+                                // Remover el punto inicial si existe
+                                const cleanEventName = eventName.startsWith('.') ? eventName.substring(1) : eventName;
+                                console.log('👂 Listening for event:', cleanEventName);
+                                channel.bind(cleanEventName, callback);
+                                return this;
+                            }
+                        };
+                    },
+                    private: function(channelName) {
+                        console.log('📡 Subscribing to private channel:', channelName);
+                        // Pusher requiere el prefijo 'private-' para canales privados
+                        const privateChannelName = channelName.startsWith('private-') ? channelName : `private-${channelName}`;
+                        const channel = window.pusher.subscribe(privateChannelName);
+                        return {
+                            listen: function(eventName, callback) {
+                                // Remover el punto inicial si existe
+                                const cleanEventName = eventName.startsWith('.') ? eventName.substring(1) : eventName;
+                                console.log('👂 Listening for private event:', cleanEventName, 'on', privateChannelName);
+                                channel.bind(cleanEventName, callback);
+                                return this;
+                            }
+                        };
+                    }
+                };
+                
+                console.log('✅ Echo initialized with Ably (Pusher-compatible mode)');
+            } catch (ablyError) {
+                console.warn('⚠️ Failed to initialize Ably, falling back to Pusher:', ablyError);
+                initializePusherEcho();
+            }
+        } else {
+            console.log('ℹ️ No Ably key found, using Pusher');
+            initializePusherEcho();
+        }
+    } catch (error) {
+        console.error('❌ Error initializing broadcasting:', error);
+        // Fallback a Pusher si todo falla
+        initializePusherEcho();
+    }
+})();
 
 console.log('🟢 About to import component files...');
 

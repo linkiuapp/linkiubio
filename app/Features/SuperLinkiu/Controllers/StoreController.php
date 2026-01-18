@@ -15,7 +15,6 @@ use App\Features\SuperLinkiu\Exports\StoresExport;
 use App\Features\SuperLinkiu\Services\StoreTemplateService;
 use App\Features\SuperLinkiu\Services\LocationService;
 use App\Features\SuperLinkiu\Services\ValidationCacheService;
-use App\Features\SuperLinkiu\Services\PerformanceMonitoringService;
 use Illuminate\Support\Facades\Log;
 use App\Features\SuperLinkiu\Requests\CreateStoreRequest;
 use App\Features\SuperLinkiu\Requests\UpdateStoreRequest;
@@ -30,7 +29,6 @@ class StoreController extends Controller
     protected StoreTemplateService $templateService;
     protected LocationService $locationService;
     protected ValidationCacheService $cacheService;
-    protected PerformanceMonitoringService $performanceService;
     protected StoreService $storeService;
     protected StoreValidationService $validationService;
 
@@ -38,14 +36,12 @@ class StoreController extends Controller
         StoreTemplateService $templateService, 
         LocationService $locationService,
         ValidationCacheService $cacheService,
-        PerformanceMonitoringService $performanceService,
         StoreService $storeService,
         StoreValidationService $validationService
     ) {
         $this->templateService = $templateService;
         $this->locationService = $locationService;
         $this->cacheService = $cacheService;
-        $this->performanceService = $performanceService;
         $this->storeService = $storeService;
         $this->validationService = $validationService;
     }
@@ -694,7 +690,7 @@ class StoreController extends Controller
             $cached = $this->cacheService->getCachedEmailValidation($email, $storeId);
             if ($cached) {
                 $responseTime = (microtime(true) - $startTime) * 1000;
-                $this->performanceService->recordValidationPerformance('validateEmail', $responseTime, true);
+                // Performance monitoring now handled by Sentry
                 
                 return response()->json([
                     'success' => true,
@@ -717,7 +713,7 @@ class StoreController extends Controller
 
             // Record performance metrics
             $responseTime = (microtime(true) - $startTime) * 1000;
-            $this->performanceService->recordValidationPerformance('validateEmail', $responseTime, false);
+            // Performance monitoring now handled by Sentry
 
             return response()->json([
                 'success' => true,
@@ -726,7 +722,8 @@ class StoreController extends Controller
 
         } catch (\Exception $e) {
             // Record error
-            $this->performanceService->recordError('validation_error', 'validateEmail', [
+            // Error monitoring now handled by Sentry
+            Log::error('validation_error in validateEmail', [
                 'email' => $request->input('email'),
                 'error' => $e->getMessage()
             ]);
@@ -764,7 +761,7 @@ class StoreController extends Controller
             if ($cached) {
                 $cacheHit = true;
                 $responseTime = (microtime(true) - $startTime) * 1000;
-                $this->performanceService->recordValidationPerformance('validateSlug', $responseTime, true);
+                // Performance monitoring now handled by Sentry
                 
                 return response()->json([
                     'success' => true,
@@ -788,7 +785,7 @@ class StoreController extends Controller
 
             // Record performance metrics
             $responseTime = (microtime(true) - $startTime) * 1000;
-            $this->performanceService->recordValidationPerformance('validateSlug', $responseTime, false);
+            // Performance monitoring now handled by Sentry
 
             return response()->json([
                 'success' => true,
@@ -797,7 +794,8 @@ class StoreController extends Controller
 
         } catch (\Exception $e) {
             // Record error
-            $this->performanceService->recordError('validation_error', 'validateSlug', [
+            // Error monitoring now handled by Sentry
+            Log::error('validation_error in validateSlug', [
                 'slug' => $request->input('slug'),
                 'error' => $e->getMessage()
             ]);
@@ -832,7 +830,7 @@ class StoreController extends Controller
             $cached = $this->cacheService->getCachedSlugSuggestions($baseSlug);
             if ($cached) {
                 $responseTime = (microtime(true) - $startTime) * 1000;
-                $this->performanceService->recordValidationPerformance('suggestSlug', $responseTime, true);
+                // Performance monitoring now handled by Sentry
                 
                 return response()->json([
                     'success' => true,
@@ -854,7 +852,7 @@ class StoreController extends Controller
 
             // Record performance metrics
             $responseTime = (microtime(true) - $startTime) * 1000;
-            $this->performanceService->recordValidationPerformance('suggestSlug', $responseTime, false);
+            // Performance monitoring now handled by Sentry
 
             return response()->json([
                 'success' => true,
@@ -863,7 +861,8 @@ class StoreController extends Controller
 
         } catch (\Exception $e) {
             // Record error
-            $this->performanceService->recordError('validation_error', 'suggestSlug', [
+            // Error monitoring now handled by Sentry
+            Log::error('validation_error in suggestSlug', [
                 'slug' => $request->input('slug'),
                 'error' => $e->getMessage()
             ]);
@@ -911,7 +910,7 @@ class StoreController extends Controller
             $cached = $this->cacheService->getCachedBillingCalculation($planId, $period, $discountCode);
             if ($cached) {
                 $responseTime = (microtime(true) - $startTime) * 1000;
-                $this->performanceService->recordValidationPerformance('calculateBilling', $responseTime, true);
+                // Performance monitoring now handled by Sentry
                 
                 return response()->json([
                     'success' => true,
@@ -989,7 +988,7 @@ class StoreController extends Controller
 
             // Record performance metrics
             $responseTime = (microtime(true) - $startTime) * 1000;
-            $this->performanceService->recordValidationPerformance('calculateBilling', $responseTime, false);
+            // Performance monitoring now handled by Sentry
 
             return response()->json([
                 'success' => true,
@@ -998,7 +997,8 @@ class StoreController extends Controller
 
         } catch (\Exception $e) {
             // Record error
-            $this->performanceService->recordError('validation_error', 'calculateBilling', [
+            // Error monitoring now handled by Sentry
+            Log::error('validation_error in calculateBilling', [
                 'plan_id' => $request->input('plan_id'),
                 'billing_period' => $request->input('billing_period'),
                 'error' => $e->getMessage()

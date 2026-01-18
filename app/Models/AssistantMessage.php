@@ -24,6 +24,6 @@ class AssistantMessage extends Model
      */
     public function conversation(): BelongsTo
     {
-        return $this->belongsTo(AssistantConversation::class);
+        return $this->belongsTo(AssistantConversation::class, 'conversation_id');
     }
 }

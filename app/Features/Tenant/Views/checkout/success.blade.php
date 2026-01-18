@@ -19,19 +19,138 @@
         .animate-check {
             animation: check 0.5s ease-out;
         }
+
+        /* Animación de carga para la línea activa - se llena progresivamente con desvanecido */
+        @keyframes loading-pulse {
+            0% {
+                background: linear-gradient(90deg, 
+                    #d1d5db 0%, 
+                    #d1d5db 100%);
+            }
+            10% {
+                background: linear-gradient(90deg, 
+                    #10b981 0%, 
+                    #10b981 5%, 
+                    rgba(16, 185, 129, 0.5) 10%, 
+                    #d1d5db 15%, 
+                    #d1d5db 100%);
+            }
+            20% {
+                background: linear-gradient(90deg, 
+                    #10b981 0%, 
+                    #10b981 15%, 
+                    rgba(16, 185, 129, 0.5) 20%, 
+                    #d1d5db 25%, 
+                    #d1d5db 100%);
+            }
+            30% {
+                background: linear-gradient(90deg, 
+                    #10b981 0%, 
+                    #10b981 35%, 
+                    rgba(16, 185, 129, 0.5) 40%, 
+                    #d1d5db 45%, 
+                    #d1d5db 100%);
+            }
+            40% {
+                background: linear-gradient(90deg, 
+                    #10b981 0%, 
+                    #10b981 55%, 
+                    rgba(16, 185, 129, 0.5) 60%, 
+                    #d1d5db 65%, 
+                    #d1d5db 100%);
+            }
+            50% {
+                background: linear-gradient(90deg, 
+                    #10b981 0%, 
+                    #10b981 75%, 
+                    rgba(16, 185, 129, 0.5) 80%, 
+                    #d1d5db 85%, 
+                    #d1d5db 100%);
+            }
+            60% {
+                background: linear-gradient(90deg, 
+                    #10b981 0%, 
+                    #10b981 95%, 
+                    rgba(16, 185, 129, 0.8) 98%, 
+                    #d1d5db 100%);
+            }
+            70% {
+                background: linear-gradient(90deg, 
+                    #10b981 0%, 
+                    #10b981 100%);
+            }
+            71% {
+                background: linear-gradient(90deg, 
+                    #d1d5db 0%, 
+                    #d1d5db 100%);
+            }
+            100% {
+                background: linear-gradient(90deg, 
+                    #d1d5db 0%, 
+                    #d1d5db 100%);
+            }
+        }
+
+        .loading-line {
+            animation: loading-pulse 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+        }
+
+        /* Efecto de brillo para el círculo activo */
+        @keyframes glow-pulse {
+            0%, 100% {
+                box-shadow: 0 0 5px rgba(16, 185, 129, 0.5);
+            }
+            50% {
+                box-shadow: 0 0 15px rgba(16, 185, 129, 0.8), 0 0 25px rgba(16, 185, 129, 0.4);
+            }
+        }
+
+        .glow-active {
+            animation: glow-pulse 2s ease-in-out infinite;
+        }
     </style>
 @endpush
 
-{{-- ===================  JS & PUSHER  =================== --}}
+{{-- ===================  JS & ABLY (directo, sin Pusher)  =================== --}}
 @push('scripts')
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <!-- Pusher para notificaciones en tiempo real -->
-    <script src="https://js.pusher.com/8.2.0/pusher.min.js"></script>
+    <meta name="ably-key" content="{{ config('broadcasting.connections.ably-realtime.key') ?: config('broadcasting.connections.ably.key') }}">
+    <!-- Ably JS directo -->
+    <script src="https://cdn.ably.com/lib/ably.min-1.js"></script>
+    @php
+        // Obtener banners dinámicamente como objetos completos
+        $successBannerImages = \App\Shared\Models\UiImage::where('context', 'store')
+            ->where('category', 'checkout_success')
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('created_at')
+            ->get();
+        
+        // Fallback a imágenes hardcodeadas si no hay imágenes en BD
+        if ($successBannerImages->isEmpty()) {
+            $successBanners = [
+                ['image_url' => asset('images-ui/banner_info_succces_linkiu_01.svg'), 'link_url' => route('register.step1')],
+                ['image_url' => asset('images-ui/banner_info_succces_linkiu_02.svg'), 'link_url' => route('register.step1')],
+            ];
+        } else {
+            // Convertir objetos a arrays con image_url y link_url
+            $successBanners = $successBannerImages->map(function($img) {
+                // url es el accessor que retorna Storage::url() de la imagen
+                // getAttributes()['url'] es el campo crudo de la BD (el enlace de destino)
+                $linkUrl = $img->getAttributes()['url'] ?? null;
+                return [
+                    'image_url' => $img->url, // URL de la imagen (Storage::url)
+                    'link_url' => $linkUrl ?: route('register.step1') // URL del campo url o fallback
+                ];
+            })->toArray();
+        }
+        $totalBanners = count($successBanners);
+    @endphp
     <script>
         function bannerSlider() {
             return {
                 currentIndex: 0,
-                totalSlides: 2,
+                totalSlides: {{ $totalBanners }},
                 isTransitioning: true,
                 displayIndex: 0,
                 interval: null,
@@ -92,7 +211,8 @@
 {{-- ==================  CONTENT (HTML) ================== --}}
 @section('content')
     <div class="max-w-2xl mx-auto px-4 py-6 space-y-6 relative z-0" data-order-id="{{ $order->id }}">
-        <!-- Slider de banners -->
+        <!-- Slider de banners (solo se muestra si hay banners) -->
+        @if(!empty($successBanners) && is_array($successBanners) && count($successBanners) > 0)
         <div class="relative overflow-hidden rounded-lg" 
              x-data="bannerSlider()"
              x-init="init()"
@@ -101,25 +221,26 @@
                  :style="'transform: translateX(-' + currentIndex * 100 + '%); transition: ' + (isTransitioning ? 'transform 0.5s ease-in-out' : 'none') + ';'"
                  @transitionend="handleTransitionEnd()">
 
-                <!-- Slides originales -->
-                <a href="{{ route('register.step1') }}" target="_blank" rel="noopener" class="flex-shrink-0 w-full flex items-center justify-center relative">
-                    <img src="{{ asset('images-ui/banner_info_succces_linkiu_01.svg') }}" alt="Banner 1" class="w-full">
+                <!-- Slides dinámicos desde base de datos -->
+                @foreach($successBanners as $banner)
+                <a href="{{ $banner['link_url'] }}" target="_blank" rel="noopener" class="flex-shrink-0 w-full flex items-center justify-center relative">
+                    <img src="{{ $banner['image_url'] }}" alt="Banner {{ $loop->iteration }}" class="w-full">
                 </a>
-                <a href="{{ route('register.step1') }}" target="_blank" rel="noopener" class="flex-shrink-0 w-full flex items-center justify-center relative">
-                    <img src="{{ asset('images-ui/banner_info_succces_linkiu_02.svg') }}" alt="Banner 2" class="w-full">
-                </a>
+                @endforeach
             </div>
 
             <!-- Indicadores de posición -->
+            @if(count($successBanners) > 1)
             <div class="absolute bottom-4 left-1/2 transform -translate-x-1/2 flex gap-2">
-                <button @click="goToSlide(0)"
-                        :class="displayIndex === 0 ? 'bg-white' : 'bg-white/50'"
+                @foreach($successBanners as $index => $banner)
+                <button @click="goToSlide({{ $index }})"
+                        :class="displayIndex === {{ $index }} ? 'bg-white' : 'bg-white/50'"
                         class="w-2 h-2 rounded-full transition-all"></button>
-                <button @click="goToSlide(1)"
-                        :class="displayIndex === 1 ? 'bg-white' : 'bg-white/50'"
-                        class="w-2 h-2 rounded-full transition-all"></button>
+                @endforeach
             </div>
+            @endif
         </div>
+        @endif
 
         <div class="relative">
             <!-- Borde serrado superior tipo factura -->
@@ -341,11 +462,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    // 🔔 INICIALIZAR PUSHER PARA ESCUCHAR CAMBIOS EN TIEMPO REAL
+    // 🔔 INICIALIZAR ABLY PARA ESCUCHAR CAMBIOS EN TIEMPO REAL
     initRealtimeNotifications();
 
-    // Actualizar cada 30 segundos (backup por si Pusher falla)
-    setInterval(loadOrderStatus, 30000);
+    // 🧪 COMENTADO PARA PROBAR SI ABLY FUNCIONA SIN BACKUP
+    // Actualizar cada 30 segundos (backup por si Ably falla)
+    // setInterval(loadOrderStatus, 30000);
 });
 
 // Función para resetear el carrito después de completar el pedido
@@ -488,13 +610,16 @@ function renderOrderStatus(order) {
         const isActive = currentStatus === step.key || (order.status === 'ready' && step.key === 'en_camino');
         const isCompleted = originalStatusOrder > stepOrder || (order.status === 'ready' && step.key === 'en_preparacion');
         const isLast = index === statusSteps.length - 1;
+        
+        // Si es el último paso (entregado) Y está activo, tratarlo como completado para mostrar el check
+        const isFinalDelivered = isLast && isActive && step.key === 'entregado';
 
         // Determinar clases y contenido del círculo
         let circleContent = '';
         let circleClass = '';
 
-        if (isCompleted) {
-            // Paso completado: checkmark verde
+        if (isCompleted || isFinalDelivered) {
+            // Paso completado O último paso entregado: checkmark verde
             circleClass = 'bg-green-600 border-2 border-green-600 transition-all duration-300 hover:scale-110';
             circleContent = `
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
@@ -502,8 +627,8 @@ function renderOrderStatus(order) {
                 </svg>
             `;
         } else if (isActive) {
-            // Paso activo: círculo blanco con borde verde y efecto pulse
-            circleClass = 'bg-white border-2 border-green-500 transition-all duration-300 hover:scale-110 animate-pulse';
+            // Paso activo: círculo blanco con borde verde, efecto pulse y brillo
+            circleClass = 'bg-white border-2 border-green-500 transition-all duration-300 hover:scale-110 animate-pulse glow-active';
             // Icono general: círculo relleno verde visible
             circleContent = `
                 <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="#10b981">
@@ -518,7 +643,18 @@ function renderOrderStatus(order) {
         }
 
         // Línea horizontal (excepto en el último paso)
-        const lineClass = isCompleted ? 'bg-green-600' : 'bg-gray-300';
+        // La línea debe tener animación de carga si conecta el estado actual con el siguiente
+        const nextStepOrder = getStatusOrder(statusSteps[index + 1]?.key || 'entregado');
+        const isLoadingLine = isActive && !isLast && originalStatusOrder < nextStepOrder && !isFinalDelivered;
+        
+        let lineClass = '';
+        if (isCompleted || (isFinalDelivered && !isLast)) {
+            lineClass = 'bg-green-600';
+        } else if (isLoadingLine) {
+            lineClass = 'loading-line'; // Animación de carga
+        } else {
+            lineClass = 'bg-gray-300';
+        }
 
         html += `
             <div class="flex items-center ${isLast ? '' : 'flex-1'} cursor-pointer group" title="${step.description}">
@@ -528,7 +664,7 @@ function renderOrderStatus(order) {
                         ${circleContent}
                     </div>
                 </div>
-                ${!isLast ? `<div class="h-0.5 flex-1 ${lineClass} transition-colors duration-300"></div>` : ''}
+                ${!isLast ? `<div class="h-1 flex-1 ${lineClass} transition-all duration-300 rounded-full"></div>` : ''}
             </div>
         `;
     });
@@ -627,30 +763,36 @@ function refreshOrderStatus() {
     });
 }
 
-// 🔔 INICIALIZAR NOTIFICACIONES EN TIEMPO REAL CON PUSHER
+// 🔔 INICIALIZAR NOTIFICACIONES EN TIEMPO REAL CON ABLY (directo)
 function initRealtimeNotifications() {
     if (!ORDER_ID) {
-        console.log('❌ No hay ORDER_ID, no se inicializa Pusher');
         return;
     }
 
     try {
-        console.log('🔔 Inicializando Pusher para pedido:', ORDER_ID);
+        // Obtener la clave de Ably desde el meta tag
+        const ablyKey = document.querySelector('meta[name="ably-key"]')?.content;
 
-        // Inicializar Pusher
-        const pusher = new Pusher('{{ config("broadcasting.connections.pusher.key") }}', {
-            cluster: '{{ config("broadcasting.connections.pusher.options.cluster") }}',
-            forceTLS: true
+        if (!ablyKey || ablyKey === '') {
+            console.warn('Ably no configurado. Notificaciones en tiempo real deshabilitadas.');
+            return;
+        }
+
+        // Inicializar Ably directo
+        const ably = new Ably.Realtime({
+            key: ablyKey,
+            echoMessages: false
         });
 
         // Suscribirse al canal del pedido
-        const orderChannel = pusher.subscribe(`order.${ORDER_ID}`);
-
-        console.log('📡 Suscrito al canal: order.' + ORDER_ID);
+        // IMPORTANTE: Los canales públicos en Ably con Laravel llevan el prefijo "public:"
+        const channelName = `public:order.${ORDER_ID}`;
+        const channel = ably.channels.get(channelName);
 
         // Escuchar cambios de estado
-        orderChannel.bind('status.changed', function(data) {
-            console.log('🔔 ¡Estado del pedido cambió!', data);
+        channel.subscribe('status.changed', function(message) {
+            const data = message.data;
+            
             // Mostrar notificación visual
             showStatusChangeNotification(data);
             // Reproducir sonido
@@ -659,38 +801,36 @@ function initRealtimeNotifications() {
             loadOrderStatus();
         });
 
-        console.log('✅ Pusher inicializado correctamente');
+        // Manejar errores de conexión
+        ably.connection.on('failed', function(err) {
+            console.error('Error de conexión Ably:', err);
+        });
     } catch (error) {
-        console.error('❌ Error inicializando Pusher:', error);
+        console.error('Error inicializando Ably:', error);
     }
 }
 
-// Mostrar notificación de cambio de estado
+// Pusher fallback removido - Ahora usamos solo Ably directo
+
+// Mostrar notificación de cambio de estado (usando el sistema unificado de toasts)
 function showStatusChangeNotification(data) {
-    // Crear toast
-    const toast = document.createElement('div');
-    toast.className = 'fixed top-4 right-4 bg-success-300 text-white px-6 py-4 rounded-lg shadow-lg z-[9999] max-w-md animate-slide-in';
-    toast.innerHTML = `
-        <div class="flex items-center gap-3">
-            <span class="text-2xl">🔔</span>
-            <div class="flex-1">
-                <strong class="block mb-1">¡Estado actualizado!</strong>
-                <span class="text-sm">${data.message}</span>
-            </div>
-            <button onclick="this.parentElement.parentElement.remove()" class="text-white hover:text-accent-100">
-                ✕
-            </button>
-        </div>
-    `;
-
-    document.body.appendChild(toast);
-
-    setTimeout(() => {
-        toast.style.opacity = '0';
-        toast.style.transform = 'translateX(100%)';
-        toast.style.transition = 'all 0.3s ease';
-        setTimeout(() => toast.remove(), 300);
-    }, 5000);
+    if (!window.toast) return;
+    
+    // Si el pedido está entregado, usar emoji de éxito (check)
+    if (data.new_status === 'delivered') {
+        window.toast.success(
+            '¡Pedido entregado! 🎉',
+            data.message || '¡Gracias por tu compra! Tu pedido ha sido entregado',
+            5000
+        );
+    } else {
+        // Para otros estados, usar emoji de info
+        window.toast.info(
+            '¡Estado actualizado!',
+            data.message || 'El estado de tu pedido ha cambiado',
+            5000
+        );
+    }
 }
 
 // Reproducir sonido de notificación

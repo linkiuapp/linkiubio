@@ -30,7 +30,7 @@
     "isDynamicEntry": true
   },
   "resources/css/app.css": {
-    "file": "assets/app-CQMWgXdO.css",
+    "file": "assets/app-BxneH17O.css",
     "src": "resources/css/app.css",
     "isEntry": true
   },
@@ -40,12 +40,12 @@
     "isEntry": true
   },
   "resources/css/wizard.css": {
-    "file": "assets/wizard-C2cgY-Oe.css",
+    "file": "assets/wizard-B9sFLe__.css",
     "src": "resources/css/wizard.css",
     "isEntry": true
   },
   "resources/js/app.js": {
-    "file": "assets/app-CmIinPT6.js",
+    "file": "assets/app-BjBUi9wJ.js",
     "name": "app",
     "src": "resources/js/app.js",
     "isEntry": true,
@@ -121,7 +121,7 @@
     "isDynamicEntry": true
   },
   "resources/js/notifications.js": {
-    "file": "assets/notifications-C593cH5E.js",
+    "file": "assets/notifications-aSSWVf2E.js",
     "name": "notifications",
     "src": "resources/js/notifications.js",
     "isDynamicEntry": true

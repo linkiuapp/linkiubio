@@ -370,7 +370,7 @@
                                                 <span class="text-xs text-gray-500">Respuestas rápidas</span>
                                             </div>
                                         </a>
-                                        <a href="#" class="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50 transition-colors group">
+                                        <a href="{{ route('tutorials.index') }}" class="flex items-center gap-3 p-2 rounded-lg {{ request()->routeIs('tutorials.*') ? 'bg-gray-100' : 'hover:bg-gray-50' }} transition-colors group">
                                             <i data-lucide="book-open" class="w-5 h-5 text-blue-500 group-hover:scale-110 transition-transform"></i>
                                             <div>
                                                 <span class="text-sm font-medium text-gray-900 block">Tutoriales</span>
@@ -503,7 +503,7 @@
             </button>
             <div x-show="ayudaOpen" class="pl-4 space-y-1">
                 <a href="{{ route('faq.index') }}" class="block px-4 py-2 {{ request()->routeIs('faq.index') ? 'text-white bg-gray-800' : 'text-gray-400 hover:text-white' }} rounded-lg transition-colors">Preguntas Frecuentes</a>
-                <a href="#" class="block px-4 py-2 text-gray-400 hover:text-white rounded-lg transition-colors">Tutoriales</a>
+                <a href="{{ route('tutorials.index') }}" class="block px-4 py-2 {{ request()->routeIs('tutorials.*') ? 'text-white bg-gray-800' : 'text-gray-400 hover:text-white' }} rounded-lg transition-colors">Tutoriales</a>
                 <a href="{{ route('contact.index') }}" class="block px-4 py-2 {{ request()->routeIs('contact.index') ? 'text-white bg-gray-800' : 'text-gray-400 hover:text-white' }} rounded-lg transition-colors">Contacto</a>
             </div>
             

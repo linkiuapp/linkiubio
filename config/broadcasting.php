@@ -51,6 +51,18 @@ return [
         'ably' => [
             'driver' => 'ably',
             'key' => env('ABLY_KEY'),
+            'disable_public_channels' => env('ABLY_DISABLE_PUBLIC_CHANNELS', false),
+            'token_expiry' => env('ABLY_TOKEN_EXPIRY', 28800), // 8 horas por defecto
+            'sync_server_time' => env('ABLY_SYNC_SERVER_TIME', false),
+        ],
+
+        // Conexión general para notificaciones en tiempo real (usando Ably)
+        'ably-realtime' => [
+            'driver' => 'ably',
+            'key' => env('ABLY_KEY'),
+            'disable_public_channels' => env('ABLY_DISABLE_PUBLIC_CHANNELS', false),
+            'token_expiry' => env('ABLY_TOKEN_EXPIRY', 28800),
+            'sync_server_time' => env('ABLY_SYNC_SERVER_TIME', false),
         ],
 
         'redis' => [

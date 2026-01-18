@@ -5,8 +5,10 @@ namespace App\Providers;
 use Illuminate\Support\ServiceProvider;
 use App\Shared\Models\User;
 use App\Shared\Models\Store;
+use App\Shared\Models\Subscription;
 use App\Observers\UserObserver;
 use App\Shared\Observers\StoreObserver;
+use App\Shared\Observers\SubscriptionObserver;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -29,5 +31,6 @@ class AppServiceProvider extends ServiceProvider
         // Registrar Observers
         User::observe(UserObserver::class);
         Store::observe(StoreObserver::class);
+        Subscription::observe(SubscriptionObserver::class);
     }
 }

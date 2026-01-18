@@ -5,27 +5,18 @@ namespace App\Events;
 use App\Shared\Models\Order;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Broadcasting\InteractsWithBroadcasting;
+use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class OrderStatusChanged implements ShouldBroadcast
+class OrderStatusChanged implements ShouldBroadcastNow
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable, InteractsWithSockets, InteractsWithBroadcasting, SerializesModels;
 
     public $order;
     public $oldStatus;
     public $newStatus;
-    
-    /**
-     * The number of times the job may be attempted.
-     */
-    public $tries = 1;
-    
-    /**
-     * The queue the job should be dispatched to.
-     */
-    public $queue = 'notifications';
 
     /**
      * Create a new event instance.
@@ -35,6 +26,9 @@ class OrderStatusChanged implements ShouldBroadcast
         $this->order = $order;
         $this->oldStatus = $oldStatus;
         $this->newStatus = $newStatus;
+        
+        // Siempre usar Ably para notificaciones de estado de pedidos
+        $this->broadcastVia('ably-realtime');
     }
 
     /**

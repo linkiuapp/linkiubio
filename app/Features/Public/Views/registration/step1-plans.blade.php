@@ -194,7 +194,7 @@
 
                                         {{-- Botón de Selección --}}
                                         <button type="button" 
-                                                @click="if (typeof fbq !== 'undefined') { fbq('track', 'Lead'); } selectedPlan = {{ $plan->id }}; $nextTick(() => { $el.closest('form').submit(); })"
+                                                @click="if (typeof fbq !== 'undefined') { fbq('track', 'Lead', {value: {{ $plan->monthly_price ?? 70000 }}, currency: 'COP', content_name: '{{ $plan->name }}'}); } selectedPlan = {{ $plan->id }}; $nextTick(() => { $el.closest('form').submit(); })"
                                                 class="w-full py-3 rounded-lg font-semibold transition-all mb-4 bg-slate-900 hover:bg-slate-800 text-white border border-slate-800 shadow-md hover:shadow-lg transform hover:scale-[1.02]">
                                             <span class="inline-flex items-center justify-center gap-2">
                                                 Seleccionar plan

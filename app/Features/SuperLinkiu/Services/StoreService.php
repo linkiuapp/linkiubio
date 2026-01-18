@@ -3,6 +3,7 @@
 namespace App\Features\SuperLinkiu\Services;
 
 use App\Shared\Models\Store;
+use App\Shared\Models\Subscription;
 use App\Shared\Traits\LogsActivity;
 use App\Shared\Models\User;
 use App\Shared\Models\Plan;
@@ -441,6 +442,9 @@ class StoreService
         // 📧 ENVIAR EMAIL DE CAMBIO DE VERIFICACIÓN
         $this->sendStoreVerificationChangeEmail($store, $oldStatus, $store->verified);
 
+        // 🔔 DISPARAR EVENTO EN TIEMPO REAL
+        event(new \App\Events\StoreVerificationChanged($store, $store->verified));
+
         return [
             'success' => true,
             'verified' => $store->verified,
@@ -477,6 +481,9 @@ class StoreService
 
         $store->status = $status;
         $store->save();
+        
+        // 🔄 Sincronizar estado de la suscripción
+        $this->syncSubscriptionStatus($store, $oldStatus, $status);
         
         // Log de auditoría para cambio de estado crítico
         $this->logStateChange($store, 'status', $oldStatus, $status);
@@ -915,6 +922,60 @@ class StoreService
         ];
 
         return $labels[$status] ?? ucfirst($status);
+    }
+
+    /**
+     * Sincronizar estado de la suscripción con el estado de la tienda
+     */
+    private function syncSubscriptionStatus(Store $store, string $oldStoreStatus, string $newStoreStatus): void
+    {
+        if (!$store->subscription) {
+            return;
+        }
+
+        $subscription = $store->subscription;
+
+        // Si la tienda se suspende manualmente, suspender la suscripción
+        if ($newStoreStatus === 'suspended' && $oldStoreStatus !== 'suspended') {
+            if ($subscription->status !== Subscription::STATUS_SUSPENDED) {
+                $subscription->update([
+                    'status' => Subscription::STATUS_SUSPENDED,
+                    'metadata' => array_merge($subscription->metadata ?? [], [
+                        'suspended_by_store_status_change' => true,
+                        'suspended_at' => now()->toISOString(),
+                    ])
+                ]);
+
+                Log::info('🔄 STORE SERVICE: Suscripción sincronizada (suspendida por cambio de estado de tienda)', [
+                    'store_id' => $store->id,
+                    'store_name' => $store->name,
+                    'old_store_status' => $oldStoreStatus,
+                    'new_store_status' => $newStoreStatus,
+                    'subscription_id' => $subscription->id,
+                ]);
+            }
+        }
+
+        // Si la tienda se reactiva (de suspended a active), reactivar la suscripción si estaba suspendida
+        if ($newStoreStatus === 'active' && $oldStoreStatus === 'suspended') {
+            if ($subscription->status === Subscription::STATUS_SUSPENDED) {
+                $subscription->update([
+                    'status' => Subscription::STATUS_ACTIVE,
+                    'metadata' => array_merge($subscription->metadata ?? [], [
+                        'reactivated_by_store_status_change' => true,
+                        'reactivated_at' => now()->toISOString(),
+                    ])
+                ]);
+
+                Log::info('🔄 STORE SERVICE: Suscripción sincronizada (reactivada por cambio de estado de tienda)', [
+                    'store_id' => $store->id,
+                    'store_name' => $store->name,
+                    'old_store_status' => $oldStoreStatus,
+                    'new_store_status' => $newStoreStatus,
+                    'subscription_id' => $subscription->id,
+                ]);
+            }
+        }
     }
 
     /**

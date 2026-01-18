@@ -17,10 +17,12 @@ use App\Features\TenantAdmin\Controllers\Core\LocationController;
 use App\Features\TenantAdmin\Controllers\Core\SimpleShippingController;
 use App\Features\TenantAdmin\Controllers\Core\TicketController;
 use App\Features\TenantAdmin\Controllers\Core\AnnouncementController;
+use App\Features\TenantAdmin\Controllers\Core\NotificationController;
 use App\Features\TenantAdmin\Controllers\Core\OrderController;
 use App\Features\TenantAdmin\Controllers\Core\BillingController;
 use App\Features\TenantAdmin\Controllers\Core\CouponController;
 use App\Features\TenantAdmin\Controllers\Core\MasterKeyController;
+use App\Features\TenantAdmin\Controllers\Core\InteractiveGuideController;
 use App\Features\TenantAdmin\Controllers\Verticals\Restaurant\TableReservationController;
 use App\Features\TenantAdmin\Controllers\Verticals\Hotel\RoomTypeController;
 use App\Features\TenantAdmin\Controllers\Verticals\Hotel\RoomController;
@@ -132,6 +134,17 @@ Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreAppro
         Route::delete('/{category}', [CategoryController::class, 'destroy'])->name('destroy');
         Route::post('/{category}/toggle-status', [CategoryController::class, 'toggleStatus'])->name('toggle-status');
         Route::post('/update-order', [CategoryController::class, 'updateOrder'])->name('update-order');
+    });
+    
+    // Icon Requests Routes (solicitudes simples)
+    Route::prefix('icon-requests')->name('icon-requests.')->group(function () {
+        Route::post('/', [\App\Features\TenantAdmin\Controllers\Core\IconRequestController::class, 'store'])->name('store');
+        Route::get('/my-requests', [\App\Features\TenantAdmin\Controllers\Core\IconRequestController::class, 'index'])->name('index');
+    });
+    
+    // Error Reports Routes
+    Route::prefix('error-reports')->name('error-reports.')->group(function () {
+        Route::post('/', [\App\Features\TenantAdmin\Controllers\Core\ErrorReportController::class, 'store'])->name('store');
     });
     
     // Variables Routes
@@ -398,6 +411,11 @@ Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreAppro
         Route::get('/api/recent', [AnnouncementController::class, 'getRecentAnnouncements'])->name('api.recent');
     });
 
+    // Notifications Routes (Unified notifications page)
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/', [NotificationController::class, 'index'])->name('index');
+    });
+
     // Orders Routes
     Route::prefix('orders')->name('orders.')->group(function () {
         Route::get('/', [OrderController::class, 'index'])->name('index');
@@ -454,6 +472,12 @@ Route::middleware(['auth', 'store.admin', \App\Shared\Middleware\CheckStoreAppro
 
     // Ruta para manejar bajada de plan
     Route::post('/handle-plan-downgrade', [BankAccountController::class, 'handlePlanDowngrade'])->name('handle-plan-downgrade');
+
+    // Guía Interactiva Routes
+    Route::prefix('interactive-guide')->name('interactive-guide.')->group(function () {
+        Route::get('/', [InteractiveGuideController::class, 'index'])->name('index');
+        Route::get('/{category}/{section}', [InteractiveGuideController::class, 'show'])->name('show');
+    });
 });
 
 

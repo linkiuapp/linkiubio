@@ -282,7 +282,10 @@ document.addEventListener('alpine:init', () => {
         cancelOrderNumber: '',
 
         initNotifications() {
-            // Inicializar polling de notificaciones
+            // 🔕 POLLING DESACTIVADO - Ahora usamos Ably para notificaciones en tiempo real
+            // El polling causaba notificaciones duplicadas (escritorio + toast + dropdown)
+            // Ahora solo se usa Ably que dispara 1 sola notificación en el dropdown
+            /*
             if (typeof lastOrderCount === 'undefined') {
                 window.lastOrderCount = {{ $orders->total() }};
             }
@@ -290,6 +293,7 @@ document.addEventListener('alpine:init', () => {
             if (typeof pollingInterval === 'undefined' && typeof window.checkForNewOrders === 'function') {
                 window.pollingInterval = setInterval(window.checkForNewOrders, 30000); // Cada 30 segundos
             }
+            */
         }
     }));
 });

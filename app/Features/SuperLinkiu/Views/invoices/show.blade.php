@@ -434,72 +434,73 @@
     </div>
 
     {{-- Modal de Eliminación --}}
-    <div x-show="open" 
-         x-cloak
+    <div x-data="deleteModalData()"
          x-on:delete-invoice.window="openModal($event.detail.id, $event.detail.number)"
-         x-on:keydown.escape.window="closeModal()"
-         x-data="deleteModalData()"
-         class="fixed inset-0 z-50 overflow-y-auto"
-         aria-labelledby="modal-title" 
-         role="dialog" 
-         aria-modal="true">
+         x-on:keydown.escape.window="closeModal()">
+        <div x-show="open" 
+             x-cloak
+             class="fixed inset-0 z-50 overflow-y-auto"
+             aria-labelledby="modal-title" 
+             role="dialog" 
+             aria-modal="true">
         
-        <div x-show="open"
-             x-transition:enter="ease-out duration-300"
-             x-transition:enter-start="opacity-0"
-             x-transition:enter-end="opacity-100"
-             x-transition:leave="ease-in duration-200"
-             x-transition:leave-start="opacity-100"
-             x-transition:leave-end="opacity-0"
-             @click="closeModal()"
-             class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity">
-        </div>
+            <div x-show="open"
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0"
+                 x-transition:enter-end="opacity-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100"
+                 x-transition:leave-end="opacity-0"
+                 @click="closeModal()"
+                 class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm transition-opacity">
+            </div>
 
-        <div x-show="open"
-             x-transition:enter="ease-out duration-300"
-             x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-             x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
-             x-transition:leave="ease-in duration-200"
-             x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
-             x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
-             class="fixed inset-0 z-10 overflow-x-hidden overflow-y-auto pointer-events-none">
-            <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
-                <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg pointer-events-auto">
-                    <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
-                        <div class="sm:flex sm:items-start">
-                            <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
-                                <i data-lucide="alert-triangle" class="h-6 w-6 text-red-600"></i>
-                            </div>
-                            <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
-                                <h3 class="text-base font-semibold leading-6 text-gray-900">
-                                    Eliminar Factura
-                                </h3>
-                                <div class="mt-2">
-                                    <p class="text-sm text-gray-500">
-                                        ¿Estás seguro de que deseas eliminar la factura <span class="font-semibold text-gray-900" x-text="invoiceNumber"></span>?
-                                        Esta acción no se puede deshacer.
-                                    </p>
+            <div x-show="open"
+                 x-transition:enter="ease-out duration-300"
+                 x-transition:enter-start="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 x-transition:enter-end="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave="ease-in duration-200"
+                 x-transition:leave-start="opacity-100 translate-y-0 sm:scale-100"
+                 x-transition:leave-end="opacity-0 translate-y-4 sm:translate-y-0 sm:scale-95"
+                 class="fixed inset-0 z-10 overflow-x-hidden overflow-y-auto pointer-events-none">
+                <div class="flex min-h-full items-end justify-center p-4 text-center sm:items-center sm:p-0">
+                    <div class="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-lg pointer-events-auto">
+                        <div class="bg-white px-4 pb-4 pt-5 sm:p-6 sm:pb-4">
+                            <div class="sm:flex sm:items-start">
+                                <div class="mx-auto flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-red-100 sm:mx-0 sm:h-10 sm:w-10">
+                                    <i data-lucide="alert-triangle" class="h-6 w-6 text-red-600"></i>
+                                </div>
+                                <div class="mt-3 text-center sm:ml-4 sm:mt-0 sm:text-left">
+                                    <h3 class="text-base font-semibold leading-6 text-gray-900">
+                                        Eliminar Factura
+                                    </h3>
+                                    <div class="mt-2">
+                                        <p class="text-sm text-gray-500">
+                                            ¿Estás seguro de que deseas eliminar la factura <span class="font-semibold text-gray-900" x-text="invoiceNumber"></span>?
+                                            Esta acción no se puede deshacer.
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 gap-2">
-                        <button type="button" 
-                                @click="confirmDelete()"
-                                :disabled="loading"
-                                class="inline-flex w-full justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 disabled:opacity-50 sm:w-auto">
-                            <span x-show="!loading">Sí, eliminar</span>
-                            <span x-show="loading" class="flex items-center gap-2">
-                                <i data-lucide="loader" class="size-4 animate-spin"></i>
-                                Eliminando...
-                            </span>
-                        </button>
-                        <button type="button" 
-                                @click="closeModal()"
-                                :disabled="loading"
-                                class="mt-3 inline-flex w-full justify-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 sm:mt-0 sm:w-auto">
-                            Cancelar
-                        </button>
+                        <div class="bg-gray-50 px-4 py-3 sm:flex sm:flex-row-reverse sm:px-6 gap-2">
+                            <button type="button" 
+                                    @click="confirmDelete()"
+                                    :disabled="loading"
+                                    class="inline-flex w-full justify-center rounded-lg bg-red-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-red-700 disabled:opacity-50 sm:w-auto">
+                                <span x-show="!loading">Sí, eliminar</span>
+                                <span x-show="loading" class="flex items-center gap-2">
+                                    <i data-lucide="loader" class="size-4 animate-spin"></i>
+                                    Eliminando...
+                                </span>
+                            </button>
+                            <button type="button" 
+                                    @click="closeModal()"
+                                    :disabled="loading"
+                                    class="mt-3 inline-flex w-full justify-center rounded-lg bg-white px-4 py-2 text-sm font-semibold text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 hover:bg-gray-50 disabled:opacity-50 sm:mt-0 sm:w-auto">
+                                Cancelar
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -708,90 +709,92 @@ function invoiceShow() {
 }
 
 // Modal de eliminación
-Alpine.data('deleteModalData', () => ({
-    open: false,
-    invoiceId: null,
-    invoiceNumber: '',
-    loading: false,
+document.addEventListener('alpine:init', () => {
+    Alpine.data('deleteModalData', () => ({
+        open: false,
+        invoiceId: null,
+        invoiceNumber: '',
+        loading: false,
 
-    openModal(id, number) {
-        this.invoiceId = id;
-        this.invoiceNumber = number;
-        this.open = true;
-        this.loading = false;
-        
-        this.$nextTick(() => {
-            if (window.createIcons) window.createIcons({ icons: window.lucideIcons });
-        });
-    },
-
-    closeModal() {
-        if (this.loading) return;
-        this.open = false;
-        this.invoiceId = null;
-        this.invoiceNumber = '';
-    },
-
-    async confirmDelete() {
-        if (!this.invoiceId) return;
-        
-        this.loading = true;
-        
-        try {
-            const response = await fetch(`/superlinkiu/invoices/${this.invoiceId}`, {
-                method: 'DELETE',
-                headers: {
-                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    'Accept': 'application/json',
-                    'Content-Type': 'application/json',
-                }
-            });
-
-            const data = await response.json();
+        openModal(id, number) {
+            this.invoiceId = id;
+            this.invoiceNumber = number;
+            this.open = true;
+            this.loading = false;
             
-            if (!response.ok) {
+            this.$nextTick(() => {
+                if (window.createIcons) window.createIcons({ icons: window.lucideIcons });
+            });
+        },
+
+        closeModal() {
+            if (this.loading) return;
+            this.open = false;
+            this.invoiceId = null;
+            this.invoiceNumber = '';
+        },
+
+        async confirmDelete() {
+            if (!this.invoiceId) return;
+            
+            this.loading = true;
+            
+            try {
+                const response = await fetch(`/superlinkiu/invoices/${this.invoiceId}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                    }
+                });
+
+                const data = await response.json();
+                
+                if (!response.ok) {
+                    this.loading = false;
+                    this.closeModal();
+                    
+                    if (window.toast) {
+                        window.toast.error(
+                            '¡Ups! algo salió mal',
+                            data.message || 'Error al eliminar la factura',
+                            5000,
+                            'bottom-center'
+                        );
+                    }
+                    return;
+                }
+                
+                this.loading = false;
+                this.closeModal();
+                
+                if (window.toast) {
+                    window.toast.success(
+                        '¡Hey! felicidades',
+                        'Factura eliminada exitosamente',
+                        5000,
+                        'bottom-center'
+                    );
+                }
+                
+                setTimeout(() => window.location.href = '/superlinkiu/invoices', 1500);
+            } catch (error) {
                 this.loading = false;
                 this.closeModal();
                 
                 if (window.toast) {
                     window.toast.error(
                         '¡Ups! algo salió mal',
-                        data.message || 'Error al eliminar la factura',
+                        error.message || 'Error al eliminar la factura',
                         5000,
                         'bottom-center'
                     );
                 }
-                return;
-            }
-            
-            this.loading = false;
-            this.closeModal();
-            
-            if (window.toast) {
-                window.toast.success(
-                    '¡Hey! felicidades',
-                    'Factura eliminada exitosamente',
-                    5000,
-                    'bottom-center'
-                );
-            }
-            
-            setTimeout(() => window.location.href = '/superlinkiu/invoices', 1500);
-        } catch (error) {
-            this.loading = false;
-            this.closeModal();
-            
-            if (window.toast) {
-                window.toast.error(
-                    '¡Ups! algo salió mal',
-                    error.message || 'Error al eliminar la factura',
-                    5000,
-                    'bottom-center'
-                );
             }
         }
-    }
-}));
+    }));
+});
 
 // Inicializar iconos Lucide
 document.addEventListener('DOMContentLoaded', function() {

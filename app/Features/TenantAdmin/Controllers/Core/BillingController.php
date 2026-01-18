@@ -610,10 +610,11 @@ class BillingController extends Controller
                 $path = $request->file('payment_proof')->store('payment-proofs/' . $store->id, 'public');
                 
                 $invoice->update([
-                    'status' => 'pending_verification',
+                    'status' => 'pending', // Mantener como 'pending' hasta que se verifique el pago
                     'metadata' => array_merge($invoice->metadata ?? [], [
                         'payment_method' => 'transfer',
                         'payment_proof' => $path,
+                        'payment_proof_uploaded' => true,
                         'uploaded_at' => now()->toIso8601String(),
                         'uploaded_by' => auth()->id(),
                     ])

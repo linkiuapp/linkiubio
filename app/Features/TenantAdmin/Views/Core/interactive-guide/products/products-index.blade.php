@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ $sectionTitle }} - Guía Interactiva - {{ $store->name }}</title>
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+    
+    @vite(['resources/css/app.css', 'resources/js/app.js'])
+    
+    <!-- Alpine.js -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-50" x-data="interactiveGuide()">
+    <div class="flex min-h-screen">
+        {{-- Sidebar Fijo --}}
+        <aside class="w-64 bg-white border-r border-gray-200 fixed left-0 top-0 bottom-0 overflow-y-auto z-30">
+            <div class="p-4">
+                <div class="mb-6">
+                    <h2 class="text-lg font-bold text-gray-900 mb-1">Guía Interactiva</h2>
+                    <p class="text-xs text-gray-600">Navegación</p>
+                </div>
+                
+                <nav class="space-y-1" x-data="{ 
+                    openSections: { 
+                        @foreach($navigation as $pIndex => $p)
+                            @php
+                                $isCurrentP = false;
+                                foreach ($p['children'] ?? [] as $c) {
+                                    if ($c['slug'] === $fullSlug) {
+                                        $isCurrentP = true;
+                                        break;
+                                    }
+                                }
+                            @endphp
+                            @if($isCurrentP)
+                                '{{ $pIndex }}': true,
+                            @endif
+                        @endforeach
+                    } 
+                }">
+                    {{-- Enlace al inicio --}}
+                    <a 
+                        href="{{ route('tenant.admin.interactive-guide.index', ['store' => $store->slug]) }}"
+                        class="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded-lg mb-4 transition-colors"
+                    >
+                        <i data-lucide="home" class="w-4 h-4"></i>
+                        <span>Inicio</span>
+                    </a>
+                    
+                    @foreach($navigation as $parentIndex => $parent)
+                        @php
+                            if (!in_array($parent['title'], ['Pedidos', 'Categorías', 'Variables', 'Productos', 'Inventario', 'Gestión de Envíos', 'Métodos de Pago', 'Sedes', 'Notificaciones de WhatsApp', 'Diseño de Tienda', 'Cupones', 'Sliders', 'Tickers Promocionales', 'Dashboard', 'Sidebar', 'Navbar', 'Footer'])) continue;
+                            
+                            // Si tiene solo un hijo, no mostrar desplegable
+                            $hasSingleChild = count($parent['children'] ?? []) === 1;
+                            $singleChild = $hasSingleChild ? ($parent['children'][0] ?? null) : null;
+                        @endphp
+                        @if($hasSingleChild && $singleChild)
+                            {{-- Elemento con una sola opción: mostrar como enlace directo --}}
+                            <a 
+                                href="{{ route($singleChild['route'], array_merge(['store' => $store->slug], $singleChild['params'] ?? [])) }}"
+                                class="flex items-center gap-2 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded-lg transition-colors mb-2"
+                            >
+                                <i data-lucide="{{ $parent['icon'] }}" class="w-4 h-4"></i>
+                                <span>{{ $parent['title'] }}</span>
+                            </a>
+                        @else
+                            {{-- Elemento con múltiples opciones: mostrar con desplegable --}}
+                            <div class="mb-2">
+                                <button
+                                    @click="openSections['{{ $parentIndex }}'] = !openSections['{{ $parentIndex }}']"
+                                    class="w-full flex items-center justify-between gap-2 px-3 py-2 text-sm font-semibold text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
+                                >
+                                    <div class="flex items-center gap-2">
+                                        <i data-lucide="{{ $parent['icon'] }}" class="w-4 h-4"></i>
+                                        <span>{{ $parent['title'] }}</span>
+                                    </div>
+                                    <i 
+                                        data-lucide="chevron-down" 
+                                        class="w-4 h-4 transition-transform"
+                                        :class="{ 'rotate-180': openSections['{{ $parentIndex }}'] }"
+                                    ></i>
+                                </button>
+                                <ul 
+                                    x-show="openSections['{{ $parentIndex }}']"
+                                    x-transition:enter="transition ease-out duration-100"
+                                    x-transition:enter-start="opacity-0 transform -translate-y-2"
+                                    x-transition:enter-end="opacity-100 transform translate-y-0"
+                                    x-transition:leave="transition ease-in duration-75"
+                                    x-transition:leave-start="opacity-100 transform translate-y-0"
+                                    x-transition:leave-end="opacity-0 transform -translate-y-2"
+                                    x-cloak
+                                    class="ml-6 mt-1 space-y-1"
+                                >
+                                    @foreach($parent['children'] ?? [] as $child)
+                                        <li>
+                                            <a 
+                                                href="{{ route($child['route'], array_merge(['store' => $store->slug], $child['params'] ?? [])) }}"
+                                                class="block px-3 py-2 text-sm rounded-lg transition-colors {{ $child['slug'] === $fullSlug ? 'bg-blue-100 text-blue-700 font-medium' : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900' }}"
+                                            >
+                                                {{ $child['title'] }}
+                                            </a>
+                                        </li>
+                                    @endforeach
+                                </ul>
+                            </div>
+                        @endif
+                    @endforeach
+                </nav>
+            </div>
+        </aside>
+
+        {{-- Main Content --}}
+        <main class="flex-1 ml-64">
+            {{-- Header --}}
+            <header class="bg-white border-b border-gray-200 sticky top-0 z-20">
+                <div class="px-6 py-4">
+                    {{-- Breadcrumbs --}}
+                    <nav class="flex items-center gap-2 text-sm text-gray-600 mb-3">
+                        @foreach($breadcrumbs as $index => $crumb)
+                            @if($crumb['url'])
+                                <a href="{{ $crumb['url'] }}" class="hover:text-gray-900 transition-colors">{{ $crumb['title'] }}</a>
+                            @else
+                                <span class="text-gray-900 font-medium">{{ $crumb['title'] }}</span>
+                            @endif
+                            @if($index < count($breadcrumbs) - 1)
+                                <i data-lucide="chevron-right" class="w-4 h-4 text-gray-400"></i>
+                            @endif
+                        @endforeach
+                    </nav>
+                    
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <h1 class="text-lg font-bold text-gray-900">{{ $sectionTitle }}</h1>
+                            <p class="text-sm text-gray-600 mt-1">{{ $parentTitle }}</p>
+                        </div>
+                        <a 
+                            href="{{ route('tenant.admin.dashboard', ['store' => $store->slug]) }}"
+                            class="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-100 rounded-lg border border-gray-200 transition-colors"
+                        >
+                            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                            <span>Volver al Panel</span>
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            {{-- Content Area --}}
+            <div class="p-6 space-y-6 pb-32">
+                {{-- Vista Real Interactiva --}}
+                <div class="bg-gray-50 rounded-lg border border-gray-200 p-6">
+                    <h2 class="text-base font-semibold text-blue-600 mb-4 flex items-center gap-2">
+                        <i data-lucide="mouse-pointer-click" class="w-5 h-5 text-blue-600"></i>
+                        <span>Vista Interactiva - Haz clic sobre los elementos para saber su funcionalidad</span>
+                    </h2>
+                    
+                    <div class="space-y-6 bg-white rounded-lg p-6">
+                        {{-- Header --}}
+                        <div class="flex items-center justify-between pb-4 border-b border-gray-200">
+                            <div>
+                                <h1 class="text-lg font-semibold text-gray-900 cursor-pointer hover:text-blue-600 transition-colors" 
+                                    @click="scrollToSection('section-header')">Productos</h1>
+                                <p class="text-sm text-gray-600 mt-1 cursor-pointer hover:text-blue-600 transition-colors"
+                                   @click="scrollToSection('section-header')">
+                                    Usando 15 de 50 productos disponibles en tu plan Básico
+                                </p>
+                            </div>
+                            <div class="flex items-center gap-3">
+                                <a href="#" 
+                                   class="inline-flex items-center gap-2 px-4 py-2 bg-gray-900 text-white rounded-lg hover:bg-gray-800 transition-colors shadow-sm cursor-pointer"
+                                   @click.prevent="scrollToSection('section-buttons-new')">
+                                    <i data-lucide="plus" class="w-5 h-5"></i>
+                                    Nuevo Producto
+                                </a>
+                            </div>
+                        </div>
+
+                        {{-- Filtros y Búsqueda --}}
+                        <div class="bg-white rounded-lg shadow-sm p-4">
+                            <div class="flex flex-wrap items-center gap-3 mb-3">
+                                <div class="px-3 py-2 pr-8 border border-gray-200 rounded-lg text-sm cursor-pointer hover:border-blue-300 transition-colors bg-white"
+                                     @click="scrollToSection('section-filters-status')"
+                                     style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-size: 16px 16px; background-position: right 0.5rem center; background-repeat: no-repeat;">
+                                    Filtrar por estado
+                                </div>
+                                <div class="px-3 py-2 pr-8 border border-gray-200 rounded-lg text-sm cursor-pointer hover:border-blue-300 transition-colors bg-white"
+                                     @click="scrollToSection('section-filters-type')"
+                                     style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-size: 16px 16px; background-position: right 0.5rem center; background-repeat: no-repeat;">
+                                    Filtrar por tipo
+                                </div>
+                                <div class="px-3 py-2 pr-8 border border-gray-200 rounded-lg text-sm cursor-pointer hover:border-blue-300 transition-colors bg-white"
+                                     @click="scrollToSection('section-filters-category')"
+                                     style="background-image: url('data:image/svg+xml;charset=UTF-8,%3csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 24 24%27 fill=%27none%27 stroke=%27currentColor%27 stroke-width=%272%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27%3e%3cpolyline points=%276 9 12 15 18 9%27%3e%3c/polyline%3e%3c/svg%3e'); background-size: 16px 16px; background-position: right 0.5rem center; background-repeat: no-repeat;">
+                                    Filtrar por categoría
+                                </div>
+                                <div class="flex-1 min-w-64">
+                                    <div class="relative">
+                                        <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400"></i>
+                                        <input type="text" 
+                                               placeholder="Buscar productos..."
+                                               class="w-full pl-10 pr-4 py-2 border border-gray-200 rounded-lg text-sm cursor-pointer hover:border-blue-300 transition-colors"
+                                               @click="scrollToSection('section-search')"
+                                               readonly>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2" style="display: none;">
+                                <button class="px-3 py-1.5 bg-green-500 text-white rounded-lg text-sm cursor-pointer"
+                                        @click="scrollToSection('section-bulk-activate')">
+                                    Activar
+                                </button>
+                                <button class="px-3 py-1.5 bg-yellow-500 text-white rounded-lg text-sm cursor-pointer"
+                                        @click="scrollToSection('section-bulk-deactivate')">
+                                    Desactivar
+                                </button>
+                                <button class="px-3 py-1.5 bg-red-500 text-white rounded-lg text-sm cursor-pointer"
+                                        @click="scrollToSection('section-bulk-delete')">
+                                    Eliminar
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- Tabla --}}
+                        <div class="bg-white rounded-lg shadow-sm overflow-hidden">
+                            <div class="px-4 pt-4 pb-2">
+                                <p class="text-sm text-gray-600 flex items-center gap-2">
+                                    <i data-lucide="mouse-pointer-click" class="w-3 h-3 text-blue-600"></i>
+                                    <span><strong>Haz clic en los encabezados de columna</strong> para conocer qué información muestra cada una</span>
+                                </p>
+                            </div>
+                            <div class="overflow-x-auto">
+                                <table class="min-w-full divide-y divide-gray-200">
+                                    <thead class="bg-gray-50">
+                                        <tr>
+                                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase">
+                                                <div class="w-4 h-4 bg-gray-200 rounded"></div>
+                                            </th>
+                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase cursor-pointer hover:text-blue-600 hover:bg-blue-50 transition-colors group relative"
+                                                @click="scrollToSection('section-table-product')">
+                                                <div class="flex items-center gap-2">
+                                                    <span>Producto</span>
+                                                    <i data-lucide="info" class="w-3 h-3 text-blue-500 group-hover:text-blue-600 transition-colors"></i>
+                                                </div>
+                                            </th>
+                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase cursor-pointer hover:text-blue-600 hover:bg-blue-50 transition-colors group relative"
+                                                @click="scrollToSection('section-table-price')">
+                                                <div class="flex items-center gap-2">
+                                                    <span>Precio</span>
+                                                    <i data-lucide="info" class="w-3 h-3 text-blue-500 group-hover:text-blue-600 transition-colors"></i>
+                                                </div>
+                                            </th>
+                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase cursor-pointer hover:text-blue-600 hover:bg-blue-50 transition-colors group relative"
+                                                @click="scrollToSection('section-table-stock')">
+                                                <div class="flex items-center gap-2">
+                                                    <span>Stock</span>
+                                                    <i data-lucide="info" class="w-3 h-3 text-blue-500 group-hover:text-blue-600 transition-colors"></i>
+                                                </div>
+                                            </th>
+                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase cursor-pointer hover:text-blue-600 hover:bg-blue-50 transition-colors group relative"
+                                                @click="scrollToSection('section-table-categories')">
+                                                <div class="flex items-center gap-2">
+                                                    <span>Categorías</span>
+                                                    <i data-lucide="info" class="w-3 h-3 text-blue-500 group-hover:text-blue-600 transition-colors"></i>
+                                                </div>
+                                            </th>
+                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase cursor-pointer hover:text-blue-600 hover:bg-blue-50 transition-colors group relative"
+                                                @click="scrollToSection('section-table-status')">
+                                                <div class="flex items-center gap-2">
+                                                    <span>Estado</span>
+                                                    <i data-lucide="info" class="w-3 h-3 text-blue-500 group-hover:text-blue-600 transition-colors"></i>
+                                                </div>
+                                            </th>
+                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase cursor-pointer hover:text-blue-600 hover:bg-blue-50 transition-colors group relative"
+                                                @click="scrollToSection('section-table-toggle')">
+                                                <div class="flex items-center gap-2">
+                                                    <span>Activar/Desactivar</span>
+                                                    <i data-lucide="info" class="w-3 h-3 text-blue-500 group-hover:text-blue-600 transition-colors"></i>
+                                                </div>
+                                            </th>
+                                            <th class="px-6 py-3 text-left text-xs font-semibold text-gray-700 uppercase cursor-pointer hover:text-blue-600 hover:bg-blue-50 transition-colors group relative"
+                                                @click="scrollToSection('section-table-share')">
+                                                <div class="flex items-center gap-2">
+                                                    <span>Compartir</span>
+                                                    <i data-lucide="info" class="w-3 h-3 text-blue-500 group-hover:text-blue-600 transition-colors"></i>
+                                                </div>
+                                            </th>
+                                            <th class="px-6 py-3 text-center text-xs font-semibold text-gray-700 uppercase cursor-pointer hover:text-blue-600 hover:bg-blue-50 transition-colors group relative"
+                                                @click="scrollToSection('section-table-actions')">
+                                                <div class="flex items-center justify-center gap-2">
+                                                    <span>Acciones</span>
+                                                    <i data-lucide="info" class="w-3 h-3 text-blue-500 group-hover:text-blue-600 transition-colors"></i>
+                                                </div>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="bg-white divide-y divide-gray-200">
+                                        @for($i = 0; $i < 1; $i++)
+                                        <tr class="hover:bg-gray-50">
+                                            {{-- Wireframe: Checkbox --}}
+                                            <td class="px-6 py-4 text-center">
+                                                <div class="w-4 h-4 bg-gray-200 rounded"></div>
+                                            </td>
+                                            {{-- Wireframe: Producto --}}
+                                            <td class="px-6 py-4">
+                                                <div class="flex items-center gap-3">
+                                                    <div class="w-12 h-12 bg-gray-200 rounded-lg"></div>
+                                                    <div class="space-y-1.5">
+                                                        <div class="h-3 bg-gray-300 rounded w-32"></div>
+                                                        <div class="h-2 bg-gray-200 rounded w-20"></div>
+                                                        <div class="h-2 bg-gray-200 rounded w-16"></div>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            {{-- Wireframe: Precio --}}
+                                            <td class="px-6 py-4">
+                                                <div class="h-4 bg-gray-200 rounded w-20"></div>
+                                            </td>
+                                            {{-- Wireframe: Stock --}}
+                                            <td class="px-6 py-4">
+                                                <div class="h-5 bg-gray-200 rounded-full w-16"></div>
+                                            </td>
+                                            {{-- Wireframe: Categorías --}}
+                                            <td class="px-6 py-4">
+                                                <div class="flex gap-1">
+                                                    <div class="h-5 bg-gray-200 rounded-full w-16"></div>
+                                                    <div class="h-5 bg-gray-200 rounded-full w-12"></div>
+                                                </div>
+                                            </td>
+                                            {{-- Wireframe: Estado --}}
+                                            <td class="px-6 py-4">
+                                                <div class="h-5 bg-gray-200 rounded-full w-16"></div>
+                                            </td>
+                                            {{-- Wireframe: Toggle --}}
+                                            <td class="px-6 py-4">
+                                                <div class="w-11 h-6 bg-gray-200 rounded-full"></div>
+                                            </td>
+                                            {{-- Wireframe: Compartir --}}
+                                            <td class="px-6 py-4">
+                                                <div class="w-11 h-6 bg-gray-200 rounded-full"></div>
+                                            </td>
+                                            {{-- Wireframe: Acciones --}}
+                                            <td class="px-6 py-4 text-center">
+                                                <div class="flex items-center justify-center gap-2">
+                                                    <div class="w-6 h-6 bg-gray-200 rounded"></div>
+                                                    <div class="w-6 h-6 bg-gray-200 rounded"></div>
+                                                    <div class="w-6 h-6 bg-gray-200 rounded"></div>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        @endfor
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        {{-- Paginación --}}
+                        <div class="flex items-center justify-center gap-2 cursor-pointer"
+                             @click="scrollToSection('section-pagination')">
+                            <button class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled>
+                                <i data-lucide="chevron-left" class="w-4 h-4"></i>
+                            </button>
+                            <button class="px-3 py-1.5 text-sm font-medium text-white bg-blue-600 rounded">1</button>
+                            <button class="px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded transition-colors">
+                                <i data-lucide="chevron-right" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Consejos Rápidos --}}
+                <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-lg border border-amber-200 p-6">
+                    <div class="flex-1">
+                        <h2 class="text-base font-semibold text-gray-900 mb-4">Consejos Rápidos</h2>
+                        <div class="grid md:grid-cols-2 gap-3">
+                            <div class="flex items-start gap-3">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0"></i>
+                                <p class="text-sm text-gray-700"><strong>Usa los filtros</strong> para encontrar productos específicos rápidamente</p>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0"></i>
+                                <p class="text-sm text-gray-700"><strong>Activa/desactiva productos</strong> usando el interruptor sin necesidad de editarlos</p>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0"></i>
+                                <p class="text-sm text-gray-700"><strong>Revisa el stock</strong> antes de activar productos para evitar vender productos agotados</p>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0"></i>
+                                <p class="text-sm text-gray-700"><strong>Los productos inactivos</strong> no se pueden ver en la tienda pero siguen existiendo</p>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0"></i>
+                                <p class="text-sm text-gray-700"><strong>Usa la búsqueda</strong> para encontrar productos por nombre o SKU rápidamente</p>
+                            </div>
+                            <div class="flex items-start gap-3">
+                                <i data-lucide="check-circle" class="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0"></i>
+                                <p class="text-sm text-gray-700"><strong>Selecciona múltiples productos</strong> para activar, desactivar o eliminar varios a la vez</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        function interactiveGuide() {
+            return {
+                selectedGuide: null,
+                selectedGuideTitle: '',
+                selectedGuideText: '',
+                
+                guides: {
+                    'section-header': {
+                        title: 'Encabezado de la Página',
+                        text: '<strong>Título "Productos":</strong> Muestra el nombre de la sección donde estás. Te indica que estás en la pantalla para administrar todos tus productos.<br><br><strong>Información del Plan:</strong> Debajo del título aparece un texto que dice cuántos productos estás usando y cuántos tienes disponibles según tu plan. Por ejemplo: "Usando 15 de 50 productos disponibles en tu plan Básico".'
+                    },
+                    'section-buttons-new': {
+                        title: 'Botón "Nuevo Producto"',
+                        text: 'Este botón te lleva a la pantalla para crear un producto nuevo. Si ya alcanzaste el límite de productos de tu plan, el botón aparece deshabilitado y dice "Límite Alcanzado".'
+                    },
+                    'section-filters-status': {
+                        title: 'Select "Filtrar por estado"',
+                        text: 'Te permite filtrar los productos por su estado: <strong>Todos:</strong> Muestra todos los productos (activos e inactivos), <strong>Activos:</strong> Solo muestra los productos que están activos y visibles en tu tienda, <strong>Inactivos:</strong> Solo muestra los productos que están desactivados y no se pueden ver en la tienda.'
+                    },
+                    'section-filters-type': {
+                        title: 'Select "Filtrar por tipo"',
+                        text: 'Te permite filtrar los productos por su tipo: <strong>Todos los tipos:</strong> Muestra todos los productos sin importar su tipo, <strong>Productos simples:</strong> Solo muestra productos simples (sin variantes), <strong>Productos variables:</strong> Solo muestra productos variables (con variantes).'
+                    },
+                    'section-filters-category': {
+                        title: 'Select "Filtrar por categoría"',
+                        text: 'Te permite filtrar los productos por categoría. Solo aparece si tienes categorías creadas. Muestra todas tus categorías y puedes elegir una para ver solo los productos de esa categoría.'
+                    },
+                    'section-search': {
+                        title: 'Campo de Búsqueda',
+                        text: 'Un cuadro de texto donde puedes escribir para buscar productos. Busca en el nombre, SKU y descripción del producto. La búsqueda se realiza automáticamente mientras escribes.'
+                    },
+                    'section-bulk-activate': {
+                        title: 'Botón "Activar" (Acciones Múltiples)',
+                        text: 'Este botón aparece cuando seleccionas uno o más productos usando las casillas de verificación. Activa todos los productos seleccionados.'
+                    },
+                    'section-bulk-deactivate': {
+                        title: 'Botón "Desactivar" (Acciones Múltiples)',
+                        text: 'Este botón aparece cuando seleccionas uno o más productos usando las casillas de verificación. Desactiva todos los productos seleccionados.'
+                    },
+                    'section-bulk-delete': {
+                        title: 'Botón "Eliminar" (Acciones Múltiples)',
+                        text: 'Este botón aparece cuando seleccionas uno o más productos usando las casillas de verificación. Elimina todos los productos seleccionados.'
+                    },
+                    'section-table-product': {
+                        title: 'Columna "Producto"',
+                        text: 'Muestra la información principal de cada producto: <strong>Imagen:</strong> Una miniatura de la primera imagen del producto (o un icono si no tiene imagen), <strong>Nombre:</strong> El nombre del producto (en negrita), <strong>SKU:</strong> El código SKU del producto (o "Sin SKU" si no tiene), <strong>Tipo:</strong> Muestra si es "Simple" o "Variable".'
+                    },
+                    'section-table-price': {
+                        title: 'Columna "Precio"',
+                        text: 'Muestra el precio del producto en formato de moneda. Si tiene precio promocional activo, se muestra el precio promocional.'
+                    },
+                    'section-table-stock': {
+                        title: 'Columna "Stock"',
+                        text: 'Muestra información sobre el inventario: <strong>Número en color:</strong> Si el producto controla stock limitado, muestra la cantidad disponible: Rojo - Stock agotado (0 unidades), Amarillo - Stock bajo (igual o menor al umbral de alerta), Verde - Stock normal (mayor al umbral). <strong>"Ilimitado":</strong> Si el producto tiene stock ilimitado. <strong>"Sin stock":</strong> Si el producto no controla stock.'
+                    },
+                    'section-table-categories': {
+                        title: 'Columna "Categorías"',
+                        text: 'Muestra las categorías asignadas al producto. Si tiene más de 2 categorías, muestra las primeras 2 y un número indicando cuántas más tiene. Si no tiene categorías, muestra "Sin categorías".'
+                    },
+                    'section-table-status': {
+                        title: 'Columna "Estado"',
+                        text: 'Muestra si el producto está activo o inactivo: <strong>Badge verde "Activo":</strong> El producto está activo y visible en tu tienda, <strong>Badge rojo "Inactivo":</strong> El producto está inactivo y no se puede ver en la tienda.'
+                    },
+                    'section-table-toggle': {
+                        title: 'Columna "Activar/Desactivar"',
+                        text: 'Tiene un interruptor (switch) que te permite activar o desactivar el producto rápidamente sin tener que editarlo. Solo haz clic en el interruptor y el estado cambia automáticamente.'
+                    },
+                    'section-table-share': {
+                        title: 'Columna "Compartir"',
+                        text: 'Tiene un interruptor (switch) que te permite permitir o no permitir que el producto se comparta. Cuando está activado, el producto puede ser compartido en redes sociales o por enlaces.'
+                    },
+                    'section-table-actions': {
+                        title: 'Columna "Acciones"',
+                        text: 'Contiene tres iconos para realizar acciones sobre cada producto:<br><br><strong>Icono de Ojo (Ver detalles):</strong> Este icono te lleva a la vista detallada del producto. Allí puedes ver toda la información completa del producto, sus imágenes, categorías, variables y variaciones.<br><strong>Icono de Lápiz (Editar):</strong> Este icono te lleva a la pantalla de edición donde puedes modificar todos los datos del producto.<br><strong>Icono de Papelera (Eliminar):</strong> Este icono te permite eliminar el producto. Al hacer clic, aparece un cuadro de confirmación. Si tu tienda tiene protección con clave maestra, primero te pedirá la clave maestra.'
+                    },
+                    'section-pagination': {
+                        title: 'Paginación',
+                        text: 'Te permite navegar entre las diferentes páginas de productos cuando tienes muchos productos. <strong>Botón "Anterior" (flecha izquierda):</strong> Te lleva a la página anterior de productos. Está deshabilitado si estás en la primera página.<br><br><strong>Números de página:</strong> Cada número representa una página. El número resaltado en azul indica la página actual. Haz clic en cualquier número para ir a esa página.<br><br><strong>Botón "Siguiente" (flecha derecha):</strong> Te lleva a la página siguiente de productos. Está deshabilitado si estás en la última página.'
+                    }
+                },
+
+                scrollToSection(sectionId) {
+                    if (this.guides[sectionId]) {
+                        this.selectedGuide = sectionId;
+                        this.selectedGuideTitle = this.guides[sectionId].title;
+                        this.selectedGuideText = this.guides[sectionId].text;
+                    }
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', function() {
+            if (typeof lucide !== 'undefined') {
+                lucide.createIcons();
+            }
+        });
+    </script>
+
+    {{-- Footer Fijo --}}
+    <footer class="fixed bottom-0 left-0 right-0 z-50 bg-slate-950 border-t border-gray-200 shadow-lg"
+            x-show="selectedGuide"
+            x-cloak
+            x-transition:enter="transition ease-out duration-300"
+            x-transition:enter-start="transform translate-y-full"
+            x-transition:enter-end="transform translate-y-0"
+            x-transition:leave="transition ease-in duration-200"
+            x-transition:leave-start="transform translate-y-0"
+            x-transition:leave-end="transform translate-y-full">
+        <div class="max-w-7xl mx-auto px-6 py-8">
+            <div class="flex items-start gap-4">
+                <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="info" class="w-5 h-5 text-blue-600"></i>
+                </div>
+                <div class="flex-1">
+                    <h3 class="font-semibold text-white mb-1" x-text="selectedGuideTitle"></h3>
+                    <p class="text-sm text-white leading-relaxed" x-html="selectedGuideText"></p>
+                </div>
+                <button @click="selectedGuide = null" 
+                        class="bg-red-50 rounded-full text-red-600 hover:text-red-700 transition-colors p-1 hover:bg-red-100">
+                    <i data-lucide="x" class="w-5 h-5"></i>
+                </button>
+            </div>
+        </div>
+    </footer>
+</body>
+</html>

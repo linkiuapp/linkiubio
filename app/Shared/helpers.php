@@ -33,6 +33,65 @@ if (!function_exists('featureEnabled')) {
     }
 }
 
+if (!function_exists('ui_image')) {
+    /**
+     * Obtener imagen(es) UI del sistema
+     * 
+     * @param string $context Contexto: 'store', 'tenant_admin', 'website', 'super_admin'
+     * @param string $category Categoría: 'checkout_success', 'login_banner', etc.
+     * @param int|null $index Índice específico (null para retornar todas)
+     * @return string|array|null URL(s) de la(s) imagen(es) o null si no existe
+     */
+    function ui_image(string $context, string $category, ?int $index = null)
+    {
+        $query = \App\Shared\Models\UiImage::where('context', $context)
+            ->where('category', $category)
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('created_at');
+        
+        if ($index !== null) {
+            $image = $query->skip($index)->first();
+            return $image ? $image->url : null;
+        }
+        
+        // Retornar todas las imágenes como array de URLs
+        return $query->get()->map(fn($img) => $img->url)->toArray();
+    }
+}
+
+if (!function_exists('ui_image_single')) {
+    /**
+     * Obtener una sola imagen UI activa (la primera disponible)
+     * Útil para logos y banners que solo necesitan una imagen
+     * 
+     * @param string $context Contexto: store, tenant_admin, website, super_admin
+     * @param string $category Categoría: login_logo, login_banner, etc.
+     * @param string|null $fallback URL de fallback si no hay imagen en BD
+     * @return string URL de la imagen o fallback
+     */
+    function ui_image_single(string $context, string $category, ?string $fallback = null): ?string
+    {
+        $image = \App\Shared\Models\UiImage::where('context', $context)
+            ->where('category', $category)
+            ->where('is_active', true)
+            ->orderBy('sort_order')
+            ->orderBy('created_at')
+            ->first();
+        
+        if (!$image) {
+            return $fallback;
+        }
+        
+        // Agregar parámetro de versión para evitar caché del navegador
+        $url = $image->url;
+        $separator = strpos($url, '?') !== false ? '&' : '?';
+        $url .= $separator . 'v=' . $image->updated_at->timestamp;
+        
+        return $url;
+    }
+}
+
 if (!function_exists('getMapboxStaticMapUrl')) {
     /**
      * Generate Mapbox Static Image API URL for a location
