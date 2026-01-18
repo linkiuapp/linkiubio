@@ -1259,7 +1259,8 @@ class OrderController extends Controller
 
         try {
             // Dispatch el Job de validación con el banco seleccionado
-            \App\Jobs\ValidatePaymentProofJob::dispatch($order, $validated['bank']);
+            \App\Jobs\ValidatePaymentProofJob::dispatch($order, $validated['bank'])
+                ->onQueue('default');
 
             $this->logActivity(
                 'validate_payment_proof',

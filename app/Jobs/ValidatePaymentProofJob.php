@@ -7,6 +7,7 @@ use App\Shared\Models\Order;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Broadcast;
 
 class ValidatePaymentProofJob implements ShouldQueue
@@ -32,13 +33,43 @@ class ValidatePaymentProofJob implements ShouldQueue
     public function handle(AWSPaymentProofValidationService $validationService): void
     {
         try {
+            Log::info('🔍 ValidatePaymentProofJob started', [
+                'order_id' => $this->order->id,
+                'order_number' => $this->order->order_number,
+                'selected_bank' => $this->selectedBank,
+                'queue' => $this->queue ?? 'default',
+            ]);
+
             // Verificar que el pedido tenga comprobante
             if (!$this->order->payment_proof_path) {
                 Log::warning('Order #' . $this->order->order_number . ' has no payment proof to validate');
                 return;
             }
 
-            Log::info('Starting payment proof validation for order #' . $this->order->order_number, [
+            // Verificar credenciales AWS
+            if (!env('AWS_ACCESS_KEY_ID') || !env('AWS_SECRET_ACCESS_KEY')) {
+                Log::error('❌ AWS credentials not configured!');
+                throw new \Exception('AWS credentials missing');
+            }
+
+            Log::info('✅ AWS credentials OK', [
+                'region' => env('AWS_DEFAULT_REGION', 'us-east-1'),
+            ]);
+
+            // Verificar que la imagen exista
+            if (!Storage::exists($this->order->payment_proof_path)) {
+                Log::error('❌ Payment proof file not found in storage', [
+                    'path' => $this->order->payment_proof_path,
+                ]);
+                throw new \Exception('Payment proof file not found');
+            }
+
+            Log::info('✅ Payment proof file exists', [
+                'path' => $this->order->payment_proof_path,
+                'size' => Storage::size($this->order->payment_proof_path) . ' bytes',
+            ]);
+
+            Log::info('🚀 Starting payment proof validation for order #' . $this->order->order_number, [
                 'selected_bank' => $this->selectedBank,
             ]);
 
@@ -53,13 +84,18 @@ class ValidatePaymentProofJob implements ShouldQueue
                 'proof_validated_at' => now(),
             ]);
 
-            Log::info('Payment proof validation completed for order #' . $this->order->order_number, [
+            Log::info('✅ Payment proof validation completed for order #' . $this->order->order_number, [
                 'status' => $result['status'],
                 'score' => $result['score'],
+                'duration' => microtime(true) - ($_SERVER['REQUEST_TIME_FLOAT'] ?? microtime(true)),
             ]);
 
             // Notificar al tenant admin via Pusher
             $this->notifyTenantAdmin($result);
+
+            Log::info('🎉 ValidatePaymentProofJob finished successfully', [
+                'order_id' => $this->order->id,
+            ]);
 
         } catch (\Exception $e) {
             Log::error('Error validating payment proof for order #' . $this->order->order_number . ': ' . $e->getMessage(), [
