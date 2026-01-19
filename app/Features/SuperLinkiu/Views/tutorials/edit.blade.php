@@ -18,9 +18,10 @@
     </div>
     {{-- End SECTION: Header --}}
 
-    <form action="{{ route('superlinkiu.tutorials.update', $tutorial) }}" 
+    <form action="{{ route('superlinkiu.tutorials.update', $tutorial) }}"
           method="POST" 
-          enctype="multipart/form-data">
+          enctype="multipart/form-data"
+          onsubmit="return validateTinyMCE()">
         @csrf
         @method('PUT')
 
@@ -81,58 +82,15 @@
                             <label class="block text-sm font-medium text-gray-700 mb-2">
                                 Contenido <span class="text-red-500">*</span>
                             </label>
-                            
-                            {{-- Toolbar del Editor --}}
-                            <div class="mb-2 flex items-center gap-2 flex-wrap p-2 bg-gray-50 rounded-lg border border-gray-200">
-                                <button type="button" 
-                                        onclick="insertAtCursor('content', '<p></p>')"
-                                        class="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-                                        title="Párrafo">
-                                    P
-                                </button>
-                                <button type="button" 
-                                        onclick="insertAtCursor('content', '<strong></strong>')"
-                                        class="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-                                        title="Negrita">
-                                    <strong>B</strong>
-                                </button>
-                                <button type="button" 
-                                        onclick="insertAtCursor('content', '<em></em>')"
-                                        class="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-                                        title="Cursiva">
-                                    <em>I</em>
-                                </button>
-                                <button type="button" 
-                                        onclick="insertAtCursor('content', '<ul><li></li></ul>')"
-                                        class="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded hover:bg-gray-50 transition-colors"
-                                        title="Lista">
-                                    • Lista
-                                </button>
-                                <div class="w-px h-6 bg-gray-300"></div>
-                                <button type="button" 
-                                        onclick="openImageUpload('content')"
-                                        class="px-3 py-1.5 text-xs font-medium text-blue-700 bg-blue-50 border border-blue-200 rounded hover:bg-blue-100 transition-colors flex items-center gap-1"
-                                        title="Insertar Imagen">
-                                    <i data-lucide="image" class="w-4 h-4"></i> Imagen
-                                </button>
-                                <button type="button" 
-                                        onclick="openVideoInsert('content')"
-                                        class="px-3 py-1.5 text-xs font-medium text-purple-700 bg-purple-50 border border-purple-200 rounded hover:bg-purple-100 transition-colors flex items-center gap-1"
-                                        title="Insertar Video">
-                                    <i data-lucide="video" class="w-4 h-4"></i> Video
-                                </button>
-                            </div>
 
                             <textarea name="content" 
                                       id="content"
                                       rows="15"
-                                      placeholder="Escribe el contenido del tutorial aquí. Usa los botones de arriba para insertar imágenes y videos..."
-                                      class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:border-blue-500 focus:ring-1 focus:ring-blue-500 focus:outline-none font-mono text-sm @error('content') border-red-300 @enderror"
-                                      required>{{ old('content', $tutorial->content) }}</textarea>
+                                      class="w-full @error('content') border-red-300 @enderror">{{ old('content', $tutorial->content) }}</textarea>
                             @error('content')
                                 <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                             @enderror
-                            <p class="text-xs text-gray-500 mt-1">Puedes usar HTML básico. Usa los botones para insertar imágenes y videos fácilmente.</p>
+                            <p class="text-xs text-gray-500 mt-1">Editor visual WYSIWYG - Escribe y formatea sin necesidad de HTML. Puedes arrastrar y soltar imágenes directamente.</p>
                         </div>
                     </div>
                 </div>
@@ -352,140 +310,105 @@
 </div>
 
 @push('scripts')
+{{-- TinyMCE CDN --}}
+<script src="https://cdn.tiny.cloud/1/do5np1q80r9ez92agz8y9snks9n3egskv7qssw6lkwo1wvxf/tinymce/8/tinymce.min.js" referrerpolicy="origin" crossorigin="anonymous"></script>
+
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         if (typeof lucide !== 'undefined') {
             lucide.createIcons();
         }
+
+        // Inicializar TinyMCE
+        tinymce.init({
+            selector: '#content',
+            height: 600,
+            menubar: true,
+            plugins: [
+                // Core editing features (plan gratuito)
+                'anchor', 'autolink', 'charmap', 'codesample', 'emoticons', 'link', 'lists', 'media', 'searchreplace', 'table', 'visualblocks', 'wordcount', 'image'
+            ],
+            toolbar: 'undo redo | blocks fontfamily fontsize | bold italic underline strikethrough | link media table | align lineheight | numlist bullist indent outdent | emoticons charmap | removeformat | code | help',
+            content_style: 'body { font-family: -apple-system, BlinkMacSystemFont, San Francisco, Segoe UI, Roboto, Helvetica Neue, sans-serif; font-size: 14px; }',
+            
+            // Configurar upload de imágenes (usando nuestro endpoint)
+            images_upload_handler: function (blobInfo, progress) {
+                return new Promise(function (resolve, reject) {
+                    const xhr = new XMLHttpRequest();
+                    xhr.withCredentials = false;
+                    xhr.open('POST', '{{ route("superlinkiu.tutorials.upload-image") }}');
+
+                    xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+                    xhr.setRequestHeader('Accept', 'application/json');
+
+                    xhr.upload.onprogress = function (e) {
+                        progress(e.loaded / e.total * 100);
+                    };
+
+                    xhr.onload = function () {
+                        if (xhr.status === 403) {
+                            reject({ message: 'HTTP Error: ' + xhr.status, remove: true });
+                            return;
+                        }
+
+                        if (xhr.status < 200 || xhr.status >= 300) {
+                            reject('HTTP Error: ' + xhr.status);
+                            return;
+                        }
+
+                        const json = JSON.parse(xhr.responseText);
+
+                        if (!json || typeof json.url != 'string') {
+                            reject('Invalid JSON: ' + xhr.responseText);
+                            return;
+                        }
+
+                        resolve(json.url);
+                    };
+
+                    xhr.onerror = function () {
+                        reject('Image upload failed due to a XHR Transport error. Code: ' + xhr.status);
+                    };
+
+                    const formData = new FormData();
+                    formData.append('image', blobInfo.blob(), blobInfo.filename());
+                    formData.append('_token', '{{ csrf_token() }}');
+
+                    xhr.send(formData);
+                });
+            },
+            
+            // Permitir drag & drop de imágenes
+            paste_data_images: true,
+            
+            // Configurar inserción de video
+            media_live_embeds: true,
+            
+            // Idioma español
+            language: 'es',
+            language_url: 'https://cdn.tiny.cloud/1/do5np1q80r9ez92agz8y9snks9n3egskv7qssw6lkwo1wvxf/tinymce/8/langs/es.js'
+        });
     });
 
-    // Función para insertar texto en el cursor
-    function insertAtCursor(textareaId, text) {
-        const textarea = document.getElementById(textareaId);
-        const start = textarea.selectionStart;
-        const end = textarea.selectionEnd;
-        const value = textarea.value;
-        
-        // Si hay texto seleccionado, envolverlo
-        if (start !== end) {
-            const selectedText = value.substring(start, end);
-            if (text.includes('</strong>')) {
-                textarea.value = value.substring(0, start) + '<strong>' + selectedText + '</strong>' + value.substring(end);
-                textarea.selectionStart = textarea.selectionEnd = start + 8 + selectedText.length;
-            } else if (text.includes('</em>')) {
-                textarea.value = value.substring(0, start) + '<em>' + selectedText + '</em>' + value.substring(end);
-                textarea.selectionStart = textarea.selectionEnd = start + 4 + selectedText.length;
-            } else {
-                textarea.value = value.substring(0, start) + text + value.substring(end);
-                textarea.selectionStart = textarea.selectionEnd = start + text.length;
-            }
-        } else {
-            // Insertar en la posición del cursor
-            textarea.value = value.substring(0, start) + text + value.substring(end);
-            // Posicionar cursor dentro de las etiquetas
-            if (text.includes('</strong>')) {
-                textarea.selectionStart = textarea.selectionEnd = start + 8;
-            } else if (text.includes('</em>')) {
-                textarea.selectionStart = textarea.selectionEnd = start + 4;
-            } else if (text.includes('</p>')) {
-                textarea.selectionStart = textarea.selectionEnd = start + 3;
-            } else if (text.includes('</li>')) {
-                textarea.selectionStart = textarea.selectionEnd = start + 4;
-            } else {
-                textarea.selectionStart = textarea.selectionEnd = start + text.length;
-            }
+    // Validar contenido de TinyMCE antes de enviar formulario
+    function validateTinyMCE() {
+        const editor = tinymce.get('content');
+        if (!editor) {
+            alert('El editor no está inicializado. Por favor, espera un momento e intenta nuevamente.');
+            return false;
         }
-        textarea.focus();
-    }
-
-    // Función para abrir modal de subida de imagen
-    function openImageUpload(textareaId) {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/jpeg,image/png,image/jpg,image/gif,image/webp';
-        input.onchange = function(e) {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            // Crear FormData
-            const formData = new FormData();
-            formData.append('image', file);
-            formData.append('_token', '{{ csrf_token() }}');
-
-            // Mostrar loading
-            const loading = document.createElement('div');
-            loading.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
-            loading.innerHTML = '<div class="bg-white p-6 rounded-lg"><p class="text-gray-700">Subiendo imagen...</p></div>';
-            document.body.appendChild(loading);
-
-            // Subir imagen
-            fetch('{{ route("superlinkiu.tutorials.upload-image") }}', {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-Requested-With': 'XMLHttpRequest',
-                    'Accept': 'application/json'
-                }
-            })
-            .then(async response => {
-                const contentType = response.headers.get('content-type');
-                if (contentType && contentType.includes('application/json')) {
-                    return response.json();
-                } else {
-                    // Si no es JSON, leer como texto para ver el error
-                    const text = await response.text();
-                    throw new Error('El servidor devolvió una respuesta no válida. ' + text.substring(0, 200));
-                }
-            })
-            .then(data => {
-                document.body.removeChild(loading);
-                if (data.success && data.url) {
-                    // Insertar imagen en el contenido
-                    const imgTag = '<img src="' + data.url + '" alt="Imagen" class="max-w-full h-auto rounded-lg my-4">';
-                    insertAtCursor(textareaId, imgTag);
-                } else {
-                    alert('Error al subir la imagen: ' + (data.message || 'Error desconocido'));
-                }
-            })
-            .catch(error => {
-                document.body.removeChild(loading);
-                alert('Error al subir la imagen: ' + error.message);
-            });
-        };
-        input.click();
-    }
-
-    // Función para insertar video
-    function openVideoInsert(textareaId) {
-        const url = prompt('Ingresa la URL del video (YouTube o Vimeo):');
-        if (!url) return;
-
-        // Detectar plataforma y extraer ID
-        let videoId = null;
-        let platform = null;
         
-        if (url.includes('youtube.com') || url.includes('youtu.be')) {
-            platform = 'youtube';
-            const match = url.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/);
-            if (match) videoId = match[1];
-        } else if (url.includes('vimeo.com')) {
-            platform = 'vimeo';
-            const match = url.match(/vimeo\.com\/(?:.*\/)?(\d+)/);
-            if (match) videoId = match[1];
-        }
-
-        if (!videoId || !platform) {
-            alert('URL de video no válida. Por favor, usa YouTube o Vimeo.');
-            return;
-        }
-
-        // Insertar iframe del video
-        const embedUrl = platform === 'youtube' 
-            ? 'https://www.youtube.com/embed/' + videoId
-            : 'https://player.vimeo.com/video/' + videoId;
+        // Sincronizar contenido de TinyMCE al textarea antes de validar
+        editor.save();
         
-        const videoTag = '<div class="relative w-full my-4" style="padding-bottom: 56.25%; height: 0; overflow: hidden;"><iframe src="' + embedUrl + '" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen class="absolute top-0 left-0 w-full h-full rounded-lg" style="border: 0;"></iframe></div>';
-        insertAtCursor(textareaId, videoTag);
+        const content = editor.getContent({ format: 'text' }).trim();
+        if (!content || content.length === 0) {
+            alert('El contenido es requerido. Por favor, agrega contenido al tutorial.');
+            editor.focus();
+            return false;
+        }
+        
+        return true;
     }
 </script>
 @endpush

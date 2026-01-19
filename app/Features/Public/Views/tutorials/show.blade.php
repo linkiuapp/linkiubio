@@ -156,7 +156,7 @@
         <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
             <article class="pt-8">
                 <!-- Header -->
-                <header class="mb-8">
+                <header class="mb-4">
                     <div class="flex items-center gap-3 mb-4 flex-wrap">
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                             {{ $tutorial->category->name }}
@@ -173,7 +173,7 @@
                         </span>
                     </div>
                     
-                    <h1 class="font-satoshi text-3xl sm:text-4xl lg:text-5xl font-black text-gray-900 mb-4">
+                    <h1 class="font-satoshi text-2xl sm:text-3xl lg:text-3xl font-black text-gray-900 mb-1">
                         {{ $tutorial->title }}
                     </h1>
                     
@@ -233,18 +233,52 @@
                 @if($relatedTutorials->isNotEmpty())
                     <div class="pt-8 border-t border-gray-200 mt-8">
                         <h3 class="font-satoshi text-xl font-bold text-gray-900 mb-6">Tutoriales relacionados</h3>
-                        <div class="grid md:grid-cols-2 gap-4">
+                        <div class="grid md:grid-cols-3 gap-4">
                             @foreach($relatedTutorials as $related)
                                 <a href="{{ route('tutorials.show', $related->slug) }}" 
-                                   class="bg-white rounded-lg border border-gray-200 p-4 hover:shadow-md transition-all hover:border-gray-300">
-                                    <h4 class="font-satoshi text-lg font-bold text-gray-900 mb-2 hover:text-blue-600 transition-colors">
-                                        {{ $related->title }}
-                                    </h4>
-                                    @if($related->description)
-                                        <p class="text-sm text-gray-600 line-clamp-2">
-                                            {{ $related->description }}
-                                        </p>
+                                   class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all hover:border-gray-300 group">
+                                    @if($related->featured_image)
+                                        <div class="h-32 bg-gray-100 overflow-hidden">
+                                            <img src="{{ Storage::disk('public')->url($related->featured_image) }}" 
+                                                 alt="{{ $related->title }}"
+                                                 class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300">
+                                        </div>
                                     @endif
+                                    
+                                    <div class="p-4">
+                                        <div class="flex items-center gap-2 mb-2 flex-wrap">
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                                {{ $related->category->name }}
+                                            </span>
+                                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium 
+                                                {{ $related->difficulty_level === 'beginner' ? 'bg-green-100 text-green-800' : '' }}
+                                                {{ $related->difficulty_level === 'intermediate' ? 'bg-yellow-100 text-yellow-800' : '' }}
+                                                {{ $related->difficulty_level === 'advanced' ? 'bg-red-100 text-red-800' : '' }}">
+                                                {{ $related->difficulty_label }}
+                                            </span>
+                                        </div>
+                                        
+                                        <h4 class="font-satoshi text-base font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors line-clamp-2">
+                                            {{ $related->title }}
+                                        </h4>
+                                        
+                                        @if($related->description)
+                                            <p class="text-gray-600 text-xs mb-3 line-clamp-2">
+                                                {{ $related->description }}
+                                            </p>
+                                        @endif
+
+                                        <div class="flex items-center justify-between text-xs text-gray-500">
+                                            <span class="flex items-center gap-1">
+                                                <i data-lucide="eye" class="w-3 h-3"></i>
+                                                {{ number_format($related->views_count) }} vistas
+                                            </span>
+                                            <span class="flex items-center gap-1 text-blue-600 font-medium">
+                                                Ver
+                                                <i data-lucide="arrow-right" class="w-3 h-3"></i>
+                                            </span>
+                                        </div>
+                                    </div>
                                 </a>
                             @endforeach
                         </div>

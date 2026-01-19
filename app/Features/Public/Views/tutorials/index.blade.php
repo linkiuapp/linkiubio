@@ -100,7 +100,7 @@
     <x-public-navbar />
 
     <!-- Hero Section -->
-    <section class="pt-40 pb-16 bg-gradient-to-br from-gray-50 to-white">
+    <section class="pt-40 pb-8 bg-gradient-to-br from-gray-50 to-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="text-center mb-12">
                 <h1 class="font-satoshi text-4xl sm:text-5xl lg:text-6xl font-black text-gray-900 mb-4">
@@ -115,8 +115,8 @@
 
     <!-- Contenido Principal -->
     <main class="pb-16 bg-white">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid lg:grid-cols-4 gap-8">
+        <div class="max-w-8xl mx-auto px-4 sm:px-8 lg:px-32">
+            <div class="grid lg:grid-cols-4 gap-4">
                 <!-- Sidebar de Filtros -->
                 <div class="lg:col-span-1">
                     <div class="bg-white rounded-xl p-6 border border-gray-200 sticky top-24">
@@ -201,7 +201,7 @@
                 <!-- Lista de Tutoriales -->
                 <div class="lg:col-span-3" id="tutoriales">
                     @if($tutorials->count() > 0)
-                        <div class="grid md:grid-cols-2 gap-6">
+                        <div class="grid md:grid-cols-3 gap-4">
                             @foreach($tutorials as $tutorial)
                                 <a href="{{ route('tutorials.show', $tutorial->slug) }}" 
                                    class="bg-white rounded-xl border border-gray-200 overflow-hidden hover:shadow-lg transition-all hover:border-gray-300 group">
