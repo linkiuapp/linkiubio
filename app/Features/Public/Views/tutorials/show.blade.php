@@ -106,9 +106,17 @@
         .prose ul, .prose ol {
             margin-bottom: 1rem;
             padding-left: 1.5rem;
+            list-style-position: outside;
+        }
+        .prose ul {
+            list-style-type: disc;
+        }
+        .prose ol {
+            list-style-type: decimal;
         }
         .prose li {
             margin-bottom: 0.5rem;
+            display: list-item;
         }
         .prose strong {
             font-weight: 600;
