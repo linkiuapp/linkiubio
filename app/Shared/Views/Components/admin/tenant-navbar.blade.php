@@ -319,7 +319,7 @@ Se adapta automáticamente al estado del sidebar (abierto/minificado/cerrado)
                         <i data-lucide="external-link" class="w-3 h-3 text-gray-400 ml-auto"></i>
                     </a>
                     <button
-                        @click="$dispatch('open-error-report')"
+                        @click.prevent="helpMenuOpen = false; if (typeof window.openErrorReportModal === 'function') { window.openErrorReportModal(); }"
                         class="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 transition-colors w-full text-left"
                     >
                         <i data-lucide="bug" class="w-4 h-4 text-red-500"></i>
@@ -688,64 +688,424 @@ Se adapta automáticamente al estado del sidebar (abierto/minificado/cerrado)
 </nav>
 {{-- End SECTION: Navbar Container --}}
 
-{{-- SECTION: Scripts --}}
-@push('scripts')
+{{-- ==================== MODAL REPORTAR ERROR ==================== --}}
+<div 
+    id="error-report-modal"
+    x-data="errorReportModal()" 
+    @open-error-report.window="openModal()"
+    x-cloak
+>
+    {{-- Overlay --}}
+    <div 
+        x-show="isOpen"
+        x-transition:enter="transition-opacity duration-300"
+        x-transition:enter-start="opacity-0"
+        x-transition:enter-end="opacity-100"
+        x-transition:leave="transition-opacity duration-200"
+        x-transition:leave-start="opacity-100"
+        x-transition:leave-end="opacity-0"
+        class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm"
+        @click="closeModal()"
+    ></div>
+
+    {{-- Modal Container --}}
+    <div 
+        x-show="isOpen"
+        x-transition:enter="transition-all duration-300"
+        x-transition:enter-start="opacity-0 scale-95"
+        x-transition:enter-end="opacity-100 scale-100"
+        x-transition:leave="transition-all duration-200"
+        x-transition:leave-start="opacity-100 scale-100"
+        x-transition:leave-end="opacity-0 scale-95"
+        class="fixed inset-0 z-50 overflow-x-hidden overflow-y-auto pointer-events-none"
+    >
+        <div class="flex min-h-full items-center justify-center p-4">
+            <div 
+                class="relative bg-white rounded-xl shadow-2xl max-w-2xl w-full pointer-events-auto"
+                @click.stop
+            >
+                {{-- Header --}}
+                <div class="bg-gradient-to-r from-red-600 to-orange-600 text-white px-6 py-4 rounded-t-xl">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <i data-lucide="bug" class="w-6 h-6"></i>
+                            <div>
+                                <h3 class="text-lg font-bold">Reportar Error</h3>
+                                <p class="text-sm text-red-100 mt-0.5">Ayúdanos a mejorar reportando problemas</p>
+                            </div>
+                        </div>
+                        <button 
+                            @click="closeModal()"
+                            class="text-white hover:text-red-100 transition-colors"
+                            :disabled="loading"
+                        >
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+
+                {{-- Body --}}
+                <div class="px-6 py-6">
+                    <div class="space-y-4">
+                        {{-- Título --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Título del error
+                                <span class="text-red-500">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                x-model="title"
+                                placeholder="Ej: No puedo guardar productos"
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all"
+                                :disabled="loading"
+                            >
+                        </div>
+
+                        {{-- Descripción --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Describe el error
+                                <span class="text-red-500">*</span>
+                            </label>
+                            <textarea
+                                x-model="description"
+                                rows="4"
+                                placeholder="Describe qué estabas haciendo cuando ocurrió el error..."
+                                class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent transition-all resize-none"
+                                :disabled="loading"
+                            ></textarea>
+                        </div>
+
+                        {{-- Screenshot (opcional) --}}
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">
+                                Captura de pantalla (opcional)
+                            </label>
+                            <div 
+                                @click="triggerFileUpload()"
+                                class="flex flex-col items-center justify-center h-32 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-red-500 hover:bg-red-50 transition-all"
+                                :class="{ 'pointer-events-none opacity-50': loading }"
+                            >
+                                <div x-show="!screenshotPreview" class="text-center pointer-events-none">
+                                    <i data-lucide="image-plus" class="w-8 h-8 text-gray-400 mx-auto mb-1"></i>
+                                    <p class="text-sm text-gray-600">Click para subir captura</p>
+                                    <p class="text-xs text-gray-500 mt-1">PNG, JPG (Max 5MB)</p>
+                                </div>
+                                <div x-show="screenshotPreview" class="relative w-full h-full pointer-events-none">
+                                    <img :src="screenshotPreview" class="w-full h-full object-contain rounded">
+                                    <button 
+                                        @click.stop="removeScreenshot()"
+                                        class="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600 transition-colors pointer-events-auto"
+                                        type="button"
+                                    >
+                                        <i data-lucide="x" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                                <input 
+                                    x-ref="fileInput"
+                                    type="file" 
+                                    @change="handleScreenshotUpload($event)"
+                                    accept="image/png,image/jpeg,image/jpg"
+                                    class="hidden"
+                                    :disabled="loading"
+                                >
+                            </div>
+                        </div>
+
+                        {{-- Mensaje de éxito --}}
+                        <div 
+                            x-show="success" 
+                            x-transition
+                            class="bg-green-50 border border-green-200 rounded-lg p-3"
+                        >
+                            <div class="flex gap-2">
+                                <i data-lucide="check-circle" class="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5"></i>
+                                <p class="text-sm text-green-700">
+                                    ¡Reporte enviado exitosamente! Revisaremos el error lo antes posible.
+                                </p>
+                            </div>
+                        </div>
+
+                        {{-- Mensaje de error --}}
+                        <div 
+                            x-show="error" 
+                            x-transition
+                            class="bg-red-50 border border-red-200 rounded-lg p-3"
+                        >
+                            <div class="flex gap-2">
+                                <i data-lucide="alert-circle" class="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5"></i>
+                                <p class="text-sm text-red-700" x-text="error"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- Footer --}}
+                <div class="bg-gray-50 px-6 py-4 flex items-center justify-end gap-3 border-t border-gray-200 rounded-b-xl">
+                    <button
+                        @click="closeModal()"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
+                        :disabled="loading"
+                    >
+                        Cancelar
+                    </button>
+                    <button
+                        @click="submitReport()"
+                        :disabled="loading || !title || !description"
+                        class="flex items-center gap-2 px-6 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                    >
+                        <i data-lucide="send" class="w-4 h-4"></i>
+                        <span x-text="loading ? 'Enviando...' : 'Enviar Reporte'"></span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{{-- ==================== END MODAL REPORTAR ERROR ==================== --}}
+
+{{-- ==================== SCRIPTS ==================== --}}
 <script>
 (function() {
     'use strict';
 
+    // ============ Alpine Component Definition (debe estar antes) =============
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('errorReportModal', function() {
+            return {
+                isOpen: false,
+                loading: false,
+                title: '',
+                description: '',
+                screenshotFile: null,
+                screenshotPreview: null,
+                success: false,
+                error: null,
+
+                init() {
+                    // Registrar este componente globalmente para acceso fácil
+                    window.__errorReportModalInstance = this;
+                },
+
+                triggerFileUpload() {
+                    if (this.loading) return;
+                    this.$refs.fileInput.click();
+                },
+
+                openModal() {
+                    this.isOpen = true;
+                    this.resetForm();
+                    document.body.style.overflow = 'hidden';
+                    
+                    // Re-inicializar iconos después de abrir
+                    this.$nextTick(() => {
+                        if (window.createIcons && window.lucideIcons) {
+                            window.createIcons({ icons: window.lucideIcons });
+                        }
+                    });
+                },
+
+                closeModal() {
+                    if (this.loading) return;
+                    this.isOpen = false;
+                    document.body.style.overflow = '';
+                    setTimeout(() => this.resetForm(), 300);
+                },
+
+                resetForm() {
+                    this.title = '';
+                    this.description = '';
+                    this.screenshotFile = null;
+                    this.screenshotPreview = null;
+                    this.success = false;
+                    this.error = null;
+                    this.loading = false;
+                },
+
+                handleScreenshotUpload(event) {
+                    const file = event.target.files[0];
+                    if (!file) return;
+
+                    // Validar tamaño
+                    if (file.size > 5 * 1024 * 1024) {
+                        this.error = 'La imagen es muy grande. Máximo 5MB.';
+                        event.target.value = '';
+                        return;
+                    }
+
+                    // Validar tipo
+                    if (!file.type.startsWith('image/')) {
+                        this.error = 'Solo se permiten imágenes PNG o JPG.';
+                        event.target.value = '';
+                        return;
+                    }
+
+                    this.screenshotFile = file;
+                    this.error = null;
+
+                    // Crear preview
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.screenshotPreview = e.target.result;
+                    };
+                    reader.readAsDataURL(file);
+                },
+
+                removeScreenshot() {
+                    this.screenshotFile = null;
+                    this.screenshotPreview = null;
+                    if (this.$refs.fileInput) {
+                        this.$refs.fileInput.value = '';
+                    }
+                },
+
+                async submitReport() {
+                    // Validaciones
+                    if (!this.title || !this.description) {
+                        this.error = 'Por favor completa todos los campos requeridos';
+                        return;
+                    }
+
+                    if (this.title.length < 5) {
+                        this.error = 'El título debe tener al menos 5 caracteres';
+                        return;
+                    }
+
+                    if (this.description.length < 10) {
+                        this.error = 'La descripción debe tener al menos 10 caracteres';
+                        return;
+                    }
+
+                    this.loading = true;
+                    this.error = null;
+                    this.success = false;
+
+                    try {
+                        const formData = new FormData();
+                        formData.append('title', this.title.trim());
+                        formData.append('description', this.description.trim());
+                        
+                        if (this.screenshotFile) {
+                            formData.append('screenshot', this.screenshotFile);
+                        }
+
+                        // Agregar información adicional del contexto
+                        formData.append('url', window.location.href);
+                        formData.append('user_agent', navigator.userAgent);
+
+                        const response = await fetch('{{ route("tenant.admin.error-reports.store", $store->slug) }}', {
+                            method: 'POST',
+                            headers: {
+                                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
+                                'X-Requested-With': 'XMLHttpRequest'
+                            },
+                            body: formData
+                        });
+
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+
+                        const data = await response.json();
+
+                        if (data.success) {
+                            this.success = true;
+                            setTimeout(() => this.closeModal(), 2000);
+                        } else {
+                            this.error = data.message || 'Error al enviar el reporte';
+                        }
+                    } catch (error) {
+                        console.error('Error al enviar reporte:', error);
+                        this.error = 'Error de conexión. Por favor intenta nuevamente.';
+                    } finally {
+                        this.loading = false;
+                    }
+                }
+            };
+        });
+    });
+
+    // ============ Modal Trigger Global Function =============
+    window.openErrorReportModal = function() {
+        // Método 1: Usar la instancia global si existe
+        if (window.__errorReportModalInstance) {
+            window.__errorReportModalInstance.openModal();
+            return;
+        }
+
+        // Método 2: Usar evento de Alpine
+        window.dispatchEvent(new CustomEvent('open-error-report'));
+
+        // Método 3: Buscar el elemento directamente
+        setTimeout(() => {
+            const modalElement = document.getElementById('error-report-modal');
+            if (modalElement && modalElement.__x && modalElement.__x.$data) {
+                modalElement.__x.$data.openModal();
+            }
+        }, 100);
+    };
+
+    // ============ Iconos & Verificación de Store =============
     document.addEventListener('DOMContentLoaded', function() {
-        if (typeof window.createIcons !== 'undefined' && typeof window.lucideIcons !== 'undefined') {
+        // Inicializar Lucide icons
+        if (window.createIcons && window.lucideIcons) {
             window.createIcons({ icons: window.lucideIcons });
         }
-        
+
+        // Función para actualizar badge de verificación
         function updateVerificationBadge(verified) {
             const container = document.getElementById('verification-badge-container');
             if (!container || !container.__x) return;
-            
+
             container.__x.$data.verified = verified;
-            
+
             const badge = document.getElementById('verification-badge');
-            if (badge) {
-                const type = verified ? 'info' : 'secondary';
-                const icon = verified ? 'badge-check' : 'shield-off';
-                const text = verified ? 'Verificado' : 'No Verificado';
-                
-                badge.className = badge.className.replace(/bg-(teal|blue|gray)-100/g, '');
-                badge.className = badge.className.replace(/text-(teal|blue|gray)-(800|500)/g, '');
-                badge.className += verified 
-                    ? ' bg-blue-100 text-blue-800' 
-                    : ' bg-gray-50 text-gray-500';
-                
-                const iconEl = badge.querySelector('i[data-lucide]');
-                if (iconEl) {
-                    iconEl.setAttribute('data-lucide', icon);
-                    if (typeof window.createIcons !== 'undefined') {
-                        window.createIcons({ icons: window.lucideIcons });
-                    }
+            if (!badge) return;
+
+            const badgeClasses = verified 
+                ? 'bg-blue-100 text-blue-800' 
+                : 'bg-gray-50 text-gray-500';
+            
+            const icon = verified ? 'badge-check' : 'shield-off';
+            const text = verified ? 'Verificado' : 'No Verificado';
+
+            // Actualizar clases
+            badge.className = badge.className
+                .replace(/bg-(teal|blue|gray)-(100|50)/g, '')
+                .replace(/text-(teal|blue|gray)-(800|500)/g, '')
+                .trim() + ' ' + badgeClasses;
+
+            // Actualizar icono
+            const iconEl = badge.querySelector('i[data-lucide]');
+            if (iconEl) {
+                iconEl.setAttribute('data-lucide', icon);
+                if (window.createIcons && window.lucideIcons) {
+                    window.createIcons({ icons: window.lucideIcons });
                 }
-                
-                const textEl = badge.querySelector('span:not([class*="size"])');
-                if (textEl && textEl.textContent) {
-                    textEl.textContent = text;
-                }
+            }
+
+            // Actualizar texto
+            const textEl = badge.querySelector('span:not([class*="size"])');
+            if (textEl) {
+                textEl.textContent = text;
             }
         }
-        
+
+        // Verificación periódica del estado de la tienda
         let verificationCheckInterval = null;
         let lastVerificationCheck = 0;
-        
+        const CHECK_INTERVAL = 30000; // 30 segundos
+
         function checkVerificationStatus() {
-            // Evitar múltiples checks simultáneos
             const now = Date.now();
-            if (now - lastVerificationCheck < 30000) {
-                return;
-            }
+            if (now - lastVerificationCheck < CHECK_INTERVAL) return;
+
             lastVerificationCheck = now;
-            
             const storeSlug = window.location.pathname.split('/')[1];
-            if (!storeSlug) return;
             
+            if (!storeSlug) return;
+
             fetch(`/api/store/${storeSlug}/status`, {
                 method: 'GET',
                 headers: {
@@ -753,283 +1113,32 @@ Se adapta automáticamente al estado del sidebar (abierto/minificado/cerrado)
                     'X-Requested-With': 'XMLHttpRequest'
                 }
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) throw new Error('Network response was not ok');
+                return response.json();
+            })
             .then(data => {
                 if (data.verified !== undefined) {
                     updateVerificationBadge(data.verified);
                 }
             })
-            .catch(() => {
-                // Error silencioso
+            .catch(error => {
+                console.error('Error al verificar estado de la tienda:', error);
             });
         }
-        
-        // Solo crear un intervalo si no existe
+
+        // Iniciar verificación periódica
         if (!verificationCheckInterval) {
-            verificationCheckInterval = setInterval(checkVerificationStatus, 30000);
-            // Ejecutar una vez después de 5 segundos (no inmediatamente)
-            setTimeout(checkVerificationStatus, 5000);
+            verificationCheckInterval = setInterval(checkVerificationStatus, CHECK_INTERVAL);
+            setTimeout(checkVerificationStatus, 5000); // Primera verificación después de 5s
         }
+
+        // Limpiar intervalo al salir
+        window.addEventListener('beforeunload', () => {
+            if (verificationCheckInterval) {
+                clearInterval(verificationCheckInterval);
+            }
+        });
     });
 })();
 </script>
-@endpush
-{{-- End SECTION: Scripts --}}
-
-{{-- SECTION: Error Report Modal --}}
-<template x-teleport="body">
-<div 
-    x-data="errorReportModal()"
-    @open-error-report.window="openModal()"
-    x-show="isOpen"
-    x-cloak
-    class="fixed inset-0 z-[99999]"
-    style="display: none;"
->
-    {{-- Overlay --}}
-    <div 
-        class="fixed inset-0 bg-black/50"
-        @click="closeModal()"
-        x-show="isOpen"
-        x-transition:enter="ease-out duration-300"
-        x-transition:enter-start="opacity-0"
-        x-transition:enter-end="opacity-100"
-        x-transition:leave="ease-in duration-200"
-        x-transition:leave-start="opacity-100"
-        x-transition:leave-end="opacity-0"
-    ></div>
-
-    {{-- Modal --}}
-    <div class="fixed inset-0 overflow-y-auto">
-        <div class="flex min-h-full items-center justify-center p-4">
-        <div 
-            class="relative bg-white rounded-xl shadow-2xl max-w-2xl w-full"
-            @click.away="closeModal()"
-            x-show="isOpen"
-            x-transition:enter="ease-out duration-300"
-            x-transition:enter-start="opacity-0 scale-95"
-            x-transition:enter-end="opacity-100 scale-100"
-            x-transition:leave="ease-in duration-200"
-            x-transition:leave-start="opacity-100 scale-100"
-            x-transition:leave-end="opacity-0 scale-95"
-        >
-            {{-- Header --}}
-            <div class="bg-gradient-to-r from-red-600 to-orange-600 text-white px-6 py-4 rounded-t-xl">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-3">
-                        <i data-lucide="bug" class="w-6 h-6"></i>
-                        <div>
-                            <h3 class="text-lg font-bold">Reportar Error</h3>
-                            <p class="text-sm text-red-100 mt-0.5">Ayúdanos a mejorar reportando problemas</p>
-                        </div>
-                    </div>
-                    <button 
-                        @click="closeModal()"
-                        class="text-white hover:text-red-100 transition-colors"
-                    >
-                        <i data-lucide="x" class="w-5 h-5"></i>
-                    </button>
-                </div>
-            </div>
-
-            {{-- Body --}}
-            <div class="px-6 py-6">
-                <div class="space-y-4">
-                    
-                    {{-- Título --}}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Título del error
-                            <span class="text-red-500">*</span>
-                        </label>
-                        <input
-                            type="text"
-                            x-model="title"
-                            placeholder="Ej: No puedo guardar productos"
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                            :disabled="loading"
-                        >
-                    </div>
-
-                    {{-- Descripción --}}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Describe el error
-                            <span class="text-red-500">*</span>
-                        </label>
-                        <textarea
-                            x-model="description"
-                            rows="4"
-                            placeholder="Describe qué estabas haciendo cuando ocurrió el error..."
-                            class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
-                            :disabled="loading"
-                        ></textarea>
-                    </div>
-
-                    {{-- Screenshot (opcional) --}}
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">
-                            Captura de pantalla (opcional)
-                        </label>
-                        <label class="flex flex-col items-center justify-center h-32 px-4 py-3 border-2 border-dashed border-gray-300 rounded-lg cursor-pointer hover:border-red-500 hover:bg-red-50 transition-all">
-                            <div x-show="!screenshotPreview" class="text-center">
-                                <i data-lucide="image-plus" class="w-8 h-8 text-gray-400 mx-auto mb-1"></i>
-                                <p class="text-sm text-gray-600">Click para subir captura</p>
-                                <p class="text-xs text-gray-500 mt-1">PNG, JPG (Max 5MB)</p>
-                            </div>
-                            <div x-show="screenshotPreview" class="w-full h-full">
-                                <img :src="screenshotPreview" class="w-full h-full object-contain">
-                            </div>
-                            <input 
-                                type="file" 
-                                @change="handleScreenshotUpload($event)"
-                                accept="image/*"
-                                class="hidden"
-                                :disabled="loading"
-                            >
-                        </label>
-                    </div>
-
-                    {{-- Mensaje de éxito --}}
-                    <div x-show="success" class="bg-green-50 border border-green-200 rounded-lg p-3">
-                        <div class="flex gap-2">
-                            <i data-lucide="check-circle" class="w-4 h-4 text-green-600 flex-shrink-0 mt-0.5"></i>
-                            <p class="text-sm text-green-700">
-                                ¡Reporte enviado exitosamente! Revisaremos el error lo antes posible.
-                            </p>
-                        </div>
-                    </div>
-
-                    {{-- Mensaje de error --}}
-                    <div x-show="error" class="bg-red-50 border border-red-200 rounded-lg p-3">
-                        <div class="flex gap-2">
-                            <i data-lucide="alert-circle" class="w-4 h-4 text-red-500 flex-shrink-0 mt-0.5"></i>
-                            <p class="text-sm text-red-700" x-text="error"></p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            {{-- Footer --}}
-            <div class="bg-gray-50 px-6 py-4 flex items-center justify-end gap-3 border-t border-gray-200">
-                <button
-                    @click="closeModal()"
-                    class="px-4 py-2 text-sm font-medium text-gray-700 hover:text-gray-900 transition-colors"
-                    :disabled="loading"
-                >
-                    Cancelar
-                </button>
-                <button
-                    @click="submit()"
-                    :disabled="loading || !title || !description"
-                    class="flex items-center gap-2 px-6 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                    <i data-lucide="send" class="w-4 h-4"></i>
-                    <span x-text="loading ? 'Enviando...' : 'Enviar Reporte'"></span>
-                </button>
-            </div>
-        </div>
-        </div>
-    </div>
-</div>
-</template>
-
-@push('scripts')
-<script>
-function errorReportModal() {
-    return {
-        isOpen: false,
-        loading: false,
-        title: '',
-        description: '',
-        screenshotFile: null,
-        screenshotPreview: null,
-        success: false,
-        error: null,
-
-        openModal() {
-            this.isOpen = true;
-            this.resetForm();
-        },
-
-        closeModal() {
-            this.isOpen = false;
-            setTimeout(() => this.resetForm(), 300);
-        },
-
-        resetForm() {
-            this.title = '';
-            this.description = '';
-            this.screenshotFile = null;
-            this.screenshotPreview = null;
-            this.success = false;
-            this.error = null;
-            this.loading = false;
-        },
-
-        handleScreenshotUpload(event) {
-            const file = event.target.files[0];
-            if (file) {
-                if (file.size > 5 * 1024 * 1024) {
-                    this.error = 'La imagen es muy grande. Máximo 5MB.';
-                    return;
-                }
-                
-                this.screenshotFile = file;
-                this.error = null;
-                
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    this.screenshotPreview = e.target.result;
-                };
-                reader.readAsDataURL(file);
-            }
-        },
-
-        async submit() {
-            if (!this.title || !this.description) {
-                this.error = 'Por favor completa todos los campos requeridos';
-                return;
-            }
-
-            this.loading = true;
-            this.error = null;
-            this.success = false;
-
-            const formData = new FormData();
-            formData.append('title', this.title);
-            formData.append('description', this.description);
-            formData.append('page_url', window.location.href);
-            if (this.screenshotFile) {
-                formData.append('screenshot', this.screenshotFile);
-            }
-
-            try {
-                const response = await fetch('{{ route("tenant.admin.error-reports.store", ["store" => $store->slug]) }}', {
-                    method: 'POST',
-                    headers: {
-                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content,
-                    },
-                    body: formData
-                });
-
-                const data = await response.json();
-
-                if (data.success) {
-                    this.success = true;
-                    setTimeout(() => this.closeModal(), 2000);
-                } else {
-                    this.error = data.message || 'Error al enviar el reporte';
-                }
-            } catch (error) {
-                this.error = 'Error de conexión. Por favor intenta nuevamente.';
-                console.error('Error:', error);
-            } finally {
-                this.loading = false;
-            }
-        }
-    }
-}
-</script>
-@endpush
-{{-- End SECTION: Error Report Modal --}}
