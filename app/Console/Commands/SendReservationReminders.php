@@ -70,7 +70,9 @@ class SendReservationReminders extends Command
             
             foreach ($reservations as $reservation) {
                 // Calcular la fecha/hora completa de la reserva
-                $reservationDateTime = Carbon::parse($reservation->reservation_date . ' ' . $reservation->reservation_time);
+                // Usar setTimeFromTimeString() para evitar problemas cuando reservation_date ya incluye hora
+                $reservationDateTime = Carbon::parse($reservation->reservation_date)
+                    ->setTimeFromTimeString($reservation->reservation_time);
                 
                 // Verificar que la reserva aún no haya pasado
                 if ($reservationDateTime->isPast()) {
