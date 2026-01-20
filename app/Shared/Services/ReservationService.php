@@ -187,7 +187,7 @@ class ReservationService
         $reservationDate = Carbon::parse($date);
         $now = Carbon::now();
         
-        // No permitir fechas pasadas
+        // No permitir fechas pasadas (excepto hoy mismo)
         if ($reservationDate->isPast() && !$reservationDate->isToday()) {
             return false;
         }
@@ -211,18 +211,16 @@ class ReservationService
             return false;
         }
         
-        // Verificar anticipación mínima
-        $hoursUntilReservation = $now->diffInHours($reservationDate, false);
-        
-        if ($hoursUntilReservation < $minAdvanceHours && !$reservationDate->isToday()) {
-            return false;
+        // Si es hoy y el día está habilitado, siempre permitir (la validación de horas se hará en los slots)
+        if ($reservationDate->isToday()) {
+            return true;
         }
         
-        // Si es hoy, verificar horas mínimas
-        if ($reservationDate->isToday()) {
-            // Calcular la hora mínima permitida para hoy
-            $minTime = $now->copy()->addHours($minAdvanceHours);
-            return true; // Se validará en el slot
+        // Verificar anticipación mínima para fechas futuras
+        $hoursUntilReservation = $now->diffInHours($reservationDate, false);
+        
+        if ($hoursUntilReservation < $minAdvanceHours) {
+            return false;
         }
         
         return true;
