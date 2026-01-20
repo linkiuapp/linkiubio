@@ -332,8 +332,13 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Días de la semana deshabilitados (0 = domingo, 1 = lunes, ..., 6 = sábado)
     const disabledWeekdays = @json($disabledWeekdays ?? []);
     
+    // DEBUG: Verificar qué días se están deshabilitando
+    console.log('🔍 Días deshabilitados recibidos del backend:', disabledWeekdays);
+    console.log('📅 Día de hoy (número):', new Date().getDay());
+    
     // Inicializar el datepicker con días deshabilitados
     if (window.initReservationDatepicker) {
+        console.log('✅ Inicializando datepicker con opciones:', { disableWeekdays: disabledWeekdays });
         await window.initReservationDatepicker(dateInput, {
             disableWeekdays: disabledWeekdays
         });
