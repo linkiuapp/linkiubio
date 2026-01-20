@@ -99,7 +99,7 @@ Layout de 2 columnas: Selector de íconos a la izquierda, formulario a la derech
 
                         {{-- Icons Grid --}}
                         <div class="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                            <div class="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2">
+                            <div class="grid grid-cols-3 md:grid-cols-5 lg:grid-cols-7 gap-2">
                                 @foreach($icons as $icon)
                                     <label 
                                         class="relative cursor-pointer icon-option"
@@ -114,7 +114,7 @@ Layout de 2 columnas: Selector de íconos a la izquierda, formulario a la derech
                                             required
                                         >
                                         {{-- Contenedor del ícono con mejor feedback visual --}}
-                                        <div class="w-full aspect-square bg-white rounded-lg p-3 border-2 border-transparent
+                                        <div class="w-full aspect-square bg-white rounded-lg p-1 border-2 border-transparent
                                                     peer-checked:border-blue-500 peer-checked:bg-blue-50 peer-checked:border-2 hover:border-blue-300
                                                     hover:bg-gray-50
                                                     transition-all duration-200 flex items-center justify-center relative">

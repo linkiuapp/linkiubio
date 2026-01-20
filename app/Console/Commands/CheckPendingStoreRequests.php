@@ -125,7 +125,7 @@ class CheckPendingStoreRequests extends Command
             ]);
         }
         
-        // TODO: Enviar notificación a SuperAdmins (email, Slack, etc.)
+        // TODO: Enviar notificación a SuperAdmins (email, etc.)
         $this->notifySuperAdmins($stores, 'critical');
     }
     
@@ -157,7 +157,7 @@ class CheckPendingStoreRequests extends Command
             ]);
         }
         
-        // TODO: Enviar notificación a SuperAdmins (email, Slack, etc.)
+        // TODO: Enviar notificación a SuperAdmins (email, etc.)
         $this->notifySuperAdmins($stores, 'urgent');
     }
     
@@ -176,7 +176,7 @@ class CheckPendingStoreRequests extends Command
         
         $this->info("📧 Notificando a {$superAdmins->count()} SuperAdmin(s)...");
         
-        // TODO: Implementar notificación real (Email, Slack, Push, etc.)
+        // TODO: Implementar notificación real (Email, Push, etc.)
         // Por ahora solo logueamos
         foreach ($superAdmins as $admin) {
             Log::channel('daily')->info('Notificación enviada a SuperAdmin', [
