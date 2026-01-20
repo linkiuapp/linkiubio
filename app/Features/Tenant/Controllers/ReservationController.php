@@ -86,10 +86,6 @@ class ReservationController extends Controller
         $timeSlots = $settings->time_slots ?? [];
         $enabledDays = array_keys($timeSlots); // ['monday', 'tuesday', etc.]
         
-        // DEBUG LOG
-        \Log::info('🔍 ReservationController - Time slots:', ['time_slots' => $timeSlots]);
-        \Log::info('📅 ReservationController - Días habilitados:', ['enabled_days' => $enabledDays]);
-        
         // Mapear días en inglés a números de día de la semana (0 = domingo, 1 = lunes, etc.)
         $dayMap = [
             'sunday' => 0,
@@ -107,8 +103,6 @@ class ReservationController extends Controller
                 $disabledWeekdays[] = $dayMap[$day];
             }
         }
-        
-        \Log::info('🚫 ReservationController - Días DESHABILITADOS a enviar al frontend:', ['disabled_weekdays' => $disabledWeekdays]);
         
         // Obtener cuentas bancarias activas para transferencias
         $bankAccounts = BankAccount::whereHas('paymentMethod', function($query) use ($store) {

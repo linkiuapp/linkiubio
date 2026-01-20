@@ -75,16 +75,11 @@ export async function initReservationDatepicker(selector, options = {}) {
     // Si se proporcionan días deshabilitados, agregarlos a las opciones
     // IMPORTANTE: No deshabilitar el día de hoy si está en los días habilitados
     if (options.disableWeekdays && Array.isArray(options.disableWeekdays) && options.disableWeekdays.length > 0) {
-        const today = new Date();
-        const todayDayOfWeek = today.getDay(); // 0 = domingo, 1 = lunes, etc.
-        
-        console.log('📊 datepicker.js - Días deshabilitados originales:', options.disableWeekdays);
-        console.log('📆 datepicker.js - Día de hoy:', todayDayOfWeek);
+        const todayCheck = new Date();
+        const todayDayOfWeek = todayCheck.getDay(); // 0 = domingo, 1 = lunes, etc.
         
         // Filtrar el día de hoy de los días deshabilitados para permitir reservas el mismo día
         const filteredDisabledDays = options.disableWeekdays.filter(day => day !== todayDayOfWeek);
-        
-        console.log('🔧 datepicker.js - Días deshabilitados después de filtrar:', filteredDisabledDays);
         
         if (filteredDisabledDays.length > 0) {
             defaultOptions.disableWeekdays = filteredDisabledDays;
