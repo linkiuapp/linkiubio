@@ -87,6 +87,9 @@ class ToolController extends Controller
             'billing_type' => 'required|in:free,monthly,yearly,pay_per_use',
             'monthly_cost' => 'nullable|numeric|min:0',
             'yearly_cost' => 'nullable|numeric|min:0',
+            'minimum_recharge' => 'nullable|numeric|min:0',
+            'current_balance' => 'nullable|numeric|min:0',
+            'balance_currency' => 'nullable|string|size:3',
             'currency' => 'nullable|string|size:3',
             'username' => 'nullable|string',
             'password' => 'nullable|string',
@@ -166,6 +169,9 @@ class ToolController extends Controller
             'billing_type' => 'required|in:free,monthly,yearly,pay_per_use',
             'monthly_cost' => 'nullable|numeric|min:0',
             'yearly_cost' => 'nullable|numeric|min:0',
+            'minimum_recharge' => 'nullable|numeric|min:0',
+            'current_balance' => 'nullable|numeric|min:0',
+            'balance_currency' => 'nullable|string|size:3',
             'currency' => 'nullable|string|size:3',
             'username' => 'nullable|string',
             'password' => 'nullable|string',
@@ -281,14 +287,18 @@ class ToolController extends Controller
     }
 
     /**
-     * Agregar pago al historial
+     * Agregar pago o recarga al historial
      */
     public function storePayment(Request $request, LinkiuTool $tool)
     {
+        $isRecharge = $tool->isPayPerUse();
+        
         $validated = $request->validate([
             'payment_date' => 'required|date',
             'amount' => 'required|numeric|min:0',
-            'payment_type' => 'required|in:monthly,yearly,renewal,one_time,other',
+            'payment_type' => $isRecharge 
+                ? 'required|in:recharge' 
+                : 'required|in:monthly,yearly,renewal,one_time,other',
             'currency' => 'nullable|string|size:3',
             'receipt' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
             'notes' => 'nullable|string',
@@ -296,7 +306,7 @@ class ToolController extends Controller
 
         $validated['tool_id'] = $tool->id;
         $validated['created_by'] = auth()->id();
-        $validated['currency'] = $validated['currency'] ?? $tool->currency ?? 'USD';
+        $validated['currency'] = $validated['currency'] ?? $tool->getBalanceCurrency();
 
         // Subir comprobante si existe
         if ($request->hasFile('receipt')) {
@@ -306,8 +316,31 @@ class ToolController extends Controller
 
         $payment = ToolPaymentHistory::create($validated);
 
-        // Actualizar fechas de renovación si es necesario
-        if (in_array($validated['payment_type'], ['monthly', 'yearly', 'renewal'])) {
+        // Si es recarga (pay_per_use), sumar al saldo actual
+        if ($isRecharge && $validated['payment_type'] === 'recharge') {
+            $rechargeAmount = $validated['amount'];
+            $currentBalance = $tool->current_balance ?? 0;
+            $tool->current_balance = $currentBalance + $rechargeAmount;
+            
+            // Actualizar moneda del saldo si no está definida
+            if (!$tool->balance_currency) {
+                $tool->balance_currency = $validated['currency'];
+            }
+            
+            $tool->save();
+            
+            Log::info('Recarga agregada al historial', [
+                'tool_id' => $tool->id,
+                'payment_id' => $payment->id,
+                'recharge_amount' => $rechargeAmount,
+                'previous_balance' => $currentBalance,
+                'new_balance' => $tool->current_balance,
+                'user_id' => auth()->id(),
+            ]);
+        }
+
+        // Actualizar fechas de renovación si es necesario (solo para pagos periódicos)
+        if (!$isRecharge && in_array($validated['payment_type'], ['monthly', 'yearly', 'renewal'])) {
             $paymentDate = \Carbon\Carbon::parse($validated['payment_date']);
             $tool->last_renewal_date = $paymentDate;
             
@@ -371,11 +404,14 @@ class ToolController extends Controller
             $tool->save();
         }
 
-        Log::info('Pago agregado al historial', [
-            'tool_id' => $tool->id,
-            'payment_id' => $payment->id,
-            'user_id' => auth()->id(),
-        ]);
+        // Log solo si no es recarga (ya se logueó arriba)
+        if (!$isRecharge) {
+            Log::info('Pago agregado al historial', [
+                'tool_id' => $tool->id,
+                'payment_id' => $payment->id,
+                'user_id' => auth()->id(),
+            ]);
+        }
 
         if ($request->ajax() || $request->wantsJson()) {
             return response()->json([

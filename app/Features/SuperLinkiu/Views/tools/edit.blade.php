@@ -166,7 +166,7 @@
                         </select>
                     </div>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" x-show="billingType !== 'free'">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4" x-show="billingType !== 'free' && billingType !== 'pay_per_use'">
                     <div>
                         <label for="monthly_cost" class="block text-sm font-medium text-gray-800 mb-2">Costo Mensual</label>
                         <input type="number" id="monthly_cost" name="monthly_cost" value="{{ old('monthly_cost', $tool->monthly_cost) }}"
@@ -178,6 +178,35 @@
                         <input type="number" id="yearly_cost" name="yearly_cost" value="{{ old('yearly_cost', $tool->yearly_cost) }}"
                                step="0.01" min="0"
                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    </div>
+                </div>
+                {{-- Campos para herramientas pay_per_use --}}
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4" x-show="billingType === 'pay_per_use'">
+                    <div>
+                        <label for="minimum_recharge" class="block text-sm font-medium text-gray-800 mb-2">Recarga Mínima Recomendada</label>
+                        <input type="number" id="minimum_recharge" name="minimum_recharge" value="{{ old('minimum_recharge', $tool->minimum_recharge) }}"
+                               step="0.01" min="0"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="0.00">
+                        <p class="text-xs text-gray-500 mt-1">Monto mínimo recomendado para recargar</p>
+                    </div>
+                    <div>
+                        <label for="current_balance" class="block text-sm font-medium text-gray-800 mb-2">Saldo Actual (Opcional)</label>
+                        <input type="number" id="current_balance" name="current_balance" value="{{ old('current_balance', $tool->current_balance) }}"
+                               step="0.01" min="0"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                               placeholder="0.00">
+                        <p class="text-xs text-gray-500 mt-1">Saldo actual si está disponible</p>
+                    </div>
+                    <div>
+                        <label for="balance_currency" class="block text-sm font-medium text-gray-800 mb-2">Moneda del Saldo</label>
+                        <select id="balance_currency" name="balance_currency" 
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
+                            <option value="">Misma que moneda principal</option>
+                            <option value="USD" {{ old('balance_currency', $tool->balance_currency) === 'USD' ? 'selected' : '' }}>USD</option>
+                            <option value="COP" {{ old('balance_currency', $tool->balance_currency) === 'COP' ? 'selected' : '' }}>COP</option>
+                            <option value="EUR" {{ old('balance_currency', $tool->balance_currency) === 'EUR' ? 'selected' : '' }}>EUR</option>
+                        </select>
                     </div>
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4">

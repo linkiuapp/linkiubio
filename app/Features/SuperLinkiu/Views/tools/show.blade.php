@@ -32,11 +32,11 @@
             </div>
         </div>
         <div class="flex items-center gap-2">
-            @if($tool->billing_type !== 'free' && $tool->next_renewal_date)
+            @if($tool->billing_type !== 'free')
                 <button onclick="openPaymentModal({{ $tool->id }}, '{{ $tool->name }}', '{{ $tool->getFormattedCost() }}', '{{ $tool->billing_type }}', '{{ $tool->currency }}')" 
                         class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
                     <i data-lucide="dollar-sign" class="w-4 h-4"></i>
-                    Pagar
+                    {{ $tool->isPayPerUse() ? 'Recargar' : 'Pagar' }}
                 </button>
             @endif
             @if($tool->notification_phone)
@@ -207,12 +207,12 @@
                 </div>
             </div>
 
-            {{-- Historial de Pagos --}}
+            {{-- Historial de Pagos/Recargas --}}
             <div class="bg-white rounded-lg shadow-sm border border-gray-200">
                 <div class="px-6 py-4 border-b border-gray-200">
                     <h2 class="text-base font-semibold text-gray-900 flex items-center gap-2">
                         <i data-lucide="dollar-sign" class="w-5 h-5 text-green-600"></i>
-                        Historial de Pagos
+                        {{ $tool->isPayPerUse() ? 'Historial de Recargas' : 'Historial de Pagos' }}
                     </h2>
                 </div>
                 <div class="p-6">
@@ -225,7 +225,7 @@
                                         <div class="flex items-center gap-3 mb-1">
                                             <span class="text-sm font-semibold text-gray-900">{{ $payment->getFormattedAmount() }}</span>
                                             <span class="px-2 py-0.5 text-xs bg-blue-100 text-blue-800 rounded">
-                                                {{ ucfirst($payment->payment_type) }}
+                                                {{ $payment->payment_type === 'recharge' ? 'Recarga' : ucfirst($payment->payment_type) }}
                                             </span>
                                         </div>
                                         <div class="text-xs text-gray-600">
@@ -246,7 +246,9 @@
                             @endforeach
                         </div>
                     @else
-                        <p class="text-sm text-gray-500 text-center py-8">No hay pagos registrados</p>
+                        <p class="text-sm text-gray-500 text-center py-8">
+                            {{ $tool->isPayPerUse() ? 'No hay recargas registradas' : 'No hay pagos registrados' }}
+                        </p>
                     @endif
                 </div>
             </div>
@@ -278,10 +280,35 @@
                         </p>
                     </div>
                     @if($tool->billing_type !== 'free')
-                        <div>
-                            <label class="block text-xs font-medium text-gray-600 mb-1">Costo</label>
-                            <p class="text-lg font-bold text-gray-900">{{ $tool->getFormattedCost() }}</p>
-                        </div>
+                        @if($tool->isPayPerUse())
+                            @if($tool->current_balance !== null)
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Saldo Actual</label>
+                                    <p class="text-lg font-bold {{ $tool->isBalanceLow() ? 'text-red-600' : 'text-gray-900' }}">
+                                        {{ $tool->getFormattedBalance() }}
+                                        @if($tool->isBalanceLow())
+                                            <span class="ml-2 text-xs text-red-600">⚠️ Saldo bajo</span>
+                                        @endif
+                                    </p>
+                                </div>
+                                @if($tool->minimum_recharge)
+                                    <div>
+                                        <label class="block text-xs font-medium text-gray-600 mb-1">Recarga Mínima Recomendada</label>
+                                        <p class="text-sm text-gray-900">{{ $tool->getBalanceCurrency() }} {{ number_format($tool->minimum_recharge, 2) }}</p>
+                                    </div>
+                                @endif
+                            @else
+                                <div>
+                                    <label class="block text-xs font-medium text-gray-600 mb-1">Saldo Actual</label>
+                                    <p class="text-sm text-gray-500">No disponible</p>
+                                </div>
+                            @endif
+                        @else
+                            <div>
+                                <label class="block text-xs font-medium text-gray-600 mb-1">Costo</label>
+                                <p class="text-lg font-bold text-gray-900">{{ $tool->getFormattedCost() }}</p>
+                            </div>
+                        @endif
                     @endif
                     @if($tool->start_date)
                         <div>
@@ -370,7 +397,7 @@
     <div class="relative bg-white rounded-xl shadow-xl max-w-md w-full mx-4 z-10" @click.stop>
         <div class="p-6">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-gray-900">Registrar Pago</h3>
+                <h3 class="text-lg font-semibold text-gray-900" x-text="billingType === 'pay_per_use' ? 'Registrar Recarga' : 'Registrar Pago'"></h3>
                 <button @click="closeModal()" class="text-gray-400 hover:text-gray-600">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
@@ -387,19 +414,23 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Fecha de Pago <span class="text-red-500">*</span></label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            <span x-text="billingType === 'pay_per_use' ? 'Fecha de Recarga' : 'Fecha de Pago'"></span> <span class="text-red-500">*</span>
+                        </label>
                         <input type="date" name="payment_date" required :value="today" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">Monto <span class="text-red-500">*</span></label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            <span x-text="billingType === 'pay_per_use' ? 'Monto de Recarga' : 'Monto'"></span> <span class="text-red-500">*</span>
+                        </label>
                         <div class="flex items-center gap-2">
                             <input type="text" name="currency" :value="currency" readonly class="w-20 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 text-sm">
                             <input type="number" name="amount" step="0.01" :value="amountValue" required class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                         </div>
                     </div>
 
-                    <div>
+                    <div x-show="billingType !== 'pay_per_use'">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Tipo de Pago <span class="text-red-500">*</span></label>
                         <select name="payment_type" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                             <option value="monthly" :selected="billingType === 'monthly'">Mensual</option>
@@ -409,6 +440,7 @@
                             <option value="other">Otro</option>
                         </select>
                     </div>
+                    <input type="hidden" name="payment_type" value="recharge" x-show="billingType === 'pay_per_use'">
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Comprobante</label>
@@ -418,7 +450,8 @@
 
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Notas</label>
-                        <textarea name="notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" placeholder="Notas adicionales sobre el pago..."></textarea>
+                        <textarea name="notes" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" 
+                                  :placeholder="billingType === 'pay_per_use' ? 'Notas adicionales sobre la recarga...' : 'Notas adicionales sobre el pago...'"></textarea>
                     </div>
                 </div>
 
@@ -427,7 +460,7 @@
                         Cancelar
                     </button>
                     <button type="submit" class="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">
-                        Registrar Pago
+                        <span x-text="billingType === 'pay_per_use' ? 'Registrar Recarga' : 'Registrar Pago'"></span>
                     </button>
                 </div>
             </form>

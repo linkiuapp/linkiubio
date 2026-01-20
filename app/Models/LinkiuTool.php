@@ -23,6 +23,9 @@ class LinkiuTool extends Model
         'monthly_cost',
         'yearly_cost',
         'currency',
+        'minimum_recharge',
+        'current_balance',
+        'balance_currency',
         'username',
         'password',
         'api_key',
@@ -45,6 +48,8 @@ class LinkiuTool extends Model
         'next_renewal_date' => 'date',
         'monthly_cost' => 'decimal:2',
         'yearly_cost' => 'decimal:2',
+        'minimum_recharge' => 'decimal:2',
+        'current_balance' => 'decimal:2',
         'is_critical' => 'boolean',
     ];
 
@@ -292,5 +297,46 @@ class LinkiuTool extends Model
         }
 
         return abs(now()->startOfDay()->diffInDays($this->next_renewal_date->startOfDay(), false));
+    }
+
+    /**
+     * Verificar si es una herramienta de pago por uso (requiere recargas)
+     */
+    public function isPayPerUse(): bool
+    {
+        return $this->billing_type === 'pay_per_use';
+    }
+
+    /**
+     * Verificar si el saldo está bajo (menor al mínimo recomendado)
+     */
+    public function isBalanceLow(): bool
+    {
+        if (!$this->isPayPerUse() || !$this->current_balance || !$this->minimum_recharge) {
+            return false;
+        }
+
+        return $this->current_balance < $this->minimum_recharge;
+    }
+
+    /**
+     * Obtener saldo formateado
+     */
+    public function getFormattedBalance(): ?string
+    {
+        if (!$this->current_balance) {
+            return null;
+        }
+
+        $currency = $this->balance_currency ?? $this->currency ?? 'USD';
+        return $currency . ' ' . number_format($this->current_balance, 2);
+    }
+
+    /**
+     * Obtener moneda del saldo (por defecto usa currency)
+     */
+    public function getBalanceCurrency(): string
+    {
+        return $this->balance_currency ?? $this->currency ?? 'USD';
     }
 }

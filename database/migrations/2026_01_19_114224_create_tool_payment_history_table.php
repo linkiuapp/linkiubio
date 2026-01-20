@@ -16,7 +16,7 @@ return new class extends Migration
             $table->foreignId('tool_id')->constrained('linkiu_tools')->cascadeOnDelete();
             $table->date('payment_date'); // Fecha de pago
             $table->decimal('amount', 10, 2); // Monto pagado
-            $table->enum('payment_type', ['monthly', 'yearly', 'renewal', 'one_time', 'other']); // Tipo de pago
+            $table->enum('payment_type', ['monthly', 'yearly', 'renewal', 'one_time', 'other', 'recharge']); // Tipo de pago/recarga
             $table->string('currency', 3)->default('USD'); // Moneda
             $table->string('receipt_path')->nullable(); // Ruta del comprobante (opcional)
             $table->text('notes')->nullable(); // Notas sobre el pago
