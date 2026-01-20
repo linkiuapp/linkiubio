@@ -56,7 +56,7 @@ class StorefrontController extends Controller
         // Por ahora obtenemos los 3 primeros productos activos
         $topProducts = Product::where('store_id', $store->id)
             ->where('is_active', true)
-            ->with('mainImage')
+            ->with(['mainImage', 'images', 'categories'])
             ->orderBy('created_at', 'desc')
             ->limit(3)
             ->get();
@@ -64,7 +64,7 @@ class StorefrontController extends Controller
         // Lo más nuevo: últimos 3 productos agregados
         $newProducts = Product::where('store_id', $store->id)
             ->where('is_active', true)
-            ->with('mainImage')
+            ->with(['mainImage', 'images', 'categories'])
             ->orderBy('created_at', 'desc')
             ->limit(3)
             ->get();
@@ -121,7 +121,7 @@ class StorefrontController extends Controller
                 ->whereHas('categories', function($query) use ($categoryIds) {
                     $query->whereIn('category_id', $categoryIds);
                 })
-                ->with('mainImage')
+                ->with(['mainImage', 'images', 'categories'])
                 ->limit(4)
                 ->get();
         }
@@ -154,7 +154,7 @@ class StorefrontController extends Controller
         // Query base de productos
         $query = Product::where('store_id', $store->id)
             ->where('is_active', true)
-            ->with(['mainImage', 'categories']);
+            ->with(['mainImage', 'images', 'categories']);
 
         // Aplicar búsqueda si existe
         if ($search = $request->get('search')) {
@@ -227,7 +227,7 @@ class StorefrontController extends Controller
                   ->orWhere('description', 'like', '%' . $search . '%')
                   ->orWhere('sku', 'like', '%' . $search . '%');
             })
-            ->with('mainImage')
+            ->with(['mainImage', 'images', 'categories'])
             ->limit(5)
             ->get()
             ->map(function ($product) use ($store) {
@@ -357,7 +357,7 @@ class StorefrontController extends Controller
             })
             ->where('store_id', $store->id)
             ->where('is_active', true)
-            ->with(['mainImage', 'categories'])
+            ->with(['mainImage', 'images', 'categories'])
             ->orderBy('name')
             ->get();
 

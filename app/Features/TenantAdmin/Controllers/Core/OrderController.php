@@ -293,7 +293,7 @@ class OrderController extends Controller
         // Obtener productos activos de la tienda
         $products = Product::byStore($store->id)
             ->active()
-            ->with(['variants', 'mainImage'])
+            ->with(['variants', 'mainImage', 'images', 'categories'])
             ->orderBy('name')
             ->get();
 
@@ -693,7 +693,7 @@ class OrderController extends Controller
         
         $products = Product::byStore($store->id)
             ->active()
-            ->with(['variants', 'mainImage'])
+            ->with(['variants', 'mainImage', 'images', 'categories'])
             ->orderBy('name')
             ->get();
 
