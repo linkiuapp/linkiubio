@@ -94,6 +94,7 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
         // User Management
         Route::resource('user-management', \App\Features\SuperLinkiu\Controllers\UserManagementController::class)
             ->except(['show'])
+            ->parameters(['user-management' => 'user'])
             ->names('user-management');
         
         // Store Approval Requests
