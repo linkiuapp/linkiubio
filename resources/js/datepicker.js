@@ -43,9 +43,13 @@ export async function initReservationDatepicker(selector, options = {}) {
         return null;
     }
 
+    // Configurar minDate como el inicio del día de hoy (sin hora)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
     const defaultOptions = {
         format: 'YYYY-MM-DD', // Formato ISO: 2025-11-04
-        minDate: new Date(), // Fecha mínima: hoy
+        minDate: today, // Fecha mínima: hoy (inicio del día)
         autoApply: true,
         singleMode: true,
         // Forzar formato ISO explícitamente
