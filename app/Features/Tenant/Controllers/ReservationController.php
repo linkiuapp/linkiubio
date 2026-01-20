@@ -82,6 +82,28 @@ class ReservationController extends Controller
         
         $settings = $this->reservationService->getSettings($store);
         
+        // Obtener días habilitados para el datepicker
+        $timeSlots = $settings->time_slots ?? [];
+        $enabledDays = array_keys($timeSlots); // ['monday', 'tuesday', etc.]
+        
+        // Mapear días en inglés a números de día de la semana (0 = domingo, 1 = lunes, etc.)
+        $dayMap = [
+            'sunday' => 0,
+            'monday' => 1,
+            'tuesday' => 2,
+            'wednesday' => 3,
+            'thursday' => 4,
+            'friday' => 5,
+            'saturday' => 6
+        ];
+        
+        $disabledWeekdays = [];
+        foreach (['sunday', 'monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday'] as $day) {
+            if (!in_array($day, $enabledDays)) {
+                $disabledWeekdays[] = $dayMap[$day];
+            }
+        }
+        
         // Obtener cuentas bancarias activas para transferencias
         $bankAccounts = BankAccount::whereHas('paymentMethod', function($query) use ($store) {
             $query->where('store_id', $store->id)
@@ -91,7 +113,7 @@ class ReservationController extends Controller
         ->where('is_active', true)
         ->get();
         
-        return view('tenant::reservations.index', compact('store', 'settings', 'bankAccounts'));
+        return view('tenant::reservations.index', compact('store', 'settings', 'bankAccounts', 'disabledWeekdays'));
     }
 
     /**

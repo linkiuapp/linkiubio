@@ -10,7 +10,7 @@ use App\Shared\Models\Order;
 use App\Features\TenantAdmin\Requests\Verticals\Restaurant\StoreTableRequest;
 use App\Features\TenantAdmin\Requests\Verticals\Restaurant\UpdateTableRequest;
 use App\Features\TenantAdmin\Requests\Verticals\Restaurant\UpdateDineInSettingsRequest;
-use App\Features\TenantAdmin\Services\Verticals\Restaurant\TableService;
+use App\Features\TenantAdmin\Services\verticals\restaurant\TableService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;

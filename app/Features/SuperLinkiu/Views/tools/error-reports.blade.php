@@ -23,8 +23,8 @@
                     <i data-lucide="alert-circle" class="w-6 h-6 text-red-600"></i>
                 </div>
                 <div class="ml-4">
-                    <p class="text-sm text-gray-600">Abiertos</p>
-                    <p class="text-2xl font-bold text-gray-900">{{ $reports->where('status', 'open')->count() }}</p>
+                    <p class="text-sm text-gray-600">Pendientes</p>
+                    <p class="text-2xl font-bold text-gray-900">{{ $reports->where('status', 'pending')->count() }}</p>
                 </div>
             </div>
         </div>
@@ -118,13 +118,13 @@
                                         name="status" 
                                         onchange="this.form.submit()"
                                         class="text-xs rounded-full px-2.5 py-0.5 border-0
-                                            @if($report->status === 'open') bg-red-100 text-red-800
+                                            @if($report->status === 'pending') bg-red-100 text-red-800
                                             @elseif($report->status === 'in_progress') bg-blue-100 text-blue-800
                                             @elseif($report->status === 'resolved') bg-green-100 text-green-800
                                             @else bg-gray-100 text-gray-800
                                             @endif"
                                     >
-                                        <option value="open" {{ $report->status === 'open' ? 'selected' : '' }}>Abierto</option>
+                                        <option value="pending" {{ $report->status === 'pending' ? 'selected' : '' }}>Pendiente</option>
                                         <option value="in_progress" {{ $report->status === 'in_progress' ? 'selected' : '' }}>En Progreso</option>
                                         <option value="resolved" {{ $report->status === 'resolved' ? 'selected' : '' }}>Resuelto</option>
                                         <option value="closed" {{ $report->status === 'closed' ? 'selected' : '' }}>Cerrado</option>

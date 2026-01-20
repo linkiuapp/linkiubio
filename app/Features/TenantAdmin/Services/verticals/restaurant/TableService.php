@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Features\TenantAdmin\Services\Verticals\Restaurant;
+namespace App\Features\TenantAdmin\Services\verticals\restaurant;
 
 use App\Shared\Models\Store;
 use App\Shared\Models\Table;

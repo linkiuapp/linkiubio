@@ -945,13 +945,19 @@ HTML;
         $items[] = [
             'label'  => 'Herramientas',
             'icon'   => 'wrench',
-            'active' => request()->routeIs('superlinkiu.tools.*'),
+            'active' => request()->routeIs('superlinkiu.tools.*') || request()->routeIs('superlinkiu.linkiu-tools.*'),
             'children' => [
                 [
                     'label'  => 'Eliminar Pedidos',
                     'url'    => route('superlinkiu.tools.delete-order'),
                     'icon'   => 'trash-2',
                     'active' => request()->routeIs('superlinkiu.tools.delete-order') || request()->routeIs('superlinkiu.tools.deletion-logs')
+                ],
+                [
+                    'label'  => 'Herramientas de Linkiu',
+                    'url'    => route('superlinkiu.linkiu-tools.index'),
+                    'icon'   => 'settings',
+                    'active' => request()->routeIs('superlinkiu.linkiu-tools.*')
                 ],
             ],
         ];

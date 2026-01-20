@@ -43,8 +43,14 @@ return new class extends Migration
             }
             
             // Composite index for role and store_id (for admin lookups)
+            // Using raw SQL to create index with prefix on role column to avoid key length issues
             if (!$this->indexExists('users', 'users_role_store_id_index')) {
-                $table->index(['role', 'store_id'], 'users_role_store_id_index');
+                try {
+                    \DB::statement('CREATE INDEX users_role_store_id_index ON users (role(50), store_id)');
+                } catch (\Exception $e) {
+                    // If index creation fails, skip it
+                    \Log::warning('Could not create users_role_store_id_index: ' . $e->getMessage());
+                }
             }
         });
 

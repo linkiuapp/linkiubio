@@ -68,6 +68,11 @@ export async function initReservationDatepicker(selector, options = {}) {
         position: 'auto'
     };
 
+    // Si se proporcionan días deshabilitados, agregarlos a las opciones
+    if (options.disableWeekdays && Array.isArray(options.disableWeekdays) && options.disableWeekdays.length > 0) {
+        defaultOptions.disableWeekdays = options.disableWeekdays;
+    }
+
     const litepickerOptions = { ...defaultOptions, ...options };
 
     // Si el selector es un string, convertirlo a elemento

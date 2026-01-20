@@ -329,9 +329,14 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     const depositPerPerson = {{ $settings->deposit_per_person ?? 0 }};
     
-    // Inicializar el datepicker
+    // Días de la semana deshabilitados (0 = domingo, 1 = lunes, ..., 6 = sábado)
+    const disabledWeekdays = @json($disabledWeekdays ?? []);
+    
+    // Inicializar el datepicker con días deshabilitados
     if (window.initReservationDatepicker) {
-        await window.initReservationDatepicker(dateInput);
+        await window.initReservationDatepicker(dateInput, {
+            disableWeekdays: disabledWeekdays
+        });
         
         // Configurar evento de Litepicker cuando esté listo
         if (dateInput._litepicker) {

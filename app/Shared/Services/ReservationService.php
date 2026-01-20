@@ -176,11 +176,12 @@ class ReservationService
 
     /**
      * Verificar si una fecha está disponible para reservas
-     * (verifica anticipación mínima)
+     * (verifica anticipación mínima y días habilitados)
      */
     public function isDateAvailable(Store $store, string $date): bool
     {
         $settings = $this->getSettings($store);
+        $timeSlots = $settings->time_slots ?? [];
         $minAdvanceHours = $settings->min_advance_hours ?? 2;
         
         $reservationDate = Carbon::parse($date);
@@ -188,6 +189,25 @@ class ReservationService
         
         // No permitir fechas pasadas
         if ($reservationDate->isPast() && !$reservationDate->isToday()) {
+            return false;
+        }
+        
+        // Verificar si el día de la semana está habilitado en la configuración
+        $dayOfWeek = strtolower($reservationDate->locale('es')->dayName);
+        $dayMap = [
+            'domingo' => 'sunday',
+            'lunes' => 'monday',
+            'martes' => 'tuesday',
+            'miércoles' => 'wednesday',
+            'jueves' => 'thursday',
+            'viernes' => 'friday',
+            'sábado' => 'saturday'
+        ];
+        
+        $dayKey = $dayMap[$dayOfWeek] ?? $dayOfWeek;
+        
+        // Si no hay configuración para ese día, la fecha no está disponible
+        if (empty($timeSlots[$dayKey])) {
             return false;
         }
         

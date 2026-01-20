@@ -12,6 +12,7 @@ use App\Features\SuperLinkiu\Controllers\BillingSettingController;
 use App\Features\SuperLinkiu\Controllers\MasterKeyRecoveryController;
 use App\Features\SuperLinkiu\Controllers\StoreReportController;
 use App\Features\SuperLinkiu\Controllers\OrderToolsController;
+use App\Features\SuperLinkiu\Controllers\ToolController;
 use Illuminate\Support\Facades\Route;
 
 // Rutas de SuperLinkiu
@@ -209,6 +210,28 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
             Route::post('/error-reports/{report}/update-status', [\App\Features\SuperLinkiu\Controllers\IconRequestController::class, 'updateErrorStatus'])->name('error-reports.update-status');
             Route::delete('/error-reports/{report}', [\App\Features\SuperLinkiu\Controllers\IconRequestController::class, 'deleteErrorReport'])->name('error-reports.delete');
         });
+
+        // Herramientas de Linkiu - Administración de servicios y herramientas
+        Route::prefix('linkiu-tools')->name('linkiu-tools.')->group(function () {
+            Route::get('/', [ToolController::class, 'index'])->name('index');
+            Route::get('/create', [ToolController::class, 'create'])->name('create');
+            Route::post('/', [ToolController::class, 'store'])->name('store');
+            Route::get('/{tool}', [ToolController::class, 'show'])->name('show');
+            Route::get('/{tool}/edit', [ToolController::class, 'edit'])->name('edit');
+            Route::put('/{tool}', [ToolController::class, 'update'])->name('update');
+            Route::delete('/{tool}', [ToolController::class, 'destroy'])->name('destroy');
+            
+            // Generar descripciones con IA
+            Route::post('/generate-description', [ToolController::class, 'generateDescription'])->name('generate-description');
+            Route::post('/generate-usage', [ToolController::class, 'generateUsageInLinkiu'])->name('generate-usage');
+            
+            // Historial de pagos
+            Route::post('/{tool}/payment', [ToolController::class, 'storePayment'])->name('store-payment');
+            
+            // Notificaciones WhatsApp
+            Route::post('/{tool}/send-notification', [ToolController::class, 'sendPaymentNotification'])->name('send-notification');
+        });
+
         Route::post('tickets/{ticket}/assign', [TicketController::class, 'assign'])
             ->name('tickets.assign');
         Route::post('tickets/{ticket}/priority', [TicketController::class, 'updatePriority'])
