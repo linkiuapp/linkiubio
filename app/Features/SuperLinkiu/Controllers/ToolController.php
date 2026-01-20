@@ -295,7 +295,17 @@ class ToolController extends Controller
         
         $validated = $request->validate([
             'payment_date' => 'required|date',
-            'amount' => 'required|numeric|min:0',
+            'amount' => [
+                'required',
+                'numeric',
+                'min:0',
+                function ($attribute, $value, $fail) use ($tool, $isRecharge) {
+                    // Validar recarga mínima si es pay_per_use
+                    if ($isRecharge && $tool->minimum_recharge && $value < $tool->minimum_recharge) {
+                        $fail("La recarga mínima es {$tool->getBalanceCurrency()} " . number_format($tool->minimum_recharge, 2) . ". Por favor ingresa un monto igual o mayor.");
+                    }
+                },
+            ],
             'payment_type' => $isRecharge 
                 ? 'required|in:recharge' 
                 : 'required|in:monthly,yearly,renewal,one_time,other',

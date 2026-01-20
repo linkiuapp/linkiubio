@@ -33,7 +33,7 @@
         </div>
         <div class="flex items-center gap-2">
             @if($tool->billing_type !== 'free')
-                <button onclick="openPaymentModal({{ $tool->id }}, '{{ $tool->name }}', '{{ $tool->getFormattedCost() }}', '{{ $tool->billing_type }}', '{{ $tool->currency }}')" 
+                <button onclick="openPaymentModal({{ $tool->id }}, '{{ $tool->name }}', '{{ $tool->getFormattedCost() }}', '{{ $tool->billing_type }}', '{{ $tool->currency }}', {{ $tool->minimum_recharge ?? 'null' }}, {{ $tool->current_balance ?? 'null' }})" 
                         class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center gap-2">
                     <i data-lucide="dollar-sign" class="w-4 h-4"></i>
                     {{ $tool->isPayPerUse() ? 'Recargar' : 'Pagar' }}
@@ -420,13 +420,44 @@
                         <input type="date" name="payment_date" required :value="today" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
                     </div>
 
+                    {{-- Información de recarga (solo para pay_per_use) --}}
+                    <div x-show="billingType === 'pay_per_use'" class="bg-blue-50 border border-blue-200 rounded-lg p-3 space-y-2">
+                        <div class="flex items-center gap-2 text-sm">
+                            <i data-lucide="info" class="w-4 h-4 text-blue-600"></i>
+                            <span class="font-medium text-blue-900">Información de Recarga</span>
+                        </div>
+                        <div class="grid grid-cols-2 gap-3 text-sm">
+                            <div x-show="currentBalance !== null">
+                                <span class="text-gray-600">Saldo Actual:</span>
+                                <span class="font-semibold text-gray-900 ml-1" x-text="currency + ' ' + (currentBalance ? parseFloat(currentBalance).toFixed(2) : '0.00')"></span>
+                            </div>
+                            <div x-show="minimumRecharge !== null">
+                                <span class="text-gray-600">Recarga Mínima:</span>
+                                <span class="font-semibold text-blue-700 ml-1" x-text="currency + ' ' + (minimumRecharge ? parseFloat(minimumRecharge).toFixed(2) : '0.00')"></span>
+                            </div>
+                        </div>
+                    </div>
+
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">
                             <span x-text="billingType === 'pay_per_use' ? 'Monto de Recarga' : 'Monto'"></span> <span class="text-red-500">*</span>
                         </label>
                         <div class="flex items-center gap-2">
                             <input type="text" name="currency" :value="currency" readonly class="w-20 px-3 py-2 border border-gray-300 rounded-lg bg-gray-50 text-gray-600 text-sm">
-                            <input type="number" name="amount" step="0.01" :value="amountValue" required class="flex-1 px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500">
+                            <input type="number" 
+                                   name="amount" 
+                                   step="0.01" 
+                                   :value="amountValue" 
+                                   x-model="rechargeAmount"
+                                   @input="validateRechargeAmount()"
+                                   required 
+                                   class="flex-1 px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500"
+                                   :class="billingType === 'pay_per_use' && minimumRecharge && parseFloat(rechargeAmount || 0) < parseFloat(minimumRecharge) ? 'border-red-500 bg-red-50' : 'border-gray-300'">
+                        </div>
+                        <div x-show="billingType === 'pay_per_use' && minimumRecharge && parseFloat(rechargeAmount || 0) < parseFloat(minimumRecharge)" 
+                             class="mt-1 text-xs text-red-600 flex items-center gap-1">
+                            <i data-lucide="alert-circle" class="w-3 h-3"></i>
+                            <span>La recarga mínima es <strong x-text="currency + ' ' + parseFloat(minimumRecharge).toFixed(2)"></strong></span>
                         </div>
                     </div>
 
@@ -480,6 +511,9 @@ function paymentModal() {
         amountValue: '',
         billingType: '',
         currency: '',
+        minimumRecharge: null,
+        currentBalance: null,
+        rechargeAmount: '',
         today: new Date().toISOString().split('T')[0],
         
         init() {
@@ -492,6 +526,9 @@ function paymentModal() {
                 self.amountValue = e.detail.amount.replace(/[^\d.]/g, '');
                 self.billingType = e.detail.billingType;
                 self.currency = e.detail.currency;
+                self.minimumRecharge = e.detail.minimumRecharge || null;
+                self.currentBalance = e.detail.currentBalance || null;
+                self.rechargeAmount = '';
                 self.open = true;
                 // Forzar actualización de Alpine
                 self.$nextTick(() => {
@@ -504,9 +541,25 @@ function paymentModal() {
         
         closeModal() {
             this.open = false;
+            this.rechargeAmount = '';
+        },
+        
+        validateRechargeAmount() {
+            // Validación se hace visualmente con Alpine
+            return true;
         },
         
         submitPayment() {
+            // Validar recarga mínima antes de enviar
+            if (this.billingType === 'pay_per_use' && this.minimumRecharge) {
+                const amount = parseFloat(this.rechargeAmount || this.amountValue || 0);
+                const minimum = parseFloat(this.minimumRecharge);
+                if (amount < minimum) {
+                    alert(`La recarga mínima es ${this.currency} ${minimum.toFixed(2)}. Por favor ingresa un monto igual o mayor.`);
+                    return false;
+                }
+            }
+            
             const formId = 'paymentForm-' + this.toolId;
             const form = document.getElementById(formId);
             if (!form) {
@@ -550,7 +603,7 @@ function paymentModal() {
     }
 }
 
-function openPaymentModal(toolId, toolName, amount, billingType, currency) {
+function openPaymentModal(toolId, toolName, amount, billingType, currency, minimumRecharge = null, currentBalance = null) {
     // Buscar el modal en la página
     const modal = document.querySelector('[x-data*="paymentModal"]');
     if (modal && modal.__x && modal.__x.$data) {
@@ -561,6 +614,9 @@ function openPaymentModal(toolId, toolName, amount, billingType, currency) {
         modal.__x.$data.amountValue = amount.replace(/[^\d.]/g, '');
         modal.__x.$data.billingType = billingType;
         modal.__x.$data.currency = currency;
+        modal.__x.$data.minimumRecharge = minimumRecharge;
+        modal.__x.$data.currentBalance = currentBalance;
+        modal.__x.$data.rechargeAmount = '';
         modal.__x.$data.open = true;
     } else {
         // Si Alpine no está disponible, usar evento
@@ -570,7 +626,9 @@ function openPaymentModal(toolId, toolName, amount, billingType, currency) {
                 toolName: toolName,
                 amount: amount,
                 billingType: billingType,
-                currency: currency
+                currency: currency,
+                minimumRecharge: minimumRecharge,
+                currentBalance: currentBalance
             }
         }));
     }
