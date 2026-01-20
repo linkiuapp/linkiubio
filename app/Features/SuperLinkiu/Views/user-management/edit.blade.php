@@ -17,7 +17,7 @@
 
     <!-- Main Form -->
     <div class="max-w-3xl">
-        <form action="{{ route('superlinkiu.user-management.update', $user->id) }}" method="POST" class="space-y-6">
+        <form action="{{ route('superlinkiu.user-management.update', ['user_management' => $user->id]) }}" method="POST" class="space-y-6">
             @csrf
             @method('PUT')
 

@@ -185,14 +185,14 @@
                                 <!-- Acciones -->
                                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                                     <div class="flex items-center justify-end gap-2">
-                                        <a href="{{ route('superlinkiu.user-management.edit', $user->id) }}" 
+                                        <a href="{{ route('superlinkiu.user-management.edit', ['user_management' => $user->id]) }}" 
                                            class="text-primary-300 hover:text-primary-400 p-2 hover:bg-primary-50 rounded-lg transition-colors"
                                            title="Editar">
                                             <x-solar-pen-2-outline class="w-4 h-4" />
                                         </a>
 
                                         @if($user->id !== auth()->id())
-                                            <form action="{{ route('superlinkiu.user-management.destroy', $user->id) }}" 
+                                            <form action="{{ route('superlinkiu.user-management.destroy', ['user_management' => $user->id]) }}" 
                                                   method="POST" 
                                                   onsubmit="return confirm('¿Estás seguro de eliminar este usuario?')">
                                                 @csrf
