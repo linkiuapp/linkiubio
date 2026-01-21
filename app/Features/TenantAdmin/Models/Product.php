@@ -317,8 +317,10 @@ class Product extends Model
             return Storage::disk('public')->url($this->mainImage->image_path);
         }
         
-        // Prioridad 2: Primera imagen disponible
-        $firstImage = $this->images()->first();
+        // Prioridad 2: Primera imagen disponible (usar relación eager-loaded si está disponible)
+        $firstImage = $this->relationLoaded('images') 
+            ? $this->images->first() 
+            : $this->images()->first();
         if ($firstImage && $firstImage->image_path) {
             return Storage::disk('public')->url($firstImage->image_path);
         }
@@ -336,8 +338,10 @@ class Product extends Model
             return Storage::disk('public')->url($this->mainImage->thumbnail_path);
         }
         
-        // Prioridad 2: Thumbnail de primera imagen disponible
-        $firstImage = $this->images()->first();
+        // Prioridad 2: Thumbnail de primera imagen disponible (usar relación eager-loaded si está disponible)
+        $firstImage = $this->relationLoaded('images') 
+            ? $this->images->first() 
+            : $this->images()->first();
         if ($firstImage && $firstImage->thumbnail_path) {
             return Storage::disk('public')->url($firstImage->thumbnail_path);
         }

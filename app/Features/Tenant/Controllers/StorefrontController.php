@@ -351,7 +351,7 @@ class StorefrontController extends Controller
             ->orderBy('name')
             ->get();
 
-        // Obtener productos de esta categoría
+        // Obtener productos de esta categoría con eager loading optimizado
         $products = Product::whereHas('categories', function($query) use ($category) {
                 $query->where('category_id', $category->id);
             })
@@ -361,6 +361,21 @@ class StorefrontController extends Controller
             ->orderBy('name')
             ->get();
 
+        // Leer store features una vez desde cache y pasar a la vista
+        $featureResolver = app(\App\Shared\Services\FeatureResolver::class);
+        $storeFeatures = $featureResolver->enabledForStore($store);
+        
+        // Verificar feature específico de favoritos (con lógica especial)
+        $favoritosEnabled = $storeFeatures->contains('favoritos');
+        if (!$favoritosEnabled) {
+            $vertical = $store->businessCategory?->vertical ?? 'ecommerce';
+            $hasReservas = $storeFeatures->contains('reservas_mesas') || 
+                          $storeFeatures->contains('reservas_hotel');
+            if ($vertical === 'ecommerce' && !$hasReservas) {
+                $favoritosEnabled = true;
+            }
+        }
+
         // Construir breadcrumbs
         $breadcrumbs = $this->buildBreadcrumbs($category);
 
@@ -369,7 +384,8 @@ class StorefrontController extends Controller
             'category', 
             'subcategories', 
             'products',
-            'breadcrumbs'
+            'breadcrumbs',
+            'favoritosEnabled'
         ));
     }
 

@@ -199,7 +199,7 @@
                                 <!-- Botones de acción -->
                                 <div class="flex gap-2 items-center md:mt-0 mt-2">
                                     <x-add-to-cart-button :product="$product" :store="$store" />
-                                    @if(featureEnabled($store, 'favoritos'))
+                                    @if($favoritosEnabled ?? false)
                                         <button class="p-3 flex items-center justify-center transition-transform bg-red-50 hover:bg-red-100 rounded-full hover:scale-110" 
                                                 data-favorite-btn
                                                 data-product-id="{{ $product->id }}">
