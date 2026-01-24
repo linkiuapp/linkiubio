@@ -174,7 +174,11 @@
                                 @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">{{ $invoice->plan->name }}</div>
+                                @if($invoice->plan)
+                                    <div class="text-sm text-gray-900">{{ $invoice->plan->name }}</div>
+                                @else
+                                    <div class="text-sm text-gray-400 italic">Plan no disponible</div>
+                                @endif
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm font-semibold text-gray-900">{{ $invoice->getFormattedAmount() }}</div>
