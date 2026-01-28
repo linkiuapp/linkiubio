@@ -22,6 +22,126 @@
         </div>
     </div>
 
+    {{-- Acceso Rápido Mobile - Acordeón --}}
+    <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-xl border border-blue-200 overflow-hidden">
+        <div class="p-6">
+            <div class="flex items-start justify-between mb-4">
+                <div>
+                    <h2 class="text-lg font-semibold text-gray-900 mb-1">Acceso Rápido Mobile</h2>
+                    <p class="text-sm text-gray-600">Accede a tus finanzas desde tu móvil sin necesidad de iniciar sesión</p>
+                </div>
+                <i data-lucide="smartphone" class="w-6 h-6 text-blue-600"></i>
+            </div>
+
+            @if(session('new_token'))
+                @php
+                    $newToken = \App\Features\SuperLinkiu\Models\PersonalFinance\AccessToken::where('token', session('new_token'))->first();
+                @endphp
+                @if($newToken)
+                <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
+                    <p class="text-sm font-medium text-green-800 mb-2">✅ Token generado exitosamente</p>
+                    <div class="bg-white rounded p-3 mb-2">
+                        <p class="text-xs text-gray-600 mb-1">URL de acceso:</p>
+                        <div class="flex items-center gap-2">
+                            <input type="text" id="accessUrl" readonly value="{{ route('superlinkiu.finances.quick-add.show', $newToken->short_code) }}" class="flex-1 px-3 py-2 bg-gray-50 border border-gray-300 rounded text-sm font-mono">
+                            <button onclick="copyAccessUrl()" class="px-3 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700">
+                                <i data-lucide="copy" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                @endif
+            @endif
+
+            <form action="{{ route('superlinkiu.personal-finance.generate-token') }}" method="POST" class="mb-4">
+                @csrf
+                <div class="flex gap-2">
+                    <input type="text" name="name" placeholder="Nombre del token (opcional)" class="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                    <input type="number" name="days_valid" placeholder="Días válidos" min="1" max="365" class="w-32 px-3 py-2 border border-gray-300 rounded-lg text-sm">
+                    <button type="submit" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium text-sm transition-colors">
+                        Generar
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        @php
+            $allTokens = \App\Features\SuperLinkiu\Models\PersonalFinance\AccessToken::where('user_id', auth()->id())
+                ->orderBy('created_at', 'desc')
+                ->get();
+        @endphp
+
+        @if($allTokens->count() > 0)
+        <div x-data="{ openTokens: false }" class="border-t border-blue-200">
+            <button @click="openTokens = !openTokens" class="w-full px-6 py-4 flex items-center justify-between hover:bg-blue-50/50 transition-colors">
+                <div class="flex items-center gap-3">
+                    <i data-lucide="key" class="w-5 h-5 text-blue-600"></i>
+                    <span class="text-sm font-medium text-gray-900">Tokens Generados</span>
+                    <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">{{ $allTokens->count() }}</span>
+                </div>
+                <i data-lucide="chevron-down" class="w-5 h-5 text-gray-400 transition-transform duration-200" :class="{ 'rotate-180': openTokens }"></i>
+            </button>
+            
+            <div x-show="openTokens" 
+                 x-transition:enter="transition ease-out duration-200"
+                 x-transition:enter-start="opacity-0 -translate-y-2"
+                 x-transition:enter-end="opacity-100 translate-y-0"
+                 x-transition:leave="transition ease-in duration-150"
+                 x-transition:leave-start="opacity-100 translate-y-0"
+                 x-transition:leave-end="opacity-0 -translate-y-2"
+                 class="px-6 pb-4 space-y-3">
+                @foreach($allTokens as $token)
+                    <div class="bg-white rounded-lg border border-gray-200 p-4 {{ !$token->is_active ? 'opacity-60' : '' }}">
+                        <div class="flex items-center justify-between mb-3">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <p class="text-sm font-medium text-gray-900">{{ $token->name ?? 'Token sin nombre' }}</p>
+                                    @if($token->is_active)
+                                        <span class="px-2 py-0.5 bg-green-100 text-green-700 text-xs rounded-full">Activo</span>
+                                    @else
+                                        <span class="px-2 py-0.5 bg-gray-100 text-gray-600 text-xs rounded-full">Inactivo</span>
+                                    @endif
+                                </div>
+                                <p class="text-xs text-gray-500">
+                                    Generado: {{ $token->created_at->format('d/m/Y H:i') }}
+                                    @if($token->expires_at)
+                                        | Expira: {{ $token->expires_at->format('d/m/Y') }}
+                                    @else
+                                        | Sin expiración
+                                    @endif
+                                </p>
+                            </div>
+                            @if($token->is_active)
+                            <form action="{{ route('superlinkiu.personal-finance.revoke-token', $token) }}" method="POST" class="inline" onsubmit="return confirm('¿Revocar este token?')">
+                                @csrf
+                                <button type="submit" class="px-3 py-1.5 text-xs bg-red-100 text-red-700 rounded hover:bg-red-200">
+                                    Revocar
+                                </button>
+                            </form>
+                            @endif
+                        </div>
+                        @if($token->is_active)
+                        <div class="bg-gray-50 rounded p-3">
+                            <p class="text-xs text-gray-600 mb-1">URL de acceso:</p>
+                            <div class="flex items-center gap-2">
+                                <input type="text" readonly value="{{ route('superlinkiu.finances.quick-add.show', $token->short_code) }}" class="flex-1 px-3 py-2 bg-white border border-gray-300 rounded text-xs font-mono">
+                                <button onclick="copyAccessUrl('{{ route('superlinkiu.finances.quick-add.show', $token->short_code) }}')" class="px-3 py-2 bg-blue-600 text-white rounded text-xs hover:bg-blue-700">
+                                    <i data-lucide="copy" class="w-3 h-3"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">
+                            <i data-lucide="info" class="w-3 h-3 inline"></i>
+                            Usos: {{ $token->usage_count }} | Último uso: {{ $token->last_used_at ? $token->last_used_at->diffForHumans() : 'Nunca' }}
+                        </p>
+                        @endif
+                    </div>
+                @endforeach
+            </div>
+        </div>
+        @endif
+    </div>
+
     {{-- Stats Cards --}}
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
         <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-4">
@@ -266,6 +386,24 @@
             lucide.createIcons();
         }
     });
+
+    function copyAccessUrl(url = null) {
+        const input = url ? null : document.getElementById('accessUrl');
+        const urlToCopy = url || input.value;
+        
+        navigator.clipboard.writeText(urlToCopy).then(function() {
+            alert('✅ URL copiada al portapapeles');
+        }, function() {
+            // Fallback para navegadores antiguos
+            const textArea = document.createElement('textarea');
+            textArea.value = urlToCopy;
+            document.body.appendChild(textArea);
+            textArea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textArea);
+            alert('✅ URL copiada al portapapeles');
+        });
+    }
 </script>
 @endpush
 @endsection

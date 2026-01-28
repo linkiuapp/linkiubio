@@ -8,6 +8,7 @@ use App\Features\SuperLinkiu\Models\PersonalFinance\Debt;
 use App\Features\SuperLinkiu\Models\PersonalFinance\Installment;
 use App\Features\SuperLinkiu\Models\PersonalFinance\Payment;
 use App\Features\SuperLinkiu\Models\PersonalFinance\Transaction;
+use App\Features\SuperLinkiu\Models\PersonalFinance\AccessToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
@@ -141,6 +142,12 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
+        // Token de acceso rápido (el más reciente activo)
+        $accessToken = AccessToken::where('user_id', $userId)
+            ->valid()
+            ->orderBy('created_at', 'desc')
+            ->first();
+
         return view('superlinkiu::personal-finance.dashboard', compact(
             'totalOwed',
             'totalPaidThisMonth',
@@ -153,7 +160,44 @@ class DashboardController extends Controller
             'totalOwedBreakdown',
             'monthlyIncome',
             'monthlyExpenses',
-            'recentTransactions'
+            'recentTransactions',
+            'accessToken'
         ));
+    }
+
+    /**
+     * Generar nuevo token de acceso rápido
+     */
+    public function generateAccessToken(Request $request)
+    {
+        $validated = $request->validate([
+            'name' => 'nullable|string|max:255',
+            'days_valid' => 'nullable|integer|min:1|max:365',
+        ]);
+
+        $token = AccessToken::generate(
+            auth()->id(),
+            $validated['name'] ?? 'Acceso rápido móvil',
+            $validated['days_valid'] ?? null
+        );
+
+        return redirect()->route('superlinkiu.personal-finance.dashboard')
+            ->with('success', 'Token de acceso generado exitosamente')
+            ->with('new_token', $token->token);
+    }
+
+    /**
+     * Revocar token de acceso
+     */
+    public function revokeAccessToken(AccessToken $accessToken)
+    {
+        if ($accessToken->user_id !== auth()->id()) {
+            abort(403);
+        }
+
+        $accessToken->update(['is_active' => false]);
+
+        return redirect()->route('superlinkiu.personal-finance.dashboard')
+            ->with('success', 'Token revocado exitosamente');
     }
 }
