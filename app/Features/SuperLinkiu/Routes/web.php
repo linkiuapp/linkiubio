@@ -13,6 +13,7 @@ use App\Features\SuperLinkiu\Controllers\MasterKeyRecoveryController;
 use App\Features\SuperLinkiu\Controllers\StoreReportController;
 use App\Features\SuperLinkiu\Controllers\OrderToolsController;
 use App\Features\SuperLinkiu\Controllers\ToolController;
+use App\Features\SuperLinkiu\Controllers\DepartmentsAndCitiesController;
 use Illuminate\Support\Facades\Route;
 
 // Rutas de SuperLinkiu
@@ -237,6 +238,21 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
             ->name('tickets.assign');
         Route::post('tickets/{ticket}/priority', [TicketController::class, 'updatePriority'])
             ->name('tickets.update-priority');
+
+        // Gestión de departamentos y ciudades (Dropshipping)
+        Route::prefix('departments-cities')->name('departments-cities.')->group(function () {
+            Route::get('/', [DepartmentsAndCitiesController::class, 'index'])->name('index');
+            Route::get('/create', [DepartmentsAndCitiesController::class, 'create'])->name('create');
+            Route::post('/', [DepartmentsAndCitiesController::class, 'store'])->name('store');
+            Route::get('/{department}/edit', [DepartmentsAndCitiesController::class, 'edit'])->name('edit');
+            Route::put('/{department}', [DepartmentsAndCitiesController::class, 'update'])->name('update');
+            Route::delete('/{department}', [DepartmentsAndCitiesController::class, 'destroy'])->name('destroy');
+            
+            // Rutas para ciudades
+            Route::post('/{department}/cities', [DepartmentsAndCitiesController::class, 'storeCity'])->name('cities.store');
+            Route::put('/{department}/cities/{city}', [DepartmentsAndCitiesController::class, 'updateCity'])->name('cities.update');
+            Route::delete('/{department}/cities/{city}', [DepartmentsAndCitiesController::class, 'destroyCity'])->name('cities.destroy');
+        });
 
         // Gestión de anuncios
         Route::resource('announcements', AnnouncementController::class)->names('announcements');
@@ -650,6 +666,66 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
                 Route::get('/{payment}', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubPaymentController::class, 'show'])->name('show');
                 Route::post('/{payment}/mark-paid', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubPaymentController::class, 'markAsPaid'])->name('mark-paid');
                 Route::post('/{payment}/cancel', [\App\Features\SuperLinkiu\Controllers\SubscriptionDev\SubPaymentController::class, 'cancel'])->name('cancel');
+            });
+        });
+
+        // ==========================================
+        // Personal Finance - Finanzas Personales
+        // ==========================================
+        Route::prefix('personal-finance')->name('personal-finance.')->group(function () {
+            // Dashboard
+            Route::get('/', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\DashboardController::class, 'index'])
+                ->name('dashboard');
+            
+            // Cuentas Bancarias
+            Route::prefix('accounts')->name('accounts.')->group(function () {
+                Route::get('/', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\AccountController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\AccountController::class, 'create'])->name('create');
+                Route::post('/', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\AccountController::class, 'store'])->name('store');
+                Route::get('/{account}', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\AccountController::class, 'show'])->name('show');
+                Route::get('/{account}/edit', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\AccountController::class, 'edit'])->name('edit');
+                Route::put('/{account}', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\AccountController::class, 'update'])->name('update');
+                Route::delete('/{account}', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\AccountController::class, 'destroy'])->name('destroy');
+            });
+            
+            // Deudas
+            Route::prefix('debts')->name('debts.')->group(function () {
+                Route::get('/', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\DebtController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\DebtController::class, 'create'])->name('create');
+                Route::post('/', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\DebtController::class, 'store'])->name('store');
+                Route::get('/{debt}', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\DebtController::class, 'show'])->name('show');
+                Route::get('/{debt}/edit', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\DebtController::class, 'edit'])->name('edit');
+                Route::put('/{debt}', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\DebtController::class, 'update'])->name('update');
+                Route::delete('/{debt}', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\DebtController::class, 'destroy'])->name('destroy');
+            });
+            
+            // Cuotas
+            Route::prefix('installments')->name('installments.')->group(function () {
+                Route::get('/', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\InstallmentController::class, 'index'])->name('index');
+                Route::post('/{installment}/mark-paid', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\InstallmentController::class, 'markAsPaid'])->name('mark-paid');
+            });
+            
+            // Pagos
+            Route::prefix('payments')->name('payments.')->group(function () {
+                Route::get('/', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\PaymentController::class, 'index'])->name('index');
+            });
+            
+            // Transacciones (Ingresos y Gastos)
+            Route::prefix('transactions')->name('transactions.')->group(function () {
+                Route::get('/', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\TransactionController::class, 'index'])->name('index');
+                Route::get('/create', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\TransactionController::class, 'create'])->name('create');
+                Route::post('/', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\TransactionController::class, 'store'])->name('store');
+                Route::get('/{transaction}/edit', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\TransactionController::class, 'edit'])->name('edit');
+                Route::put('/{transaction}', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\TransactionController::class, 'update'])->name('update');
+                Route::delete('/{transaction}', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\TransactionController::class, 'destroy'])->name('destroy');
+            });
+            
+            // Recordatorios de Pagos
+            Route::prefix('reminders')->name('reminders.')->group(function () {
+                Route::get('/', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\ReminderController::class, 'index'])->name('index');
+                Route::post('/', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\ReminderController::class, 'store'])->name('store');
+                Route::put('/{reminder}', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\ReminderController::class, 'update'])->name('update');
+                Route::delete('/{reminder}', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\ReminderController::class, 'destroy'])->name('destroy');
             });
         });
 

@@ -72,6 +72,12 @@ class SidebarBuilderService
     {
         $items = [];
 
+        // Si es dropshipping, usar estructura específica
+        if ($this->vertical === 'dropshipping') {
+            return $this->buildDropshippingSidebar();
+        }
+
+        // Estructura para otros verticales (ecommerce, restaurant, hotel, etc.)
         // Favoritos
         $items[] = ['type' => 'section', 'title' => 'Favoritos'];
         $items = array_merge($items, $this->buildFavoritesSection());
@@ -154,10 +160,41 @@ class SidebarBuilderService
             return $this->buildGracePeriodBanner($subscription, $checkoutUrl, $billingUrl);
         }
 
-        // PRIORIDAD 4: Calcular fechas y días restantes de suscripción
+        // PRIORIDAD 3.5: Trial vencido pero aún no procesado (período de gracia implícito)
         $isInTrial = $subscription->trial_end && $now->lte($subscription->trial_end);
-        $endDate = $isInTrial ? $subscription->trial_end : $subscription->current_period_end;
-        $startDate = $isInTrial ? $subscription->trial_start : $subscription->current_period_start;
+        $trialExpired = $subscription->trial_end && $now->gt($subscription->trial_end);
+        
+        if ($trialExpired && $status === 'active' && !$subscription->grace_period_end) {
+            // Trial venció pero no fue procesado aún - calcular días desde que venció
+            $daysSinceTrialEnded = (int) $subscription->trial_end->diffInDays($now);
+            $gracePeriodDays = 3; // Días de gracia estándar
+            $suspensionDays = 7; // Días antes de suspender
+            
+            // Si está dentro del período de gracia (primeros 3 días), mostrar banner de gracia
+            if ($daysSinceTrialEnded <= $gracePeriodDays) {
+                // Simular grace_period_end para mostrar el banner correcto
+                $graceEnd = $subscription->trial_end->copy()->addDays($gracePeriodDays);
+                $subscription->grace_period_end = $graceEnd;
+                return $this->buildGracePeriodBanner($subscription, $checkoutUrl, $billingUrl);
+            }
+            // Si pasó el período de gracia pero aún no se suspendió (días 4-7), mostrar aviso urgente
+            elseif ($daysSinceTrialEnded <= $suspensionDays) {
+                // Mostrar banner de "Prueba finalizada" con aviso de suspensión inminente
+                $daysUntilSuspension = $suspensionDays - $daysSinceTrialEnded;
+                return $this->buildTrialExpiredWarningBanner($subscription, $daysUntilSuspension, $checkoutUrl, $billingUrl);
+            }
+        }
+
+        // PRIORIDAD 4: Calcular fechas y días restantes de suscripción
+        // Si el trial venció, usar trial_end como referencia para mostrar el aviso
+        if ($trialExpired) {
+            $endDate = $subscription->trial_end;
+            $startDate = $subscription->trial_start;
+            $isInTrial = false; // Ya no está en trial, pero queremos mostrar el aviso
+        } else {
+            $endDate = $isInTrial ? $subscription->trial_end : $subscription->current_period_end;
+            $startDate = $isInTrial ? $subscription->trial_start : $subscription->current_period_start;
+        }
         
         if (!$endDate) {
             return null;
@@ -174,8 +211,8 @@ class SidebarBuilderService
         // Fecha formateada en español
         $endDateFormatted = $endDate->locale('es')->isoFormat('D MMM YYYY');
         
-        // Solo mostrar banner si quedan 15 días o menos, o si está en trial
-        if ($daysRemaining > 15 && !$isInTrial) {
+        // Solo mostrar banner si quedan 15 días o menos, si está en trial, o si el trial venció
+        if ($daysRemaining > 15 && !$isInTrial && !$trialExpired) {
             return null;
         }
 
@@ -190,7 +227,7 @@ class SidebarBuilderService
             $titleColor = 'text-red-800';
             $subtitleColor = 'text-red-600';
             $icon = 'alert-triangle';
-            $title = $isInTrial ? '¡Prueba finalizada!' : '¡Suscripción vencida!';
+            $title = ($isInTrial || $trialExpired) ? '¡Prueba finalizada!' : '¡Suscripción vencida!';
             $subtitle = 'Renueva para continuar';
         } elseif ($daysRemaining <= 3) {
             $bgColor = 'bg-red-50';
@@ -349,6 +386,54 @@ HTML;
                 Pagar ahora
             </a>
             <a href="{$billingUrl}" class="inline-flex items-center justify-center gap-1 rounded-lg border border-orange-300 bg-white px-3 py-2 text-xs font-medium text-orange-700 hover:bg-orange-50 transition-colors">
+                Ver detalles
+            </a>
+        </div>
+    </div>
+</div>
+HTML;
+
+        return [
+            'type' => 'custom',
+            'content' => $html,
+        ];
+    }
+
+    /**
+     * Banner de advertencia cuando el trial venció y está cerca de la suspensión
+     */
+    protected function buildTrialExpiredWarningBanner($subscription, int $daysUntilSuspension, string $checkoutUrl, string $billingUrl): array
+    {
+        $trialEndFormatted = $subscription->trial_end->locale('es')->isoFormat('D MMM YYYY');
+        $suspensionDate = $subscription->trial_end->copy()->addDays(7);
+        $suspensionDateFormatted = $suspensionDate->locale('es')->isoFormat('D MMM YYYY');
+
+        $html = <<<HTML
+<div class="mx-2 mb-3 mt-3">
+    <div class="rounded-xl bg-red-50 border-2 border-red-300 p-4 shadow-sm">
+        <!-- Header -->
+        <div class="flex items-center gap-3 mb-3">
+            <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100">
+                <i data-lucide="alert-triangle" class="h-5 w-5 text-red-600"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+                <p class="text-sm font-bold text-red-800">¡Prueba Finalizada!</p>
+                <p class="text-xs text-red-600">Suspensión en {$daysUntilSuspension} día(s)</p>
+            </div>
+        </div>
+        
+        <!-- Mensaje -->
+        <p class="text-xs text-red-700 mb-3 leading-relaxed">
+            Tu período de prueba terminó el <strong>{$trialEndFormatted}</strong>. Tu tienda será suspendida el <strong>{$suspensionDateFormatted}</strong> si no realizas el pago.
+        </p>
+        
+        <!-- Botones -->
+        <div class="flex gap-2">
+            <a href="{$checkoutUrl}" class="flex-1 inline-flex items-center justify-center gap-1.5 rounded-lg bg-red-600 px-3 py-2 text-xs font-semibold text-white hover:bg-red-700 transition-colors">
+                <i data-lucide="credit-card" class="h-3.5 w-3.5"></i>
+                Pagar ahora
+            </a>
+            <a href="{$billingUrl}" class="inline-flex items-center justify-center gap-1 rounded-lg border border-red-300 bg-white px-3 py-2 text-xs font-medium text-red-700 hover:bg-red-50 transition-colors">
                 Ver detalles
             </a>
         </div>
@@ -579,6 +664,9 @@ HTML;
         // 5.5. Release Notes (Nuevas Actualizaciones) - Sección independiente
         $items = array_merge($items, $this->buildSuperAdminReleaseNotesSection());
 
+        // 5.6. Dropshipping
+        $items = array_merge($items, $this->buildSuperAdminDropshippingSection());
+
         // 6. Herramientas y Monitoreo (reorganizado: incluye reportes y recuperación)
         $items = array_merge($items, $this->buildSuperAdminToolsSection());
 
@@ -587,6 +675,9 @@ HTML;
 
         // 8. LinkiuDev - Gestión de Proyectos y Suscripciones Dev (NO TOCAR)
         $items = array_merge($items, $this->buildLinkiuDevSection());
+
+        // 9. Finanzas Personales
+        $items = array_merge($items, $this->buildSuperAdminPersonalFinanceSection());
 
         return $items;
     }
@@ -1102,6 +1193,36 @@ HTML;
     /**
      * Construir sección de Release Notes (Nuevas Actualizaciones) para SuperAdmin
      */
+    /**
+     * Construir sección de Dropshipping para SuperAdmin
+     */
+    protected function buildSuperAdminDropshippingSection(): array
+    {
+        $items = [];
+
+        $totalDepartments = \App\Features\TenantAdmin\Models\Department::count();
+        $activeDepartments = \App\Features\TenantAdmin\Models\Department::where('is_active', true)->count();
+        $totalCities = \App\Features\TenantAdmin\Models\City::count();
+        $activeCities = \App\Features\TenantAdmin\Models\City::where('is_active', true)->count();
+
+        // Dropshipping (expandible)
+        $items[] = [
+            'label'  => 'Dropshipping',
+            'icon'   => 'truck',
+            'active' => request()->routeIs('superlinkiu.departments-cities.*'),
+            'children' => [
+                [
+                    'label'      => 'Departamentos y Ciudades',
+                    'url'        => route('superlinkiu.departments-cities.index'),
+                    'icon'       => 'map-pin',
+                    'active'     => request()->routeIs('superlinkiu.departments-cities.*'),
+                ],
+            ],
+        ];
+
+        return $items;
+    }
+
     protected function buildSuperAdminReleaseNotesSection(): array
     {
         $items = [];
@@ -1253,11 +1374,12 @@ HTML;
             'badgeColor' => $this->getBadgeColor('count', $variablesUsed, $variablesLimit)
         ];
 
-        // Productos
+        // Productos (o Productos Dropshipping si es vertical dropshipping)
         $productsUsed = $this->store->products_count ?? 0;
         $productsLimit = $this->store->plan->max_products;
+        $productLabel = $this->vertical === 'dropshipping' ? 'Productos Dropshipping' : 'Productos';
         $items[] = [
-            'label'      => 'Productos',
+            'label'      => $productLabel,
             'url'        => route('tenant.admin.products.index', ['store' => $this->store->slug]),
             'icon'       => 'package',
             'active'     => request()->routeIs('tenant.admin.products.*') && !request()->routeIs('tenant.admin.inventario.*'),
@@ -1274,37 +1396,41 @@ HTML;
             'indent'     => true
         ];
 
-        // Gestión de Envíos (si está habilitado o es ecommerce/dropshipping)
-        $shippingEnabled = featureEnabled($this->store, 'shipping') || 
-                          featureEnabled($this->store, 'shipping') ||
-                          in_array($this->vertical, ['ecommerce', 'dropshipping', 'restaurant']);
-        
-        if ($shippingEnabled) {
-            $simpleShipping = \App\Features\TenantAdmin\Models\SimpleShipping::where('store_id', $this->store->id)->first();
-            $currentZones = $simpleShipping ? $simpleShipping->zones()->count() : 0;
-            $maxZones = $this->store->plan->max_delivery_zones ?? 3;
+        // Gestión de Envíos (NO para dropshipping - tienen Zonas de Entrega)
+        if ($this->vertical !== 'dropshipping') {
+            $shippingEnabled = featureEnabled($this->store, 'shipping') || 
+                              featureEnabled($this->store, 'shipping') ||
+                              in_array($this->vertical, ['ecommerce', 'restaurant']);
             
-            $items[] = [
-                'label'      => 'Gestión de Envíos',
-                'url'        => route('tenant.admin.simple-shipping.index', ['store' => $this->store->slug]),
-                'icon'       => 'truck',
-                'active'     => request()->routeIs('tenant.admin.simple-shipping.*'),
-                'badge'      => "{$currentZones}/{$maxZones}",
-                'badgeColor' => $this->getBadgeColor('count', $currentZones, $maxZones)
-            ];
+            if ($shippingEnabled) {
+                $simpleShipping = \App\Features\TenantAdmin\Models\SimpleShipping::where('store_id', $this->store->id)->first();
+                $currentZones = $simpleShipping ? $simpleShipping->zones()->count() : 0;
+                $maxZones = $this->store->plan->max_delivery_zones ?? 3;
+                
+                $items[] = [
+                    'label'      => 'Gestión de Envíos',
+                    'url'        => route('tenant.admin.simple-shipping.index', ['store' => $this->store->slug]),
+                    'icon'       => 'truck',
+                    'active'     => request()->routeIs('tenant.admin.simple-shipping.*'),
+                    'badge'      => "{$currentZones}/{$maxZones}",
+                    'badgeColor' => $this->getBadgeColor('count', $currentZones, $maxZones)
+                ];
+            }
         }
 
-        // Métodos de Pago
-        $paymentMethodsUsed = $this->store->paymentMethods()->active()->count();
-        $paymentMethodsLimit = $this->store->plan->max_payment_methods ?? 4;
-        $items[] = [
-            'label'      => 'Métodos de Pago',
-            'url'        => route('tenant.admin.payment-methods.index', ['store' => $this->store->slug]),
-            'icon'       => 'dock',
-            'active'     => request()->routeIs('tenant.admin.payment-methods.*'),
-            'badge'      => "{$paymentMethodsUsed}/{$paymentMethodsLimit}",
-            'badgeColor' => $this->getBadgeColor('count', $paymentMethodsUsed, $paymentMethodsLimit)
-        ];
+        // Métodos de Pago (NO para dropshipping - LinkiuPay es principalmente COD)
+        if ($this->vertical !== 'dropshipping') {
+            $paymentMethodsUsed = $this->store->paymentMethods()->active()->count();
+            $paymentMethodsLimit = $this->store->plan->max_payment_methods ?? 4;
+            $items[] = [
+                'label'      => 'Métodos de Pago',
+                'url'        => route('tenant.admin.payment-methods.index', ['store' => $this->store->slug]),
+                'icon'       => 'dock',
+                'active'     => request()->routeIs('tenant.admin.payment-methods.*'),
+                'badge'      => "{$paymentMethodsUsed}/{$paymentMethodsLimit}",
+                'badgeColor' => $this->getBadgeColor('count', $paymentMethodsUsed, $paymentMethodsLimit)
+            ];
+        }
 
         // Sedes
         $locationsUsed = $this->store->locations_count ?? 0;
@@ -1412,17 +1538,19 @@ HTML;
             'active' => request()->routeIs('tenant.admin.store-design.*')
         ];
 
-        // Cupones
-        $couponsUsed = $this->store->active_coupons_count ?? 0;
-        $couponsLimit = $this->store->plan->max_active_coupons;
-        $items[] = [
-            'label'      => 'Cupones',
-            'url'        => route('tenant.admin.coupons.index', ['store' => $this->store->slug]),
-            'icon'       => 'ticket-percent',
-            'active'     => request()->routeIs('tenant.admin.coupons.*'),
-            'badge'      => "{$couponsUsed}/{$couponsLimit}",
-            'badgeColor' => $this->getBadgeColor('count', $couponsUsed, $couponsLimit)
-        ];
+        // Cupones (NO para dropshipping - Releasit tiene problemas con códigos de descuento)
+        if ($this->vertical !== 'dropshipping') {
+            $couponsUsed = $this->store->active_coupons_count ?? 0;
+            $couponsLimit = $this->store->plan->max_active_coupons;
+            $items[] = [
+                'label'      => 'Cupones',
+                'url'        => route('tenant.admin.coupons.index', ['store' => $this->store->slug]),
+                'icon'       => 'ticket-percent',
+                'active'     => request()->routeIs('tenant.admin.coupons.*'),
+                'badge'      => "{$couponsUsed}/{$couponsLimit}",
+                'badgeColor' => $this->getBadgeColor('count', $couponsUsed, $couponsLimit)
+            ];
+        }
 
         // Slider
         $slidersUsed = $this->store->sliders_count ?? 0;
@@ -1488,6 +1616,438 @@ HTML;
     }
 
     /**
+     * Construir sidebar completo para Dropshipping - Nueva estructura reorganizada
+     */
+    protected function buildDropshippingSidebar(): array
+    {
+        $items = [];
+
+        // 1. Dashboard
+        $items[] = [
+            'label'  => 'Dashboard',
+            'url'    => route('tenant.admin.dashboard', ['store' => $this->store->slug]),
+            'icon'   => 'layout-dashboard',
+            'active' => request()->routeIs('tenant.admin.dashboard')
+        ];
+
+        // 2. Mis pedidos
+        $pendingOrders = $this->store->pending_orders_count ?? 0;
+        $ordersUrl = \Illuminate\Support\Facades\Route::has('tenant.admin.dropshipping.orders.index')
+            ? route('tenant.admin.dropshipping.orders.index', ['store' => $this->store->slug])
+            : '#';
+        $items[] = [
+            'label'      => 'Mis pedidos',
+            'url'        => $ordersUrl,
+            'icon'       => 'package-search',
+            'active'     => \Illuminate\Support\Facades\Route::has('tenant.admin.dropshipping.orders.index')
+                && request()->routeIs('tenant.admin.dropshipping.orders.*'),
+            'badge'      => (string)$pendingOrders,
+            'badgeColor' => $pendingOrders > 0 ? $this->getBadgeColor('important') : $this->getBadgeColor('count')
+        ];
+
+        // 3. Mis Archivos
+        $filesUrl = \Illuminate\Support\Facades\Route::has('tenant.admin.dropshipping.files.index')
+            ? route('tenant.admin.dropshipping.files.index', ['store' => $this->store->slug])
+            : '#';
+        $items[] = [
+            'label'  => 'Mis Archivos',
+            'url'    => $filesUrl,
+            'icon'   => 'folder-open',
+            'active' => \Illuminate\Support\Facades\Route::has('tenant.admin.dropshipping.files.index')
+                && request()->routeIs('tenant.admin.dropshipping.files.*')
+        ];
+
+        // 4. Tienda (expandible)
+        $items[] = [
+            'label'  => 'Tienda',
+            'icon'   => 'store',
+            'active' => request()->routeIs('tenant.admin.categories.*') ||
+                       request()->routeIs('tenant.admin.products.*') ||
+                       request()->routeIs('tenant.admin.dropshipping.products.*') ||
+                       request()->routeIs('tenant.admin.inventario.*'),
+            'children' => $this->buildDropshippingStoreAndProductsSection()
+        ];
+
+        // 5. Herramientas (expandible)
+        $items[] = [
+            'label'  => 'Herramientas',
+            'icon'   => 'wrench',
+            'active' => request()->routeIs('tenant.admin.store-design.*') ||
+                       request()->routeIs('tenant.admin.buildiu.*') ||
+                       request()->routeIs('tenant.admin.linkiupay.*') ||
+                       request()->routeIs('tenant.admin.whatsapp-notifications.*') ||
+                       request()->routeIs('tenant.admin.sliders.*'),
+            'children' => $this->buildDropshippingToolsSection()
+        ];
+
+        // 5. Zona de entrega (expandible)
+        $items[] = [
+            'label'  => 'Zona de entrega',
+            'icon'   => 'map-pin',
+            'active' => request()->routeIs('tenant.admin.dropshipping.delivery-zones.*') ||
+                       request()->routeIs('tenant.admin.locations.*'),
+            'children' => $this->buildDropshippingDeliveryZonesSection()
+        ];
+
+        // 6. Integraciones (expandible)
+        $items[] = [
+            'label'  => 'Integraciones',
+            'icon'   => 'plug',
+            'active' => request()->routeIs('tenant.admin.dropshipping.suppliers.*'),
+            'children' => $this->buildDropshippingIntegrationsSection()
+        ];
+
+        // 7. Linkiulab (Analytics Avanzado) (expandible)
+        $items[] = [
+            'label'  => 'Linkiulab',
+            'icon'   => 'bar-chart-3',
+            'active' => request()->routeIs('tenant.admin.dropshipping.analytics.*'),
+            'children' => $this->buildLinkiulabSection()
+        ];
+
+        // 8. Tickets y Soporte
+        $items[] = ['type' => 'section', 'title' => 'Tickets y Soporte'];
+        $items = array_merge($items, $this->buildDropshippingSupportSection());
+
+        // Banner de suscripción al final (si aplica)
+        $subscriptionBanner = $this->buildSubscriptionBanner();
+        if ($subscriptionBanner) {
+            $items[] = ['type' => 'separator'];
+            $items[] = $subscriptionBanner;
+        }
+
+        return $items;
+    }
+
+    /**
+     * Construir sección de Tienda para Dropshipping (como children de "Tienda")
+     */
+    protected function buildDropshippingStoreAndProductsSection(): array
+    {
+        $items = [];
+
+        // Categorías
+        $categoriesUsed = $this->store->categories_count ?? 0;
+        $categoriesLimit = $this->store->plan->max_categories;
+        $items[] = [
+            'label'      => 'Categorías',
+            'url'        => route('tenant.admin.categories.index', ['store' => $this->store->slug]),
+            'icon'       => 'layout-list',
+            'active'     => request()->routeIs('tenant.admin.categories.*'),
+            'badge'      => "{$categoriesUsed}/{$categoriesLimit}",
+            'badgeColor' => $this->getBadgeColor('count', $categoriesUsed, $categoriesLimit)
+        ];
+
+        // Variables NO aplica para dropshipping - se crean directamente en el producto
+
+        // Productos Dropshipping
+        $productsUsed = $this->store->products_count ?? 0;
+        $productsLimit = $this->store->plan->max_products;
+        $items[] = [
+            'label'      => 'Productos Dropshipping',
+            'url'        => Route::has('tenant.admin.dropshipping.products.index') 
+                ? route('tenant.admin.dropshipping.products.index', ['store' => $this->store->slug])
+                : '#',
+            'icon'       => 'package',
+            'active'     => Route::has('tenant.admin.dropshipping.products.index') 
+                && request()->routeIs('tenant.admin.dropshipping.products.*'),
+            'badge'      => "{$productsUsed}/{$productsLimit}",
+            'badgeColor' => $this->getBadgeColor('count', $productsUsed, $productsLimit)
+        ];
+
+        // Inventario
+        $items[] = [
+            'label'      => 'Inventario',
+            'url'        => route('tenant.admin.inventario.index', ['store' => $this->store->slug]),
+            'icon'       => 'warehouse',
+            'active'     => request()->routeIs('tenant.admin.inventario.*')
+        ];
+
+        return $items;
+    }
+
+    /**
+     * Construir sección de Herramientas para Dropshipping
+     */
+    protected function buildDropshippingToolsSection(): array
+    {
+        $items = [];
+
+        // Diseño de la Tienda
+        $items[] = [
+            'label'  => 'Diseño de la Tienda',
+            'url'    => route('tenant.admin.store-design.index', ['store' => $this->store->slug]),
+            'icon'   => 'palette',
+            'active' => request()->routeIs('tenant.admin.store-design.*')
+        ];
+
+        // Buildiu
+        $buildiuUrl = \Illuminate\Support\Facades\Route::has('tenant.admin.buildiu.index')
+            ? route('tenant.admin.buildiu.index', ['store' => $this->store->slug])
+            : '#';
+        $items[] = [
+            'label'  => 'Buildiu',
+            'url'    => $buildiuUrl,
+            'icon'   => 'wand-2',
+            'active' => \Illuminate\Support\Facades\Route::has('tenant.admin.buildiu.index')
+                && request()->routeIs('tenant.admin.buildiu.*')
+        ];
+
+        // LinkiuPay (expandible)
+        $items[] = [
+            'label'  => 'LinkiuPay',
+            'icon'   => 'credit-card',
+            'active' => request()->routeIs('tenant.admin.linkiupay.*'),
+            'children' => [
+                [
+                    'label'  => 'Ofertas',
+                    'url'    => \Illuminate\Support\Facades\Route::has('tenant.admin.linkiupay.offers.index')
+                        ? route('tenant.admin.linkiupay.offers.index', ['store' => $this->store->slug])
+                        : '#',
+                    'icon'   => 'badge-dollar-sign',
+                    'active' => \Illuminate\Support\Facades\Route::has('tenant.admin.linkiupay.offers.index')
+                        && request()->routeIs('tenant.admin.linkiupay.offers.*')
+                ],
+                [
+                    'label'  => 'Campos de checkout',
+                    'url'    => \Illuminate\Support\Facades\Route::has('tenant.admin.linkiupay.fields.index')
+                        ? route('tenant.admin.linkiupay.fields.index', ['store' => $this->store->slug])
+                        : '#',
+                    'icon'   => 'list-filter',
+                    'active' => \Illuminate\Support\Facades\Route::has('tenant.admin.linkiupay.fields.index')
+                        && request()->routeIs('tenant.admin.linkiupay.fields.*')
+                ],
+                [
+                    'label'  => 'Estadísticas',
+                    'url'    => \Illuminate\Support\Facades\Route::has('tenant.admin.linkiupay.statistics.index')
+                        ? route('tenant.admin.linkiupay.statistics.index', ['store' => $this->store->slug])
+                        : '#',
+                    'icon'   => 'bar-chart-2',
+                    'active' => \Illuminate\Support\Facades\Route::has('tenant.admin.linkiupay.statistics.index')
+                        && request()->routeIs('tenant.admin.linkiupay.statistics.*')
+                ],
+            ]
+        ];
+
+        // Notificaciones WhatsApp
+        if ($this->store->plan && $this->store->plan->whatsapp_integration) {
+            $items[] = [
+                'label'  => 'Notificaciones WhatsApp',
+                'url'    => route('tenant.admin.whatsapp-notifications.index', ['store' => $this->store->slug]),
+                'icon'   => 'message-circle',
+                'active' => request()->routeIs('tenant.admin.whatsapp-notifications.*')
+            ];
+        }
+
+        // Slider
+        $slidersUsed = $this->store->sliders_count ?? 0;
+        $slidersLimit = $this->store->plan->max_sliders ?? $this->store->plan->max_slider ?? 1;
+        $items[] = [
+            'label'      => 'Slider',
+            'url'        => route('tenant.admin.sliders.index', ['store' => $this->store->slug]),
+            'icon'       => 'images',
+            'active'     => request()->routeIs('tenant.admin.sliders.*'),
+            'badge'      => "{$slidersUsed}/{$slidersLimit}",
+            'badgeColor' => $this->getBadgeColor('count', $slidersUsed, $slidersLimit)
+        ];
+
+        return $items;
+    }
+
+    /**
+     * Construir sección de Zona de Entrega para Dropshipping (con Sedes dentro)
+     */
+    protected function buildDropshippingDeliveryZonesSection(): array
+    {
+        $items = [];
+
+        // Costos de envío para dropshipping
+        $shippingCostUrl = \Illuminate\Support\Facades\Route::has('tenant.admin.dropshipping.shipping-cost.index')
+            ? route('tenant.admin.dropshipping.shipping-cost.index', ['store' => $this->store->slug])
+            : '#';
+        $items[] = [
+            'label'  => 'Costos de envío',
+            'url'    => $shippingCostUrl,
+            'icon'   => 'truck',
+            'active' => \Illuminate\Support\Facades\Route::has('tenant.admin.dropshipping.shipping-cost.index')
+                && request()->routeIs('tenant.admin.dropshipping.shipping-cost.*')
+        ];
+
+        // Sedes (dentro de Zona de entrega)
+        $locationsUsed = $this->store->locations_count ?? 0;
+        $locationsLimit = $this->store->plan->max_locations ?? $this->store->plan->max_sedes ?? 1;
+        $items[] = [
+            'label'      => 'Sedes',
+            'url'        => route('tenant.admin.locations.index', ['store' => $this->store->slug]),
+            'icon'       => 'store',
+            'active'     => request()->routeIs('tenant.admin.locations.*'),
+            'badge'      => "{$locationsUsed}/{$locationsLimit}",
+            'badgeColor' => $this->getBadgeColor('count', $locationsUsed, $locationsLimit)
+        ];
+
+        return $items;
+    }
+
+    /**
+     * Construir sección de Linkiulab (Analytics Avanzado)
+     */
+    protected function buildLinkiulabSection(): array
+    {
+        $items = [];
+
+        // Visitas y Tráfico
+        $trafficUrl = \Illuminate\Support\Facades\Route::has('tenant.admin.dropshipping.analytics.traffic.index')
+            ? route('tenant.admin.dropshipping.analytics.traffic.index', ['store' => $this->store->slug])
+            : '#';
+        $items[] = [
+            'label'  => 'Visitas y Tráfico',
+            'url'    => $trafficUrl,
+            'icon'   => 'trending-up',
+            'active' => \Illuminate\Support\Facades\Route::has('tenant.admin.dropshipping.analytics.traffic.index')
+                && request()->routeIs('tenant.admin.dropshipping.analytics.traffic.*')
+        ];
+
+        // Secciones Visitadas
+        $sectionsUrl = \Illuminate\Support\Facades\Route::has('tenant.admin.dropshipping.analytics.sections.index')
+            ? route('tenant.admin.dropshipping.analytics.sections.index', ['store' => $this->store->slug])
+            : '#';
+        $items[] = [
+            'label'  => 'Secciones Visitadas',
+            'url'    => $sectionsUrl,
+            'icon'   => 'layout-grid',
+            'active' => \Illuminate\Support\Facades\Route::has('tenant.admin.dropshipping.analytics.sections.index')
+                && request()->routeIs('tenant.admin.dropshipping.analytics.sections.*')
+        ];
+
+        // Conversiones
+        $conversionsUrl = \Illuminate\Support\Facades\Route::has('tenant.admin.dropshipping.analytics.conversions.index')
+            ? route('tenant.admin.dropshipping.analytics.conversions.index', ['store' => $this->store->slug])
+            : '#';
+        $items[] = [
+            'label'  => 'Conversiones',
+            'url'    => $conversionsUrl,
+            'icon'   => 'target',
+            'active' => \Illuminate\Support\Facades\Route::has('tenant.admin.dropshipping.analytics.conversions.index')
+                && request()->routeIs('tenant.admin.dropshipping.analytics.conversions.*')
+        ];
+
+        // Productos Más Vistos
+        $productsUrl = \Illuminate\Support\Facades\Route::has('tenant.admin.dropshipping.analytics.products.index')
+            ? route('tenant.admin.dropshipping.analytics.products.index', ['store' => $this->store->slug])
+            : '#';
+        $items[] = [
+            'label'  => 'Productos Más Vistos',
+            'url'    => $productsUrl,
+            'icon'   => 'eye',
+            'active' => \Illuminate\Support\Facades\Route::has('tenant.admin.dropshipping.analytics.products.index')
+                && request()->routeIs('tenant.admin.dropshipping.analytics.products.*')
+        ];
+
+        // Heatmaps (Próximamente)
+        $items[] = [
+            'label'  => 'Heatmaps',
+            'url'    => '#',
+            'icon'   => 'map',
+            'active' => false,
+            'badge'  => 'Próximamente',
+            'badgeColor' => $this->getBadgeColor('beta')
+        ];
+
+        return $items;
+    }
+
+
+    /**
+     * Construir sección de Integraciones para Dropshipping (como children de "Integraciones")
+     */
+    protected function buildDropshippingIntegrationsSection(): array
+    {
+        $items = [];
+
+        // Dropshipping y Logística (expandible)
+        $dropiUrl = \Illuminate\Support\Facades\Route::has('tenant.admin.dropshipping.suppliers.show')
+            ? route('tenant.admin.dropshipping.suppliers.show', ['store' => $this->store->slug, 'supplier' => 'dropi'])
+            : '#';
+        $mastershopUrl = \Illuminate\Support\Facades\Route::has('tenant.admin.dropshipping.suppliers.show')
+            ? route('tenant.admin.dropshipping.suppliers.show', ['store' => $this->store->slug, 'supplier' => 'mastershop'])
+            : '#';
+
+        $items[] = [
+            'label'  => 'Dropshipping y Logística',
+            'icon'   => 'truck',
+            'active' => \Illuminate\Support\Facades\Route::has('tenant.admin.dropshipping.suppliers.show')
+                && request()->routeIs('tenant.admin.dropshipping.suppliers.*'),
+            'children' => [
+                [
+                    'label'  => 'Dropi',
+                    'url'    => $dropiUrl,
+                    'icon'   => 'package',
+                    'active' => \Illuminate\Support\Facades\Route::has('tenant.admin.dropshipping.suppliers.show')
+                        && request()->routeIs('tenant.admin.dropshipping.suppliers.*') 
+                        && request()->get('supplier') === 'dropi'
+                ],
+                [
+                    'label'  => 'Mastershop',
+                    'url'    => $mastershopUrl,
+                    'icon'   => 'package',
+                    'active' => \Illuminate\Support\Facades\Route::has('tenant.admin.dropshipping.suppliers.show')
+                        && request()->routeIs('tenant.admin.dropshipping.suppliers.*') 
+                        && request()->get('supplier') === 'mastershop'
+                ],
+            ],
+        ];
+
+        // Sincronización (Próximamente)
+        $items[] = [
+            'label'  => 'Sincronización',
+            'url'    => '#',
+            'icon'   => 'refresh-cw',
+            'active' => false,
+            'badge'  => 'Próximamente',
+            'badgeColor' => $this->getBadgeColor('beta')
+        ];
+
+        // Pasarelas (Próximamente)
+        $items[] = [
+            'label'  => 'Pasarelas',
+            'url'    => '#',
+            'icon'   => 'credit-card',
+            'active' => false,
+            'badge'  => 'Próximamente',
+            'badgeColor' => $this->getBadgeColor('beta')
+        ];
+
+        return $items;
+    }
+
+
+    /**
+     * Construir sección de Soporte para Dropshipping
+     */
+    protected function buildDropshippingSupportSection(): array
+    {
+        $items = [];
+
+        // Soporte y Tickets
+        $ticketsThisMonth = $this->store->tickets()->whereMonth('created_at', now()->month)->whereYear('created_at', now()->year)->count();
+        $ticketsLimit = $this->store->plan->max_tickets_per_month ?? 999;
+        $openTicketsCount = $this->store->tickets()->whereIn('status', ['open', 'in_progress'])->count();
+        
+        $items[] = [
+            'label'      => 'Soporte y Tickets',
+            'url'        => route('tenant.admin.tickets.index', ['store' => $this->store->slug]),
+            'icon'       => 'server-crash',
+            'active'     => request()->routeIs('tenant.admin.tickets.*'),
+            'badge'      => "{$ticketsThisMonth}/{$ticketsLimit}",
+            'badgeColor' => $this->getBadgeColor('count', $ticketsThisMonth, $ticketsLimit),
+            'subBadge'   => $openTicketsCount > 0 ? (string)$openTicketsCount : null,
+            'subBadgeColor' => $openTicketsCount > 0 ? $this->getBadgeColor('error') : null
+        ];
+
+        return $items;
+    }
+
+    /**
      * Construir footer del sidebar
      */
     public function buildFooter(): array
@@ -1545,6 +2105,88 @@ HTML;
         }
 
         return $footer;
+    }
+
+    /**
+     * Construir sección de Finanzas Personales para SuperAdmin
+     */
+    protected function buildSuperAdminPersonalFinanceSection(): array
+    {
+        $items = [];
+        $userId = auth()->id();
+
+        // Contar cuotas vencidas y próximas
+        $overdueCount = \App\Features\SuperLinkiu\Models\PersonalFinance\Installment::whereHas('debt', function($query) use ($userId) {
+            $query->where('user_id', $userId)
+                  ->where('status', 'active');
+        })
+        ->where('status', 'pending')
+        ->where('due_date', '<', now())
+        ->count();
+
+        $upcomingCount = \App\Features\SuperLinkiu\Models\PersonalFinance\Installment::whereHas('debt', function($query) use ($userId) {
+            $query->where('user_id', $userId)
+                  ->where('status', 'active');
+        })
+        ->where('status', 'pending')
+        ->whereBetween('due_date', [now(), now()->addDays(7)])
+        ->count();
+
+        $items[] = [
+            'label'  => 'Finanzas Personales',
+            'icon'   => 'wallet',
+            'active' => request()->routeIs('superlinkiu.personal-finance.*'),
+            'children' => [
+                [
+                    'label'  => 'Dashboard',
+                    'url'    => route('superlinkiu.personal-finance.dashboard'),
+                    'icon'   => 'layout-dashboard',
+                    'active' => request()->routeIs('superlinkiu.personal-finance.dashboard')
+                ],
+                [
+                    'label'  => 'Cuentas Bancarias',
+                    'url'    => route('superlinkiu.personal-finance.accounts.index'),
+                    'icon'   => 'credit-card',
+                    'active' => request()->routeIs('superlinkiu.personal-finance.accounts.*')
+                ],
+                [
+                    'label'  => 'Deudas',
+                    'url'    => route('superlinkiu.personal-finance.debts.index'),
+                    'icon'   => 'file-text',
+                    'active' => request()->routeIs('superlinkiu.personal-finance.debts.*')
+                ],
+                [
+                    'label'      => 'Cuotas Pendientes',
+                    'url'        => route('superlinkiu.personal-finance.installments.index'),
+                    'icon'       => 'calendar',
+                    'active'     => request()->routeIs('superlinkiu.personal-finance.installments.*'),
+                    'badge'      => $upcomingCount > 0 ? (string)$upcomingCount : null,
+                    'badgeColor' => $upcomingCount > 0 ? 'bg-blue-500 text-white' : null,
+                    'subBadge'   => $overdueCount > 0 ? (string)$overdueCount : null,
+                    'subBadgeColor' => $overdueCount > 0 ? 'bg-red-500 text-white' : null
+                ],
+                [
+                    'label'  => 'Historial de Pagos',
+                    'url'    => route('superlinkiu.personal-finance.payments.index'),
+                    'icon'   => 'history',
+                    'active' => request()->routeIs('superlinkiu.personal-finance.payments.*')
+                ],
+                [
+                    'label'  => 'Ingresos y Gastos',
+                    'url'    => route('superlinkiu.personal-finance.transactions.index'),
+                    'icon'   => 'receipt',
+                    'active' => request()->routeIs('superlinkiu.personal-finance.transactions.*')
+                ],
+                [
+                    'label'  => 'Recordatorios',
+                    'url'    => route('superlinkiu.personal-finance.reminders.index'),
+                    'icon'   => 'bell',
+                    'active' => request()->routeIs('superlinkiu.personal-finance.reminders.*')
+                ],
+            ],
+        ];
+
+        return $items;
     }
 }
 
