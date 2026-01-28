@@ -676,6 +676,10 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
             // Dashboard
             Route::get('/', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\DashboardController::class, 'index'])
                 ->name('dashboard');
+            Route::post('/generate-token', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\DashboardController::class, 'generateAccessToken'])
+                ->name('generate-token');
+            Route::post('/revoke-token/{accessToken}', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\DashboardController::class, 'revokeAccessToken'])
+                ->name('revoke-token');
             
             // Cuentas Bancarias
             Route::prefix('accounts')->name('accounts.')->group(function () {
@@ -727,6 +731,14 @@ Route::prefix('superlinkiu')->name('superlinkiu.')->middleware('web')->group(fun
                 Route::put('/{reminder}', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\ReminderController::class, 'update'])->name('update');
                 Route::delete('/{reminder}', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\ReminderController::class, 'destroy'])->name('destroy');
             });
+        });
+
+        // Acceso Rápido Mobile (Público con token)
+        Route::prefix('finances/quick-add')->name('finances.quick-add.')->group(function () {
+            Route::get('/{token}', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\QuickAccessController::class, 'show'])->name('show');
+            Route::post('/{token}/pay', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\QuickAccessController::class, 'payInstallment'])->name('pay');
+            Route::post('/{token}/income', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\QuickAccessController::class, 'addIncome'])->name('income');
+            Route::post('/{token}/expense', [\App\Features\SuperLinkiu\Controllers\PersonalFinance\QuickAccessController::class, 'addExpense'])->name('expense');
         });
 
         // Logout (dentro del middleware auth)
