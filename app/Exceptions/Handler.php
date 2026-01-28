@@ -36,6 +36,46 @@ class Handler extends ExceptionHandler
     }
 
     /**
+     * Render an exception into an HTTP response.
+     */
+    public function render($request, Throwable $exception)
+    {
+        // Para errores HTTP 500, pasar la excepción a la vista
+        if ($this->isHttpException($exception)) {
+            $statusCode = $exception->getStatusCode();
+            
+            if ($statusCode === 500) {
+                return response()->view('errors.500', [
+                    'exception' => $exception,
+                ], 500);
+            }
+        }
+
+        // Para errores que no son HTTP exceptions pero son errores del servidor
+        // Solo interceptar si NO es una excepción de validación o autenticación
+        if (!$this->isHttpException($exception) && 
+            !($exception instanceof \Illuminate\Validation\ValidationException) &&
+            !($exception instanceof \Illuminate\Auth\AuthenticationException)) {
+            
+            // Mostrar vista personalizada para errores críticos o en modo debug
+            if (config('app.debug') || 
+                $exception instanceof \ErrorException ||
+                $exception instanceof \ParseError ||
+                $exception instanceof \TypeError ||
+                $exception instanceof \ArgumentCountError ||
+                $exception instanceof \ArithmeticError) {
+                
+                return response()->view('errors.500', [
+                    'exception' => $exception,
+                ], 500);
+            }
+        }
+
+        // Para otras excepciones, usar el render por defecto
+        return parent::render($request, $exception);
+    }
+
+    /**
      * Log error to database
      */
     protected function logErrorToDatabase(Throwable $exception): void

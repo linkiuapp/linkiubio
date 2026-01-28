@@ -1200,6 +1200,8 @@ HTML;
     {
         $items = [];
 
+        // TODO: Descomentar cuando esté lista la funcionalidad de departamentos y ciudades
+        /*
         $totalDepartments = \App\Features\TenantAdmin\Models\Department::count();
         $activeDepartments = \App\Features\TenantAdmin\Models\Department::where('is_active', true)->count();
         $totalCities = \App\Features\TenantAdmin\Models\City::count();
@@ -1219,6 +1221,7 @@ HTML;
                 ],
             ],
         ];
+        */
 
         return $items;
     }

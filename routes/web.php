@@ -16,6 +16,10 @@ Route::get('/admin-login', function () {
     return view('public::auth.store-login');
 })->name('store.login');
 
+// Endpoint público para reportar errores del sistema (error 500)
+Route::post('/api/error-report', [App\Features\TenantAdmin\Controllers\Core\ErrorReportController::class, 'storePublic'])
+    ->name('api.error-report');
+
 // Wizard de Registro Público
 Route::prefix('registre')->name('register.')->group(function () {
     Route::get('/', [App\Features\Public\Controllers\RegistrationWizardController::class, 'step1'])->name('step1');
@@ -355,7 +359,9 @@ Route::get('/storage/tickets/{store}/{ticket}/responses/{response}/{filename}', 
 
 // Ruta para servir SVG del DesignSystem desde app/Features/DesignSystem/images-ui
 Route::get('/images-ui/{filename}', function ($filename) {
-    $filePath = app_path('Features/DesignSystem/images-ui/' . $filename);
+    // Decodificar el nombre del archivo (puede venir con espacios codificados)
+    $decodedFilename = urldecode($filename);
+    $filePath = app_path('Features/DesignSystem/images-ui/' . $decodedFilename);
     
     if (!file_exists($filePath)) {
         abort(404);
@@ -367,7 +373,7 @@ Route::get('/images-ui/{filename}', function ($filename) {
     return response($file, 200)
         ->header('Content-Type', $mimeType)
         ->header('Cache-Control', 'public, max-age=31536000');
-})->where('filename', '[a-zA-Z0-9\-_\.]+');
+})->where('filename', '.*');
 
 // Test temporal para SuperAdmin
 Route::get('/test-superlinkiu', function () {
